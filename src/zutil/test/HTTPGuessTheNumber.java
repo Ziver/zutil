@@ -1,0 +1,79 @@
+package zutil.test;
+
+import java.io.IOException;
+import java.util.HashMap;
+
+import zutil.network.http.HttpPage;
+import zutil.network.http.HttpPrintStream;
+import zutil.network.http.HttpServer;
+
+public class HTTPGuessTheNumber implements HttpPage{
+
+	public static void main(String[] args) throws IOException{
+		HttpServer server = new HttpServer("localhost", 80);
+		server.setDefaultPage(new HTTPGuessTheNumber());
+		server.run();
+	}
+
+	public void respond(HttpPrintStream out,
+			HashMap<String, String> client_info,
+			HashMap<String, String> session, HashMap<String, String> cookie,
+			HashMap<String, String> request) {
+
+		out.enableBuffering(true);
+		out.println("<html>");
+		out.println("<H2>Welcome To The Number Guess Game!</H2>");
+
+		if(session.containsKey("random_nummber") && request.containsKey("guess")){
+			int guess = Integer.parseInt(request.get("guess"));
+			int nummber = Integer.parseInt(session.get("random_nummber"));
+			try {
+				if(guess == nummber){
+					session.remove("random_nummber");
+					out.println("You Guessed Right! Congrats!");
+					out.println("</html>");
+					return;
+				}
+				else if(guess > nummber){
+					out.println("<b>To High</b><br>");
+					if(Integer.parseInt(cookie.get("high")) > guess){
+						out.setCookie("high", ""+guess);
+						cookie.put("high", ""+guess);
+					}
+				}
+				else{
+					out.println("<b>To Low</b><br>");
+					if(Integer.parseInt(cookie.get("low")) < guess){
+						out.setCookie("low", ""+guess);
+						cookie.put("low", ""+guess);
+					}
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+		else{
+			session.put("random_nummber", ""+(int)(Math.random()*99+1));
+			try {
+				out.setCookie("low", "0");
+				out.setCookie("high", "100");
+				cookie.put("low", "0");
+				cookie.put("high", "100");
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+
+		out.println("<form method='post'>");
+		out.println(cookie.get("low")+" < X < "+cookie.get("high")+"<br>");
+		out.println("Guess a number between 0 and 100:<br>");
+		out.println("<input type='text' name='guess'>");
+		out.println("<input type='hidden' name='test' value='test'>");
+		out.println("<input type='submit' value='Guess'>");
+		out.println("</form>");
+		out.println("<script>document.all.guess.focus();</script>");
+		//out.println("<b>DEBUG: nummber="+session.get("random_nummber")+"</b><br>");
+		out.println("</html>");
+	}
+
+}
