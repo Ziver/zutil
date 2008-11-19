@@ -43,6 +43,25 @@ public class ImageUtil {
 			}
 		}
 	}
+	
+	/**
+	 * Normalizes the image data by the given scale
+	 * 
+	 * @param output The output data array
+	 * @param data The image data
+	 * @param cols The number of columns
+	 * @param rows The number of rows
+	 * @param scale The scale to normalize the image by
+	 */
+	public static void normalize(int[][][] output, int[][][] data, int cols, int rows, double scale) {
+		for(int y=0; y<rows ;y++){
+			for(int x=0; x<cols ;x++){
+				output[y][x][1] = (int)(data[y][x][1] * scale);
+				output[y][x][2] = (int)(data[y][x][2] * scale);
+				output[y][x][3] = (int)(data[y][x][3] * scale);
+			}
+		}
+	}
 
 	/**
 	 * Returns the rms value of the image
@@ -167,4 +186,60 @@ public class ImageUtil {
 		}
 		return crop;
 	}
+	
+	/**
+	 * Copies the given array to a new one that it returns
+	 * 
+	 * @param data The data to duplicate
+	 * @param cols The amount of columns
+	 * @param rows The amount of rows
+	 * @return The array copy
+	 */
+	public static int[][][] copyArray(int[][][] data,int cols,int rows){
+		int[][][] copy = new int[rows][cols][4];
+		for(int y=0; y<rows ;y++){
+			for(int x=0; x<cols ;x++){
+				copy[y][x][0] = data[y][x][0];
+				copy[y][x][1] = data[y][x][1];
+				copy[y][x][2] = data[y][x][2];
+				copy[y][x][3] = data[y][x][3];
+			}
+		}
+		return copy;
+	}
+
+	/**
+	 * This method clips the values of the pixel so that they
+	 * are in the range 0-255
+	 * 
+	 * @param data The image data
+	 * @param cols The amount of columns
+	 * @param rows The amount of rows
+	 */
+	public static void clip(int[][][] data, int cols, int rows){
+		for(int y=0; y<rows ;y++){
+			for(int x=0; x<cols ;x++){
+				data[y][x][1] = clip(data[y][x][1]);
+				data[y][x][1] = clip(data[y][x][2]);
+				data[y][x][1] = clip(data[y][x][3]);
+			}
+		}
+	}
+
+	/**
+	 * This method clips the values of a color so that it
+	 * is in the range 0-255
+	 * 
+	 * @param color
+	 * @return
+	 */
+	public static int clip(int color){
+		if(color < 0) 
+			return 0;
+		else if(color > 255) 
+			return 255;
+		else 
+			return color;
+	}
+
 }

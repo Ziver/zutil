@@ -26,52 +26,58 @@ public class BlurFilter extends ImageFilterProcessor{
 		super(img);
 		blurValue = blur;
 	}
-	
+
 	@Override
 	public int[][][] process(final int[][][] data, int cols, int rows) {
 		int inputPeak = ImageUtil.peakValue(data, cols, rows);
 
 		int[][][] output = new int[rows][cols][4];
-		//Perform the convolution one or more times
-		// in succession
+		int[][][] tmpData = ImageUtil.copyArray(data, cols, rows);
+		//Perform the convolution one or more times in succession
+		int redSum, greenSum, blueSum, outputPeak;
 		for(int i=0; i<blurValue ;i++){
-			//Iterate on each pixel as a registration
-			// point.
-			for(int y=1; y<rows-2 ;y++){
-				setProgress(ZMath.percent(0, (blurValue-1)*(rows-3), i*(rows-3)+y));
-				for(int x=0+1; x<cols-2 ;x++){
-					int redSum =
-						data[y - 1][x - 1][1] +
-						data[y - 1][x - 0][1] +
-						data[y - 1][x + 1][1] +
-						data[y - 0][x - 1][1] +
-						data[y - 0][x - 0][1] +
-						data[y - 0][x + 1][1] +
-						data[y + 1][x - 1][1] +
-						data[y + 1][x - 0][1] +
-						data[y + 1][x + 1][1];
-					int greenSum =
-						data[y - 1][x - 1][2] +
-						data[y - 1][x - 0][2] +
-						data[y - 1][x + 1][2] +
-						data[y - 0][x - 1][2] +
-						data[y - 0][x - 0][2] +
-						data[y - 0][x + 1][2] +
-						data[y + 1][x - 1][2] +
-						data[y + 1][x - 0][2] +
-						data[y + 1][x + 1][2];
-					int blueSum =
-						data[y - 1][x - 1][3] +
-						data[y - 1][x - 0][3] +
-						data[y - 1][x + 1][3] +
-						data[y - 0][x - 1][3] +
-						data[y - 0][x - 0][3] +
-						data[y - 0][x + 1][3] +
-						data[y + 1][x - 1][3] +
-						data[y + 1][x - 0][3] +
-						data[y + 1][x + 1][3];
-
-					output[y][x][0] = data[y][x][0];
+			//Iterate on each pixel as a registration point.
+			for(int y=0; y<rows ;y++){
+				setProgress(ZMath.percent(0, (blurValue-1)*(rows-2), i*(rows-2)+y));
+				for(int x=0; x<cols ;x++){
+					if(x == 0 || x == cols-1 || y == 0 || y == rows-1){
+						redSum = tmpData[y][x][1] * 9;
+						greenSum = tmpData[y][x][2] * 9;
+						blueSum = tmpData[y][x][3] * 9;
+					}
+					else{
+						redSum =
+							tmpData[y - 1][x - 1][1] +
+							tmpData[y - 1][x - 0][1] +
+							tmpData[y - 1][x + 1][1] +
+							tmpData[y - 0][x - 1][1] +
+							tmpData[y - 0][x - 0][1] +
+							tmpData[y - 0][x + 1][1] +
+							tmpData[y + 1][x - 1][1] +
+							tmpData[y + 1][x - 0][1] +
+							tmpData[y + 1][x + 1][1];
+						greenSum =
+							tmpData[y - 1][x - 1][2] +
+							tmpData[y - 1][x - 0][2] +
+							tmpData[y - 1][x + 1][2] +
+							tmpData[y - 0][x - 1][2] +
+							tmpData[y - 0][x - 0][2] +
+							tmpData[y - 0][x + 1][2] +
+							tmpData[y + 1][x - 1][2] +
+							tmpData[y + 1][x - 0][2] +
+							tmpData[y + 1][x + 1][2];
+						blueSum =
+							tmpData[y - 1][x - 1][3] +
+							tmpData[y - 1][x - 0][3] +
+							tmpData[y - 1][x + 1][3] +
+							tmpData[y - 0][x - 1][3] +
+							tmpData[y - 0][x - 0][3] +
+							tmpData[y - 0][x + 1][3] +
+							tmpData[y + 1][x - 1][3] +
+							tmpData[y + 1][x - 0][3] +
+							tmpData[y + 1][x + 1][3];
+					}
+					output[y][x][0] = tmpData[y][x][0];
 					output[y][x][1] = redSum;
 					output[y][x][2] = greenSum;
 					output[y][x][3] = blueSum;
@@ -79,10 +85,10 @@ public class BlurFilter extends ImageFilterProcessor{
 			}
 
 			// getting the new peak value and normalizing the image
-			int outputPeak = ImageUtil.peakValue(output, cols, rows);
-			ImageUtil.normalize(output, cols, rows, ((double)inputPeak)/outputPeak );
+			outputPeak = ImageUtil.peakValue(output, cols, rows);
+			ImageUtil.normalize(tmpData, output, cols, rows, ((double)inputPeak)/outputPeak );
 		}
-		
-		return output;
+
+		return tmpData;
 	}
 }

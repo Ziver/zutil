@@ -3,6 +3,7 @@ package zutil.image.filters;
 import java.awt.image.BufferedImage;
 
 import zutil.image.ImageFilterProcessor;
+import zutil.image.ImageUtil;
 import zutil.math.ZMath;
 
 public class SpotLightFilter extends ImageFilterProcessor{
@@ -62,9 +63,9 @@ public class SpotLightFilter extends ImageFilterProcessor{
 				}
 				
 				output[y][x][0] = data[y][x][0];
-				output[y][x][1] = clip((int)(scale * data[y][x][1]));
-				output[y][x][2] = clip((int)(scale * data[y][x][2]));
-				output[y][x][3] = clip((int)(scale * data[y][x][3]));
+				output[y][x][1] = ImageUtil.clip((int)(scale * data[y][x][1]));
+				output[y][x][2] = ImageUtil.clip((int)(scale * data[y][x][2]));
+				output[y][x][3] = ImageUtil.clip((int)(scale * data[y][x][3]));
 			}
 		}
 		return output;		

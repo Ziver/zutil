@@ -31,7 +31,7 @@ import zutil.image.filters.SpotLightFilter;
 
 @SuppressWarnings("unused")
 public class ImageProcessorTest implements ProgressListener{
-	private static String imgPath = "Image6.gif";
+	private static String imgPath = "exemple.gif";
 
 	private JLabel processedLabel;
 	private JLabel orginalLabel;
@@ -64,11 +64,11 @@ public class ImageProcessorTest implements ProgressListener{
 			//ImageFilterProcessor processor = new SpotLightFilter(img,100,100,100);
 			//ImageFilterProcessor processor = new ContrastBrightnessFilter(img);
 			//ImageFilterProcessor processor = new ColorIntensityFilter(img, true);
-			//ImageFilterProcessor processor = new BlurFilter(img);
+			ImageFilterProcessor processor = new BlurFilter(img, 100);
 			//ImageFilterProcessor processor = new DitheringFilter(img);
 			//ImageFilterProcessor processor = new ResizeImage(img,100,100);
 			//ImageFilterProcessor processor = new MedianFilter(img);
-			ImageFilterProcessor processor = new FaceDetectionFilter(img);
+			//ImageFilterProcessor processor = new FaceDetectionFilter(img);
 			
 			processor.setProgressListener(this);
 			procImg = processor.process();
