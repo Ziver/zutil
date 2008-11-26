@@ -151,6 +151,7 @@ public class FTPClient extends Thread{
 	private synchronized String readCommand(boolean print) throws IOException{
 		String tmp = in.readLine();
 		if(print)System.out.println(tmp);
+		//if(parseReturnCode(tmp) >= 400 ) throw new IOException(tmp);
 		
 		return tmp;
 	}
