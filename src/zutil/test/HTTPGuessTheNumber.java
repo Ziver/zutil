@@ -3,6 +3,7 @@ package zutil.test;
 import java.io.IOException;
 import java.util.HashMap;
 
+import zutil.FileFinder;
 import zutil.network.http.HttpPage;
 import zutil.network.http.HttpPrintStream;
 import zutil.network.http.HttpServer;
@@ -10,7 +11,8 @@ import zutil.network.http.HttpServer;
 public class HTTPGuessTheNumber implements HttpPage{
 
 	public static void main(String[] args) throws IOException{
-		HttpServer server = new HttpServer("localhost", 80);
+		HttpServer server = new HttpServer("localhost", 443, FileFinder.find("keySSL"), "rootroot");//SSL
+		//HttpServer server = new HttpServer("localhost", 80);
 		server.setDefaultPage(new HTTPGuessTheNumber());
 		server.run();
 	}

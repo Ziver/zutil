@@ -1,11 +1,20 @@
 package zutil.network.http;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 import java.util.HashMap;
+
+import javax.net.ssl.SSLServerSocket;
+import javax.net.ssl.SSLServerSocketFactory;
 
 import zutil.MultiPrintStream;
 
@@ -24,6 +33,8 @@ public class HttpServer extends Thread{
 
 	public final String server_url;
 	public final int server_port;
+	private File keyStore;
+	private String keyStorePass;
 
 	private HashMap<String,HttpPage> pages;
 	private HttpPage defaultPage;
@@ -37,8 +48,23 @@ public class HttpServer extends Thread{
 	 * @param port The port that the server should listen to
 	 */
 	public HttpServer(String url, int port){
+		this(url, port, null, null);
+	}
+
+
+	/**
+	 * Creates a new instance of the sever
+	 * 
+	 * @param url The address to the server
+	 * @param port The port that the server should listen to
+	 * @param sslCert If this is not null then the server will use SSL connection with this keyStore file path
+	 * @param sslCert If this is not null then the server will use a SSL connection with the given certificate
+	 */
+	public HttpServer(String url, int port, File keyStore, String keyStorePass){
 		this.server_url = url;
 		this.server_port = port;
+		this.keyStorePass = keyStorePass;
+		this.keyStore = keyStore;
 
 		pages = new HashMap<String,HttpPage>();
 		sessions = new HashMap<String,HashMap<String,String>>();
@@ -67,15 +93,47 @@ public class HttpServer extends Thread{
 
 	public void run(){
 		try{
-			ServerSocket ss = new ServerSocket(server_port);
-			MultiPrintStream.out.println("Http Server Running!!!");
+			ServerSocket ss;
+			if(keyStorePass != null && keyStore != null){
+				registerCertificate(keyStore, keyStorePass);
+				ss = initSSL(server_port);
+				MultiPrintStream.out.println("Https Server Running!!!");
+			}
+			else{
+				ss = new ServerSocket(server_port);
+				MultiPrintStream.out.println("Http Server Running!!!");
+			}
 
 			while(true){
 				new HttpServerThread(ss.accept());
 			}
-		} catch (IOException e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
+	}
+
+	/**
+	 * Initiates a SSLServerSocket
+	 * 
+	 * @param port The port to listen to
+	 * @return The SSLServerSocket
+	 * @throws IOException
+	 */
+	private ServerSocket initSSL(int port) throws IOException{
+		SSLServerSocketFactory sslserversocketfactory =
+			(SSLServerSocketFactory) SSLServerSocketFactory.getDefault();
+		return sslserversocketfactory.createServerSocket(port);
+
+	}
+
+	/**
+	 * Registers the given cert file to the KeyStore
+	 * 
+	 * @param certFile The cert file
+	 */
+	private void registerCertificate(File keyStore, String keyStorePass) throws CertificateException, IOException, KeyStoreException, NoSuchProviderException, NoSuchAlgorithmException{
+		System.setProperty("javax.net.ssl.keyStore", keyStore.getAbsolutePath());
+		System.setProperty("javax.net.ssl.keyStorePassword", keyStorePass);
 	}
 
 	/**
