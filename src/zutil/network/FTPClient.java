@@ -25,6 +25,8 @@ import zutil.MultiPrintStream;
  * TODO: file info, rename, Active mode
  */
 public class FTPClient extends Thread{
+	public static boolean DEBUG = false;
+	
 	public static final int FTP_ACTIVE = 0;
 	public static final int FTP_PASSIVE = 1;
 	public static final int FTP_PORT = 21;
@@ -90,8 +92,8 @@ public class FTPClient extends Thread{
 		readCommand(true);
 		sendCommand("USER "+user);
 		sendNoReplyCommand("PASS "+pass, false);
-		System.out.println("PASS ***");
-		String tmp = readMultipleCommands(true);
+		if(DEBUG)System.out.println("PASS ***");
+		String tmp = readMultipleCommands(DEBUG);
 		if(parseReturnCode(tmp) == FTPC_LOGIN_NO){
 			close();
 			throw new AccountException(tmp);
@@ -112,7 +114,7 @@ public class FTPClient extends Thread{
 	 * @throws IOException 
 	 */
 	public synchronized int sendCommand(String cmd) throws IOException{
-		return parseReturnCode(sendCommand(cmd, true));
+		return parseReturnCode(sendCommand(cmd, DEBUG));
 	}
 	
 	/**
@@ -203,7 +205,7 @@ public class FTPClient extends Thread{
 		LinkedList<String> list = new LinkedList<String>();
 		
 		BufferedReader data_in = getDataInputStream();
-		sendCommand("NLST "+path, true);		
+		sendCommand("NLST "+path, DEBUG);		
 		
 		String tmp = "";
 		while((tmp = data_in.readLine()) != null){
@@ -211,7 +213,7 @@ public class FTPClient extends Thread{
 		}
 		
 		data_in.close();
-		readCommand(true);
+		readCommand(DEBUG);
 		return list;
 	}
 	
@@ -237,7 +239,7 @@ public class FTPClient extends Thread{
 		}
 		
 		data_in.close();
-		readCommand(true);
+		readCommand(DEBUG);
 		return info.toString();
 	}
 	
@@ -250,10 +252,10 @@ public class FTPClient extends Thread{
 	 */
 	public void sendFile(String path, String data) throws IOException{
 		PrintStream data_out = getDataOutputStream();
-		sendCommand("STOR "+path, true);
+		sendCommand("STOR "+path, DEBUG);
 		data_out.println(data);
 		data_out.close();
-		readCommand(true);
+		readCommand(DEBUG);
 	}
 	
 	/**
@@ -278,7 +280,7 @@ public class FTPClient extends Thread{
 	 */
 	private BufferedReader getFile(String path) throws IOException{
 		BufferedReader ret = getDataInputStream();
-		sendCommand("RETR "+path, true);
+		sendCommand("RETR "+path, DEBUG);
 		return ret;
 	}
 	
@@ -297,7 +299,7 @@ public class FTPClient extends Thread{
 		while((tmp = file_in.readLine()) != null){
 			file_out.println(tmp);
 		}
-		readCommand(true);
+		readCommand(DEBUG);
 	}
 	
 	/**
@@ -440,7 +442,7 @@ public class FTPClient extends Thread{
 	 * @throws IOException
 	 */
 	private int setPassiveMode() throws IOException{
-		String tmp = sendCommand("PASV", true);
+		String tmp = sendCommand("PASV", DEBUG);
 		if(parseReturnCode(tmp) != FTPC_ENTERING_PASSIVE){
 			throw new IOException(tmp);
 		}
@@ -479,7 +481,7 @@ public class FTPClient extends Thread{
 	 */
 	@SuppressWarnings("deprecation")
 	public void close() throws IOException{
-		sendCommand("QUIT", true);
+		sendCommand("QUIT", DEBUG);
 		in.close();
 		out.close();
 		socket.close();

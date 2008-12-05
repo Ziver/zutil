@@ -17,6 +17,7 @@ import java.util.Date;
  *
  */
 public class SMTPClient {
+	public static boolean DEBUG = false;
 
 	private BufferedReader in;
 	private PrintStream out;
@@ -52,13 +53,13 @@ public class SMTPClient {
 			sendCommand("RCPT TO:"+to);
 			sendCommand("DATA");
 			// The Message
-			sendNoReplyCommand("Date: "+(new Date()), true);
-			sendNoReplyCommand("From: "+from, true);
-			sendNoReplyCommand("To: "+to, true);
-			sendNoReplyCommand("Subject: "+subj, true);
-			sendNoReplyCommand(" ", true);
-			sendNoReplyCommand(msg, true);
-			sendCommand(".", true);
+			sendNoReplyCommand("Date: "+(new Date()), DEBUG);
+			sendNoReplyCommand("From: "+from, DEBUG);
+			sendNoReplyCommand("To: "+to, DEBUG);
+			sendNoReplyCommand("Subject: "+subj, DEBUG);
+			sendNoReplyCommand(" ", DEBUG);
+			sendNoReplyCommand(msg, DEBUG);
+			sendCommand(".", DEBUG);
 			
 			close();
 		}catch(IOException e){
@@ -78,7 +79,7 @@ public class SMTPClient {
 		in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 		out = new PrintStream(socket.getOutputStream());
 
-		readCommand(true);
+		readCommand(DEBUG);
 		sendCommand("HELO "+url);
 	}
 
@@ -90,7 +91,7 @@ public class SMTPClient {
 	 * @throws IOException if the cmd fails
 	 */
 	private int sendCommand(String cmd) throws IOException{
-		return parseReturnCode(sendCommand(cmd, true));
+		return parseReturnCode(sendCommand(cmd, DEBUG));
 	}
 
 	/**
@@ -145,7 +146,7 @@ public class SMTPClient {
 	}
 
 	public void close() throws IOException{
-		sendCommand("QUIT", true);
+		sendCommand("QUIT", DEBUG);
 		in.close();
 		out.close();
 		socket.close();

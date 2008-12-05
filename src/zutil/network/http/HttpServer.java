@@ -10,10 +10,8 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
 import java.util.HashMap;
 
-import javax.net.ssl.SSLServerSocket;
 import javax.net.ssl.SSLServerSocketFactory;
 
 import zutil.MultiPrintStream;
@@ -131,7 +129,7 @@ public class HttpServer extends Thread{
 	 * 
 	 * @param certFile The cert file
 	 */
-	private void registerCertificate(File keyStore, String keyStorePass) throws CertificateException, IOException, KeyStoreException, NoSuchProviderException, NoSuchAlgorithmException{
+	protected void registerCertificate(File keyStore, String keyStorePass) throws CertificateException, IOException, KeyStoreException, NoSuchProviderException, NoSuchAlgorithmException{
 		System.setProperty("javax.net.ssl.keyStore", keyStore.getAbsolutePath());
 		System.setProperty("javax.net.ssl.keyStorePassword", keyStorePass);
 	}
