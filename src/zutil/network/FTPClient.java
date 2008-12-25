@@ -25,7 +25,7 @@ import zutil.MultiPrintStream;
  * TODO: file info, rename, Active mode
  */
 public class FTPClient extends Thread{
-	public static boolean DEBUG = false;
+	public static boolean DEBUG = true;
 	
 	public static final int FTP_ACTIVE = 0;
 	public static final int FTP_PASSIVE = 1;
@@ -51,7 +51,7 @@ public class FTPClient extends Thread{
 
 	public static void main(String[] args){
 		try {
-			FTPClient client = new FTPClient("koc.se", 21, "kth", "****", FTP_PASSIVE);
+			FTPClient client = new FTPClient("koc.se", 21, "ziver", "****", FTP_PASSIVE);
 			client.createDir("./ziver/lol");
 			client.removeDir("./ziver/lol");
 			
@@ -60,7 +60,7 @@ public class FTPClient extends Thread{
 			MultiPrintStream.out.dump(client.getFileList("./ziver"));
 			
 			MultiPrintStream.out.dump(client.getFile("./ziver/test.txt"));
-			client.readCommand(true);
+			client.readCommand(DEBUG);
 			
 			MultiPrintStream.out.println(client.getFileInfo("./ziver/test.txt"));
 			
@@ -89,9 +89,9 @@ public class FTPClient extends Thread{
 		in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 		out = new PrintStream(socket.getOutputStream());
 		
-		readCommand(true);
+		readCommand(DEBUG);
 		sendCommand("USER "+user);
-		sendNoReplyCommand("PASS "+pass, false);
+		sendNoReplyCommand("PASS "+pass, DEBUG);
 		if(DEBUG)System.out.println("PASS ***");
 		String tmp = readMultipleCommands(DEBUG);
 		if(parseReturnCode(tmp) == FTPC_LOGIN_NO){
@@ -153,7 +153,7 @@ public class FTPClient extends Thread{
 	private synchronized String readCommand(boolean print) throws IOException{
 		String tmp = in.readLine();
 		if(print)System.out.println(tmp);
-		//if(parseReturnCode(tmp) >= 400 ) throw new IOException(tmp);
+		if(parseReturnCode(tmp) >= 400 ) throw new IOException(tmp);
 		
 		return tmp;
 	}
@@ -167,6 +167,12 @@ public class FTPClient extends Thread{
 	 * @throws IOException
 	 */
 	private synchronized String readMultipleCommands(boolean print) throws IOException{
+		String tmp = readCommand(print);
+		while(!tmp.substring(3, 4).equalsIgnoreCase(" ")){
+			tmp = readCommand(print);
+		}
+		
+		/*
 		String tmp = in.readLine();
 		if(print)System.out.println(tmp);
 		try{ Thread.sleep(500); }catch(Exception e){}
@@ -175,7 +181,7 @@ public class FTPClient extends Thread{
 			if(print)System.out.println(tmp);
 			try{ Thread.sleep(500); }catch(Exception e){}
 		}
-		
+		*/
 		return tmp;
 	}
 	
