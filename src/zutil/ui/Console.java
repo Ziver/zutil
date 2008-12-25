@@ -42,7 +42,7 @@ import zutil.FileFinder;
  *
  */
 public class Console{
-	public static String defaultIcon = "zutil/data/JavaConsole.png";
+	public static String DEFAULT_ICON = "zutil/data/JavaConsole.png";
 	// UI things
 	private JFrame frame;
 	private JTextPane console;
@@ -60,7 +60,7 @@ public class Console{
 
 	public Console(String title, int width, int height, int buffer, boolean tray){
 		ConsoleInputStream in = new ConsoleInputStream();
-		defaultIcon = FileFinder.find(defaultIcon).getAbsolutePath();
+		DEFAULT_ICON = FileFinder.find(DEFAULT_ICON).getAbsolutePath();
 		initUI(title, in);
 
 		bufferSize = buffer;
@@ -69,7 +69,7 @@ public class Console{
 		System.setIn(in);
 
 		enableTray(tray);
-		setFrameIcon(Toolkit.getDefaultToolkit().getImage(defaultIcon));
+		setFrameIcon(Toolkit.getDefaultToolkit().getImage(DEFAULT_ICON));
 		frame.setSize(width, height);
 		frame.setVisible(true);
 	}
@@ -161,7 +161,7 @@ public class Console{
 
 				// Icon
 				trayIcon = new TrayIcon(
-						Toolkit.getDefaultToolkit().getImage(defaultIcon),
+						Toolkit.getDefaultToolkit().getImage(DEFAULT_ICON),
 						"Console", menu);
 				trayIcon.setImageAutoSize(true);
 				trayIcon.addMouseListener(new MouseListener(){
@@ -217,7 +217,7 @@ public class Console{
 		public void print(String s){
 			appendConsole(s, style);
 			console.setCaretPosition(console.getDocument().getLength());
-			if(trayMessageType != null){
+			if(trayMessageType != null && trayIcon != null){
 				trayIcon.displayMessage(
 						s.substring(0, (s.length() > 25 ? 25 : s.length()))+"...",
 						s, trayMessageType);
@@ -259,12 +259,14 @@ public class Console{
 				input = 0;
 				return -1;
 			}
+			
 			read = true;
 			input = 0;
 			while(input == 0){
 				try {Thread.sleep(10);} catch (InterruptedException e) {}
 			}
 			read = false;
+			
 			System.out.print((char)input);
 			if(input == KeyEvent.VK_ENTER){
 				input = -1;

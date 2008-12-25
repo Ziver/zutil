@@ -8,7 +8,7 @@ import zutil.ui.Console;
 
 public class ConsoleTest {
 	public static void main(String[] args) throws IOException{
-		new Console("Console Test", true);
+		new Console("Console Test");
 		BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
 
 		while(true){
