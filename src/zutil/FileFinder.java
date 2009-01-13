@@ -1,6 +1,9 @@
 package zutil;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -50,6 +53,28 @@ public class FileFinder {
 			e.printStackTrace();
 		}
 		return null;
+	}
+	
+	
+	/**
+	 * Reads and returns the content of a file as a String.
+	 * Or use FileUtils.readFileToString(file);
+	 * 
+	 * @param file The file to read
+	 * @return The file content
+	 * @throws IOException
+	 */
+	public static String getFileContent(File file) throws IOException{
+		BufferedReader in = new BufferedReader(new FileReader(file));
+		StringBuffer ret = new StringBuffer();
+		int tmp;
+
+		while((tmp=in.read()) != -1){
+			ret.append((char)tmp);
+		}
+		
+		in.close();
+		return ret.toString();
 	}
 	
 	/**
