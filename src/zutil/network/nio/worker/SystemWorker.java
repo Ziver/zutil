@@ -11,8 +11,8 @@ import zutil.network.nio.message.SyncMessage;
 import zutil.network.nio.message.type.EchoMessage;
 import zutil.network.nio.message.type.ResponseRequestMessage;
 import zutil.network.nio.response.ResponseEvent;
-import zutil.network.nio.service.ChatService;
 import zutil.network.nio.service.NetworkService;
+import zutil.network.nio.service.chat.ChatService;
 import zutil.network.nio.service.sync.SyncService;
 
 

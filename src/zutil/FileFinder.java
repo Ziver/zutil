@@ -109,15 +109,17 @@ public class FileFinder {
 		String[] temp = dir.list();
 		File file;
 		
-		for(int i=0; i<temp.length ;i++){
-			file = new File(dir.getPath()+File.separator+temp[i]);
-			if(file.isDirectory()){
-				search(new File(dir.getPath()+File.separator+temp[i]+File.separator),fileList);
+		if(temp != null){
+			for(int i=0; i<temp.length ;i++){
+				file = new File(dir.getPath()+File.separator+temp[i]);
+				if(file.isDirectory()){
+					search(new File(dir.getPath()+File.separator+temp[i]+File.separator),fileList);
+				}
+				else if(file.isFile()){
+					MultiPrintStream.out.println("File Found: "+file);
+					fileList.add(file);
+				}			
 			}
-			else if(file.isFile()){
-				MultiPrintStream.out.println("File Found: "+file);
-				fileList.add(file);
-			}			
 		}
 		
 		return fileList;

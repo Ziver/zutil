@@ -1,4 +1,4 @@
-package zutil.network.nio.service;
+package zutil.network.nio.service.chat;
 
 import java.nio.channels.SocketChannel;
 import java.util.HashMap;
@@ -8,6 +8,7 @@ import zutil.MultiPrintStream;
 import zutil.network.nio.NioNetwork;
 import zutil.network.nio.message.ChatMessage;
 import zutil.network.nio.message.Message;
+import zutil.network.nio.service.NetworkService;
 
 public class ChatService extends NetworkService{
 	private HashMap<String,LinkedList<SocketChannel>> rooms;
