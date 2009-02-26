@@ -7,6 +7,8 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.BitSet;
 
+import zutil.struct.DynamicByteArrayStream;
+
 public class Converter {
 
 	/** 
@@ -14,18 +16,41 @@ public class Converter {
 	 * 
 	 * @param object the object to convert.
 	 * @return the associated byte array.
+	 * @throws IOException 
 	 */
-	public static byte[] toBytes(Object object){
+	public static byte[] toBytes(Object object) throws IOException{
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		try{
-			ObjectOutputStream oos = new ObjectOutputStream(baos);
-			oos.writeObject(object);
-			oos.flush();
-			oos.close();
-		}catch(IOException ioe){
-			System.out.println(ioe.getMessage());
-		}
+
+		ObjectOutputStream oos = new ObjectOutputStream(baos);
+		oos.writeObject(object);
+		oos.flush();
+		oos.close();
+
 		return baos.toByteArray();
+	}
+	
+	/**
+	 * Converts a Integer to an byte array
+	 * 
+	 * @param num is the number to convert
+	 * @return an byte array of four bytes
+	 */
+	public static byte[] toBytes(int num){
+		return new byte[]{ 
+				(byte)(num & 0xff), 
+				(byte)((num >> 8)& 0xff), 
+				(byte)((num >> 16)& 0xff), 
+				(byte)((num >> 24)& 0xff)};
+	}
+	
+	/**
+	 * Converts a Integer to an byte
+	 * 
+	 * @param num is the number to convert
+	 * @return an byte
+	 */
+	public static byte toByte(int num){
+		return (byte)(num & 0xff);
 	}
 
 	/** 
@@ -34,20 +59,33 @@ public class Converter {
 	 * 
 	 * @param bytes the byte array to convert.
 	 * @return the associated object.
+	 * @throws Exception 
 	 */
-	public static Object toObject(byte[] bytes)	{
+	public static Object toObject(byte[] bytes) throws Exception{
 		Object object = null;
-		try{
-			ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
-			ObjectInputStream ois= new ObjectInputStream(bais);
-			object = ois.readObject();
-			ois.close();
-			bais.close();
-		}catch(IOException ioe){
-			System.out.println(ioe.getMessage());
-		}catch(ClassNotFoundException cnfe){
-			System.out.println(cnfe.getMessage());
-		}
+
+		ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(bytes));
+		object = ois.readObject();
+		ois.close();
+
+		return object;
+	}
+	
+	/** 
+	 * Converts an array of bytes back to its constituent object. The 
+	 * input array is assumed to have been created from the original object.
+	 * 
+	 * @param bytes the byte array to convert.
+	 * @return the associated object.
+	 * @throws Exception 
+	 */
+	public static Object toObject(DynamicByteArrayStream bytes) throws Exception{
+		Object object = null;
+
+		ObjectInputStream ois = new ObjectInputStream(bytes);
+		object = ois.readObject();
+		ois.close();
+
 		return object;
 	}
 
@@ -69,23 +107,68 @@ public class Converter {
 		return false;
 	}
 
-	// array neaded for byteToHex
+	/** array needed for byteToHex */
 	private static char[] HEX_CHARS = {'0','1','2','3','4','5','6','7','8','9','A','B','C','D','E','F'};
 	/**
 	 * Converts a byte Array to a Hex String
 	 * 
-	 * @param raw the byte arrat to convert
+	 * @param raw the byte array to convert
+	 * @return a Hex String
+	 */
+	public static String toHexString(byte[][] raw){
+		StringBuffer ret = new StringBuffer();
+		
+		for(byte[] a : raw){
+			for(byte b : a){
+				ret.append(HEX_CHARS[(int) (b >>> 0x04)& 0x0F ]);
+				ret.append(HEX_CHARS[(int) b & 0x0F ]);
+			}
+		}
+
+		return ret.toString();
+	}
+
+	public static String toHexStringByColumn(byte[][] raw){
+		StringBuffer ret = new StringBuffer();
+		
+		for(int col=0; col<raw[0].length ;col++){
+			for(int row=0; row<raw.length ;row++){
+				ret.append(HEX_CHARS[(int) (raw[row][col] >>> 0x04)& 0x0F ]);
+				ret.append(HEX_CHARS[(int) raw[row][col] & 0x0F ]);
+			}
+		}
+
+		return ret.toString();
+	}
+	
+	/**
+	 * Converts a byte Array to a Hex String
+	 * 
+	 * @param raw the byte array to convert
 	 * @return a Hex String
 	 */
 	public static String toHexString(byte[] raw){
 		StringBuffer ret = new StringBuffer();
 
 		for(byte b : raw){
-			ret.append(HEX_CHARS[(int) b & 0x0F ]);
 			ret.append(HEX_CHARS[(int) (b >>> 0x04)& 0x0F ]);
+			ret.append(HEX_CHARS[(int) b & 0x0F ]);
 		}
 
 		return ret.toString();
+	}
+
+	/**
+	 * Converts a byte to a Hex String
+	 * 
+	 * @param raw the byte to convert
+	 * @return a Hex String
+	 */
+	public static String toHexString(byte raw){
+		String ret = ""+HEX_CHARS[(int) (raw >>> 0x04)& 0x0F ];
+		ret += ""+HEX_CHARS[(int) raw & 0x0F ];
+
+		return ret;
 	}
 
 	/**
@@ -101,7 +184,7 @@ public class Converter {
 		}
 		return ret.toString();
 	}
-	
+
 	/**
 	 * Converts the given byte array to a String with 1's and 0's
 	 * 
@@ -117,7 +200,7 @@ public class Converter {
 		}
 		return ret.toString();
 	}
-	
+
 	/**
 	 * Converts a BitSet to a Integer
 	 * 
@@ -126,14 +209,30 @@ public class Converter {
 	 */
 	public static int toInt(BitSet bits){
 		int ret = 0;
-		
-		 for (int i = bits.nextSetBit(0); i >= 0; i = bits.nextSetBit(i+1)) {
-		     ret += Math.pow(2, i);
-		 }
-		
+
+		for (int i = bits.nextSetBit(0); i >= 0; i = bits.nextSetBit(i+1)) {
+			ret += Math.pow(2, i);
+		}
+
 		return ret;
 	}
 	
+	/**
+	 * Converts a boolean array(bit sequence whit most significant bit at index 0) to a Integer
+	 * 
+	 * @param bits the boolean array to convert
+	 * @return a Integer
+	 */
+	public static int toInt(boolean[] bits){
+		int ret = 0;
+
+		for (int i = bits.length-1; i >= 0; i--) {
+			if(bits[i])ret += Math.pow(2, bits.length-i-1);
+		}
+
+		return ret;
+	}
+
 	/**
 	 * Converts a Integer to a BitSet
 	 * 

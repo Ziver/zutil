@@ -1,4 +1,4 @@
-package zutil.algo;
+package zutil.algo.search;
 
 import zutil.algo.sort.sortable.SortableDataList;
 

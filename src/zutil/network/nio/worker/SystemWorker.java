@@ -33,27 +33,31 @@ public class SystemWorker extends ThreadedEventWorker {
 
 	@Override
 	public void messageEvent(WorkerDataEvent event) {
-		if(NioNetwork.DEBUG>=2)MultiPrintStream.out.println("System Message: "+event.data.getClass().getName());
-		if(event.data instanceof Message){
-			if(event.data instanceof EchoMessage && ((EchoMessage)event.data).echo()){
-				// Echos back the recived message
-				((EchoMessage)event.data).recived();
-				if(NioNetwork.DEBUG>=3)MultiPrintStream.out.println("Echoing Message: "+event.data);
-				nio.send(event.socket, event.data);
-			}
-			else if(event.data instanceof ResponseRequestMessage && 
-					rspEvents.get(((ResponseRequestMessage)event.data).getResponseId()) != null){
-				// Handle the response
-				handleResponse(((ResponseRequestMessage)event.data).getResponseId(), event.data);
-				if(NioNetwork.DEBUG>=3)MultiPrintStream.out.println("Response Request Message: "+event.data);
-			}
-			else{
-				//Services
-				if(services.containsKey(event.data.getClass()) ||
-						!services.containsKey(event.data.getClass()) && defaultServices(event.data)){
-					services.get(event.data.getClass()).handleMessage((Message)event.data, event.socket);
+		try {
+			if(NioNetwork.DEBUG>=2)MultiPrintStream.out.println("System Message: "+event.data.getClass().getName());
+			if(event.data instanceof Message){
+				if(event.data instanceof EchoMessage && ((EchoMessage)event.data).echo()){
+					// Echos back the recived message
+					((EchoMessage)event.data).recived();
+					if(NioNetwork.DEBUG>=3)MultiPrintStream.out.println("Echoing Message: "+event.data);
+					nio.send(event.socket, event.data);
+				}
+				else if(event.data instanceof ResponseRequestMessage && 
+						rspEvents.get(((ResponseRequestMessage)event.data).getResponseId()) != null){
+					// Handle the response
+					handleResponse(((ResponseRequestMessage)event.data).getResponseId(), event.data);
+					if(NioNetwork.DEBUG>=3)MultiPrintStream.out.println("Response Request Message: "+event.data);
+				}
+				else{
+					//Services
+					if(services.containsKey(event.data.getClass()) ||
+							!services.containsKey(event.data.getClass()) && defaultServices(event.data)){
+						services.get(event.data.getClass()).handleMessage((Message)event.data, event.socket);
+					}
 				}
 			}
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
 	}
 

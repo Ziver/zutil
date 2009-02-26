@@ -38,8 +38,8 @@ public class HttpPrintStream extends PrintStream{
 	/**
 	 * Adds a cookie that will be sent to the client
 	 * 
-	 * @param key The name of the cookie
-	 * @param value The value of the cookie
+	 * @param key is the name of the cookie
+	 * @param value is the value of the cookie
 	 * @throws Exception Throws exception if the header has already been sent
 	 */
 	public void setCookie(String key, String value) throws Exception{
@@ -52,7 +52,7 @@ public class HttpPrintStream extends PrintStream{
 	 * Sends the given header directly to the client.
 	 * No buffering involved.
 	 * 
-	 * @param header The header to send
+	 * @param header is the header to send
 	 * @throws Exception Throws exception if the header has already been sent
 	 */
 	public void sendHeader(String header) throws Exception{
@@ -62,7 +62,7 @@ public class HttpPrintStream extends PrintStream{
 	}
 
 	/**
-	 * prints whit a new line
+	 * Prints with a new line
 	 */
 	public void println(String s){
 		printOrBuffer(s+"\n");
@@ -97,7 +97,7 @@ public class HttpPrintStream extends PrintStream{
 	}
 
 	/**
-	 * Sends out all the buffer and clears it
+	 * Sends out the buffer and clears it
 	 */
 	public void flush(){
 		if(buffer_enabled){

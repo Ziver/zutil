@@ -202,6 +202,7 @@ public class MultiPrintStream extends PrintStream {
 	 */
 	@SuppressWarnings("unchecked")
 	private String dump( Object o , boolean print) {
+		if(o == null) return "NULL";
 		StringBuffer buffer = new StringBuffer();
 		Class oClass = o.getClass();
 		buffer.append( oClass.getName() );

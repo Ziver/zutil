@@ -52,7 +52,7 @@ public class Hasher {
 	public static String MD5(Serializable object){
 		try {
 			return hash(object, "MD5");
-		} catch (NoSuchAlgorithmException e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		return null;
@@ -67,7 +67,7 @@ public class Hasher {
 	public static String SHA1(Serializable object){
 		try {
 			return hash(object, "SHA-1");
-		} catch (NoSuchAlgorithmException e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		return null;
@@ -80,8 +80,9 @@ public class Hasher {
 	 * @param hashType The hash method (MD2, MD5, SHA-1, SHA-256, SHA-384, SHA-512 )
 	 * @return String containing the hash
 	 * @throws NoSuchAlgorithmException
+	 * @throws IOException 
 	 */
-	public static String hash(Serializable object, String hashType) throws NoSuchAlgorithmException {
+	public static String hash(Serializable object, String hashType) throws Exception {
 		MessageDigest md = null;
 		md = MessageDigest.getInstance(hashType); //MD5 || SHA
 		md.update(Converter.toBytes(object));
@@ -97,8 +98,9 @@ public class Hasher {
 	 * @param object The Key
 	 * @param seed Seed
 	 * @return A MurmurHash of the key
+	 * @throws Exception 
 	 */
-	public static int MurmurHash(Serializable object, int seed){
+	public static int MurmurHash(Serializable object, int seed) throws Exception{
 		byte[] data = Converter.toBytes(object);
 		int length = data.length;
 

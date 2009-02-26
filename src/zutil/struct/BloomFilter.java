@@ -41,12 +41,16 @@ public class BloomFilter<T extends Serializable> implements Set<T>, Serializable
 	 * @return If the optimal size has been reached
 	 */
 	public boolean add(T e) {
-		content_size++;
-		int hash = 0;
-		for(int i=0; i<k ;i++){
-			hash = Hasher.MurmurHash(e, hash);
-			hash = Math.abs(hash) % bits.size();
-			bits.set(hash, true);
+		try {
+			content_size++;
+			int hash = 0;
+			for(int i=0; i<k ;i++){
+				hash = Hasher.MurmurHash(e, hash);
+				hash = Math.abs(hash) % bits.size();
+				bits.set(hash, true);
+			}
+		} catch (Exception e1) {
+			e1.printStackTrace();
 		}
 		return isFull();
 	}
@@ -77,13 +81,17 @@ public class BloomFilter<T extends Serializable> implements Set<T>, Serializable
 	 * 			if the Object is not Serializable
 	 */
 	public boolean contains(Object o) {
-		if(!(o instanceof Serializable))return false;
-		int hash = 0;
-		for(int i=0; i<k ;i++){
-			hash = Hasher.MurmurHash((Serializable)o, hash);
-			hash = Math.abs(hash) % bits.size();
-			if(!bits.get(hash))
-				return false;
+		try {
+			if(!(o instanceof Serializable))return false;
+			int hash = 0;
+			for(int i=0; i<k ;i++){
+				hash = Hasher.MurmurHash((Serializable)o, hash);
+				hash = Math.abs(hash) % bits.size();
+				if(!bits.get(hash))
+					return false;
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
 		
 		return true;

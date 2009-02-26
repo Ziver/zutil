@@ -2,7 +2,7 @@ package zutil.test;
 
 import java.util.Arrays;
 
-import zutil.algo.QuickSelect;
+import zutil.algo.search.QuickSelect;
 import zutil.algo.sort.sortable.SortableIntArray;
 
 public class QuickSelectTest {

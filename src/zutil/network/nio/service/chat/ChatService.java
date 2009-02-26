@@ -21,38 +21,42 @@ public class ChatService extends NetworkService{
 
 	@Override
 	public void handleMessage(Message message, SocketChannel socket) {
-		// New message
-		if(message instanceof ChatMessage){
-			ChatMessage chatmessage = (ChatMessage)message;
-			//is this a new message
-			if(chatmessage.type == ChatMessage.ChatMessageType.MESSAGE){
-				// Is this the server
-				if(nio.getType() == NioNetwork.NetworkType.SERVER){
-					if(rooms.containsKey(chatmessage.room)){
-						LinkedList<SocketChannel> tmpList = rooms.get(chatmessage.room);
+		try {
+			// New message
+			if(message instanceof ChatMessage){
+				ChatMessage chatmessage = (ChatMessage)message;
+				//is this a new message
+				if(chatmessage.type == ChatMessage.ChatMessageType.MESSAGE){
+					// Is this the server
+					if(nio.getType() == NioNetwork.NetworkType.SERVER){
+						if(rooms.containsKey(chatmessage.room)){
+							LinkedList<SocketChannel> tmpList = rooms.get(chatmessage.room);
 
-						// Broadcast the message
-						for(SocketChannel s : tmpList){
-							if(s.isConnected()){
-								nio.send(s, chatmessage);
-							}
-							else{
-								unRegisterUser(chatmessage.room, s);
+							// Broadcast the message
+							for(SocketChannel s : tmpList){
+								if(s.isConnected()){
+									nio.send(s, chatmessage);
+								}
+								else{
+									unRegisterUser(chatmessage.room, s);
+								}
 							}
 						}
 					}
+					if(NioNetwork.DEBUG>=2)MultiPrintStream.out.println("New Chat Message: "+chatmessage.msg);
+					listener.messageAction(chatmessage.msg, chatmessage.room);
 				}
-				if(NioNetwork.DEBUG>=2)MultiPrintStream.out.println("New Chat Message: "+chatmessage.msg);
-				listener.messageAction(chatmessage.msg, chatmessage.room);
+				// register to a room
+				else if(chatmessage.type == ChatMessage.ChatMessageType.REGISTER){
+					registerUser(chatmessage.room, socket);
+				}
+				// unregister to a room
+				else if(chatmessage.type == ChatMessage.ChatMessageType.UNREGISTER){
+					unRegisterUser(chatmessage.room, socket);
+				}
 			}
-			// register to a room
-			else if(chatmessage.type == ChatMessage.ChatMessageType.REGISTER){
-				registerUser(chatmessage.room, socket);
-			}
-			// unregister to a room
-			else if(chatmessage.type == ChatMessage.ChatMessageType.UNREGISTER){
-				unRegisterUser(chatmessage.room, socket);
-			}
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
 
 	}

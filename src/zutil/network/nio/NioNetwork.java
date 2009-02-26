@@ -1,7 +1,6 @@
 package zutil.network.nio;
 
 import java.io.IOException;
-import java.net.ConnectException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
@@ -26,6 +25,7 @@ import zutil.network.nio.server.ChangeRequest;
 import zutil.network.nio.server.ClientData;
 import zutil.network.nio.worker.SystemWorker;
 import zutil.network.nio.worker.Worker;
+import zutil.struct.DynamicByteArrayStream;
 
 
 public abstract class NioNetwork implements Runnable {
@@ -36,7 +36,7 @@ public abstract class NioNetwork implements Runnable {
 	 * 2 = message debug
 	 * 3 = selector debug
 	 */     
-	public static final int DEBUG = 1;
+	public static final int DEBUG = 2;
 	public static enum NetworkType {SERVER, CLIENT};
 
 	private NetworkType type;
@@ -60,7 +60,8 @@ public abstract class NioNetwork implements Runnable {
 	// A list of PendingChange instances
 	private List<ChangeRequest> pendingChanges = new LinkedList<ChangeRequest>();
 	// Maps a SocketChannel to a list of ByteBuffer instances
-	private Map<SocketChannel, List<ByteBuffer>> pendingData = new HashMap<SocketChannel, List<ByteBuffer>>();
+	private Map<SocketChannel, List<ByteBuffer>> pendingWriteData = new HashMap<SocketChannel, List<ByteBuffer>>();
+	private Map<SocketChannel, DynamicByteArrayStream> pendingReadData = new HashMap<SocketChannel, DynamicByteArrayStream>();
 	// The encrypter
 	private Encrypter encrypter;
 
@@ -102,11 +103,11 @@ public abstract class NioNetwork implements Runnable {
 				(encrypter != null ? "Enabled("+encrypter.getAlgorithm()+")" : "Disabled")+"!!");
 	}
 
-	public void send(SocketChannel socket, Object data) {
+	public void send(SocketChannel socket, Object data) throws IOException{
 		send(socket, Converter.toBytes(data));
 	}
 
-	public void send(InetSocketAddress address, Object data){
+	public void send(InetSocketAddress address, Object data) throws IOException{
 		send(address, Converter.toBytes(data));
 	}
 
@@ -140,11 +141,11 @@ public abstract class NioNetwork implements Runnable {
 	protected void queueSend(SocketChannel socket, byte[] data){
 		if(DEBUG>=3)MultiPrintStream.out.println("Sending Queue...");
 		// And queue the data we want written
-		synchronized (pendingData) {
-			List<ByteBuffer> queue = pendingData.get(socket);
+		synchronized (pendingWriteData) {
+			List<ByteBuffer> queue = pendingWriteData.get(socket);
 			if (queue == null) {
 				queue = new ArrayList<ByteBuffer>();
-				pendingData.put(socket, queue);
+				pendingWriteData.put(socket, queue);
 			}
 			//encrypts
 			if(encrypter != null) 
@@ -266,8 +267,10 @@ public abstract class NioNetwork implements Runnable {
 			key.cancel();
 			socketChannel.close();
 			clients.remove(remoteAdr);
+			pendingReadData.remove(socketChannel);
+			pendingWriteData.remove(socketChannel);
 			if(DEBUG>=1)MultiPrintStream.out.println("Connection Forced Close("+remoteAdr+")!!! Connection Count: "+clients.size());
-			if(type == NetworkType.CLIENT) throw new ConnectException("Server Closed The Connection!!!");
+			if(type == NetworkType.CLIENT) throw new IOException("Server Closed The Connection!!!");
 			return;
 		}
 
@@ -277,8 +280,10 @@ public abstract class NioNetwork implements Runnable {
 			key.channel().close();
 			key.cancel();
 			clients.remove(remoteAdr);
+			pendingReadData.remove(socketChannel);
+			pendingWriteData.remove(socketChannel);
 			if(DEBUG>=1)MultiPrintStream.out.println("Connection Close("+remoteAdr+")!!! Connection Count: "+clients.size());
-			if(type == NetworkType.CLIENT) throw new ConnectException("Server Closed The Connection!!!");
+			if(type == NetworkType.CLIENT) throw new IOException("Server Closed The Connection!!!");
 			return;
 		}
 
@@ -286,8 +291,28 @@ public abstract class NioNetwork implements Runnable {
 		// to the client
 		byte[] rspByteData = new byte[numRead];
 		System.arraycopy(readBuffer.array(), 0, rspByteData, 0, numRead);
+		if(encrypter != null)// Encryption
+			rspByteData = encrypter.decrypt(rspByteData);
 
-		handleRecivedMessage(socketChannel, rspByteData);
+		/*
+		if(!pendingReadData.containsKey(socketChannel)){
+			pendingReadData.put(socketChannel, new DynamicByteArrayStream());
+		}
+		if(encrypter != null)// Encryption
+			rspByteData = encrypter.decrypt(rspByteData);
+
+		pendingReadData.get(socketChannel).add(rspByteData);
+		 */
+		
+		Object rspData = null;		
+		try{
+			rspData = Converter.toObject(rspByteData);
+			//rspData = Converter.toObject(pendingReadData.get(socketChannel));
+			handleRecivedMessage(socketChannel, rspData);
+			//pendingReadData.get(socketChannel).clear();
+		}catch(Exception e){
+			e.printStackTrace();
+		}
 	}
 
 	/**
@@ -296,18 +321,22 @@ public abstract class NioNetwork implements Runnable {
 	private void write(SelectionKey key) throws IOException {
 		SocketChannel socketChannel = (SocketChannel) key.channel();
 
-		synchronized (pendingData) {
-			List<ByteBuffer> queue = pendingData.get(socketChannel);
+		synchronized (pendingWriteData) {
+			List<ByteBuffer> queue = pendingWriteData.get(socketChannel);
 			if(queue == null){
 				queue = new ArrayList<ByteBuffer>();
 			}
 
+			int i = 0;
 			// Write until there's not more data ...
 			while (!queue.isEmpty()) {
 				ByteBuffer buf = queue.get(0);
+				i += buf.remaining();
 				socketChannel.write(buf);
+				i -= buf.remaining();
 				if (buf.remaining() > 0) {
 					// ... or the socket's buffer fills up
+					if(DEBUG>=3)MultiPrintStream.out.println("Write Buffer Full!!");
 					break;
 				}
 				queue.remove(0);
@@ -323,14 +352,8 @@ public abstract class NioNetwork implements Runnable {
 		}
 	}
 
-	private void handleRecivedMessage(SocketChannel socketChannel, byte[] rspByteData){
-		//Encryption
-		Object rspData;
-		if(encrypter != null)
-			rspData = Converter.toObject(encrypter.decrypt(rspByteData));
-		else rspData = Converter.toObject(rspByteData);
+	private void handleRecivedMessage(SocketChannel socketChannel, Object rspData){
 		if(DEBUG>=2)MultiPrintStream.out.println("Handling incomming message...");
-
 		if(rspData instanceof SystemMessage){
 			if(systemWorker != null){
 				if(DEBUG>=3)MultiPrintStream.out.println("System Message!!!");
@@ -347,13 +370,13 @@ public abstract class NioNetwork implements Runnable {
 				worker.processData(this, socketChannel, rspData);
 			}
 			else{
-				if(DEBUG>=1)MultiPrintStream.out.println("Unhandled Message!!!");
+				if(DEBUG>=1)MultiPrintStream.out.println("Unhandled Worker Message!!!");
 			}
 		}
 	}
 
 	/**
-	 * Initializes a socket to the server
+	 * Initializes a socket to a server
 	 */
 	protected SocketChannel initiateConnection(InetSocketAddress address) throws IOException {
 		// Create a non-blocking socket channel

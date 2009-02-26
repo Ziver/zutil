@@ -12,14 +12,11 @@ public class MySQLConnection {
 	
 	/**
 	 * Connects to a MySQL server
-	 * @param url The URL of the MySQL server
-	 * @param db The database to connect to
-	 * @param user The user name
-	 * @param password The password
-	 * @throws SQLException 
-	 * @throws ClassNotFoundException 
-	 * @throws IllegalAccessException 
-	 * @throws InstantiationException 
+	 * 
+	 * @param url is the URL of the MySQL server
+	 * @param db is the database to connect to
+	 * @param user is the user name
+	 * @param password is the password
 	 */
     public MySQLConnection(String url,String db,String user, String password) throws SQLException, InstantiationException, IllegalAccessException, ClassNotFoundException{
 		Class.forName ("com.mysql.jdbc.Driver").newInstance();
@@ -27,11 +24,11 @@ public class MySQLConnection {
     }
     
     /**
-     * Runs a query and returns the result
-     * NOTE: Don't forget to close the ResultSet and the Statement or it can lead to memory leak tex: rows.getStatement().close();
-     * @param sql The query to execute
-     * @return The data that the DB returned
-     * @throws SQLException
+     * Runs a query and returns the result.<br>
+     * <b>NOTE:</b> Don't forget to close the ResultSet and the Statement or it can lead to memory leak tex: rows.getStatement().close();
+     * 
+     * @param sql is the query to execute
+     * @return the data that the DB returned
      */
     public synchronized ResultSet returnQuery(String sql) throws SQLException{
     	Statement s = conn.createStatement ();
@@ -41,9 +38,9 @@ public class MySQLConnection {
     
     /**
      * Runs a query in the MySQL server and returns effected rows
-     * @param sql The query to execute
-     * @return Number of rows effected
-     * @throws SQLException
+     * 
+     * @param sql is the query to execute
+     * @return the number of rows effected
      */
     public synchronized int updateQuery(String sql) throws SQLException{
     	Statement s = conn.createStatement ();
@@ -53,11 +50,10 @@ public class MySQLConnection {
     }
     
     /**
-     * Runs a Prepared Statement
-     * NOTE: Don't forget to close the PreparedStatement or it can lead to memory leak
-     * @param sql The SQL to run
+     * Runs a Prepared Statement.<br>
+     * <b>NOTE:</b> Don't forget to close the PreparedStatement or it can lead to memory leak
+     * @param sql is the SQL query to run
      * @return The PreparedStatement
-     * @throws SQLException
      */
     public synchronized PreparedStatement prepareStatement(String sql) throws SQLException{
     	return conn.prepareStatement(sql);
@@ -65,8 +61,6 @@ public class MySQLConnection {
     
     /**
      * Disconnects from the database
-     * @throws SQLException 
-     *
      */
     public synchronized void close() throws SQLException{
     	if (conn != null){
