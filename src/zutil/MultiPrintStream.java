@@ -35,8 +35,8 @@ public class MultiPrintStream extends PrintStream {
 	}
 
 	/**
-	 * this constructor makes a simple PrintStream that prints to the console and to a file
-	 * @param file the file name to output to
+	 * This constructor makes a simple PrintStream that prints to the console and to a file
+	 * @param file is the file name to output to
 	 */
 	public MultiPrintStream(String file){
 		super(new PrintStream(System.out));
@@ -51,8 +51,8 @@ public class MultiPrintStream extends PrintStream {
 	}
 
 	/**
-	 * this constructor takes a array of PrintStreams to be used
-	 * @param streams a array of the streams that will be used
+	 * This constructor takes a array of PrintStreams to be used
+	 * @param streams is a array of the streams that will be used
 	 */
 	public MultiPrintStream(PrintStream[] streams){
 		super(streams[0]);
@@ -63,39 +63,39 @@ public class MultiPrintStream extends PrintStream {
 	}
 
 	/**
-	 * this constructor takes a array of PrintStreams to be used
-	 * @param streams a array of the streams that will be used
+	 * This constructor takes a array of PrintStreams to be used
+	 * @param streams is a array of the streams that will be used
 	 */
 	public static void makeInstance(MultiPrintStream instanceStream){
 		out = instanceStream;
 	}
 
 	/**
-	 * Adds a printstream to the list pf streams
-	 * @param p The Printstream to add
+	 * Adds a PrintStream to the list of streams
+	 * @param p is the PrintStream to add
 	 */
 	public void addPrintStream(PrintStream p){
 		streams.add(p);
 	}
 
 	/**
-	 * Remove a printstream from the list
-	 * @param p The PrintStream to remove
+	 * Remove a PrintStream from the list
+	 * @param p is the PrintStream to remove
 	 */
 	public void removePrintStream(PrintStream p){
 		streams.remove(p);
 	}
 
 	/**
-	 * Remove a printstream from the list
-	 * @param p The index of the PrintStream to remove
+	 * Remove a PrintStream from the list
+	 * @param p is the index of the PrintStream to remove
 	 */
 	public void removePrintStream(int p){
 		streams.remove(p);
 	}
 
 	/**
-	 * prints whit a new line to all the PrintStreams
+	 * Prints with a new line to all the PrintStreams
 	 */
 	public void println(String s){
 		if(!s.equals(""))s = getTime() + s;
@@ -104,7 +104,7 @@ public class MultiPrintStream extends PrintStream {
 	}
 
 	/**
-	 * prints to all the PrintStreams
+	 * Prints to all the PrintStreams
 	 */
 	public void print(String s){
 		for(int i=0; i<streams.size() ;i++)
@@ -132,7 +132,7 @@ public class MultiPrintStream extends PrintStream {
 
 
 	/**
-	 * If the streams should print timestamp in front
+	 * If the streams should print time stamp in front
 	 * of the msgs
 	 * @param enable True to activate
 	 */
@@ -142,7 +142,7 @@ public class MultiPrintStream extends PrintStream {
 
 	/**
 	 * The DateFormat to print in the time stamp
-	 * @param ts String to send to SimpleDateFormat
+	 * @param ts is the String to send to SimpleDateFormat
 	 */
 	public void setTimeStamp(String ts){
 		timeStampString = ts;
@@ -173,18 +173,17 @@ public class MultiPrintStream extends PrintStream {
 
 	/**
 	 * Dumps the content of:
-	 * - Array content
-	 * - Map content (HashMap etc.)
-	 * - List content (ArrayList, LinkedList etc.)
-	 * - InputStream content (Prints out until the end of the stream)
-	 * - Reader content (Prints out until the end of the reader)
-	 * - Instance variables of a Object
+	 * <br>- Array content
+	 * <br>- Map content (HashMap etc.)
+	 * <br>- List content (ArrayList, LinkedList etc.)
+	 * <br>- InputStream content (Prints out until the end of the stream)
+	 * <br>- Reader content (Prints out until the end of the reader)
+	 * <br>- Instance variables of a Object
 	 * 
-	 * @param o The Object to dump
-	 * @return A String with all the printed data
+	 * @param o is the Object to dump
 	 */
-	public String dump( Object o ){
-		return dump( o , true);
+	public void dump( Object o ){
+		dumpToString( o );
 	}
 
 	/**
@@ -196,12 +195,12 @@ public class MultiPrintStream extends PrintStream {
 	 * <br>- Reader content (Prints out until the end of the reader)
 	 * <br>- Instance variables of a Object
 	 * 
-	 * @param o The Object to dump
-	 * @param print If the method should print the data or just return it
+	 * @param o is the Object to dump
+	 * @param print is if the method should print the data or just return it
 	 * @return A String with all the printed data
 	 */
 	@SuppressWarnings("unchecked")
-	private String dump( Object o , boolean print) {
+	public String dumpToString( Object o ) {
 		if(o == null) return "NULL";
 		StringBuffer buffer = new StringBuffer();
 		Class oClass = o.getClass();
@@ -213,7 +212,7 @@ public class MultiPrintStream extends PrintStream {
 				if ( i > 0 )
 					buffer.append( ", " );
 				Object value = Array.get(o,i);
-				buffer.append( (dumbCapable(value) ? dump(value,false) : value) );
+				buffer.append( (dumbCapable(value) ? dumpToString(value) : value) );
 			}
 			buffer.append( "]" );
 		}
@@ -223,7 +222,7 @@ public class MultiPrintStream extends PrintStream {
 			buffer.append( "{" );
 			while(it.hasNext()){
 				Object value = it.next();
-				buffer.append( (dumbCapable(value) ? dump(value,false) : value) );
+				buffer.append( (dumbCapable(value) ? dumpToString(value) : value) );
 				if(it.hasNext())
 					buffer.append( ", " );
 			}
@@ -238,7 +237,7 @@ public class MultiPrintStream extends PrintStream {
 				Object value = ((Map)o).get(key);
 				buffer.append( key );
 				buffer.append( "=>" );
-				buffer.append( (dumbCapable(value) ? dump(value,false) : value) );
+				buffer.append( (dumbCapable(value) ? dumpToString(value) : value) );
 				if(it.hasNext())
 					buffer.append( ", " );
 			}
@@ -288,7 +287,7 @@ public class MultiPrintStream extends PrintStream {
 					try {
 						Object value = fields[i].get(o);
 						if (value != null) {
-							buffer.append( (dumbCapable(value) ? dump(value,false) : value) );
+							buffer.append( (dumbCapable(value) ? dumpToString(value) : value) );
 						}
 					} catch ( IllegalAccessException e ) {}
 				}
@@ -297,14 +296,18 @@ public class MultiPrintStream extends PrintStream {
 			buffer.append( "}" );
 		}
 
-		if(print) out.println(buffer.toString());
 		return buffer.toString();
 	}
 
+	/**
+	 * An helper function for the dump function.
+	 */
 	private boolean dumbCapable(Object o){
-		if(o.getClass().isArray()) return true;
-		else if(o instanceof Collection)return true;
-		else if(o instanceof Map)return true;
+		if(o != null){		
+			if(o.getClass().isArray()) return true;
+			else if(o instanceof Collection)return true;
+			else if(o instanceof Map)return true;
+		}
 		return false;
 	}
 }

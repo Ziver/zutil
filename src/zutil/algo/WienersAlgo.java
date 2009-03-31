@@ -46,6 +46,7 @@ public class WienersAlgo {
 			d1 = g.multiply( d1 ).add( d0 );
 			d0 = t;
 			
+			// (d1*e-1) % c1 == 0
 			n1 = d1.multiply( e ).subtract( BigInteger.ONE );
 			if( n1.mod( c1 ).equals( BigInteger.ZERO ) ){
 				n1 = n1.divide( c1 );

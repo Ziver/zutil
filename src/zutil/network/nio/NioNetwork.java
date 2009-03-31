@@ -312,6 +312,7 @@ public abstract class NioNetwork implements Runnable {
 			//pendingReadData.get(socketChannel).clear();
 		}catch(Exception e){
 			e.printStackTrace();
+			//pendingReadData.get(socketChannel).reset();
 		}
 	}
 
