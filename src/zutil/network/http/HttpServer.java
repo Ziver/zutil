@@ -21,13 +21,12 @@ import zutil.MultiPrintStream;
  * sessions for all the clients
  * 
  * @author Ziver
- * TODO: File upload
  */
 public class HttpServer extends Thread{
 	public static final boolean DEBUG = false;
-	public static final String SERVER_VERSION = "Evil HttpServer 1.0";
+	public static final String SERVER_VERSION = "StaticInt HttpServer 1.0";
 	public static final int COOKIE_TTL = 200;
-	public static final int SESSION_TTL = 200;
+	public static final int SESSION_TTL = 3600*3*1000; // in ms
 
 	public final String server_url;
 	public final int server_port;
@@ -212,19 +211,26 @@ public class HttpServer extends Thread{
 					tmp = client_info.get("Content-Length");
 					int post_data_length = Integer.parseInt(
 							tmp.substring(tmp.indexOf(':')+1, tmp.length()).trim() );
+					// read the data
+					StringBuffer tmpb = new StringBuffer();
+					// read the data
+					for(int i=0; i<post_data_length ;i++){
+						tmpb.append((char)in.read());
+					}
 
 					if(client_info.get("Content-Type").equals("application/x-www-form-urlencoded")){
-						StringBuffer tmpb = new StringBuffer();
-						// read the data
-						for(int i=0; i<post_data_length ;i++){
-							tmpb.append((char)in.read());
-						}
 						// get the variables
 						parseVariables(tmpb.toString(), request);
 					}
+					else if(client_info.get("Content-Type").equals("application/soap+xml") || 
+							client_info.get("Content-Type").equals("text/xml") || 
+							client_info.get("Content-Type").equals("text/plain")){
+						// save the variables
+						request.put("" , tmpb.toString());
+					}
 					else if(client_info.get("Content-Type").contains("multipart/form-data")){
-						// TODO:
-						throw new Exception("\"multipart/form-data\" Not implemented!!!");
+						// TODO: File upload
+						throw new Exception("\"multipart-form-data\" Not implemented!!!");
 					}						
 				}
 				//*****************
@@ -233,18 +239,34 @@ public class HttpServer extends Thread{
 				try {
 					out.sendHeader("HTTP/1.0 500 ERROR");
 				} catch (Exception e1) {}
-				out.println("500 Internal Error(Header: "+tmp+"): "+e.getMessage());
+				if(e.getMessage() != null)
+					out.println("500 Internal Error(Header: "+tmp+"): "+e.getMessage());
+				else{
+					out.println("500 Internal Error(Header: "+tmp+"): "+e.getCause().getMessage());
+				}
 			}
 			try {
 				//****************************  HANDLE REQUEST *********************************
 				// Get the client session or create one
 				HashMap<String,String> client_session;
+				long ttl_time = System.currentTimeMillis()+SESSION_TTL;
 				if(cookie.containsKey("session_id") && sessions.containsKey(cookie.get("session_id"))){
 					client_session = sessions.get(cookie.get("session_id"));
+					// Check if session is still valid
+					if(Long.parseLong(client_session.get("ttl")) < System.currentTimeMillis()){
+						int session_id = Integer.parseInt(client_session.get("session_id"));
+						client_session = new HashMap<String,String>();
+						client_session.put("session_id", ""+session_id);
+						sessions.put(""+session_id, client_session);
+					}
+					// renew the session TTL
+					
+					client_session.put("ttl", ""+ttl_time);
 				}
 				else{
 					client_session = new HashMap<String,String>();
 					client_session.put("session_id", ""+nextSessionId);
+					client_session.put("ttl", ""+ttl_time);
 					sessions.put(""+nextSessionId, client_session);
 					nextSessionId++;
 				}
@@ -262,7 +284,6 @@ public class HttpServer extends Thread{
 				out.sendHeader("Server: "+SERVER_VERSION);
 				out.sendHeader("Content-Type: text/html");
 				out.setCookie("session_id", client_session.get("session_id"));
-
 
 				if(!page_url.isEmpty() && pages.containsKey(page_url)){
 					pages.get(page_url).respond(out, client_info, client_session, cookie, request);
@@ -322,17 +343,19 @@ public class HttpServer extends Thread{
 	 * @param map The HashMap to put all the variables into
 	 */
 	private void parseVariables(String header, HashMap<String, String> map){
-		int tmpi;
+		int tmp;
 		// get the variables
-		while(!header.isEmpty()){
-			tmpi = ( (tmpi = header.indexOf('&')) == -1 ? header.length() : tmpi);
-			map.put(
-					(header.substring(0, header.indexOf('=')).trim() ), 			// Key
-					(header.substring(header.indexOf('=')+1, tmpi )).trim() );	//Value
-			if(header.indexOf('&') > 0)
-				header = header.substring(header.indexOf('&')+1, header.length());
-			else
-				break;
+		String[] data = header.split("&");
+		for(String element : data){
+			tmp = element.indexOf('=');
+			if(tmp > 0){
+				map.put(
+					element.substring(0, tmp ).trim(), 		// Key
+					element.substring(tmp+1, element.length() ).trim() );	//Value
+			}
+			else{
+				map.put(element, "");
+			}
 		}
 	}
 }
