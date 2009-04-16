@@ -3,7 +3,6 @@ package zutil.test;
 import java.io.IOException;
 import java.util.HashMap;
 
-import zutil.FileFinder;
 import zutil.network.http.HttpPage;
 import zutil.network.http.HttpPrintStream;
 import zutil.network.http.HttpServer;

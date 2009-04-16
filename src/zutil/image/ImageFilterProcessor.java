@@ -65,7 +65,7 @@ public abstract class ImageFilterProcessor {
 		// converts the img to raw data
 		int[][][] data = convertToArray(img, cols, rows);
 		//processes the image
-		data = process(data, cols, rows);
+		process(data);
 		//converts back the image
 		return convertToImage(data, data[0].length, data.length);
 	}
@@ -148,10 +148,20 @@ public abstract class ImageFilterProcessor {
 	}
 
 	/**
+	 * Runs the image thrue the processor
+	 * @param data The raw image to apply the effect to
+	 */
+	public void process(final int[][][] data){
+		process(data, 0, 0, data[0].length, data.length);
+	}
+	
+	/**
 	 * The underlying effect is run here
 	 * @param data The raw image to apply the effect to
-	 * @param cols Columns of the image
-	 * @param rows Rows of the image
+	 * @param startX is the x pixel of the image to start from
+	 * @param startY is the y pixel of the image to start from
+	 * @param stopX is the x pixel of the image to stop
+	 * @param stopY is the y pixel of the image to stop
 	 */
-	public abstract int[][][] process(final int[][][] data, int cols, int rows);
+	public abstract void process(final int[][][] data, int startX, int startY, int stopX, int stopY);
 }

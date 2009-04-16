@@ -28,67 +28,64 @@ public class BlurFilter extends ImageFilterProcessor{
 	}
 
 	@Override
-	public int[][][] process(final int[][][] data, int cols, int rows) {
-		int inputPeak = ImageUtil.peakValue(data, cols, rows);
+	public void process(final int[][][] data, int startX, int startY, int stopX, int stopY) {
+		int inputPeak = ImageUtil.peakValue(data);
 
-		int[][][] output = new int[rows][cols][4];
-		int[][][] tmpData = ImageUtil.copyArray(data, cols, rows);
+		int[][][] tmpData = new int[data.length][data[0].length][4];
 		//Perform the convolution one or more times in succession
 		int redSum, greenSum, blueSum, outputPeak;
 		for(int i=0; i<blurValue ;i++){
 			//Iterate on each pixel as a registration point.
-			for(int y=0; y<rows ;y++){
-				setProgress(ZMath.percent(0, (blurValue-1)*(rows-2), i*(rows-2)+y));
-				for(int x=0; x<cols ;x++){
-					if(x == 0 || x == cols-1 || y == 0 || y == rows-1){
-						redSum = tmpData[y][x][1] * 9;
-						greenSum = tmpData[y][x][2] * 9;
-						blueSum = tmpData[y][x][3] * 9;
+			for(int y=startY; y<stopY ;y++){
+				setProgress(ZMath.percent(0, (blurValue-1)*(stopY-startY-2), i*(stopY-startY-2)+y));
+				for(int x=startX; x<stopX ;x++){
+					if(x == 0 || x == data[0].length-1 || y == 0 || y == data.length-1){
+						redSum = data[y][x][1] * 9;
+						greenSum = data[y][x][2] * 9;
+						blueSum = data[y][x][3] * 9;
 					}
 					else{
 						redSum =
-							tmpData[y - 1][x - 1][1] +
-							tmpData[y - 1][x - 0][1] +
-							tmpData[y - 1][x + 1][1] +
-							tmpData[y - 0][x - 1][1] +
-							tmpData[y - 0][x - 0][1] +
-							tmpData[y - 0][x + 1][1] +
-							tmpData[y + 1][x - 1][1] +
-							tmpData[y + 1][x - 0][1] +
-							tmpData[y + 1][x + 1][1];
+							data[y - 1][x - 1][1] +
+							data[y - 1][x - 0][1] +
+							data[y - 1][x + 1][1] +
+							data[y - 0][x - 1][1] +
+							data[y - 0][x - 0][1] +
+							data[y - 0][x + 1][1] +
+							data[y + 1][x - 1][1] +
+							data[y + 1][x - 0][1] +
+							data[y + 1][x + 1][1];
 						greenSum =
-							tmpData[y - 1][x - 1][2] +
-							tmpData[y - 1][x - 0][2] +
-							tmpData[y - 1][x + 1][2] +
-							tmpData[y - 0][x - 1][2] +
-							tmpData[y - 0][x - 0][2] +
-							tmpData[y - 0][x + 1][2] +
-							tmpData[y + 1][x - 1][2] +
-							tmpData[y + 1][x - 0][2] +
-							tmpData[y + 1][x + 1][2];
+							data[y - 1][x - 1][2] +
+							data[y - 1][x - 0][2] +
+							data[y - 1][x + 1][2] +
+							data[y - 0][x - 1][2] +
+							data[y - 0][x - 0][2] +
+							data[y - 0][x + 1][2] +
+							data[y + 1][x - 1][2] +
+							data[y + 1][x - 0][2] +
+							data[y + 1][x + 1][2];
 						blueSum =
-							tmpData[y - 1][x - 1][3] +
-							tmpData[y - 1][x - 0][3] +
-							tmpData[y - 1][x + 1][3] +
-							tmpData[y - 0][x - 1][3] +
-							tmpData[y - 0][x - 0][3] +
-							tmpData[y - 0][x + 1][3] +
-							tmpData[y + 1][x - 1][3] +
-							tmpData[y + 1][x - 0][3] +
-							tmpData[y + 1][x + 1][3];
+							data[y - 1][x - 1][3] +
+							data[y - 1][x - 0][3] +
+							data[y - 1][x + 1][3] +
+							data[y - 0][x - 1][3] +
+							data[y - 0][x - 0][3] +
+							data[y - 0][x + 1][3] +
+							data[y + 1][x - 1][3] +
+							data[y + 1][x - 0][3] +
+							data[y + 1][x + 1][3];
 					}
-					output[y][x][0] = tmpData[y][x][0];
-					output[y][x][1] = redSum;
-					output[y][x][2] = greenSum;
-					output[y][x][3] = blueSum;
+					tmpData[y][x][0] = data[y][x][0];
+					tmpData[y][x][1] = redSum;
+					tmpData[y][x][2] = greenSum;
+					tmpData[y][x][3] = blueSum;
 				}
 			}
 
 			// getting the new peak value and normalizing the image
-			outputPeak = ImageUtil.peakValue(output, cols, rows);
-			ImageUtil.normalize(tmpData, output, cols, rows, ((double)inputPeak)/outputPeak );
-		}
-
-		return tmpData;
+			outputPeak = ImageUtil.peakValue(tmpData);
+			ImageUtil.normalize(data, tmpData, startX, startY, stopX, stopY, ((double)inputPeak)/outputPeak );
+		}		
 	}
 }

@@ -30,18 +30,14 @@ public class ContrastBrightnessFilter extends ImageFilterProcessor{
 	}
 
 	@Override
-	public int[][][] process(final int[][][] data, int cols, int rows) {
-		int mean = ImageUtil.meanValue(data, cols, rows);
+	public void process(final int[][][] data, int startX, int startY, int stopX, int stopY) {
+		int mean = ImageUtil.meanValue(data);
 		
-		int[][][] output = ImageUtil.copyArray(data, cols, rows);
-		
-		ImageUtil.addMeanValue(output, cols, rows, mean*(-1));
-		ImageUtil.scale(output, cols, rows, contrast);
-		ImageUtil.addMeanValue(output, cols, rows, (int)(brightness*mean));
+		ImageUtil.addMeanValue(data, startX, startY, stopX, stopY, mean*(-1));
+		ImageUtil.scale(data, startX, startY, stopX, stopY, contrast);
+		ImageUtil.addMeanValue(data, startX, startY, stopX, stopY, (int)(brightness*mean));
 
-		ImageUtil.clip(output ,cols, rows);
-		
-		return output;
+		ImageUtil.clip(data , startX, startY, stopX, stopY);
 	}
 
 }

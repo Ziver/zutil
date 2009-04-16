@@ -58,7 +58,7 @@ public class HttpPrintStream extends PrintStream{
 	public void sendHeader(String header) throws Exception{
 		if(cookie == null)
 			throw new Exception("Header already sent!!!");
-		super.println(header);
+		super.print(header+"\n");
 	}
 
 	/**
@@ -69,27 +69,25 @@ public class HttpPrintStream extends PrintStream{
 	}
 
 	/**
-	 * NOT TO BE USED!!!!
-	 * use printOrBuffer(String s) instead
+	 * Prints an string
 	 */
-	@Deprecated
 	public void print(String s){
-		super.print(s);
+		printOrBuffer(s);
 	}
 	
 	/**
 	 * prints to all
 	 */
-	public void printOrBuffer(String s){
+	private void printOrBuffer(String s){
 		if(buffer_enabled){
 			buffer.append(s);
 		}
 		else{
 			if(cookie != null){
 				for(String key : cookie.keySet()){					
-					super.println("Set-Cookie: "+key+"="+cookie.get(key)+"; ");
+					super.print("Set-Cookie: "+key+"="+cookie.get(key)+"; \n");
 				}
-				super.println(" \n");
+				super.print(" \n");
 				cookie = null;
 			}
 			super.print(s);
@@ -115,21 +113,21 @@ public class HttpPrintStream extends PrintStream{
 	}
 	
 	public void println(){			println("");}
-	public void println(boolean x){	println(""+x);}
-	public void println(char x){	println(""+x);}
+	public void println(boolean x){	println(String.valueOf(x));}
+	public void println(char x){	println(String.valueOf(x));}
 	public void println(char[] x){	println(new String(x));}
-	public void println(double x){	println(""+x);}
-	public void println(float x){	println(""+x);}
-	public void println(int x){		println(""+x);}
-	public void println(long x){	println(""+x);}
-	public void println(Object x){	println(""+x);}
+	public void println(double x){	println(String.valueOf(x));}
+	public void println(float x){	println(String.valueOf(x));}
+	public void println(int x){		println(String.valueOf(x));}
+	public void println(long x){	println(String.valueOf(x));}
+	public void println(Object x){	println(String.valueOf(x));}
 	
-	public void print(boolean x){	printOrBuffer(""+x);}
-	public void print(char x){		printOrBuffer(""+x);}
+	public void print(boolean x){	printOrBuffer(String.valueOf(x));}
+	public void print(char x){		printOrBuffer(String.valueOf(x));}
 	public void print(char[] x){	printOrBuffer(new String(x));}
-	public void print(double x){	printOrBuffer(""+x);}
-	public void print(float x){		printOrBuffer(""+x);}
-	public void print(int x){		printOrBuffer(""+x);}
-	public void print(long x){		printOrBuffer(""+x);}
-	public void print(Object x){	printOrBuffer(""+x);}
+	public void print(double x){	printOrBuffer(String.valueOf(x));}
+	public void print(float x){		printOrBuffer(String.valueOf(x));}
+	public void print(int x){		printOrBuffer(String.valueOf(x));}
+	public void print(long x){		printOrBuffer(String.valueOf(x));}
+	public void print(Object x){	printOrBuffer(String.valueOf(x));}
 }

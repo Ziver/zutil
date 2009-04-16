@@ -61,13 +61,13 @@ public class ImageProcessorTest implements ProgressListener{
 		
 		BufferedImage procImg = null;
 		try {
-			//ImageFilterProcessor processor = new SpotLightFilter(img,100,100,100);
-			//ImageFilterProcessor processor = new ContrastBrightnessFilter(img);
+			//ImageFilterProcessor processor = new BlurFilter(img, 10);
 			//ImageFilterProcessor processor = new ColorIntensityFilter(img, true);
-			ImageFilterProcessor processor = new BlurFilter(img, 100);
-			//ImageFilterProcessor processor = new DitheringFilter(img);
-			//ImageFilterProcessor processor = new ResizeImage(img,100,100);
+			//ImageFilterProcessor processor = new ContrastBrightnessFilter(img);
+			ImageFilterProcessor processor = new DitheringFilter(img);
 			//ImageFilterProcessor processor = new MedianFilter(img);
+			//ImageFilterProcessor processor = new ResizeImage(img,100,100);
+			//ImageFilterProcessor processor = new SpotLightFilter(img,100,100,100);			
 			//ImageFilterProcessor processor = new FaceDetectionFilter(img);
 			
 			processor.setProgressListener(this);

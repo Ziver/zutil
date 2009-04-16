@@ -52,7 +52,7 @@ public class ColorIntensityFilter extends ImageFilterProcessor{
 	}
 
 	@Override
-	public int[][][] process(final int[][][] data, int cols, int rows) {
+	public void process(final int[][][] data, int startX, int startY, int stopX, int stopY) {
 		// making sure the scales are right
 		if(redScale > 100) redScale = 100;
 		else if(redScale < 0) redScale = 0;
@@ -62,29 +62,26 @@ public class ColorIntensityFilter extends ImageFilterProcessor{
 
 		if(blueScale > 100) blueScale = 100;
 		else if(blueScale < 0) blueScale = 0;
-
-		int[][][] output = new int[rows][cols][4];
 		
 		// Applying the color intensity to the image
-		for(int y=0; y<rows ;y++){
-			setProgress(ZMath.percent(0, rows-1, y));
-			for(int x=0; x<cols ;x++){
+		for(int y=startY; y<stopY ;y++){
+			setProgress(ZMath.percent(0, stopY-startY-1, y));
+			for(int x=startX; x<stopX ;x++){
 				if(!invert){
 					// inversion
-					output[y][x][0] = data[y][x][0];
-					output[y][x][1] = 255 - data[y][x][1] * redScale/100;
-					output[y][x][2] = 255 - data[y][x][2] * greenScale/100;
-					output[y][x][3] = 255 - data[y][x][3] * blueScale/100;
+					data[y][x][0] = data[y][x][0];
+					data[y][x][1] = 255 - data[y][x][1] * redScale/100;
+					data[y][x][2] = 255 - data[y][x][2] * greenScale/100;
+					data[y][x][3] = 255 - data[y][x][3] * blueScale/100;
 				}
 				else{
-					output[y][x][0] = data[y][x][0];
-					output[y][x][1] = data[y][x][1] * redScale/100;
-					output[y][x][2] = data[y][x][2] * greenScale/100;
-					output[y][x][3] = data[y][x][3] * blueScale/100;
+					data[y][x][0] = data[y][x][0];
+					data[y][x][1] = data[y][x][1] * redScale/100;
+					data[y][x][2] = data[y][x][2] * greenScale/100;
+					data[y][x][3] = data[y][x][3] * blueScale/100;
 				}
 			}
 		}
-		return output;
 	}
 
 }

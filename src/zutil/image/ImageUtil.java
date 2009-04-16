@@ -6,18 +6,35 @@ package zutil.image;
  *
  */
 public class ImageUtil {
+	
 	/**
 	 * Returns the peek value in the image
 	 * 
 	 * @param data The image data
-	 * @param cols The number of columns
-	 * @param rows The number of rows
+	 * @param startX is the x pixel of the image to start from
+	 * @param startY is the y pixel of the image to start from
+	 * @param stopX is the x pixel of the image to stop
+	 * @param stopY is the y pixel of the image to stop
 	 * @return The peak value of the image
 	 */
-	public static int peakValue(int[][][] data, int cols, int rows) {
+	public static int peakValue(int[][][] data) {
+		return peakValue(data, 0, 0, data[0].length, data.length);
+	}
+	
+	/**
+	 * Returns the peek value in the image
+	 * 
+	 * @param data The image data
+	 * @param startX is the x pixel of the image to start from
+	 * @param startY is the y pixel of the image to start from
+	 * @param stopX is the x pixel of the image to stop
+	 * @param stopY is the y pixel of the image to stop
+	 * @return The peak value of the image
+	 */
+	public static int peakValue(int[][][] data, int startX, int startY, int stopX, int stopY) {
 		int peak = 0;
-		for(int y=0; y<rows ;y++){
-			for(int x=0; x<cols ;x++){
+		for(int y=startY; y<stopY ;y++){
+			for(int x=startX; x<stopX ;x++){
 				if(data[y][x][1] > peak) peak = data[y][x][1];
 				if(data[y][x][2] > peak) peak = data[y][x][2];
 				if(data[y][x][3] > peak) peak = data[y][x][3];
@@ -30,13 +47,15 @@ public class ImageUtil {
 	 * Normalizes the image data by the given scale
 	 * 
 	 * @param data The image data
-	 * @param cols The number of columns
-	 * @param rows The number of rows
+	 * @param startX is the x pixel of the image to start from
+	 * @param startY is the y pixel of the image to start from
+	 * @param stopX is the x pixel of the image to stop
+	 * @param stopY is the y pixel of the image to stop
 	 * @param scale The scale to normalize the image by
 	 */
-	public static void normalize(int[][][] data, int cols, int rows, double scale) {
-		for(int y=0; y<rows ;y++){
-			for(int x=0; x<cols ;x++){
+	public static void normalize(int[][][] data, int startX, int startY, int stopX, int stopY, double scale) {
+		for(int y=startY; y<stopY ;y++){
+			for(int x=startX; x<stopX ;x++){
 				data[y][x][1] = (int)(data[y][x][1] * scale);
 				data[y][x][2] = (int)(data[y][x][2] * scale);
 				data[y][x][3] = (int)(data[y][x][3] * scale);
@@ -49,13 +68,15 @@ public class ImageUtil {
 	 * 
 	 * @param output The output data array
 	 * @param data The image data
-	 * @param cols The number of columns
-	 * @param rows The number of rows
+	 * @param startX is the x pixel of the image to start from
+	 * @param startY is the y pixel of the image to start from
+	 * @param stopX is the x pixel of the image to stop
+	 * @param stopY is the y pixel of the image to stop
 	 * @param scale The scale to normalize the image by
 	 */
-	public static void normalize(int[][][] output, int[][][] data, int cols, int rows, double scale) {
-		for(int y=0; y<rows ;y++){
-			for(int x=0; x<cols ;x++){
+	public static void normalize(int[][][] output, int[][][] data, int startX, int startY, int stopX, int stopY, double scale) {
+		for(int y=startY; y<stopY ;y++){
+			for(int x=startX; x<stopX ;x++){
 				output[y][x][1] = (int)(data[y][x][1] * scale);
 				output[y][x][2] = (int)(data[y][x][2] * scale);
 				output[y][x][3] = (int)(data[y][x][3] * scale);
@@ -64,19 +85,21 @@ public class ImageUtil {
 	}
 
 	/**
-	 * Returns the rms value of the image
+	 * Returns the RMS value of the image
 	 * (The RMS value is a measure of the width of the color distribution.)
 	 * 
-	 * @param data The image data
-	 * @param cols The number of columns
-	 * @param rows The number of rows
-	 * @return The rms value for the image
+	 * @param data is the image data
+	 * @param startX is the x pixel of the image to start from
+	 * @param startY is the y pixel of the image to start from
+	 * @param stopX is the x pixel of the image to stop
+	 * @param stopY is the y pixel of the image to stop
+	 * @return The RMS value for the image
 	 */
-	public static int rms(int[][][] data, int cols, int rows){
+	public static int rms(int[][][] data, int startX, int startY, int stopX, int stopY){
 		int pixelCount = 0;
 		long accum = 0;
-		for(int y=0; y <rows ;y++){
-			for(int x=0; x<cols ;x++){
+		for(int y=startY; y <stopY ;y++){
+			for(int x=startX; x<stopX ;x++){
 				accum += data[y][x][1] * data[y][x][1];
 				accum += data[y][x][2] * data[y][x][2];
 				accum += data[y][x][3] * data[y][x][3];
@@ -92,13 +115,15 @@ public class ImageUtil {
 	 * Multiplies the given image data by the given value
 	 * 
 	 * @param data The image data
-	 * @param cols The number of columns
-	 * @param rows The number of rows
+	 * @param startX is the x pixel of the image to start from
+	 * @param startY is the y pixel of the image to start from
+	 * @param stopX is the x pixel of the image to stop
+	 * @param stopY is the y pixel of the image to stop
 	 * @param scale The number to scale the image by
 	 */
-	public static void scale(int[][][] data, int cols, int rows, double scale){
-		for(int y=0; y<rows ;y++){
-			for(int x=0; x<cols ;x++){
+	public static void scale(int[][][] data, int startX, int startY, int stopX, int stopY, double scale){
+		for(int y=startY; y<stopY ;y++){
+			for(int x=startX; x<stopX ;x++){
 				data[y][x][1] *= scale;
 				data[y][x][2] *= scale;
 				data[y][x][3] *= scale;
@@ -110,15 +135,27 @@ public class ImageUtil {
 	 * Returns the mean value of the given image data
 	 * 
 	 * @param data The image data
-	 * @param cols The column count
-	 * @param rows The row count
 	 * @return The mean value of the image
 	 */
-	public static int meanValue(int[][][] data,int cols, int rows){
+	public static int meanValue(int[][][] data){
+		return meanValue(data, 0, 0, data[0].length, data.length);
+	}
+	
+	/**
+	 * Returns the mean value of the given image data
+	 * 
+	 * @param data The image data
+	 * @param startX is the x pixel of the image to start from
+	 * @param startY is the y pixel of the image to start from
+	 * @param stopX is the x pixel of the image to stop
+	 * @param stopY is the y pixel of the image to stop
+	 * @return The mean value of the image
+	 */
+	public static int meanValue(int[][][] data, int startX, int startY, int stopX, int stopY){
 		int pixelCount = 0;
 		long accum = 0;
-		for(int y=0; y<rows ;y++){
-			for(int x=0; x<cols ;x++){
+		for(int y=startY; y<stopY ;y++){
+			for(int x=startX; x<stopX ;x++){
 				accum += data[y][x][1];
 				accum += data[y][x][2];
 				accum += data[y][x][3];
@@ -133,13 +170,15 @@ public class ImageUtil {
 	 * Adds the mean value to the image data
 	 * 
 	 * @param data The image data
-	 * @param cols The number of columns
-	 * @param rows The number of rows
+	 * @param startX is the x pixel of the image to start from
+	 * @param startY is the y pixel of the image to start from
+	 * @param stopX is the x pixel of the image to stop
+	 * @param stopY is the y pixel of the image to stop
 	 * @param mean The mean value
 	 */
-	public static void addMeanValue(int[][][] data,int cols, int rows, int mean){
-		for(int y=0; y<rows ;y++){
-			for(int x=0; x<cols ;x++){
+	public static void addMeanValue(int[][][] data, int startX, int startY, int stopX, int stopY, int mean){
+		for(int y=startY; y<stopY ;y++){
+			for(int x=startX; x<stopX ;x++){
 				data[y][x][1] += mean;
 				data[y][x][2] += mean;
 				data[y][x][3] += mean;
@@ -191,21 +230,48 @@ public class ImageUtil {
 	 * Copies the given array to a new one that it returns
 	 * 
 	 * @param data The data to duplicate
-	 * @param cols The amount of columns
-	 * @param rows The amount of rows
+	 * @return an copy of the array
+	 */
+	public static int[][][] copyArray(int[][][] data){
+		return copyArray(data, 0, 0, data[0].length, data.length);
+	}
+	
+	/**
+	 * Copies the given array to a new one that it returns
+	 * 
+	 * @param data The data to duplicate
+	 * @param startX is the x pixel of the image to start from
+	 * @param startY is the y pixel of the image to start from
+	 * @param stopX is the x pixel of the image to stop
+	 * @param stopY is the y pixel of the image to stop
 	 * @return The array copy
 	 */
-	public static int[][][] copyArray(int[][][] data,int cols,int rows){
-		int[][][] copy = new int[rows][cols][4];
-		for(int y=0; y<rows ;y++){
-			for(int x=0; x<cols ;x++){
-				copy[y][x][0] = data[y][x][0];
-				copy[y][x][1] = data[y][x][1];
-				copy[y][x][2] = data[y][x][2];
-				copy[y][x][3] = data[y][x][3];
+	public static int[][][] copyArray(int[][][] data, int startX, int startY, int stopX, int stopY){
+		int[][][] copy = new int[data.length][data[0].length][4];
+		return copyArray(data, copy, startX, startY, stopX, stopY);
+	}
+	
+	/**
+	 * Copies the given array to a new one that it returns
+	 * 
+	 * @param data The data to duplicate
+	 * @param dest is the array to copy the data to
+	 * @param startX is the x pixel of the image to start from
+	 * @param startY is the y pixel of the image to start from
+	 * @param stopX is the x pixel of the image to stop
+	 * @param stopY is the y pixel of the image to stop
+	 * @return the dest array
+	 */
+	public static int[][][] copyArray(int[][][] data, int[][][] dest, int startX, int startY, int stopX, int stopY){
+		for(int y=startY; y<stopY ;y++){
+			for(int x=startX; x<stopX ;x++){
+				dest[y][x][0] = data[y][x][0];
+				dest[y][x][1] = data[y][x][1];
+				dest[y][x][2] = data[y][x][2];
+				dest[y][x][3] = data[y][x][3];
 			}
 		}
-		return copy;
+		return dest;
 	}
 
 	/**
@@ -213,15 +279,17 @@ public class ImageUtil {
 	 * are in the range 0-255
 	 * 
 	 * @param data The image data
-	 * @param cols The amount of columns
-	 * @param rows The amount of rows
+	 * @param startX is the x pixel of the image to start from
+	 * @param startY is the y pixel of the image to start from
+	 * @param stopX is the x pixel of the image to stop
+	 * @param stopY is the y pixel of the image to stop
 	 */
-	public static void clip(int[][][] data, int cols, int rows){
-		for(int y=0; y<rows ;y++){
-			for(int x=0; x<cols ;x++){
+	public static void clip(int[][][] data, int startX, int startY, int stopX, int stopY){
+		for(int y=startY; y<stopY ;y++){
+			for(int x=startX; x<stopX ;x++){
 				data[y][x][1] = clip(data[y][x][1]);
-				data[y][x][1] = clip(data[y][x][2]);
-				data[y][x][1] = clip(data[y][x][3]);
+				data[y][x][2] = clip(data[y][x][2]);
+				data[y][x][3] = clip(data[y][x][3]);
 			}
 		}
 	}
