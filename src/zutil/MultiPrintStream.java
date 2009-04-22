@@ -95,6 +95,22 @@ public class MultiPrintStream extends PrintStream {
 	}
 
 	/**
+	 * writes to all the PrintStreams
+	 */
+	public void write(int b) {
+		for(int i=0; i<streams.size() ;i++)
+			streams.get(i).write(b);
+	}
+	
+	/**
+	 * writes to all the PrintStreams
+	 */
+	 public void write(byte buf[], int off, int len){
+		for(int i=0; i<streams.size() ;i++)
+			streams.get(i).write(buf, off, len);
+	}
+	
+	/**
 	 * Prints with a new line to all the PrintStreams
 	 */
 	public void println(String s){
@@ -112,23 +128,23 @@ public class MultiPrintStream extends PrintStream {
 	}
 
 	public void println(){			println("");}
-	public void println(boolean x){	println(""+x);}
-	public void println(char x){	println(""+x);}
+	public void println(boolean x){	println(String.valueOf(x));}
+	public void println(char x){	println(String.valueOf(x));}
 	public void println(char[] x){	println(new String(x));}
-	public void println(double x){	println(""+x);}
-	public void println(float x){	println(""+x);}
-	public void println(int x){		println(""+x);}
-	public void println(long x){	println(""+x);}
-	public void println(Object x){	println(""+x);}
+	public void println(double x){	println(String.valueOf(x));}
+	public void println(float x){	println(String.valueOf(x));}
+	public void println(int x){		println(String.valueOf(x));}
+	public void println(long x){	println(String.valueOf(x));}
+	public void println(Object x){	println(String.valueOf(x));}
 
-	public void print(boolean x){	print(""+x);}
-	public void print(char x){		print(""+x);}
+	public void print(boolean x){	print(String.valueOf(x));}
+	public void print(char x){		print(String.valueOf(x));}
 	public void print(char[] x){	print(new String(x));}
-	public void print(double x){	print(""+x);}
-	public void print(float x){		print(""+x);}
-	public void print(int x){		print(""+x);}
-	public void print(long x){		print(""+x);}
-	public void print(Object x){	print(""+x);}
+	public void print(double x){	print(String.valueOf(x));}
+	public void print(float x){		print(String.valueOf(x));}
+	public void print(int x){		print(String.valueOf(x));}
+	public void print(long x){		print(String.valueOf(x));}
+	public void print(Object x){	print(String.valueOf(x));}
 
 
 	/**

@@ -22,7 +22,7 @@ import zutil.MultiPrintStream;
  *
  */
 public class MySQLQueue<E> implements Queue<E>{
-
+	// GO TO KNOW = SELECT LAST_INSERT_ID() as pos_id
 	private MySQLConnection db;
 	private String table;
 	
