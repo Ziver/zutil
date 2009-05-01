@@ -29,6 +29,7 @@ public class Encrypter {
 	public static final String DES_ALGO = "DES";
 	public static final String DESEDE_ALGO = "DESede";
 	public static final String TRIPLEDES_ALGO = "TripleDES";
+	public static final String AES_ALGO = "AES";
 	public static final String PASSPHRASE_TOWFISH_ALGO = "PBEWithSHAAndTwofish-CBC";
 	public static final String PASSPHRASE_TRIPLEDES_ALGO = "PBEWithMD5AndTripleDES";
 	public static final String PASSPHRASE_DES_ALGO = "PBEWithMD5AndDES";
