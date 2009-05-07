@@ -33,11 +33,10 @@ public class Hasher {
 			output = bigInt.toString(16);
 		}
 		catch(IOException e) {
-			throw new RuntimeException("Unable to process file for MD5", e);
+			throw new RuntimeException("Unable to process file for "+hashType+" hash", e);
 		}
 		is.close();
 
-		MultiPrintStream.out.println("File Hash: "+output);
 		return output;
 	}
 
