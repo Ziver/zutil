@@ -71,6 +71,17 @@ public class Hasher {
 	}
 
 	/**
+	 * Hashes the given String as UTF8
+	 * 
+	 * @param object is the String
+	 * @param hashType is the hash algorithm (MD2, MD5, SHA-1, SHA-256, SHA-384, SHA-512 )
+	 * @return a hex String of the hash
+	 */
+	public static String hash(String object, String hashType) throws Exception {
+		return hash(object.getBytes("UTF8"), hashType);//(new BASE64Encoder()).encode(raw);
+	}
+	
+	/**
 	 * Returns the hash of the given object
 	 * 
 	 * @param object is the object to hash
