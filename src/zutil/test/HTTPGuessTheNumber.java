@@ -7,18 +7,19 @@ import zutil.network.http.HttpPage;
 import zutil.network.http.HttpPrintStream;
 import zutil.network.http.HttpServer;
 
+
 public class HTTPGuessTheNumber implements HttpPage{
 
 	public static void main(String[] args) throws IOException{
 		//HttpServer server = new HttpServer("localhost", 443, FileFinder.find("keySSL"), "rootroot");//SSL
-		HttpServer server = new HttpServer("localhost", 80);
+		HttpServer server = new HttpServer("localhost", 8080);
 		server.setDefaultPage(new HTTPGuessTheNumber());
 		server.run();
 	}
 
 	public void respond(HttpPrintStream out,
 			HashMap<String, String> client_info,
-			HashMap<String, String> session, HashMap<String, String> cookie,
+			HashMap<String, Object> session, HashMap<String, String> cookie,
 			HashMap<String, String> request) {
 
 		out.enableBuffering(true);
@@ -27,7 +28,7 @@ public class HTTPGuessTheNumber implements HttpPage{
 
 		if(session.containsKey("random_nummber") && request.containsKey("guess")){
 			int guess = Integer.parseInt(request.get("guess"));
-			int nummber = Integer.parseInt(session.get("random_nummber"));
+			int nummber = (Integer)session.get("random_nummber");
 			try {
 				if(guess == nummber){
 					session.remove("random_nummber");
@@ -54,7 +55,7 @@ public class HTTPGuessTheNumber implements HttpPage{
 			}
 		}
 		else{
-			session.put("random_nummber", ""+(int)(Math.random()*99+1));
+			session.put("random_nummber", (int)(Math.random()*99+1));
 			try {
 				out.setCookie("low", "0");
 				out.setCookie("high", "100");
@@ -73,7 +74,7 @@ public class HTTPGuessTheNumber implements HttpPage{
 		out.println("<input type='submit' value='Guess'>");
 		out.println("</form>");
 		out.println("<script>document.all.guess.focus();</script>");
-		//out.println("<b>DEBUG: nummber="+session.get("random_nummber")+"</b><br>");
+		out.println("<b>DEBUG: nummber="+session.get("random_nummber")+"</b><br>");
 		out.println("</html>");
 	}
 

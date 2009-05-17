@@ -40,4 +40,17 @@ public interface SOAPObject{
 		String value();
 		boolean optional() default false;
 	}
+	
+	/**
+	 * This generates an documentation tag in the
+	 * WSDL for the object type
+	 * 
+	 * @author Ziver
+	 */
+	/*
+	@Retention(RetentionPolicy.RUNTIME)
+	@Target(ElementType.TYPE)
+	public @interface WSDLDocumentation {
+		String value();
+	}*/
 }

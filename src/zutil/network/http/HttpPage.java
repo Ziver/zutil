@@ -22,7 +22,7 @@ public interface HttpPage{
 	 */
 	public abstract void respond(HttpPrintStream out,
 			HashMap<String,String> client_info,
-			HashMap<String,String> session,
+			HashMap<String,Object> session,
 			HashMap<String,String> cookie, 
 			HashMap<String,String> request);
 }

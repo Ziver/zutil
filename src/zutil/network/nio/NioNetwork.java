@@ -15,9 +15,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import zutil.Converter;
 import zutil.Encrypter;
 import zutil.MultiPrintStream;
+import zutil.converters.Converter;
 import zutil.network.nio.message.type.ResponseRequestMessage;
 import zutil.network.nio.message.type.SystemMessage;
 import zutil.network.nio.response.ResponseEvent;

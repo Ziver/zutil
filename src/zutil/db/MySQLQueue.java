@@ -7,8 +7,8 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.Queue;
 
-import zutil.Converter;
 import zutil.MultiPrintStream;
+import zutil.converters.Converter;
 
 /**
  * This class creates a queue that stors the 

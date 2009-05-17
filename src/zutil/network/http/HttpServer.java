@@ -11,11 +11,13 @@ import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.cert.CertificateException;
 import java.util.HashMap;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.regex.Pattern;
 
 import javax.net.ssl.SSLServerSocketFactory;
 
 import zutil.MultiPrintStream;
-
 
 /**
  * A simple web server that handles both cookies and
@@ -27,7 +29,7 @@ public class HttpServer extends Thread{
 	public static final boolean DEBUG = false;
 	public static final String SERVER_VERSION = "StaticInt HttpServer 1.0";
 	public static final int COOKIE_TTL = 200;
-	public static final int SESSION_TTL = 3600*3*1000; // in ms
+	public static final int SESSION_TTL = 10*60*1000; // in milliseconds
 
 	public final String server_url;
 	public final int server_port;
@@ -36,7 +38,7 @@ public class HttpServer extends Thread{
 
 	private HashMap<String,HttpPage> pages;
 	private HttpPage defaultPage;
-	private HashMap<String,HashMap<String,String>> sessions;
+	private HashMap<String,HashMap<String,Object>> sessions;
 	private int nextSessionId;
 
 	/**
@@ -65,8 +67,33 @@ public class HttpServer extends Thread{
 		this.keyStore = keyStore;
 
 		pages = new HashMap<String,HttpPage>();
-		sessions = new HashMap<String,HashMap<String,String>>();
+		sessions = new HashMap<String,HashMap<String,Object>>();
 		nextSessionId = 0;
+
+		Timer timer = new Timer();
+		timer.schedule(new GarbageCollector(), 0, SESSION_TTL / 2);
+	}
+
+	/**
+	 * This class acts as an garbage collector that 
+	 * removes old sessions from the session HashMap
+	 * 
+	 * @author Ziver
+	 */
+	private class GarbageCollector extends TimerTask {
+		public void run(){
+			synchronized(sessions) {
+				for(String key : sessions.keySet()){
+					HashMap<String,Object> client_session = sessions.get(key);
+
+					// Check if session is still valid
+					if((Long)client_session.get("ttl") < System.currentTimeMillis()){
+						sessions.remove(key);
+						if(DEBUG) MultiPrintStream.out.println("Removing Session: "+key);
+					}
+				}
+			}
+		}
 	}
 
 	/**
@@ -155,7 +182,10 @@ public class HttpServer extends Thread{
 
 		public void run(){
 			String tmp = null;
-			int tmpi;
+			String[] tmpArray, tmpArray2;
+			Pattern colonPattern = Pattern.compile(":");
+			Pattern semiColonPattern = Pattern.compile(";");
+			Pattern equalPattern = Pattern.compile("=");
 
 			String page_url = "";
 			HashMap<String,String> client_info = new HashMap<String,String>();
@@ -165,7 +195,7 @@ public class HttpServer extends Thread{
 			//****************************  REQUEST *********************************
 			try {
 				if(DEBUG)MultiPrintStream.out.println("Reciving Http Request!!!");
-				while(!(tmp=in.readLine()).isEmpty()){
+				while((tmp=in.readLine()) != null && !tmp.isEmpty()){
 					//System.err.println(tmp);
 					//***********   Handling Get variables
 					if(tmp.startsWith("GET")){
@@ -181,28 +211,21 @@ public class HttpServer extends Thread{
 					}
 					//*********   Handling Cookies
 					else if(tmp.startsWith("Cookie")){
-						tmp = tmp.substring(tmp.indexOf(':')+1, tmp.length());
-						while(!tmp.isEmpty()){
-							tmpi = ( (tmpi = tmp.indexOf(';')) == -1 ? tmp.length() : tmpi);
+						tmp = colonPattern.split(tmp)[1];
+						tmpArray = semiColonPattern.split(tmp);
+						for(String e : tmpArray){
+							tmpArray2 = equalPattern.split(e);
 							cookie.put(
-									(tmp.substring(0, tmp.indexOf('=')).trim() ), 			// Key
-									(tmp.substring(tmp.indexOf('=')+1, tmpi)).trim() );		//Value
-							if(tmp.indexOf(';') > 0)
-								tmp = tmp.substring(tmp.indexOf(';')+1, tmp.length());
-							else
-								break;
+									tmpArray2[0].trim(), 								// Key
+									(tmpArray2.length>1 ? tmpArray2[1] : "").trim()); 	//Value
 						}
 					}
 					//*********   Handling Client info
 					else{
-						if(tmp.indexOf(':') > -1){
-							client_info.put(
-									(tmp.substring(0, tmp.indexOf(':')).trim() ), 				// Key
-									(tmp.substring(tmp.indexOf(':')+1, tmp.length())).trim() ); //Value
-						}
-						else{
-							MultiPrintStream.out.println("Faild to parsse header: "+tmp);
-						}
+						tmpArray = colonPattern.split(tmp);
+						client_info.put(
+								tmpArray[0].trim(), 								// Key
+								(tmpArray.length>1 ? tmpArray[1] : "").trim()); 	//Value
 					}
 				}
 
@@ -210,8 +233,7 @@ public class HttpServer extends Thread{
 				if(client_info.containsKey("Content-Length")){
 					// Reads the post data size
 					tmp = client_info.get("Content-Length");
-					int post_data_length = Integer.parseInt(
-							tmp.substring(tmp.indexOf(':')+1, tmp.length()).trim() );
+					int post_data_length = Integer.parseInt( tmp );
 					// read the data
 					StringBuffer tmpb = new StringBuffer();
 					// read the data
@@ -230,44 +252,31 @@ public class HttpServer extends Thread{
 						request.put("" , tmpb.toString());
 					}
 					else if(client_info.get("Content-Type").contains("multipart/form-data")){
-						// TODO: File upload
+						// TODO: File upload					
 						throw new Exception("\"multipart-form-data\" Not implemented!!!");
 					}						
 				}
-				//*****************
-			} catch (Exception e) {
-				e.printStackTrace();
-				try {
-					out.sendHeader("HTTP/1.0 500 ERROR");
-				} catch (Exception e1) {}
-				if(e.getMessage() != null)
-					out.println("500 Internal Error(Header: "+tmp+"): "+e.getMessage());
-				else{
-					out.println("500 Internal Error(Header: "+tmp+"): "+e.getCause().getMessage());
-				}
-			}
-			try {
+
 				//****************************  HANDLE REQUEST *********************************
 				// Get the client session or create one
-				HashMap<String,String> client_session;
+				HashMap<String, Object> client_session;
 				long ttl_time = System.currentTimeMillis()+SESSION_TTL;
 				if(cookie.containsKey("session_id") && sessions.containsKey(cookie.get("session_id"))){
 					client_session = sessions.get(cookie.get("session_id"));
 					// Check if session is still valid
-					if(Long.parseLong(client_session.get("ttl")) < System.currentTimeMillis()){
-						int session_id = Integer.parseInt(client_session.get("session_id"));
-						client_session = new HashMap<String,String>();
-						client_session.put("session_id", ""+session_id);
+					if((Long)client_session.get("ttl") < System.currentTimeMillis()){
+						int session_id = (Integer)client_session.get("session_id");
+						client_session = new HashMap<String, Object>();
+						client_session.put("session_id", session_id);
 						sessions.put(""+session_id, client_session);
 					}
 					// renew the session TTL
-					
-					client_session.put("ttl", ""+ttl_time);
+					client_session.put("ttl", ttl_time);
 				}
 				else{
-					client_session = new HashMap<String,String>();
-					client_session.put("session_id", ""+nextSessionId);
-					client_session.put("ttl", ""+ttl_time);
+					client_session = new HashMap<String, Object>();
+					client_session.put("session_id", nextSessionId);
+					client_session.put("ttl", ttl_time);
 					sessions.put(""+nextSessionId, client_session);
 					nextSessionId++;
 				}
@@ -281,10 +290,10 @@ public class HttpServer extends Thread{
 				}
 				//****************************  RESPONSE  ************************************
 				if(DEBUG)MultiPrintStream.out.println("Sending Http Response!!!");
-				out.sendHeader("HTTP/1.0 200 OK");
-				out.sendHeader("Server: "+SERVER_VERSION);
-				out.sendHeader("Content-Type: text/html");
-				out.setCookie("session_id", client_session.get("session_id"));
+				out.setStatusCode(200);
+				out.setHeader("Server", SERVER_VERSION);
+				out.setHeader("Content-Type", "text/html");
+				out.setCookie("session_id", ""+client_session.get("session_id"));
 
 				if(!page_url.isEmpty() && pages.containsKey(page_url)){
 					pages.get(page_url).respond(out, client_info, client_session, cookie, request);
@@ -293,13 +302,21 @@ public class HttpServer extends Thread{
 					defaultPage.respond(out, client_info, client_session, cookie, request);
 				}
 				else{
-					out.println("404 ERROR");	
+					out.setStatusCode(404);
+					out.println("404 Page Not Found");	
 				}
 
 				//********************************************************************************
 			} catch (Exception e) {
-				e.printStackTrace();
-				out.println("500 Internal Error: "+e.getMessage());
+				e.printStackTrace(MultiPrintStream.out);
+				try {
+					out.setStatusCode(500);
+				} catch (Exception e1) {}
+				if(e.getMessage() != null)
+					out.println("500 Internal Server Error(Header: "+tmp+"): "+e.getMessage());
+				else{
+					out.println("500 Internal Server Error(Header: "+tmp+"): "+e.getCause().getMessage());
+				}				
 			}
 
 			try{
@@ -308,7 +325,7 @@ public class HttpServer extends Thread{
 				in.close();
 				socket.close();
 			} catch (Exception e) {
-				e.printStackTrace();
+				e.printStackTrace(MultiPrintStream.out);
 			}
 		}
 	}
@@ -351,8 +368,8 @@ public class HttpServer extends Thread{
 			tmp = element.indexOf('=');
 			if(tmp > 0){
 				map.put(
-					element.substring(0, tmp ).trim(), 		// Key
-					element.substring(tmp+1, element.length() ).trim() );	//Value
+						element.substring(0, tmp ).trim(), 		// Key
+						element.substring(tmp+1, element.length() ).trim() );	//Value
 			}
 			else{
 				map.put(element, "");
