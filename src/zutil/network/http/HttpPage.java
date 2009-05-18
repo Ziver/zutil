@@ -1,6 +1,6 @@
 package zutil.network.http;
 
-import java.util.HashMap;
+import java.util.Map;
 
 /**
  * This is a interface for a ordinary page for the HttpServer
@@ -21,8 +21,8 @@ public interface HttpPage{
 	 * @param request		is POST and GET requests from the client
 	 */
 	public abstract void respond(HttpPrintStream out,
-			HashMap<String,String> client_info,
-			HashMap<String,Object> session,
-			HashMap<String,String> cookie, 
-			HashMap<String,String> request);
+			Map<String,String> client_info,
+			Map<String,Object> session,
+			Map<String,String> cookie, 
+			Map<String,String> request);
 }

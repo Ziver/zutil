@@ -10,6 +10,7 @@ import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 
 import javax.wsdl.Binding;
 import javax.wsdl.BindingInput;
@@ -190,9 +191,10 @@ public class SOAPHttpPage implements HttpPage{
 
 
 	public void respond(HttpPrintStream out,
-			HashMap<String, String> client_info,
-			HashMap<String, Object> session, HashMap<String, String> cookie,
-			HashMap<String, String> request) {
+			Map<String, String> client_info,
+			Map<String, Object> session, 
+			Map<String, String> cookie,
+			Map<String, String> request) {
 
 		try {
 			out.setHeader("Content-Type", "text/xml");

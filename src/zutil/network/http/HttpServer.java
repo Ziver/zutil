@@ -10,7 +10,9 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.cert.CertificateException;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.regex.Pattern;
@@ -18,6 +20,7 @@ import java.util.regex.Pattern;
 import javax.net.ssl.SSLServerSocketFactory;
 
 import zutil.MultiPrintStream;
+
 
 /**
  * A simple web server that handles both cookies and
@@ -38,7 +41,7 @@ public class HttpServer extends Thread{
 
 	private HashMap<String,HttpPage> pages;
 	private HttpPage defaultPage;
-	private HashMap<String,HashMap<String,Object>> sessions;
+	private Map<String,Map<String,Object>> sessions;
 	private int nextSessionId;
 
 	/**
@@ -67,7 +70,7 @@ public class HttpServer extends Thread{
 		this.keyStore = keyStore;
 
 		pages = new HashMap<String,HttpPage>();
-		sessions = new HashMap<String,HashMap<String,Object>>();
+		sessions = Collections.synchronizedMap(new HashMap<String,Map<String,Object>>());
 		nextSessionId = 0;
 
 		Timer timer = new Timer();
@@ -82,17 +85,17 @@ public class HttpServer extends Thread{
 	 */
 	private class GarbageCollector extends TimerTask {
 		public void run(){
-			synchronized(sessions) {
-				for(String key : sessions.keySet()){
-					HashMap<String,Object> client_session = sessions.get(key);
+			Object[] keys = sessions.keySet().toArray();
+			for(Object key : keys){
+				Map<String,Object> client_session = sessions.get(key);
 
-					// Check if session is still valid
-					if((Long)client_session.get("ttl") < System.currentTimeMillis()){
-						sessions.remove(key);
-						if(DEBUG) MultiPrintStream.out.println("Removing Session: "+key);
-					}
+				// Check if session is still valid
+				if((Long)client_session.get("ttl") < System.currentTimeMillis()){
+					sessions.remove(key);
+					if(DEBUG) MultiPrintStream.out.println("Removing Session: "+key);
 				}
 			}
+
 		}
 	}
 
@@ -259,14 +262,14 @@ public class HttpServer extends Thread{
 
 				//****************************  HANDLE REQUEST *********************************
 				// Get the client session or create one
-				HashMap<String, Object> client_session;
+				Map<String, Object> client_session;
 				long ttl_time = System.currentTimeMillis()+SESSION_TTL;
 				if(cookie.containsKey("session_id") && sessions.containsKey(cookie.get("session_id"))){
 					client_session = sessions.get(cookie.get("session_id"));
 					// Check if session is still valid
 					if((Long)client_session.get("ttl") < System.currentTimeMillis()){
 						int session_id = (Integer)client_session.get("session_id");
-						client_session = new HashMap<String, Object>();
+						client_session = Collections.synchronizedMap(new HashMap<String, Object>());
 						client_session.put("session_id", session_id);
 						sessions.put(""+session_id, client_session);
 					}
@@ -274,7 +277,7 @@ public class HttpServer extends Thread{
 					client_session.put("ttl", ttl_time);
 				}
 				else{
-					client_session = new HashMap<String, Object>();
+					client_session = Collections.synchronizedMap(new HashMap<String, Object>());
 					client_session.put("session_id", nextSessionId);
 					client_session.put("ttl", ttl_time);
 					sessions.put(""+nextSessionId, client_session);

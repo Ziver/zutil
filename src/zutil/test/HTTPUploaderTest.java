@@ -1,7 +1,7 @@
 package zutil.test;
 
 import java.io.IOException;
-import java.util.HashMap;
+import java.util.Map;
 
 import zutil.network.http.HttpPage;
 import zutil.network.http.HttpPrintStream;
@@ -18,9 +18,10 @@ public class HTTPUploaderTest implements HttpPage{
 	}
 
 	public void respond(HttpPrintStream out,
-			HashMap<String, String> client_info,
-			HashMap<String, Object> session, HashMap<String, String> cookie,
-			HashMap<String, String> request) {
+			Map<String, String> client_info,
+			Map<String, Object> session, 
+			Map<String, String> cookie,
+			Map<String, String> request) {
 
 		if(!session.containsKey("file1")){
 			out.println("</html>" +

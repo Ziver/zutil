@@ -1,7 +1,7 @@
 package zutil.test;
 
 import java.io.IOException;
-import java.util.HashMap;
+import java.util.Map;
 
 import zutil.network.http.HttpPage;
 import zutil.network.http.HttpPrintStream;
@@ -18,15 +18,16 @@ public class HTTPGuessTheNumber implements HttpPage{
 	}
 
 	public void respond(HttpPrintStream out,
-			HashMap<String, String> client_info,
-			HashMap<String, Object> session, HashMap<String, String> cookie,
-			HashMap<String, String> request) {
+			Map<String, String> client_info,
+			Map<String, Object> session, 
+			Map<String, String> cookie,
+			Map<String, String> request) {
 
 		out.enableBuffering(true);
 		out.println("<html>");
 		out.println("<H2>Welcome To The Number Guess Game!</H2>");
 
-		if(session.containsKey("random_nummber") && request.containsKey("guess")){
+		if(session.containsKey("random_nummber") && request.containsKey("guess") && !request.get("guess").isEmpty()){
 			int guess = Integer.parseInt(request.get("guess"));
 			int nummber = (Integer)session.get("random_nummber");
 			try {
