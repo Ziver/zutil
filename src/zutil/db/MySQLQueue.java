@@ -93,7 +93,7 @@ public class MySQLQueue<E> implements Queue<E>{
 		return poll();
 	}
 
-	public boolean addAll(Collection arg0) {
+	public boolean addAll(Collection<? extends E> arg0) {
 		// TODO Auto-generated method stub
 		return false;
 	}
@@ -119,7 +119,7 @@ public class MySQLQueue<E> implements Queue<E>{
 		return false;
 	}
 
-	public boolean containsAll(Collection arg0) {
+	public boolean containsAll(Collection<?> arg0) {
 		// TODO Auto-generated method stub
 		return false;
 	}
@@ -128,7 +128,7 @@ public class MySQLQueue<E> implements Queue<E>{
 		return (peek() != null);
 	}
 
-	public Iterator iterator() {
+	public Iterator<E> iterator() {
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -144,12 +144,12 @@ public class MySQLQueue<E> implements Queue<E>{
 		return false;
 	}
 
-	public synchronized boolean removeAll(Collection arg0) {
+	public synchronized boolean removeAll(Collection<?> arg0) {
 		// TODO Auto-generated method stub
 		return false;
 	}
 
-	public boolean retainAll(Collection arg0) {
+	public boolean retainAll(Collection<?> arg0) {
 		// TODO Auto-generated method stub
 		return false;
 	}

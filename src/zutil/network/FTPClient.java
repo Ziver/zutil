@@ -7,7 +7,9 @@ import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.regex.Pattern;
 
 import javax.security.auth.login.AccountException;
 
@@ -51,7 +53,8 @@ public class FTPClient extends Thread{
 
 	public static void main(String[] args){
 		try {
-			FTPClient client = new FTPClient("koc.se", 21, "ziver", "****", FTP_PASSIVE);
+			FTPClient client = new FTPClient("213.180.86.135", 21, "administrator", "geineZ2K", FTP_PASSIVE);
+			/*
 			client.createDir("./ziver/lol");
 			client.removeDir("./ziver/lol");
 			
@@ -67,7 +70,12 @@ public class FTPClient extends Thread{
 			MultiPrintStream.out.dump(client.getFileList("./ziver"));
 			client.removeFile("./ziver/test.txt");
 			MultiPrintStream.out.dump(client.getFileList("./ziver"));
-			
+			*/
+			ArrayList<String[]> tmp = client.getFileInfo("");
+			MultiPrintStream.out.println("****************");
+			MultiPrintStream.out.dump(tmp);
+			MultiPrintStream.out.println(tmp.size());
+			MultiPrintStream.out.println("****************");
 			client.close();
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -150,7 +158,7 @@ public class FTPClient extends Thread{
 	 * @return The input line
 	 * @throws IOException
 	 */
-	private synchronized String readCommand(boolean print) throws IOException{
+	public synchronized String readCommand(boolean print) throws IOException{
 		String tmp = in.readLine();
 		if(print)System.out.println(tmp);
 		if(parseReturnCode(tmp) >= 400 ) throw new IOException(tmp);
@@ -161,7 +169,7 @@ public class FTPClient extends Thread{
 	/**
 	 * Reads from the command channel until there are nothing
 	 * left to read and returns the last line
-	 * Multiple 
+	 * 
 	 * @param print To print out the received lines
 	 * @return The last received line
 	 * @throws IOException
@@ -225,28 +233,28 @@ public class FTPClient extends Thread{
 	
 	/**
 	 * Returns information about the file or directory
-	 * (This is system specific information)
 	 * 
-	 *  TODO:
-	 * @deprecated DOSENT WORK!!!!
+	 * @deprecated
 	 * @param path The path and filename of a file or a directory
-	 * @return A String with information
+	 * @return A List of Strings with information
 	 * @throws IOException 
 	 */
-	public String getFileInfo(String path) throws IOException{
-		StringBuffer info = new StringBuffer("");
+	public ArrayList<String[]> getFileInfo(String path) throws IOException{
+		Pattern regex = Pattern.compile("\\s{1,}");
+		ArrayList<String[]> info = new ArrayList<String[]>();
 		
 		BufferedReader data_in = getDataInputStream();
-		sendCommand("LIST "+path, true);		
+		sendCommand("LIST "+path, DEBUG);		
 		
 		String tmp = "";
-		while((tmp = data_in.readLine()) != null){
-			info.append(tmp);
+		while((tmp = data_in.readLine()) != null){			
+			System.err.println(tmp);
+			info.add(regex.split(tmp));
 		}
 		
 		data_in.close();
 		readCommand(DEBUG);
-		return info.toString();
+		return info;
 	}
 	
 	/**

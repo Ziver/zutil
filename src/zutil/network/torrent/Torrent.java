@@ -29,7 +29,7 @@ public class Torrent {
 	private boolean is_private;
 	
 	public Torrent(File torrent) throws IOException{
-		this(FileFinder.getFileContent(FileFinder.find("C:\\Users\\Ziver\\Desktop\\test.torrent")));
+		this(FileFinder.getFileContent(	torrent ));
 	}
 
 	public Torrent(String data){
@@ -51,8 +51,9 @@ public class Torrent {
 		is_private = false;
 	}
 	
+	@SuppressWarnings("unchecked")
 	private void decode(String data){
-		HashMap dataMap = (HashMap)TorrentParser.decode(data);
+		HashMap<?,?> dataMap = (HashMap<?,?>)TorrentParser.decode(data);
 		
 		name = (String)dataMap.get("name");
 		comment = (String)dataMap.get("comment");
@@ -65,4 +66,37 @@ public class Torrent {
 		info_hash = (HashMap)dataMap.get("info");
 		is_private = (((Integer)dataMap.get("private")) != 0);
 	}
+	
+	// ************** GETTER **************
+	public String getName(){
+		return name;
+	}	
+	public String getComments(){
+		return comment;
+	}	
+	public long getDate(){
+		return date;
+	}
+	public ArrayList<String> getFileList(){
+		return file_list;
+	}
+	public long getSize(){
+		return size;
+	}
+	public String getAuthor(){
+		return created_by;
+	}
+	public String getMainTracker(){
+		return main_tracker;
+	}
+	public ArrayList<String> getTrackerList(){
+		return tracker_list;
+	}
+	public HashMap<String,Object> getInfoHash(){
+		return info_hash;
+	}
+	public boolean isPrivate(){
+		return is_private;
+	}
+	// ************************************
 }

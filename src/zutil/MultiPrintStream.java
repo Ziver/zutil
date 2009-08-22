@@ -199,7 +199,7 @@ public class MultiPrintStream extends PrintStream {
 	 * @param o is the Object to dump
 	 */
 	public void dump( Object o ){
-		dumpToString( o );
+		println(dumpToString( o ));
 	}
 
 	/**
@@ -212,24 +212,45 @@ public class MultiPrintStream extends PrintStream {
 	 * <br>- Instance variables of a Object
 	 * 
 	 * @param o is the Object to dump
-	 * @param print is if the method should print the data or just return it
+	 * @return A String with all the printed data
+	 */
+	public String dumpToString( Object o) {
+		return dumpToString(o, "");
+	}
+	
+	/**
+	 * Dumps the content of:
+	 * <br>- Array content
+	 * <br>- Map content (HashMap etc.)
+	 * <br>- List content (ArrayList, LinkedList etc.)
+	 * <br>- InputStream content (Prints out until the end of the stream)
+	 * <br>- Reader content (Prints out until the end of the reader)
+	 * <br>- Instance variables of a Object
+	 * 
+	 * @param o is the Object to dump
+	 * @param head is the string that will be put in front of every line
 	 * @return A String with all the printed data
 	 */
 	@SuppressWarnings("unchecked")
-	public String dumpToString( Object o ) {
+	private String dumpToString( Object o , String head) {
 		if(o == null) return "NULL";
 		StringBuffer buffer = new StringBuffer();
 		Class oClass = o.getClass();
 		buffer.append( oClass.getName() );
+		String nextHead = head + "\t";
 		// Prints out Arrays
-		if ( oClass.isArray() ) {
+		if ( oClass.isArray() ) {			
 			buffer.append( "[" );
 			for ( int i=0; i<Array.getLength(o) ;i++ ) {
-				if ( i > 0 )
-					buffer.append( ", " );
 				Object value = Array.get(o,i);
-				buffer.append( (dumbCapable(value) ? dumpToString(value) : value) );
+				buffer.append("\n");
+				buffer.append(nextHead);
+				buffer.append( (dumbCapable(value) ? dumpToString(value, nextHead) : value) );
+				if ( i+1<Array.getLength(o) )
+					buffer.append( "," );
 			}
+			buffer.append( "\n" );
+			buffer.append(head);
 			buffer.append( "]" );
 		}
 		// Prints out a list
@@ -238,10 +259,14 @@ public class MultiPrintStream extends PrintStream {
 			buffer.append( "{" );
 			while(it.hasNext()){
 				Object value = it.next();
-				buffer.append( (dumbCapable(value) ? dumpToString(value) : value) );
+				buffer.append("\n");
+				buffer.append(nextHead);
+				buffer.append( (dumbCapable(value) ? dumpToString(value, nextHead) : value) );
 				if(it.hasNext())
-					buffer.append( ", " );
+					buffer.append( "," );
 			}
+			buffer.append( "\n" );
+			buffer.append(head);
 			buffer.append( "}" );
 		}
 		// Prints out a Map
@@ -251,43 +276,53 @@ public class MultiPrintStream extends PrintStream {
 			while(it.hasNext()){
 				Object key = it.next();
 				Object value = ((Map)o).get(key);
+				buffer.append("\n");
+				buffer.append(nextHead);
 				buffer.append( key );
 				buffer.append( "=>" );
-				buffer.append( (dumbCapable(value) ? dumpToString(value) : value) );
+				buffer.append( (dumbCapable(value) ? dumpToString(value, nextHead) : value) );
 				if(it.hasNext())
-					buffer.append( ", " );
+					buffer.append( "," );
 			}
+			buffer.append( "\n" );
+			buffer.append(head);
 			buffer.append( "}" );
 		}
 		// Prints out data from InputStream
 		else if(o instanceof InputStream){
-			buffer.append( " =>{ \n" );
+			buffer.append( " =>{\n" );
 			try {				
 				InputStream in = (InputStream)o;
 				int tmp;
 				while((tmp = in.read()) != -1){
+					buffer.append(nextHead);
 					buffer.append( (char)tmp );
 				}
 				in.close();
 			} catch (IOException e) {
 				e.printStackTrace(this);
 			}
-			buffer.append( "\n}" );
+			buffer.append( "\n" );
+			buffer.append(head);
+			buffer.append( "}" );
 		}
 		// Prints out data from InputStream
 		else if(o instanceof Reader){
-			buffer.append( " =>{ \n" );
+			buffer.append( " =>{\n" );
 			try {
 				Reader in = (Reader)o;
 				int tmp;
 				while((tmp = in.read()) != -1){
+					buffer.append(nextHead);
 					buffer.append( (char)tmp );
 				}
 				in.close();
 			} catch (IOException e) {
 				e.printStackTrace(this);
 			}
-			buffer.append( "\n}" );
+			buffer.append( "\n" );
+			buffer.append(head);
+			buffer.append( "}" );
 		}
 		// Prints out Object properties
 		else{
@@ -295,20 +330,24 @@ public class MultiPrintStream extends PrintStream {
 			while ( oClass != null ) {
 				Field[] fields = oClass.getDeclaredFields();
 				for ( int i=0; i<fields.length; i++ ) {
-					if ( buffer.length() > 1 )
-						buffer.append( ", " );
 					fields[i].setAccessible( true );
+					buffer.append("\n");
+					buffer.append(head);
 					buffer.append( fields[i].getName() );
 					buffer.append( "=" );
 					try {
 						Object value = fields[i].get(o);
 						if (value != null) {
-							buffer.append( (dumbCapable(value) ? dumpToString(value) : value) );
+							buffer.append( (dumbCapable(value) ? dumpToString(value, nextHead) : value) );
 						}
 					} catch ( IllegalAccessException e ) {}
+					if ( i+1<fields.length )
+						buffer.append( "," );
 				}
 				oClass = oClass.getSuperclass();
 			}
+			buffer.append( "\n" );
+			buffer.append(head);
 			buffer.append( "}" );
 		}
 
@@ -321,8 +360,11 @@ public class MultiPrintStream extends PrintStream {
 	private boolean dumbCapable(Object o){
 		if(o != null){		
 			if(o.getClass().isArray()) return true;
-			else if(o instanceof Collection)return true;
-			else if(o instanceof Map)return true;
+			else if(o instanceof Collection<?>)return true;
+			else if(o instanceof Map<?,?>)return true;
+			else if(o instanceof InputStream)return true;
+			else if(o instanceof Reader)return true;
+			else if(o instanceof Dumpable)return true;
 		}
 		return false;
 	}
