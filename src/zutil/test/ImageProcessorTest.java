@@ -20,18 +20,21 @@ import javax.swing.JLabel;
 
 import zutil.ProgressListener;
 import zutil.image.ImageFilterProcessor;
+import zutil.image.filters.GaussianBlurFilter;
 import zutil.image.filters.BlurFilter;
 import zutil.image.filters.ColorIntensityFilter;
 import zutil.image.filters.ContrastBrightnessFilter;
 import zutil.image.filters.DitheringFilter;
-import zutil.image.filters.FaceDetectionFilter;
+import zutil.image.filters.MeanBlurFilter;
 import zutil.image.filters.MedianFilter;
 import zutil.image.filters.ResizeImage;
+import zutil.image.filters.SobelEdgeDetectionFilter;
 import zutil.image.filters.SpotLightFilter;
 
 @SuppressWarnings("unused")
 public class ImageProcessorTest implements ProgressListener{
-	private static String imgPath = "exemple.gif";
+	private static String imgPath = "test.gif";
+	//private static String imgPath = "test2.jpg";
 
 	private JLabel processedLabel;
 	private JLabel orginalLabel;
@@ -61,14 +64,16 @@ public class ImageProcessorTest implements ProgressListener{
 		
 		BufferedImage procImg = null;
 		try {
-			//ImageFilterProcessor processor = new BlurFilter(img, 10);
+			//ImageFilterProcessor processor = new SobelEdgeDetectionFilter(img);
+			ImageFilterProcessor processor = new GaussianBlurFilter(img);
+			//ImageFilterProcessor processor = new BlurFilter(img, 100);
 			//ImageFilterProcessor processor = new ColorIntensityFilter(img, true);
 			//ImageFilterProcessor processor = new ContrastBrightnessFilter(img);
-			ImageFilterProcessor processor = new DitheringFilter(img);
+			//ImageFilterProcessor processor = new DitheringFilter(img);
+			//ImageFilterProcessor processor = new MeanBlurFilter(img);
 			//ImageFilterProcessor processor = new MedianFilter(img);
 			//ImageFilterProcessor processor = new ResizeImage(img,100,100);
-			//ImageFilterProcessor processor = new SpotLightFilter(img,100,100,100);			
-			//ImageFilterProcessor processor = new FaceDetectionFilter(img);
+			//ImageFilterProcessor processor = new SpotLightFilter(img,100,100,100);
 			
 			processor.setProgressListener(this);
 			procImg = processor.process();

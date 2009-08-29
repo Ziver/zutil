@@ -17,8 +17,8 @@ public class ImageUtil {
 	 * @param stopY is the y pixel of the image to stop
 	 * @return The peak value of the image
 	 */
-	public static int peakValue(int[][][] data) {
-		return peakValue(data, 0, 0, data[0].length, data.length);
+	public static int getPeakValue(int[][][] data) {
+		return getPeakValue(data, 0, 0, data[0].length, data.length);
 	}
 	
 	/**
@@ -31,7 +31,7 @@ public class ImageUtil {
 	 * @param stopY is the y pixel of the image to stop
 	 * @return The peak value of the image
 	 */
-	public static int peakValue(int[][][] data, int startX, int startY, int stopX, int stopY) {
+	public static int getPeakValue(int[][][] data, int startX, int startY, int stopX, int stopY) {
 		int peak = 0;
 		for(int y=startY; y<stopY ;y++){
 			for(int x=startX; x<stopX ;x++){
@@ -95,7 +95,7 @@ public class ImageUtil {
 	 * @param stopY is the y pixel of the image to stop
 	 * @return The RMS value for the image
 	 */
-	public static int rms(int[][][] data, int startX, int startY, int stopX, int stopY){
+	public static int getRMS(int[][][] data, int startX, int startY, int stopX, int stopY){
 		int pixelCount = 0;
 		long accum = 0;
 		for(int y=startY; y <stopY ;y++){
@@ -114,12 +114,12 @@ public class ImageUtil {
 	/**
 	 * Multiplies the given image data by the given value
 	 * 
-	 * @param data The image data
+	 * @param data is the image data
 	 * @param startX is the x pixel of the image to start from
 	 * @param startY is the y pixel of the image to start from
 	 * @param stopX is the x pixel of the image to stop
 	 * @param stopY is the y pixel of the image to stop
-	 * @param scale The number to scale the image by
+	 * @param scale is the number to scale the image color by
 	 */
 	public static void scale(int[][][] data, int startX, int startY, int stopX, int stopY, double scale){
 		for(int y=startY; y<stopY ;y++){
@@ -134,54 +134,114 @@ public class ImageUtil {
 	/**
 	 * Returns the mean value of the given image data
 	 * 
-	 * @param data The image data
-	 * @return The mean value of the image
+	 * @param data is the image data
+	 * @return the mean value of the image
 	 */
-	public static int meanValue(int[][][] data){
-		return meanValue(data, 0, 0, data[0].length, data.length);
+	public static int getMeanValue(int[][][] data){
+		return getMeanValue(data, 0, 0, data[0].length, data.length);
 	}
 	
 	/**
 	 * Returns the mean value of the given image data
 	 * 
-	 * @param data The image data
+	 * @param data is the image data
 	 * @param startX is the x pixel of the image to start from
 	 * @param startY is the y pixel of the image to start from
 	 * @param stopX is the x pixel of the image to stop
 	 * @param stopY is the y pixel of the image to stop
-	 * @return The mean value of the image
+	 * @return the mean value of the image
 	 */
-	public static int meanValue(int[][][] data, int startX, int startY, int stopX, int stopY){
-		int pixelCount = 0;
-		long accum = 0;
+	public static int getMeanValue(int[][][] data, int startX, int startY, int stopX, int stopY){
+		int[] tmp = getMeanArray(data, startX, startY, stopX, stopY);
+		return (tmp[0] + tmp[1] + tmp[2])/3;
+	}
+	
+	/**
+	 * Returns an mean array containing a mean value for each color
+	 * 
+	 * @param data is the image data
+	 * @param startX is the x pixel of the image to start from
+	 * @param startY is the y pixel of the image to start from
+	 * @param stopX is the x pixel of the image to stop
+	 * @param stopY is the y pixel of the image to stop
+	 * @return the mean value of the image
+	 */
+	public static int[] getMeanArray(int[][][] data, int startX, int startY, int stopX, int stopY){
+		int mean[] = new int[3];
 		for(int y=startY; y<stopY ;y++){
 			for(int x=startX; x<stopX ;x++){
-				accum += data[y][x][1];
-				accum += data[y][x][2];
-				accum += data[y][x][3];
-				pixelCount += 3;
+				mean[0] += data[y][x][1];
+				mean[1] += data[y][x][2];
+				mean[2] += data[y][x][3];
 			}
 		}
 		// calculate the mean value
-		return (int)(accum/pixelCount);
+		int pixelCount = (stopY-startY)*(stopX-startX);
+		mean[0] /= pixelCount;
+		mean[1] /= pixelCount;
+		mean[2] /= pixelCount;
+		
+		return mean;
 	}
 
 	/**
-	 * Adds the mean value to the image data
+	 * removes the mean value from the image data
 	 * 
-	 * @param data The image data
+	 * @param data is the image data
 	 * @param startX is the x pixel of the image to start from
 	 * @param startY is the y pixel of the image to start from
 	 * @param stopX is the x pixel of the image to stop
 	 * @param stopY is the y pixel of the image to stop
-	 * @param mean The mean value
+	 * @param mean is the mean value
+	 */
+	public static void remMeanValue(int[][][] data, int startX, int startY, int stopX, int stopY, int mean){
+		addMeanValue(data, startX, startY, stopX, stopY, -mean);
+	}
+	
+	/**
+	 * Adds the mean value to the image data
+	 * 
+	 * @param data is the image data
+	 * @param startX is the x pixel of the image to start from
+	 * @param startY is the y pixel of the image to start from
+	 * @param stopX is the x pixel of the image to stop
+	 * @param stopY is the y pixel of the image to stop
+	 * @param mean is the mean value
 	 */
 	public static void addMeanValue(int[][][] data, int startX, int startY, int stopX, int stopY, int mean){
+		addMeanArray(data, startX, startY, stopX, stopY, new int[]{mean, mean, mean});
+	}
+	
+	/**
+	 * removes an mean array containing a mean value for each color
+	 * 
+	 * @param data is the image data
+	 * @param startX is the x pixel of the image to start from
+	 * @param startY is the y pixel of the image to start from
+	 * @param stopX is the x pixel of the image to stop
+	 * @param stopY is the y pixel of the image to stop
+	 * @param mean is an array of length 3 containing a mean value for each color RGB
+	 */
+	public static void remMeanArray(int[][][] data, int startX, int startY, int stopX, int stopY, int[] mean){
+		addMeanArray(data, startX, startY, stopX, stopY, new int[]{-mean[0], -mean[1], -mean[2]});
+	}
+	
+	/**
+	 * Adds an mean array containing a mean value for each color
+	 * 
+	 * @param data is the image data
+	 * @param startX is the x pixel of the image to start from
+	 * @param startY is the y pixel of the image to start from
+	 * @param stopX is the x pixel of the image to stop
+	 * @param stopY is the y pixel of the image to stop
+	 * @param mean is an array of length 3 containing a mean value for each color RGB
+	 */
+	public static void addMeanArray(int[][][] data, int startX, int startY, int stopX, int stopY, int[] mean){
 		for(int y=startY; y<stopY ;y++){
 			for(int x=startX; x<stopX ;x++){
-				data[y][x][1] += mean;
-				data[y][x][2] += mean;
-				data[y][x][3] += mean;
+				data[y][x][1] += mean[0];
+				data[y][x][2] += mean[1];
+				data[y][x][3] += mean[2];
 			}
 		}
 	}
@@ -309,5 +369,4 @@ public class ImageUtil {
 		else 
 			return color;
 	}
-
 }

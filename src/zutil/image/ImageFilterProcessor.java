@@ -22,10 +22,17 @@ public abstract class ImageFilterProcessor {
 	
 	/**
 	 * Sets the listener
-	 * @param listener The listener, null to disable the progress
+	 * @param listener is the listener, null to disable the progress
 	 */
 	public void setProgressListener(ProgressListener listener){
 		this.progress = listener;
+	}
+	
+	/**
+	 * Returns the listener
+	 */
+	public ProgressListener getProgressListener(){
+		return this.progress;
 	}
 	
 	/**
@@ -65,23 +72,23 @@ public abstract class ImageFilterProcessor {
 		// converts the img to raw data
 		int[][][] data = convertToArray(img, cols, rows);
 		//processes the image
-		process(data);
+		data = process(data);
 		//converts back the image
 		return convertToImage(data, data[0].length, data.length);
 	}
 
 	/**
-	 * Creates a Integer array whit the pixel data of the image
+	 * Creates a Integer array with the pixel data of the image
 	 * int[row][col][4]
 	 * 0 -> Alpha data
 	 * 		Red data
 	 * 		Green data
 	 * 4 ->	Blue data
 	 * 
-	 * @param img The image to convert
-	 * @param cols Columns of the image
-	 * @param rows Rows of the image
-	 * @return A Integer array
+	 * @param img is the image to convert
+	 * @param cols is the columns of the image
+	 * @param rows is the rows of the image
+	 * @return A is the integer array
 	 * @throws InterruptedException
 	 */
 	public static int[][][] convertToArray(BufferedImage img, int cols, int rows) throws InterruptedException{
@@ -101,13 +108,13 @@ public abstract class ImageFilterProcessor {
 			// Reading in the color data
 			for(int x=0; x<cols ;x++){
 				//Alpha data
-				data[y][x][0] = (aRow[x] >> 24) & 0xFF;
+				data[y][x][0] = ((aRow[x] >> 24) & 0xFF);
 				//Red data
-				data[y][x][1] = (aRow[x] >> 16) & 0xFF;
+				data[y][x][1] = ((aRow[x] >> 16) & 0xFF);
 				//Green data
-				data[y][x][2] = (aRow[x] >> 8)	& 0xFF;
+				data[y][x][2] = ((aRow[x] >> 8)	& 0xFF);
 				//Blue data
-				data[y][x][3] = (aRow[x])& 0xFF;
+				data[y][x][3] = ((aRow[x])& 0xFF);
 			}
 		}
 		return data;
@@ -117,9 +124,9 @@ public abstract class ImageFilterProcessor {
 	/**
 	 * Converts a pixel data array to a java Image object
 	 * 
-	 * @param pixels The pixel data array
-	 * @param cols Columns of the image
-	 * @param rows Rows of the image
+	 * @param pixels is the pixel data array
+	 * @param cols is the columns of the image
+	 * @param rows is the rows of the image
 	 * @return A Image
 	 */
 	public static BufferedImage convertToImage(int[][][] pixels, int cols, int rows){
@@ -148,20 +155,22 @@ public abstract class ImageFilterProcessor {
 	}
 
 	/**
-	 * Runs the image thrue the processor
-	 * @param data The raw image to apply the effect to
+	 * Runs the image thru the processor
+	 * @param data is the raw image to apply the effect to. This will NOT be altered
 	 */
-	public void process(final int[][][] data){
-		process(data, 0, 0, data[0].length, data.length);
+	public int[][][] process(int[][][] data){
+		return process(data, 0, 0, data[0].length, data.length);
 	}
 	
 	/**
 	 * The underlying effect is run here
-	 * @param data The raw image to apply the effect to
+	 * 
+	 * @param data is the raw image to apply the effect to. This will NOT be altered
 	 * @param startX is the x pixel of the image to start from
 	 * @param startY is the y pixel of the image to start from
 	 * @param stopX is the x pixel of the image to stop
 	 * @param stopY is the y pixel of the image to stop
+	 * @return either the modified data parameter or an new array
 	 */
-	public abstract void process(final int[][][] data, int startX, int startY, int stopX, int stopY);
+	public abstract int[][][] process(int[][][] data, int startX, int startY, int stopX, int stopY);
 }

@@ -3,7 +3,6 @@ package zutil.image.filters;
 import java.awt.image.BufferedImage;
 
 import zutil.image.ImageFilterProcessor;
-import zutil.image.ImageUtil;
 import zutil.math.ZMath;
 
 public class ResizeImage extends ImageFilterProcessor{
@@ -37,7 +36,7 @@ public class ResizeImage extends ImageFilterProcessor{
 	}
 	
 	@Override
-	public void process(final int[][][] data, int startX, int startY, int stopX, int stopY) {
+	public int[][][] process(final int[][][] data, int startX, int startY, int stopX, int stopY) {
 		if(width < 1){
 			height = (int)(((double)width/(stopX-startX))*(stopY-startY));
 		}
@@ -59,14 +58,6 @@ public class ResizeImage extends ImageFilterProcessor{
 			}
 		}
 		
-		ImageUtil.copyArray(newData, data, 0, 0, width, height);
-	}
-
-	/**
-	 * Returns the resulting image after processing
-	 * @return an image or null if not processed
-	 */
-	public int[][][] getResult(){
 		return newData;
 	}
 }

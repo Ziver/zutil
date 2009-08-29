@@ -38,32 +38,35 @@ public class DitheringFilter extends ImageFilterProcessor{
 	}
 
 	@Override
-	public void process(final int[][][] data, int startX, int startY, int stopX, int stopY) {
+	public int[][][] process(int[][][] data, int startX, int startY, int stopX, int stopY) {
 		int error, index;
 		int[] currentPixel;
+		int[][][] output = ImageUtil.copyArray(data);
 		
 		for(int y=startY; y<stopY ;y++){
 			setProgress(ZMath.percent(0, stopY-startY-1, y));
 			for(int x=startX; x<stopX ;x++){
-				currentPixel = data[y][x];
+				currentPixel = output[y][x];
 				index = findNearestColor(currentPixel, palette);
-				data[y][x] = palette[index];
+				output[y][x] = palette[index];
 
 				for (int i = 1; i < 4; i++)	{
 					error = currentPixel[i] - palette[index][i];
-					if (x + 1 < data[0].length) {
-						data[y+0][x+1][i] = ImageUtil.clip( data[y+0][x+1][i] + (error*7)/16 );
+					if (x + 1 < output[0].length) {
+						output[y+0][x+1][i] = ImageUtil.clip( output[y+0][x+1][i] + (error*7)/16 );
 					}
 					if (y + 1 < data.length) {
 						if (x - 1 > 0) 
-							data[y+1][x-1][i] = ImageUtil.clip( data[y+1][x-1][i] + (error*3)/16 );
-						data[y+1][x+0][i] = ImageUtil.clip( data[y+1][x+0][i] + (error*5)/16 );
+							output[y+1][x-1][i] = ImageUtil.clip( output[y+1][x-1][i] + (error*3)/16 );
+						output[y+1][x+0][i] = ImageUtil.clip( output[y+1][x+0][i] + (error*5)/16 );
 						if (x + 1 < data[0].length) 
-							data[y+1][x+1][i] = ImageUtil.clip( data[y+1][x+1][i] + (error*1)/16 );
+							output[y+1][x+1][i] = ImageUtil.clip( output[y+1][x+1][i] + (error*1)/16 );
 					}
 				}
 			}
 		}
+		
+		return output;
 	}
 	
     private static int findNearestColor(int[] color, int[][] palette) {

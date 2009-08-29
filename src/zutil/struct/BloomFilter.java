@@ -76,9 +76,9 @@ public class BloomFilter<T extends Serializable> implements Set<T>, Serializable
 	}
 
 	/**
-	 * @param o The Serializable object to search for
-	 * @return If the object contains in the filter or false 
-	 * 			if the Object is not Serializable
+	 * @param o is the Serializable object to search for
+	 * @return If the object contains in the filter or 
+	 * 			false if the Object is not Serializable
 	 */
 	public boolean contains(Object o) {
 		try {
@@ -131,7 +131,7 @@ public class BloomFilter<T extends Serializable> implements Set<T>, Serializable
 	}
 	
 	/**
-	 * @return The false posetive probability of the current state of the filter
+	 * @return The false positive probability of the current state of the filter
 	 */
 	public double falsePosetiveProbability(){
 		return Math.pow(0.6185, bits.size()/content_size);

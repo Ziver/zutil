@@ -41,10 +41,12 @@ public class SpotLightFilter extends ImageFilterProcessor{
 	}
 
 	@Override
-	public void process(final int[][][] data, int startX, int startY, int stopX, int stopY) {
+	public int[][][] process(int[][][] data, int startX, int startY, int stopX, int stopY) {
 		if(xPos < 0) xPos = data[0].length/2;
 		if(yPos < 0) yPos = data.length/2;
-
+		
+		int[][][] output = new int[data.length][data[0].length][4];
+		
 		double scale, dx, dy, distance;
 		for(int y=startY; y<stopY ;y++){
 			setProgress(ZMath.percent(0, (stopY-startY)-1, y));
@@ -61,12 +63,13 @@ public class SpotLightFilter extends ImageFilterProcessor{
 					scale = 1-(distance/radius);
 				}
 				
-				data[y][x][0] = data[y][x][0];
-				data[y][x][1] = ImageUtil.clip((int)(scale * data[y][x][1]));
-				data[y][x][2] = ImageUtil.clip((int)(scale * data[y][x][2]));
-				data[y][x][3] = ImageUtil.clip((int)(scale * data[y][x][3]));
+				output[y][x][0] = data[y][x][0];
+				output[y][x][1] = ImageUtil.clip((int)(scale * data[y][x][1]));
+				output[y][x][2] = ImageUtil.clip((int)(scale * data[y][x][2]));
+				output[y][x][3] = ImageUtil.clip((int)(scale * data[y][x][3]));
 			}
-		}	
+		}
+		return output;
 	}
 
 }

@@ -34,7 +34,7 @@ public class MedianFilter extends ImageFilterProcessor{
 	public MedianFilter(BufferedImage img, int pixels) {
 		this(img, pixels, new boolean[]{true,true,true,true});
 	}
-	
+
 	/**
 	 * Setup a default MedianFilter
 	 * 
@@ -49,36 +49,36 @@ public class MedianFilter extends ImageFilterProcessor{
 	}
 
 	/*
-	   edgex := (window width / 2) rounded down
-	   edgey := (window height / 2) rounded down
-	   for x from edgex to image width - edgex:
-	       for y from edgey to  image height - edgey:
-	           colorArray[window width][window height];
-	           for fx from 0 to window width:
-	               for fy from 0 to window height:
-	                   colorArray[fx][fy] := pixelvalue[x + fx - edgex][y + fy - edgey]
-	           Sort colorArray[][];
-	           pixelValue[x][y] := colorArray[window width / 2][window height / 2];
+           edgex := (window width / 2) rounded down
+           edgey := (window height / 2) rounded down
+           for x from edgex to image width - edgex:
+               for y from edgey to  image height - edgey:
+                   colorArray[window width][window height];
+                   for fx from 0 to window width:
+                       for fy from 0 to window height:
+                           colorArray[fx][fy] := pixelvalue[x + fx - edgex][y + fy - edgey]
+                   Sort colorArray[][];
+                   pixelValue[x][y] := colorArray[window width / 2][window height / 2];
 	 */
 	@Override
-	public void process(int[][][] data, int startX, int startY, int stopX, int stopY) {
+	public int[][][] process(int[][][] data, int startX, int startY, int stopX, int stopY) {
 		int[][][] tmpData = ImageUtil.copyArray(data);
-		
+
 		int edgeX = windowSize / 2;
 		int edgeY = windowSize / 2;
-		
+
 		int[][] tmpArray = new int[4][256*2];
 		int pixelCount = 0;
 		for(int y=startY; y<stopY ;y++){
 			setProgress(ZMath.percent(0, stopY-startY-1, y));
 			for(int x=startX; x<stopX ;x++){
-				
+
 				pixelCount = 0;
 				for(int fy=0; fy<windowSize ;fy++){
 					for(int fx=0; fx<windowSize ;fx++){
 						if(y+fy-edgeY >= 0 && y+fy-edgeY < data.length && x+fx-edgeX >= 0 && x+fx-edgeX < data[0].length){
 							//colorArray[fx][fy] := pixelvalue[x + fx - edgex][y + fy - edgey]
-							if(channels[0]) tmpArray[0][ getMedianIndex( tmpData[y + fy - edgeY][x + fx - edgeX][0] ) ]++;
+							                                                   if(channels[0]) tmpArray[0][ getMedianIndex( tmpData[y + fy - edgeY][x + fx - edgeX][0] ) ]++;
 							if(channels[1]) tmpArray[1][ getMedianIndex( tmpData[y + fy - edgeY][x + fx - edgeX][1] ) ]++;
 							if(channels[2]) tmpArray[2][ getMedianIndex( tmpData[y + fy - edgeY][x + fx - edgeX][2] ) ]++;
 							if(channels[3]) tmpArray[3][ getMedianIndex( tmpData[y + fy - edgeY][x + fx - edgeX][3] ) ]++;
@@ -87,23 +87,21 @@ public class MedianFilter extends ImageFilterProcessor{
 					}
 				}
 
-				if(channels[0]) data[y][x][0] = findMedian(tmpArray[0], pixelCount/2);
-				else data[y][x][0] = tmpData[y][x][0];
-				if(channels[1]) data[y][x][1] = findMedian(tmpArray[1], pixelCount/2);
-				else data[y][x][1] = tmpData[y][x][1];
-				if(channels[2]) data[y][x][2] = findMedian(tmpArray[2], pixelCount/2);
-				else data[y][x][2] = tmpData[y][x][2];
-				if(channels[3]) data[y][x][3] = findMedian(tmpArray[3], pixelCount/2);
-				else data[y][x][3] = tmpData[y][x][3];
+				if(channels[0]) tmpData[y][x][0] = findMedian(tmpArray[0], pixelCount/2);
+				if(channels[1]) tmpData[y][x][1] = findMedian(tmpArray[1], pixelCount/2);
+				if(channels[2]) tmpData[y][x][2] = findMedian(tmpArray[2], pixelCount/2);
+				if(channels[3]) tmpData[y][x][3] = findMedian(tmpArray[3], pixelCount/2);
 			}
 		}
+		
+		return tmpData;
 	}
-	
+
 	private int getMedianIndex(int i){
 		if(i < 0) return Math.abs(i);
 		else return i+256;
 	}
-	
+
 	private int findMedian(int[] median, int medianCount){
 		int sum = 0;
 		int ret = 0;
@@ -114,11 +112,11 @@ public class MedianFilter extends ImageFilterProcessor{
 				ret = i-256;
 			}
 		}
-		
+
 		return ret;
 	}
-	
-	
+
+
 	class SortableARGB implements SortableDataList<Integer>{
 		private int[][][] data;
 		private int cols;
@@ -153,12 +151,12 @@ public class MedianFilter extends ImageFilterProcessor{
 			data[ getY(a) ][ getX(a) ][ channel ] = data[ getY(b) ][ getX(b) ][ channel ];
 			data[ getY(b) ][ getX(b) ][ channel ] = tmp;
 		}
-		
-		
+
+
 		private int getX(int a){
 			return a % cols;
 		}
-		
+
 		private int getY(int a){
 			return a / cols;
 		}
