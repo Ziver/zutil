@@ -37,13 +37,6 @@ import javax.wsdl.factory.WSDLFactory;
 import javax.wsdl.xml.WSDLWriter;
 import javax.xml.namespace.QName;
 
-import zutil.network.http.HttpPage;
-import zutil.network.http.HttpPrintStream;
-import zutil.network.http.soap.SOAPInterface.WSDLDocumentation;
-import zutil.network.http.soap.SOAPInterface.WSDLParamDocumentation;
-import zutil.network.http.soap.SOAPObject.SOAPFieldName;
-import zutil.MultiPrintStream;
-
 import org.dom4j.Document;
 import org.dom4j.DocumentException;
 import org.dom4j.DocumentHelper;
@@ -52,6 +45,13 @@ import org.dom4j.Namespace;
 import org.dom4j.io.OutputFormat;
 import org.dom4j.io.XMLWriter;
 import org.xml.sax.SAXException;
+
+import zutil.MultiPrintStream;
+import zutil.network.http.HttpPage;
+import zutil.network.http.HttpPrintStream;
+import zutil.network.http.soap.SOAPInterface.WSDLDocumentation;
+import zutil.network.http.soap.SOAPInterface.WSDLParamDocumentation;
+import zutil.network.http.soap.SOAPObject.SOAPFieldName;
 
 import com.ibm.wsdl.extensions.PopulatedExtensionRegistry;
 import com.ibm.wsdl.extensions.soap.SOAPConstants;
@@ -89,16 +89,16 @@ import com.sun.org.apache.xerces.internal.dom.DocumentImpl;
  */
 public class SOAPHttpPage implements HttpPage{
 	// valid methods for this soap page
-	private HashMap<String, MethodChasch> methods;
+	private HashMap<String, MethodCache> methods;
 	// contains an method and the names for the parameters
-	private class MethodChasch{
+	private class MethodCache{
 		String[] paramName;
 		boolean[] paramOptional;
 		String returnName;
 		Method method;
 		boolean header;
 
-		MethodChasch(Method m){
+		MethodCache(Method m){
 			method = m;
 			paramName = new String[method.getParameterTypes().length];
 			paramOptional = new boolean[method.getParameterTypes().length];
@@ -122,13 +122,13 @@ public class SOAPHttpPage implements HttpPage{
 		this.url = url;
 		this.interf = interf;
 		this.session_enabled = false;
-		methods = new HashMap<String, MethodChasch>();
+		methods = new HashMap<String, MethodCache>();
 
 		for(Method m : interf.getClass().getDeclaredMethods()){
 			// check for public methods
 			if((m.getModifiers() & Modifier.PUBLIC) > 0 && 
 					!m.isAnnotationPresent(SOAPInterface.SOAPDisabled.class)){
-				MethodChasch chasch = new MethodChasch(m);
+				MethodCache chasch = new MethodCache(m);
 				StringBuffer tmp = new StringBuffer(m.getName()+"(");
 
 				// Get the parameter names
@@ -218,11 +218,21 @@ public class SOAPHttpPage implements HttpPage{
 					if(session_enabled) session.put("SOAPInterface", obj);
 				}
 				
+				
 				Document document = soapResponse( request.get(""), obj);
-
+				
 				OutputFormat format = OutputFormat.createPrettyPrint();
 				XMLWriter writer = new XMLWriter( out, format );
 				writer.write( document );
+				
+				/*
+				// DEBUG
+				System.out.println("Request");
+				System.out.println(request);
+				System.out.println("Response");
+				writer = new XMLWriter( System.out, format );
+				writer.write( document );
+				*/
 			}
 		} catch (Exception e) {
 			e.printStackTrace(MultiPrintStream.out);			
@@ -238,24 +248,25 @@ public class SOAPHttpPage implements HttpPage{
 		try {
 			return soapResponse(xml, interf.getClass().newInstance());
 		} catch (Exception e) {
-			e.printStackTrace();
+			e.printStackTrace(MultiPrintStream.out);
 		}
 		return null;
 	}
 
 	protected Document soapResponse(String xml, SOAPInterface obj){
+		Document document = DocumentHelper.createDocument();
+		Element envelope = document.addElement("soap:Envelope");
 		try {
-			Document document = DocumentHelper.createDocument();
-			Element envelope = document.addElement("soap:Envelope");
-			envelope.add(new Namespace("soap", "http://www.w3.org/2001/12/soap-envelope"));
-			envelope.addAttribute("soap:encodingStyle", "http://www.w3.org/2001/12/soap-encoding");
-
-			Element header = envelope.addElement( "soap:Header" );
+			envelope.add(new Namespace("soap", "http://schemas.xmlsoap.org/soap/envelope/"));
+			envelope.addAttribute("soap:encodingStyle", "http://schemas.xmlsoap.org/soap/envelope/");
+			
 			Element body = envelope.addElement( "soap:Body" );
 			try{
 				Element request = getXMLRoot(xml);
+				if(request == null) return document;
 				// Header
 				if( request.element("Header") != null){
+					Element header = envelope.addElement( "soap:Header" );
 					prepareInvoke( obj, request.element("Header"), header );
 				}
 
@@ -278,13 +289,11 @@ public class SOAPHttpPage implements HttpPage{
 					fault.addElement("faultstring").setText( ""+e.getMessage() );
 				e.printStackTrace(MultiPrintStream.out);
 			}
-
-			return document;
 		} catch (Exception e) {
 			e.printStackTrace(MultiPrintStream.out);
 		}
 
-		return null;
+		return document;
 	}
 
 	/**
@@ -301,7 +310,7 @@ public class SOAPHttpPage implements HttpPage{
 		while( it.hasNext() ){
 			Element e = it.next();
 			if(methods.containsKey(e.getQName().getName())){
-				MethodChasch m = methods.get(e.getQName().getName());
+				MethodCache m = methods.get(e.getQName().getName());
 				Object[] params = new Object[m.paramName.length];
 
 				// Get the param values
@@ -318,7 +327,7 @@ public class SOAPHttpPage implements HttpPage{
 				// generate response xml
 				if(m.method.getReturnType() != void.class){
 					Element response = responseRoot.addElement(m.method.getName()+"Response");
-					createReturnXML(response, ret, m.returnName, m);
+					generateReturnXML(response, ret, m.returnName, m);
 				}
 			}
 			else{
@@ -337,7 +346,7 @@ public class SOAPHttpPage implements HttpPage{
 	 * @param ename is the name of the parent Element
 	 * @param m is the method that returned the ret
 	 */
-	private void createReturnXML(Element root, Object ret, String ename, MethodChasch m) throws IllegalArgumentException, IllegalAccessException{
+	private void generateReturnXML(Element root, Object ret, String ename, MethodCache m) throws IllegalArgumentException, IllegalAccessException{
 		if(ret == null) return;
 		if(byte[].class.isAssignableFrom(ret.getClass())){
 			Element valueE = root.addElement( ename );
@@ -355,7 +364,7 @@ public class SOAPHttpPage implements HttpPage{
 			array.addAttribute("type", "soap:Array");
 			array.addAttribute("soap:arrayType", arrayType);
 			for(int i=0; i<Array.getLength(ret) ;i++){
-				createReturnXML(array, Array.get(ret, i), "element", m);
+				generateReturnXML(array, Array.get(ret, i), "element", m);
 			}
 		}		
 		else{
@@ -369,7 +378,7 @@ public class SOAPHttpPage implements HttpPage{
 					String name;
 					if(tmp != null) name = tmp.value();
 					else name = "field"+i;
-					createReturnXML(objectE, fields[i].get(ret), name, m);
+					generateReturnXML(objectE, fields[i].get(ret), name, m);
 				}
 			}
 			else {
@@ -485,12 +494,21 @@ public class SOAPHttpPage implements HttpPage{
 
 		Message exception = wsdl.createMessage();
 		exception.setQName(new QName(tns, "exception"));
-		exception.setUndefined(false);
+		exception.setUndefined(true);
 		Part epart = wsdl.createPart();
 		epart.setName("message");
 		epart.setTypeName(new QName(xsd, "string"));
 		exception.addPart(epart);
-		wsdl.addMessage(exception);	
+		wsdl.addMessage(exception);
+		
+		Message empty = wsdl.createMessage();
+		empty.setQName(new QName(tns, "empty"));
+		empty.setUndefined(false);
+		epart = wsdl.createPart();
+		epart.setName("empty");
+		epart.setTypeName(new QName(td, "empty"));
+		empty.addPart(epart);
+		wsdl.addMessage(empty);	
 
 		// Types import
 		Import imp = wsdl.createImport();
@@ -502,7 +520,7 @@ public class SOAPHttpPage implements HttpPage{
 		PortType portType = wsdl.createPortType();
 		portType.setQName(new QName(tns, portTypeName));
 		portType.setUndefined(false);
-		for(MethodChasch m : methods.values()){
+		for(MethodCache m : methods.values()){
 			Operation operation = wsdl.createOperation();			
 			//********* Request Messages
 			if(m.paramName.length > 0){
@@ -533,6 +551,11 @@ public class SOAPHttpPage implements HttpPage{
 				wsdl.addMessage(msgIn);
 				Input input = wsdl.createInput();
 				input.setMessage(msgIn);
+				operation.setInput(input);
+			}
+			else{
+				Input input = wsdl.createInput();
+				input.setMessage(empty);
 				operation.setInput(input);
 			}
 			//********** Response Message
@@ -611,30 +634,30 @@ public class SOAPHttpPage implements HttpPage{
 		soapBinding.setTransportURI("http://schemas.xmlsoap.org/soap/http");
 		binding.addExtensibilityElement(soapBinding);
 
-		for(MethodChasch m : methods.values()){
+		for(MethodCache m : methods.values()){
 			BindingOperation operation = wsdl.createBindingOperation();
 			operation.setName(m.method.getName());
 
 			SOAPOperation soapOperation = (SOAPOperation)extReg.createExtension(BindingOperation.class, SOAPConstants.Q_ELEM_SOAP_OPERATION);
-			soapOperation.setSoapActionURI("");
+			soapOperation.setSoapActionURI(url+""+m.method.getName());
 			operation.addExtensibilityElement(soapOperation);
 
 			// input
-			if(m.paramName.length > 0){
-				BindingInput input = wsdl.createBindingInput();
-				// Header
-				if(m.header){
-					SOAPHeader soapHeader = (SOAPHeader)extReg.createExtension(BindingInput.class, SOAPConstants.Q_ELEM_SOAP_HEADER);
-					soapHeader.setUse("literal");
-					input.addExtensibilityElement(soapHeader);
-				}// Body
-				else{
-					SOAPBody soapBody = (SOAPBody)extReg.createExtension(BindingInput.class, SOAPConstants.Q_ELEM_SOAP_BODY);
-					soapBody.setUse("literal");
-					input.addExtensibilityElement(soapBody);
-				}
-				operation.setBindingInput(input);
+			BindingInput input = wsdl.createBindingInput();
+			// Header
+			if(m.header){
+				SOAPHeader soapHeader = (SOAPHeader)extReg.createExtension(BindingInput.class, SOAPConstants.Q_ELEM_SOAP_HEADER);
+				soapHeader.setUse("literal");
+				soapHeader.setNamespaceURI(url+""+m.method.getName());
+				input.addExtensibilityElement(soapHeader);
+			}// Body
+			else{
+				SOAPBody soapBody = (SOAPBody)extReg.createExtension(BindingInput.class, SOAPConstants.Q_ELEM_SOAP_BODY);
+				soapBody.setUse("literal");
+				soapBody.setNamespaceURI(url+""+m.method.getName());
+				input.addExtensibilityElement(soapBody);
 			}
+			operation.setBindingInput(input);
 
 			// output
 			if(!m.method.getReturnType().equals( void.class )){
@@ -643,11 +666,13 @@ public class SOAPHttpPage implements HttpPage{
 				if(m.header){
 					SOAPHeader soapHeader = (SOAPHeader)extReg.createExtension(BindingInput.class, SOAPConstants.Q_ELEM_SOAP_HEADER);
 					soapHeader.setUse("literal");
+					soapHeader.setNamespaceURI(url+""+m.method.getName());
 					output.addExtensibilityElement(soapHeader);
 				}// Body
 				else{
 					SOAPBody soapBody = (SOAPBody)extReg.createExtension(BindingInput.class, SOAPConstants.Q_ELEM_SOAP_BODY);
 					soapBody.setUse("literal");
+					soapBody.setNamespaceURI(url+""+m.method.getName());
 					output.addExtensibilityElement(soapBody);
 				}
 				operation.setBindingOutput(output);
@@ -683,12 +708,19 @@ public class SOAPHttpPage implements HttpPage{
 		wsdlType = DocumentHelper.createDocument();
 		Element definitions = wsdlType.addElement( "wsdl:definitions" );
 		definitions.addAttribute("targetNamespace", url+"?type");
+		definitions.addNamespace("tns", url+"?type");
 		definitions.addNamespace("xsd", "http://www.w3.org/2001/XMLSchema");
 		definitions.addNamespace("wsdl", "http://schemas.xmlsoap.org/wsdl/"); 
 		definitions.addNamespace("SOAP-ENC", "http://schemas.xmlsoap.org/soap/encoding/");
 
 		Element typeE = definitions.addElement("wsdl:types");	
-		Element schema = typeE.addElement("xsd:schema");	
+		Element schema = typeE.addElement("xsd:schema");
+		schema.addAttribute("targetNamespace", url+"?type");
+		
+		// empty type
+		Element empty = schema.addElement("xsd:complexType");
+		empty.addAttribute("name", "empty");
+		empty.addElement("xsd:sequence");
 
 		for(int n=0; n<types.size() ;n++){
 			Class<?> c = types.get(n);
@@ -699,6 +731,8 @@ public class SOAPHttpPage implements HttpPage{
 				Element type = schema.addElement("xsd:complexType");
 				type.addAttribute("name", 
 						"ArrayOf"+getClassSOAPName(c).replaceAll("[\\[\\]]", ""));
+				
+				/*// .Net can't handle this code
 				Element complexContent = type.addElement("complexContent");
 				
 				Element restriction = complexContent.addElement("restriction");
@@ -707,6 +741,19 @@ public class SOAPHttpPage implements HttpPage{
 				Element attribute = restriction.addElement("attribute");
 				attribute.addAttribute("ref", "SOAP-ENC:arrayType");
 				attribute.addAttribute("wsdl:arrayType", "tns:"+getClassSOAPName(c));
+				*/
+				
+				Element sequence = type.addElement("xsd:sequence");
+				
+				Element element = sequence.addElement("xsd:element");
+				element.addAttribute("minOccurs", "0");
+				element.addAttribute("maxOccurs", "unbounded");
+				element.addAttribute("name", "element");
+				element.addAttribute("nillable", "true");
+				if(SOAPObject.class.isAssignableFrom(ctmp))
+					element.addAttribute("type", "tns:"+getClassSOAPName(c).replace("[]", ""));
+				else
+					element.addAttribute("type", "xsd:"+getClassSOAPName(c).replace("[]", ""));
 				
 				if(!types.contains(ctmp))
 					types.add(ctmp);
@@ -752,5 +799,4 @@ public class SOAPHttpPage implements HttpPage{
 		}
 		return c;
 	}
-
 }

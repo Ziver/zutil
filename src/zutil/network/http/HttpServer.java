@@ -244,13 +244,13 @@ public class HttpServer extends Thread{
 						tmpb.append((char)in.read());
 					}
 
-					if(client_info.get("Content-Type").equals("application/x-www-form-urlencoded")){
+					if(client_info.get("Content-Type").contains("application/x-www-form-urlencoded")){
 						// get the variables
 						parseVariables(tmpb.toString(), request);
 					}
-					else if(client_info.get("Content-Type").equals("application/soap+xml") || 
-							client_info.get("Content-Type").equals("text/xml") || 
-							client_info.get("Content-Type").equals("text/plain")){
+					else if(client_info.get("Content-Type").contains("application/soap+xml") || 
+							client_info.get("Content-Type").contains("text/xml") || 
+							client_info.get("Content-Type").contains("text/plain")){
 						// save the variables
 						request.put("" , tmpb.toString());
 					}

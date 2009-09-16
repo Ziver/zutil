@@ -18,22 +18,39 @@ public class MySQLConnection {
 	 * @param user is the user name
 	 * @param password is the password
 	 */
-    public MySQLConnection(String url,String db,String user, String password) throws SQLException, InstantiationException, IllegalAccessException, ClassNotFoundException{
+    public MySQLConnection(String url, String db, String user, String password) 
+    		throws SQLException, InstantiationException, IllegalAccessException, ClassNotFoundException{
 		Class.forName ("com.mysql.jdbc.Driver").newInstance();
         conn = DriverManager.getConnection ("jdbc:mysql://"+url+"/"+db, user, password);
     }
     
     /**
      * Runs a query and returns the result.<br>
-     * <b>NOTE:</b> Don't forget to close the ResultSet and the Statement or it can lead to memory leak tex: rows.getStatement().close();
+     * <b>NOTE:</b> Don't forget to close the ResultSet and the Statement or it 
+     * can lead to memory leak: rows.getStatement().close();
      * 
      * @param sql is the query to execute
      * @return the data that the DB returned
      */
-    public synchronized ResultSet returnQuery(String sql) throws SQLException{
+    public synchronized ResultSet query(String sql) throws SQLException{
     	Statement s = conn.createStatement ();
-    	s.executeQuery (sql);
+    	s.executeQuery(sql);
     	return s.getResultSet();    	
+    }
+    
+    /**
+     * Returns the first cell of the first row of the query
+     * 
+     * @param sql is the SQL query to run, preferably with the LIMIT 1 at the end
+     * @return A SQL row if it exists or else null
+     */
+    public synchronized String simpleQuery(String sql) throws SQLException{
+    	Statement s = conn.createStatement ();
+    	s.executeQuery(sql);
+    	ResultSet result = s.getResultSet();
+    	if(result.next())
+    		return result.getString(0);
+    	return null;    	
     }
     
     /**
@@ -52,6 +69,7 @@ public class MySQLConnection {
     /**
      * Runs a Prepared Statement.<br>
      * <b>NOTE:</b> Don't forget to close the PreparedStatement or it can lead to memory leak
+     * 
      * @param sql is the SQL query to run
      * @return The PreparedStatement
      */

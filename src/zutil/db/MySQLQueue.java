@@ -63,7 +63,7 @@ public class MySQLQueue<E> implements Queue<E>{
 	@SuppressWarnings("unchecked")
 	public synchronized E peek() {
 		try {
-			ResultSet rs = db.returnQuery("SELECT * FROM "+table+" LIMIT 1");
+			ResultSet rs = db.query("SELECT * FROM "+table+" LIMIT 1");
 			if (rs.next()) {
 				return (E) Converter.toObject(rs.getBytes("data"));
 			}
@@ -77,7 +77,7 @@ public class MySQLQueue<E> implements Queue<E>{
 	@SuppressWarnings("unchecked")
 	public synchronized E poll() {
 		try {
-			ResultSet rs = db.returnQuery("SELECT * FROM "+table+" LIMIT 1");
+			ResultSet rs = db.query("SELECT * FROM "+table+" LIMIT 1");
 			if (rs.next()) {
 				db.updateQuery("DELETE FROM "+table+" WHERE id="+rs.getInt("id")+" LIMIT 1");
 				return (E) Converter.toObject(rs.getBytes("data"));
@@ -108,7 +108,7 @@ public class MySQLQueue<E> implements Queue<E>{
 
 	public boolean contains(Object arg0) {
 		try {
-			ResultSet rs = db.returnQuery("SELECT data FROM "+table+" WHERE data='"+Converter.toBytes(arg0)+"' LIMIT 1");
+			ResultSet rs = db.query("SELECT data FROM "+table+" WHERE data='"+Converter.toBytes(arg0)+"' LIMIT 1");
 			if (rs.next()) {
 				return true;
 			}
@@ -135,7 +135,7 @@ public class MySQLQueue<E> implements Queue<E>{
 
 	public synchronized boolean remove(Object arg0) {
 		try {
-			ResultSet rs = db.returnQuery("DELETE FROM "+table+" WHERE data='"+Converter.toBytes(arg0)+"' LIMIT 1");
+			ResultSet rs = db.query("DELETE FROM "+table+" WHERE data='"+Converter.toBytes(arg0)+"' LIMIT 1");
 			rs.getStatement().close();
 			return true;
 		} catch (Exception e) {
@@ -156,7 +156,7 @@ public class MySQLQueue<E> implements Queue<E>{
 
 	public int size() {
 		try {
-			ResultSet rs = db.returnQuery("SELECT count(*) FROM "+table);
+			ResultSet rs = db.query("SELECT count(*) FROM "+table);
 			if (rs.next()) {
 				return rs.getInt(1);
 			}
