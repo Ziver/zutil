@@ -41,7 +41,6 @@ import org.dom4j.Document;
 import org.dom4j.DocumentException;
 import org.dom4j.DocumentHelper;
 import org.dom4j.Element;
-import org.dom4j.Namespace;
 import org.dom4j.io.OutputFormat;
 import org.dom4j.io.XMLWriter;
 import org.xml.sax.SAXException;
@@ -218,7 +217,6 @@ public class SOAPHttpPage implements HttpPage{
 					if(session_enabled) session.put("SOAPInterface", obj);
 				}
 				
-				
 				Document document = soapResponse( request.get(""), obj);
 				
 				OutputFormat format = OutputFormat.createPrettyPrint();
@@ -227,8 +225,8 @@ public class SOAPHttpPage implements HttpPage{
 				
 				/*
 				// DEBUG
-				System.out.println("Request");
-				System.out.println(request);
+				System.err.println("Request");
+				System.err.println(request);
 				System.out.println("Response");
 				writer = new XMLWriter( System.out, format );
 				writer.write( document );
@@ -257,8 +255,9 @@ public class SOAPHttpPage implements HttpPage{
 		Document document = DocumentHelper.createDocument();
 		Element envelope = document.addElement("soap:Envelope");
 		try {
-			envelope.add(new Namespace("soap", "http://schemas.xmlsoap.org/soap/envelope/"));
-			envelope.addAttribute("soap:encodingStyle", "http://schemas.xmlsoap.org/soap/envelope/");
+			envelope.addNamespace("soap", "http://schemas.xmlsoap.org/soap/envelope/");
+			envelope.addNamespace("xsi", "http://www.w3.org/2001/XMLSchema-instance");
+			envelope.addNamespace("xsd", "http://www.w3.org/2001/XMLSchema");
 			
 			Element body = envelope.addElement( "soap:Body" );
 			try{
@@ -326,7 +325,8 @@ public class SOAPHttpPage implements HttpPage{
 
 				// generate response xml
 				if(m.method.getReturnType() != void.class){
-					Element response = responseRoot.addElement(m.method.getName()+"Response");
+					responseRoot.addNamespace("m",  url+""+m.method.getName());
+					Element response = responseRoot.addElement("m:"+m.method.getName()+"Response");
 					generateReturnXML(response, ret, m.returnName, m);
 				}
 			}
@@ -371,7 +371,7 @@ public class SOAPHttpPage implements HttpPage{
 			if(ret instanceof Element)
 				root.add( (Element)ret );
 			if(ret instanceof SOAPObject){
-				Element objectE = root.addElement( getClassSOAPName(ret.getClass()) );
+				Element objectE = root.addElement( ename ); //getClassSOAPName(ret.getClass())
 				Field[] fields = ret.getClass().getFields();
 				for(int i=0; i<fields.length ;i++){
 					SOAPFieldName tmp = fields[i].getAnnotation(SOAPObject.SOAPFieldName.class);
@@ -707,7 +707,7 @@ public class SOAPHttpPage implements HttpPage{
 	private void generateWSDLType(ArrayList<Class<?>> types){
 		wsdlType = DocumentHelper.createDocument();
 		Element definitions = wsdlType.addElement( "wsdl:definitions" );
-		definitions.addAttribute("targetNamespace", url+"?type");
+		definitions.addAttribute("targetNamespace", url);
 		definitions.addNamespace("tns", url+"?type");
 		definitions.addNamespace("xsd", "http://www.w3.org/2001/XMLSchema");
 		definitions.addNamespace("wsdl", "http://schemas.xmlsoap.org/wsdl/"); 
@@ -800,3 +800,4 @@ public class SOAPHttpPage implements HttpPage{
 		return c;
 	}
 }
+

@@ -11,6 +11,7 @@ import java.net.Socket;
 import java.net.URISyntaxException;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.List;
 
 import zutil.FileFinder;
 import zutil.Hasher;
@@ -123,7 +124,7 @@ public class UpdateServer extends Thread{
 	public static ArrayList<FileHash> getFileList(String path) throws Exception{
 		ArrayList<FileHash> fileHash = new ArrayList<FileHash>();
 
-		ArrayList<File> files = FileFinder.search(FileFinder.find(path));
+		List<File> files = FileFinder.search(FileFinder.find(path));
 		for(File file : files){
 			fileHash.add(new FileHash(
 					FileFinder.relativePath(file, path),
