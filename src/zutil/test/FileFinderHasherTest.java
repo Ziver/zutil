@@ -2,7 +2,7 @@ package zutil.test;
 
 import java.io.File;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
+import java.util.List;
 
 import zutil.FileFinder;
 import zutil.Hasher;
@@ -12,7 +12,7 @@ public class FileFinderHasherTest {
 		String relativePath = "zutil/test";
 		
 		File path = FileFinder.find(relativePath);
-		ArrayList<File> files = FileFinder.search(path);
+		List<File> files = FileFinder.search(path);
 		for(int i=0; i<files.size(); i++){
 			try {
 				System.out.println(

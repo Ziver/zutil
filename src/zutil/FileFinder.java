@@ -1,12 +1,16 @@
 package zutil;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.regex.Matcher;
 
 /**
@@ -19,8 +23,8 @@ public class FileFinder {
 	/**
 	 * Returns a String with a relative path from the given path
 	 * 
-	 * @param file The file to get a relative path from
-	 * @param path The path
+	 * @param file is the file to get a relative path from
+	 * @param path is the path
 	 * @return A String with a relative path
 	 */
 	public static String relativePath(File file, String path){
@@ -36,11 +40,11 @@ public class FileFinder {
 	}
 	
 	/**
-	 * Returns the File object for the given file
+	 * Returns the File object for the given file. 
+	 * Can not point to files in JAR files.
 	 * 
-	 * @param path The path to the file (no / if not absolute path)
+	 * @param path is the path to the file (no / if not absolute path)
 	 * @return A File object for the file
-	 * @throws URISyntaxException 
 	 */
 	public static File find(String path){
 		try {
@@ -50,17 +54,46 @@ public class FileFinder {
 			}
 			return new File(findURL(path).toURI());
 		} catch (Exception e) {
-			e.printStackTrace();
+			//e.printStackTrace(MultiPrintStream.out);
 		}
 		return null;
 	}
 	
+	/**
+	 * Returns the URL to the given file
+	 * 
+	 * @param path is the path to the file (no / if not absolute path)
+	 * @return A URL object for the file
+	 * @throws URISyntaxException 
+	 */
+	public static URL findURL(String path){
+		return FileFinder.class.getClassLoader().getResource(path);
+	}
+	
+	/**
+	 * Returns a InputStream from the path
+	 * 
+	 * @param path is the path to the file (no / if not absolute path)
+	 * @return A InputStream object for the file
+	 */
+	public static InputStream getInputStream(String path){
+		try {
+			File file = new File(path);
+			if(file!=null && file.exists()){
+				return new BufferedInputStream( new FileInputStream( file ) );
+			}
+			return FileFinder.class.getClassLoader().getResourceAsStream(path);
+		} catch (Exception e) {
+			//e.printStackTrace(MultiPrintStream.out);
+		}
+		return null;
+	}
 	
 	/**
 	 * Reads and returns the content of a file as a String.
 	 * Or use FileUtils.readFileToString(file);
 	 * 
-	 * @param file The file to read
+	 * @param file is the file to read
 	 * @return The file content
 	 * @throws IOException
 	 */
@@ -78,45 +111,35 @@ public class FileFinder {
 	}
 	
 	/**
-	 * Returns the URL to the given file
+	 * Returns a ArrayList with all the files in a folder and sub folders
 	 * 
-	 * @param path The path to the file (no / if not absolute path)
-	 * @return A URL object for the file
-	 * @throws URISyntaxException 
+	 * @param dir is the directory to search in
+	 * @return The ArrayList with the files
 	 */
-	public static URL findURL(String path){
-		return FileFinder.class.getClassLoader().getResource(path);
+	public static List<File> search(File dir){
+		return search(dir, new LinkedList<File>(), true);
 	}
 	
 	/**
 	 * Returns a ArrayList with all the files in a folder and sub folders
 	 * 
-	 * @param dir The directory to search in
+	 * @param dir is the directory to search in
+	 * @param fileList is the ArrayList to add the files to
+	 * @param recursice is if the method should search the sub directories to.
 	 * @return The ArrayList with the files
 	 */
-	public static ArrayList<File> search(File dir){
-		return search(dir, new ArrayList<File>());
-	}
-	
-	/**
-	 * Returns a ArrayList with all the files in a folder and sub folders
-	 * 
-	 * @param dir The directory to search in
-	 * @param fileList The ArrayList to add the files to
-	 * @return The ArrayList with the files
-	 */
-	public static ArrayList<File> search(File dir, ArrayList<File> fileList){
+	public static List<File> search(File dir, List<File> fileList, boolean recursive){
 		String[] temp = dir.list();
 		File file;
 		
 		if(temp != null){
 			for(int i=0; i<temp.length ;i++){
 				file = new File(dir.getPath()+File.separator+temp[i]);
-				if(file.isDirectory()){
-					search(new File(dir.getPath()+File.separator+temp[i]+File.separator),fileList);
+				if(recursive && file.isDirectory()){
+					search(new File(dir.getPath()+File.separator+temp[i]+File.separator), fileList, recursive);
 				}
 				else if(file.isFile()){
-					MultiPrintStream.out.println("File Found: "+file);
+					//MultiPrintStream.out.println("File Found: "+file);
 					fileList.add(file);
 				}			
 			}
@@ -127,7 +150,8 @@ public class FileFinder {
 	
 	/**
 	 * Returns the extension of the file
-	 * @param file The file
+	 * 
+	 * @param file is the file
 	 * @return The extension
 	 */
 	public static String fileExtension(File file){
@@ -136,7 +160,8 @@ public class FileFinder {
 	
 	/**
 	 * Returns the extension of the file
-	 * @param file The file
+	 * 
+	 * @param file is the file
 	 * @return The extension
 	 */
 	public static String fileExtension(String file){

@@ -36,7 +36,7 @@ public abstract class NioNetwork implements Runnable {
 	 * 2 = message debug
 	 * 3 = selector debug
 	 */     
-	public static int DEBUG = 2;
+	public static final int DEBUG = 2;
 	public static enum NetworkType {SERVER, CLIENT};
 
 	private NetworkType type;

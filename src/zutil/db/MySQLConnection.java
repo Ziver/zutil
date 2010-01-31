@@ -21,6 +21,7 @@ public class MySQLConnection {
     public MySQLConnection(String url, String db, String user, String password) 
     		throws SQLException, InstantiationException, IllegalAccessException, ClassNotFoundException{
 		Class.forName ("com.mysql.jdbc.Driver").newInstance();
+		DriverManager.setLoginTimeout(10);
         conn = DriverManager.getConnection ("jdbc:mysql://"+url+"/"+db, user, password);
     }
     
@@ -48,8 +49,11 @@ public class MySQLConnection {
     	Statement s = conn.createStatement ();
     	s.executeQuery(sql);
     	ResultSet result = s.getResultSet();
-    	if(result.next())
-    		return result.getString(0);
+    	if(result.next()){
+    		String tmp = result.getString(1);
+    		result.close();
+    		return tmp;
+    	}
     	return null;    	
     }
     
@@ -64,6 +68,22 @@ public class MySQLConnection {
     	int ret = s.executeUpdate(sql);
     	s.close();
     	return ret;
+    }
+    
+    /**
+     * @return the last inserted id or -1 if there was an error
+     * @throws SQLException
+     */
+    public int getLastInsertID() throws SQLException{
+    	Statement s = conn.createStatement ();
+    	s.executeQuery("SELECT LAST_INSERT_ID()");
+    	ResultSet result = s.getResultSet();
+    	if(result.next()){
+    		int tmp = result.getInt(1);
+    		result.close();
+    		return tmp;
+    	}
+    	return -1;   
     }
     
     /**

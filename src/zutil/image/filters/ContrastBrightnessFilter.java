@@ -3,7 +3,7 @@ package zutil.image.filters;
 import java.awt.image.BufferedImage;
 
 import zutil.image.ImageFilterProcessor;
-import zutil.image.ImageUtil;
+import zutil.image.RAWImageUtil;
 
 public class ContrastBrightnessFilter extends ImageFilterProcessor{
 	private double contrast;
@@ -31,15 +31,15 @@ public class ContrastBrightnessFilter extends ImageFilterProcessor{
 
 	@Override
 	public int[][][] process(int[][][] data, int startX, int startY, int stopX, int stopY) {
-		int mean = ImageUtil.getMeanValue(data);
+		int mean = RAWImageUtil.getMeanValue(data);
 		
-		int[][][] output = ImageUtil.copyArray(data);
+		int[][][] output = RAWImageUtil.copyArray(data);
 		
-		ImageUtil.addMeanValue(output, startX, startY, stopX, stopY, mean*(-1));
-		ImageUtil.scale(output, startX, startY, stopX, stopY, contrast);
-		ImageUtil.addMeanValue(output, startX, startY, stopX, stopY, (int)(brightness*mean));
+		RAWImageUtil.addMeanValue(output, startX, startY, stopX, stopY, mean*(-1));
+		RAWImageUtil.scale(output, startX, startY, stopX, stopY, contrast);
+		RAWImageUtil.addMeanValue(output, startX, startY, stopX, stopY, (int)(brightness*mean));
 
-		ImageUtil.clip(output, startX, startY, stopX, stopY);
+		RAWImageUtil.clip(output, startX, startY, stopX, stopY);
 		
 		return output;
 	}

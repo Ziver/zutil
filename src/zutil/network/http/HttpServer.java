@@ -4,22 +4,16 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.net.ServerSocket;
 import java.net.Socket;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.security.cert.CertificateException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.regex.Pattern;
-
-import javax.net.ssl.SSLServerSocketFactory;
 
 import zutil.MultiPrintStream;
+import zutil.network.threaded.ThreadedTCPNetworkServer;
+import zutil.network.threaded.ThreadedTCPNetworkServerThread;
 
 
 /**
@@ -28,7 +22,7 @@ import zutil.MultiPrintStream;
  * 
  * @author Ziver
  */
-public class HttpServer extends Thread{
+public class HttpServer extends ThreadedTCPNetworkServer{
 	public static final boolean DEBUG = false;
 	public static final String SERVER_VERSION = "StaticInt HttpServer 1.0";
 	public static final int COOKIE_TTL = 200;
@@ -36,8 +30,6 @@ public class HttpServer extends Thread{
 
 	public final String server_url;
 	public final int server_port;
-	private File keyStore;
-	private String keyStorePass;
 
 	private HashMap<String,HttpPage> pages;
 	private HttpPage defaultPage;
@@ -64,10 +56,9 @@ public class HttpServer extends Thread{
 	 * @param sslCert If this is not null then the server will use a SSL connection with the given certificate
 	 */
 	public HttpServer(String url, int port, File keyStore, String keyStorePass){
+		super( port, keyStore, keyStorePass );
 		this.server_url = url;
 		this.server_port = port;
-		this.keyStorePass = keyStorePass;
-		this.keyStore = keyStore;
 
 		pages = new HashMap<String,HttpPage>();
 		sessions = Collections.synchronizedMap(new HashMap<String,Map<String,Object>>());
@@ -75,6 +66,8 @@ public class HttpServer extends Thread{
 
 		Timer timer = new Timer();
 		timer.schedule(new GarbageCollector(), 0, SESSION_TTL / 2);
+
+		MultiPrintStream.out.println("HTTP"+(keyStore==null?"":"S")+" Server ready!");
 	}
 
 	/**
@@ -119,49 +112,13 @@ public class HttpServer extends Thread{
 		defaultPage = page;
 	}
 
-	public void run(){
-		try{
-			ServerSocket ss;
-			if(keyStorePass != null && keyStore != null){
-				registerCertificate(keyStore, keyStorePass);
-				ss = initSSL(server_port);
-				MultiPrintStream.out.println("Https Server Running!!!");
-			}
-			else{
-				ss = new ServerSocket(server_port);
-				MultiPrintStream.out.println("Http Server Running!!!");
-			}
-
-			while(true){
-				new HttpServerThread(ss.accept());
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
+	protected ThreadedTCPNetworkServerThread getThreadInstance( Socket s ){
+		try {
+			return new HttpServerThread( s );
+		} catch (IOException e) {
+			e.printStackTrace( MultiPrintStream.out );
 		}
-	}
-
-	/**
-	 * Initiates a SSLServerSocket
-	 * 
-	 * @param port The port to listen to
-	 * @return The SSLServerSocket
-	 * @throws IOException
-	 */
-	private ServerSocket initSSL(int port) throws IOException{
-		SSLServerSocketFactory sslserversocketfactory =
-			(SSLServerSocketFactory) SSLServerSocketFactory.getDefault();
-		return sslserversocketfactory.createServerSocket(port);
-
-	}
-
-	/**
-	 * Registers the given cert file to the KeyStore
-	 * 
-	 * @param certFile The cert file
-	 */
-	protected void registerCertificate(File keyStore, String keyStorePass) throws CertificateException, IOException, KeyStoreException, NoSuchProviderException, NoSuchAlgorithmException{
-		System.setProperty("javax.net.ssl.keyStore", keyStore.getAbsolutePath());
-		System.setProperty("javax.net.ssl.keyStorePassword", keyStorePass);
+		return null;
 	}
 
 	/**
@@ -170,7 +127,7 @@ public class HttpServer extends Thread{
 	 * @author Ziver
 	 *
 	 */
-	class HttpServerThread extends Thread{
+	protected class HttpServerThread implements ThreadedTCPNetworkServerThread{
 		private HttpPrintStream out;
 		private BufferedReader in;
 		private Socket socket;
@@ -179,16 +136,11 @@ public class HttpServer extends Thread{
 			out = new HttpPrintStream(socket.getOutputStream());
 			in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 			this.socket = socket;
-			start();
-			if(DEBUG)MultiPrintStream.out.println("New Connection!!! "+socket.getInetAddress().getHostName());
+			if(DEBUG) MultiPrintStream.out.println("New Connection!!! "+socket.getInetAddress().getHostName());
 		}
 
 		public void run(){
 			String tmp = null;
-			String[] tmpArray, tmpArray2;
-			Pattern colonPattern = Pattern.compile(":");
-			Pattern semiColonPattern = Pattern.compile(";");
-			Pattern equalPattern = Pattern.compile("=");
 
 			String page_url = "";
 			HashMap<String,String> client_info = new HashMap<String,String>();
@@ -197,45 +149,19 @@ public class HttpServer extends Thread{
 
 			//****************************  REQUEST *********************************
 			try {
-				if(DEBUG)MultiPrintStream.out.println("Reciving Http Request!!!");
-				while((tmp=in.readLine()) != null && !tmp.isEmpty()){
-					//System.err.println(tmp);
-					//***********   Handling Get variables
-					if(tmp.startsWith("GET")){
-						// Gets the file URL and get values
-						tmp = (tmp.substring(5, tmp.indexOf("HTTP/"))).trim();
-						page_url = parseHttpHeader(tmp, request);
-					}
-					//*********   Handling Post variable data
-					else if(tmp.startsWith("POST")){
-						// Gets the file URL and get values
-						tmp = (tmp.substring(6, tmp.indexOf("HTTP/"))).trim();
-						page_url = parseHttpHeader(tmp, request);
-					}
-					//*********   Handling Cookies
-					else if(tmp.startsWith("Cookie")){
-						tmp = colonPattern.split(tmp)[1];
-						tmpArray = semiColonPattern.split(tmp);
-						for(String e : tmpArray){
-							tmpArray2 = equalPattern.split(e);
-							cookie.put(
-									tmpArray2[0].trim(), 								// Key
-									(tmpArray2.length>1 ? tmpArray2[1] : "").trim()); 	//Value
-						}
-					}
-					//*********   Handling Client info
-					else{
-						tmpArray = colonPattern.split(tmp);
-						client_info.put(
-								tmpArray[0].trim(), 								// Key
-								(tmpArray.length>1 ? tmpArray[1] : "").trim()); 	//Value
-					}
-				}
+				if(DEBUG) MultiPrintStream.out.println("Reciving Http Request!!!");
+
+				HTTPHeaderParser parser = new HTTPHeaderParser(in);
+				if(DEBUG) MultiPrintStream.out.println(parser);
+				client_info = parser.getAttributes();
+				request = parser.getURLAttributes();
+				cookie = parser.getCookies();
+
 
 				//******* Read in the post data if available
-				if(client_info.containsKey("Content-Length")){
+				if( parser.getHTTPAttribute("Content-Length")!=null ){
 					// Reads the post data size
-					tmp = client_info.get("Content-Length");
+					tmp = parser.getHTTPAttribute("Content-Length");
 					int post_data_length = Integer.parseInt( tmp );
 					// read the data
 					StringBuffer tmpb = new StringBuffer();
@@ -244,19 +170,20 @@ public class HttpServer extends Thread{
 						tmpb.append((char)in.read());
 					}
 
-					if(client_info.get("Content-Type").contains("application/x-www-form-urlencoded")){
+					tmp = parser.getHTTPAttribute("Content-Type");
+					if( tmp.contains("application/x-www-form-urlencoded") ){
 						// get the variables
-						parseVariables(tmpb.toString(), request);
+						HTTPHeaderParser.parseUrlAttributes( tmpb.toString(), request );
 					}
-					else if(client_info.get("Content-Type").contains("application/soap+xml") || 
-							client_info.get("Content-Type").contains("text/xml") || 
-							client_info.get("Content-Type").contains("text/plain")){
+					else if( tmp.contains("application/soap+xml" ) || 
+							tmp.contains("text/xml") || 
+							tmp.contains("text/plain") ){
 						// save the variables
-						request.put("" , tmpb.toString());
+						request.put( "" , tmpb.toString() );
 					}
-					else if(client_info.get("Content-Type").contains("multipart/form-data")){
+					else if( tmp.contains("multipart/form-data") ){
 						// TODO: File upload					
-						throw new Exception("\"multipart-form-data\" Not implemented!!!");
+						throw new Exception( "\"multipart-form-data\" Not implemented!!!" );
 					}						
 				}
 
@@ -264,118 +191,71 @@ public class HttpServer extends Thread{
 				// Get the client session or create one
 				Map<String, Object> client_session;
 				long ttl_time = System.currentTimeMillis()+SESSION_TTL;
-				if(cookie.containsKey("session_id") && sessions.containsKey(cookie.get("session_id"))){
-					client_session = sessions.get(cookie.get("session_id"));
+				if( cookie.containsKey("session_id") && sessions.containsKey(cookie.get("session_id")) ){
+					client_session = sessions.get( cookie.get("session_id") );
 					// Check if session is still valid
-					if((Long)client_session.get("ttl") < System.currentTimeMillis()){
+					if( (Long)client_session.get("ttl") < System.currentTimeMillis() ){
 						int session_id = (Integer)client_session.get("session_id");
 						client_session = Collections.synchronizedMap(new HashMap<String, Object>());
-						client_session.put("session_id", session_id);
-						sessions.put(""+session_id, client_session);
+						client_session.put( "session_id", session_id);
+						sessions.put( ""+session_id, client_session);
 					}
 					// renew the session TTL
-					client_session.put("ttl", ttl_time);
+					client_session.put( "ttl", ttl_time );
 				}
 				else{
 					client_session = Collections.synchronizedMap(new HashMap<String, Object>());
-					client_session.put("session_id", nextSessionId);
-					client_session.put("ttl", ttl_time);
-					sessions.put(""+nextSessionId, client_session);
+					client_session.put( "session_id", nextSessionId );
+					client_session.put( "ttl", ttl_time );
+					sessions.put( ""+nextSessionId, client_session );
 					nextSessionId++;
 				}
 				// Debug
 				if(DEBUG){
-					MultiPrintStream.out.println("# page_url: "+page_url);
-					MultiPrintStream.out.println("# cookie: "+cookie);
-					MultiPrintStream.out.println("# client_session: "+client_session);
-					MultiPrintStream.out.println("# client_info: "+client_info);
-					MultiPrintStream.out.println("# request: "+request);
+					MultiPrintStream.out.println( "# page_url: "+page_url );
+					MultiPrintStream.out.println( "# cookie: "+cookie );
+					MultiPrintStream.out.println( "# client_session: "+client_session );
+					MultiPrintStream.out.println( "# client_info: "+client_info );
+					MultiPrintStream.out.println( "# request: "+request );
 				}
 				//****************************  RESPONSE  ************************************
-				if(DEBUG)MultiPrintStream.out.println("Sending Http Response!!!");
+				if(DEBUG) MultiPrintStream.out.println("Sending Http Response!!!");
 				out.setStatusCode(200);
-				out.setHeader("Server", SERVER_VERSION);
-				out.setHeader("Content-Type", "text/html");
-				out.setCookie("session_id", ""+client_session.get("session_id"));
+				out.setHeader( "Server", SERVER_VERSION );
+				out.setHeader( "Content-Type", "text/html" );
+				out.setCookie( "session_id", ""+client_session.get("session_id") );
 
-				if(!page_url.isEmpty() && pages.containsKey(page_url)){
+				if( !page_url.isEmpty() && pages.containsKey(page_url) ){
 					pages.get(page_url).respond(out, client_info, client_session, cookie, request);
 				}
-				else if(defaultPage != null){
+				else if( defaultPage != null ){
 					defaultPage.respond(out, client_info, client_session, cookie, request);
 				}
 				else{
-					out.setStatusCode(404);
-					out.println("404 Page Not Found");	
+					out.setStatusCode( 404 );
+					out.println( "404 Page Not Found" );	
 				}
 
 				//********************************************************************************
 			} catch (Exception e) {
-				e.printStackTrace(MultiPrintStream.out);
+				e.printStackTrace( MultiPrintStream.out );
 				try {
-					out.setStatusCode(500);
+					out.setStatusCode( 500 );
 				} catch (Exception e1) {}
 				if(e.getMessage() != null)
-					out.println("500 Internal Server Error(Header: "+tmp+"): "+e.getMessage());
+					out.println( "500 Internal Server Error: "+e.getMessage() );
 				else{
-					out.println("500 Internal Server Error(Header: "+tmp+"): "+e.getCause().getMessage());
+					out.println( "500 Internal Server Error: "+e.getCause().getMessage() );
 				}				
 			}
 
 			try{
-				if(DEBUG)MultiPrintStream.out.println("Conection Closed!!!");
+				if(DEBUG) MultiPrintStream.out.println("Conection Closed!!!");
 				out.close();
 				in.close();
 				socket.close();
-			} catch (Exception e) {
-				e.printStackTrace(MultiPrintStream.out);
-			}
-		}
-	}
-
-	/**
-	 * Parses the first header line and ads the values to 
-	 * the map and returns the file name and path
-	 * 
-	 * @param header The header String
-	 * @param map The HashMap to put the variables to
-	 * @return The path and file name as a String
-	 */
-	private String parseHttpHeader(String header, HashMap<String, String> map){
-		String page_url = "";
-		// cut out the page name
-		if(header.indexOf('?') > -1){ 
-			page_url = header.substring(0, header.indexOf('?'));
-			header = header.substring(header.indexOf('?')+1, header.length());
-			parseVariables(header, map);
-		}
-		else{
-			page_url = header;
-		}
-
-		return page_url;
-	}
-
-	/**
-	 * Parses a String with variables from a get or post
-	 * from a client and puts the data into a HashMap
-	 * 
-	 * @param header A String with all the variables
-	 * @param map The HashMap to put all the variables into
-	 */
-	private void parseVariables(String header, HashMap<String, String> map){
-		int tmp;
-		// get the variables
-		String[] data = header.split("&");
-		for(String element : data){
-			tmp = element.indexOf('=');
-			if(tmp > 0){
-				map.put(
-						element.substring(0, tmp ).trim(), 		// Key
-						element.substring(tmp+1, element.length() ).trim() );	//Value
-			}
-			else{
-				map.put(element, "");
+			} catch( Exception e ) {
+				e.printStackTrace( MultiPrintStream.out );
 			}
 		}
 	}

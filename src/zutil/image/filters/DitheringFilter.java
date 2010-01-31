@@ -3,7 +3,7 @@ package zutil.image.filters;
 import java.awt.image.BufferedImage;
 
 import zutil.image.ImageFilterProcessor;
-import zutil.image.ImageUtil;
+import zutil.image.RAWImageUtil;
 import zutil.math.ZMath;
 
 
@@ -41,7 +41,7 @@ public class DitheringFilter extends ImageFilterProcessor{
 	public int[][][] process(int[][][] data, int startX, int startY, int stopX, int stopY) {
 		int error, index;
 		int[] currentPixel;
-		int[][][] output = ImageUtil.copyArray(data);
+		int[][][] output = RAWImageUtil.copyArray(data);
 		
 		for(int y=startY; y<stopY ;y++){
 			setProgress(ZMath.percent(0, stopY-startY-1, y));
@@ -53,14 +53,14 @@ public class DitheringFilter extends ImageFilterProcessor{
 				for (int i = 1; i < 4; i++)	{
 					error = currentPixel[i] - palette[index][i];
 					if (x + 1 < output[0].length) {
-						output[y+0][x+1][i] = ImageUtil.clip( output[y+0][x+1][i] + (error*7)/16 );
+						output[y+0][x+1][i] = RAWImageUtil.clip( output[y+0][x+1][i] + (error*7)/16 );
 					}
 					if (y + 1 < data.length) {
 						if (x - 1 > 0) 
-							output[y+1][x-1][i] = ImageUtil.clip( output[y+1][x-1][i] + (error*3)/16 );
-						output[y+1][x+0][i] = ImageUtil.clip( output[y+1][x+0][i] + (error*5)/16 );
+							output[y+1][x-1][i] = RAWImageUtil.clip( output[y+1][x-1][i] + (error*3)/16 );
+						output[y+1][x+0][i] = RAWImageUtil.clip( output[y+1][x+0][i] + (error*5)/16 );
 						if (x + 1 < data[0].length) 
-							output[y+1][x+1][i] = ImageUtil.clip( output[y+1][x+1][i] + (error*1)/16 );
+							output[y+1][x+1][i] = RAWImageUtil.clip( output[y+1][x+1][i] + (error*1)/16 );
 					}
 				}
 			}

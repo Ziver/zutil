@@ -3,7 +3,7 @@ package zutil.image.filters;
 import java.awt.image.BufferedImage;
 
 import zutil.image.ImageFilterProcessor;
-import zutil.image.ImageUtil;
+import zutil.image.RAWImageUtil;
 import zutil.math.ZMath;
 
 /**
@@ -59,7 +59,7 @@ public class ConvolutionFilter extends ImageFilterProcessor{
 			}
 		}
 		
-		ImageUtil.clip(tmpData, startX, startY, stopX, stopY);
+		RAWImageUtil.clip(tmpData, startX, startY, stopX, stopY);
 		
 		return tmpData;
 	}

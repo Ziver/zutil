@@ -4,7 +4,7 @@ import java.awt.image.BufferedImage;
 
 import zutil.algo.sort.sortable.SortableDataList;
 import zutil.image.ImageFilterProcessor;
-import zutil.image.ImageUtil;
+import zutil.image.RAWImageUtil;
 import zutil.math.ZMath;
 
 /**
@@ -62,7 +62,7 @@ public class MedianFilter extends ImageFilterProcessor{
 	 */
 	@Override
 	public int[][][] process(int[][][] data, int startX, int startY, int stopX, int stopY) {
-		int[][][] tmpData = ImageUtil.copyArray(data);
+		int[][][] tmpData = RAWImageUtil.copyArray(data);
 
 		int edgeX = windowSize / 2;
 		int edgeY = windowSize / 2;

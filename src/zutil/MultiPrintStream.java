@@ -332,9 +332,11 @@ public class MultiPrintStream extends PrintStream {
 				for ( int i=0; i<fields.length; i++ ) {
 					fields[i].setAccessible( true );
 					buffer.append("\n");
-					buffer.append(head);
+					buffer.append(nextHead);
+					buffer.append( fields[i].getType().getSimpleName() );
+					buffer.append( " " );
 					buffer.append( fields[i].getName() );
-					buffer.append( "=" );
+					buffer.append( " = " );
 					try {
 						Object value = fields[i].get(o);
 						if (value != null) {
@@ -357,11 +359,12 @@ public class MultiPrintStream extends PrintStream {
 	/**
 	 * An helper function for the dump function.
 	 */
+	@SuppressWarnings("unchecked")
 	private boolean dumbCapable(Object o){
 		if(o != null){		
 			if(o.getClass().isArray()) return true;
-			else if(o instanceof Collection<?>)return true;
-			else if(o instanceof Map<?,?>)return true;
+			else if(o instanceof Collection)return true;
+			else if(o instanceof Map)return true;
 			else if(o instanceof InputStream)return true;
 			else if(o instanceof Reader)return true;
 			else if(o instanceof Dumpable)return true;

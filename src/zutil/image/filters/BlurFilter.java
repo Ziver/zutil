@@ -3,7 +3,7 @@ package zutil.image.filters;
 import java.awt.image.BufferedImage;
 
 import zutil.image.ImageFilterProcessor;
-import zutil.image.ImageUtil;
+import zutil.image.RAWImageUtil;
 import zutil.math.ZMath;
 
 public class BlurFilter extends ImageFilterProcessor{
@@ -29,10 +29,10 @@ public class BlurFilter extends ImageFilterProcessor{
 
 	@Override
 	public int[][][] process(int[][][] data, int startX, int startY, int stopX, int stopY) {
-		int inputPeak = ImageUtil.getPeakValue(data);
+		int inputPeak = RAWImageUtil.getPeakValue(data);
 
 		int[][][] tmpData = new int[data.length][data[0].length][4];
-		int[][][] output = ImageUtil.copyArray(data);
+		int[][][] output = RAWImageUtil.copyArray(data);
 		//Perform the convolution one or more times in succession
 		int redSum, greenSum, blueSum, outputPeak;
 		for(int i=0; i<blurValue ;i++){
@@ -85,8 +85,8 @@ public class BlurFilter extends ImageFilterProcessor{
 			}
 
 			// getting the new peak value and normalizing the image
-			outputPeak = ImageUtil.getPeakValue(tmpData);
-			ImageUtil.normalize(output, tmpData, startX, startY, stopX, stopY, ((double)inputPeak)/outputPeak );
+			outputPeak = RAWImageUtil.getPeakValue(tmpData);
+			RAWImageUtil.normalize(output, tmpData, startX, startY, stopX, stopY, ((double)inputPeak)/outputPeak );
 		}	
 		return output;	
 	}
