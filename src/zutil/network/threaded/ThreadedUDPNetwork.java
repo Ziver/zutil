@@ -28,9 +28,22 @@ public class ThreadedUDPNetwork extends Thread{
 	protected DatagramSocket socket;
 	protected ThreadedUDPNetworkThread thread = null;
 
+	/**
+	 * Creates a new unicast Clien instance of the class
+	 * 
+	 * @param thread is the class that will handle incoming packets
+	 * @throws SocketException
+	 */
+	public ThreadedUDPNetwork(ThreadedUDPNetworkThread thread) throws SocketException{
+		this.type = UDPType.UNICAST;
+		this.port = -1;
+		setThread( thread );
+		
+		socket = new DatagramSocket();
+	}
 
 	/**
-	 * Creates a new unicast instance of the sever
+	 * Creates a new unicast Server instance of the class
 	 * 
 	 * @param thread is the class that will handle incoming packets
 	 * @param port is the port that the server should listen to
@@ -45,14 +58,14 @@ public class ThreadedUDPNetwork extends Thread{
 	}
 	
 	/**
-	 * Creates a new multicast instance of the sever
+	 * Creates a new multicast Server instance of the class
 	 * 
 	 * @param thread is the class that will handle incoming packets
 	 * @param port is the port that the server should listen to
 	 * @param multicast_addr is the multicast address that the server will listen on
 	 * @throws IOException 
 	 */
-	public ThreadedUDPNetwork(ThreadedUDPNetworkThread thread, int port, String multicast_addr ) throws IOException{
+	public ThreadedUDPNetwork(ThreadedUDPNetworkThread thread, String multicast_addr, int port ) throws IOException{
 		this.type = UDPType.MULTICAST;
 		this.port = port;
 		setThread( thread );

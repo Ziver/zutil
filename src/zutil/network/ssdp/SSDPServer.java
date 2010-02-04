@@ -1,4 +1,4 @@
-package zutil.network;
+package zutil.network.ssdp;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
@@ -6,7 +6,6 @@ import java.net.InetAddress;
 import java.util.HashMap;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.UUID;
 
 import zutil.MultiPrintStream;
 import zutil.network.http.HTTPHeaderParser;
@@ -49,25 +48,25 @@ public class SSDPServer extends ThreadedUDPNetwork implements ThreadedUDPNetwork
 	// instance specific values
 	private int cache_time;
 	private NotifyTimer notifyTimer = null;
-	/** HashMap that contains services as < SearchTargetName, Location > */
-	private HashMap<String, String> services;
-	/** A Map of all the used USN:s */
-	private HashMap<String, String> usn_map;
+	/** HashMap that contains services as < SearchTargetName, SSDPServiceInfo > */
+	private HashMap<String, SSDPServiceInfo> services;
 
 
 	public static void main(String[] args) throws IOException{
 		SSDPServer ssdp = new SSDPServer();
-		ssdp.addService("upnp:rootdevice", "nowhere");
+		SSDPServiceInfo service = new SSDPServiceInfo();
+		service.setLocation("nowhere");
+		service.setST("upnp:rootdevice");
+		ssdp.addService(service);
 		ssdp.start();
 		MultiPrintStream.out.println("SSDP Server running");
 	}
 
 	public SSDPServer() throws IOException{
-		super( null, SSDP_PORT, SSDP_MULTICAST_ADDR );
+		super( null, SSDP_MULTICAST_ADDR, SSDP_PORT );
 		super.setThread( this );
 
-		services = new HashMap<String, String>();
-		usn_map = new HashMap<String, String>();
+		services = new HashMap<String, SSDPServiceInfo>();
 
 		setChacheTime( DEFAULT_CACHE_TIME );
 		enableNotify( true );
@@ -79,8 +78,8 @@ public class SSDPServer extends ThreadedUDPNetwork implements ThreadedUDPNetwork
 	 * @param searchTarget is the ST value in SSDP
 	 * @param location is the location of the service
 	 */
-	public void addService(String searchTarget, String location){
-		services.put( searchTarget, location );
+	public void addService(SSDPServiceInfo service){
+		services.put( service.getSearchTarget(), service );
 	}
 	/**
 	 * Remove a service from being announced. This function will
@@ -134,7 +133,6 @@ public class SSDPServer extends ThreadedUDPNetwork implements ThreadedUDPNetwork
 	 * 
 	 * ***** REQUEST: 
 	 * M-SEARCH * HTTP/1.1 
-	 * S: uuid:ijklmnop-7dec-11d0-a765-00a0c91e6bf6 
 	 * Host: 239.255.255.250:reservedSSDPport 
 	 * Man: "ssdp:discover" 
 	 * ST: ge:fridge 
@@ -142,12 +140,11 @@ public class SSDPServer extends ThreadedUDPNetwork implements ThreadedUDPNetwork
 	 * 
 	 * ***** RESPONSE; 
 	 * HTTP/1.1 200 OK 
-	 * S: uuid:ijklmnop-7dec-11d0-a765-00a0c91e6bf6 
 	 * Ext: 
 	 * Cache-Control: no-cache="Ext", max-age = 5000 
 	 * ST: ge:fridge 
 	 * USN: uuid:abcdefgh-7dec-11d0-a765-00a0c91e6bf6 
-	 * AL: <blender:ixl><http://foo/bar> 
+	 * Location: http://localhost:80
 	 * 
 	 */
 	public void receivedPacket(DatagramPacket packet, ThreadedUDPNetwork network) {
@@ -155,7 +152,7 @@ public class SSDPServer extends ThreadedUDPNetwork implements ThreadedUDPNetwork
 			String msg = new String( packet.getData() );
 
 			HTTPHeaderParser header = new HTTPHeaderParser( msg );
-			MultiPrintStream.out.println(header);
+			//MultiPrintStream.out.println("**** Received:\n"+header);
 
 			// ******* Respond
 			// Check that the message is an ssdp discovery message
@@ -172,13 +169,13 @@ public class SSDPServer extends ThreadedUDPNetwork implements ThreadedUDPNetwork
 						http.setStatusCode(200);
 						http.setHeader("Server", SERVER_INFO );
 						http.setHeader("ST", st );
-						http.setHeader("Location", services.get(st) );
+						http.setHeader("Location", services.get(st).getLocation() );
 						http.setHeader("EXT", "" );
 						http.setHeader("Cache-Control", "max-age = "+cache_time );
-						http.setHeader("USN", getUSN(st) );
+						http.setHeader("USN", services.get(st).getUSN() );
 
 						http.close();
-						MultiPrintStream.out.println("\n"+response);
+						//MultiPrintStream.out.println("********** Response:\n"+response);
 						byte[] data = response.toString().getBytes();
 						packet = new DatagramPacket( 
 								data, data.length, 
@@ -225,7 +222,7 @@ public class SSDPServer extends ThreadedUDPNetwork implements ThreadedUDPNetwork
 	 * NT: blenderassociation:blender 
 	 * NTS: ssdp:alive 
 	 * USN: someunique:idscheme3 
-	 * AL: <blender:ixl><http://foo/bar> 
+	 * Location: http://localhost:80
 	 * Cache-Control: max-age = 7393 
 	 */
 	public void sendNotify(String searchTarget){
@@ -239,12 +236,12 @@ public class SSDPServer extends ThreadedUDPNetwork implements ThreadedUDPNetwork
 			http.setHeader("Host", SSDP_MULTICAST_ADDR+":"+SSDP_PORT );
 			http.setHeader("NT", searchTarget );
 			http.setHeader("NTS", "ssdp:alive" );
-			http.setHeader("Location", services.get(searchTarget) );
+			http.setHeader("Location", services.get(searchTarget).getLocation() );
 			http.setHeader("Cache-Control", "max-age = "+cache_time );
-			http.setHeader("USN", getUSN(searchTarget) );
+			http.setHeader("USN", services.get(searchTarget).getUSN() );
 
 			http.close();
-			MultiPrintStream.out.println("\n"+msg);
+			//MultiPrintStream.out.println("******** Notification:\n"+msg);
 			byte[] data = msg.toString().getBytes();
 			DatagramPacket packet = new DatagramPacket( 
 					data, data.length, 
@@ -290,10 +287,10 @@ public class SSDPServer extends ThreadedUDPNetwork implements ThreadedUDPNetwork
 			http.setHeader("Host", SSDP_MULTICAST_ADDR+":"+SSDP_PORT );
 			http.setHeader("NT", searchTarget );
 			http.setHeader("NTS", "ssdp:byebye" );
-			http.setHeader("USN", getUSN(searchTarget) );
+			http.setHeader("USN", services.get(searchTarget).getUSN() );
 
 			http.close();
-			MultiPrintStream.out.println("\n"+msg);
+			//MultiPrintStream.out.println("******** ByeBye:\n"+msg);
 			byte[] data = msg.toString().getBytes();
 			DatagramPacket packet = new DatagramPacket( 
 					data, data.length, 
@@ -304,20 +301,5 @@ public class SSDPServer extends ThreadedUDPNetwork implements ThreadedUDPNetwork
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-	}
-
-	/**
-	 * Generates an unique USN for the service
-	 * 
-	 * @param searchTarget is the service ST name
-	 * @return an unique string that corresponds to the service
-	 */
-	public String getUSN(String searchTarget){
-		if( !usn_map.containsKey( searchTarget ) ){
-			String usn = "uuid:" + UUID.nameUUIDFromBytes( (searchTarget+services.get(searchTarget)).getBytes() );
-			usn_map.put( searchTarget, usn );
-			return usn;
-		}
-		return usn_map.get( searchTarget );
 	}
 }

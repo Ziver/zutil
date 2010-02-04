@@ -151,16 +151,11 @@ class MathNumber extends Math{
 abstract class MathOperation extends Math{
 	Math math1;
 	Math math2;
-	int priority;
 
 	public abstract double exec();
 }
 
 class MathAddition extends MathOperation{
-	public MathAddition(){
-		priority = 1;
-	}
-
 	public double exec() {
 		return math1.exec() + math2.exec();
 	}
@@ -171,10 +166,6 @@ class MathAddition extends MathOperation{
 }
 
 class MathSubtraction extends MathOperation{
-	public MathSubtraction(){
-		priority = 1;
-	}
-
 	public double exec() {
 		return math1.exec() - math2.exec();
 	}
@@ -185,10 +176,6 @@ class MathSubtraction extends MathOperation{
 }
 
 class MathMultiplication extends MathOperation{
-	public MathMultiplication(){
-		priority = 2;
-	}
-
 	public double exec() {
 		return math1.exec() * math2.exec();
 	}
@@ -199,10 +186,6 @@ class MathMultiplication extends MathOperation{
 }
 
 class MathDivision extends MathOperation{
-	public MathDivision(){
-		priority = 2;
-	}
-
 	public double exec() {
 		return math1.exec() / math2.exec();
 	}
@@ -213,10 +196,6 @@ class MathDivision extends MathOperation{
 }
 
 class MathModulus extends MathOperation{
-	public MathModulus(){
-		priority = 2;
-	}
-
 	public double exec() {
 		return math1.exec() % math2.exec();
 	}
@@ -227,10 +206,6 @@ class MathModulus extends MathOperation{
 }
 
 class MathPow extends MathOperation{
-	public MathPow(){
-		priority = 3;
-	}
-
 	public double exec() {
 		double ret = 1;
 		double tmp1 = math1.exec();
