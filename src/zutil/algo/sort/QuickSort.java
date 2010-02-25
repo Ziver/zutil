@@ -11,41 +11,37 @@ import zutil.algo.sort.sortable.SortableDataList;
 public class QuickSort{
 	public static final int RANDOM_PIVOT = 0;
 	public static final int MEDIAN_PIVOT = 1;
-	public static final int HALF_PIVOT = 2;
+	public static final int MIDDLE_PIVOT = 2;
 	
     /**
-     * Sort the elements in ascending order using quicksort.
+     * Sort the elements in ascending order using Quicksort.
      *
-     * @param  A   		A list to sort.
+     * @param A is the list to sort.
      */
-    @SuppressWarnings("unchecked")
-	public static void sort(SortableDataList list){
-    	sort(list, 0, list.size()-1, 2, true);
+	public static void sort(SortableDataList<?> list){
+    	sort(list, 0, list.size()-1, MIDDLE_PIVOT, true);
     }
     
     /**
-     * Sort the elements in ascending order using quicksort.
+     * Sort the elements in ascending order using Quicksort.
      *
-     * @param  A   		A list to sort.
-     * @param type		type of pivot
-     * @param insert	to use insertion sort when needed
+     * @param A is the list to sort.
+     * @param type is the type of pivot
+     * @param insert is if insertion sort will be used
      */
-    @SuppressWarnings("unchecked")
-	public static void sort(SortableDataList list, int type, boolean insert){
+	public static void sort(SortableDataList<?> list, int type, boolean insert){
     	sort(list, 0, list.size()-1, type, insert);
     }
 	
     /**
-     * Sort the elements in ascending order using qicksort.
-     * after the 10 th re write and a bad mood i found this
-     * site that gave me much help:
-     * http://www.inf.fh-flensburg.de/lang/algorithmen/
-     *		sortieren/quick/quicken.htm
+     * Sort the elements in ascending order using Quicksort.
+     * Reference: http://www.inf.fh-flensburg.de/lang/algorithmen/sortieren/quick/quicken.htm
+     * Complexity: O(n*log n) normally, but O(n^2) if the pivot is bad
      *
-     * @param  A   		A list to sort.
-     * @param  start	The index to start from
-     * @param  stop		The index to stop
-     * @param  type		The type of pivot to use
+     * @param A is the list to sort.
+     * @param start is the index to start from
+     * @param stop is the index to stop
+     * @param type is the type of pivot to use
      */	
 	@SuppressWarnings("unchecked")
 	public static void sort(SortableDataList list, int start, int stop, int type, boolean insertionSort){
@@ -53,7 +49,7 @@ public class QuickSort{
 			SimpleSort.insertionSort( list, start, stop);
 		}
 		int pivotIndex = pivot(list,start,stop,type);
-		Object pivot = list.getIndex(pivotIndex);
+		Object pivot = list.get(pivotIndex);
 		int left=start, right=stop;
 		
 		do{
@@ -80,25 +76,24 @@ public class QuickSort{
 
 	}
 
-    
-    @SuppressWarnings("unchecked")
-	private static int pivot(SortableDataList list, int start, int stop,int type){
+	@SuppressWarnings("unchecked")
+	private static int pivot(SortableDataList<?> list, int start, int stop,int type){
     	switch(type){
-    		case 0:
+    		case RANDOM_PIVOT:
     			return start+(int)(Math.random()*(stop-start));
-    		case 1:
+    		case MEDIAN_PIVOT:
     			Comparable[] i = new Comparable[]{
-    					(Comparable)list.getIndex(0), 
-    					(Comparable)list.getIndex(list.size()/2), 
-    					(Comparable)list.getIndex(list.size()-1)};
-    			SimpleSort.insertionSort(new SortableComparableArray(i),0,i.length);
-    			if(i[i.length/2].compareTo(list.getIndex(start)) == 0)
+    					(Comparable)list.get(0), 
+    					(Comparable)list.get(list.size()/2), 
+    					(Comparable)list.get(list.size()-1)};
+    			SimpleSort.insertionSort(new SortableComparableArray(i));
+    			if(i[i.length/2].compareTo(list.get(start)) == 0)
     				return start;
-    			else if(i[i.length/2].compareTo(list.getIndex(stop)) == 0)
+    			else if(i[i.length/2].compareTo(list.get(stop)) == 0)
     				return stop;
     			else 
     				return start+(stop-start)/2;
-    		case 2:
+    		case MIDDLE_PIVOT:
     			return (start+stop)/2;
     	}
     	return 0;

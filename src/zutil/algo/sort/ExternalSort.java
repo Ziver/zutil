@@ -114,7 +114,6 @@ public class ExternalSort {
 				for(int i=1; i<rows.length ;i++){
 					row = rows[i];
 					if (min!=null) {
-
 						if(row!=null && row.compareTo(min) < 0){
 							minIndex = i;
 							min = row;

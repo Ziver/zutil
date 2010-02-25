@@ -7,7 +7,7 @@ public class SortableIntArray implements SortableDataList<Integer>{
 		this.list = list;
 	}	
 	
-	public Integer getIndex(int i) {
+	public Integer get(int i) {
 		return list[i];
 	}
 

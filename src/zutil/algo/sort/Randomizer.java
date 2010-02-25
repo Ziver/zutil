@@ -9,7 +9,6 @@ import zutil.algo.sort.sortable.SortableDataList;
  * @author Ziver
  */
 public class Randomizer {
-
 	
 	/**
 	 * Randomizes the index of all the elements

@@ -8,7 +8,7 @@ public class SortableComparableArray implements SortableDataList<Comparable>{
 		this.list = list;
 	}	
 	
-	public Comparable getIndex(int i) {
+	public Comparable get(int i) {
 		return list[i];
 	}
 

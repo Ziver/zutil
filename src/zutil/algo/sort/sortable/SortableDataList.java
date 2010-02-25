@@ -3,23 +3,24 @@ package zutil.algo.sort.sortable;
 public interface SortableDataList<T>{
 	
 	/**
-	 * Returns a specific index i the list
-	 * @param i The index
+	 * Returns a is a specific index i the list
+	 * @param i is the index
 	 * @return
 	 */
-	public T getIndex(int i);
+	public T get(int i);
 	
 	/**
 	 * Returns the size of the list
 	 * 
-	 * @return The size of the list
+	 * @return the size of the list
 	 */
 	public int size();
 	
 	/**
 	 * Swaps the given indexes
-	 * @param a First index
-	 * @param b Second index
+	 * 
+	 * @param a is the first index
+	 * @param b is the second index
 	 */
 	public void swap(int a, int b);
 	
@@ -29,8 +30,8 @@ public interface SortableDataList<T>{
 	 * >0 if a>b ,
 	 * =0 if a=b
 	 * 
-	 * @param a Firs index to compare
-	 * @param b Second index to compare
+	 * @param a is the first index to compare
+	 * @param b is the second index to compare
 	 * @return Look at the info
 	 */
 	public int compare(int a, int b);
@@ -41,8 +42,8 @@ public interface SortableDataList<T>{
 	 * >0 if a>b ,
 	 * =0 if a=b
 	 * 
-	 * @param a Firs index to compare
-	 * @param b Second Object to compare
+	 * @param a is the first index to compare
+	 * @param b is the second Object to compare
 	 * @return Look at the info
 	 */
 	public int compare(int a, T b);

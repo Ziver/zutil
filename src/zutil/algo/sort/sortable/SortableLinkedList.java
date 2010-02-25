@@ -9,7 +9,7 @@ public class SortableLinkedList<T> implements SortableDataList<T>{
 		this.list = list;
 	}
 
-	public T getIndex(int i) {
+	public T get(int i) {
 		return list.get(i);
 	}
 
