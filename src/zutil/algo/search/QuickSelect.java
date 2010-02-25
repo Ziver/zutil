@@ -33,7 +33,7 @@ public class QuickSelect {
 		int pivot = right/2;
 		int newPivot = partition(list, left, right, pivot);
 		if(k == newPivot)
-			return list.getIndex(k);
+			return list.get(k);
 		else if(k < newPivot)
 			return find(list, k, left, newPivot-1);
 		else
@@ -53,7 +53,7 @@ public class QuickSelect {
 	     return storeIndex
 	 */
 	private static int partition(SortableDataList list, int left, int right, int pivot){
-		Object pivotValue = list.getIndex(pivot);
+		Object pivotValue = list.get(pivot);
 		list.swap(pivot, right);
 		int storeIndex = left;
 		for(int i=left; i<right ;i++){

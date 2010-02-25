@@ -138,7 +138,7 @@ public class MedianFilter extends ImageFilterProcessor{
 			return ((Integer)data[ getY(a) ][ getX(a) ][ channel ]).compareTo(b);
 		}
 
-		public Integer getIndex(int i) {
+		public Integer get(int i) {
 			return data[ getY(i) ][ getX(i) ][ channel ];
 		}
 
