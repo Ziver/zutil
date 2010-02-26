@@ -12,6 +12,10 @@ public class SortableArrayList<T> implements SortableDataList<T>{
 	public T get(int i) {
 		return list.get(i);
 	}
+	
+	public void set(int i, T o){
+		list.set(i, o);
+	}
 
 	public int size() {
 		return list.size();

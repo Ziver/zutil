@@ -141,6 +141,10 @@ public class MedianFilter extends ImageFilterProcessor{
 		public Integer get(int i) {
 			return data[ getY(i) ][ getX(i) ][ channel ];
 		}
+		
+		public void set(int i, Integer o){
+			data[ getY(i) ][ getX(i) ][ channel ] = o;
+		}
 
 		public int size() {
 			return cols * rows;

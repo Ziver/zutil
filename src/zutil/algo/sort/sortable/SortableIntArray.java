@@ -11,6 +11,10 @@ public class SortableIntArray implements SortableDataList<Integer>{
 		return list[i];
 	}
 
+	public void set(int i, Integer o){
+		list[i] = o;
+	}
+	
 	public int size() {
 		return list.length;
 	}

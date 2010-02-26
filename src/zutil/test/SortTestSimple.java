@@ -1,4 +1,5 @@
 package zutil.test;
+import zutil.algo.sort.MergeSort;
 import zutil.algo.sort.QuickSort;
 import zutil.algo.sort.SimpleSort;
 import zutil.algo.sort.sortable.SortableIntArray;
@@ -20,10 +21,12 @@ public class SortTestSimple extends TestCase {
 		}
 		
 		long time = System.currentTimeMillis();
-		//SimpleSort.bubbleSort(new SortableIntArray(array));
-		//SimpleSort.selectionSort(new SortableIntArray(array));
-		SimpleSort.insertionSort(new SortableIntArray(array));
-		//QuickSort.sort(new SortableIntArray(array));
+		//SimpleSort.bubbleSort( new SortableIntArray(array) );
+		//SimpleSort.selectionSort( new SortableIntArray(array) );
+		//SimpleSort.insertionSort( new SortableIntArray(array) );
+		//QuickSort.sort( new SortableIntArray(array) );
+		//MergeSort.sort( array );
+		MergeSort.sort( new SortableIntArray(array) );
 		time = System.currentTimeMillis() - time;
 		
 		System.out.println("\n--------------------------------------------");

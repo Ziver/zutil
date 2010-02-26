@@ -11,6 +11,10 @@ public class SortableComparableArray implements SortableDataList<Comparable>{
 	public Comparable get(int i) {
 		return list[i];
 	}
+	
+	public void set(int i, Comparable o){
+		list[i] = o;
+	}
 
 	public int size() {
 		return list.length;

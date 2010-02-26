@@ -4,10 +4,19 @@ public interface SortableDataList<T>{
 	
 	/**
 	 * Returns a is a specific index i the list
+	 * 
 	 * @param i is the index
 	 * @return
 	 */
 	public T get(int i);
+	
+	/**
+	 * Sets an Object in the specified index
+	 * 
+	 * @param i is the index
+	 * @param o is the Object
+	 */
+	public void set(int i, T o);
 	
 	/**
 	 * Returns the size of the list
