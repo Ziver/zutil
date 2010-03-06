@@ -8,7 +8,6 @@ import java.io.PrintStream;
 import java.io.Reader;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
@@ -21,10 +20,6 @@ import java.util.Map;
 public class MultiPrintStream extends PrintStream {
 	//the print streams that will print
 	private ArrayList<PrintStream> streams;
-	// the stream should print time stamp
-	private boolean timeStamp = false;
-	//The timestamp style
-	private String timeStampString = "yyyy-MM-dd HH:mm:ss:SSS# ";
 	//a instance of this class
 	public static MultiPrintStream out = new MultiPrintStream();
 
@@ -114,7 +109,6 @@ public class MultiPrintStream extends PrintStream {
 	 * Prints with a new line to all the PrintStreams
 	 */
 	public void println(String s){
-		if(!s.equals(""))s = getTime() + s;
 		for(int i=0; i<streams.size() ;i++)
 			streams.get(i).println(s);
 	}
@@ -147,29 +141,6 @@ public class MultiPrintStream extends PrintStream {
 	public void print(Object x){	print(String.valueOf(x));}
 
 
-	/**
-	 * If the streams should print time stamp in front
-	 * of the msgs
-	 * @param enable True to activate
-	 */
-	public void printTimeStamp(boolean enable){
-		timeStamp = enable;
-	}
-
-	/**
-	 * The DateFormat to print in the time stamp
-	 * @param ts is the String to send to SimpleDateFormat
-	 */
-	public void setTimeStamp(String ts){
-		timeStampString = ts;
-	}
-
-	private String getTime(){
-		if(timeStamp)
-			return "" + (new SimpleDateFormat(timeStampString)).format(new java.util.Date());
-		else 
-			return "";
-	}
 
 	public boolean checkError(){
 		for(int i=0; i<streams.size() ;i++)
