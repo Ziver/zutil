@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.logging.Level;
 
 import zutil.MultiPrintStream;
+import zutil.wrapper.StringOutputStream;
 
 /**
  * This is a logger class
@@ -14,13 +15,13 @@ import zutil.MultiPrintStream;
  */
 public class Logger {	
 	// This is the global log level
-	protected static Level global_log_level;
+	protected static Level global_log_level = Level.WARNING;
+	// Class Specific log level
+	protected static HashMap<String, Level> class_log_level;
 	// The OutputStream
 	protected static PrintStream out;
 	// The formatter class that formats the output
 	protected static LogFormatter formatter;
-	// Class Specific log level
-	protected static HashMap<String, Level> class_log_level;
 
 	// The class that is logging
 	private String source;
@@ -38,7 +39,7 @@ public class Logger {
 	 * @param logging_class is the class that will be displayed as the logger
 	 */
 	public Logger(Class<?> logging_class){
-		this(logging_class.getSimpleName());
+		this( logging_class.getSimpleName() );
 	}
 	
 	/**
@@ -57,6 +58,20 @@ public class Logger {
 			formatter = new StandardLogFormatter();
 		if(class_log_level == null)
 			class_log_level = new HashMap<String, Level>();
+	}
+	
+	/**
+	 * Sets the global log level
+	 */
+	public static void setGlobalLogLevel(Level l){
+		global_log_level = l;
+	}
+	
+	/**
+	 * Sets an specific log level for an class
+	 */
+	public static void setClassLogLevel(Class<?> c, Level l){
+		class_log_level.put(c.getSimpleName(), l);
 	}
 
 	/**
@@ -87,6 +102,18 @@ public class Logger {
 		Logger.out = out;
 	}
 
+	/**
+	 * Logs the given exception
+	 * 
+	 * @param level is the severity of the exception
+	 * @param e is the exception
+	 */
+	public void printStackTrace(Level level, Exception e){
+		StringOutputStream msg = new StringOutputStream();
+		e.printStackTrace( new PrintStream(msg) );
+		log(level, msg.toString());
+	}
+	
 	/**
 	 * Logs an message based on level
 	 * 

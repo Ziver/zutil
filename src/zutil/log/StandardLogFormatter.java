@@ -19,6 +19,17 @@ public class StandardLogFormatter implements LogFormatter{
 	
 	public String format(String source, Level level, String msg) {
 		StringBuilder data = new StringBuilder();
+		
+		switch(level.intValue()){
+		case /* SEVERE  */	1000: data.append("SEVERE : "); break;
+		case /* WARNING */	900 : data.append("WARNING: "); break;
+		case /* INFO    */	800 : data.append("INFO   : "); break;
+		case /* CONFIG  */	700 : data.append("CONFIG : "); break;		
+		case /* FINE    */	500 : data.append("FINE   : "); break;
+		case /* FINER   */	400 : data.append("FINER  : "); break;
+		case /* FINEST  */	300 : data.append("FINEST : "); break;
+		}
+		
 		if( timeStamp && className ){
 			data.append( getTime() );
 			data.append( " " );
