@@ -111,10 +111,10 @@ public class FileFinder {
 	}
 	
 	/**
-	 * Returns a ArrayList with all the files in a folder and sub folders
+	 * Returns a List with all the files in a folder and sub folders
 	 * 
 	 * @param dir is the directory to search in
-	 * @return The ArrayList with the files
+	 * @return The List with the files
 	 */
 	public static List<File> search(File dir){
 		return search(dir, new LinkedList<File>(), true);
@@ -124,22 +124,42 @@ public class FileFinder {
 	 * Returns a ArrayList with all the files in a folder and sub folders
 	 * 
 	 * @param dir is the directory to search in
-	 * @param fileList is the ArrayList to add the files to
-	 * @param recursice is if the method should search the sub directories to.
-	 * @return The ArrayList with the files
+	 * @param fileList is the List to add the files to
+	 * @param recursive is if the method should search the sub directories to.
+	 * @return A List with the files
 	 */
 	public static List<File> search(File dir, List<File> fileList, boolean recursive){
-		String[] temp = dir.list();
-		File file;
+		return search(dir, new LinkedList<File>(), false, (recursive ? Integer.MAX_VALUE : 0));
+	}
+	
+	/**
+	 * Returns a ArrayList with all the files in a folder and sub folders
+	 * 
+	 * @param dir is the directory to search in
+	 * @param fileList is the List to add the files to
+	 * @param folders is if the method should add the folders to the List
+	 * @param recurse is how many times it should recurse into folders
+	 * @return A List with the files and/or folders
+	 */
+	public static List<File> search(File dir, List<File> fileList, boolean folders, int recurse){
+		if(recurse<0)
+			return fileList;
+		--recurse;
+		if(folders){
+			MultiPrintStream.out.println("Dir Found : "+dir);
+			fileList.add( dir );
+		}
 		
+		File file;
+		String[] temp = dir.list();
 		if(temp != null){
 			for(int i=0; i<temp.length ;i++){
 				file = new File(dir.getPath()+File.separator+temp[i]);
-				if(recursive && file.isDirectory()){
-					search(new File(dir.getPath()+File.separator+temp[i]+File.separator), fileList, recursive);
+				if(file.isDirectory()){
+					search(new File(dir.getPath()+File.separator+temp[i]+File.separator), fileList, folders, recurse);
 				}
 				else if(file.isFile()){
-					//MultiPrintStream.out.println("File Found: "+file);
+					MultiPrintStream.out.println("File Found: "+file);
 					fileList.add(file);
 				}			
 			}

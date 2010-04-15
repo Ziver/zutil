@@ -5,8 +5,9 @@ import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.logging.Level;
 
-import zutil.MultiPrintStream;
+import zutil.log.Logger;
 import zutil.network.http.HTTPHeaderParser;
 import zutil.network.http.HttpPrintStream;
 import zutil.network.threaded.ThreadedUDPNetwork;
@@ -20,20 +21,22 @@ import zutil.wrapper.StringOutputStream;
  * @author Ziver
  */
 public class SSDPClient extends ThreadedUDPNetwork implements ThreadedUDPNetworkThread{
+	public static final Logger logger = new Logger();
 	// Contains all the received services
 	private HashMap<String, LinkedList<SSDPServiceInfo>> services_st;
 	private HashMap<String, SSDPServiceInfo> 			 services_usn;
 	
 	
 	public static void main(String[] args) throws IOException{
+		Logger.setGlobalLogLevel(Level.FINEST);
 		SSDPClient ssdp = new SSDPClient();
 		ssdp.requestService("upnp:rootdevice");
 		ssdp.start();
-
+		
 		for(int i=0; true ;++i){
 			while( i==ssdp.getServicesCount("upnp:rootdevice") ){ try{Thread.sleep(100);}catch(Exception e){} }
-			MultiPrintStream.out.println( "************************" );	
-			MultiPrintStream.out.println( ssdp.getServices("upnp:rootdevice").get(i) );	
+			logger.log(Level.FINEST, "************************" );	
+			logger.log(Level.FINEST, ""+ssdp.getServices("upnp:rootdevice").get(i) );	
 		}
 	}
 	
@@ -79,14 +82,13 @@ public class SSDPClient extends ThreadedUDPNetwork implements ThreadedUDPNetwork
 			http.setHeader("MX", "3" );
 
 			http.close();
-			//MultiPrintStream.out.println("***** REQUEST: \n"+msg);
+			logger.log(Level.FINEST, "***** REQUEST: \n"+msg);
 			byte[] data = msg.toString().getBytes();
 			DatagramPacket packet = new DatagramPacket( 
 					data, data.length, 
 					InetAddress.getByName( SSDPServer.SSDP_MULTICAST_ADDR ), 
 					SSDPServer.SSDP_PORT );
 			super.send( packet );
-
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -147,18 +149,18 @@ public class SSDPClient extends ThreadedUDPNetwork implements ThreadedUDPNetwork
 	 */
 	public void receivedPacket(DatagramPacket packet, ThreadedUDPNetwork network) {
 		HTTPHeaderParser header = new HTTPHeaderParser( new String( packet.getData() ) );
-		//MultiPrintStream.out.println("*********** Recived\n"+header);
+		logger.log(Level.FINEST, "*********** Recived\n"+header);
 		
 		String usn = header.getHTTPAttribute("USN");
 		String st = header.getHTTPAttribute("ST");
-		SSDPServiceInfo service;
+		StandardSSDPInfo service;
 		// Get existing service
 		if( services_usn.containsKey( usn )){
-			service = services_usn.get( usn );
+			service = (StandardSSDPInfo)services_usn.get( usn );
 		}
 		// Add new service
 		else{
-			service = new SSDPServiceInfo();
+			service = new StandardSSDPInfo();
 			services_usn.put( usn, service);
 			if( !services_st.containsKey(st) )
 				services_st.put( st, new LinkedList<SSDPServiceInfo>() );
@@ -171,7 +173,7 @@ public class SSDPClient extends ThreadedUDPNetwork implements ThreadedUDPNetwork
 		service.setExpirationTime( 
 				System.currentTimeMillis() +
 				1000 * getCacheTime(header.getHTTPAttribute("Cache-Control")) );
-		//MultiPrintStream.out.println("*********** Recived\n"+service);
+		logger.log(Level.FINEST, "*********** Recived\n"+service);
 	}
 	
 	private long getCacheTime(String cache_control){

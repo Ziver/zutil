@@ -1,6 +1,5 @@
 package zutil.wrapper;
 
-import java.io.IOException;
 import java.io.OutputStream;
 
 /**
@@ -21,7 +20,7 @@ public class StringOutputStream extends OutputStream{
 	}
 	
 	@Override
-	public void write(int b) throws IOException {
+	public void write(int b) {
 		buffer.append( b );
 	}
 

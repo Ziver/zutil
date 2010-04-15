@@ -96,6 +96,8 @@ public class HTTPHeaderParser {
 			else{
 				url = line;
 			}
+			
+			url = url.replaceAll("//", "/");
 		}
 	}
 

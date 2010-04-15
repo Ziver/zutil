@@ -60,6 +60,7 @@ import com.sun.org.apache.xerces.internal.dom.DocumentImpl;
  * This is an HTTPPage for the HTTPServer that 
  * handles soap messages.
  * 
+ * TODO: Header should be variables not methods
  * TODO: Read SOAPObjects as input parameter
  * TODO: Ability to have multiple arrays of same SOAPObject
  * 
@@ -75,6 +76,7 @@ import com.sun.org.apache.xerces.internal.dom.DocumentImpl;
  * 
  * Output:
  * <br>-SOAPObjects
+ * <br>-SOAPReturnObjectList
  * <br>-byte[]
  * <br>-int
  * <br>-double
@@ -93,7 +95,8 @@ public class SOAPHttpPage implements HttpPage{
 	private class MethodCache{
 		String[] paramName;
 		boolean[] paramOptional;
-		String returnName;
+		String[] returnName;
+		Class<?>[] returnClass;
 		Method method;
 		boolean header;
 
@@ -102,6 +105,20 @@ public class SOAPHttpPage implements HttpPage{
 			paramName = new String[method.getParameterTypes().length];
 			paramOptional = new boolean[method.getParameterTypes().length];
 			header = false;
+			
+			Class<?> tmp = m.getReturnType();
+			if( SOAPReturnValueList.class.isAssignableFrom( tmp )){
+				returnName = new String[ tmp.getFields().length ];
+				returnClass = new Class<?>[ tmp.getFields().length ];
+			}
+			else if( !tmp.isAssignableFrom( void.class )){
+				returnName = new String[1];
+				returnClass = new Class<?>[1];
+			}
+			else{
+				returnName = new String[0];
+				returnClass = new Class<?>[0];
+			}
 		}
 	}
 	// The object that the functions will be invoked from
@@ -148,12 +165,28 @@ public class SOAPHttpPage implements HttpPage{
 					tmp.append(m.getParameterTypes()[i].getSimpleName()+" "+chasch.paramName[i]);
 					if( i<paramAnnotation.length-1 ) tmp.append(", ");
 				}
-				tmp.append(")");
+				tmp.append(") => ");
 
-				// the return param name
+				// the return parameter name
 				SOAPInterface.SOAPReturnName returnName = m.getAnnotation(SOAPInterface.SOAPReturnName.class);
-				if(returnName != null) chasch.returnName = returnName.value();
-				else chasch.returnName = "return";
+				if( SOAPReturnValueList.class.isAssignableFrom( m.getReturnType() ) ){
+					Class<?> retClass = m.getReturnType();
+					for(int i=0; i<retClass.getFields().length ;i++){
+						if(i!=0) tmp.append(", ");
+						SOAPReturnValueList.SOAPValueName retValName = retClass.getFields()[i]
+						                   .getAnnotation( SOAPReturnValueList.SOAPValueName.class );
+						if(retValName != null) chasch.returnName[i] = retValName.value();
+						else chasch.returnName[i] = retClass.getFields()[i].getName();
+						chasch.returnClass[i] = retClass.getFields()[i].getType();
+						tmp.append(chasch.returnClass[i].getSimpleName()+" "+chasch.returnName[i]);
+					}
+				}
+				else if( chasch.returnName.length>0 ){
+					if(returnName != null) chasch.returnName[0] = returnName.value();
+					else chasch.returnName[0] = "return";
+					chasch.returnClass[0] = m.getReturnType();
+					tmp.append(chasch.returnClass[0].getSimpleName()+" "+chasch.returnName[0]);
+				}
 
 				// SOAP header?
 				if(m.getAnnotation(SOAPInterface.SOAPHeader.class) != null) 
@@ -184,6 +217,13 @@ public class SOAPHttpPage implements HttpPage{
 		}
 	}
 	
+	/**
+	 * Enables session support, if enabled then a new instance 
+	 * of the SOAPInterface will be created, if disabled then 
+	 * only the given object will be used as an static interface
+	 * 
+	 * @param enabled is if session should be enabled
+	 */
 	public void enableSession(boolean enabled){
 		this.session_enabled = enabled;
 	}
@@ -210,27 +250,33 @@ public class SOAPHttpPage implements HttpPage{
 			}
 			else{
 				SOAPInterface obj = null;
-				if(session_enabled && session.containsKey("SOAPInterface"))
-					obj = (SOAPInterface)session.get("SOAPInterface");
+				if(session_enabled){ 
+					if( session.containsKey("SOAPInterface"))
+						obj = (SOAPInterface)session.get("SOAPInterface");
+					else{
+						obj = interf.getClass().newInstance();
+						session.put("SOAPInterface", obj);
+					}
+				}
 				else{
-					obj = interf.getClass().newInstance();
-					if(session_enabled) session.put("SOAPInterface", obj);
+					obj = interf;
 				}
 				
-				Document document = soapResponse( request.get(""), obj);
+				Document document = genSOAPResponse( request.get(""), obj);
 				
-				OutputFormat format = OutputFormat.createPrettyPrint();
+				OutputFormat format = OutputFormat.createCompactFormat();
 				XMLWriter writer = new XMLWriter( out, format );
 				writer.write( document );
 				
-				/*
+				
 				// DEBUG
-				System.err.println("Request");
+				OutputFormat format2 = OutputFormat.createPrettyPrint();
+				System.err.println("********** Request");
 				System.err.println(request);
-				System.out.println("Response");
-				writer = new XMLWriter( System.out, format );
+				System.out.println("********** Response");
+				writer = new XMLWriter( System.out, format2 );
 				writer.write( document );
-				*/
+				
 			}
 		} catch (Exception e) {
 			e.printStackTrace(MultiPrintStream.out);			
@@ -238,20 +284,24 @@ public class SOAPHttpPage implements HttpPage{
 	}
 	
 	/**
-	 * Generates a soap response for the given 
+	 * Generates a soap response for the given XML
 	 * @param xml is the XML request
 	 * @return a Document with the response
 	 */
-	public Document soapResponse(String xml){
+	public Document genSOAPResponse(String xml){
 		try {
-			return soapResponse(xml, interf.getClass().newInstance());
+			SOAPInterface o = null;
+			if(session_enabled) o = interf.getClass().newInstance();
+			else o = interf;
+			
+			return genSOAPResponse(xml, o );
 		} catch (Exception e) {
 			e.printStackTrace(MultiPrintStream.out);
 		}
 		return null;
 	}
 
-	protected Document soapResponse(String xml, SOAPInterface obj){
+	protected Document genSOAPResponse(String xml, SOAPInterface obj){
 		Document document = DocumentHelper.createDocument();
 		Element envelope = document.addElement("soap:Envelope");
 		try {
@@ -294,17 +344,31 @@ public class SOAPHttpPage implements HttpPage{
 
 		return document;
 	}
+	
+	/**
+	 * Converts an String XML to an Element
+	 * 
+	 * @param msg is the string XML
+	 * @return the XML root Element
+	 */
+	private Element getXMLRoot(String xml) throws Exception {
+		if(xml != null && !xml.isEmpty()){
+			Document document = DocumentHelper.parseText(xml);
+			return document.getRootElement();
+		}
+		return null;
+	}
 
 	/**
 	 * Takes an XML Element and invokes all the 
-	 * chide Elements as methods.
+	 * Child Elements as methods.
 	 * 
 	 * @param obj is the object that the methods will be called from
 	 * @param requestRoot is the Element where the children lies
 	 * @param responseRoot is the root element of the response
 	 */
 	@SuppressWarnings("unchecked")
-	private void prepareInvoke(Object obj, Element requestRoot, Element responseRoot) throws Throwable{
+	private void prepareInvoke(SOAPInterface obj, Element requestRoot, Element responseRoot) throws Throwable{
 		Iterator<Element> it = requestRoot.elementIterator();
 		while( it.hasNext() ){
 			Element e = it.next();
@@ -312,7 +376,7 @@ public class SOAPHttpPage implements HttpPage{
 				MethodCache m = methods.get(e.getQName().getName());
 				Object[] params = new Object[m.paramName.length];
 
-				// Get the param values
+				// Get the parameter values
 				for(int i=0; i<m.paramName.length ;i++){
 					if(e.element(m.paramName[i]) != null)
 						params[i] = convertToClass(
@@ -323,68 +387,28 @@ public class SOAPHttpPage implements HttpPage{
 				// Invoke
 				Object ret = invoke(obj, m.method, params);
 
-				// generate response xml
-				if(m.method.getReturnType() != void.class){
-					responseRoot.addNamespace("m",  url+""+m.method.getName());
-					Element response = responseRoot.addElement("m:"+m.method.getName()+"Response");
-					generateReturnXML(response, ret, m.returnName, m);
+				// generate response XML
+				if( m.returnClass.length>0 ){
+					SOAPInterface.SOAPNameSpace namespace = m.method.getAnnotation(SOAPInterface.SOAPNameSpace.class);
+					Element response = responseRoot.addElement("");
+					if( namespace != null )
+						response.addNamespace("m",  namespace.value());
+					else
+						response.addNamespace("m",  url+""+m.method.getName());
+					response.setName("m:"+m.method.getName()+"Response");
+					if( ret instanceof SOAPReturnValueList ){
+						Field[] f = ret.getClass().getFields();
+						for(int i=0; i<m.returnName.length ;i++ ){
+							generateReturnXML(response,((SOAPReturnValueList)ret).getValue(f[i]) , m.returnName[i], m);
+						}
+					}
+					else{
+						generateReturnXML(response, ret, m.returnName[0], m);
+					}
 				}
 			}
 			else{
 				throw new Exception("No such method: "+e.getQName().getName()+"!");
-			}
-		}
-	}
-
-	/**
-	 * Generates an return XML Element. This function can
-	 * handle return values as XML Elements, SOAPObject and the
-	 * Java basic data types.
-	 * 
-	 * @param root is the parent Element
-	 * @param ret is the object that is the return value
-	 * @param ename is the name of the parent Element
-	 * @param m is the method that returned the ret
-	 */
-	private void generateReturnXML(Element root, Object ret, String ename, MethodCache m) throws IllegalArgumentException, IllegalAccessException{
-		if(ret == null) return;
-		if(byte[].class.isAssignableFrom(ret.getClass())){
-			Element valueE = root.addElement( ename );
-			valueE.addAttribute("type", "xsd:"+getClassSOAPName(ret.getClass()));
-			String tmp = new sun.misc.BASE64Encoder().encode((byte[])ret);
-			tmp = tmp.replaceAll("\\s", "");
-			valueE.setText(tmp);
-		}
-		// return an array
-		else if(ret.getClass().isArray()){
-			Element array = root.addElement( (ename.equals("element") ? "Array" : ename) );
-			String arrayType = "xsd:"+getClassSOAPName(ret.getClass());
-			arrayType = arrayType.replaceFirst("\\[\\]", "["+Array.getLength(ret)+"]");
-
-			array.addAttribute("type", "soap:Array");
-			array.addAttribute("soap:arrayType", arrayType);
-			for(int i=0; i<Array.getLength(ret) ;i++){
-				generateReturnXML(array, Array.get(ret, i), "element", m);
-			}
-		}		
-		else{
-			if(ret instanceof Element)
-				root.add( (Element)ret );
-			if(ret instanceof SOAPObject){
-				Element objectE = root.addElement( ename ); //getClassSOAPName(ret.getClass())
-				Field[] fields = ret.getClass().getFields();
-				for(int i=0; i<fields.length ;i++){
-					SOAPFieldName tmp = fields[i].getAnnotation(SOAPObject.SOAPFieldName.class);
-					String name;
-					if(tmp != null) name = tmp.value();
-					else name = "field"+i;
-					generateReturnXML(objectE, fields[i].get(ret), name, m);
-				}
-			}
-			else {
-				Element valueE = root.addElement( ename );
-				valueE.addAttribute("type", "xsd:"+getClassSOAPName(ret.getClass()));
-				valueE.addText( ""+ret );
 			}
 		}
 	}
@@ -413,7 +437,7 @@ public class SOAPHttpPage implements HttpPage{
 										return new sun.misc.BASE64Decoder().decodeBuffer(data);
 		return null;
 	}
-
+	
 	/**
 	 * Invokes a specified method
 	 * 
@@ -432,20 +456,59 @@ public class SOAPHttpPage implements HttpPage{
 			throw e.getCause();
 		}
 	}
-
+	
 	/**
-	 * Converts an String XML to an Element
+	 * Generates an return XML Element. This function can
+	 * handle return values as XML Elements, SOAPObject and the
+	 * Java basic data types.
 	 * 
-	 * @param msg is the string XML
-	 * @return the XML root Element
+	 * @param root is the parent Element
+	 * @param ret is the object that is the return value
+	 * @param ename is the name of the parent Element
+	 * @param m is the method that returned the ret value
 	 */
-	private Element getXMLRoot(String xml) throws Exception {
-		if(xml != null && !xml.isEmpty()){
-			Document document = DocumentHelper.parseText(xml);
-			return document.getRootElement();
+	private void generateReturnXML(Element root, Object ret, String ename, MethodCache m) throws IllegalArgumentException, IllegalAccessException{
+		if(ret == null) return;
+		if(byte[].class.isAssignableFrom(ret.getClass())){
+			Element valueE = root.addElement( ename );
+			valueE.addAttribute("type", "xsd:"+getClassSOAPName(ret.getClass()));
+			String tmp = new sun.misc.BASE64Encoder().encode((byte[])ret);
+			tmp = tmp.replaceAll("\\s", "");
+			valueE.setText(tmp);
 		}
-		return null;
+		// return an array
+		else if(ret.getClass().isArray()){
+			Element array = root.addElement( (ename.equals("element") ? "Array" : ename) );
+			String arrayType = "xsd:"+getClassSOAPName(ret.getClass());
+			arrayType = arrayType.replaceFirst("\\[\\]", "["+Array.getLength(ret)+"]");
+
+			array.addAttribute("type", "soap:Array");
+			array.addAttribute("soap:arrayType", arrayType);
+			for(int i=0; i<Array.getLength(ret) ;i++){
+				generateReturnXML(array, Array.get(ret, i), "element", m);
+			}
+		}		
+		else{
+			Element objectE = root.addElement( ename ); //getClassSOAPName(ret.getClass())
+			if(ret instanceof Element)
+				objectE.add( (Element)ret );
+			else if(ret instanceof SOAPObject){
+				Field[] fields = ret.getClass().getFields();
+				for(int i=0; i<fields.length ;i++){
+					SOAPFieldName tmp = fields[i].getAnnotation(SOAPObject.SOAPFieldName.class);
+					String name;
+					if(tmp != null) name = tmp.value();
+					else name = "field"+i;
+					generateReturnXML(objectE, fields[i].get(ret), name, m);
+				}
+			}
+			else {
+				objectE.addAttribute("type", "xsd:"+getClassSOAPName(ret.getClass()));
+				objectE.addText( ""+ret );
+			}
+		}
 	}
+
 	
 	private String getClassSOAPName(Class<?> c){
 		Class<?> cTmp = getClass(c);
@@ -465,6 +528,9 @@ public class SOAPHttpPage implements HttpPage{
 		}
 	}
 
+	//********************************************************
+	//*********   WSDL Generation    *************************	
+	
 	/**
 	 * Generates an WSDL document for the class
 	 * 
@@ -516,7 +582,7 @@ public class SOAPHttpPage implements HttpPage{
 		imp.setLocationURI(td);
 		wsdl.addImport(imp);
 		
-		// PrtType
+		// PortType
 		PortType portType = wsdl.createPortType();
 		portType.setQName(new QName(tns, portTypeName));
 		portType.setUndefined(false);
@@ -559,38 +625,43 @@ public class SOAPHttpPage implements HttpPage{
 				operation.setInput(input);
 			}
 			//********** Response Message
-			if(!m.method.getReturnType().equals( void.class )){
+			if( m.returnName.length>0 ){
 				Message msgOut = wsdl.createMessage();
 				msgOut.setQName(new QName(tns, m.method.getName()+"Response"));
 				msgOut.setUndefined(false);
-
-				// Parts
-				Part part = wsdl.createPart();
-				part.setName(m.returnName);
-				msgOut.addPart(part);
-
-				// Generate new type if the object is an SOAPObject
-				Class<?> cTmp = getClass(m.method.getReturnType());
-				if(byte[].class.isAssignableFrom(m.method.getReturnType())){
-					part.setTypeName(new QName(xsd, "base64Binary"));
-				}
-				// is an array?
-				else if(m.method.getReturnType().isArray()){
-					part.setTypeName(new QName(td, 
-							"ArrayOf"+getClassSOAPName(m.method.getReturnType()).replaceAll("[\\[\\]]", "")));
-					// add to type generation list
-					if(!types.contains(m.method.getReturnType()))
-						types.add(m.method.getReturnType());
-				}
-				else if( SOAPObject.class.isAssignableFrom(cTmp) ){					
-					// its an SOAPObject
-					part.setTypeName(new QName(td, getClassSOAPName(m.method.getReturnType())));
-					// add to type generation list
-					if(!types.contains(cTmp))
-						types.add(cTmp);
-				}
-				else{// its an Object 
-					part.setTypeName(new QName(xsd, getClassSOAPName(m.method.getReturnType())));
+				
+				for( int i=0; i<m.returnName.length ;i++ ){					
+					Class<?> retClass = m.returnClass[i];
+					//MultiPrintStream.out.println(m.method.getName()+"=>"+m.returnName[i]+"="+retClass);
+					
+					// Parts
+					Part part = wsdl.createPart();
+					part.setName( m.returnName[i] );
+					msgOut.addPart(part);
+					
+					Class<?> cTmp = getClass( retClass );
+					// is an binary array
+					if(byte[].class.isAssignableFrom( retClass )){
+						part.setTypeName(new QName(xsd, "base64Binary"));
+					}
+					// is an array?
+					else if( retClass.isArray()){
+						part.setTypeName(new QName(td, 
+								"ArrayOf"+getClassSOAPName( retClass ).replaceAll("[\\[\\]]", "")));
+						// add to type generation list
+						if(!types.contains( retClass ))
+							types.add( retClass );
+					}
+					else if( SOAPObject.class.isAssignableFrom(cTmp) ){					
+						// its an SOAPObject
+						part.setTypeName(new QName(td, getClassSOAPName( retClass )));
+						// add to type generation list
+						if(!types.contains(cTmp))
+							types.add(cTmp);
+					}
+					else{// its an Object 
+						part.setTypeName(new QName(xsd, getClassSOAPName( retClass )));
+					}
 				}
 
 				wsdl.addMessage(msgOut);				
@@ -794,7 +865,7 @@ public class SOAPHttpPage implements HttpPage{
 	}
 
 	private Class<?> getClass(Class<?> c){
-		if(c.isArray()){
+		if(c!=null && c.isArray()){
 			return getClass(c.getComponentType());
 		}
 		return c;

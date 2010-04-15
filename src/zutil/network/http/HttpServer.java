@@ -23,8 +23,8 @@ import zutil.network.threaded.ThreadedTCPNetworkServerThread;
  * @author Ziver
  */
 public class HttpServer extends ThreadedTCPNetworkServer{
-	public static final boolean DEBUG = false;
-	public static final String SERVER_VERSION = "StaticInt HttpServer 1.0";
+	public static final boolean DEBUG = true;
+	public static final String SERVER_VERSION = "Ziver HttpServer 1.0";
 	public static final int COOKIE_TTL = 200;
 	public static final int SESSION_TTL = 10*60*1000; // in milliseconds
 
@@ -88,7 +88,6 @@ public class HttpServer extends ThreadedTCPNetworkServer{
 					if(DEBUG) MultiPrintStream.out.println("Removing Session: "+key);
 				}
 			}
-
 		}
 	}
 
@@ -142,7 +141,6 @@ public class HttpServer extends ThreadedTCPNetworkServer{
 		public void run(){
 			String tmp = null;
 
-			String page_url = "";
 			HashMap<String,String> client_info = new HashMap<String,String>();
 			HashMap<String,String> cookie = new HashMap<String,String>();
 			HashMap<String,String> request = new HashMap<String,String>();
@@ -212,7 +210,7 @@ public class HttpServer extends ThreadedTCPNetworkServer{
 				}
 				// Debug
 				if(DEBUG){
-					MultiPrintStream.out.println( "# page_url: "+page_url );
+					MultiPrintStream.out.println( "# page_url: "+parser.getRequestURL() );
 					MultiPrintStream.out.println( "# cookie: "+cookie );
 					MultiPrintStream.out.println( "# client_session: "+client_session );
 					MultiPrintStream.out.println( "# client_info: "+client_info );
@@ -225,15 +223,16 @@ public class HttpServer extends ThreadedTCPNetworkServer{
 				out.setHeader( "Content-Type", "text/html" );
 				out.setCookie( "session_id", ""+client_session.get("session_id") );
 
-				if( !page_url.isEmpty() && pages.containsKey(page_url) ){
-					pages.get(page_url).respond(out, client_info, client_session, cookie, request);
+				if( !parser.getRequestURL().isEmpty() && pages.containsKey(parser.getRequestURL()) ){
+					pages.get(parser.getRequestURL()).respond(out, client_info, client_session, cookie, request);
 				}
 				else if( defaultPage != null ){
 					defaultPage.respond(out, client_info, client_session, cookie, request);
 				}
 				else{
 					out.setStatusCode( 404 );
-					out.println( "404 Page Not Found" );	
+					out.println( "404 Page Not Found" );
+					if(DEBUG) MultiPrintStream.out.println("404 Page Not Found");
 				}
 
 				//********************************************************************************

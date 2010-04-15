@@ -32,7 +32,7 @@ import zutil.ui.wizard.listener.BlockingWizardListener;
  * @author Ziver
  */
 public class Wizard implements ActionListener{
-	public static final boolean DEBUG = true;
+	public static final boolean DEBUG = false;
 	private static final long serialVersionUID = 1L;
 
 	/** Some defoult backgrounds for the sidebar */

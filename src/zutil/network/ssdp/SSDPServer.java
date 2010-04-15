@@ -6,8 +6,10 @@ import java.net.InetAddress;
 import java.util.HashMap;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.logging.Level;
 
 import zutil.MultiPrintStream;
+import zutil.log.Logger;
 import zutil.network.http.HTTPHeaderParser;
 import zutil.network.http.HttpPrintStream;
 import zutil.network.threaded.ThreadedUDPNetworkThread;
@@ -39,6 +41,7 @@ import zutil.wrapper.StringOutputStream;
  * NTS: same as Man but for Notify messages
  */
 public class SSDPServer extends ThreadedUDPNetwork implements ThreadedUDPNetworkThread{
+	public static final Logger logger = new Logger();
 	public static final String SERVER_INFO = "SSDP Java Server by Ziver Koc";
 	public static final int DEFAULT_CACHE_TIME = 60*30; // 30 min
 	public static final int BUFFER_SIZE = 512;
@@ -54,7 +57,7 @@ public class SSDPServer extends ThreadedUDPNetwork implements ThreadedUDPNetwork
 
 	public static void main(String[] args) throws IOException{
 		SSDPServer ssdp = new SSDPServer();
-		SSDPServiceInfo service = new SSDPServiceInfo();
+		StandardSSDPInfo service = new StandardSSDPInfo();
 		service.setLocation("nowhere");
 		service.setST("upnp:rootdevice");
 		ssdp.addService(service);
@@ -152,7 +155,7 @@ public class SSDPServer extends ThreadedUDPNetwork implements ThreadedUDPNetwork
 			String msg = new String( packet.getData() );
 
 			HTTPHeaderParser header = new HTTPHeaderParser( msg );
-			//MultiPrintStream.out.println("**** Received:\n"+header);
+			logger.log(Level.FINEST, "**** Received:\n"+header);
 
 			// ******* Respond
 			// Check that the message is an ssdp discovery message
@@ -175,7 +178,7 @@ public class SSDPServer extends ThreadedUDPNetwork implements ThreadedUDPNetwork
 						http.setHeader("USN", services.get(st).getUSN() );
 
 						http.close();
-						//MultiPrintStream.out.println("********** Response:\n"+response);
+						logger.log(Level.FINEST, "********** Response:\n"+response);
 						byte[] data = response.toString().getBytes();
 						packet = new DatagramPacket( 
 								data, data.length, 
@@ -241,7 +244,7 @@ public class SSDPServer extends ThreadedUDPNetwork implements ThreadedUDPNetwork
 			http.setHeader("USN", services.get(searchTarget).getUSN() );
 
 			http.close();
-			//MultiPrintStream.out.println("******** Notification:\n"+msg);
+			logger.log(Level.FINEST, "******** Notification:\n"+msg);
 			byte[] data = msg.toString().getBytes();
 			DatagramPacket packet = new DatagramPacket( 
 					data, data.length, 
@@ -290,7 +293,7 @@ public class SSDPServer extends ThreadedUDPNetwork implements ThreadedUDPNetwork
 			http.setHeader("USN", services.get(searchTarget).getUSN() );
 
 			http.close();
-			//MultiPrintStream.out.println("******** ByeBye:\n"+msg);
+			logger.log(Level.FINEST, "******** ByeBye:\n"+msg);
 			byte[] data = msg.toString().getBytes();
 			DatagramPacket packet = new DatagramPacket( 
 					data, data.length, 

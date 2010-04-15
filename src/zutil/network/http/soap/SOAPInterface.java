@@ -1,7 +1,6 @@
 package zutil.network.http.soap;
 
 import java.lang.annotation.*;
-
 /**
  * 
  * Specifies SOAP parameters names an other things. 
@@ -99,4 +98,15 @@ public interface SOAPInterface {
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target(ElementType.METHOD)
 	public @interface SOAPHeader { }
+	
+	/**
+	 * Specifies the namespace for the method.
+	 * 
+	 * @author Ziver
+	 */
+	@Retention(RetentionPolicy.RUNTIME)
+	@Target(ElementType.METHOD)
+	public @interface SOAPNameSpace {
+		String value();
+	}
 }

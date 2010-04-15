@@ -1,4 +1,4 @@
-package zutil.test;
+package zutil.network.http.soap;
 
 import javax.wsdl.WSDLException;
 
@@ -6,9 +6,6 @@ import org.dom4j.Document;
 import org.dom4j.io.OutputFormat;
 import org.dom4j.io.XMLWriter;
 
-import zutil.network.http.soap.SOAPHttpPage;
-import zutil.network.http.soap.SOAPInterface;
-import zutil.network.http.soap.SOAPObject;
 
 public class SOAPTest {
 	//*******************************************************************************************
@@ -20,7 +17,7 @@ public class SOAPTest {
 			
 			// Response		
 			try {	
-				Document document = soap.soapResponse(
+				Document document = soap.genSOAPResponse(
 						"<?xml version=\"1.0\"?>" +
 						"<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\n" +
 						"	<soap:Body xmlns:m=\"http://www.example.org/stock\">\n" +
@@ -35,7 +32,7 @@ public class SOAPTest {
 						"		</m:pubB>\n" +
 						"	</soap:Body>\n" +
 				"</soap:Envelope>");
-				System.out.println();	
+				System.out.println( "****************** RESPONSE *********************" );	
 
 				OutputFormat format = OutputFormat.createPrettyPrint();
 				XMLWriter writer = new XMLWriter( System.out, format );
@@ -65,13 +62,20 @@ class SOAPTestClass2 implements SOAPObject{
 	public SOAPTestClass3 l = new SOAPTestClass3();
 }
 
+class SOAPTestRetClass implements SOAPReturnObjectList{
+	@SOAPValueName("retTest")
+	public String lol = "lol1";
+	public String lol2 = "lol2";
+}
+
 class SOAPTestClass implements SOAPInterface{
 	public SOAPTestClass(){}
 
 	@SOAPHeader()
 	@WSDLDocumentation("hello")
 	public void pubZ(
-			@SOAPParamName(value="olle", optional=true) int lol) throws Exception{ 
+			@SOAPParamName(value="olle", optional=true) int lol,
+			@SOAPParamName(value="olle2", optional=true) int lol2) throws Exception{ 
 		//System.out.println("Param: "+lol);
 		throw new Exception("Ziver is the fizle");
 	}
@@ -93,9 +97,12 @@ class SOAPTestClass implements SOAPInterface{
 
 	@SOAPReturnName("zivarray")
 	@WSDLParamDocumentation("null is the shizzle")
-	public byte[] pubB (
+	public SOAPTestRetClass pubB (
 			@SOAPParamName("byte") String lol) throws Exception{ 
-		return new byte[]{0x12, 0x23};
+		SOAPTestRetClass tmp = new SOAPTestRetClass();
+		tmp.lol = "test";
+		tmp.lol2 = "test2";
+		return tmp;
 	}
 	
 	@SOAPDisabled()
