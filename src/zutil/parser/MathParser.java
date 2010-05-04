@@ -1,4 +1,4 @@
-package zutil.math.parser;
+package zutil.parser;
 
 import java.io.BufferedReader;
 import java.io.IOException;
