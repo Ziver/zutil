@@ -4,7 +4,6 @@ import java.nio.channels.SocketChannel;
 import java.util.HashMap;
 import java.util.logging.Logger;
 
-import zutil.MultiPrintStream;
 import zutil.log.LogUtil;
 import zutil.network.nio.NioNetwork;
 import zutil.network.nio.message.Message;
