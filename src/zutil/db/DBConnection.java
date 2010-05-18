@@ -84,20 +84,18 @@ public class DBConnection{
 	/**
 	 * @return the last inserted id or -1 if there was an error
 	 */
-	public int getLastInsertID() throws SQLException{
-		Statement s = null;
+	public int getLastInsertID(){
 		try{
-			s = conn.createStatement ();
-			s.executeQuery("SELECT LAST_INSERT_ID()");
-			ResultSet result = s.getResultSet();
-			if(result.next()){
-				return result.getInt(1);
-			}
-		}finally{
-			if(s!=null)
-				s.close();
-		}
-		return -1;   
+			return exec("SELECT LAST_INSERT_ID()", new SQLResultHandler<Integer>(){
+				public Integer handle(Statement stmt, ResultSet result) throws SQLException {
+					if(result.next())
+						return result.getInt(1);
+					return -1;
+				}
+			});
+		}catch(SQLException e){
+			return -1;
+		}	
 	}
 
 	/**
@@ -219,22 +217,21 @@ public class DBConnection{
 	 * @return true or false depending on the validity of the connection
 	 */
 	public boolean valid(){
-		boolean ret = true;
 		try {
 			conn.getMetaData();
-			ret = ret && !conn.isClosed();
+			return !conn.isClosed();
 		}catch (Exception e) {
 			return false;
 		}
-		return ret;
 	}
 
 	/**
 	 * Disconnects from the database or releases the connection back to the pool
 	 */
-	public void close() throws SQLException{
+	public void close(){
 		if(pool!=null){
 			pool.releaseConnection(this);
+			conn = null;
 		}
 		else{
 			forceClose();
