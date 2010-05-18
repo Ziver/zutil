@@ -14,10 +14,12 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Logger;
 
 import zutil.Encrypter;
 import zutil.MultiPrintStream;
 import zutil.converters.Converter;
+import zutil.log.LogUtil;
 import zutil.network.nio.message.type.ResponseRequestMessage;
 import zutil.network.nio.message.type.SystemMessage;
 import zutil.network.nio.response.ResponseEvent;
@@ -29,14 +31,7 @@ import zutil.struct.DynamicByteArrayStream;
 
 
 public abstract class NioNetwork implements Runnable {
-	/**
-	 * Debug level
-	 * 0 = nothing
-	 * 1 = connection info
-	 * 2 = message debug
-	 * 3 = selector debug
-	 */     
-	public static final int DEBUG = 2;
+	private static Logger logger = LogUtil.getLogger();
 	public static enum NetworkType {SERVER, CLIENT};
 
 	private NetworkType type;
@@ -139,7 +134,7 @@ public abstract class NioNetwork implements Runnable {
 	 * @param data The data to send
 	 */
 	protected void queueSend(SocketChannel socket, byte[] data){
-		if(DEBUG>=3) MultiPrintStream.out.println("Sending Queue...");
+		logger.finest("Sending Queue...");
 		// And queue the data we want written
 		synchronized (pendingWriteData) {
 			List<ByteBuffer> queue = pendingWriteData.get(socket);
@@ -157,13 +152,13 @@ public abstract class NioNetwork implements Runnable {
 			// Indicate we want the interest ops set changed
 			pendingChanges.add(new ChangeRequest(socket, ChangeRequest.CHANGEOPS, SelectionKey.OP_WRITE));
 		}
-		if(DEBUG>=3) MultiPrintStream.out.println("selector.wakeup();");
+		logger.finest("selector.wakeup();");
 		// Finally, wake up our selecting thread so it can make the required changes
 		selector.wakeup();
 	}
 
 	public void run() {
-		if(DEBUG>=1)MultiPrintStream.out.println("NioNetwork Started!!!");
+		logger.fine("NioNetwork Started!!!");
 		while (true) {
 			try {
 				// Process any pending changes
@@ -175,11 +170,11 @@ public abstract class NioNetwork implements Runnable {
 						case ChangeRequest.CHANGEOPS:
 							SelectionKey key = change.socket.keyFor(selector);
 							key.interestOps(change.ops);
-							if(DEBUG>=3) MultiPrintStream.out.println("change.ops "+change.ops);
+							logger.finest("change.ops "+change.ops);
 							break;
 						case ChangeRequest.REGISTER:
 							change.socket.register(selector, change.ops);
-							if(DEBUG>=3) MultiPrintStream.out.println("register socket ");
+							logger.finest("register socket ");
 							break;
 						}
 					}
@@ -188,31 +183,31 @@ public abstract class NioNetwork implements Runnable {
 
 				// Wait for an event one of the registered channels
 				selector.select();
-				if(DEBUG>=3) MultiPrintStream.out.println("selector is awake");
+				logger.finest("selector is awake");
 
 				// Iterate over the set of keys for which events are available
 				Iterator<SelectionKey> selectedKeys = selector.selectedKeys().iterator();
 				while (selectedKeys.hasNext()) {
 					SelectionKey key = (SelectionKey) selectedKeys.next();
 					selectedKeys.remove();
-					if(DEBUG>=3) MultiPrintStream.out.println("KeyOP: "+key.interestOps()+"	isAcceptable: "+SelectionKey.OP_ACCEPT+" isConnectable: "+SelectionKey.OP_CONNECT+" isWritable: "+SelectionKey.OP_WRITE+" isReadable: "+SelectionKey.OP_READ);
+					logger.finest("KeyOP: "+key.interestOps()+"	isAcceptable: "+SelectionKey.OP_ACCEPT+" isConnectable: "+SelectionKey.OP_CONNECT+" isWritable: "+SelectionKey.OP_WRITE+" isReadable: "+SelectionKey.OP_READ);
 
 					if (key.isValid()) {
 						// Check what event is available and deal with it
 						if (key.isAcceptable()) {
-							if(DEBUG>=3) MultiPrintStream.out.println("Accepting Connection!!");
+							logger.finest("Accepting Connection!!");
 							accept(key);
 						}
 						else if (key.isConnectable()) {
-							if(DEBUG>=3) MultiPrintStream.out.println("Finnishing Connection!!");
+							logger.finest("Finnishing Connection!!");
 							finishConnection(key);
 						}
 						else if (key.isWritable()) {
-							if(DEBUG>=3) MultiPrintStream.out.println("Writing");
+							logger.finest("Writing");
 							write(key);
 						}
 						else if (key.isReadable()) {
-							if(DEBUG>=3) MultiPrintStream.out.println("Reading");
+							logger.finest("Reading");
 							read(key);
 						} 
 					}
@@ -243,7 +238,7 @@ public abstract class NioNetwork implements Runnable {
 		InetSocketAddress remoteAdr = (InetSocketAddress) socketChannel.socket().getRemoteSocketAddress();
 		if(!clients.containsValue(remoteAdr)){
 			clients.put(remoteAdr, new ClientData(socketChannel));
-			if(DEBUG>=1)MultiPrintStream.out.println("New Connection("+remoteAdr+")!!! Count: "+clients.size());
+			logger.fine("New Connection("+remoteAdr+")!!! Count: "+clients.size());
 		}
 	}
 
@@ -269,8 +264,9 @@ public abstract class NioNetwork implements Runnable {
 			clients.remove(remoteAdr);
 			pendingReadData.remove(socketChannel);
 			pendingWriteData.remove(socketChannel);
-			if(DEBUG>=1) MultiPrintStream.out.println("Connection Forced Close("+remoteAdr+")!!! Connection Count: "+clients.size());
-			if(type == NetworkType.CLIENT) throw new IOException("Server Closed The Connection!!!");
+			logger.fine("Connection Forced Close("+remoteAdr+")!!! Connection Count: "+clients.size());
+			if(type == NetworkType.CLIENT) 
+				throw new IOException("Server Closed The Connection!!!");
 			return;
 		}
 
@@ -282,8 +278,9 @@ public abstract class NioNetwork implements Runnable {
 			clients.remove(remoteAdr);
 			pendingReadData.remove(socketChannel);
 			pendingWriteData.remove(socketChannel);
-			if(DEBUG>=1) MultiPrintStream.out.println("Connection Close("+remoteAdr+")!!! Connection Count: "+clients.size());
-			if(type == NetworkType.CLIENT) throw new IOException("Server Closed The Connection!!!");
+			logger.fine("Connection Close("+remoteAdr+")!!! Connection Count: "+clients.size());
+			if(type == NetworkType.CLIENT) 
+				throw new IOException("Server Closed The Connection!!!");
 			return;
 		}
 
@@ -334,7 +331,7 @@ public abstract class NioNetwork implements Runnable {
 				socketChannel.write(buf);
 				if (buf.remaining() > 0) {
 					// ... or the socket's buffer fills up
-					if(DEBUG>=3) MultiPrintStream.out.println("Write Buffer Full!!");
+					logger.finest("Write Buffer Full!!");
 					break;
 				}
 				queue.remove(0);
@@ -344,32 +341,32 @@ public abstract class NioNetwork implements Runnable {
 				// We wrote away all data, so we're no longer interested
 				// in writing on this socket. Switch back to waiting for
 				// data.
-				if(DEBUG>=3) MultiPrintStream.out.println("No more Data to write!!");
+				logger.finest("No more Data to write!!");
 				key.interestOps(SelectionKey.OP_READ);
 			}
 		}
 	}
 
 	private void handleRecivedMessage(SocketChannel socketChannel, Object rspData){
-		if(DEBUG>=2) MultiPrintStream.out.println("Handling incomming message...");
+		logger.finer("Handling incomming message...");
 		
 		if(rspData instanceof SystemMessage){
 			if(systemWorker != null){
-				if(DEBUG>=3) MultiPrintStream.out.println("System Message!!!");
+				logger.finest("System Message!!!");
 				systemWorker.processData(this, socketChannel, rspData);
 			}
 			else{
-				if(DEBUG>=2) MultiPrintStream.out.println("Unhandled System Message!!!");
+				logger.finer("Unhandled System Message!!!");
 			}
 		}
 		else{
 			// Hand the data off to our worker thread
 			if(worker != null){
-				if(DEBUG>=3) MultiPrintStream.out.println("Worker Message!!!");
+				logger.finest("Worker Message!!!");
 				worker.processData(this, socketChannel, rspData);
 			}
 			else{
-				if(DEBUG>=1) MultiPrintStream.out.println("Unhandled Worker Message!!!");
+				logger.fine("Unhandled Worker Message!!!");
 			}
 		}
 	}
@@ -382,7 +379,7 @@ public abstract class NioNetwork implements Runnable {
 		SocketChannel socketChannel = SocketChannel.open();
 		socketChannel.socket().setReuseAddress(true);
 		socketChannel.configureBlocking(false);
-		if(DEBUG>=1)MultiPrintStream.out.println("Connecting to: "+address);
+		logger.fine("Connecting to: "+address);
 
 		// Kick off connection establishment
 		socketChannel.connect(address);

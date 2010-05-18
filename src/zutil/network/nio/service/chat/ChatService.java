@@ -3,14 +3,21 @@ package zutil.network.nio.service.chat;
 import java.nio.channels.SocketChannel;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.logging.Logger;
 
-import zutil.MultiPrintStream;
+import zutil.log.LogUtil;
 import zutil.network.nio.NioNetwork;
 import zutil.network.nio.message.ChatMessage;
 import zutil.network.nio.message.Message;
 import zutil.network.nio.service.NetworkService;
 
+/**
+ * A simple chat service with users and rooms
+ * 
+ * @author Ziver
+ */
 public class ChatService extends NetworkService{
+	private static Logger logger = LogUtil.getLogger();
 	private HashMap<String,LinkedList<SocketChannel>> rooms;
 	private ChatListener listener;
 
@@ -43,7 +50,7 @@ public class ChatService extends NetworkService{
 							}
 						}
 					}
-					if(NioNetwork.DEBUG>=2)MultiPrintStream.out.println("New Chat Message: "+chatmessage.msg);
+					logger.finer("New Chat Message: "+chatmessage.msg);
 					listener.messageAction(chatmessage.msg, chatmessage.room);
 				}
 				// register to a room
@@ -78,7 +85,7 @@ public class ChatService extends NetworkService{
 	 */
 	public void registerUser(String room, SocketChannel socket){
 		addRoom(room);
-		if(NioNetwork.DEBUG>=1)MultiPrintStream.out.println("New Chat User: "+socket);
+		logger.fine("New Chat User: "+socket);
 		rooms.get(room).add(socket);
 	}
 
@@ -90,7 +97,7 @@ public class ChatService extends NetworkService{
 	 */
 	public void unRegisterUser(String room, SocketChannel socket){
 		if(rooms.containsKey(room)){
-			if(NioNetwork.DEBUG>=1)MultiPrintStream.out.println("Remove Chat User: "+socket);
+			logger.fine("Remove Chat User: "+socket);
 			rooms.get(room).remove(socket);
 			removeRoom(room);
 		}
@@ -103,7 +110,7 @@ public class ChatService extends NetworkService{
 	 */
 	public void addRoom(String room){
 		if(!rooms.containsKey(room)){
-			if(NioNetwork.DEBUG>=1)MultiPrintStream.out.println("New Chat Room: "+room);
+			logger.fine("New Chat Room: "+room);
 			rooms.put(room, new LinkedList<SocketChannel>());
 		}
 	}
@@ -115,7 +122,7 @@ public class ChatService extends NetworkService{
 	 */
 	public void removeRoom(String room){
 		if(rooms.get(room).isEmpty()){
-			if(NioNetwork.DEBUG>=1)MultiPrintStream.out.println("Remove Chat Room: "+room);
+			logger.fine("Remove Chat Room: "+room);
 			rooms.remove(room);
 		}
 	}

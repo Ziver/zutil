@@ -2,8 +2,9 @@ package zutil.network.nio.worker;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Logger;
 
-import zutil.MultiPrintStream;
+import zutil.log.LogUtil;
 import zutil.network.nio.NioNetwork;
 import zutil.network.nio.message.ChatMessage;
 import zutil.network.nio.message.Message;
@@ -17,6 +18,7 @@ import zutil.network.nio.service.sync.SyncService;
 
 
 public class SystemWorker extends ThreadedEventWorker {
+	private static Logger logger = LogUtil.getLogger();
 	private NioNetwork nio;
 	// Maps a SocketChannel to a RspHandler
 	private Map<Double, ResponseEvent> rspEvents = new HashMap<Double, ResponseEvent>();	
@@ -34,19 +36,19 @@ public class SystemWorker extends ThreadedEventWorker {
 	@Override
 	public void messageEvent(WorkerDataEvent event) {
 		try {
-			if(NioNetwork.DEBUG>=2) MultiPrintStream.out.println("System Message: "+event.data.getClass().getName());
+			logger.finer("System Message: "+event.data.getClass().getName());
 			if(event.data instanceof Message){
 				if(event.data instanceof EchoMessage && ((EchoMessage)event.data).echo()){
 					// Echos back the recived message
 					((EchoMessage)event.data).recived();
-					if(NioNetwork.DEBUG>=3) MultiPrintStream.out.println("Echoing Message: "+event.data);
+					logger.finer("Echoing Message: "+event.data);
 					nio.send(event.socket, event.data);
 				}
 				else if(event.data instanceof ResponseRequestMessage && 
 						rspEvents.get(((ResponseRequestMessage)event.data).getResponseId()) != null){
 					// Handle the response
 					handleResponse(((ResponseRequestMessage)event.data).getResponseId(), event.data);
-					if(NioNetwork.DEBUG>=3) MultiPrintStream.out.println("Response Request Message: "+event.data);
+					logger.finer("Response Request Message: "+event.data);
 				}
 				else{
 					//Services

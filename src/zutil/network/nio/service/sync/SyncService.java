@@ -2,14 +2,17 @@ package zutil.network.nio.service.sync;
 
 import java.nio.channels.SocketChannel;
 import java.util.HashMap;
+import java.util.logging.Logger;
 
 import zutil.MultiPrintStream;
+import zutil.log.LogUtil;
 import zutil.network.nio.NioNetwork;
 import zutil.network.nio.message.Message;
 import zutil.network.nio.message.SyncMessage;
 import zutil.network.nio.service.NetworkService;
 
 public class SyncService extends NetworkService{
+	private static Logger logger = LogUtil.getLogger();
 	// list of objects to sync	
 	private HashMap<String, ObjectSync> sync;
 
@@ -24,7 +27,7 @@ public class SyncService extends NetworkService{
 	 */
 	public void addSyncObject(ObjectSync os){
 		sync.put(os.id, os);
-		if(NioNetwork.DEBUG>=1)MultiPrintStream.out.println("New Sync object: "+os);
+		logger.fine("New Sync object: "+os);
 	}
 
 	public void handleMessage(Message message, SocketChannel socket){
@@ -33,7 +36,7 @@ public class SyncService extends NetworkService{
 			if(syncMessage.type == SyncMessage.MessageType.SYNC){
 				ObjectSync obj = sync.get(syncMessage.id);
 				if(obj != null){
-					if(NioNetwork.DEBUG>=2)MultiPrintStream.out.println("Syncing Message...");
+					logger.finer("Syncing Message...");
 					obj.syncObject(syncMessage);
 				}
 			}
