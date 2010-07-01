@@ -10,6 +10,7 @@ import java.util.BitSet;
 import zutil.struct.DynamicByteArrayStream;
 
 public class Converter {
+	private Converter(){}
 
 	/** 
 	 * Converts an object to an array of bytes.
@@ -247,5 +248,40 @@ public class Converter {
 			ret.set(i , tmp.charAt(tmp.length()-i-1) != '0');
 		}		
 		return ret;
+	}
+	
+
+	/**
+	 * Converts a given String to a specified class
+	 * 
+	 * @param <T> is the resulting class
+	 * @param data is the String data to be converted
+	 * @param c is the class to convert to
+	 * @return a instance of the class with the value in the string or null if there was an problem
+	 */
+	@SuppressWarnings("unchecked")
+	public static <T> T fromString(String data, Class<T> c){
+		if(data == null || data.isEmpty())
+			return null;
+		try{
+			if(     c == String.class) 		return (T) data;
+			else if(c == Integer.class) 	return (T) new Integer(data);
+			else if(c == int.class) 		return (T) new Integer(data);
+			else if(c == Long.class) 		return (T) new Long(data);
+			else if(c == long.class) 		return (T) new Long(data);
+			else if(c == Float.class) 		return (T) new Float(data);
+			else if(c == float.class) 		return (T) new Float(data);
+			else if(c == Double.class) 		return (T) new Double(data);
+			else if(c == double.class) 		return (T) new Double(data);
+			else if(c == Boolean.class) 	return (T) new Boolean(data);
+			else if(c == boolean.class) 	return (T) new Boolean(data);
+			else if(c == Byte.class) 		return (T) new Byte(data);
+			else if(c == byte.class) 		return (T) new Byte(data);
+			else if(byte[].class.isAssignableFrom(c))
+											return (T) new sun.misc.BASE64Decoder().decodeBuffer(data);
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+		return null;
 	}
 }

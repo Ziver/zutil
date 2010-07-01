@@ -7,7 +7,7 @@ import java.io.IOException;
 import javax.imageio.ImageIO;
 import javax.swing.JPanel;
 
-import zutil.FileFinder;
+import zutil.FileUtil;
 import zutil.image.ImageUtil;
 
 /**
@@ -35,7 +35,7 @@ public class JImagePanel extends JPanel {
 	 * @param img is the path to the image
 	 */
 	public JImagePanel(String img) throws IOException {
-		this(ImageIO.read( FileFinder.find( img ) ));
+		this(ImageIO.read( FileUtil.find( img ) ));
 	}
 
 	/**

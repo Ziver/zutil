@@ -8,7 +8,7 @@ import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.util.ArrayList;
 
-import zutil.FileFinder;
+import zutil.FileUtil;
 import zutil.MultiPrintStream;
 import zutil.ProgressListener;
 
@@ -60,7 +60,7 @@ public class UpdateClient{
 		
 		// receive file updates
 		FileHash fileInfo = (FileHash)in.readObject();
-		File tmpPath = FileFinder.find(path);
+		File tmpPath = FileUtil.find(path);
 		while(!fileInfo.path.isEmpty()){
 			MultiPrintStream.out.println("Updating: "+path+fileInfo.path);
 			// reading new file data

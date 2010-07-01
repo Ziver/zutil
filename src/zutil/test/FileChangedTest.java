@@ -5,12 +5,12 @@ import java.io.FileNotFoundException;
 import java.net.URISyntaxException;
 
 import zutil.FileChangeListener;
-import zutil.FileFinder;
+import zutil.FileUtil;
 import zutil.FileWatcher;
 
 public class FileChangedTest implements FileChangeListener{
 	public static void main(String[] args) throws URISyntaxException, FileNotFoundException{
-		FileWatcher watcher = new FileWatcher(FileFinder.find("test.txt"));
+		FileWatcher watcher = new FileWatcher(FileUtil.find("test.txt"));
 		watcher.setListener(new FileChangedTest());
 		
 		while(true){

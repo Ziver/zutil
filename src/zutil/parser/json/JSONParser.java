@@ -3,7 +3,7 @@ package zutil.parser.json;
 import zutil.MultiPrintStream;
 import zutil.parser.json.JSONNode.JSONType;
 
-public class JSONParser {
+public class JSONParser{
 	private String json;
 	private int index;
 
@@ -159,4 +159,6 @@ public class JSONParser {
 		System.out.println("Return");
 		return root;
 	}
+
+	public void close() {}
 }

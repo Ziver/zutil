@@ -2,7 +2,6 @@ package zutil.parser.json;
 
 import java.io.OutputStream;
 import java.io.PrintStream;
-import java.io.PrintWriter;
 import java.util.Iterator;
 
 import zutil.parser.json.JSONNode.JSONType;
@@ -12,7 +11,7 @@ import zutil.parser.json.JSONNode.JSONType;
  * 
  * @author Ziver
  */
-public class JSONWriter {
+public class JSONWriter{
 	private PrintStream out;
 	
 	/**

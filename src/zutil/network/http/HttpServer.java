@@ -10,8 +10,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
-import zutil.MultiPrintStream;
+import zutil.log.LogUtil;
 import zutil.network.threaded.ThreadedTCPNetworkServer;
 import zutil.network.threaded.ThreadedTCPNetworkServerThread;
 
@@ -23,7 +25,7 @@ import zutil.network.threaded.ThreadedTCPNetworkServerThread;
  * @author Ziver
  */
 public class HttpServer extends ThreadedTCPNetworkServer{
-	public static final boolean DEBUG = true;
+	public static final Logger logger = LogUtil.getLogger();
 	public static final String SERVER_VERSION = "Ziver HttpServer 1.0";
 	public static final int COOKIE_TTL = 200;
 	public static final int SESSION_TTL = 10*60*1000; // in milliseconds
@@ -67,7 +69,7 @@ public class HttpServer extends ThreadedTCPNetworkServer{
 		Timer timer = new Timer();
 		timer.schedule(new GarbageCollector(), 0, SESSION_TTL / 2);
 
-		MultiPrintStream.out.println("HTTP"+(keyStore==null?"":"S")+" Server ready!");
+		logger.info("HTTP"+(keyStore==null?"":"S")+" Server ready!");
 	}
 
 	/**
@@ -85,7 +87,7 @@ public class HttpServer extends ThreadedTCPNetworkServer{
 				// Check if session is still valid
 				if((Long)client_session.get("ttl") < System.currentTimeMillis()){
 					sessions.remove(key);
-					if(DEBUG) MultiPrintStream.out.println("Removing Session: "+key);
+					logger.fine("Removing Session: "+key);
 				}
 			}
 		}
@@ -115,7 +117,7 @@ public class HttpServer extends ThreadedTCPNetworkServer{
 		try {
 			return new HttpServerThread( s );
 		} catch (IOException e) {
-			e.printStackTrace( MultiPrintStream.out );
+			logger.log(Level.SEVERE, "Could not start new Thread", e);
 		}
 		return null;
 	}
@@ -135,7 +137,7 @@ public class HttpServer extends ThreadedTCPNetworkServer{
 			out = new HttpPrintStream(socket.getOutputStream());
 			in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 			this.socket = socket;
-			if(DEBUG) MultiPrintStream.out.println("New Connection!!! "+socket.getInetAddress().getHostName());
+			logger.fine("New Connection!!! "+socket.getInetAddress().getHostName());
 		}
 
 		public void run(){
@@ -147,10 +149,10 @@ public class HttpServer extends ThreadedTCPNetworkServer{
 
 			//****************************  REQUEST *********************************
 			try {
-				if(DEBUG) MultiPrintStream.out.println("Reciving Http Request!!!");
+				logger.finer("Reciving Http Request!!!");
 
 				HTTPHeaderParser parser = new HTTPHeaderParser(in);
-				if(DEBUG) MultiPrintStream.out.println(parser);
+				logger.finest(parser.toString());
 				client_info = parser.getAttributes();
 				request = parser.getURLAttributes();
 				cookie = parser.getCookies();
@@ -209,15 +211,15 @@ public class HttpServer extends ThreadedTCPNetworkServer{
 					nextSessionId++;
 				}
 				// Debug
-				if(DEBUG){
-					MultiPrintStream.out.println( "# page_url: "+parser.getRequestURL() );
-					MultiPrintStream.out.println( "# cookie: "+cookie );
-					MultiPrintStream.out.println( "# client_session: "+client_session );
-					MultiPrintStream.out.println( "# client_info: "+client_info );
-					MultiPrintStream.out.println( "# request: "+request );
+				if(logger.isLoggable(Level.FINE)){
+					logger.finest( "# page_url: "+parser.getRequestURL() );
+					logger.finest( "# cookie: "+cookie );
+					logger.finest( "# client_session: "+client_session );
+					logger.finest( "# client_info: "+client_info );
+					logger.finest( "# request: "+request );
 				}
 				//****************************  RESPONSE  ************************************
-				if(DEBUG) MultiPrintStream.out.println("Sending Http Response!!!");
+				logger.finer("Sending Http Response!!!");
 				out.setStatusCode(200);
 				out.setHeader( "Server", SERVER_VERSION );
 				out.setHeader( "Content-Type", "text/html" );
@@ -231,13 +233,13 @@ public class HttpServer extends ThreadedTCPNetworkServer{
 				}
 				else{
 					out.setStatusCode( 404 );
-					out.println( "404 Page Not Found" );
-					if(DEBUG) MultiPrintStream.out.println("404 Page Not Found");
+					out.println( "404 Page Not Found: "+parser.getRequestURL() );
+					logger.fine( "404 Page Not Found: "+parser.getRequestURL() );
 				}
 
 				//********************************************************************************
 			} catch (Exception e) {
-				e.printStackTrace( MultiPrintStream.out );
+				logger.log(Level.WARNING, "500 Internal Server Error", e);
 				try {
 					out.setStatusCode( 500 );
 				} catch (Exception e1) {}
@@ -249,12 +251,12 @@ public class HttpServer extends ThreadedTCPNetworkServer{
 			}
 
 			try{
-				if(DEBUG) MultiPrintStream.out.println("Conection Closed!!!");
+				logger.fine("Conection Closed!!!");
 				out.close();
 				in.close();
 				socket.close();
 			} catch( Exception e ) {
-				e.printStackTrace( MultiPrintStream.out );
+				logger.log(Level.WARNING, "Could not close connection", e);
 			}
 		}
 	}

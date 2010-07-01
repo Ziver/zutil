@@ -2,12 +2,10 @@ package zutil.test;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.logging.Level;
 
 import javax.wsdl.WSDLException;
 
 import zutil.MultiPrintStream;
-import zutil.log.Logger;
 import zutil.network.http.HttpServer;
 import zutil.network.http.soap.SOAPHttpPage;
 import zutil.network.ssdp.SSDPServer;
@@ -16,9 +14,7 @@ import zutil.network.upnp.services.UPnPContentDirectory;
 
 public class UPnPServerTest {
 	
-	public static void main(String[] args) throws IOException, WSDLException{
-		//Logger.setGlobalLogLevel(Level.FINEST);
-		
+	public static void main(String[] args) throws IOException, WSDLException{		
 		UPnPMediaServer upnp = new UPnPMediaServer("http://192.168.0.60:8080/");
 		MultiPrintStream.out.println("UPNP Server running");
 		

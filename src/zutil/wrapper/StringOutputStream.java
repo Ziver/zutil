@@ -10,13 +10,13 @@ import java.io.OutputStream;
  */
 public class StringOutputStream extends OutputStream{
 	// The buffer
-	protected StringBuffer buffer;
+	protected StringBuilder buffer;
 	
 	/**
 	 * Creates an new instance of this class
 	 */
 	public StringOutputStream(){
-		buffer = new StringBuffer();
+		clear();
 	}
 	
 	@Override
@@ -34,6 +34,10 @@ public class StringOutputStream extends OutputStream{
 		buffer.append( new String(b, off, len) );
 	}
 
+	public void clear(){
+		buffer = new StringBuilder();
+	}
+	
 	/**
 	 * @return the String with the data
 	 */

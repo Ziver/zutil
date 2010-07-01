@@ -13,7 +13,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
 
-import zutil.FileFinder;
+import zutil.FileUtil;
 import zutil.Hasher;
 import zutil.MultiPrintStream;
 
@@ -78,7 +78,7 @@ public class UpdateServer extends Thread{
 			try {
 				// receive the clients filelist
 				ArrayList<FileHash> clientFileList = (ArrayList<FileHash>)in.readObject();
-				File tmpPath = FileFinder.find(path);
+				File tmpPath = FileUtil.find(path);
 
 				for(FileHash file : fileList){
 					if(!clientFileList.contains(file)){
@@ -124,10 +124,10 @@ public class UpdateServer extends Thread{
 	public static ArrayList<FileHash> getFileList(String path) throws Exception{
 		ArrayList<FileHash> fileHash = new ArrayList<FileHash>();
 
-		List<File> files = FileFinder.search(FileFinder.find(path));
+		List<File> files = FileUtil.search(FileUtil.find(path));
 		for(File file : files){
 			fileHash.add(new FileHash(
-					FileFinder.relativePath(file, path),
+					FileUtil.relativePath(file, path),
 					Hasher.hash(file, "MD5"),
 					file.length()));
 		}

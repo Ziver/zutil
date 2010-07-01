@@ -7,7 +7,7 @@ import java.util.Scanner;
 import java.util.regex.Pattern;
 
 public class HTTPHeaderParser {
-	// Some Cached regexes
+	// Some Cached regex's
 	private static final Pattern colonPattern = Pattern.compile(":");	
 	private static final Pattern equalPattern = Pattern.compile("=");
 	private static final Pattern andPattern = Pattern.compile("&");
@@ -20,7 +20,7 @@ public class HTTPHeaderParser {
 	private float version;
 	private int httpCode;
 
-	// params
+	// Parameters
 	private HashMap<String, String> attributes;
 	private HashMap<String, String> cookies;
 

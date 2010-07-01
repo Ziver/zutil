@@ -7,8 +7,10 @@ import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -18,7 +20,7 @@ import java.util.regex.Matcher;
  * 
  * @author Ziver
  */
-public class FileFinder {
+public class FileUtil {
 	
 	/**
 	 * Returns a String with a relative path from the given path
@@ -67,7 +69,7 @@ public class FileFinder {
 	 * @throws URISyntaxException 
 	 */
 	public static URL findURL(String path){
-		return FileFinder.class.getClassLoader().getResource(path);
+		return FileUtil.class.getClassLoader().getResource(path);
 	}
 	
 	/**
@@ -82,7 +84,7 @@ public class FileFinder {
 			if(file!=null && file.exists()){
 				return new BufferedInputStream( new FileInputStream( file ) );
 			}
-			return FileFinder.class.getClassLoader().getResourceAsStream(path);
+			return FileUtil.class.getClassLoader().getResourceAsStream(path);
 		} catch (Exception e) {
 			//e.printStackTrace(MultiPrintStream.out);
 		}
@@ -98,7 +100,31 @@ public class FileFinder {
 	 * @throws IOException
 	 */
 	public static String getFileContent(File file) throws IOException{
-		BufferedReader in = new BufferedReader(new FileReader(file));
+		return getContent( new FileInputStream(file) );
+	}
+	
+	/**
+	 * Reads and returns the content of a file as a String.
+	 * Or use FileUtils.readFileToString(file);
+	 * 
+	 * @param url is the url to read
+	 * @return The file content
+	 * @throws IOException
+	 */
+	public static String getContent(URL url) throws IOException{
+		return getContent( url.openStream() );
+	}
+	
+	/**
+	 * Reads and returns the content of a file as a String.
+	 * Or use FileUtils.readFileToString(file);
+	 * 
+	 * @param stream is the file stream to read
+	 * @return The file content
+	 * @throws IOException
+	 */
+	public static String getContent(InputStream stream) throws IOException{
+		BufferedReader in = new BufferedReader(new InputStreamReader(stream));
 		StringBuffer ret = new StringBuffer();
 		int tmp;
 
@@ -108,6 +134,75 @@ public class FileFinder {
 		
 		in.close();
 		return ret.toString();
+	}
+	
+	/**
+	 * Cache for the search functions
+	 */
+	private static HashMap<SearchItem,List<File>> search_cache = new HashMap<SearchItem,List<File>>();
+	/**
+	 * An Cache Item class to identify different cached items
+	 * @author Ziver
+	 */
+	private static class SearchItem{
+		private File dir;
+		private boolean folders;
+		private int recurse;
+		
+		protected SearchItem(File dir, boolean folders, int recurse){
+			this.dir = dir;
+			this.folders = folders;
+			this.recurse = recurse;
+		}
+		
+		public boolean equals(Object o){
+			if(o!=null && o instanceof SearchItem){
+				SearchItem si = (SearchItem)o;
+				return dir.equals(si.dir) && folders == si.folders && recurse == si.recurse;
+			}
+			return false;
+		}
+		public int hashCode(){
+			int hash = 133;
+			hash = 23 * hash + dir.hashCode();
+			hash = 23 * hash + (folders ? 1 : 0);
+			hash = 23 * hash + recurse;
+			return 0;
+		}
+	}
+	
+	/**
+	 * Same as search(File dir)
+	 * but is caches the result to be used next time this function is called
+	 * with the same parameters.
+	 */
+	public static List<File> cachedSearch(File dir){
+		return cachedSearch(dir, new LinkedList<File>(), true);
+	}
+	
+	/**
+	 * Same as search(File dir, List<File> fileList, boolean recursive)
+	 * but is caches the result to be used next time this function is called
+	 * with the same parameters.
+	 */
+	public static List<File> cachedSearch(File dir, List<File> fileList, boolean recursive){
+		return cachedSearch(dir, new LinkedList<File>(), false, (recursive ? Integer.MAX_VALUE : 0));
+	}
+	
+	/**
+	 * Same as search(File dir, List<File> fileList, boolean folders, int recurse)
+	 * but is caches the result to be used next time this function is called
+	 * with the same parameters.
+	 */
+	public static List<File> cachedSearch(File dir, List<File> fileList, boolean folders, int recurse){
+		SearchItem si = new SearchItem(dir, folders, recurse);
+		if( search_cache.containsKey(si) ){
+			fileList.addAll( search_cache.get(si) );
+			return fileList;
+		}
+		search(dir, fileList, folders, recurse);
+		search_cache.put(si, fileList);
+		return fileList;
 	}
 	
 	/**

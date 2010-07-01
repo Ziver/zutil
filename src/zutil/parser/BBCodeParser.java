@@ -18,6 +18,7 @@ public class BBCodeParser {
 		System.out.println(parser.parse("jshdkj [m"));
 		System.out.println(parser.parse("jshdkj [/m"));
 		System.out.println(parser.parse("jshdkj m]"));
+		System.out.println(parser.parse("jshdkj <br />"));
 	}
 	
 	/**
@@ -81,7 +82,7 @@ public class BBCodeParser {
 			if(c == '['){
 				bbcode = new StringBuilder();
 			}
-			else if(c == '/'){
+			else if(bbcode!=null && c == '/'){
 				closeTag = true;
 			}
 			else if(bbcode!=null){

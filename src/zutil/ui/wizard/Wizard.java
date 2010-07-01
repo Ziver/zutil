@@ -20,7 +20,7 @@ import javax.swing.WindowConstants;
 import javax.swing.GroupLayout.Alignment;
 import javax.swing.LayoutStyle.ComponentPlacement;
 
-import zutil.FileFinder;
+import zutil.FileUtil;
 import zutil.MultiPrintStream;
 import zutil.struct.HistoryList;
 import zutil.ui.JImagePanel;
@@ -89,7 +89,7 @@ public class Wizard implements ActionListener{
 			finish.addActionListener( this );
 			
 			// Set the image in the sidebar
-			sidebar.setImage(ImageIO.read( FileFinder.getInputStream( bg ) ));
+			sidebar.setImage(ImageIO.read( FileUtil.getInputStream( bg ) ));
 			
 			// add the first page
 			pages.add( start );

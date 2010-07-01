@@ -5,6 +5,7 @@ import zutil.algo.sort.SimpleSort;
 import zutil.algo.sort.sortable.SortableIntArray;
 import junit.framework.*;
 
+@SuppressWarnings("unused")
 public class SortTestSimple extends TestCase {
 	public static final int SIZE = 10000;
 	public static final int MAX_INT = 10000;

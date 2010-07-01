@@ -31,7 +31,7 @@ import javax.swing.text.Document;
 import javax.swing.text.Style;
 import javax.swing.text.StyleConstants;
 
-import zutil.FileFinder;
+import zutil.FileUtil;
 
 /**
  * Creates a Swing console window Thats takes System.in and
@@ -60,7 +60,7 @@ public class Console{
 
 	public Console(String title, int width, int height, int buffer, boolean tray){
 		ConsoleInputStream in = new ConsoleInputStream();
-		DEFAULT_ICON = FileFinder.find(DEFAULT_ICON).getAbsolutePath();
+		DEFAULT_ICON = FileUtil.find(DEFAULT_ICON).getAbsolutePath();
 		initUI(title, in);
 
 		bufferSize = buffer;

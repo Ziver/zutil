@@ -155,7 +155,7 @@ public class JSONNode implements Iterable<JSONNode>{
 	 * Sets the value of the node, but only if it is setup as an JSONType.Value
 	 */
 	public void set(int value){
-		if( !this.isValue() ) return;
+		if( !this.isValue() ) throw new NullPointerException("The node is not setup as a value");
 		type = JSONType.Number;
 		this.value = ""+value;
 	}
@@ -163,7 +163,7 @@ public class JSONNode implements Iterable<JSONNode>{
 	 * Sets the value of the node, but only if it is setup as an JSONType.Value
 	 */
 	public void set(double value){
-		if( !this.isValue() ) return;
+		if( !this.isValue() ) throw new NullPointerException("The node is not setup as a value");
 		type = JSONType.Number;
 		this.value = ""+value;
 	}
@@ -171,7 +171,7 @@ public class JSONNode implements Iterable<JSONNode>{
 	 * Sets the value of the node, but only if it is setup as an JSONType.Value
 	 */
 	public void set(boolean value){
-		if( !this.isValue() ) return;
+		if( !this.isValue() ) throw new NullPointerException("The node is not setup as a value");
 		type = JSONType.Boolean;
 		this.value = ""+value;
 	}
@@ -179,7 +179,7 @@ public class JSONNode implements Iterable<JSONNode>{
 	 * Sets the value of the node, but only if it is setup as an JSONType.Value
 	 */
 	public void set(String value){
-		if( !this.isValue() ) return;
+		if( !this.isValue() ) throw new NullPointerException("The node is not setup as a value");
 		type = JSONType.String;
 		this.value = value;
 	}
