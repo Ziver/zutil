@@ -45,6 +45,13 @@ public class JSONNode implements Iterable<JSONNode>{
 		this.value = ""+value;
 	}
 	/**
+	 * Creates an instance with an long value
+	 */
+	public JSONNode(long value){
+		this.type = JSONType.Number;
+		this.value = ""+value;
+	}
+	/**
 	 * Creates an instance with an String value
 	 */
 	public JSONNode(String value){
@@ -130,6 +137,9 @@ public class JSONNode implements Iterable<JSONNode>{
 	public void add(double value){
 		list.add(new JSONNode( value ));
 	}
+	public void add(long value){
+		list.add(new JSONNode( value ));
+	}
 	public void add(String value){
 		list.add(new JSONNode( value ));
 	}
@@ -146,6 +156,9 @@ public class JSONNode implements Iterable<JSONNode>{
 		map.put(key, new JSONNode(value));
 	}
 	public void add(String key, double value){
+		map.put(key, new JSONNode(value));
+	}
+	public void add(String key, long value){
 		map.put(key, new JSONNode(value));
 	}
 	public void add(String key, String value){
@@ -173,6 +186,14 @@ public class JSONNode implements Iterable<JSONNode>{
 	public void set(boolean value){
 		if( !this.isValue() ) throw new NullPointerException("The node is not setup as a value");
 		type = JSONType.Boolean;
+		this.value = ""+value;
+	}
+	/**
+	 * Sets the value of the node, but only if it is setup as an JSONType.Value
+	 */
+	public void set(long value){
+		if( !this.isValue() ) throw new NullPointerException("The node is not setup as a value");
+		type = JSONType.Number;
 		this.value = ""+value;
 	}
 	/**

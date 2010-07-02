@@ -2,6 +2,7 @@ package zutil.parser.json;
 
 import java.io.OutputStream;
 import java.io.PrintStream;
+import java.io.PrintWriter;
 import java.util.Iterator;
 
 import zutil.parser.json.JSONNode.JSONType;
@@ -12,7 +13,7 @@ import zutil.parser.json.JSONNode.JSONType;
  * @author Ziver
  */
 public class JSONWriter{
-	private PrintStream out;
+	private PrintWriter out;
 	
 	/**
 	 * Creates a new instance of the writer
@@ -20,7 +21,25 @@ public class JSONWriter{
 	 * @param out the OutputStream that the Nodes will be sent to
 	 */
 	public JSONWriter(OutputStream out){
-		this.out = new PrintStream(out);
+		this( new PrintWriter(out) );
+	}
+	
+	/**
+	 * Creates a new instance of the writer
+	 * 
+	 * @param out the OutputStream that the Nodes will be sent to
+	 */
+	public JSONWriter(PrintStream out){
+		this( new PrintWriter(out) );
+	}
+	
+	/**
+	 * Creates a new instance of the writer
+	 * 
+	 * @param out the OutputStream that the Nodes will be sent to
+	 */
+	public JSONWriter(PrintWriter out){
+		this.out = out;
 	}
 	
 	/**
