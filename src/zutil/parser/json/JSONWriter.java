@@ -83,7 +83,7 @@ public class JSONWriter{
 			out.print(']');
 			break;		
 		default:
-			if(root.getType() == JSONType.String){
+			if(root.getString() != null && root.getType() == JSONType.String){
 				out.print('\"');
 				out.print(root.toString());
 				out.print('\"');
