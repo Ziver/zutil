@@ -4,7 +4,6 @@ import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -56,7 +55,7 @@ public class FileUtil {
 			}
 			return new File(findURL(path).toURI());
 		} catch (Exception e) {
-			//e.printStackTrace(MultiPrintStream.out);
+			e.printStackTrace();
 		}
 		return null;
 	}
@@ -69,7 +68,7 @@ public class FileUtil {
 	 * @throws URISyntaxException 
 	 */
 	public static URL findURL(String path){
-		return FileUtil.class.getClassLoader().getResource(path);
+		return Thread.currentThread().getContextClassLoader().getResource(path);
 	}
 	
 	/**
@@ -84,9 +83,10 @@ public class FileUtil {
 			if(file!=null && file.exists()){
 				return new BufferedInputStream( new FileInputStream( file ) );
 			}
-			return FileUtil.class.getClassLoader().getResourceAsStream(path);
+			return Thread.currentThread().getContextClassLoader()
+						.getResourceAsStream(path);
 		} catch (Exception e) {
-			//e.printStackTrace(MultiPrintStream.out);
+			e.printStackTrace();
 		}
 		return null;
 	}
