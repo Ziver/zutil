@@ -1,4 +1,4 @@
-package zutil.wrapper;
+package zutil.io;
 
 import java.io.OutputStream;
 

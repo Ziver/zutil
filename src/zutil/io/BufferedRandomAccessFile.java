@@ -1,4 +1,4 @@
-package zutil.wrapper;
+package zutil.io;
 
 import java.io.File;
 import java.io.IOException;
@@ -22,33 +22,59 @@ public class BufferedRandomAccessFile extends RandomAccessFile{
 	// The position in the buffer
 	int buf_pos = 0;
 	// The real file pointer position where the buffer starts
-	long real_pos = 0;
+	long file_pos = 0;
 
-	
+	/**
+	 * Create a instance of this buffer
+	 * 
+	 * @param filename is the file to read from
+	 * @param mode as in {@link java.io.RandomAccessFile#RandomAccessFile(File file, String mode)}
+	 */
 	public BufferedRandomAccessFile(String filename, String mode) throws IOException{
 		this(new File(filename), mode);
 	}
 	
+	/**
+	 * Create a instance of this buffer
+	 * 
+	 * @param file is the file to read from
+	 * @param mode as in {@link java.io.RandomAccessFile#RandomAccessFile(File file, String mode)}
+	 */
 	public BufferedRandomAccessFile(File file, String mode) throws IOException{
 		super(file,mode);
 		invalidate();
 		buffer = new byte[BUF_SIZE];    
 	}
 	
+	/**
+	 * Create a instance of this buffer
+	 * 
+	 * @param filename is the file to read from
+	 * @param mode as in {@link java.io.RandomAccessFile#RandomAccessFile(File file, String mode)}
+	 * @param bufsize is the buffer size in bytes
+	 * @throws IOException
+	 */
 	public BufferedRandomAccessFile(String filename, String mode, int bufsize) throws IOException{
 		this(new File(filename), mode, bufsize);  
 	}
 	
+	/**
+	 * Create a instance of this buffer
+	 * 
+	 * @param file is the file to read from
+	 * @param mode as in {@link java.io.RandomAccessFile#RandomAccessFile(File file, String mode)}
+	 * @param bufsize is the buffer size in bytes
+	 * @throws IOException
+	 */
 	public BufferedRandomAccessFile(File file, String mode, int bufsize) throws IOException{
 		super(file,mode);
 		invalidate();
 		BUF_SIZE = bufsize;
-		buffer = new byte[BUF_SIZE];    
+		buffer = new byte[BUF_SIZE];
 	}
 
 	/**
-	 * Reads the next byte in the buffer
-	 * 
+	 * @return the next byte in the buffer
 	 */
 	public final int read() throws IOException{
 		if(buf_pos >= buf_end) {
@@ -66,13 +92,13 @@ public class BufferedRandomAccessFile extends RandomAccessFile{
 	/**
 	 * Reads in data from the file to the buffer
 	 * 
-	 * @return The buffer
+	 * @return the buffer
 	 * @throws IOException
 	 */
 	private int fillBuffer() throws IOException {
 		int n = super.read(buffer, 0, BUF_SIZE );
 		if(n >= 0) {
-			real_pos +=n;
+			file_pos +=n;
 			buf_end = n;
 			buf_pos = 0;
 		}
@@ -87,11 +113,14 @@ public class BufferedRandomAccessFile extends RandomAccessFile{
 	private void invalidate() throws IOException {
 		buf_end = 0;
 		buf_pos = 0;
-		real_pos = super.getFilePointer();
+		file_pos = super.getFilePointer();
 	}
 
 	/**
-	 * This class while read in b.length from the file
+	 * Fills the given array with data from the buffer
+	 * 
+	 * @param b is the array that will be filled
+	 * @return the amount of bytes read or -1 if eof
 	 */
 	public int read(byte b[]) throws IOException {
 		return read(b, 0, b.length);
@@ -100,6 +129,10 @@ public class BufferedRandomAccessFile extends RandomAccessFile{
 	/**
 	 * Reads a given length of bytes from the buffer
 	 * 
+	 * @param b is the array that will be filled
+	 * @param off is the offset in the array
+	 * @param len is the amount to read
+	 * @return the amount of bytes read or -1 if eof
 	 */
 	public int read(byte b[], int off, int len) throws IOException {
 		int leftover = buf_end - buf_pos;
@@ -120,10 +153,10 @@ public class BufferedRandomAccessFile extends RandomAccessFile{
 	}
 
 	/**
-	 * Returns the file pointer in the file
+	 * @return the file pointer in the file
 	 */
 	public long getFilePointer() throws IOException{
-		long l = real_pos;
+		long l = file_pos;
 		return (l - buf_end + buf_pos) ;
 	}
 	
@@ -133,7 +166,7 @@ public class BufferedRandomAccessFile extends RandomAccessFile{
 	 * @param pos The position to move the pointer to
 	 */
 	public void seek(long pos) throws IOException {
-		int n = (int)(real_pos - pos);
+		int n = (int)(file_pos - pos);
 		if(n >= 0 && n <= buf_end) {
 			buf_pos = buf_end - n;
 		} else {
@@ -143,8 +176,9 @@ public class BufferedRandomAccessFile extends RandomAccessFile{
 	}
 
 	/**
-	 * Returns the next line in the file
 	 * This method is a replacement for readLine() 
+	 * 
+	 * @return the next line in the file
 	 */
 	 public final String readNextLine() throws IOException {
 		String str = null;
