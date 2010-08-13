@@ -1,0 +1,89 @@
+package zutil.network.upnp;
+
+import java.util.Map;
+import java.util.UUID;
+
+import zutil.network.http.HttpPrintStream;
+
+/**
+ * This class is a UPnP AV Media Server that handles all the
+ * other UPnP services
+ * 
+ * @author Ziver
+ */
+public class UPnPMediaServer extends UPnPRootDevice{
+	public static final String RELATIVE_URL = "upnp/rootdev";
+	
+	private String url;
+	private String uuid;
+	
+	public UPnPMediaServer(String location){
+		url = location;
+	}
+
+	public void respond(HttpPrintStream out, Map<String, String> clientInfo,
+			Map<String, Object> session, Map<String, String> cookie,
+			Map<String, String> request) {
+
+		out.enableBuffering(true);
+		out.setHeader("Content-Type", "text/xml");
+		
+		out.println("<?xml version=\"1.0\" encoding=\"utf-8\"?>");
+		out.println("<root xmlns=\"urn:schemas-upnp-org:service:ContentDirectory:1\">");
+		out.println("	<specVersion>");
+		out.println("		<major>1</major>");
+		out.println("		<minor>0</minor>");
+		out.println("	</specVersion>");
+		out.println("	<URLBase>"+url+"</URLBase>");//"+ssdp.getLocation()+"
+		out.println("	<device>");
+		out.println("		<deviceType>urn:schemas-upnp-org:device:MediaServer:1</deviceType>");
+		out.println("		<friendlyName>ZupNP AV Media Server</friendlyName>");
+		out.println("		<manufacturer>Ziver Koc</manufacturer>");
+		out.println("		<manufacturerURL>http://ziver.koc.se</manufacturerURL>");
+		out.println("");
+		out.println("		<modelName>ZupNP Server</modelName>");		
+		out.println("		<modelDescription>UPnP AV Media Server</modelDescription>");
+		out.println("		<modelNumber>0.1</modelNumber>");
+		out.println("		<UDN>"+getUUID()+"</UDN>");
+		out.println("		<serviceList>");
+		out.println("		<service>");
+		out.println("			<serviceType>urn:schemas-upnp-org:service:ConnectionManager:1</serviceType>");
+		out.println("			<serviceId>urn:upnp-org:serviceId:CMGR_1-0</serviceId>");
+		out.println("			<SCPDURL>CMGR_Control/GetServDesc</SCPDURL>");
+		out.println("			<controlURL>CMGR_Control</controlURL>");
+		out.println("			<eventSubURL>CMGR_Event</eventSubURL>");
+		out.println("		</service>");
+		out.println("		<service>");
+		out.println("			<serviceType>urn:schemas-upnp-org:service:ContentDirectory:1</serviceType>");
+		out.println("			<serviceId>urn:upnp-org:serviceId:CDS_1-0</serviceId>");
+		out.println("			<SCPDURL>SCP/ContentDir</SCPDURL>");
+		out.println("			<controlURL>Action/ContentDir</controlURL>");
+		out.println("			<eventSubURL>Event/ContentDir</eventSubURL>");
+		out.println("		</service>");
+		out.println("		</serviceList>");
+		out.println("	</device>");
+		out.println("</root>");
+		out.flush();
+	}
+
+	
+	public long getExpirationTime() {
+		return 60*30; // 30min
+	}
+	public String getLocation() {
+		return url+"RootDesc";
+	}
+	public String getSearchTarget() {
+		return "upnp:rootdevice";
+	}
+	public String getUSN() {
+		return getUUID()+"::upnp:rootdevice";
+	}
+	public String getUUID() {
+		if(uuid==null){
+			uuid = "uuid:"+UUID.nameUUIDFromBytes( this.getClass().toString().getBytes() ); //(url+Math.random()).getBytes()
+		}
+		return uuid;
+	}
+
+}
