@@ -1,31 +1,30 @@
-package zutil.network.http.soap;
+package zutil.network.ws;
 
 import java.lang.annotation.*;
 /**
  * 
- * Specifies SOAP parameters names an other things. 
+ * Specifies web service parameter names and other things. 
  * Example:
  * <pre>
- *	private static class Test implements SOAPInterface{
+ *	private static class Test implements WSInterface{
  *		public Test(){}
  *	
- *		@SOAPHeader()
- *		@WSDLDocumentation("blabla")
+ *		@WSDocumentation("blabla")
  *		@WSDLParamDocumentation("olle = an variable?")
  *		public void pubZ( 
- *				@SOAPParamName("olle") int lol) 
+ *				@WSParamName("olle") int lol) 
  *				throws Exception{ 
  *			....
  *		}
  *	
- *		@SOAPReturnName("param")
+ *		@WSReturnName("param")
  *		public String pubA( 
- *				@SOAPParamName(value="lol", optional=true) String lol) 
+ *				@WSParamName(value="lol", optional=true) String lol) 
  *				throws Exception{ 
  *			....
  *		}
  *	
- *		@SOAPDisabled()
+ *		@WSDisabled()
  *		public void privaZ(....){ 
  *			...
  *		}		
@@ -34,7 +33,7 @@ import java.lang.annotation.*;
  * </pre>
  * @author Ziver
  */
-public interface SOAPInterface {
+public interface WSInterface {
 	/**
 	 * Annotation that assigns a name to an parameters
 	 * in an method.
@@ -43,7 +42,7 @@ public interface SOAPInterface {
 	 */
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target(ElementType.PARAMETER)
-	public @interface SOAPParamName {
+	public @interface WSParamName {
 	    String value();
 	    boolean optional() default false;
 	}
@@ -56,29 +55,30 @@ public interface SOAPInterface {
 	 */
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target(ElementType.METHOD)
-	public @interface SOAPReturnName {
+	public @interface WSReturnName {
 	    String value();
 	}
 	
 	/**
-	 * Disables SOAP publication of the given method
+	 * Disables publication of the given method
 	 * 
 	 * @author Ziver
 	 */
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target(ElementType.METHOD)
-	public @interface SOAPDisabled { }
+	public @interface WSDisabled { }
 	
 	/**
-	 * Method comments for the WSDL. 
-	 * These comments are put in the operation part of the WSDL
+	 * Method or Parameter comments for the WSDL. 
+	 * These comments are put in the message part of the WSDL
 	 * 
 	 * @author Ziver
 	 */
 	@Retention(RetentionPolicy.RUNTIME)
-	public @interface WSDLDocumentation{
+	public @interface WSDocumentation{
 		String value();
 	}
+
 	/**
 	 * Parameter comments for the WSDL. 
 	 * These comments are put in the message part of the WSDL
@@ -86,27 +86,27 @@ public interface SOAPInterface {
 	 * @author Ziver
 	 */
 	@Retention(RetentionPolicy.RUNTIME)
-	public @interface WSDLParamDocumentation{
+	public @interface WSParamDocumentation{
 		String value();
 	}
 	
 	/**
-	 * This method will be used in the header of the soap.
+	 * This method will be used in the header.
 	 * 
 	 * @author Ziver
 	 */
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target(ElementType.METHOD)
-	public @interface SOAPHeader { }
+	public @interface WSHeader { }
 	
 	/**
-	 * Specifies the namespace for the method.
+	 * Specifies the name space for the method.
 	 * 
 	 * @author Ziver
 	 */
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target(ElementType.METHOD)
-	public @interface SOAPNameSpace {
+	public @interface WSNamespace {
 		String value();
 	}
 }

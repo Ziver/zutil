@@ -1,6 +1,5 @@
 package zutil.network.http.soap;
 
-import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
@@ -11,6 +10,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.wsdl.Binding;
 import javax.wsdl.BindingInput;
@@ -45,12 +46,17 @@ import org.dom4j.io.OutputFormat;
 import org.dom4j.io.XMLWriter;
 import org.xml.sax.SAXException;
 
-import zutil.MultiPrintStream;
+import zutil.converters.Converter;
+import zutil.io.StringOutputStream;
+import zutil.log.LogUtil;
 import zutil.network.http.HttpPage;
 import zutil.network.http.HttpPrintStream;
-import zutil.network.http.soap.SOAPInterface.WSDLDocumentation;
-import zutil.network.http.soap.SOAPInterface.WSDLParamDocumentation;
-import zutil.network.http.soap.SOAPObject.SOAPFieldName;
+import zutil.network.ws.WSInterface;
+import zutil.network.ws.WSObject;
+import zutil.network.ws.WSReturnValueList;
+import zutil.network.ws.WSInterface.WSDocumentation;
+import zutil.network.ws.WSInterface.WSParamDocumentation;
+import zutil.network.ws.WSObject.WSFieldName;
 
 import com.ibm.wsdl.extensions.PopulatedExtensionRegistry;
 import com.ibm.wsdl.extensions.soap.SOAPConstants;
@@ -89,6 +95,8 @@ import com.sun.org.apache.xerces.internal.dom.DocumentImpl;
  * @author Ziver
  */
 public class SOAPHttpPage implements HttpPage{
+	public static final Logger logger = LogUtil.getLogger();
+	
 	// valid methods for this soap page
 	private HashMap<String, MethodCache> methods;
 	// contains an method and the names for the parameters
@@ -107,7 +115,7 @@ public class SOAPHttpPage implements HttpPage{
 			header = false;
 			
 			Class<?> tmp = m.getReturnType();
-			if( SOAPReturnValueList.class.isAssignableFrom( tmp )){
+			if( WSReturnValueList.class.isAssignableFrom( tmp )){
 				returnName = new String[ tmp.getFields().length ];
 				returnClass = new Class<?>[ tmp.getFields().length ];
 			}
@@ -122,7 +130,7 @@ public class SOAPHttpPage implements HttpPage{
 		}
 	}
 	// The object that the functions will be invoked from
-	private SOAPInterface interf;
+	private WSInterface interf;
 	// The WSDL document
 	private Definition wsdl;
 	// The WSDL Type part
@@ -132,7 +140,7 @@ public class SOAPHttpPage implements HttpPage{
 	// Session enabled
 	private boolean session_enabled;
 
-	public SOAPHttpPage(String url, SOAPInterface interf) throws WSDLException{
+	public SOAPHttpPage(String url, WSInterface interf) throws WSDLException{
 		//if(!SOAPInterface.class.isAssignableFrom(interf) )
 		//	throw new ClassCastException("Class does not implement SOAPInterface!");
 		this.url = url;
@@ -143,7 +151,7 @@ public class SOAPHttpPage implements HttpPage{
 		for(Method m : interf.getClass().getDeclaredMethods()){
 			// check for public methods
 			if((m.getModifiers() & Modifier.PUBLIC) > 0 && 
-					!m.isAnnotationPresent(SOAPInterface.SOAPDisabled.class)){
+					!m.isAnnotationPresent(WSInterface.WSDisabled.class)){
 				MethodCache chasch = new MethodCache(m);
 				StringBuffer tmp = new StringBuffer(m.getName()+"(");
 
@@ -152,8 +160,8 @@ public class SOAPHttpPage implements HttpPage{
 
 				for(int i=0; i<paramAnnotation.length ;i++){
 					for(Annotation annotation : paramAnnotation[i]){
-						if(annotation instanceof SOAPInterface.SOAPParamName){
-							SOAPInterface.SOAPParamName paramName = (SOAPInterface.SOAPParamName) annotation;
+						if(annotation instanceof WSInterface.WSParamName){
+							WSInterface.WSParamName paramName = (WSInterface.WSParamName) annotation;
 							chasch.paramName[i] = paramName.value();
 							chasch.paramOptional[i] = paramName.optional();
 						}
@@ -168,13 +176,13 @@ public class SOAPHttpPage implements HttpPage{
 				tmp.append(") => ");
 
 				// the return parameter name
-				SOAPInterface.SOAPReturnName returnName = m.getAnnotation(SOAPInterface.SOAPReturnName.class);
-				if( SOAPReturnValueList.class.isAssignableFrom( m.getReturnType() ) ){
+				WSInterface.WSReturnName returnName = m.getAnnotation(WSInterface.WSReturnName.class);
+				if( WSReturnValueList.class.isAssignableFrom( m.getReturnType() ) ){
 					Class<?> retClass = m.getReturnType();
 					for(int i=0; i<retClass.getFields().length ;i++){
 						if(i!=0) tmp.append(", ");
-						SOAPReturnValueList.SOAPValueName retValName = retClass.getFields()[i]
-						                   .getAnnotation( SOAPReturnValueList.SOAPValueName.class );
+						WSReturnValueList.WSValueName retValName = retClass.getFields()[i]
+						                   .getAnnotation( WSReturnValueList.WSValueName.class );
 						if(retValName != null) chasch.returnName[i] = retValName.value();
 						else chasch.returnName[i] = retClass.getFields()[i].getName();
 						chasch.returnClass[i] = retClass.getFields()[i].getType();
@@ -189,31 +197,34 @@ public class SOAPHttpPage implements HttpPage{
 				}
 
 				// SOAP header?
-				if(m.getAnnotation(SOAPInterface.SOAPHeader.class) != null) 
+				if(m.getAnnotation(WSInterface.WSHeader.class) != null) 
 					chasch.header = true;
 
 				// save in HashMap
-				MultiPrintStream.out.println("New SOAP Method Registered: "+tmp);
+				logger.info("New SOAP Method Registered: "+tmp);
 				methods.put(m.getName(), chasch);
 			}
 		}
 
 		generateWSDL();
 
-		try {
-			// WSDL
-			MultiPrintStream.out.println();
-			WSDLFactory factory = WSDLFactory.newInstance();
-			WSDLWriter writer = factory.newWSDLWriter();
-			writer.writeWSDL(wsdl, MultiPrintStream.out);
-			MultiPrintStream.out.println();
-			// WSDL Type
-			OutputFormat format = OutputFormat.createPrettyPrint();
-			XMLWriter xmlWriter = new XMLWriter( MultiPrintStream.out, format );
-			xmlWriter.write( wsdlType );
-			MultiPrintStream.out.println();
-		} catch (Exception e) {
-			e.printStackTrace();
+		if(logger.isLoggable(Level.INFO)){
+			try {
+				// WSDL
+				StringOutputStream out = new StringOutputStream();
+				WSDLFactory factory = WSDLFactory.newInstance();
+				WSDLWriter writer = factory.newWSDLWriter();
+				writer.writeWSDL(wsdl, out);
+				logger.info(out.toString());
+				// WSDL Type
+				out.clear();
+				OutputFormat format = OutputFormat.createPrettyPrint();
+				XMLWriter xmlWriter = new XMLWriter( out, format );
+				xmlWriter.write( wsdlType );
+				logger.info(out.toString());
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 		}
 	}
 	
@@ -249,10 +260,10 @@ public class SOAPHttpPage implements HttpPage{
 				writer.write( wsdlType );
 			}
 			else{
-				SOAPInterface obj = null;
+				WSInterface obj = null;
 				if(session_enabled){ 
 					if( session.containsKey("SOAPInterface"))
-						obj = (SOAPInterface)session.get("SOAPInterface");
+						obj = (WSInterface)session.get("SOAPInterface");
 					else{
 						obj = interf.getClass().newInstance();
 						session.put("SOAPInterface", obj);
@@ -279,7 +290,7 @@ public class SOAPHttpPage implements HttpPage{
 				
 			}
 		} catch (Exception e) {
-			e.printStackTrace(MultiPrintStream.out);			
+			logger.log(Level.WARNING, "Unhandled request", e);
 		}
 	}
 	
@@ -290,18 +301,18 @@ public class SOAPHttpPage implements HttpPage{
 	 */
 	public Document genSOAPResponse(String xml){
 		try {
-			SOAPInterface o = null;
+			WSInterface o = null;
 			if(session_enabled) o = interf.getClass().newInstance();
 			else o = interf;
 			
 			return genSOAPResponse(xml, o );
 		} catch (Exception e) {
-			e.printStackTrace(MultiPrintStream.out);
+			logger.log(Level.WARNING, "Exception in SOAP generation", e);
 		}
 		return null;
 	}
 
-	protected Document genSOAPResponse(String xml, SOAPInterface obj){
+	protected Document genSOAPResponse(String xml, WSInterface obj){
 		Document document = DocumentHelper.createDocument();
 		Element envelope = document.addElement("soap:Envelope");
 		try {
@@ -327,7 +338,7 @@ public class SOAPHttpPage implements HttpPage{
 				body.clearContent();
 				Element fault = body.addElement("soap:Fault");
 				// The fault source
-				if(e instanceof SOAPClientException || e instanceof SAXException || e instanceof DocumentException)
+				if(e instanceof SOAPException || e instanceof SAXException || e instanceof DocumentException)
 					fault.addElement("faultcode").setText( "soap:Client" );
 				else 
 					fault.addElement("faultcode").setText( "soap:Server" );
@@ -336,10 +347,10 @@ public class SOAPHttpPage implements HttpPage{
 					fault.addElement("faultstring").setText( ""+e.getClass().getSimpleName() );
 				else
 					fault.addElement("faultstring").setText( ""+e.getMessage() );
-				e.printStackTrace(MultiPrintStream.out);
+				logger.log(Level.WARNING, "Caught exception from SOAP Class", e);
 			}
 		} catch (Exception e) {
-			e.printStackTrace(MultiPrintStream.out);
+			logger.log(Level.WARNING, "Exception in SOAP generation", e);
 		}
 
 		return document;
@@ -368,7 +379,7 @@ public class SOAPHttpPage implements HttpPage{
 	 * @param responseRoot is the root element of the response
 	 */
 	@SuppressWarnings("unchecked")
-	private void prepareInvoke(SOAPInterface obj, Element requestRoot, Element responseRoot) throws Throwable{
+	private void prepareInvoke(WSInterface obj, Element requestRoot, Element responseRoot) throws Throwable{
 		Iterator<Element> it = requestRoot.elementIterator();
 		while( it.hasNext() ){
 			Element e = it.next();
@@ -379,7 +390,7 @@ public class SOAPHttpPage implements HttpPage{
 				// Get the parameter values
 				for(int i=0; i<m.paramName.length ;i++){
 					if(e.element(m.paramName[i]) != null)
-						params[i] = convertToClass(
+						params[i] = Converter.fromString(
 								e.element(m.paramName[i]).getTextTrim(),
 								m.method.getParameterTypes()[i]);
 				}
@@ -389,17 +400,17 @@ public class SOAPHttpPage implements HttpPage{
 
 				// generate response XML
 				if( m.returnClass.length>0 ){
-					SOAPInterface.SOAPNameSpace namespace = m.method.getAnnotation(SOAPInterface.SOAPNameSpace.class);
+					WSInterface.WSNamespace namespace = m.method.getAnnotation(WSInterface.WSNamespace.class);
 					Element response = responseRoot.addElement("");
 					if( namespace != null )
 						response.addNamespace("m",  namespace.value());
 					else
 						response.addNamespace("m",  url+""+m.method.getName());
 					response.setName("m:"+m.method.getName()+"Response");
-					if( ret instanceof SOAPReturnValueList ){
+					if( ret instanceof WSReturnValueList ){
 						Field[] f = ret.getClass().getFields();
 						for(int i=0; i<m.returnName.length ;i++ ){
-							generateReturnXML(response,((SOAPReturnValueList)ret).getValue(f[i]) , m.returnName[i], m);
+							generateReturnXML(response,((WSReturnValueList)ret).getValue(f[i]) , m.returnName[i], m);
 						}
 					}
 					else{
@@ -411,31 +422,6 @@ public class SOAPHttpPage implements HttpPage{
 				throw new Exception("No such method: "+e.getQName().getName()+"!");
 			}
 		}
-	}
-
-	/**
-	 * Converts an given String to a specified class
-	 */
-	protected Object convertToClass(String data, Class<?> c) throws IOException{
-		if(data == null || data.isEmpty())
-			return null;
-
-		if(     c == String.class) 		return data;
-		else if(c == Integer.class) 	return Integer.parseInt(data);
-		else if(c == int.class) 		return Integer.parseInt(data);
-		else if(c == Long.class) 		return Long.parseLong(data);
-		else if(c == long.class) 		return Long.parseLong(data);
-		else if(c == Float.class) 		return Float.parseFloat(data);
-		else if(c == float.class) 		return Float.parseFloat(data);
-		else if(c == Double.class) 		return Double.parseDouble(data);
-		else if(c == double.class) 		return Double.parseDouble(data);
-		else if(c == Boolean.class) 	return Boolean.parseBoolean(data);
-		else if(c == boolean.class) 	return Boolean.parseBoolean(data);
-		else if(c == Byte.class) 		return Byte.parseByte(data);
-		else if(c == byte.class) 		return Byte.parseByte(data);
-		else if(byte[].class.isAssignableFrom(c))
-										return new sun.misc.BASE64Decoder().decodeBuffer(data);
-		return null;
 	}
 	
 	/**
@@ -449,7 +435,7 @@ public class SOAPHttpPage implements HttpPage{
 		try {
 			return m.invoke(obj, params );
 		} catch (IllegalArgumentException e) {
-			throw new SOAPClientException("Arguments missing for "+m.getName()+"!");
+			throw new SOAPException("Arguments missing for "+m.getName()+"!");
 		} catch (IllegalAccessException e) {
 			throw e;
 		} catch (InvocationTargetException e) {
@@ -492,10 +478,10 @@ public class SOAPHttpPage implements HttpPage{
 			Element objectE = root.addElement( ename ); //getClassSOAPName(ret.getClass())
 			if(ret instanceof Element)
 				objectE.add( (Element)ret );
-			else if(ret instanceof SOAPObject){
+			else if(ret instanceof WSObject){
 				Field[] fields = ret.getClass().getFields();
 				for(int i=0; i<fields.length ;i++){
-					SOAPFieldName tmp = fields[i].getAnnotation(SOAPObject.SOAPFieldName.class);
+					WSFieldName tmp = fields[i].getAnnotation(WSObject.WSFieldName.class);
 					String name;
 					if(tmp != null) name = tmp.value();
 					else name = "field"+i;
@@ -515,7 +501,7 @@ public class SOAPHttpPage implements HttpPage{
 		if(byte[].class.isAssignableFrom(c)){
 			return "base64Binary";
 		}
-		else if( SOAPObject.class.isAssignableFrom(cTmp) ){
+		else if( WSObject.class.isAssignableFrom(cTmp) ){
 			return c.getSimpleName();
 		}
 		else{
@@ -595,7 +581,7 @@ public class SOAPHttpPage implements HttpPage{
 				msgIn.setUndefined(false);
 
 				//***** Documentation
-				WSDLParamDocumentation tmpParamDoc = m.method.getAnnotation(SOAPInterface.WSDLParamDocumentation.class);
+				WSParamDocumentation tmpParamDoc = m.method.getAnnotation(WSInterface.WSParamDocumentation.class);
 				if(tmpParamDoc != null){
 					org.w3c.dom.Document xmldoc= new DocumentImpl();
 					org.w3c.dom.Element paramDoc = xmldoc.createElement("wsdl:documentation");
@@ -652,7 +638,7 @@ public class SOAPHttpPage implements HttpPage{
 						if(!types.contains( retClass ))
 							types.add( retClass );
 					}
-					else if( SOAPObject.class.isAssignableFrom(cTmp) ){					
+					else if( WSObject.class.isAssignableFrom(cTmp) ){					
 						// its an SOAPObject
 						part.setTypeName(new QName(td, getClassSOAPName( retClass )));
 						// add to type generation list
@@ -680,7 +666,7 @@ public class SOAPHttpPage implements HttpPage{
 			operation.setUndefined(false);			
 
 			//***** Documentation
-			WSDLDocumentation tmpDoc = m.method.getAnnotation(SOAPInterface.WSDLDocumentation.class);
+			WSDocumentation tmpDoc = m.method.getAnnotation(WSInterface.WSDocumentation.class);
 			if(tmpDoc != null){
 				// <!-- example -->
 				org.w3c.dom.Document xmldoc= new DocumentImpl();
@@ -821,7 +807,7 @@ public class SOAPHttpPage implements HttpPage{
 				element.addAttribute("maxOccurs", "unbounded");
 				element.addAttribute("name", "element");
 				element.addAttribute("nillable", "true");
-				if(SOAPObject.class.isAssignableFrom(ctmp))
+				if(WSObject.class.isAssignableFrom(ctmp))
 					element.addAttribute("type", "tns:"+getClassSOAPName(c).replace("[]", ""));
 				else
 					element.addAttribute("type", "xsd:"+getClassSOAPName(c).replace("[]", ""));
@@ -830,7 +816,7 @@ public class SOAPHttpPage implements HttpPage{
 					types.add(ctmp);
 			}
 			// Generate SOAPObject type
-			else if(SOAPObject.class.isAssignableFrom(c)){
+			else if(WSObject.class.isAssignableFrom(c)){
 				Element type = schema.addElement("xsd:complexType");
 				type.addAttribute("name", getClassSOAPName(c));
 
@@ -838,7 +824,7 @@ public class SOAPHttpPage implements HttpPage{
 
 				Field[] fields = c.getFields();
 				for(int i=0; i<fields.length ;i++){
-					SOAPFieldName tmp = fields[i].getAnnotation(SOAPObject.SOAPFieldName.class);
+					WSFieldName tmp = fields[i].getAnnotation(WSObject.WSFieldName.class);
 					String name;
 					if(tmp != null) name = tmp.value();
 					else name = "field"+i;
@@ -848,7 +834,7 @@ public class SOAPHttpPage implements HttpPage{
 
 					// Check if the object is an SOAPObject
 					Class<?> cTmp = getClass(fields[i].getType());
-					if(SOAPObject.class.isAssignableFrom(cTmp)){
+					if(WSObject.class.isAssignableFrom(cTmp)){
 						element.addAttribute("type", "tns:"+getClassSOAPName(cTmp));
 						if(!types.contains(cTmp))
 							types.add(cTmp);

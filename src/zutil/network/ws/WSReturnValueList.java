@@ -1,4 +1,4 @@
-package zutil.network.http.soap;
+package zutil.network.ws;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -15,7 +15,7 @@ import java.lang.reflect.Field;
  * @author Ziver
  *
  */
-public class SOAPReturnValueList {
+public class WSReturnValueList {
 	
 	/**
 	 * Method comments for the WSDL. 
@@ -29,7 +29,7 @@ public class SOAPReturnValueList {
 	}
 	
 	/**
-	 * Disables SOAP publication of the given field.
+	 * Disables publication of the given field.
 	 * 
 	 * @author Ziver
 	 */
@@ -45,12 +45,12 @@ public class SOAPReturnValueList {
 	 */
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target(ElementType.FIELD)
-	public @interface SOAPValueName {
+	public @interface WSValueName {
 	    String value();
 	}
 	
 	
-	protected Object getValue(Field field) throws IllegalArgumentException, IllegalAccessException{
+	public Object getValue(Field field) throws IllegalArgumentException, IllegalAccessException{
 		return field.get(this);
 	}
 }

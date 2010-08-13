@@ -6,10 +6,10 @@ package zutil.network.http.soap;
  * 
  * @author Ziver
  */
-public class SOAPClientException extends Exception{
+public class SOAPException extends Exception{
 	private static final long serialVersionUID = 1L;
 	
-	public SOAPClientException(String string) {
+	public SOAPException(String string) {
 		super(string);
 	}
 }

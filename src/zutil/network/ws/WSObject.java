@@ -1,4 +1,4 @@
-package zutil.network.http.soap;
+package zutil.network.ws;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -6,11 +6,11 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * This class is used as an return Object for SOAP.
+ * This class is used as an return Object for a web service.
  * If an class implements this interface then it can return 
  * multiple values through the SOAPInterface. Example:
  * <pre>
- * 	private static class TestObject implements SOAPObject{
+ * 	private static class TestObject implements WSObject{
  *		@SOAPFieldName("name")
  *		public String name;
  *		@SOAPFieldName("lastname")
@@ -26,17 +26,17 @@ import java.lang.annotation.Target;
  * @author Ziver
  *
  */
-public interface SOAPObject{
+public interface WSObject{
 	/**
-	 * Specifies the SOAP name of an field.
-	 * The fields that are available for SOAP should
+	 * Specifies the name of a field.
+	 * The fields that are available in the service should
 	 * be declared public.
 	 * 
 	 * @author Ziver
 	 */
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target(ElementType.FIELD)
-	public @interface SOAPFieldName {
+	public @interface WSFieldName {
 		String value();
 		boolean optional() default false;
 	}
