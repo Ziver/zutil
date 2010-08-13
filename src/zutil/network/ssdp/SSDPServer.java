@@ -7,14 +7,15 @@ import java.util.HashMap;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import zutil.MultiPrintStream;
-import zutil.log.Logger;
+import zutil.io.StringOutputStream;
+import zutil.log.LogUtil;
 import zutil.network.http.HTTPHeaderParser;
 import zutil.network.http.HttpPrintStream;
 import zutil.network.threaded.ThreadedUDPNetworkThread;
 import zutil.network.threaded.ThreadedUDPNetwork;
-import zutil.wrapper.StringOutputStream;
 
 /**
  * A Server class that announces an service by the SSDP 
@@ -41,7 +42,7 @@ import zutil.wrapper.StringOutputStream;
  * NTS: same as Man but for Notify messages
  */
 public class SSDPServer extends ThreadedUDPNetwork implements ThreadedUDPNetworkThread{
-	public static final Logger logger = new Logger();
+	public static final Logger logger = LogUtil.getLogger();
 	public static final String SERVER_INFO = "SSDP Java Server by Ziver Koc";
 	public static final int DEFAULT_CACHE_TIME = 60*30; // 30 min
 	public static final int BUFFER_SIZE = 512;
@@ -160,8 +161,8 @@ public class SSDPServer extends ThreadedUDPNetwork implements ThreadedUDPNetwork
 			// ******* Respond
 			// Check that the message is an ssdp discovery message
 			if( header.getRequestType().equalsIgnoreCase("M-SEARCH") ){
-				String man = header.getHTTPAttribute("Man").replace("\"", "");
-				String st = header.getHTTPAttribute("ST");
+				String man = header.getHeader("Man").replace("\"", "");
+				String st = header.getHeader("ST");
 				// Check that its the correct URL and that its an ssdp:discover message
 				if( header.getRequestURL().equals("*") && man.equalsIgnoreCase("ssdp:discover") ){
 					// Check if the requested service exists

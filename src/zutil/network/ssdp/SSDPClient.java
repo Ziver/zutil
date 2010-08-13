@@ -6,13 +6,14 @@ import java.net.InetAddress;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 
-import zutil.log.Logger;
+import zutil.io.StringOutputStream;
+import zutil.log.LogUtil;
 import zutil.network.http.HTTPHeaderParser;
 import zutil.network.http.HttpPrintStream;
 import zutil.network.threaded.ThreadedUDPNetwork;
 import zutil.network.threaded.ThreadedUDPNetworkThread;
-import zutil.wrapper.StringOutputStream;
 
 /**
  * An SSDP client class that will request
@@ -21,14 +22,15 @@ import zutil.wrapper.StringOutputStream;
  * @author Ziver
  */
 public class SSDPClient extends ThreadedUDPNetwork implements ThreadedUDPNetworkThread{
-	public static final Logger logger = new Logger();
+	public static final Logger logger = LogUtil.getLogger();
 	// Contains all the received services
 	private HashMap<String, LinkedList<SSDPServiceInfo>> services_st;
 	private HashMap<String, SSDPServiceInfo> 			 services_usn;
 	
 	
 	public static void main(String[] args) throws IOException{
-		Logger.setGlobalLogLevel(Level.FINEST);
+		System.out.println(LogUtil.getCalingClass());
+		LogUtil.setGlobalLogLevel(Level.FINEST);
 		SSDPClient ssdp = new SSDPClient();
 		ssdp.requestService("upnp:rootdevice");
 		ssdp.start();
@@ -151,8 +153,8 @@ public class SSDPClient extends ThreadedUDPNetwork implements ThreadedUDPNetwork
 		HTTPHeaderParser header = new HTTPHeaderParser( new String( packet.getData() ) );
 		logger.log(Level.FINEST, "*********** Recived\n"+header);
 		
-		String usn = header.getHTTPAttribute("USN");
-		String st = header.getHTTPAttribute("ST");
+		String usn = header.getHeader("USN");
+		String st = header.getHeader("ST");
 		StandardSSDPInfo service;
 		// Get existing service
 		if( services_usn.containsKey( usn )){
@@ -164,15 +166,15 @@ public class SSDPClient extends ThreadedUDPNetwork implements ThreadedUDPNetwork
 			services_usn.put( usn, service);
 			if( !services_st.containsKey(st) )
 				services_st.put( st, new LinkedList<SSDPServiceInfo>() );
-			services_st.get( header.getHTTPAttribute("ST") ).add( service );
+			services_st.get( header.getHeader("ST") ).add( service );
 		}
 		
-		service.setLocation( header.getHTTPAttribute("LOCATION") );
+		service.setLocation( header.getHeader("LOCATION") );
 		service.setST( st );
 		service.setUSN( usn );
 		service.setExpirationTime( 
 				System.currentTimeMillis() +
-				1000 * getCacheTime(header.getHTTPAttribute("Cache-Control")) );
+				1000 * getCacheTime(header.getHeader("Cache-Control")) );
 		logger.log(Level.FINEST, "*********** Recived\n"+service);
 	}
 	
