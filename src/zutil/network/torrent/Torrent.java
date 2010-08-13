@@ -5,7 +5,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import zutil.FileFinder;
+import zutil.FileUtil;
 
 public class Torrent {
 	// Name of the torrent
@@ -29,7 +29,7 @@ public class Torrent {
 	private boolean is_private;
 	
 	public Torrent(File torrent) throws IOException{
-		this(FileFinder.getFileContent(	torrent ));
+		this(FileUtil.getFileContent(	torrent ));
 	}
 
 	public Torrent(String data){

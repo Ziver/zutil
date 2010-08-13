@@ -5,7 +5,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.LinkedList;
 
-import zutil.FileFinder;
+import zutil.FileUtil;
 import zutil.MultiPrintStream;
 
 /**
@@ -19,7 +19,7 @@ public class TorrentParser {
 	 */
 	public static void main(String[] args){
 		try {
-			String tmp = FileFinder.getFileContent(FileFinder.find("C:\\Users\\Ziver\\Desktop\\test.torrent"));
+			String tmp = FileUtil.getFileContent(FileUtil.find("C:\\Users\\Ziver\\Desktop\\test.torrent"));
 			MultiPrintStream.out.dump(TorrentParser.decode(tmp));
 			
 		} catch (FileNotFoundException e) {
