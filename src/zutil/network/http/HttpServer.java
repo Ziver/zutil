@@ -153,15 +153,15 @@ public class HttpServer extends ThreadedTCPNetworkServer{
 
 				HTTPHeaderParser parser = new HTTPHeaderParser(in);
 				logger.finest(parser.toString());
-				client_info = parser.getAttributes();
+				client_info = parser.getHeaders();
 				request = parser.getURLAttributes();
 				cookie = parser.getCookies();
 
 
 				//******* Read in the post data if available
-				if( parser.getHTTPAttribute("Content-Length")!=null ){
+				if( parser.getHeader("Content-Length")!=null ){
 					// Reads the post data size
-					tmp = parser.getHTTPAttribute("Content-Length");
+					tmp = parser.getHeader("Content-Length");
 					int post_data_length = Integer.parseInt( tmp );
 					// read the data
 					StringBuffer tmpb = new StringBuffer();
@@ -170,7 +170,7 @@ public class HttpServer extends ThreadedTCPNetworkServer{
 						tmpb.append((char)in.read());
 					}
 
-					tmp = parser.getHTTPAttribute("Content-Type");
+					tmp = parser.getHeader("Content-Type");
 					if( tmp.contains("application/x-www-form-urlencoded") ){
 						// get the variables
 						HTTPHeaderParser.parseUrlAttributes( tmpb.toString(), request );

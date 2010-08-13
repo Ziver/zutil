@@ -21,7 +21,7 @@ public class HTTPHeaderParser {
 	private int httpCode;
 
 	// Parameters
-	private HashMap<String, String> attributes;
+	private HashMap<String, String> headers;
 	private HashMap<String, String> cookies;
 
 	/**
@@ -32,12 +32,12 @@ public class HTTPHeaderParser {
 	 */
 	public HTTPHeaderParser(BufferedReader in) throws IOException{
 		url_attr = new HashMap<String, String>();
-		attributes = new HashMap<String, String>();
+		headers = new HashMap<String, String>();
 		cookies = new HashMap<String, String>();
 
 		String tmp = null;
 		if( (tmp=in.readLine()) != null && !tmp.isEmpty() ){
-			parseStartLine( tmp );
+			parseFirstLine( tmp );
 			while( (tmp=in.readLine()) != null && !tmp.isEmpty() ){
 				parseLine( tmp );
 			}
@@ -52,14 +52,14 @@ public class HTTPHeaderParser {
 	 */
 	public HTTPHeaderParser(String in){
 		url_attr = new HashMap<String, String>();
-		attributes = new HashMap<String, String>();
+		headers = new HashMap<String, String>();
 		cookies = new HashMap<String, String>();
 
 		Scanner sc = new Scanner(in);
 		sc.useDelimiter("\n");
 		String tmp = null;
 		if( sc.hasNext() && !(tmp=sc.next()).isEmpty() ){
-			parseStartLine( tmp );
+			parseFirstLine( tmp );
 			while( sc.hasNext() && !(tmp=sc.next()).isEmpty() ){
 				parseLine( tmp );
 			}
@@ -75,7 +75,7 @@ public class HTTPHeaderParser {
 	 * @param map The HashMap to put the variables to
 	 * @return The path and file name as a String
 	 */
-	protected void parseStartLine(String line){
+	protected void parseFirstLine(String line){
 		// Server Response
 		if( line.startsWith("HTTP/") ){
 			version = Float.parseFloat( line.substring( 5 , 8) );
@@ -88,9 +88,10 @@ public class HTTPHeaderParser {
 			line = (line.substring(type.length()+1, line.lastIndexOf("HTTP/"))).trim();
 
 			// parse URL and attributes
-			if(line.indexOf('?') > -1){ 
-				url = line.substring(0, line.indexOf('?'));
-				line = line.substring(line.indexOf('?')+1, line.length());
+			int index = line.indexOf('?');
+			if(index > -1){ 
+				url = line.substring(0, index );
+				line = line.substring( index+1, line.length());
 				parseUrlAttributes(line, url_attr);
 			}
 			else{
@@ -127,7 +128,7 @@ public class HTTPHeaderParser {
 	 */
 	protected void parseLine(String line){
 		String[] data = colonPattern.split( line, 2 );
-		attributes.put(
+		headers.put(
 				data[0].trim().toUpperCase(), 					// Key
 				(data.length>1 ? data[1] : "").trim()); 		//Value
 	}
@@ -139,8 +140,8 @@ public class HTTPHeaderParser {
 	 * @return a HashMap with cookie values
 	 */
 	protected void parseCookies(){
-		if( attributes.containsKey("COOKIE") ){
-			String[] tmp = semiColonPattern.split( attributes.get("COOKIE") );
+		if( headers.containsKey("COOKIE") ){
+			String[] tmp = semiColonPattern.split( headers.get("COOKIE") );
 			String[] tmp2;
 			for(String cookie : tmp){
 				tmp2 = equalPattern.split(cookie, 2);
@@ -186,8 +187,8 @@ public class HTTPHeaderParser {
 	 * Returns the HTTP attribute value of the given name,
 	 * returns null if there is no such attribute
 	 */
-	public String getHTTPAttribute(String name){
-		return attributes.get( name.toUpperCase() );
+	public String getHeader(String name){
+		return headers.get( name.toUpperCase() );
 	}
 	/**
 	 * Returns the cookie value of the given name,
@@ -199,34 +200,30 @@ public class HTTPHeaderParser {
 
 
 	/**
-	 * @return athe parsed cookies
+	 * @return a map of the parsed cookies
 	 */
 	public HashMap<String, String> getCookies(){
 		return cookies;
 	}
 	/**
-	 * @return the parsed URL values
+	 * @return a map of the parsed URL attributes
 	 */
 	public HashMap<String, String> getURLAttributes(){
 		return url_attr;
 	}
 	/**
-	 * @return the parsed header attributes
+	 * @return a map of the parsed headers
 	 */
-	public HashMap<String, String> getAttributes(){
-		return attributes;
+	public HashMap<String, String> getHeaders(){
+		return headers;
 	}
 
 
 	public String toString(){
 		StringBuffer tmp = new StringBuffer();
-		tmp.append("Type: ");
-		tmp.append(type);
-		tmp.append("\nHTTP Version: HTTP/");
-		tmp.append(version);
-
-		tmp.append("\nURL: ");
-		tmp.append(url);		
+		tmp.append("Type: ").append(type);
+		tmp.append("\nHTTP Version: HTTP/").append(version);
+		tmp.append("\nURL: ").append(url);
 
 		for( String key : url_attr.keySet() ){
 			tmp.append("\nURL Attr: ");
@@ -235,11 +232,11 @@ public class HTTPHeaderParser {
 			tmp.append( url_attr.get(key) );
 		}
 
-		for( String key : attributes.keySet() ){
-			tmp.append("\nHTTP Attr: ");
+		for( String key : headers.keySet() ){
+			tmp.append("\nHeader: ");
 			tmp.append(key);
 			tmp.append("=");
-			tmp.append( attributes.get(key) );
+			tmp.append( headers.get(key) );
 		}
 
 		for( String key : cookies.keySet() ){
