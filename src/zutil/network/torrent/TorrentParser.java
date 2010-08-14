@@ -75,7 +75,7 @@ public class TorrentParser {
 		case 'l':
 			//System.out.println("Found List at "+index);
 			data.deleteCharAt(0);
-			LinkedList list = new LinkedList();
+			LinkedList<Object> list = new LinkedList<Object>();
 			c = data.charAt(0);
 			while(c != 'e'){
 				list.add(decode_BEncoded(data));
@@ -94,7 +94,7 @@ public class TorrentParser {
 		case 'd':
 			//System.out.println("Found Dictionary at "+index);
 			data.deleteCharAt(0);
-			HashMap map = new HashMap();
+			HashMap<Object,Object> map = new HashMap<Object,Object>();
 			c = data.charAt(0);
 			while(c != 'e'){
 				Object tmp2 = decode_BEncoded(data);

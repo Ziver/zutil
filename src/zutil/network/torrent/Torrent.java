@@ -63,7 +63,7 @@ public class Torrent {
 		created_by = (String)dataMap.get("created by");
 		main_tracker = (String)dataMap.get("announce");
 		tracker_list = (ArrayList<String>)dataMap.get("announce-list");
-		info_hash = (HashMap)dataMap.get("info");
+		info_hash = (HashMap<String, Object>)dataMap.get("info");
 		is_private = (((Integer)dataMap.get("private")) != 0);
 	}
 	
