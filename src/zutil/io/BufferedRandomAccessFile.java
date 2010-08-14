@@ -12,8 +12,8 @@ import java.io.RandomAccessFile;
  * @author Ziver
  */
 public class BufferedRandomAccessFile extends RandomAccessFile{
-	// The size of the buffer
-	private int BUF_SIZE = 256;
+	// The size of the buffer in Byte
+	private int BUF_SIZE = 64*1024;
 
 	// The Buffer
 	byte buffer[];
@@ -74,22 +74,6 @@ public class BufferedRandomAccessFile extends RandomAccessFile{
 	}
 
 	/**
-	 * @return the next byte in the buffer
-	 */
-	public final int read() throws IOException{
-		if(buf_pos >= buf_end) {
-			if(fillBuffer() < 0)
-				return -1;
-		}
-		if(buf_end == 0) {
-			return -1;
-		} else {
-			buf_pos++;
-			return buffer[buf_pos-1];
-		}
-	}
-
-	/**
 	 * Reads in data from the file to the buffer
 	 * 
 	 * @return the buffer
@@ -117,6 +101,22 @@ public class BufferedRandomAccessFile extends RandomAccessFile{
 	}
 
 	/**
+	 * @return the next byte in the buffer
+	 */
+	public final int read() throws IOException{
+		if(buf_pos >= buf_end) {
+			if(fillBuffer() < 0)
+				return -1;
+		}
+		if(buf_end == 0) {
+			return -1;
+		} else {
+			buf_pos++;
+			return buffer[buf_pos-1];
+		}
+	}
+	
+	/**
 	 * Fills the given array with data from the buffer
 	 * 
 	 * @param b is the array that will be filled
@@ -135,13 +135,26 @@ public class BufferedRandomAccessFile extends RandomAccessFile{
 	 * @return the amount of bytes read or -1 if eof
 	 */
 	public int read(byte b[], int off, int len) throws IOException {
+		if(buf_pos >= buf_end) {
+			if(fillBuffer() < 0)
+				return -1; // EOF
+		}
+		
+		// Copy from buffer
 		int leftover = buf_end - buf_pos;
 		if(len <= leftover) {
 			System.arraycopy(buffer, buf_pos, b, off, len);
 			buf_pos += len;
 			return len;
 		}
-		for(int i = 0; i < len; i++) {
+		
+		System.arraycopy(buffer, buf_pos, b, off, leftover);
+		int n = super.read(b, off+leftover, len-leftover );
+		fillBuffer();
+		if( n >= 0 )
+			return leftover + n;
+		return leftover;
+		/*for(int i = 0; i < len; i++) {
 			int c = this.read();
 			if(c != -1)
 				b[off+i] = (byte)c;
@@ -149,7 +162,7 @@ public class BufferedRandomAccessFile extends RandomAccessFile{
 				return i;
 			}
 		}
-		return len;
+		return len;*/
 	}
 
 	/**

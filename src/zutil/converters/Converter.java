@@ -7,7 +7,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.BitSet;
 
-import zutil.struct.DynamicByteArrayStream;
+import zutil.io.DynamicByteArrayStream;
 
 public class Converter {
 	private Converter(){}
