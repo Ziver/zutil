@@ -19,6 +19,7 @@ import java.util.logging.Logger;
 import zutil.Encrypter;
 import zutil.MultiPrintStream;
 import zutil.converters.Converter;
+import zutil.io.DynamicByteArrayStream;
 import zutil.log.LogUtil;
 import zutil.network.nio.message.type.ResponseRequestMessage;
 import zutil.network.nio.message.type.SystemMessage;
@@ -27,7 +28,6 @@ import zutil.network.nio.server.ChangeRequest;
 import zutil.network.nio.server.ClientData;
 import zutil.network.nio.worker.SystemWorker;
 import zutil.network.nio.worker.Worker;
-import zutil.struct.DynamicByteArrayStream;
 
 
 public abstract class NioNetwork implements Runnable {
