@@ -1,6 +1,6 @@
 package zutil.algo.sort.sortable;
 
-@SuppressWarnings("unchecked")
+@SuppressWarnings({ "unchecked", "rawtypes" })
 public class SortableComparableArray implements SortableDataList<Comparable>{
 	private Comparable[] list;
 	

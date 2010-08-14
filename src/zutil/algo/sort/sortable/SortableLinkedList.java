@@ -2,6 +2,7 @@ package zutil.algo.sort.sortable;
 
 import java.util.LinkedList;
 
+@SuppressWarnings({ "unchecked", "rawtypes" })
 public class SortableLinkedList<T> implements SortableDataList<T>{
 	private LinkedList<T> list;
 	
@@ -27,14 +28,12 @@ public class SortableLinkedList<T> implements SortableDataList<T>{
 		list.set(b, temp);
 	}
 	
-	@SuppressWarnings("unchecked")
 	public int compare(int a, int b) {
 		Comparable aa = (Comparable)list.get(a);
 		Comparable bb = (Comparable)list.get(b);
 		return aa.compareTo(bb);
 	}
 
-	@SuppressWarnings("unchecked")
 	public int compare(int a, T b) {
 		Comparable aa = (Comparable)list.get(a);
 		Comparable bb = (Comparable)b;
