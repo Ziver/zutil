@@ -97,9 +97,8 @@ public class Converter {
 	 * @param interf the interface to look for
 	 * @return true if the interface is implemented else false
 	 */
-	@SuppressWarnings("unchecked")
-	public static boolean isInstanceOf(Object object, Class interf){
-		Class[] objectInterf = object.getClass().getInterfaces();
+	public static boolean isInstanceOf(Object object, Class<?> interf){
+		Class<?>[] objectInterf = object.getClass().getInterfaces();
 		for(int i=0; i<objectInterf.length ;i++){
 			if(objectInterf[i] == interf){
 				return true;

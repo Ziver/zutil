@@ -17,6 +17,7 @@ import zutil.network.nio.worker.WorkerDataEvent;
  * 
  * @author Ziver
  */
+@SuppressWarnings({ "unchecked", "rawtypes" })
 public class GridClient extends ThreadedEventWorker {
 	private static LinkedList<GridJob> jobQueue;
 	private static GridThread thread;
@@ -43,7 +44,7 @@ public class GridClient extends ThreadedEventWorker {
 	 */
 	public void initiate() throws IOException{
 		network.setDefaultWorker(this);
-		network.send(new GridMessage<Object>(GridMessage.REGISTER));
+		network.send(new GridMessage(GridMessage.REGISTER));
 
 		for(int i=0; i<Runtime.getRuntime().availableProcessors() ;i++){
 			Thread t = new Thread(thread);
@@ -55,14 +56,14 @@ public class GridClient extends ThreadedEventWorker {
 	public void messageEvent(WorkerDataEvent e) {
 		// ignores other messages than GridMessage
 		if(e.data instanceof GridMessage){
-			GridMessage<?> msg = (GridMessage<?>)e.data;
+			GridMessage msg = (GridMessage)e.data;
 			switch(msg.messageType()){
 			// Receive data from Server
 			case GridMessage.INIT_DATA:
 				thread.setInitData(msg.getData());
 				break;
 			case GridMessage.COMP_DATA:
-				jobQueue.add(new GridJob(msg.getJobQueueID(), (Queue<?>)msg.getData()));
+				jobQueue.add(new GridJob(msg.getJobQueueID(), (Queue)msg.getData()));
 				break;
 			}
 		}
@@ -78,9 +79,9 @@ public class GridClient extends ThreadedEventWorker {
 	 */
 	public static void jobDone(int jobID, boolean correct, Object result) throws IOException{
 		if(correct)
-			network.send(new GridMessage<Object>(GridMessage.COMP_SUCCESSFUL, jobID, result));
+			network.send(new GridMessage(GridMessage.COMP_SUCCESSFUL, jobID, result));
 		else
-			network.send(new GridMessage<Object>(GridMessage.COMP_INCORRECT, jobID, result));
+			network.send(new GridMessage(GridMessage.COMP_INCORRECT, jobID, result));
 	}
 
 	/**
@@ -91,7 +92,7 @@ public class GridClient extends ThreadedEventWorker {
 	 */
 	public static void jobError(int jobID){
 		try{
-			network.send(new GridMessage<Object>(GridMessage.COMP_SUCCESSFUL, jobID));
+			network.send(new GridMessage(GridMessage.COMP_SUCCESSFUL, jobID));
 		}catch(Exception e){e.printStackTrace();}
 	}
 
@@ -101,7 +102,7 @@ public class GridClient extends ThreadedEventWorker {
 	 */
 	public static synchronized GridJob getNextJob() throws IOException{
 		if(jobQueue.isEmpty()){
-			network.send(new GridMessage<Object>(GridMessage.NEW_DATA));
+			network.send(new GridMessage(GridMessage.NEW_DATA));
 			while(jobQueue.isEmpty()){
 				try{Thread.sleep(100);}catch(Exception e){}
 			}

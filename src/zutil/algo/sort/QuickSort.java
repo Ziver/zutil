@@ -43,7 +43,7 @@ public class QuickSort{
      * @param stop is the index to stop
      * @param type is the type of pivot to use
      */	
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public static void sort(SortableDataList list, int start, int stop, int type, boolean insertionSort){
 		if(stop-start <= 15 && insertionSort){
 			SimpleSort.insertionSort( list, start, stop);
@@ -76,7 +76,7 @@ public class QuickSort{
 
 	}
 
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	private static int pivot(SortableDataList<?> list, int start, int stop,int type){
     	switch(type){
     		case RANDOM_PIVOT:

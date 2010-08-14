@@ -14,18 +14,18 @@ import zutil.network.nio.worker.WorkerDataEvent;
  * 
  * @author Ziver
  */
-
+@SuppressWarnings({ "unchecked", "rawtypes" })
 public class GridServerWorker extends ThreadedEventWorker{
 	// Job timeout after 30 min
 	public static int JOB_TIMEOUT = 1000*60*30;
 
 	private HashMap<Integer, GridJob> jobs; // contains all the ongoing jobs
 	private Queue<GridJob> reSendjobQueue; // Contains all the jobs that will be recalculated
-	private GridJobGenerator<?> jobGenerator; // The job generator
-	private GridResultHandler<Object> resHandler;
+	private GridJobGenerator jobGenerator; // The job generator
+	private GridResultHandler resHandler;
 	private int nextJobID;
 
-	public GridServerWorker(GridResultHandler<Object> resHandler, GridJobGenerator<?> jobGenerator){
+	public GridServerWorker(GridResultHandler resHandler, GridJobGenerator jobGenerator){
 		this.resHandler = resHandler;
 		this.jobGenerator = jobGenerator;
 		nextJobID = 0;
@@ -41,12 +41,12 @@ public class GridServerWorker extends ThreadedEventWorker{
 		try {
 			// ignores other messages than GridMessage
 			if(e.data instanceof GridMessage){
-				GridMessage<?> msg = (GridMessage<?>)e.data;
+				GridMessage msg = (GridMessage)e.data;
 				GridJob job = null;
 
 				switch(msg.messageType()){
 				case GridMessage.REGISTER:
-					e.network.send(e.socket, new GridMessage<Object>(GridMessage.INIT_DATA, 0, jobGenerator.initValues()));
+					e.network.send(e.socket, new GridMessage(GridMessage.INIT_DATA, 0, jobGenerator.initValues()));
 					break;
 				// Sending new data to compute to the client
 				case GridMessage.NEW_DATA:
@@ -60,7 +60,7 @@ public class GridServerWorker extends ThreadedEventWorker{
 						jobs.put(job.jobID, job);
 						nextJobID++;
 					}
-					GridMessage<Object> newMsg = new GridMessage<Object>(GridMessage.COMP_DATA, job.jobID, job.job);
+					GridMessage newMsg = new GridMessage(GridMessage.COMP_DATA, job.jobID, job.job);
 					e.network.send(e.socket, newMsg);				
 					break;
 
