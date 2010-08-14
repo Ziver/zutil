@@ -23,8 +23,7 @@ public class SystemWorker extends ThreadedEventWorker {
 	// Maps a SocketChannel to a RspHandler
 	private Map<Double, ResponseEvent> rspEvents = new HashMap<Double, ResponseEvent>();	
 	// Difren services listening on specific messages
-	@SuppressWarnings("unchecked")
-	private Map<Class, NetworkService> services = new HashMap<Class, NetworkService>();
+	private Map<Class<?>, NetworkService> services = new HashMap<Class<?>, NetworkService>();
 	/**
 	 * Creates a new SystemWorker
 	 * @param nio The Network
@@ -69,8 +68,7 @@ public class SystemWorker extends ThreadedEventWorker {
 	 * @param c The Message class
 	 * @param ns The service
 	 */
-	@SuppressWarnings("unchecked")
-	public void registerService(Class c, NetworkService ns){
+	public void registerService(Class<?> c, NetworkService ns){
 		services.put(c, ns);
 	}
 
@@ -79,8 +77,7 @@ public class SystemWorker extends ThreadedEventWorker {
 	 * 
 	 * @param c The class
 	 */
-	@SuppressWarnings("unchecked")
-	public void unregisterService(Class c){
+	public void unregisterService(Class<?> c){
 		services.remove(c);
 	}
 

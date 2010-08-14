@@ -6,5 +6,6 @@ package zutil.network.nio.worker.grid;
  * @author Ziver
  */
 public interface GridResultHandler<T> {
+	
 	public void resultEvent(int jobID, boolean correct, T result);
 }
