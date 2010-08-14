@@ -47,7 +47,6 @@ public class TorrentParser {
 	 * @param index The index in data to start from
 	 * @return
 	 */
-	@SuppressWarnings("unchecked")
 	private static Object decode_BEncoded(StringBuffer data){
 		String tmp;
 		char c = ' ';
