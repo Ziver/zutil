@@ -10,7 +10,7 @@ import zutil.algo.sort.sortable.SortableDataList;
  * @author Ziver
  *
  */
-@SuppressWarnings("unchecked")
+@SuppressWarnings({ "unchecked", "rawtypes" })
 public class QuickSelect {
 	
 	public static Object find(SortableDataList list, int k){

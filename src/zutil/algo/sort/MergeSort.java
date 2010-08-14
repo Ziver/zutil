@@ -110,7 +110,7 @@ public class MergeSort{
 	 * @param stop is the end of the second sublist
 	 * @param pivot is the end index for the first list and the beginning of the second.
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	protected static <T> void merge(SortableDataList<T> list, int start, int stop, int pivot){
 		int length = pivot-start;
 		Object[] tmp = new Object[stop-start];
