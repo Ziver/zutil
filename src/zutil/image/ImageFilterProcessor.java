@@ -14,7 +14,7 @@ import zutil.ProgressListener;
  */
 public abstract class ImageFilterProcessor {
 	private BufferedImage img;
-	private ProgressListener progress;
+	private ProgressListener<?> progress;
 
 	public ImageFilterProcessor(BufferedImage img){
 		this.img = img;
@@ -24,14 +24,14 @@ public abstract class ImageFilterProcessor {
 	 * Sets the listener
 	 * @param listener is the listener, null to disable the progress
 	 */
-	public void setProgressListener(ProgressListener listener){
+	public void setProgressListener(ProgressListener<?> listener){
 		this.progress = listener;
 	}
 	
 	/**
 	 * Returns the listener
 	 */
-	public ProgressListener getProgressListener(){
+	public ProgressListener<?> getProgressListener(){
 		return this.progress;
 	}
 	
