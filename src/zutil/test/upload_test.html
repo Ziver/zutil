@@ -1,0 +1,49 @@
+<html>
+<head>
+	<script type='text/javascript' src='js/jquery-1.4.2.min.js'></script>
+	<script type='text/javascript' src='upload?js'></script>
+	<style type='text/css'> 
+		.progressbar{
+		    background: transparent url(img/bar-grey.gif) repeat-x scroll 0%;
+		    border: 1px solid black;
+		    color: white;
+		    height: 16px;
+		    margin: 0pt;
+		    padding: 0pt;
+		    position: relative;
+		    text-align: center;
+		    width; 150px;
+		    border-collapse: collapse;
+		}
+		.progressbar b{
+		    background: transparent url(img/bar-revered.gif) repeat-x scroll 0%;
+		    float: left;
+		    height: 16px;
+		    margin: 0pt;
+		    padding: 0pt;
+		    font-size: 11px;
+		}
+		
+		ul{
+			list-style-type: none;
+			padding: 0px;
+			margin: 0px;
+		}
+	</style> 
+</head>
+<body>
+	<FORM id="AjaxFileUpload">
+		<INPUT type="file" multiple name="file" />
+		<INPUT type="submit" />
+	</FORM>
+	<UL id="UploadQueue">
+		<li id="1367232194">
+			<div class="progressbar">	
+				<b id="progress" style="width: 70%; display: block; ">		
+					<span id="filename">Test</span> 	
+				</b>
+			</div>
+		</li>
+	</UL>	    
+</body>
+</html>

@@ -6,6 +6,7 @@ package zutil;
  * @author Ziver *
  */
 public class StringUtil {
+	public static final String[] sizes = new String[]{"YB", "ZB", "EB", "PB", "TB", "GB", "MB", "kB", "B"};
 
 	/**
 	 * Present a size (in bytes) as a human-readable value
@@ -14,7 +15,6 @@ public class StringUtil {
 	 * @return string
 	 */
 	public static String formatBytesToString(long bytes){
-		String[] sizes = new String[]{"YB", "ZB", "EB", "PB", "TB", "GB", "MB", "kB", "B"};
 		int total = sizes.length-1;
 		double value = bytes;
 		
@@ -22,7 +22,7 @@ public class StringUtil {
 			value /= 1024;
 		}
 		
-		value = (double)( (int)(value*100) )/100;
+		value = (double)( (int)(value*10) )/10;
 		return value+" "+sizes[total];
 	}
 	
