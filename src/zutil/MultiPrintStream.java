@@ -202,11 +202,12 @@ public class MultiPrintStream extends PrintStream {
 	 * @param head is the string that will be put in front of every line
 	 * @return A String with all the printed data
 	 */
-	@SuppressWarnings("unchecked")
+
 	private String dumpToString( Object o , String head) {
-		if(o == null) return "NULL";
+		if(o == null) 
+			return "NULL";
 		StringBuffer buffer = new StringBuffer();
-		Class oClass = o.getClass();
+		Class<?> oClass = o.getClass();
 		buffer.append( oClass.getName() );
 		String nextHead = head + "\t";
 		// Prints out Arrays
@@ -226,7 +227,7 @@ public class MultiPrintStream extends PrintStream {
 		}
 		// Prints out a list
 		else if(o instanceof Collection){
-			Iterator it = ((Collection)o).iterator();
+			Iterator<?> it = ((Collection<?>)o).iterator();
 			buffer.append( "{" );
 			while(it.hasNext()){
 				Object value = it.next();
@@ -242,11 +243,11 @@ public class MultiPrintStream extends PrintStream {
 		}
 		// Prints out a Map
 		else if(o instanceof Map){
-			Iterator it = ((Map)o).keySet().iterator();
+			Iterator<?> it = ((Map<?,?>)o).keySet().iterator();
 			buffer.append( "{" );
 			while(it.hasNext()){
 				Object key = it.next();
-				Object value = ((Map)o).get(key);
+				Object value = ((Map<?,?>)o).get(key);
 				buffer.append("\n");
 				buffer.append(nextHead);
 				buffer.append( key );
@@ -330,7 +331,6 @@ public class MultiPrintStream extends PrintStream {
 	/**
 	 * An helper function for the dump function.
 	 */
-	@SuppressWarnings("unchecked")
 	private boolean dumbCapable(Object o){
 		if(o != null){		
 			if(o.getClass().isArray()) return true;
