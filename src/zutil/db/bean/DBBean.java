@@ -18,10 +18,23 @@ import java.util.NoSuchElementException;
 import zutil.db.DBConnection;
 
 /**
+ * <XMP>
  * The class that extends this will be able to save its state to a DB.
  * Fields that are transient will be ignored, and fields that extend 
  * DBBean will be replaced by the id field of that class.
  * 
+ * Supported fields:
+ * *Boolean
+ * *Integer
+ * *Short
+ * *Float
+ * *Double
+ * *String
+ * *Character
+ * *DBBean
+ * *List<DBBean>
+ * 
+ * </XMP>
  * @author Ziver
  */
 public abstract class DBBean {
@@ -32,6 +45,15 @@ public abstract class DBBean {
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target(ElementType.TYPE)
 	public @interface DBTable {
+	    String value();
+	}
+	
+	/**
+	 * Sets the name of the table that links different DBBeans together
+	 */
+	@Retention(RetentionPolicy.RUNTIME)
+	@Target(ElementType.FIELD)
+	public @interface DBLinkTable {
 	    String value();
 	}
 	
@@ -57,15 +79,16 @@ public abstract class DBBean {
 			fields = new ArrayList<Field>();
 		}
 	}
-	/**
-	 * This is a cache of all the initialized beans
-	 */
-	private static HashMap<Class<? extends DBBean>,DBBeanConfig> beanConfigs = new HashMap<Class<? extends DBBean>,DBBeanConfig>();
 	
+	/** This is a cache of all the initialized beans */	 
+	private static HashMap<Class<? extends DBBean>,DBBeanConfig> beanConfigs = new HashMap<Class<? extends DBBean>,DBBeanConfig>();
+	/** This value is for preventing recursive loops */	 
+	private boolean processing;
 	
 	protected DBBean(){
 		if( !beanConfigs.containsKey( this.getClass() ) )
 			initBeanConfig( this.getClass() );
+		processing = false;
 	}
 	
 	/**
@@ -119,7 +142,11 @@ public abstract class DBBean {
 	/**
 	 * Saves the Object to the DB
 	 */
+	@SuppressWarnings("unchecked")
 	public void save(DBConnection sql) throws SQLException{
+		if(processing)
+			return;
+		processing = true;
 		Class<? extends DBBean> c = this.getClass();
 		DBBeanConfig config = beanConfigs.get(c);
 		try {
@@ -141,10 +168,30 @@ public abstract class DBBean {
 				Field field = config.fields.get(i);				
 				
 				// Another DBBean class
-				if( DBBean.class.isAssignableFrom( field.getDeclaringClass() )){
+				if( DBBean.class.isAssignableFrom( field.getType() )){
 					DBBean subobj = (DBBean)field.get(this);
 					subobj.save(sql);
 					stmt.setObject(i+2, getBeanConfig(subobj.getClass()) );
+				}
+				// A list of DBBeans
+				else if( List.class.isAssignableFrom( field.getType() ) && 
+						field.getAnnotation( DBLinkTable.class ) != null){
+					List<DBBean> list = (List<DBBean>)field.get(this);
+					String subtable = field.getAnnotation( DBLinkTable.class ).value().replace("\"", "");
+
+					DBBeanConfig subConfig = null;
+					for(DBBean subobj : list){
+						if(subConfig == null)
+							subConfig = beanConfigs.get( subobj.getClass() );
+						// Save links in link table
+						PreparedStatement subStmt = sql.getPreparedStatement("REPLACE INTO \""+subtable+"\" "+config.tableName+"=? ?=?");
+						subStmt.setObject(1, config.id_field);
+						subStmt.setString(2, subConfig.tableName);
+						subStmt.setObject(3, subConfig.id_field.get(subobj));
+						DBConnection.exec(subStmt);
+						// Save the sub bean
+						subobj.save(sql);
+					}
 				}
 				// Normal field
 				else
@@ -161,7 +208,7 @@ public abstract class DBBean {
 	}
 	
 	/**
-	 * Deletes the object from the DB
+	 * Deletes the object from the DB, WARNING will not delete sub beans
 	 */
 	public void delete(DBConnection sql){
 		Class<? extends DBBean> c = this.getClass();
@@ -189,16 +236,16 @@ public abstract class DBBean {
 	 * @param 	c 		is the class of the bean
 	 * @return			a LinkedList with all the Beans in the DB
 	 */
-	public static <T extends DBBean> List<T> load(DBConnection sql, Class<T> c) throws SQLException {
+	public static <T extends DBBean> List<T> load(DBConnection db, Class<T> c) throws SQLException {
 		// Initiate a BeanConfig if there is non
 		if( !beanConfigs.containsKey( c ) )
 			initBeanConfig( c );
 		DBBeanConfig config = beanConfigs.get(c);
 		// Generate query
-		PreparedStatement stmt = sql.getPreparedStatement( "SELECT * FROM ?" );
+		PreparedStatement stmt = db.getPreparedStatement( "SELECT * FROM ?" );
 		stmt.setString(1, config.tableName);
 		// Run query
-		List<T> list = DBConnection.exec(stmt, DBBeanResultHandler.createList(c) );
+		List<T> list = DBConnection.exec(stmt, DBBeanSQLResultHandler.createList(c, db) );
 		return list;
 	}
 	
@@ -210,18 +257,18 @@ public abstract class DBBean {
 	 * @param	id		is the id value of the bean
 	 * @return			a DBBean Object with the specific id or null
 	 */
-	public static <T extends DBBean> T load(DBConnection sql, Class<T> c, Object id) throws SQLException {
+	public static <T extends DBBean> T load(DBConnection db, Class<T> c, Object id) throws SQLException {
 		// Initiate a BeanConfig if there is non
 		if( !beanConfigs.containsKey( c ) )
 			initBeanConfig( c );
 		DBBeanConfig config = beanConfigs.get(c);
 		// Generate query
-		PreparedStatement stmt = sql.getPreparedStatement( "SELECT * FROM ? WHERE ?=? LIMIT 1" );
+		PreparedStatement stmt = db.getPreparedStatement( "SELECT * FROM ? WHERE ?=? LIMIT 1" );
 		stmt.setString(1, config.tableName);
 		stmt.setString(2, config.id_field.getName());
 		stmt.setObject(3, id );
 		// Run query
-		T obj = DBConnection.exec(stmt, DBBeanResultHandler.create(c) );
+		T obj = DBConnection.exec(stmt, DBBeanSQLResultHandler.create(c, db) );
 		return obj;
 	}
 	
@@ -284,6 +331,7 @@ public abstract class DBBean {
 	 */
 	protected Object getFieldValue(Field field){
 		try {
+			field.setAccessible(true);
 			return field.get(this);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -299,6 +347,7 @@ public abstract class DBBean {
 	 */
 	protected void setFieldValue(Field field, Object o){
 		try {
+			field.setAccessible(true);
 			field.set(this, o);
 		} catch (Exception e) {
 			e.printStackTrace();
