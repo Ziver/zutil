@@ -54,7 +54,10 @@ public abstract class DBBean {
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target(ElementType.FIELD)
 	public @interface DBLinkTable {
-	    String value();
+		/** The name of the Link table */
+	    String name();
+	    /** The name of the column that contains this objects id */
+	    String column() default "";
 	}
 	
 	/**
@@ -177,17 +180,21 @@ public abstract class DBBean {
 				else if( List.class.isAssignableFrom( field.getType() ) && 
 						field.getAnnotation( DBLinkTable.class ) != null){
 					List<DBBean> list = (List<DBBean>)field.get(this);
-					String subtable = field.getAnnotation( DBLinkTable.class ).value().replace("\"", "");
+					DBLinkTable linkTable = field.getAnnotation( DBLinkTable.class );
+					String subtable = linkTable.name();
+					String idcol = (linkTable.column().isEmpty() ? config.tableName : linkTable.column() );
 
 					DBBeanConfig subConfig = null;
 					for(DBBean subobj : list){
 						if(subConfig == null)
 							subConfig = beanConfigs.get( subobj.getClass() );
 						// Save links in link table
-						PreparedStatement subStmt = sql.getPreparedStatement("REPLACE INTO \""+subtable+"\" "+config.tableName+"=? ?=?");
-						subStmt.setObject(1, config.id_field);
-						subStmt.setString(2, subConfig.tableName);
-						subStmt.setObject(3, subConfig.id_field.get(subobj));
+						PreparedStatement subStmt = sql.getPreparedStatement("REPLACE INTO ? ?=? ?=?");
+						subStmt.setString(1, subtable);
+						subStmt.setString(2, idcol);
+						subStmt.setObject(3, config.id_field);
+						subStmt.setString(4, subConfig.tableName);
+						subStmt.setObject(5, subConfig.id_field.get(subobj));
 						DBConnection.exec(subStmt);
 						// Save the sub bean
 						subobj.save(sql);

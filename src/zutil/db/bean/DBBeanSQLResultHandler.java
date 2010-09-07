@@ -125,10 +125,15 @@ public class DBBeanSQLResultHandler<T> implements SQLResultHandler<T>{
 				else if( List.class.isAssignableFrom( field.getType() ) && 
 						field.getAnnotation( DBLinkTable.class ) != null){
 					if(db != null){
-						String subtable = field.getAnnotation( DBLinkTable.class ).value().replace("\"", "");
+						DBLinkTable linkTable = field.getAnnotation( DBLinkTable.class );
+						String subtable = linkTable.name();
+						String idcol = (linkTable.column().isEmpty() ? bean_config.tableName : linkTable.column() );
 
 						// Load list from link table
-						PreparedStatement subStmt = db.getPreparedStatement("SELECT * FROM \""+subtable+"\" WHERE ?=?");
+						PreparedStatement subStmt = db.getPreparedStatement("SELECT * FROM ? WHERE ?=?");
+						subStmt.setString(1, subtable);
+						subStmt.setString(2, idcol);
+						subStmt.setObject(3, bean_config.id_field.get( obj ));
 						List<? extends DBBean> list = DBConnection.exec(subStmt, 
 								DBBeanSQLResultHandler.createList((Class<? extends DBBean>)field.getType(), db));
 						obj.setFieldValue(field, list);
