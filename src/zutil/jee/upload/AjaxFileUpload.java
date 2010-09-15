@@ -78,6 +78,7 @@ public abstract class AjaxFileUpload extends HttpServlet {
 	public static String JAVASCRIPT = "";
 
 	public void init(ServletConfig config) throws ServletException {
+		super.init(config);
 		try {
 			// Read the javascript file to memory
 			String path = JAVASCRIPT_FILE;
@@ -207,10 +208,9 @@ public abstract class AjaxFileUpload extends HttpServlet {
 			}
 			// Process the upload
 			listener.setStatus( Status.Processing );
-			handleUpload( fields, files );
+			doUpload( request, response, fields, files );
 			// Done
 			listener.setStatus( Status.Done );
-			response.getWriter().print("<html>OK</html>");
 		} catch (Exception e) {
 			e.printStackTrace();
 			listener.setStatus(Status.Error);
@@ -231,5 +231,6 @@ public abstract class AjaxFileUpload extends HttpServlet {
 	/**
 	 * Handle the uppload
 	 */
-	public abstract void handleUpload(Map<String,String> fields, List<FileItem> files);
+	public abstract void doUpload(HttpServletRequest request, HttpServletResponse response, 
+										Map<String,String> fields, List<FileItem> files);
 }
