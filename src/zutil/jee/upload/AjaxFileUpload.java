@@ -82,8 +82,8 @@ public abstract class AjaxFileUpload extends HttpServlet {
 		try {
 			// Read the javascript file to memory
 			String path = JAVASCRIPT_FILE;
-			if(config.getInitParameter("JAVASCRIPT") != null)
-				path = config.getInitParameter("JAVASCRIPT");
+			if(config.getInitParameter("JAVASCRIPT_FILE") != null)
+				path = config.getInitParameter("JAVASCRIPT_FILE");
 			JAVASCRIPT = FileUtil.getContent( FileUtil.findURL(path) );
 
 			// Read temp dir
