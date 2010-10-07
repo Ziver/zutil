@@ -14,8 +14,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.logging.Logger;
 
 import zutil.db.DBConnection;
+import zutil.log.LogUtil;
 
 /**
  * <XMP>
@@ -38,6 +40,10 @@ import zutil.db.DBConnection;
  * @author Ziver
  */
 public abstract class DBBean {
+	public static final Logger logger = LogUtil.getLogger();
+	
+	/** The id of the bean **/
+	private Long id;
 	
 	/**
 	 * Sets the name of the table in the database
@@ -45,9 +51,9 @@ public abstract class DBBean {
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target(ElementType.TYPE)
 	public @interface DBTable {
-	    String value();
+		String value();
 	}
-	
+
 	/**
 	 * Sets the name of the table that links different DBBeans together
 	 */
@@ -55,17 +61,20 @@ public abstract class DBBean {
 	@Target(ElementType.FIELD)
 	public @interface DBLinkTable {
 		/** The name of the Link table */
-	    String name();
-	    /** The name of the column that contains this objects id */
-	    String column() default "";
+		String name();
+		/** The class of the linked bean */
+		Class<? extends DBBean> beanClass();
+		/** The name of the column that contains this objects id */
+		String column() default "";
 	}
-	
+
 	/**
 	 * Sets the field as the id column in the table
 	 */
-	@Retention(RetentionPolicy.RUNTIME)
+	/*@Retention(RetentionPolicy.RUNTIME)
 	@Target(ElementType.FIELD)
 	public @interface DBTableID {}
+	*/
 
 	/**
 	 * A Class that contains information about a bean
@@ -77,23 +86,23 @@ public abstract class DBBean {
 		protected Field id_field;
 		/** All the fields in the bean */
 		protected ArrayList<Field> fields;
-		
+
 		protected DBBeanConfig(){
 			fields = new ArrayList<Field>();
 		}
 	}
-	
+
 	/** This is a cache of all the initialized beans */	 
 	private static HashMap<Class<? extends DBBean>,DBBeanConfig> beanConfigs = new HashMap<Class<? extends DBBean>,DBBeanConfig>();
 	/** This value is for preventing recursive loops */	 
 	private boolean processing;
-	
+
 	protected DBBean(){
 		if( !beanConfigs.containsKey( this.getClass() ) )
 			initBeanConfig( this.getClass() );
 		processing = false;
 	}
-	
+
 	/**
 	 * @return the ID field of the bean or null if there is non
 	 */
@@ -102,7 +111,7 @@ public abstract class DBBean {
 			initBeanConfig( c );
 		return beanConfigs.get( c ).id_field;
 	}
-		
+
 	/**
 	 * @return all the fields except the ID field
 	 */
@@ -111,7 +120,7 @@ public abstract class DBBean {
 			initBeanConfig( c );
 		return beanConfigs.get( c ).fields;		
 	}
-	
+
 	/**
 	 * @return the configuration object for the specified class
 	 */
@@ -120,7 +129,7 @@ public abstract class DBBean {
 			initBeanConfig( c );
 		return beanConfigs.get( c );	
 	}
-	
+
 	/**
 	 * Caches the fields
 	 */
@@ -129,113 +138,149 @@ public abstract class DBBean {
 		DBBeanConfig config = new DBBeanConfig();
 		// Find the table name
 		if( c.getAnnotation(DBTable.class) != null )
-				config.tableName = c.getAnnotation(DBTable.class).value().replace('\"', ' ');
+			config.tableName = c.getAnnotation(DBTable.class).value().replace('\"', ' ');
 		// Add the fields in the bean
 		for( Field field : fields ){
-			if( !Modifier.isTransient(field.getModifiers()) ){
-				if(field.getAnnotation(DBBean.DBTableID.class) != null)			
-					config.id_field = field;		
+			int mod = field.getModifiers();
+			if( !Modifier.isTransient( mod ) &&
+					!Modifier.isAbstract( mod ) &&
+					!Modifier.isFinal( mod ) &&
+					!Modifier.isStatic( mod ) &&
+					!Modifier.isInterface( mod ) &&
+					!Modifier.isNative( mod )){
+				//if(field.getAnnotation(DBBean.DBTableID.class) != null)			
+				//	config.id_field = field;
 				config.fields.add( field );
 			}
 		}
-		
+		try {
+			config.id_field = DBBean.class.getDeclaredField("id");
+			config.id_field.setAccessible(true);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
 		beanConfigs.put(c, config);
 	}
-	
+
 	/**
 	 * Saves the Object to the DB
 	 */
 	@SuppressWarnings("unchecked")
-	public void save(DBConnection sql) throws SQLException{
+	public void save(DBConnection db) throws SQLException{
 		if(processing)
 			return;
 		processing = true;
 		Class<? extends DBBean> c = this.getClass();
 		DBBeanConfig config = beanConfigs.get(c);
 		try {
+			Object id = getFieldValue( config.id_field );
 			// Generate the SQL
 			StringBuilder query = new StringBuilder();
-			query.append("REPLACE INTO ?  ");
+			if( id == null )
+				query.append("INSERT INTO ");
+			else query.append("UPDATE ");
+			query.append( config.tableName );
 			
+			StringBuilder params = new StringBuilder();
 			for( Field field : config.fields ){
-				query.append(" ");
-				query.append(field.getName());
-				query.append("=?, ");
+				if( !List.class.isAssignableFrom(field.getType()) ){
+					params.append(" ");
+					params.append(field.getName());
+					params.append("=?,");
+				}
 			}
-			query.delete( query.length()-2, query.length());
-			PreparedStatement stmt = sql.getPreparedStatement( sql.toString() );
-			// add the table name
-			stmt.setObject(1, config.tableName);
+			if( params.length() > 0 ){
+				params.delete( params.length()-1, params.length());
+				query.append( " SET" );
+				query.append( params );
+				if( id != null )
+					query.append( " id=?" );
+			}
+			logger.fine("Save query: "+query.toString());
+			PreparedStatement stmt = db.getPreparedStatement( query.toString() );
 			// Put in the variables in the SQL
 			for(int i=0; i<config.fields.size() ;++i ){
 				Field field = config.fields.get(i);				
-				
+
 				// Another DBBean class
 				if( DBBean.class.isAssignableFrom( field.getType() )){
-					DBBean subobj = (DBBean)field.get(this);
-					subobj.save(sql);
-					stmt.setObject(i+2, getBeanConfig(subobj.getClass()) );
+					DBBean subobj = (DBBean)getFieldValue(field);					
+					if(subobj != null){
+						subobj.save(db);					
+						DBBeanConfig subconfig = getBeanConfig(subobj.getClass());
+						stmt.setObject(i+1, subobj.getFieldValue(subconfig.id_field) );
+					}
+					else
+						stmt.setObject(i+1, null);
 				}
 				// A list of DBBeans
 				else if( List.class.isAssignableFrom( field.getType() ) && 
 						field.getAnnotation( DBLinkTable.class ) != null){
-					List<DBBean> list = (List<DBBean>)field.get(this);
-					DBLinkTable linkTable = field.getAnnotation( DBLinkTable.class );
-					String subtable = linkTable.name();
-					String idcol = (linkTable.column().isEmpty() ? config.tableName : linkTable.column() );
-
-					DBBeanConfig subConfig = null;
-					for(DBBean subobj : list){
-						if(subConfig == null)
-							subConfig = beanConfigs.get( subobj.getClass() );
-						// Save links in link table
-						PreparedStatement subStmt = sql.getPreparedStatement("REPLACE INTO ? ?=? ?=?");
-						subStmt.setString(1, subtable);
-						subStmt.setString(2, idcol);
-						subStmt.setObject(3, config.id_field);
-						subStmt.setString(4, subConfig.tableName);
-						subStmt.setObject(5, subConfig.id_field.get(subobj));
-						DBConnection.exec(subStmt);
-						// Save the sub bean
-						subobj.save(sql);
+					List<DBBean> list = (List<DBBean>)getFieldValue(field);
+					if( list != null ){
+						DBLinkTable linkTable = field.getAnnotation( DBLinkTable.class );
+						String subtable = linkTable.name();
+						String idcol = (linkTable.column().isEmpty() ? config.tableName : linkTable.column() );
+	
+						DBBeanConfig subConfig = null;
+						for(DBBean subobj : list){
+							if(subConfig == null)
+								subConfig = beanConfigs.get( subobj.getClass() );
+							// Save links in link table
+							PreparedStatement subStmt = db.getPreparedStatement("REPLACE INTO "+subtable+" SET ?=? ?=?");
+							subStmt.setString(1, idcol);
+							subStmt.setObject(2, config.id_field);
+							subStmt.setString(3, subConfig.tableName);
+							subStmt.setObject(4, subobj.getFieldValue(subConfig.id_field) );
+							DBConnection.exec(subStmt);
+							// Save the sub bean
+							subobj.save(db);
+						}
 					}
 				}
 				// Normal field
-				else
-					stmt.setObject(i+2, field.get(this));
+				else{
+					Object value = getFieldValue(field);
+					stmt.setObject(i+1, value);
+				}
 			}
-			
+			if( id != null )
+				stmt.setObject(config.fields.size(), id);
+
 			// Execute the SQL
 			DBConnection.exec(stmt);
+			setFieldValue( config.id_field, db.getLastInsertID() );
 		} catch (SQLException e) {
 			throw e;
 		} catch (Exception e) {
 			throw new SQLException(e);
 		}
 	}
-	
+
 	/**
 	 * Deletes the object from the DB, WARNING will not delete sub beans
 	 */
-	public void delete(DBConnection sql){
+	public void delete(DBConnection db){
 		Class<? extends DBBean> c = this.getClass();
 		DBBeanConfig config = beanConfigs.get(c);
 		if( config.id_field == null )
 			throw new NoSuchElementException("DBTableID annotation missing in bean!");
-		try {		
-			PreparedStatement stmt = sql.getPreparedStatement(
-					"DELETE FROM ? WHERE "+ config.id_field +"=?");
-			// Put in the variables in the SQL		
-			stmt.setObject(1, config.tableName );
-			stmt.setObject(2, config.id_field.get(this) );
-			
+		try {
+			String sql = "DELETE FROM "+config.tableName+" WHERE "+ config.id_field +"=?";
+			logger.fine("Load query: "+sql);
+			PreparedStatement stmt = db.getPreparedStatement( sql );
+			// Put in the variables in the SQL
+			logger.fine("Delete query: "+sql);
+			stmt.setObject(1, getFieldValue(config.id_field) );
+
 			// Execute the SQL
 			DBConnection.exec(stmt);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
-	
+
 	/**
 	 * Loads all the rows in the table into a LinkedList
 	 * 
@@ -249,13 +294,14 @@ public abstract class DBBean {
 			initBeanConfig( c );
 		DBBeanConfig config = beanConfigs.get(c);
 		// Generate query
-		PreparedStatement stmt = db.getPreparedStatement( "SELECT * FROM ?" );
-		stmt.setString(1, config.tableName);
+		String sql = "SELECT * FROM "+config.tableName;
+		logger.fine("Load query: "+sql);
+		PreparedStatement stmt = db.getPreparedStatement( sql );
 		// Run query
 		List<T> list = DBConnection.exec(stmt, DBBeanSQLResultHandler.createList(c, db) );
 		return list;
 	}
-	
+
 	/**
 	 * Loads all the rows in the table into a LinkedList
 	 * 
@@ -270,15 +316,14 @@ public abstract class DBBean {
 			initBeanConfig( c );
 		DBBeanConfig config = beanConfigs.get(c);
 		// Generate query
-		PreparedStatement stmt = db.getPreparedStatement( "SELECT * FROM ? WHERE ?=? LIMIT 1" );
-		stmt.setString(1, config.tableName);
-		stmt.setString(2, config.id_field.getName());
-		stmt.setObject(3, id );
+		PreparedStatement stmt = db.getPreparedStatement( "SELECT * FROM "+config.tableName+" WHERE ?=? LIMIT 1" );
+		stmt.setString(1, config.id_field.getName());
+		stmt.setObject(2, id );
 		// Run query
 		T obj = DBConnection.exec(stmt, DBBeanSQLResultHandler.create(c, db) );
 		return obj;
 	}
-	
+
 	/**
 	 * Creates a specific table for the given Bean
 	 */
@@ -289,8 +334,8 @@ public abstract class DBBean {
 
 		// Generate the SQL
 		StringBuilder query = new StringBuilder();
-		query.append("CREATE TABLE ? (  ");
-		
+		query.append("CREATE TABLE "+config.tableName+" (  ");
+
 		for( Field field : config.fields ){
 			query.append(" ");
 			query.append( field.getName() );
@@ -302,13 +347,11 @@ public abstract class DBBean {
 		query.delete( query.length()-2, query.length());
 		query.append(")");
 		PreparedStatement stmt = sql.getPreparedStatement( sql.toString() );
-		// add the table name
-		stmt.setObject(1, config.tableName);
-		
+
 		// Execute the SQL
 		DBConnection.exec(stmt);
 	}
-	
+
 	private static String classToDBName(Class<?> c){
 		if(     c == String.class) 		return "CLOB"; // TEXT
 		else if(c == Short.class) 		return "SMALLINT";
@@ -329,7 +372,7 @@ public abstract class DBBean {
 		else if(c == byte.class) 		return "BINARY(1)";
 		return null;
 	}
-	
+
 	/**
 	 * This is a workaround if the field is not visible to other classes
 	 * 
@@ -345,7 +388,7 @@ public abstract class DBBean {
 		}
 		return null;
 	}
-	
+
 	/**
 	 * This is a workaround if the field is not visible to other classes
 	 * 
@@ -359,5 +402,12 @@ public abstract class DBBean {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+	}
+	
+	/**
+	 * @return the object id or null if the bean has not bean saved yet
+	 */
+	public Long getId(){
+		return id;
 	}
 }
