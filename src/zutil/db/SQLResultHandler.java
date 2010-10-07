@@ -11,5 +11,5 @@ public interface SQLResultHandler<T> {
 	 * @param stmt is the query
 	 * @param result is the ResultSet
 	 */
-	public T handle(Statement stmt, ResultSet result) throws SQLException;
+	public T handleQueryResult(Statement stmt, ResultSet result) throws SQLException;
 }

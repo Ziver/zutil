@@ -84,17 +84,17 @@ public class DBConnection{
 	/**
 	 * @return the last inserted id or -1 if there was an error
 	 */
-	public int getLastInsertID(){
+	public Object getLastInsertID(){
 		try{
-			return exec("SELECT LAST_INSERT_ID()", new SQLResultHandler<Integer>(){
-				public Integer handle(Statement stmt, ResultSet result) throws SQLException {
+			return exec("SELECT LAST_INSERT_ID()", new SQLResultHandler<Object>(){
+				public Object handleQueryResult(Statement stmt, ResultSet result) throws SQLException {
 					if(result.next())
-						return result.getInt(1);
-					return -1;
+						return result.getObject(1);
+					return null;
 				}
 			});
 		}catch(SQLException e){
-			return -1;
+			return null;
 		}	
 	}
 
@@ -137,7 +137,7 @@ public class DBConnection{
 	 */
 	public static int exec(PreparedStatement stmt) throws SQLException {
 		return exec(stmt, new SQLResultHandler<Integer>(){
-			public Integer handle(Statement stmt, ResultSet result) {
+			public Integer handleQueryResult(Statement stmt, ResultSet result) {
 				try {
 					return stmt.getUpdateCount();
 				} catch (SQLException e) {
@@ -178,7 +178,7 @@ public class DBConnection{
 				ResultSet result = null;
 				try{
 					result = stmt.getResultSet();
-					return handler.handle(stmt, result);		
+					return handler.handleQueryResult(stmt, result);		
 				}finally{
 					if(result != null){
 						try {

@@ -63,7 +63,7 @@ public class DBQueue<E> implements Queue<E>{
 	public synchronized E peek() {
 		try {
 			return db.exec("SELECT * FROM "+table+" LIMIT 1", new SQLResultHandler<E>(){
-				public E handle(Statement stmt, ResultSet rs) throws SQLException{
+				public E handleQueryResult(Statement stmt, ResultSet rs) throws SQLException{
 					if (rs.next())
 						try {
 							return (E) Converter.toObject(rs.getBytes("data"));
@@ -83,7 +83,7 @@ public class DBQueue<E> implements Queue<E>{
 	public synchronized E poll() {
 		try {
 			return db.exec("SELECT * FROM "+table+" LIMIT 1", new SQLResultHandler<E>(){
-				public E handle(Statement stmt, ResultSet rs) {
+				public E handleQueryResult(Statement stmt, ResultSet rs) {
 					try{
 					if (rs.next()) {
 						db.exec("DELETE FROM "+table+" WHERE id="+rs.getInt("id")+" LIMIT 1");
@@ -121,7 +121,7 @@ public class DBQueue<E> implements Queue<E>{
 	public boolean contains(Object arg0) {
 		try {
 			return db.exec("SELECT data FROM "+table+" WHERE data='"+Converter.toBytes(arg0)+"' LIMIT 1", new SQLResultHandler<Boolean>(){
-				public Boolean handle(Statement stmt, ResultSet rs) throws SQLException{
+				public Boolean handleQueryResult(Statement stmt, ResultSet rs) throws SQLException{
 					return rs.next();
 				}
 			});
@@ -168,7 +168,7 @@ public class DBQueue<E> implements Queue<E>{
 	public int size() {
 		try {
 			return db.exec("SELECT count(*) FROM "+table, new SQLResultHandler<Integer>(){
-				public Integer handle(Statement stmt, ResultSet rs) throws SQLException{
+				public Integer handleQueryResult(Statement stmt, ResultSet rs) throws SQLException{
 					if (rs.next()) 
 						return rs.getInt(1);
 					return 0;
