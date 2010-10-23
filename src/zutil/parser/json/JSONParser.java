@@ -3,10 +3,13 @@ package zutil.parser.json;
 import zutil.MultiPrintStream;
 import zutil.parser.json.JSONNode.JSONType;
 
+/**
+ * This is a JSON parser class
+ * 
+ * @author Ziver
+ */
 public class JSONParser{
 	private String json;
-	private int index;
-
 
 	public static void main(String[] args){
 		JSONParser parser = new JSONParser("" +
@@ -27,20 +30,44 @@ public class JSONParser{
 		"}");
 		JSONNode node = parser.read();
 		MultiPrintStream.out.dump( node );
-		JSONWriter writer = new JSONWriter(System.out);
+		JSONWriter writer = new JSONWriter( System.out );
 		writer.write(node);
 	}
 
+	/**
+	 * Creates a new instance of the parser
+	 * 
+	 * @param 	json	is the JSON String to parse
+	 */
 	public JSONParser(String json){
 		this.json = json;
 	}
 
+	/**
+	 * Starts parsing
+	 * 
+	 * @return a JSONNode object that is the root of the JSON
+	 */
 	public JSONNode read(){
-		index = 0;
 		return parse(new StringBuffer(json));
 	}
+	
+	/**
+	 * Starts parsing
+	 * 
+	 * @return a JSONNode object that is the root of the JSON
+	 */
+	/*public static JSONNode read( String json ){
+		return parse(new StringBuffer(json));
+	}*/
 
-	protected JSONNode parse(StringBuffer json){
+	/**
+	 * This is the real recursive parsing method
+	 * 
+	 * @param json
+	 * @return
+	 */
+	protected static JSONNode parse(StringBuffer json){
 		JSONNode root = null;
 		JSONNode key = null;
 		JSONNode node = null;
@@ -90,75 +117,4 @@ public class JSONParser{
 
 		return root;
 	}
-
-
-	protected JSONNode parse2(){
-		System.out.println("Recursion");
-		JSONNode root = null;
-
-		for(; index<json.length() ;++index){
-			if(!Character.isWhitespace( json.charAt(index) ))
-				break;
-		}
-
-		// Parse Map
-		if( json.charAt(index)=='{' ){
-			++index;
-			System.out.println("Map:");
-			root = new JSONNode(JSONType.Map);
-			for(; index<json.length() ;++index){
-				if( json.charAt(index)=='}' ) break;
-				if( Character.isWhitespace( json.charAt(index) )) 
-					continue;
-				int next = json.indexOf(":", index+1);
-				String key = json.substring(index, next);
-				index = next+1;
-				System.out.println("New Map element: "+key);
-				root.add( key, parse2() );
-			}
-			++index;
-		}
-		// Parse List
-		else if( json.charAt(index)=='[' ){
-			++index;
-			System.out.println("List");
-			root = new JSONNode(JSONType.List);
-			for(; index<json.length() ;++index){
-				if( json.charAt(index)==']' ) break;
-				if( Character.isWhitespace( json.charAt(index) )) 
-					continue;
-				System.out.println("New List: ");
-				root.add( parse2() );
-			}
-			++index;
-		}
-		// Parse String
-		else if( json.charAt(index)=='\"' ){
-			++index;
-			int next = json.indexOf("\"", index);
-			root = new JSONNode(JSONType.String);
-			root.set( json.substring(index, next) );
-			System.out.println("String: "+root);
-			index = next;
-		}
-		// Parse Number or Boolean
-		else{
-			System.out.println("Number");
-			int next = index;
-			for(; next<json.length() ;++next)
-				if( json.charAt(next)==',' || 
-						json.charAt(next)==']' ||
-						json.charAt(next)=='}'){
-					break;
-				}
-			root = new JSONNode(JSONType.Number);
-			root.set( json.substring(index, next).trim() );
-			System.out.println("Number: "+root);
-			index = next;
-		}
-		System.out.println("Return");
-		return root;
-	}
-
-	public void close() {}
 }
