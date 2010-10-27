@@ -8,9 +8,9 @@ import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.util.ArrayList;
 
-import zutil.FileUtil;
-import zutil.MultiPrintStream;
 import zutil.ProgressListener;
+import zutil.io.MultiPrintStream;
+import zutil.io.file.FileUtil;
 
 /**
  * This class connects to a update server and updates a path

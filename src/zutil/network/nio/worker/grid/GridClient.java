@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.util.LinkedList;
 import java.util.Queue;
 
-import zutil.MultiPrintStream;
+import zutil.io.MultiPrintStream;
 import zutil.network.nio.NioClient;
 import zutil.network.nio.message.GridMessage;
 import zutil.network.nio.worker.ThreadedEventWorker;

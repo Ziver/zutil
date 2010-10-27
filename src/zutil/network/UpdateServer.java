@@ -13,9 +13,9 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
 
-import zutil.FileUtil;
 import zutil.Hasher;
-import zutil.MultiPrintStream;
+import zutil.io.MultiPrintStream;
+import zutil.io.file.FileUtil;
 
 public class UpdateServer extends Thread{
 	private ArrayList<FileHash> fileList;

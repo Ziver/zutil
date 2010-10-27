@@ -20,8 +20,8 @@ import javax.swing.WindowConstants;
 import javax.swing.GroupLayout.Alignment;
 import javax.swing.LayoutStyle.ComponentPlacement;
 
-import zutil.FileUtil;
-import zutil.MultiPrintStream;
+import zutil.io.MultiPrintStream;
+import zutil.io.file.FileUtil;
 import zutil.struct.HistoryList;
 import zutil.ui.JImagePanel;
 import zutil.ui.wizard.listener.BlockingWizardListener;

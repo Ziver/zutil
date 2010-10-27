@@ -7,8 +7,8 @@ import java.io.IOException;
 import javax.imageio.ImageIO;
 import javax.swing.JPanel;
 
-import zutil.FileUtil;
 import zutil.image.ImageUtil;
+import zutil.io.file.FileUtil;
 
 /**
  * This class is a panel with a background image

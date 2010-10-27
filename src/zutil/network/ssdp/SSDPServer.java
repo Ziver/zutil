@@ -9,7 +9,7 @@ import java.util.TimerTask;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import zutil.MultiPrintStream;
+import zutil.io.MultiPrintStream;
 import zutil.io.StringOutputStream;
 import zutil.log.LogUtil;
 import zutil.network.http.HTTPHeaderParser;

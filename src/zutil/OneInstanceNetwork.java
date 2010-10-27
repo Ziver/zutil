@@ -4,13 +4,15 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 
+import zutil.io.MultiPrintStream;
+
 /**
  * This class checks if the app is alredy running
  * by Locking a port
  * 
  * @author Ziver Koc
  */
-public class OneAppNetwork extends Thread implements OneApp{
+public class OneInstanceNetwork extends Thread implements OneInstance{
 	private int port;
 	
 	/**
@@ -18,7 +20,7 @@ public class OneAppNetwork extends Thread implements OneApp{
 	 * 
 	 * @param port The port to lock
 	 */
-	public OneAppNetwork(int port){
+	public OneInstanceNetwork(int port){
 		this.port = port;
 	}
 	

@@ -1,4 +1,4 @@
-package zutil;
+package zutil.io.file;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
@@ -14,6 +14,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.regex.Matcher;
 
+import zutil.io.MultiPrintStream;
+
 /**
  * File path utilities
  * 
@@ -24,9 +26,9 @@ public class FileUtil {
 	/**
 	 * Returns a String with a relative path from the given path
 	 * 
-	 * @param file is the file to get a relative path from
-	 * @param path is the path
-	 * @return A String with a relative path
+	 * @param 		file 		is the file to get a relative path from
+	 * @param 		path 		is the path
+	 * @return 					A String with a relative path
 	 */
 	public static String relativePath(File file, String path){
 		String absolute = file.getAbsolutePath();
@@ -44,8 +46,8 @@ public class FileUtil {
 	 * Returns the File object for the given file. 
 	 * Can not point to files in JAR files.
 	 * 
-	 * @param path is the path to the file (no / if not absolute path)
-	 * @return A File object for the file
+	 * @param 		path 		is the path to the file (no / if not absolute path)
+	 * @return 					A File object for the file
 	 */
 	public static File find(String path){
 		try {
@@ -63,8 +65,8 @@ public class FileUtil {
 	/**
 	 * Returns the URL to the given file
 	 * 
-	 * @param path is the path to the file (no / if not absolute path)
-	 * @return A URL object for the file
+	 * @param 		path 		is the path to the file (no / if not absolute path)
+	 * @return					A URL object for the file
 	 * @throws URISyntaxException 
 	 */
 	public static URL findURL(String path){
@@ -74,8 +76,8 @@ public class FileUtil {
 	/**
 	 * Returns a InputStream from the path
 	 * 
-	 * @param path is the path to the file (no / if not absolute path)
-	 * @return A InputStream object for the file
+	 * @param 		path 		is the path to the file (no / if not absolute path)
+	 * @return 					A InputStream object for the file
 	 */
 	public static InputStream getInputStream(String path){
 		try {
@@ -95,8 +97,8 @@ public class FileUtil {
 	 * Reads and returns the content of a file as a String.
 	 * Or use FileUtils.readFileToString(file);
 	 * 
-	 * @param file is the file to read
-	 * @return The file content
+	 * @param 		file 		is the file to read
+	 * @return 					The file content
 	 * @throws IOException
 	 */
 	public static String getFileContent(File file) throws IOException{
@@ -107,8 +109,8 @@ public class FileUtil {
 	 * Reads and returns the content of a file as a String.
 	 * Or use FileUtils.readFileToString(file);
 	 * 
-	 * @param url is the url to read
-	 * @return The file content
+	 * @param 		url 		is the url to read
+	 * @return 					The file content
 	 * @throws IOException
 	 */
 	public static String getContent(URL url) throws IOException{
@@ -119,8 +121,8 @@ public class FileUtil {
 	 * Reads and returns the content of a file as a String.
 	 * Or use FileUtils.readFileToString(file);
 	 * 
-	 * @param stream is the file stream to read
-	 * @return The file content
+	 * @param 		stream 		is the file stream to read
+	 * @return 					The file content
 	 * @throws IOException
 	 */
 	public static String getContent(InputStream stream) throws IOException{
@@ -172,9 +174,9 @@ public class FileUtil {
 	}
 	
 	/**
-	 * Same as search(File dir)
-	 * but is caches the result to be used next time this function is called
-	 * with the same parameters.
+	 * Same as search(File dir) but it caches the result 
+	 * to be used next time this function is called with 
+	 * the same parameters.
 	 */
 	public static List<File> cachedSearch(File dir){
 		return cachedSearch(dir, new LinkedList<File>(), true);
@@ -182,8 +184,8 @@ public class FileUtil {
 	
 	/**
 	 * Same as search(File dir, List<File> fileList, boolean recursive)
-	 * but is caches the result to be used next time this function is called
-	 * with the same parameters.
+	 * but is caches the result to be used next time this function is 
+	 * called with the same parameters.
 	 */
 	public static List<File> cachedSearch(File dir, List<File> fileList, boolean recursive){
 		return cachedSearch(dir, new LinkedList<File>(), false, (recursive ? Integer.MAX_VALUE : 0));
@@ -208,8 +210,8 @@ public class FileUtil {
 	/**
 	 * Returns a List with all the files in a folder and sub folders
 	 * 
-	 * @param dir is the directory to search in
-	 * @return The List with the files
+	 * @param 		dir 		is the directory to search in
+	 * @return 					The List with the files
 	 */
 	public static List<File> search(File dir){
 		return search(dir, new LinkedList<File>(), true);
@@ -218,10 +220,10 @@ public class FileUtil {
 	/**
 	 * Returns a ArrayList with all the files in a folder and sub folders
 	 * 
-	 * @param dir is the directory to search in
-	 * @param fileList is the List to add the files to
-	 * @param recursive is if the method should search the sub directories to.
-	 * @return A List with the files
+	 * @param 		dir 		is the directory to search in
+	 * @param 		fileList 	is the List to add the files to
+	 * @param 		recursive 	is if the method should search the sub directories to.
+	 * @return					A List with the files
 	 */
 	public static List<File> search(File dir, List<File> fileList, boolean recursive){
 		return search(dir, new LinkedList<File>(), false, (recursive ? Integer.MAX_VALUE : 0));
@@ -230,11 +232,11 @@ public class FileUtil {
 	/**
 	 * Returns a ArrayList with all the files in a folder and sub folders
 	 * 
-	 * @param dir is the directory to search in
-	 * @param fileList is the List to add the files to
-	 * @param folders is if the method should add the folders to the List
-	 * @param recurse is how many times it should recurse into folders
-	 * @return A List with the files and/or folders
+	 * @param 		dir 		is the directory to search in
+	 * @param 		fileList 	is the List to add the files to
+	 * @param 		folders 	is if the method should add the folders to the List
+	 * @param 		recurse 	is how many times it should recurse into folders
+	 * @return 					A List with the files and/or folders
 	 */
 	public static List<File> search(File dir, List<File> fileList, boolean folders, int recurse){
 		if(recurse<0)
@@ -266,8 +268,8 @@ public class FileUtil {
 	/**
 	 * Returns the extension of the file
 	 * 
-	 * @param file is the file
-	 * @return The extension
+	 * @param 		file 		is the file
+	 * @return 					The extension
 	 */
 	public static String fileExtension(File file){
 		return fileExtension(file.getName());
@@ -276,8 +278,8 @@ public class FileUtil {
 	/**
 	 * Returns the extension of the file
 	 * 
-	 * @param file is the file
-	 * @return The extension
+	 * @param 		file 		is the file
+	 * @return 					The extension
 	 */
 	public static String fileExtension(String file){
 		if(file.lastIndexOf(".")==-1)

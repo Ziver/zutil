@@ -1,13 +1,16 @@
-package zutil;
+package zutil.io.file;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import zutil.io.MultiPrintStream;
+
 /**
  * This class calls a given listener 
  * when a file is changed
+ * 
  * @author Ziver
  *
  */
@@ -20,7 +23,7 @@ public class FileWatcher extends TimerTask{
 	 * Creates a watcher for the given file whit the check 
 	 * interval of 1 second
 	 * 
-	 * @param file The file to check
+	 * @param 		file 	is the file to check
 	 * @throws FileNotFoundException 
 	 */
 	public FileWatcher(File file) throws FileNotFoundException{
@@ -31,12 +34,13 @@ public class FileWatcher extends TimerTask{
 	 * Creates a watcher for the given file whit the given 
 	 * check interval
 	 * 
-	 * @param file The file
-	 * @param intervall The interval
+	 * @param 		file 			is the file
+	 * @param 		intervall 		is the interval
 	 * @throws FileNotFoundException 
 	 */
 	public FileWatcher(File file, int intervall) throws FileNotFoundException{
-		if(file==null || !file.exists()) throw new FileNotFoundException("File not found: "+file);
+		if(file==null || !file.exists()) 
+			throw new FileNotFoundException("File not found: "+file);
 		this.file = file;
 		lastChanged = file.lastModified();
 		

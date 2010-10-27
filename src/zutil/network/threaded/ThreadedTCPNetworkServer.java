@@ -11,7 +11,7 @@ import java.security.cert.CertificateException;
 
 import javax.net.ssl.SSLServerSocketFactory;
 
-import zutil.MultiPrintStream;
+import zutil.io.MultiPrintStream;
 
 
 /**

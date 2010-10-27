@@ -5,7 +5,7 @@ import java.io.IOException;
 
 import javax.wsdl.WSDLException;
 
-import zutil.MultiPrintStream;
+import zutil.io.MultiPrintStream;
 import zutil.network.http.HttpServer;
 import zutil.network.http.soap.SOAPHttpPage;
 import zutil.network.ssdp.SSDPServer;

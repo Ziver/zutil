@@ -31,7 +31,7 @@ import javax.swing.text.Document;
 import javax.swing.text.Style;
 import javax.swing.text.StyleConstants;
 
-import zutil.FileUtil;
+import zutil.io.file.FileUtil;
 
 /**
  * Creates a Swing console window Thats takes System.in and

@@ -1,4 +1,4 @@
-package zutil;
+package zutil.io.file;
 
 import java.io.File;
 
@@ -10,8 +10,7 @@ import java.io.File;
 public interface FileChangeListener{
 	
 	/**
-	 * This method is called when there is a change in 
-	 * a file
+	 * This method is called when there is a change in a file
 	 * 
 	 * @param file The file that has changed
 	 */

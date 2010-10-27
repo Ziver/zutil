@@ -13,7 +13,7 @@ import java.util.regex.Pattern;
 
 import javax.security.auth.login.AccountException;
 
-import zutil.MultiPrintStream;
+import zutil.io.MultiPrintStream;
 
 /**
  * A simple FTP client class

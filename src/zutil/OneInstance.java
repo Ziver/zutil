@@ -7,7 +7,7 @@ package zutil;
  * @author Ziver
  *
  */
-public interface OneApp {
+public interface OneInstance {
 	/**
 	 * Checks if the application is already running
 	 * 

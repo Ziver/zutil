@@ -3,7 +3,7 @@ package zutil.algo;
 import java.math.BigInteger;
 import java.util.LinkedList;
 
-import zutil.MultiPrintStream;
+import zutil.io.MultiPrintStream;
 
 /**
  * Euclidean algorithm is an algorithm to determine 

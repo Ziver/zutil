@@ -12,7 +12,7 @@ import java.nio.channels.OverlappingFileLockException;
  * 
  * @author Ziver Koc
  */
-public class OneAppFile implements OneApp{
+public class OneInstanceFile implements OneInstance{
 	private File file;
 	private FileChannel channel;
 	private FileLock lock;
@@ -22,7 +22,7 @@ public class OneAppFile implements OneApp{
 	 * 
 	 * @param filename The name of the file to be locked
 	 */
-	public OneAppFile(String filename){
+	public OneInstanceFile(String filename){
 		this.file = new File(System.getProperty("user.home"), filename);
 	}
 

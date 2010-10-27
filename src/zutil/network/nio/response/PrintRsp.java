@@ -1,6 +1,6 @@
 package zutil.network.nio.response;
 
-import zutil.MultiPrintStream;
+import zutil.io.MultiPrintStream;
 
 public class PrintRsp extends ResponseEvent{
 

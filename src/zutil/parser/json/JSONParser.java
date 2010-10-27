@@ -1,6 +1,6 @@
 package zutil.parser.json;
 
-import zutil.MultiPrintStream;
+import zutil.io.MultiPrintStream;
 import zutil.parser.json.JSONNode.JSONType;
 
 /**

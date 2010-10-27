@@ -7,7 +7,7 @@ import java.util.Map;
 
 import org.dom4j.DocumentException;
 
-import zutil.FileUtil;
+import zutil.io.file.FileUtil;
 import zutil.network.http.HttpPage;
 import zutil.network.http.HttpPrintStream;
 import zutil.network.upnp.UPnPService;

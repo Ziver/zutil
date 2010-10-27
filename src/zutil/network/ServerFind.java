@@ -6,7 +6,7 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
 
-import zutil.MultiPrintStream;
+import zutil.io.MultiPrintStream;
 
 /**
  * This class broadcast its address in the LAN so that 

@@ -5,7 +5,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import zutil.FileUtil;
+import zutil.io.file.FileUtil;
 
 public class Torrent {
 	// Name of the torrent

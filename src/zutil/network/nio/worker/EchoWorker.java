@@ -2,7 +2,7 @@ package zutil.network.nio.worker;
 
 import java.io.IOException;
 
-import zutil.MultiPrintStream;
+import zutil.io.MultiPrintStream;
 
 public class EchoWorker extends ThreadedEventWorker {
 
