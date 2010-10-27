@@ -14,9 +14,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import zutil.db.DBConnection;
+import zutil.log.CompactLogFormatter;
 import zutil.log.LogUtil;
 
 /**
@@ -195,19 +197,19 @@ public abstract class DBBean {
 				query.append( " SET" );
 				query.append( params );
 				if( id != null )
-					query.append( " id=?" );
+					query.append( ", "+config.id_field.getName()+"=?" );
 			}
 			logger.fine("Save query: "+query.toString());
 			PreparedStatement stmt = db.getPreparedStatement( query.toString() );
 			// Put in the variables in the SQL
 			for(int i=0; i<config.fields.size() ;++i ){
-				Field field = config.fields.get(i);				
+				Field field = config.fields.get(i);
 
 				// Another DBBean class
 				if( DBBean.class.isAssignableFrom( field.getType() )){
-					DBBean subobj = (DBBean)getFieldValue(field);					
+					DBBean subobj = (DBBean)getFieldValue(field);
 					if(subobj != null){
-						subobj.save(db);					
+						subobj.save(db);
 						DBBeanConfig subconfig = getBeanConfig(subobj.getClass());
 						stmt.setObject(i+1, subobj.getFieldValue(subconfig.id_field) );
 					}
@@ -246,11 +248,12 @@ public abstract class DBBean {
 				}
 			}
 			if( id != null )
-				stmt.setObject(config.fields.size(), id);
+				stmt.setObject(config.fields.size()+1, id);
 
 			// Execute the SQL
 			DBConnection.exec(stmt);
-			setFieldValue( config.id_field, db.getLastInsertID() );
+			if( id == null )
+				setFieldValue( config.id_field, db.getLastInsertID() );
 		} catch (SQLException e) {
 			throw e;
 		} catch (Exception e) {
@@ -265,7 +268,7 @@ public abstract class DBBean {
 		Class<? extends DBBean> c = this.getClass();
 		DBBeanConfig config = beanConfigs.get(c);
 		if( config.id_field == null )
-			throw new NoSuchElementException("DBTableID annotation missing in bean!");
+			throw new NoSuchElementException("ID field is null!");
 		try {
 			String sql = "DELETE FROM "+config.tableName+" WHERE "+ config.id_field +"=?";
 			logger.fine("Load query: "+sql);

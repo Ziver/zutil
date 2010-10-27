@@ -131,8 +131,14 @@ public class DBBeanSQLResultHandler<T> implements SQLResultHandler<T>{
 				return obj;
 			obj = bean_class.newInstance();
 			cacheDBBean(obj, id);
-
-			for( Field field : bean_config.fields ){					
+			
+			// Get id field
+			obj.setFieldValue(bean_config.id_field, result.getLong(bean_config.id_field.getName()));
+			// Get the rest
+			for( Field field : bean_config.fields ){
+				// Skip id field (its already loaded)
+				if( field.equals(bean_config.id_field) )
+					continue;
 				String name = field.getName();
 
 				// Another DBBean class

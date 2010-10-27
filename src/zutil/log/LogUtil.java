@@ -49,18 +49,25 @@ public class LogUtil {
 	/**
 	 * Sets the global log level
 	 */
-	public static void setGlobalLogLevel(Level level){
+	public static void setGlobalLevel(Level level){
 		setLevel("", level);
+	}
+	
+	/**
+	 * Sets the log level for a specified class
+	 */
+	public static void setLevel(Class<?> c, Level level){
+		setLevel(c.getName(), level);
 	}
 	
 	/**
 	 * Sets the log level for a specified logger
 	 */
 	public static void setLevel(String name, Level level){
-		Logger root = Logger.getLogger("");
-		root.setLevel(level);
-		for (Handler handler : root.getHandlers()) {
-			handler.setLevel(level);
-	    }
+		Logger logger = Logger.getLogger(name);
+		logger.setLevel(level);
+		//for (Handler handler : logger.getHandlers()) {
+		//	handler.setLevel(level);
+	    //}
 	}
 }

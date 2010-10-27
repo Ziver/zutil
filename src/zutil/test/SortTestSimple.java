@@ -3,10 +3,9 @@ import zutil.algo.sort.MergeSort;
 import zutil.algo.sort.QuickSort;
 import zutil.algo.sort.SimpleSort;
 import zutil.algo.sort.sortable.SortableIntArray;
-import junit.framework.*;
 
 @SuppressWarnings("unused")
-public class SortTestSimple extends TestCase {
+public class SortTestSimple {
 	public static final int SIZE = 10000;
 	public static final int MAX_INT = 10000;
 
