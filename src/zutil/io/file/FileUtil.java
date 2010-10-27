@@ -1,12 +1,10 @@
 package zutil.io.file;
 
 import java.io.BufferedInputStream;
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.HashMap;
@@ -14,6 +12,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.regex.Matcher;
 
+import zutil.io.IOUtil;
 import zutil.io.MultiPrintStream;
 
 /**
@@ -102,7 +101,7 @@ public class FileUtil {
 	 * @throws IOException
 	 */
 	public static String getFileContent(File file) throws IOException{
-		return getContent( new FileInputStream(file) );
+		return IOUtil.getContent( new FileInputStream(file) );
 	}
 	
 	/**
@@ -114,28 +113,7 @@ public class FileUtil {
 	 * @throws IOException
 	 */
 	public static String getContent(URL url) throws IOException{
-		return getContent( url.openStream() );
-	}
-	
-	/**
-	 * Reads and returns the content of a file as a String.
-	 * Or use FileUtils.readFileToString(file);
-	 * 
-	 * @param 		stream 		is the file stream to read
-	 * @return 					The file content
-	 * @throws IOException
-	 */
-	public static String getContent(InputStream stream) throws IOException{
-		BufferedReader in = new BufferedReader(new InputStreamReader(stream));
-		StringBuffer ret = new StringBuffer();
-		int tmp;
-
-		while((tmp=in.read()) != -1){
-			ret.append((char)tmp);
-		}
-		
-		in.close();
-		return ret.toString();
+		return IOUtil.getContent( url.openStream() );
 	}
 	
 	/**
