@@ -45,7 +45,7 @@ public abstract class DBBean {
 	public static final Logger logger = LogUtil.getLogger();
 	
 	/** The id of the bean **/
-	private Long id;
+	protected Long id;
 	
 	/**
 	 * Sets the name of the table in the database
@@ -85,7 +85,7 @@ public abstract class DBBean {
 		/** The name of the table in the DB */
 		protected String tableName;
 		/** The id field */
-		protected Field id_field;
+		//protected Field id_field;
 		/** All the fields in the bean */
 		protected ArrayList<Field> fields;
 
@@ -108,11 +108,11 @@ public abstract class DBBean {
 	/**
 	 * @return the ID field of the bean or null if there is non
 	 */
-	public static Field getIDField(Class<? extends DBBean> c){
+	/*public static Field getIDField(Class<? extends DBBean> c){
 		if( !beanConfigs.containsKey( c ) )
 			initBeanConfig( c );
 		return beanConfigs.get( c ).id_field;
-	}
+	}*/
 
 	/**
 	 * @return all the fields except the ID field
@@ -155,12 +155,12 @@ public abstract class DBBean {
 				config.fields.add( field );
 			}
 		}
-		try {
+		/*try {
 			config.id_field = DBBean.class.getDeclaredField("id");
 			config.id_field.setAccessible(true);
 		} catch (Exception e) {
 			e.printStackTrace();
-		}
+		}*/
 
 		beanConfigs.put(c, config);
 	}
@@ -170,13 +170,13 @@ public abstract class DBBean {
 	 */
 	@SuppressWarnings("unchecked")
 	public void save(DBConnection db) throws SQLException{
-		if(processing)
+		if( processing )
 			return;
 		processing = true;
 		Class<? extends DBBean> c = this.getClass();
 		DBBeanConfig config = beanConfigs.get(c);
 		try {
-			Object id = getFieldValue( config.id_field );
+			Long id = this.getId();
 			// Generate the SQL
 			StringBuilder query = new StringBuilder();
 			if( id == null )
@@ -197,7 +197,7 @@ public abstract class DBBean {
 				query.append( " SET" );
 				query.append( params );
 				if( id != null )
-					query.append( ", "+config.id_field.getName()+"=?" );
+					query.append( ", id=?" );
 			}
 			logger.fine("Save query: "+query.toString());
 			PreparedStatement stmt = db.getPreparedStatement( query.toString() );
@@ -211,7 +211,7 @@ public abstract class DBBean {
 					if(subobj != null){
 						subobj.save(db);
 						DBBeanConfig subconfig = getBeanConfig(subobj.getClass());
-						stmt.setObject(i+1, subobj.getFieldValue(subconfig.id_field) );
+						stmt.setObject(i+1, subobj.getId() );
 					}
 					else
 						stmt.setObject(i+1, null);
@@ -230,11 +230,10 @@ public abstract class DBBean {
 							if(subConfig == null)
 								subConfig = beanConfigs.get( subobj.getClass() );
 							// Save links in link table
-							PreparedStatement subStmt = db.getPreparedStatement("REPLACE INTO "+subtable+" SET ?=? ?=?");
+							PreparedStatement subStmt = db.getPreparedStatement("REPLACE INTO "+subtable+" SET ?=? id=?");
 							subStmt.setString(1, idcol);
-							subStmt.setObject(2, config.id_field);
-							subStmt.setString(3, subConfig.tableName);
-							subStmt.setObject(4, subobj.getFieldValue(subConfig.id_field) );
+							subStmt.setString(2, subConfig.tableName);
+							subStmt.setObject(3, subobj.getId() );
 							DBConnection.exec(subStmt);
 							// Save the sub bean
 							subobj.save(db);
@@ -253,12 +252,13 @@ public abstract class DBBean {
 			// Execute the SQL
 			DBConnection.exec(stmt);
 			if( id == null )
-				setFieldValue( config.id_field, db.getLastInsertID() );
+				this.id = (Long) db.getLastInsertID();
 		} catch (SQLException e) {
 			throw e;
 		} catch (Exception e) {
 			throw new SQLException(e);
 		}
+		processing = false;
 	}
 
 	/**
@@ -267,15 +267,15 @@ public abstract class DBBean {
 	public void delete(DBConnection db){
 		Class<? extends DBBean> c = this.getClass();
 		DBBeanConfig config = beanConfigs.get(c);
-		if( config.id_field == null )
+		if( this.getId() == null )
 			throw new NoSuchElementException("ID field is null!");
 		try {
-			String sql = "DELETE FROM "+config.tableName+" WHERE "+ config.id_field +"=?";
+			String sql = "DELETE FROM "+config.tableName+" WHERE id=?";
 			logger.fine("Load query: "+sql);
 			PreparedStatement stmt = db.getPreparedStatement( sql );
 			// Put in the variables in the SQL
 			logger.fine("Delete query: "+sql);
-			stmt.setObject(1, getFieldValue(config.id_field) );
+			stmt.setObject(1, this.getId() );
 
 			// Execute the SQL
 			DBConnection.exec(stmt);
@@ -319,9 +319,8 @@ public abstract class DBBean {
 			initBeanConfig( c );
 		DBBeanConfig config = beanConfigs.get(c);
 		// Generate query
-		PreparedStatement stmt = db.getPreparedStatement( "SELECT * FROM "+config.tableName+" WHERE ?=? LIMIT 1" );
-		stmt.setString(1, config.id_field.getName());
-		stmt.setObject(2, id );
+		PreparedStatement stmt = db.getPreparedStatement( "SELECT * FROM "+config.tableName+" WHERE id=? LIMIT 1" );
+		stmt.setObject(1, id );
 		// Run query
 		T obj = DBConnection.exec(stmt, DBBeanSQLResultHandler.create(c, db) );
 		return obj;
@@ -339,12 +338,15 @@ public abstract class DBBean {
 		StringBuilder query = new StringBuilder();
 		query.append("CREATE TABLE "+config.tableName+" (  ");
 
+		// ID
+		query.append(" id ");
+		query.append( classToDBName( Long.class ) );
+		query.append(" PRIMARY KEY, ");
+		
 		for( Field field : config.fields ){
 			query.append(" ");
 			query.append( field.getName() );
 			query.append( classToDBName(c) );
-			if( config.id_field.equals( field ) )
-				query.append(" PRIMARY KEY");
 			query.append(", ");
 		}
 		query.delete( query.length()-2, query.length());

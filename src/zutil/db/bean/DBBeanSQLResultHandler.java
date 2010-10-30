@@ -125,7 +125,7 @@ public class DBBeanSQLResultHandler<T> implements SQLResultHandler<T>{
 	@SuppressWarnings("unchecked")
 	private DBBean createBean(ResultSet result) throws SQLException{
 		try {			
-			Object id = result.getObject( bean_config.id_field.getName() );
+			Long id = result.getLong( "id" );
 			DBBean obj = getCachedDBBean(bean_class, id);
 			if( obj != null )
 				return obj;
@@ -133,12 +133,9 @@ public class DBBeanSQLResultHandler<T> implements SQLResultHandler<T>{
 			cacheDBBean(obj, id);
 			
 			// Get id field
-			obj.setFieldValue(bean_config.id_field, result.getLong(bean_config.id_field.getName()));
+			obj.id = id;
 			// Get the rest
 			for( Field field : bean_config.fields ){
-				// Skip id field (its already loaded)
-				if( field.equals(bean_config.id_field) )
-					continue;
 				String name = field.getName();
 
 				// Another DBBean class
@@ -162,7 +159,7 @@ public class DBBeanSQLResultHandler<T> implements SQLResultHandler<T>{
 						// Load list from link table
 						PreparedStatement subStmt = db.getPreparedStatement("SELECT * FROM "+subtable+" WHERE ?=?");
 						subStmt.setString(1, idcol);
-						subStmt.setObject(2, bean_config.id_field.get( obj ));
+						subStmt.setObject(2, obj.getId() );
 						List<? extends DBBean> list = DBConnection.exec(subStmt, 
 								DBBeanSQLResultHandler.createList(linkTable.beanClass(), db));
 						obj.setFieldValue(field, list);
