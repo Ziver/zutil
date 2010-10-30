@@ -30,7 +30,7 @@ public class SSDPClient extends ThreadedUDPNetwork implements ThreadedUDPNetwork
 	
 	public static void main(String[] args) throws IOException{
 		System.out.println(LogUtil.getCalingClass());
-		LogUtil.setGlobalLogLevel(Level.FINEST);
+		LogUtil.setGlobalLevel(Level.FINEST);
 		SSDPClient ssdp = new SSDPClient();
 		ssdp.requestService("upnp:rootdevice");
 		ssdp.start();
