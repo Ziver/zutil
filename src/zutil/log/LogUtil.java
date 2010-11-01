@@ -28,8 +28,10 @@ public class LogUtil {
 		for(int i=1; i<stackTraceElements.length ;++i){
 			String name = stackTraceElements[i].getClassName();
 			//name = name.substring( name.lastIndexOf('.')+1 );
-			if( !name.equals( LogUtil.class.getName() ) )
+			if( !name.equals( LogUtil.class.getName() ) ){
+				//System.out.println("\""+name+"\"");
 				return name;
+			}
 		}
 		return null;
 	}

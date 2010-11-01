@@ -14,11 +14,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import zutil.db.DBConnection;
-import zutil.log.CompactLogFormatter;
 import zutil.log.LogUtil;
 
 /**
@@ -197,24 +195,24 @@ public abstract class DBBean {
 				query.append( " SET" );
 				query.append( params );
 				if( id != null )
-					query.append( ", id=?" );
+					query.append( "WHERE id=?" );
 			}
-			logger.fine("Save query: "+query.toString());
+			logger.finest("Save query: "+query.toString());
 			PreparedStatement stmt = db.getPreparedStatement( query.toString() );
 			// Put in the variables in the SQL
-			for(int i=0; i<config.fields.size() ;++i ){
-				Field field = config.fields.get(i);
+			int index = 1;
+			for(Field field : config.fields){
 
 				// Another DBBean class
 				if( DBBean.class.isAssignableFrom( field.getType() )){
 					DBBean subobj = (DBBean)getFieldValue(field);
 					if(subobj != null){
 						subobj.save(db);
-						DBBeanConfig subconfig = getBeanConfig(subobj.getClass());
-						stmt.setObject(i+1, subobj.getId() );
+						stmt.setObject(index, subobj.getId() );
 					}
 					else
-						stmt.setObject(i+1, null);
+						stmt.setObject(index, null);
+					index++;
 				}
 				// A list of DBBeans
 				else if( List.class.isAssignableFrom( field.getType() ) && 
@@ -243,11 +241,12 @@ public abstract class DBBean {
 				// Normal field
 				else{
 					Object value = getFieldValue(field);
-					stmt.setObject(i+1, value);
+					stmt.setObject(index, value);
+					index++;
 				}
 			}
 			if( id != null )
-				stmt.setObject(config.fields.size()+1, id);
+				stmt.setObject(index, id);
 
 			// Execute the SQL
 			DBConnection.exec(stmt);
@@ -327,7 +326,8 @@ public abstract class DBBean {
 	}
 
 	/**
-	 * Creates a specific table for the given Bean
+	 * Creates a specific table for the given Bean,
+	 * WARNING: Experimental
 	 */
 	public static void create(DBConnection sql, Class<? extends DBBean> c) throws SQLException{
 		if( !beanConfigs.containsKey( c ) )
@@ -341,7 +341,7 @@ public abstract class DBBean {
 		// ID
 		query.append(" id ");
 		query.append( classToDBName( Long.class ) );
-		query.append(" PRIMARY KEY, ");
+		query.append(" PRIMARY KEY AUTO_INCREMENT, ");
 		
 		for( Field field : config.fields ){
 			query.append(" ");
@@ -375,6 +375,8 @@ public abstract class DBBean {
 		else if(c == boolean.class) 	return "BOOLEAN";
 		else if(c == Byte.class) 		return "BINARY(1)";
 		else if(c == byte.class) 		return "BINARY(1)";
+		else if(DBBean.class.isAssignableFrom(c))
+										return classToDBName(Long.class);
 		return null;
 	}
 
