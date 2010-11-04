@@ -67,19 +67,21 @@ function updateUploadStatus(){
 					$("#UploadQueue").append("<li id='"+item.id+"'>{PROGHTML}</li>");
 				}
 				// Update data
+				if(jQuery("#UploadQueue #"+item.id+" .status").size() > 0)
+					jQuery("#UploadQueue #"+item.id+" .status").html( item.status );
+				if(jQuery("#UploadQueue #"+item.id+" .message").size() > 0)
+					jQuery("#UploadQueue #"+item.id+" .message").html( item.message );
 				if(jQuery("#UploadQueue #"+item.id+" .filename").size() > 0)
 					jQuery("#UploadQueue #"+item.id+" .filename").html( item.filename );
 				if(jQuery("#UploadQueue #"+item.id+" .progress").size() > 0)
 					jQuery("#UploadQueue #"+item.id+" .progress").animate({width: item.percent+"%"}, 'slow');
-					//jQuery("#UploadQueue #"+item.id+" #progress").css("width", item.percent+"%");
+				
 				if(jQuery("#UploadQueue #"+item.id+" .total").size() > 0)
 					jQuery("#UploadQueue #"+item.id+" .total").html( item.total );
 				if(jQuery("#UploadQueue #"+item.id+" .uploaded").size() > 0)
 					jQuery("#UploadQueue #"+item.id+" .uploaded").html( item.uploaded );
 				if(jQuery("#UploadQueue #"+item.id+" .speed").size() > 0)
 					jQuery("#UploadQueue #"+item.id+" .speed").html( item.speed );
-				if(jQuery("#UploadQueue #"+item.id+" .status").size() > 0)
-					jQuery("#UploadQueue #"+item.id+" .status").html( item.status );
 				
 				// remove li when done
 				if( item.status == "Done" ){

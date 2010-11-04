@@ -2,6 +2,10 @@ package zutil.jee.upload;
 
 import org.apache.commons.fileupload.ProgressListener;
 
+import zutil.StringUtil;
+import zutil.parser.json.JSONNode;
+import zutil.parser.json.JSONNode.JSONType;
+
 
 /**
  * This is a File Upload Listener that is used by Apache
@@ -19,11 +23,12 @@ public class FileUploadListener implements ProgressListener{
 	}
 	
 	private String id;
+	private volatile Status status;
 	private volatile String filename;
+	private volatile String message;
 	private volatile long bytes = 0l;
 	private volatile long length = 0l;
 	private volatile int item = 0;
-	private volatile Status status;
 	private volatile long time;
 	
 	// Speed
@@ -56,11 +61,13 @@ public class FileUploadListener implements ProgressListener{
 	
 	protected void setFileName(String filename){
 		this.filename = filename;
-		item++;
 	}
 	protected void setStatus(Status status){
 		this.status = status;
 		time = System.currentTimeMillis();
+	}
+	protected void setMessage(String msg){
+		this.message = msg;
 	}
 	
 	
@@ -92,6 +99,10 @@ public class FileUploadListener implements ProgressListener{
 		return time;
 	}
 	
+	protected String getMessage(){
+		return message;
+	}
+	
 	/**
 	 * @return bytes per second
 	 */
@@ -106,5 +117,20 @@ public class FileUploadListener implements ProgressListener{
 		if(length == 0)
 			return 0;
 		return (int)((100 * bytes) / length);
+	}
+
+	public JSONNode getJSON() {
+		JSONNode node = new JSONNode( JSONType.Map );
+		node.add("id", id);
+		
+		node.add("status", status.toString());
+		node.add("message", message);
+		node.add("filename", filename);
+		node.add("percent", getPercentComplete());
+		
+		node.add("uploaded", StringUtil.formatBytesToString( bytes ));
+		node.add("total", StringUtil.formatBytesToString( length ));
+		node.add("speed", StringUtil.formatBytesToString( speed )+"/s");
+		return node;
 	}
 }

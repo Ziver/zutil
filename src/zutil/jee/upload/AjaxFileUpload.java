@@ -134,16 +134,8 @@ public abstract class AjaxFileUpload extends HttpServlet {
 					it.remove();
 				}
 			}
-
-			JSONNode node = new JSONNode( JSONType.Map );
-			node.add("id", listener.getID());
-			node.add("filename", listener.getFilename());
-			node.add("percent", listener.getPercentComplete());
-			node.add("uploaded", StringUtil.formatBytesToString( listener.getBytesRead() ));
-			node.add("total", StringUtil.formatBytesToString( listener.getContentLength() ));
-			node.add("speed", StringUtil.formatBytesToString( listener.getSpeed() )+"/s");
-			node.add("status", listener.getStatus().toString());
-			root.add(node);
+			
+			root.add( listener.getJSON() );
 		}
 
 		// Write to the user
@@ -214,6 +206,8 @@ public abstract class AjaxFileUpload extends HttpServlet {
 		} catch (Exception e) {
 			e.printStackTrace();
 			listener.setStatus(Status.Error);
+			listener.setFileName("");
+			listener.setMessage( e.getMessage() );
 		}
 	}
 
