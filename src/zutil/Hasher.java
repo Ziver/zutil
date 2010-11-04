@@ -16,9 +16,9 @@ public class Hasher {
 	/**
 	 * Returns a hash of a file
 	 * 
-	 * @param file is the path to the file
-	 * @param hashType is the hash type
-	 * @return a String with the hash
+	 * @param 		file 		is the path to the file
+	 * @param 		hashType 	is the hash type
+	 * @return 					a String with the hash
 	 */
 	public static String hash(File file, String hashType) throws NoSuchAlgorithmException, IOException {
 		MessageDigest digest = MessageDigest.getInstance(hashType);//"MD5"
@@ -45,8 +45,23 @@ public class Hasher {
 	/**
 	 * Returns the MD5 hash of the given object
 	 * 
-	 * @param object is the object to hash
-	 * @return an String containing the hash
+	 * @param 		object 		is the String to hash
+	 * @return 					an String containing the hash
+	 */
+	public static String MD5(String str){
+		try {
+			return hash(str, "MD5");
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+
+	/**
+	 * Returns the MD5 hash of the given object
+	 * 
+	 * @param 		object 		is the object to hash
+	 * @return 					an String containing the hash
 	 */
 	public static String MD5(Serializable object){
 		try {
@@ -60,8 +75,23 @@ public class Hasher {
 	/**
 	 * Returns the SHA-1 hash of the given object
 	 * 
-	 * @param object is the object to hash
-	 * @return an String containing the hash
+	 * @param 		str 		is the String to hash
+	 * @return 					an String containing the hash
+	 */
+	public static String SHA1(String str){
+		try {
+			return hash(str, "SHA-1");
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+	
+	/**
+	 * Returns the SHA-1 hash of the given object
+	 * 
+	 * @param 		object 		is the object to hash
+	 * @return 					an String containing the hash
 	 */
 	public static String SHA1(Serializable object){
 		try {
@@ -75,20 +105,20 @@ public class Hasher {
 	/**
 	 * Hashes the given String as UTF8
 	 * 
-	 * @param object is the String
-	 * @param hashType is the hash algorithm (MD2, MD5, SHA-1, SHA-256, SHA-384, SHA-512 )
-	 * @return a hex String of the hash
+	 * @param 		object 		is the String
+	 * @param 		hashType 	is the hash algorithm (MD2, MD5, SHA-1, SHA-256, SHA-384, SHA-512 )
+	 * @return 					a hex String of the hash
 	 */
 	public static String hash(String object, String hashType) throws Exception {
-		return hash(object.getBytes("UTF8"), hashType);//(new BASE64Encoder()).encode(raw);
+		return hash(object.getBytes(), hashType);//(new BASE64Encoder()).encode(raw);
 	}
 	
 	/**
 	 * Returns the hash of the given object
 	 * 
-	 * @param object is the object to hash
-	 * @param hashType is the hash method (MD2, MD5, SHA-1, SHA-256, SHA-384, SHA-512 )
-	 * @return an String containing the hash
+	 * @param 		object 		is the object to hash
+	 * @param 		hashType 	is the hash method (MD2, MD5, SHA-1, SHA-256, SHA-384, SHA-512 )
+	 * @return 					an String containing the hash
 	 */
 	public static String hash(Serializable object, String hashType) throws Exception {
 		return hash(Converter.toBytes(object), hashType);//(new BASE64Encoder()).encode(raw);
@@ -97,9 +127,9 @@ public class Hasher {
 	/**
 	 * Hashes a given byte array
 	 * 
-	 * @param data is the byte array to hash
-	 * @param hashType is the hash method (MD2, MD5, SHA-1, SHA-256, SHA-384, SHA-512 )
-	 * @return an String containing the hash
+	 * @param 		data 		is the byte array to hash
+	 * @param 		hashType 	is the hash method (MD2, MD5, SHA-1, SHA-256, SHA-384, SHA-512 )
+	 * @return 					an String containing the hash
 	 * @throws Exception
 	 */
 	public static String hash(byte[] data, String hashType) throws Exception {
@@ -114,9 +144,9 @@ public class Hasher {
 	/**
 	 * MurmurHash2 ported from c++ source
 	 * 
-	 * @param object is the Key
-	 * @param seed is the seed
-	 * @return A MurmurHash of the key
+	 * @param 		object 		is the Key
+	 * @param 		seed 		is the seed
+	 * @return 					A MurmurHash of the key
 	 */
 	public static int MurmurHash(Serializable object, int seed) throws Exception{
 		byte[] data = Converter.toBytes(object);

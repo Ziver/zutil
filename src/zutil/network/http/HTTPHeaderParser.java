@@ -37,7 +37,7 @@ public class HTTPHeaderParser {
 
 		String tmp = null;
 		if( (tmp=in.readLine()) != null && !tmp.isEmpty() ){
-			parseFirstLine( tmp );
+			parseStatusLine( tmp );
 			while( (tmp=in.readLine()) != null && !tmp.isEmpty() ){
 				parseLine( tmp );
 			}
@@ -48,7 +48,7 @@ public class HTTPHeaderParser {
 	/**
 	 * Parses the HTTP header information from an String
 	 * 
-	 * @param 		in is the string
+	 * @param 		in 		is the string
 	 */
 	public HTTPHeaderParser(String in){
 		url_attr = new HashMap<String, String>();
@@ -59,7 +59,7 @@ public class HTTPHeaderParser {
 		sc.useDelimiter("\n");
 		String tmp = null;
 		if( sc.hasNext() && !(tmp=sc.next()).isEmpty() ){
-			parseFirstLine( tmp );
+			parseStatusLine( tmp );
 			while( sc.hasNext() && !(tmp=sc.next()).isEmpty() ){
 				parseLine( tmp );
 			}
@@ -75,7 +75,7 @@ public class HTTPHeaderParser {
 	 * @param 	map 		The HashMap to put the variables to
 	 * @return 				The path and file name as a String
 	 */
-	protected void parseFirstLine(String line){
+	protected void parseStatusLine(String line){
 		// Server Response
 		if( line.startsWith("HTTP/") ){
 			version = Float.parseFloat( line.substring( 5 , 8) );

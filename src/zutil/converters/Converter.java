@@ -108,7 +108,7 @@ public class Converter {
 	}
 
 	/** array needed for byteToHex */
-	private static char[] HEX_CHARS = {'0','1','2','3','4','5','6','7','8','9','A','B','C','D','E','F'};
+	private static char[] HEX_CHARS = {'0','1','2','3','4','5','6','7','8','9','a','b','c','d','e','f'};
 	/**
 	 * Converts a byte Array to a Hex String
 	 * 
