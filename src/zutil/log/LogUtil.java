@@ -1,5 +1,6 @@
 package zutil.log;
 
+import java.util.logging.ConsoleHandler;
 import java.util.logging.Formatter;
 import java.util.logging.Handler;
 import java.util.logging.Level;
@@ -12,14 +13,14 @@ import java.util.logging.Logger;
  */
 public class LogUtil {
 	private LogUtil(){}
-	
+
 	/**
 	 * @return a new Logger for the calling class
 	 */
 	public static Logger getLogger(){
 		return Logger.getLogger(getCalingClass());
 	}
-	
+
 	/**
 	 * @return the parent class other than Logger in the stack
 	 */
@@ -35,7 +36,7 @@ public class LogUtil {
 		}
 		return null;
 	}
-	
+
 	/**
 	 * Sets the global log formatter to the specified one
 	 * 
@@ -45,31 +46,42 @@ public class LogUtil {
 		Logger root = Logger.getLogger("");
 		for (Handler handler : root.getHandlers()) {
 			handler.setFormatter(f);
-	    }
+		}
 	}
-	
+
 	/**
 	 * Sets the global log level
 	 */
 	public static void setGlobalLevel(Level level){
 		setLevel("", level);
 	}
-	
+
 	/**
 	 * Sets the log level for a specified class
 	 */
 	public static void setLevel(Class<?> c, Level level){
 		setLevel(c.getName(), level);
 	}
-	
+
 	/**
 	 * Sets the log level for a specified logger
 	 */
 	public static void setLevel(String name, Level level){
 		Logger logger = Logger.getLogger(name);
 		logger.setLevel(level);
-		//for (Handler handler : logger.getHandlers()) {
-		//	handler.setLevel(level);
-	    //}
+		// Check if the logger has a handler
+		if( logger.getHandlers().length == 0 ){
+			// Create a new console handler
+			ConsoleHandler handler = new ConsoleHandler();
+			handler.setLevel( level );
+			logger.addHandler( handler );
+			logger.setUseParentHandlers( false );
+		}
+		else{
+			// Set the level on the handlers
+			for (Handler handler : logger.getHandlers()) {
+				handler.setLevel(level);
+			}
+		}
 	}
 }
