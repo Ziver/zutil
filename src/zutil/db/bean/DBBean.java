@@ -195,7 +195,7 @@ public abstract class DBBean {
 				query.append( " SET" );
 				query.append( params );
 				if( id != null )
-					query.append( "WHERE id=?" );
+					query.append( " WHERE id=?" );
 			}
 			logger.finest("Save query: "+query.toString());
 			PreparedStatement stmt = db.getPreparedStatement( query.toString() );
