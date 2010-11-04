@@ -230,7 +230,8 @@ public abstract class AjaxFileUpload extends HttpServlet {
 
 	/**
 	 * Handle the uppload
+	 * @throws ServletException 
 	 */
 	public abstract void doUpload(HttpServletRequest request, HttpServletResponse response, 
-										Map<String,String> fields, List<FileItem> files);
+										Map<String,String> fields, List<FileItem> files) throws ServletException;
 }
