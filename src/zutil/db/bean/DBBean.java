@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import zutil.db.DBConnection;
@@ -26,25 +27,26 @@ import zutil.log.LogUtil;
  * DBBean will be replaced by the id field of that class.
  * 
  * Supported fields:
- * *Boolean
- * *Integer
- * *Short
- * *Float
- * *Double
- * *String
- * *Character
- * *DBBean
- * *List<DBBean>
+ * 	*Boolean
+ * 	*Integer
+ * 	*Short
+ * 	*Float
+ * 	*Double
+ * 	*String
+ * 	*Character
+ * 	*DBBean
+ * 	*java.sql.Date
+ * 	*List<DBBean>
  * 
  * </XMP>
  * @author Ziver
  */
 public abstract class DBBean {
 	public static final Logger logger = LogUtil.getLogger();
-	
+
 	/** The id of the bean **/
 	protected Long id;
-	
+
 	/**
 	 * Sets the name of the table in the database
 	 */
@@ -69,21 +71,11 @@ public abstract class DBBean {
 	}
 
 	/**
-	 * Sets the field as the id column in the table
-	 */
-	/*@Retention(RetentionPolicy.RUNTIME)
-	@Target(ElementType.FIELD)
-	public @interface DBTableID {}
-	*/
-
-	/**
 	 * A Class that contains information about a bean
 	 */
 	protected static class DBBeanConfig{
 		/** The name of the table in the DB */
 		protected String tableName;
-		/** The id field */
-		//protected Field id_field;
 		/** All the fields in the bean */
 		protected ArrayList<Field> fields;
 
@@ -102,15 +94,6 @@ public abstract class DBBean {
 			initBeanConfig( this.getClass() );
 		processing = false;
 	}
-
-	/**
-	 * @return the ID field of the bean or null if there is non
-	 */
-	/*public static Field getIDField(Class<? extends DBBean> c){
-		if( !beanConfigs.containsKey( c ) )
-			initBeanConfig( c );
-		return beanConfigs.get( c ).id_field;
-	}*/
 
 	/**
 	 * @return all the fields except the ID field
@@ -148,17 +131,9 @@ public abstract class DBBean {
 					!Modifier.isStatic( mod ) &&
 					!Modifier.isInterface( mod ) &&
 					!Modifier.isNative( mod )){
-				//if(field.getAnnotation(DBBean.DBTableID.class) != null)			
-				//	config.id_field = field;
 				config.fields.add( field );
 			}
 		}
-		/*try {
-			config.id_field = DBBean.class.getDeclaredField("id");
-			config.id_field.setAccessible(true);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}*/
 
 		beanConfigs.put(c, config);
 	}
@@ -181,7 +156,7 @@ public abstract class DBBean {
 				query.append("INSERT INTO ");
 			else query.append("UPDATE ");
 			query.append( config.tableName );
-			
+
 			StringBuilder params = new StringBuilder();
 			for( Field field : config.fields ){
 				if( !List.class.isAssignableFrom(field.getType()) ){
@@ -222,7 +197,7 @@ public abstract class DBBean {
 						DBLinkTable linkTable = field.getAnnotation( DBLinkTable.class );
 						String subtable = linkTable.name();
 						String idcol = (linkTable.column().isEmpty() ? config.tableName : linkTable.column() );
-	
+
 						DBBeanConfig subConfig = null;
 						for(DBBean subobj : list){
 							if(subConfig == null)
@@ -262,25 +237,24 @@ public abstract class DBBean {
 
 	/**
 	 * Deletes the object from the DB, WARNING will not delete sub beans
+	 * 
+	 * @throws SQLException 
 	 */
-	public void delete(DBConnection db){
+	public void delete(DBConnection db) throws SQLException{
 		Class<? extends DBBean> c = this.getClass();
 		DBBeanConfig config = beanConfigs.get(c);
 		if( this.getId() == null )
-			throw new NoSuchElementException("ID field is null!");
-		try {
-			String sql = "DELETE FROM "+config.tableName+" WHERE id=?";
-			logger.fine("Load query: "+sql);
-			PreparedStatement stmt = db.getPreparedStatement( sql );
-			// Put in the variables in the SQL
-			logger.fine("Delete query: "+sql);
-			stmt.setObject(1, this.getId() );
+			throw new NoSuchElementException("ID field is null( Has the bean been saved?)!");
 
-			// Execute the SQL
-			DBConnection.exec(stmt);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+		String sql = "DELETE FROM "+config.tableName+" WHERE id=?";
+		logger.fine("Load query: "+sql);
+		PreparedStatement stmt = db.getPreparedStatement( sql );
+		// Put in the variables in the SQL
+		logger.fine("Delete query: "+sql);
+		stmt.setObject(1, this.getId() );
+
+		// Execute the SQL
+		DBConnection.exec(stmt);
 	}
 
 	/**
@@ -342,7 +316,7 @@ public abstract class DBBean {
 		query.append(" id ");
 		query.append( classToDBName( Long.class ) );
 		query.append(" PRIMARY KEY AUTO_INCREMENT, ");
-		
+
 		for( Field field : config.fields ){
 			query.append(" ");
 			query.append( field.getName() );
@@ -376,7 +350,7 @@ public abstract class DBBean {
 		else if(c == Byte.class) 		return "BINARY(1)";
 		else if(c == byte.class) 		return "BINARY(1)";
 		else if(DBBean.class.isAssignableFrom(c))
-										return classToDBName(Long.class);
+			return classToDBName(Long.class);
 		return null;
 	}
 
@@ -391,7 +365,7 @@ public abstract class DBBean {
 			field.setAccessible(true);
 			return field.get(this);
 		} catch (Exception e) {
-			e.printStackTrace();
+			logger.log(Level.WARNING, e.getMessage(), e);
 		}
 		return null;
 	}
@@ -405,12 +379,24 @@ public abstract class DBBean {
 	protected void setFieldValue(Field field, Object o){
 		try {
 			field.setAccessible(true);
-			field.set(this, o);
+			if( o == null && !Object.class.isAssignableFrom( field.getType() ) ){
+				logger.fine("Trying to set primitive data type to null!");
+				if( 	 field.getType() == Integer.TYPE )	field.setInt(this, 0);
+				else if( field.getType() == Character.TYPE )field.setChar(this, (char) 0);
+				else if( field.getType() == Byte.TYPE )		field.setByte(this, (byte) 0);
+				else if( field.getType() == Short.TYPE )	field.setShort(this, (short) 0);
+				else if( field.getType() == Long.TYPE )		field.setLong(this, 0l);
+				else if( field.getType() == Float.TYPE )	field.setFloat(this, 0f);
+				else if( field.getType() == Double.TYPE )	field.setDouble(this, 0d);
+				else if( field.getType() == Boolean.TYPE )	field.setBoolean(this, false);
+			}
+			else
+				field.set(this, o);
 		} catch (Exception e) {
-			e.printStackTrace();
+			logger.log(Level.WARNING, e.getMessage(), e);
 		}
 	}
-	
+
 	/**
 	 * @return the object id or null if the bean has not bean saved yet
 	 */
