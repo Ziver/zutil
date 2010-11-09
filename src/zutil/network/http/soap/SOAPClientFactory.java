@@ -64,6 +64,7 @@ public class SOAPClientFactory {
 		}
 		
 		// Generate the methods
+		// TODO:
 		for(WSMethodDef methodDef : wsDef.getMethods()){
 			CtMethod method = CtNewMethod.make("public int m(int i){}", cc);
 			method.insertBefore("System.out.println(\"Hello.say():\");");

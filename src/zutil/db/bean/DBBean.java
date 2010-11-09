@@ -10,6 +10,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -35,7 +36,7 @@ import zutil.log.LogUtil;
  * 	*String
  * 	*Character
  * 	*DBBean
- * 	*java.sql.Date
+ * 	*java.sql.Timestamp
  * 	*List<DBBean>
  * 
  * </XMP>
@@ -139,10 +140,22 @@ public abstract class DBBean {
 	}
 
 	/**
+	 * Saves the object and all the sub objects to the DB
+	 * 
+	 * @param		db				is the DBMS connection
+	 */
+	public void save(DBConnection db) throws SQLException{
+		save( db, true );
+	}
+	
+	/**
 	 * Saves the Object to the DB
+	 * 
+	 * @param		db				is the DBMS connection
+	 * @param		recursive		is if the method should save all sub objects
 	 */
 	@SuppressWarnings("unchecked")
-	public void save(DBConnection db) throws SQLException{
+	public void save(DBConnection db, boolean recursive) throws SQLException{
 		if( processing )
 			return;
 		processing = true;
@@ -182,7 +195,8 @@ public abstract class DBBean {
 				if( DBBean.class.isAssignableFrom( field.getType() )){
 					DBBean subobj = (DBBean)getFieldValue(field);
 					if(subobj != null){
-						subobj.save(db);
+						if( recursive || subobj.getId() == null )
+							subobj.save(db);
 						stmt.setObject(index, subobj.getId() );
 					}
 					else
@@ -192,26 +206,7 @@ public abstract class DBBean {
 				// A list of DBBeans
 				else if( List.class.isAssignableFrom( field.getType() ) && 
 						field.getAnnotation( DBLinkTable.class ) != null){
-					List<DBBean> list = (List<DBBean>)getFieldValue(field);
-					if( list != null ){
-						DBLinkTable linkTable = field.getAnnotation( DBLinkTable.class );
-						String subtable = linkTable.name();
-						String idcol = (linkTable.column().isEmpty() ? config.tableName : linkTable.column() );
-
-						DBBeanConfig subConfig = null;
-						for(DBBean subobj : list){
-							if(subConfig == null)
-								subConfig = beanConfigs.get( subobj.getClass() );
-							// Save links in link table
-							PreparedStatement subStmt = db.getPreparedStatement("REPLACE INTO "+subtable+" SET ?=? id=?");
-							subStmt.setString(1, idcol);
-							subStmt.setString(2, subConfig.tableName);
-							subStmt.setObject(3, subobj.getId() );
-							DBConnection.exec(subStmt);
-							// Save the sub bean
-							subobj.save(db);
-						}
-					}
+					// DO NOTING
 				}
 				// Normal field
 				else{
@@ -227,6 +222,37 @@ public abstract class DBBean {
 			DBConnection.exec(stmt);
 			if( id == null )
 				this.id = (Long) db.getLastInsertID();
+			
+			// Save the list, after we get the object id
+			for(Field field : config.fields){
+				if( List.class.isAssignableFrom( field.getType() ) && 
+						field.getAnnotation( DBLinkTable.class ) != null){
+					List<DBBean> list = (List<DBBean>)getFieldValue(field);
+					if( list != null ){
+						DBLinkTable linkTable = field.getAnnotation( DBLinkTable.class );
+						String subtable = linkTable.name();
+						String idcol = (linkTable.column().isEmpty() ? config.tableName : linkTable.column() );
+						String sub_idcol = "id";
+
+						DBBeanConfig subConfig = null;
+						for(DBBean subobj : list){
+							// Save the sub bean
+							if( recursive || subobj.getId() == null )
+								subobj.save(db);
+							// Get the Sub object configuration
+							if(subConfig == null)
+								subConfig = beanConfigs.get( subobj.getClass() );
+							// Save links in link table
+							String subsql = "REPLACE INTO "+subtable+" SET "+idcol+"=?, "+sub_idcol+"=?";
+							logger.finest("List Save query: "+subsql);
+							PreparedStatement subStmt = db.getPreparedStatement( subsql );
+							subStmt.setLong(1, this.getId() );
+							subStmt.setLong(2, subobj.getId() );
+							DBConnection.exec(subStmt);
+						}
+					}
+				}
+			}
 		} catch (SQLException e) {
 			throw e;
 		} catch (Exception e) {
@@ -349,6 +375,7 @@ public abstract class DBBean {
 		else if(c == boolean.class) 	return "BOOLEAN";
 		else if(c == Byte.class) 		return "BINARY(1)";
 		else if(c == byte.class) 		return "BINARY(1)";
+		else if(c == Timestamp.class)	return "DATETIME";
 		else if(DBBean.class.isAssignableFrom(c))
 			return classToDBName(Long.class);
 		return null;
@@ -393,7 +420,7 @@ public abstract class DBBean {
 			else
 				field.set(this, o);
 		} catch (Exception e) {
-			logger.log(Level.WARNING, e.getMessage(), e);
+			logger.log(Level.SEVERE, e.getMessage(), e);
 		}
 	}
 

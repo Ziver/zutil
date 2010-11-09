@@ -19,7 +19,7 @@ import zutil.log.LogUtil;
 public class DBBeanSQLResultHandler<T> implements SQLResultHandler<T>{
 	public static final Logger logger = LogUtil.getLogger();
 	/** This is the time to live for the cached items **/
-	public static final long CACHE_TTL = 1000*60*10; // in ms
+	public static final long CACHE_TTL = 1000*60*10; // 10 min in ms
 	/** A cache for detecting recursion **/
 	protected static HashMap<Class<?>, HashMap<Object,DBBeanCache>> cache =
 		new HashMap<Class<?>, HashMap<Object,DBBeanCache>>();
@@ -102,6 +102,7 @@ public class DBBeanSQLResultHandler<T> implements SQLResultHandler<T>{
 	public T handleQueryResult(Statement stmt, ResultSet result) throws SQLException{
 		if( list ){
 			LinkedList<DBBean> bean_list = new LinkedList<DBBean>();
+			logger.fine("Loading new DBBean List");
 			while( result.next() ){
 				DBBean obj = createBean(result);
 				bean_list.add( obj );
@@ -109,8 +110,9 @@ public class DBBeanSQLResultHandler<T> implements SQLResultHandler<T>{
 			return (T) bean_list;
 		}
 		else{
-			if( result.next() )
+			if( result.next() ){
 				return (T) createBean(result);
+			}
 			return null;
 		}
 
@@ -129,6 +131,7 @@ public class DBBeanSQLResultHandler<T> implements SQLResultHandler<T>{
 			DBBean obj = getCachedDBBean(bean_class, id);
 			if( obj != null )
 				return obj;
+			logger.fine("Loading new DBBean("+bean_class.getName()+") with id: "+id);
 			obj = bean_class.newInstance();
 			cacheDBBean(obj, id);
 			
@@ -157,7 +160,9 @@ public class DBBeanSQLResultHandler<T> implements SQLResultHandler<T>{
 						String idcol = (linkTable.column().isEmpty() ? bean_config.tableName : linkTable.column() );
 
 						// Load list from link table
-						PreparedStatement subStmt = db.getPreparedStatement("SELECT * FROM "+subtable+" WHERE ?=?");
+						String subsql = "SELECT * FROM "+subtable+" WHERE ?=?";
+						logger.finest("List Load Query: "+subsql);
+						PreparedStatement subStmt = db.getPreparedStatement( subsql );
 						subStmt.setString(1, idcol);
 						subStmt.setObject(2, obj.getId() );
 						List<? extends DBBean> list = DBConnection.exec(subStmt, 
