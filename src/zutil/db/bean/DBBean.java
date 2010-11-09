@@ -63,12 +63,12 @@ public abstract class DBBean {
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target(ElementType.FIELD)
 	public @interface DBLinkTable {
-		/** The name of the Link table */
+		/** The name of the Link table, should not contain any strange characters or spaces */
 		String name();
 		/** The class of the linked bean */
 		Class<? extends DBBean> beanClass();
-		/** The name of the column that contains this objects id */
-		String column() default "";
+		/** The name of the column that contains the main objects id */
+		String idColumn() default "";
 	}
 
 	/**
@@ -231,7 +231,7 @@ public abstract class DBBean {
 					if( list != null ){
 						DBLinkTable linkTable = field.getAnnotation( DBLinkTable.class );
 						String subtable = linkTable.name();
-						String idcol = (linkTable.column().isEmpty() ? config.tableName : linkTable.column() );
+						String idcol = (linkTable.idColumn().isEmpty() ? config.tableName : linkTable.idColumn() );
 						String sub_idcol = "id";
 
 						DBBeanConfig subConfig = null;

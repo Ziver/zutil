@@ -135,7 +135,7 @@ public class DBBeanSQLResultHandler<T> implements SQLResultHandler<T>{
 			obj = bean_class.newInstance();
 			cacheDBBean(obj, id);
 			
-			// Get id field
+			// Set id field
 			obj.id = id;
 			// Get the rest
 			for( Field field : bean_config.fields ){
@@ -144,7 +144,7 @@ public class DBBeanSQLResultHandler<T> implements SQLResultHandler<T>{
 				// Another DBBean class
 				if( DBBean.class.isAssignableFrom( field.getType() )){
 					if(db != null){
-						Object subid = result.getObject(name);
+						Long subid = result.getLong( name );
 						DBBean subobj = getCachedDBBean(field.getType(), subid);
 						if( subobj == null )
 							subobj = DBBean.load(db, (Class<? extends DBBean>)field.getType(), subid);
@@ -156,15 +156,17 @@ public class DBBeanSQLResultHandler<T> implements SQLResultHandler<T>{
 						field.getAnnotation( DBLinkTable.class ) != null){
 					if(db != null){
 						DBLinkTable linkTable = field.getAnnotation( DBLinkTable.class );
-						String subtable = linkTable.name();
-						String idcol = (linkTable.column().isEmpty() ? bean_config.tableName : linkTable.column() );
+						DBBeanConfig subConfig = DBBean.getBeanConfig( linkTable.beanClass() );
+						String linkTableName = linkTable.name();
+						String subTable = subConfig.tableName;
+						String idcol = (linkTable.idColumn().isEmpty() ? bean_config.tableName : linkTable.idColumn() );
 
 						// Load list from link table
-						String subsql = "SELECT * FROM "+subtable+" WHERE ?=?";
+						//String subsql = "SELECT * FROM "+linkTableName+" NATURAL JOIN "+subConfig.tableName+" WHERE "+idcol+"=?";
+						String subsql = "SELECT obj.* FROM "+linkTableName+" as link, "+subTable+" as obj WHERE obj."+idcol+"=? AND obj.id=link.id";
 						logger.finest("List Load Query: "+subsql);
 						PreparedStatement subStmt = db.getPreparedStatement( subsql );
-						subStmt.setString(1, idcol);
-						subStmt.setObject(2, obj.getId() );
+						subStmt.setObject(1, obj.getId() );
 						List<? extends DBBean> list = DBConnection.exec(subStmt, 
 								DBBeanSQLResultHandler.createList(linkTable.beanClass(), db));
 						obj.setFieldValue(field, list);
@@ -176,9 +178,7 @@ public class DBBeanSQLResultHandler<T> implements SQLResultHandler<T>{
 			}
 			return obj;
 
-		} catch (InstantiationException e) {
-			throw new SQLException(e);
-		} catch (IllegalAccessException e) {
+		} catch (Exception e) {
 			throw new SQLException(e);
 		}
 	}
