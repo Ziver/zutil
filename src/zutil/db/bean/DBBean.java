@@ -87,13 +87,16 @@ public abstract class DBBean {
 
 	/** This is a cache of all the initialized beans */	 
 	private static HashMap<Class<? extends DBBean>,DBBeanConfig> beanConfigs = new HashMap<Class<? extends DBBean>,DBBeanConfig>();
-	/** This value is for preventing recursive loops */	 
-	private boolean processing;
+	/** This value is for preventing recursive loops when saving */
+	protected boolean processing_save;
+	/** This value is for preventing recursive loops when updating */	
+	protected boolean processing_update;
 
 	protected DBBean(){
 		if( !beanConfigs.containsKey( this.getClass() ) )
 			initBeanConfig( this.getClass() );
-		processing = false;
+		processing_save = false;
+		processing_update = false;
 	}
 
 	/**
@@ -156,9 +159,9 @@ public abstract class DBBean {
 	 */
 	@SuppressWarnings("unchecked")
 	public void save(DBConnection db, boolean recursive) throws SQLException{
-		if( processing )
+		if( processing_save )
 			return;
-		processing = true;
+		processing_save = true;
 		Class<? extends DBBean> c = this.getClass();
 		DBBeanConfig config = beanConfigs.get(c);
 		try {
@@ -257,8 +260,9 @@ public abstract class DBBean {
 			throw e;
 		} catch (Exception e) {
 			throw new SQLException(e);
-		}
-		processing = false;
+		} finally{
+			processing_save = false;
+		}		
 	}
 
 	/**

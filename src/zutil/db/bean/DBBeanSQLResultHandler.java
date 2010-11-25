@@ -5,9 +5,11 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.ResultSet;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
 
 import zutil.db.DBConnection;
@@ -19,10 +21,10 @@ import zutil.log.LogUtil;
 public class DBBeanSQLResultHandler<T> implements SQLResultHandler<T>{
 	public static final Logger logger = LogUtil.getLogger();
 	/** This is the time to live for the cached items **/
-	public static final long CACHE_TTL = 1000*60*10; // 10 min in ms
+	public static final long CACHE_TTL = 1000*60*1; // 1 min in ms
 	/** A cache for detecting recursion **/
-	protected static HashMap<Class<?>, HashMap<Object,DBBeanCache>> cache =
-		new HashMap<Class<?>, HashMap<Object,DBBeanCache>>();
+	protected static Map<Class<?>, Map<Long,DBBeanCache>> cache =
+		Collections.synchronizedMap(new HashMap<Class<?>, Map<Long,DBBeanCache>>());
 	/**
 	 * A cache container that contains a object and last read time
 	 */
@@ -117,26 +119,46 @@ public class DBBeanSQLResultHandler<T> implements SQLResultHandler<T>{
 		}
 
 	}
-
+	
+	
 	/**
 	 * Instantiates a new bean and assigns field values from the ResultSet
 	 * 
-	 * @param 	result	is where the field values for the bean will bee read from, the cursor should be in front of the data
-	 * @return			a new instance of the bean
+	 * @param 		result		is where the field values for the bean will bee read from, the cursor should be in front of the data
+	 * @return					a new instance of the bean
 	 */
-	@SuppressWarnings("unchecked")
-	private DBBean createBean(ResultSet result) throws SQLException{
+	protected DBBean createBean(ResultSet result) throws SQLException{
 		try {			
 			Long id = result.getLong( "id" );
-			DBBean obj = getCachedDBBean(bean_class, id);
+			DBBean obj = getCachedDBBean(bean_class, id, result);
 			if( obj != null )
 				return obj;
-			logger.fine("Loading new DBBean("+bean_class.getName()+") with id: "+id);
+			logger.fine("Creating new DBBean("+bean_class.getName()+") with id: "+id);
 			obj = bean_class.newInstance();
 			cacheDBBean(obj, id);
 			
 			// Set id field
 			obj.id = id;
+			
+			// Update fields
+			updateBean( result, obj );
+			return obj;
+		} catch (Exception e) {
+			throw new SQLException(e);
+		}
+	}
+	
+	/**
+	 * Updates an existing bean and assigns field values from the ResultSet
+	 * 
+	 * @param 		result		is where the field values for the bean will bee read from, the cursor should be in front of the data
+	 * @param		obj			is the object that will be updated
+	 */
+	@SuppressWarnings("unchecked")
+	protected void updateBean(ResultSet result, DBBean obj) throws SQLException{
+		try {
+			logger.fine("Updating DBBean("+bean_class.getName()+") with id: "+obj.id);
+			obj.processing_update = true;
 			// Get the rest
 			for( Field field : bean_config.fields ){
 				String name = field.getName();
@@ -145,7 +167,7 @@ public class DBBeanSQLResultHandler<T> implements SQLResultHandler<T>{
 				if( DBBean.class.isAssignableFrom( field.getType() )){
 					if(db != null){
 						Long subid = result.getLong( name );
-						DBBean subobj = getCachedDBBean(field.getType(), subid);
+						DBBean subobj = getCachedDBBean( field.getType(), subid );
 						if( subobj == null )
 							subobj = DBBean.load(db, (Class<? extends DBBean>)field.getType(), subid);
 						obj.setFieldValue(field, subobj);
@@ -176,53 +198,78 @@ public class DBBeanSQLResultHandler<T> implements SQLResultHandler<T>{
 				else				
 					obj.setFieldValue(field, result.getObject(name));
 			}
-			return obj;
-
 		} catch (Exception e) {
 			throw new SQLException(e);
+		} finally{
+			obj.processing_update = false;
 		}
 	}
 
 	/**
+	 * Will check the cache if the given object exists
+	 * 
+	 * @param 		c			is the class of the bean
+	 * @param 		id			is the id of the bean
+	 * @return					a cached DBBean object, or null if there is no cached object or if the cache is to old
+	 */
+	protected DBBean getCachedDBBean(Class<?> c, Long id){
+		try{
+			return getCachedDBBean( c, id, null );
+		}catch(SQLException e){
+			throw new RuntimeException("This exception sould not be thrown, Somting is realy wrong!", e);
+		}
+	}
+	
+	/**
+	 * Will check the cache if the given object exists and will update it if its old
+	 * 
+	 * @param 		c			is the class of the bean
+	 * @param 		id			is the id of the bean
+	 * @param		result		is the ResultSet for this object, the object will be updated from this ResultSet if the object is to old, there will be no update if this parameter is null
+	 * @return					a cached DBBean object, might update the cached object if its old but only if the ResultSet parameter is set
+	 */
+	protected DBBean getCachedDBBean(Class<?> c, Long id, ResultSet result) throws SQLException{
+		if( cache.containsKey(c) ){
+			DBBeanCache item = cache.get(c).get(id);
+			// Check if the cache is valid
+			if( item != null ){
+				// The cache is old, update and return it
+				if( item.timestamp+CACHE_TTL > System.currentTimeMillis() ){
+					// There is no ResultSet to update from
+					if( result == null )
+						return null;
+					// Only update object if there is no update running now
+					if( !item.bean.processing_update ){
+						logger.finer("Cache to old: "+c.getName()+" ID: "+id);
+						updateBean( result, item.bean );
+					}
+				}
+				return item.bean;
+			}
+			// The cache is null
+			cache.get(c).remove(id);
+		}
+		logger.finer("Cache miss: "+c.getName()+" ID: "+id);
+		return null;
+	}
+	
+	/**
 	 * Adds the given object to the cache
 	 * 
-	 * @param obj	is the object to cache
-	 * @param id	is the id object of the bean
+	 * @param 		obj		is the object to cache
+	 * @param 		id		is the id object of the bean
 	 */
-	protected static void cacheDBBean(DBBean obj, Object id) {
+	protected static synchronized void cacheDBBean(DBBean obj, Long id) {
 		DBBeanCache item = new DBBeanCache();
 		item.timestamp = System.currentTimeMillis();
 		item.bean = obj;
 		if( cache.containsKey(obj.getClass()) )
 			cache.get(obj.getClass()).put(id, item);
 		else{
-			HashMap<Object, DBBeanCache> map = new HashMap<Object, DBBeanCache>();
+			HashMap<Long, DBBeanCache> map = new HashMap<Long, DBBeanCache>();
 			map.put(id, item);
 			cache.put(obj.getClass(), map);
 		}
-	}
-
-	/**
-	 * @param c		is the class of the bean
-	 * @param id	is the id object of the bean
-	 * @return		an cached DBBean object or null if the object is not cached or has expired
-	 */
-	protected static DBBean getCachedDBBean(Class<?> c, Object id){
-		if( cache.containsKey(c) ){
-			DBBeanCache item = cache.get(c).get(id);
-			// Check if the cache is valid
-			if( item != null &&  item.timestamp+CACHE_TTL > System.currentTimeMillis() ){
-				return item.bean;
-			}
-			// The cache is old, remove it and return null
-			else{
-				logger.finer("Cache to old: "+c.getName()+" ID: "+id);
-				cache.get(c).remove(id);
-				return null;
-			}
-		}
-		logger.finer("Cache miss: "+c.getName()+" ID: "+id);
-		return null;
 	}
 	
 }
