@@ -5,7 +5,7 @@ import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 
 /**
- * This is a static class containing image utilities
+ * This is a static class containing image utility methods
  * 
  * @author Ziver
  */
