@@ -12,7 +12,7 @@ import java.awt.image.BufferedImage;
 public class ImageUtil {
 
 	/**
-	 * Resizes an BufferedImage
+	 * Resizes a BufferedImage
 	 * 
 	 * @param source is the image to resize
 	 * @param width is the wanted width
