@@ -14,11 +14,11 @@ public class ImageUtil {
 	/**
 	 * Resizes a BufferedImage
 	 * 
-	 * @param source is the image to resize
-	 * @param width is the wanted width
-	 * @param height is the wanted height
-	 * @param keep_aspect is if the aspect ratio of the image should be kept
-	 * @return the resized image
+	 * @param 		source 		is the image to resize
+	 * @param 		width 		is the wanted width
+	 * @param 		height 		is the wanted height
+	 * @param 		keep_aspect is if the aspect ratio of the image should be kept
+	 * @return 		the 		resized image
 	 */
 	public static BufferedImage scale(BufferedImage source, int width, int height, boolean keep_aspect){
 		double scale_width = (double)width / source.getWidth();
