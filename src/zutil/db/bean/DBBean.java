@@ -242,6 +242,10 @@ public abstract class DBBean {
 							// Save the sub bean
 							if( recursive || subobj.getId() == null )
 								subobj.save(db);
+							if( subobj.getId() == null ){
+								logger.severe("Unable to save field "+config.getClass().getSimpleName()+"."+field.getName()+" with "+subobj);
+								continue;
+							}
 							// Get the Sub object configuration
 							if(subConfig == null)
 								subConfig = beanConfigs.get( subobj.getClass() );
