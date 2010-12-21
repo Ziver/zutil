@@ -188,7 +188,7 @@ public abstract class DBBean {
 				if( id != null )
 					query.append( " WHERE id=?" );
 			}
-			logger.finest("Save query: "+query.toString());
+			logger.finest("Save query("+c.getSimpleName()+"): "+query.toString());
 			PreparedStatement stmt = db.getPreparedStatement( query.toString() );
 			// Put in the variables in the SQL
 			int index = 1;
@@ -243,7 +243,7 @@ public abstract class DBBean {
 							if( recursive || subobj.getId() == null )
 								subobj.save(db);
 							if( subobj.getId() == null ){
-								logger.severe("Unable to save field "+config.getClass().getSimpleName()+"."+field.getName()+" with "+subobj);
+								logger.severe("Unable to save field "+c.getSimpleName()+"."+field.getName()+" with "+subobj.getClass().getSimpleName());
 								continue;
 							}
 							// Get the Sub object configuration
@@ -251,7 +251,7 @@ public abstract class DBBean {
 								subConfig = beanConfigs.get( subobj.getClass() );
 							// Save links in link table
 							String subsql = "REPLACE INTO "+subtable+" SET "+idcol+"=?, "+sub_idcol+"=?";
-							logger.finest("List Save query: "+subsql);
+							logger.finest("List Save query("+c.getSimpleName()+"): "+subsql);
 							PreparedStatement subStmt = db.getPreparedStatement( subsql );
 							subStmt.setLong(1, this.getId() );
 							subStmt.setLong(2, subobj.getId() );
@@ -281,14 +281,14 @@ public abstract class DBBean {
 			throw new NoSuchElementException("ID field is null( Has the bean been saved?)!");
 
 		String sql = "DELETE FROM "+config.tableName+" WHERE id=?";
-		logger.fine("Load query: "+sql);
+		logger.fine("Delete query("+c.getSimpleName()+"): "+sql);
 		PreparedStatement stmt = db.getPreparedStatement( sql );
 		// Put in the variables in the SQL
-		logger.fine("Delete query: "+sql);
 		stmt.setObject(1, this.getId() );
 
 		// Execute the SQL
 		DBConnection.exec(stmt);
+		this.id = null;
 	}
 
 	/**
@@ -305,7 +305,7 @@ public abstract class DBBean {
 		DBBeanConfig config = beanConfigs.get(c);
 		// Generate query
 		String sql = "SELECT * FROM "+config.tableName;
-		logger.fine("Load query: "+sql);
+		logger.fine("Load query("+c.getSimpleName()+"): "+sql);
 		PreparedStatement stmt = db.getPreparedStatement( sql );
 		// Run query
 		List<T> list = DBConnection.exec(stmt, DBBeanSQLResultHandler.createList(c, db) );
@@ -326,7 +326,9 @@ public abstract class DBBean {
 			initBeanConfig( c );
 		DBBeanConfig config = beanConfigs.get(c);
 		// Generate query
-		PreparedStatement stmt = db.getPreparedStatement( "SELECT * FROM "+config.tableName+" WHERE id=? LIMIT 1" );
+		String sql = "SELECT * FROM "+config.tableName+" WHERE id=? LIMIT 1";
+		logger.fine("Load query("+c.getSimpleName()+"): "+sql);
+		PreparedStatement stmt = db.getPreparedStatement( sql );
 		stmt.setObject(1, id );
 		// Run query
 		T obj = DBConnection.exec(stmt, DBBeanSQLResultHandler.create(c, db) );
@@ -359,6 +361,7 @@ public abstract class DBBean {
 		}
 		query.delete( query.length()-2, query.length());
 		query.append(")");
+		logger.fine("Create query("+c.getSimpleName()+"): "+sql.toString());
 		PreparedStatement stmt = sql.getPreparedStatement( sql.toString() );
 
 		// Execute the SQL
