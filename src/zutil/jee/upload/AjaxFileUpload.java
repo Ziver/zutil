@@ -101,10 +101,13 @@ public abstract class AjaxFileUpload extends HttpServlet {
 			
 			// Read allowed file types
 			if(config.getInitParameter("ALLOWED_EXTENSIONS") != null){
-				String[] tmp = config.getInitParameter("TEMP_PATH").split(",");
+				String[] tmp = config.getInitParameter("ALLOWED_EXTENSIONS").split(",");
+				StringBuilder ext_log = new StringBuilder("Allowed extensions: ");
 				for( String ext : tmp ){
 					ALLOWED_EXTENSIONS.add(ext.trim());
+					ext_log.append(ext).append(", ");
 				}
+				logger.info( ext_log.toString() );
 			}
 
 		} catch (IOException e) {
@@ -190,8 +193,15 @@ public abstract class AjaxFileUpload extends HttpServlet {
 			FileItemIterator it = upload.getItemIterator( request );
 			while( it.hasNext() ) {
 				FileItemStream item = it.next();
-				if( !ALLOWED_EXTENSIONS.contains( FileUtil.fileExtension(item.getName()) ))
-					throw new Exception("Filetype "+FileUtil.fileExtension(item.getName())+" not allowed!");
+				// Is the file type allowed?
+				if( !item.isFormField() && !ALLOWED_EXTENSIONS.contains( FileUtil.fileExtension(item.getName()) )){
+					String msg = "Filetype "+FileUtil.fileExtension(item.getName())+" is not allowed!";
+					logger.warning( msg );
+					listener.setStatus(Status.Error);
+					listener.setFileName( item.getName() );
+					listener.setMessage( msg );
+					return;
+				}
 				listener.setFileName( item.getName() );
 				FileItem fileItem = factory.createItem(item.getFieldName(),
 						item.getContentType(), item.isFormField(), item.getName());
@@ -217,7 +227,7 @@ public abstract class AjaxFileUpload extends HttpServlet {
 			// Done
 			listener.setStatus( Status.Done );
 		} catch (Exception e) {
-			logger.log(Level.WARNING, null, e);
+			logger.log(Level.SEVERE, null, e);
 			listener.setStatus(Status.Error);
 			listener.setFileName("");
 			listener.setMessage( e.getMessage() );

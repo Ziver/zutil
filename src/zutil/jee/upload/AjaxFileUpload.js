@@ -88,7 +88,11 @@ function updateUploadStatus(){
 					jQuery("#UploadQueue #"+item.id).delay(5000).fadeOut("slow", function(){
 						jQuery(this).remove();
 					});
-					//jQuery("#UploadQueue #"+item.id).attr("id", "del");
+				}
+				else if( item.status == "Error" ){
+					jQuery("#UploadQueue #"+item.id).delay(30000).fadeOut("slow", function(){
+						jQuery(this).remove();
+					});
 				}
 			});
 		},
