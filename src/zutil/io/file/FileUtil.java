@@ -260,9 +260,9 @@ public class FileUtil {
 	 * @return 					The extension
 	 */
 	public static String fileExtension(String file){
-		if(file.lastIndexOf(".")==-1)
+		if( file == null || file.lastIndexOf(".") == -1 )
 			return "";
-		return file.substring(file.lastIndexOf(".")+1,file.length());
+		return file.substring(file.lastIndexOf(".")+1, file.length());
 	}
 	
 }

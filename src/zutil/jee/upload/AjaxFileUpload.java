@@ -5,10 +5,12 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.servlet.ServletConfig;
@@ -76,6 +78,7 @@ public abstract class AjaxFileUpload extends HttpServlet {
 
 	public static File TEMPFILE_PATH = null;
 	public static String JAVASCRIPT = "";
+	public static HashSet<String> ALLOWED_EXTENSIONS = new HashSet<String>();
 
 	public void init(ServletConfig config) throws ServletException {
 		super.init(config);
@@ -94,6 +97,14 @@ public abstract class AjaxFileUpload extends HttpServlet {
 					TEMPFILE_PATH = (File) config.getServletContext().getAttribute("javax.servlet.context.tempdir");
 				else
 					TEMPFILE_PATH = new File( config.getInitParameter("TEMP_PATH") );
+			}
+			
+			// Read allowed file types
+			if(config.getInitParameter("ALLOWED_EXTENSIONS") != null){
+				String[] tmp = config.getInitParameter("TEMP_PATH").split(",");
+				for( String ext : tmp ){
+					ALLOWED_EXTENSIONS.add(ext.trim());
+				}
 			}
 
 		} catch (IOException e) {
@@ -179,6 +190,8 @@ public abstract class AjaxFileUpload extends HttpServlet {
 			FileItemIterator it = upload.getItemIterator( request );
 			while( it.hasNext() ) {
 				FileItemStream item = it.next();
+				if( !ALLOWED_EXTENSIONS.contains( FileUtil.fileExtension(item.getName()) ))
+					throw new Exception("Filetype "+FileUtil.fileExtension(item.getName())+" not allowed!");
 				listener.setFileName( item.getName() );
 				FileItem fileItem = factory.createItem(item.getFieldName(),
 						item.getContentType(), item.isFormField(), item.getName());
@@ -204,7 +217,7 @@ public abstract class AjaxFileUpload extends HttpServlet {
 			// Done
 			listener.setStatus( Status.Done );
 		} catch (Exception e) {
-			e.printStackTrace();
+			logger.log(Level.WARNING, null, e);
 			listener.setStatus(Status.Error);
 			listener.setFileName("");
 			listener.setMessage( e.getMessage() );
