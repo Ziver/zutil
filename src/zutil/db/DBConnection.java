@@ -11,6 +11,8 @@ import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
 
+import zutil.db.handler.SimpleResultHandler;
+
 public class DBConnection{
 	public enum DBMS{
 		MySQL
@@ -86,13 +88,7 @@ public class DBConnection{
 	 */
 	public Object getLastInsertID(){
 		try{
-			return exec("SELECT LAST_INSERT_ID()", new SQLResultHandler<Object>(){
-				public Object handleQueryResult(Statement stmt, ResultSet result) throws SQLException {
-					if(result.next())
-						return result.getObject(1);
-					return null;
-				}
-			});
+			return exec("SELECT LAST_INSERT_ID()", new SimpleResultHandler<Object>());
 		}catch(SQLException e){
 			return null;
 		}	
