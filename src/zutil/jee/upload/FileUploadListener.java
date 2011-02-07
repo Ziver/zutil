@@ -39,6 +39,8 @@ public class FileUploadListener implements ProgressListener{
 	public FileUploadListener(){
 		id = ""+(int)(Math.random()*Integer.MAX_VALUE);
 		status = Status.Initializing;
+		filename = "";
+		message = "";
 	}
 	
 	public void update(long pBytesRead, long pContentLength, int pItems) {
