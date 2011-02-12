@@ -249,8 +249,8 @@ public class FileUtil {
 	 * @param 		file 		is the file
 	 * @return 					The extension
 	 */
-	public static String fileExtension(File file){
-		return fileExtension(file.getName());
+	public static String getFileExtension(File file){
+		return getFileExtension(file.getName());
 	}
 	
 	/**
@@ -259,7 +259,7 @@ public class FileUtil {
 	 * @param 		file 		is the file
 	 * @return 					The extension
 	 */
-	public static String fileExtension(String file){
+	public static String getFileExtension(String file){
 		if( file == null || file.lastIndexOf(".") == -1 )
 			return "";
 		return file.substring(file.lastIndexOf(".")+1, file.length());
