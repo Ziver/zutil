@@ -6,10 +6,10 @@ import org.dom4j.Document;
 import org.dom4j.io.OutputFormat;
 import org.dom4j.io.XMLWriter;
 
-import zutil.network.http.soap.SOAPHttpPage;
-import zutil.network.ws.WSInterface;
-import zutil.network.ws.WSObject;
-import zutil.network.ws.WSReturnValueList;
+import zutil.net.http.soap.SOAPHttpPage;
+import zutil.net.ws.WSInterface;
+import zutil.net.ws.WSObject;
+import zutil.net.ws.WSReturnValueList;
 
 
 public class SOAPTest {

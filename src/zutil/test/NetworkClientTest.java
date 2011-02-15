@@ -5,9 +5,9 @@ import java.net.InetAddress;
 import java.security.NoSuchAlgorithmException;
 
 import zutil.Encrypter;
-import zutil.network.nio.NioClient;
-import zutil.network.nio.message.StringMessage;
-import zutil.network.nio.response.PrintRsp;
+import zutil.net.nio.NioClient;
+import zutil.net.nio.message.StringMessage;
+import zutil.net.nio.response.PrintRsp;
 
 
 @SuppressWarnings("unused")

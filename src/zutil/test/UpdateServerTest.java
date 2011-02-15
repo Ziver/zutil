@@ -1,6 +1,6 @@
 package zutil.test;
 
-import zutil.network.UpdateServer;
+import zutil.net.UpdateServer;
 
 public class UpdateServerTest {
 	public static void main(String[] args){

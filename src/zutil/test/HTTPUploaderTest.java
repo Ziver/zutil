@@ -3,9 +3,9 @@ package zutil.test;
 import java.io.IOException;
 import java.util.Map;
 
-import zutil.network.http.HttpPage;
-import zutil.network.http.HttpPrintStream;
-import zutil.network.http.HttpServer;
+import zutil.net.http.HttpPage;
+import zutil.net.http.HttpPrintStream;
+import zutil.net.http.HttpServer;
 
 
 

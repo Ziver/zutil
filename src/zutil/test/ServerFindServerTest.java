@@ -2,7 +2,7 @@ package zutil.test;
 
 import java.io.IOException;
 
-import zutil.network.ServerFind;
+import zutil.net.ServerFind;
 
 public class ServerFindServerTest {
 	public static void main(String[] args){

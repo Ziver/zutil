@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 
 import zutil.Encrypter;
-import zutil.network.nio.NioServer;
+import zutil.net.nio.NioServer;
 
 
 @SuppressWarnings("unused")

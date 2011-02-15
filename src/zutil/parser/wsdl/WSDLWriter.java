@@ -37,11 +37,11 @@ import com.ibm.wsdl.extensions.soap.SOAPConstants;
 import com.sun.org.apache.xerces.internal.dom.DocumentImpl;
 
 import zutil.log.LogUtil;
-import zutil.network.ws.WSMethodDef;
-import zutil.network.ws.WSObject;
-import zutil.network.ws.WSParameterDef;
-import zutil.network.ws.WebServiceDef;
-import zutil.network.ws.WSObject.WSFieldName;
+import zutil.net.ws.WSMethodDef;
+import zutil.net.ws.WSObject;
+import zutil.net.ws.WSParameterDef;
+import zutil.net.ws.WebServiceDef;
+import zutil.net.ws.WSObject.WSFieldName;
 
 public class WSDLWriter{
 	private static final Logger logger = LogUtil.getLogger();

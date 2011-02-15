@@ -1,8 +1,8 @@
 package zutil.test;
 
 import zutil.ProgressListener;
-import zutil.network.UpdateClient;
-import zutil.network.Zupdater;
+import zutil.net.UpdateClient;
+import zutil.net.Zupdater;
 
 public class UpdateClientTest implements ProgressListener{
 	public static void main(String[] args){

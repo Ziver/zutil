@@ -6,11 +6,11 @@ import java.io.IOException;
 import javax.wsdl.WSDLException;
 
 import zutil.io.MultiPrintStream;
-import zutil.network.http.HttpServer;
-import zutil.network.http.soap.SOAPHttpPage;
-import zutil.network.ssdp.SSDPServer;
-import zutil.network.upnp.UPnPMediaServer;
-import zutil.network.upnp.services.UPnPContentDirectory;
+import zutil.net.http.HttpServer;
+import zutil.net.http.soap.SOAPHttpPage;
+import zutil.net.ssdp.SSDPServer;
+import zutil.net.upnp.UPnPMediaServer;
+import zutil.net.upnp.services.UPnPContentDirectory;
 
 public class UPnPServerTest {
 	
