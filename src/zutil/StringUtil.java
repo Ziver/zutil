@@ -26,6 +26,65 @@ public class StringUtil {
 		return value+" "+sizes[total];
 	}
 	
+	public static String formatTimeToString(long milisec){
+		StringBuilder str = new StringBuilder();
+		long tmp = 0;
+		
+		// Years
+		if( milisec >= 31557032762.3361d ){
+			tmp = (long) (milisec / 31557032762.3361d);
+			milisec -= tmp * 31557032762.3361d;
+			if( tmp > 1 ) 
+				str.append(tmp).append(" years ");
+			else 
+				str.append(tmp).append(" year ");
+		}
+		// Months
+		if( milisec >= 2629743830l ){
+			tmp = (long) (milisec / 2629743830l);
+			milisec -= tmp * 2629743830l;
+			if( tmp > 1 ) 
+				str.append(tmp).append(" months ");
+			else 
+				str.append(tmp).append(" month ");
+		}		
+		// Days
+		if( milisec >= 86400000 ){
+			tmp = (long) (milisec / 86400000);
+			milisec -= tmp * 86400000;
+			if( tmp > 1 ) 
+				str.append(tmp).append(" days ");
+			else 
+				str.append(tmp).append(" day ");
+		}
+		// Hours
+		if( milisec >= 3600000 ){
+			tmp = (long) (milisec / 3600000);
+			milisec -= tmp * 3600000;
+			if( tmp > 1 ) 
+				str.append(tmp).append(" hours ");
+			else 
+				str.append(tmp).append(" hour ");
+		}
+		// Minutes
+		if( milisec >= 60000 ){
+			tmp = (long) (milisec / 60000);
+			milisec -= tmp * 60000;
+			str.append(tmp).append(" min ");
+		}
+		// sec
+		if( milisec >= 1000 ){
+			tmp = (long) (milisec / 1000);
+			milisec -= tmp * 1000;
+			str.append(tmp).append(" sec ");
+		}
+		if( milisec > 0 ){
+			str.append(milisec).append(" milisec ");
+		}
+		
+		return str.toString();
+	}
+	
 	/**
 	 * Trims the given char and whitespace at the beginning and the end
 	 * 
