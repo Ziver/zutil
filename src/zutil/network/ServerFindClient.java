@@ -1,4 +1,4 @@
-package zutil.network;
+package zutil.net;
 
 import java.io.IOException;
 import java.net.DatagramPacket;

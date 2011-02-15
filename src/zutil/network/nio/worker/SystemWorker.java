@@ -1,20 +1,20 @@
-package zutil.network.nio.worker;
+package zutil.net.nio.worker;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
 
 import zutil.log.LogUtil;
-import zutil.network.nio.NioNetwork;
-import zutil.network.nio.message.ChatMessage;
-import zutil.network.nio.message.Message;
-import zutil.network.nio.message.SyncMessage;
-import zutil.network.nio.message.type.EchoMessage;
-import zutil.network.nio.message.type.ResponseRequestMessage;
-import zutil.network.nio.response.ResponseEvent;
-import zutil.network.nio.service.NetworkService;
-import zutil.network.nio.service.chat.ChatService;
-import zutil.network.nio.service.sync.SyncService;
+import zutil.net.nio.NioNetwork;
+import zutil.net.nio.message.ChatMessage;
+import zutil.net.nio.message.Message;
+import zutil.net.nio.message.SyncMessage;
+import zutil.net.nio.message.type.EchoMessage;
+import zutil.net.nio.message.type.ResponseRequestMessage;
+import zutil.net.nio.response.ResponseEvent;
+import zutil.net.nio.service.NetworkService;
+import zutil.net.nio.service.chat.ChatService;
+import zutil.net.nio.service.sync.SyncService;
 
 
 public class SystemWorker extends ThreadedEventWorker {

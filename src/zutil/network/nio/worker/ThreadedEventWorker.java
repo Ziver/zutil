@@ -1,4 +1,4 @@
-package zutil.network.nio.worker;
+package zutil.net.nio.worker;
 
 public abstract class ThreadedEventWorker extends Worker{
 	private Thread thread;

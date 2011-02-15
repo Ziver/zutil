@@ -1,4 +1,4 @@
-package zutil.network.upnp;
+package zutil.net.upnp;
 
 /**
  * Information about a UPNP Service

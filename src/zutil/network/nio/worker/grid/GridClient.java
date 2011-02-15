@@ -1,14 +1,14 @@
-package zutil.network.nio.worker.grid;
+package zutil.net.nio.worker.grid;
 
 import java.io.IOException;
 import java.util.LinkedList;
 import java.util.Queue;
 
 import zutil.io.MultiPrintStream;
-import zutil.network.nio.NioClient;
-import zutil.network.nio.message.GridMessage;
-import zutil.network.nio.worker.ThreadedEventWorker;
-import zutil.network.nio.worker.WorkerDataEvent;
+import zutil.net.nio.NioClient;
+import zutil.net.nio.message.GridMessage;
+import zutil.net.nio.worker.ThreadedEventWorker;
+import zutil.net.nio.worker.WorkerDataEvent;
 
 /**
  * This class is the client part of the grid.

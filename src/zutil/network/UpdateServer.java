@@ -1,4 +1,4 @@
-package zutil.network;
+package zutil.net;
 
 import java.io.File;
 import java.io.FileInputStream;

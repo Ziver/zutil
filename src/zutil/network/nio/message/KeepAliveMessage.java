@@ -1,6 +1,6 @@
-package zutil.network.nio.message;
+package zutil.net.nio.message;
 
-import zutil.network.nio.message.type.SystemMessage;
+import zutil.net.nio.message.type.SystemMessage;
 
 /**
  * Tells the destination that the 

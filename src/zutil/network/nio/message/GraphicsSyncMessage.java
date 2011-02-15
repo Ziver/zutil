@@ -1,4 +1,4 @@
-package zutil.network.nio.message;
+package zutil.net.nio.message;
 
 
 public class GraphicsSyncMessage extends SyncMessage{

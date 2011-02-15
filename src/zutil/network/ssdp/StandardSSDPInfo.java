@@ -1,4 +1,4 @@
-package zutil.network.ssdp;
+package zutil.net.ssdp;
 
 import java.util.Date;
 import java.util.UUID;

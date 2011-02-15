@@ -1,4 +1,4 @@
-package zutil.network.nio.worker.grid;
+package zutil.net.nio.worker.grid;
 
 /**
  * Handles the incoming results from the grid

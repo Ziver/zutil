@@ -1,6 +1,6 @@
-package zutil.network.nio.message.type;
+package zutil.net.nio.message.type;
 
-import zutil.network.nio.message.Message;
+import zutil.net.nio.message.Message;
 
 /**
  * The reciver will echo out this message to the sender

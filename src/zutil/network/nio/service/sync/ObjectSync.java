@@ -1,6 +1,6 @@
-package zutil.network.nio.service.sync;
+package zutil.net.nio.service.sync;
 
-import zutil.network.nio.message.SyncMessage;
+import zutil.net.nio.message.SyncMessage;
 
 public abstract class ObjectSync {
 	public String id;

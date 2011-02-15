@@ -1,9 +1,9 @@
-package zutil.network.upnp;
+package zutil.net.upnp;
 
 import java.util.Map;
 import java.util.UUID;
 
-import zutil.network.http.HttpPrintStream;
+import zutil.net.http.HttpPrintStream;
 
 /**
  * This class is a UPnP AV Media Server that handles all the

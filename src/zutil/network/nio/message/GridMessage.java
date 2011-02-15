@@ -1,4 +1,4 @@
-package zutil.network.nio.message;
+package zutil.net.nio.message;
 
 public class GridMessage<T> extends Message{
 	private static final long serialVersionUID = 1L;

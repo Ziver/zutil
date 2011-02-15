@@ -1,4 +1,4 @@
-package zutil.network.nio.message.type;
+package zutil.net.nio.message.type;
 
 /**
  * A message that implements this will be 

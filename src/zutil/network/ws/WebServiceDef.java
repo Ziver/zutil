@@ -1,4 +1,4 @@
-package zutil.network.ws;
+package zutil.net.ws;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;

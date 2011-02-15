@@ -1,4 +1,4 @@
-package zutil.network.http;
+package zutil.net.http;
 
 import java.io.OutputStream;
 import java.io.PrintStream;

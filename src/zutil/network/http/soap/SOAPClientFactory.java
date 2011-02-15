@@ -1,4 +1,4 @@
-package zutil.network.http.soap;
+package zutil.net.http.soap;
 
 import javax.wsdl.WSDLException;
 
@@ -8,9 +8,9 @@ import javassist.CtClass;
 import javassist.CtMethod;
 import javassist.CtNewMethod;
 import javassist.NotFoundException;
-import zutil.network.ws.WSInterface;
-import zutil.network.ws.WSMethodDef;
-import zutil.network.ws.WebServiceDef;
+import zutil.net.ws.WSInterface;
+import zutil.net.ws.WSMethodDef;
+import zutil.net.ws.WebServiceDef;
 
 /**
  * This is an factory that generates clients for web services

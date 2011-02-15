@@ -1,8 +1,8 @@
-package zutil.network.nio.worker;
+package zutil.net.nio.worker;
 
 import java.nio.channels.SocketChannel;
 
-import zutil.network.nio.NioNetwork;
+import zutil.net.nio.NioNetwork;
 
 
 public class WorkerDataEvent {

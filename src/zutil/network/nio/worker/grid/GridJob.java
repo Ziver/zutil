@@ -1,4 +1,4 @@
-package zutil.network.nio.worker.grid;
+package zutil.net.nio.worker.grid;
 
 /**
  * A internal class for handling the jobs

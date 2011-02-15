@@ -4,7 +4,7 @@
  * Created on den 27 juli 2008, 23:32
  */
 
-package zutil.network;
+package zutil.net;
 
 import java.awt.Dimension;
 

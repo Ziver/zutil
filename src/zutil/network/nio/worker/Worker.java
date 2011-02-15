@@ -1,10 +1,10 @@
-package zutil.network.nio.worker;
+package zutil.net.nio.worker;
 
 import java.nio.channels.SocketChannel;
 import java.util.LinkedList;
 import java.util.List;
 
-import zutil.network.nio.NioNetwork;
+import zutil.net.nio.NioNetwork;
 
 
 public abstract class Worker implements Runnable {

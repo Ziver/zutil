@@ -1,4 +1,4 @@
-package zutil.network.threaded;
+package zutil.net.threaded;
 
 import java.net.DatagramPacket;
 

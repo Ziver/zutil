@@ -1,6 +1,6 @@
-package zutil.network.upnp.services;
+package zutil.net.upnp.services;
 
-import zutil.network.ws.WSReturnValueList;
+import zutil.net.ws.WSReturnValueList;
 
 public class BrowseRetObj extends WSReturnValueList{
 		@WSValueName("Result")

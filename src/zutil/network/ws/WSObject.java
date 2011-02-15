@@ -1,4 +1,4 @@
-package zutil.network.ws;
+package zutil.net.ws;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

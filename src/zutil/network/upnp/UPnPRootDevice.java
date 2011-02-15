@@ -1,7 +1,7 @@
-package zutil.network.upnp;
+package zutil.net.upnp;
 
-import zutil.network.http.HttpPage;
-import zutil.network.ssdp.SSDPServiceInfo;
+import zutil.net.http.HttpPage;
+import zutil.net.ssdp.SSDPServiceInfo;
 /**
  * This class is a UPnP Server class that will be extended 
  * by all root devices handles all the other UPnP services

@@ -1,4 +1,4 @@
-package zutil.network.nio;
+package zutil.net.nio;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -21,13 +21,13 @@ import zutil.converters.Converter;
 import zutil.io.DynamicByteArrayStream;
 import zutil.io.MultiPrintStream;
 import zutil.log.LogUtil;
-import zutil.network.nio.message.type.ResponseRequestMessage;
-import zutil.network.nio.message.type.SystemMessage;
-import zutil.network.nio.response.ResponseEvent;
-import zutil.network.nio.server.ChangeRequest;
-import zutil.network.nio.server.ClientData;
-import zutil.network.nio.worker.SystemWorker;
-import zutil.network.nio.worker.Worker;
+import zutil.net.nio.message.type.ResponseRequestMessage;
+import zutil.net.nio.message.type.SystemMessage;
+import zutil.net.nio.response.ResponseEvent;
+import zutil.net.nio.server.ChangeRequest;
+import zutil.net.nio.server.ClientData;
+import zutil.net.nio.worker.SystemWorker;
+import zutil.net.nio.worker.Worker;
 
 
 public abstract class NioNetwork implements Runnable {

@@ -1,4 +1,4 @@
-package zutil.network.ws;
+package zutil.net.ws;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
@@ -6,7 +6,7 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
-import zutil.network.ws.WSInterface.WSDocumentation;
+import zutil.net.ws.WSInterface.WSDocumentation;
 
 // TODO: Header parameters
 public class WSMethodDef {

@@ -1,4 +1,5 @@
-package zutil.network.ws;
+package zutil.net.ws;
+
 public class WSParameterDef{
 	/** The class type of the parameter **/
 	protected Class<?> paramClass;

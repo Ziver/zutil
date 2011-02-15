@@ -1,4 +1,4 @@
-package zutil.network.nio;
+package zutil.net.nio;
 
 import java.io.IOException;
 import java.net.InetAddress;

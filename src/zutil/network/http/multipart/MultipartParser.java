@@ -1,4 +1,4 @@
-package zutil.network.http.multipart;
+package zutil.net.http.multipart;
 
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
@@ -13,7 +13,7 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 
 import zutil.ProgressListener;
-import zutil.network.http.HTTPHeaderParser;
+import zutil.net.http.HTTPHeaderParser;
 
 /**
  * Parses a multipart/form-data http request, 

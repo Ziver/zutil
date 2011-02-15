@@ -1,4 +1,4 @@
-package zutil.network.http.soap;
+package zutil.net.http.soap;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Array;
@@ -49,14 +49,14 @@ import org.xml.sax.SAXException;
 import zutil.converters.Converter;
 import zutil.io.StringOutputStream;
 import zutil.log.LogUtil;
-import zutil.network.http.HttpPage;
-import zutil.network.http.HttpPrintStream;
-import zutil.network.ws.WSInterface;
-import zutil.network.ws.WSObject;
-import zutil.network.ws.WSReturnValueList;
-import zutil.network.ws.WSInterface.WSDocumentation;
-import zutil.network.ws.WSInterface.WSParamDocumentation;
-import zutil.network.ws.WSObject.WSFieldName;
+import zutil.net.http.HttpPage;
+import zutil.net.http.HttpPrintStream;
+import zutil.net.ws.WSInterface;
+import zutil.net.ws.WSObject;
+import zutil.net.ws.WSReturnValueList;
+import zutil.net.ws.WSInterface.WSDocumentation;
+import zutil.net.ws.WSInterface.WSParamDocumentation;
+import zutil.net.ws.WSObject.WSFieldName;
 
 import com.ibm.wsdl.extensions.PopulatedExtensionRegistry;
 import com.ibm.wsdl.extensions.soap.SOAPConstants;

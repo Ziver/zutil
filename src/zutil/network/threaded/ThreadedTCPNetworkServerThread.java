@@ -1,4 +1,4 @@
-package zutil.network.threaded;
+package zutil.net.threaded;
 
 /**
  * The class that will handle the TCP connection will incclude 

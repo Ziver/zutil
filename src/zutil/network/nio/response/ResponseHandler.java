@@ -1,4 +1,4 @@
-package zutil.network.nio.response;
+package zutil.net.nio.response;
 
 import java.util.LinkedList;
 import java.util.List;

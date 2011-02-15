@@ -1,4 +1,4 @@
-package zutil.network.nio.server;
+package zutil.net.nio.server;
 
 import java.nio.channels.SocketChannel;
 

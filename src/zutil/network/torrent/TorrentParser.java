@@ -1,4 +1,4 @@
-package zutil.network.torrent;
+package zutil.net.torrent;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;

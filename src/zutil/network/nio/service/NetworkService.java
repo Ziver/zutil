@@ -1,9 +1,9 @@
-package zutil.network.nio.service;
+package zutil.net.nio.service;
 
 import java.nio.channels.SocketChannel;
 
-import zutil.network.nio.NioNetwork;
-import zutil.network.nio.message.Message;
+import zutil.net.nio.NioNetwork;
+import zutil.net.nio.message.Message;
 
 public abstract class NetworkService {
 	protected static NetworkService instance;

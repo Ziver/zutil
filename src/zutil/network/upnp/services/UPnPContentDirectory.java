@@ -1,4 +1,4 @@
-package zutil.network.upnp.services;
+package zutil.net.upnp.services;
 
 import java.io.File;
 import java.util.LinkedList;
@@ -8,11 +8,11 @@ import java.util.Map;
 import org.dom4j.DocumentException;
 
 import zutil.io.file.FileUtil;
-import zutil.network.http.HttpPage;
-import zutil.network.http.HttpPrintStream;
-import zutil.network.upnp.UPnPService;
-import zutil.network.ws.WSInterface;
-import zutil.network.ws.WSReturnValueList;
+import zutil.net.http.HttpPage;
+import zutil.net.http.HttpPrintStream;
+import zutil.net.upnp.UPnPService;
+import zutil.net.ws.WSInterface;
+import zutil.net.ws.WSReturnValueList;
 
 /**
  * Information about a UPNP Service

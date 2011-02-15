@@ -1,4 +1,4 @@
-package zutil.network.nio;
+package zutil.net.nio;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -7,9 +7,9 @@ import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
 import java.nio.channels.spi.SelectorProvider;
 
-import zutil.network.nio.message.Message;
-import zutil.network.nio.message.type.ResponseRequestMessage;
-import zutil.network.nio.response.ResponseEvent;
+import zutil.net.nio.message.Message;
+import zutil.net.nio.message.type.ResponseRequestMessage;
+import zutil.net.nio.response.ResponseEvent;
 
 
 public class NioClient extends NioNetwork{

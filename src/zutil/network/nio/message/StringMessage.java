@@ -1,7 +1,7 @@
-package zutil.network.nio.message;
+package zutil.net.nio.message;
 
-import zutil.network.nio.message.type.EchoMessage;
-import zutil.network.nio.message.type.ResponseRequestMessage;
+import zutil.net.nio.message.type.EchoMessage;
+import zutil.net.nio.message.type.ResponseRequestMessage;
 
 
 

@@ -1,4 +1,4 @@
-package zutil.network.nio.worker.grid;
+package zutil.net.nio.worker.grid;
 
 /**
  * This interface is the thread that will do 

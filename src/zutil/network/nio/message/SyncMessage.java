@@ -1,6 +1,6 @@
-package zutil.network.nio.message;
+package zutil.net.nio.message;
 
-import zutil.network.nio.message.type.SystemMessage;
+import zutil.net.nio.message.type.SystemMessage;
 
 public class SyncMessage extends Message implements SystemMessage{
 	private static final long serialVersionUID = 1L;

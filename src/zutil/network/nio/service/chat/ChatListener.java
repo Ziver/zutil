@@ -1,4 +1,4 @@
-package zutil.network.nio.service.chat;
+package zutil.net.nio.service.chat;
 
 /**
  * Tis is a listener class for new chat messages

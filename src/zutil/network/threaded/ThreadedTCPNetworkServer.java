@@ -1,4 +1,4 @@
-package zutil.network.threaded;
+package zutil.net.threaded;
 
 import java.io.File;
 import java.io.IOException;

@@ -1,4 +1,4 @@
-package zutil.network.http.soap;
+package zutil.net.http.soap;
 
 /**
  * This generates an client fault message 

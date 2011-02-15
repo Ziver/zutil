@@ -1,4 +1,4 @@
-package zutil.network.http;
+package zutil.net.http;
 
 import java.util.Map;
 

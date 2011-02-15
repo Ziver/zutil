@@ -1,4 +1,4 @@
-package zutil.network.http;
+package zutil.net.http;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -14,8 +14,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import zutil.log.LogUtil;
-import zutil.network.threaded.ThreadedTCPNetworkServer;
-import zutil.network.threaded.ThreadedTCPNetworkServerThread;
+import zutil.net.threaded.ThreadedTCPNetworkServer;
+import zutil.net.threaded.ThreadedTCPNetworkServerThread;
 
 
 /**

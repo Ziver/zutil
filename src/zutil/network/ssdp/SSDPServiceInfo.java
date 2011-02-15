@@ -1,4 +1,4 @@
-package zutil.network.ssdp;
+package zutil.net.ssdp;
 
 /**
  * This class contains information about a service from

@@ -1,4 +1,4 @@
-package zutil.network.ssdp;
+package zutil.net.ssdp;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
@@ -10,10 +10,10 @@ import java.util.logging.Logger;
 
 import zutil.io.StringOutputStream;
 import zutil.log.LogUtil;
-import zutil.network.http.HTTPHeaderParser;
-import zutil.network.http.HttpPrintStream;
-import zutil.network.threaded.ThreadedUDPNetwork;
-import zutil.network.threaded.ThreadedUDPNetworkThread;
+import zutil.net.http.HTTPHeaderParser;
+import zutil.net.http.HttpPrintStream;
+import zutil.net.threaded.ThreadedUDPNetwork;
+import zutil.net.threaded.ThreadedUDPNetworkThread;
 
 /**
  * An SSDP client class that will request
