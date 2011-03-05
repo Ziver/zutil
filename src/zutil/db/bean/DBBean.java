@@ -43,7 +43,7 @@ import zutil.log.LogUtil;
  * @author Ziver
  */
 public abstract class DBBean {
-	public static final Logger logger = LogUtil.getLogger();
+	private static final Logger logger = LogUtil.getLogger();
 
 	/** The id of the bean **/
 	protected Long id;
@@ -54,7 +54,10 @@ public abstract class DBBean {
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target(ElementType.TYPE)
 	public @interface DBTable {
+		/** This is the name of the table, SQL rules apply, No " or whitespace **/
 		String value();
+		/** Sets if the fields in the super classes is also part of the bean **/
+		boolean superBean() default false;
 	}
 
 	/**
@@ -86,7 +89,7 @@ public abstract class DBBean {
 	}
 
 	/** This is a cache of all the initialized beans */	 
-	private static HashMap<Class<? extends DBBean>,DBBeanConfig> beanConfigs = new HashMap<Class<? extends DBBean>,DBBeanConfig>();
+	private static HashMap<String,DBBeanConfig> beanConfigs = new HashMap<String,DBBeanConfig>();
 	/** This value is for preventing recursive loops when saving */
 	protected boolean processing_save;
 	/** This value is for preventing recursive loops when updating */	
@@ -103,43 +106,50 @@ public abstract class DBBean {
 	 * @return all the fields except the ID field
 	 */
 	public static ArrayList<Field> getFields(Class<? extends DBBean> c){
-		if( !beanConfigs.containsKey( c ) )
+		if( !beanConfigs.containsKey( c.getName() ) )
 			initBeanConfig( c );
-		return beanConfigs.get( c ).fields;		
+		return beanConfigs.get( c.getName() ).fields;		
 	}
 
 	/**
 	 * @return the configuration object for the specified class
 	 */
 	protected static DBBeanConfig getBeanConfig(Class<? extends DBBean> c){
-		if( !beanConfigs.containsKey( c ) )
+		if( !beanConfigs.containsKey( c.getName() ) )
 			initBeanConfig( c );
-		return beanConfigs.get( c );	
+		return beanConfigs.get( c.getName() );	
 	}
 
 	/**
 	 * Caches the fields
 	 */
 	private static void initBeanConfig(Class<? extends DBBean> c){
-		Field[] fields = c.getDeclaredFields();
+		logger.fine("Initiating new DBBeanConfig( "+c.getName()+" )");
 		DBBeanConfig config = new DBBeanConfig();
 		// Find the table name
-		if( c.getAnnotation(DBTable.class) != null )
-			config.tableName = c.getAnnotation(DBTable.class).value().replace('\"', ' ');
-		// Add the fields in the bean
-		for( Field field : fields ){
-			int mod = field.getModifiers();
-			if( !Modifier.isTransient( mod ) &&
-					!Modifier.isAbstract( mod ) &&
-					!Modifier.isFinal( mod ) &&
-					!Modifier.isStatic( mod ) &&
-					!Modifier.isInterface( mod ) &&
-					!Modifier.isNative( mod )){
-				config.fields.add( field );
+		DBTable tableAnn = c.getAnnotation(DBTable.class);
+		if( tableAnn != null )
+			config.tableName = tableAnn.value().replace('\"', '_');
+		// Add the fields in the bean and all the super classes fields
+		for(Class<?> cc = c; cc != DBBean.class ;cc = cc.getSuperclass()){
+			Field[] fields = cc.getDeclaredFields();
+			for( Field field : fields ){
+				int mod = field.getModifiers();
+				if( !Modifier.isTransient( mod ) &&
+						!Modifier.isAbstract( mod ) &&
+						!Modifier.isFinal( mod ) &&
+						!Modifier.isStatic( mod ) &&
+						!Modifier.isInterface( mod ) &&
+						!Modifier.isNative( mod ) &&
+						!config.fields.contains( field )){
+					config.fields.add( field );
+				}
 			}
+			if( tableAnn == null || !tableAnn.superBean() )
+				break;
 		}
 
-		beanConfigs.put(c, config);
+		beanConfigs.put(c.getName(), config);
 	}
 
 	/**
@@ -163,7 +173,7 @@ public abstract class DBBean {
 			return;
 		processing_save = true;
 		Class<? extends DBBean> c = this.getClass();
-		DBBeanConfig config = beanConfigs.get(c);
+		DBBeanConfig config = getBeanConfig( c );
 		try {
 			Long id = this.getId();
 			// Generate the SQL
@@ -248,7 +258,7 @@ public abstract class DBBean {
 							}
 							// Get the Sub object configuration
 							if(subConfig == null)
-								subConfig = beanConfigs.get( subobj.getClass() );
+								subConfig = getBeanConfig( subobj.getClass() );
 							// Save links in link table
 							String subsql = "";
 							if( subtable.equals(subConfig.tableName) )
@@ -280,7 +290,7 @@ public abstract class DBBean {
 	 */
 	public void delete(DBConnection db) throws SQLException{
 		Class<? extends DBBean> c = this.getClass();
-		DBBeanConfig config = beanConfigs.get(c);
+		DBBeanConfig config = getBeanConfig( c );
 		if( this.getId() == null )
 			throw new NoSuchElementException("ID field is null( Has the bean been saved?)!");
 
@@ -304,9 +314,7 @@ public abstract class DBBean {
 	 */
 	public static <T extends DBBean> List<T> load(DBConnection db, Class<T> c) throws SQLException {
 		// Initiate a BeanConfig if there is non
-		if( !beanConfigs.containsKey( c ) )
-			initBeanConfig( c );
-		DBBeanConfig config = beanConfigs.get(c);
+		DBBeanConfig config = getBeanConfig( c );
 		// Generate query
 		String sql = "SELECT * FROM "+config.tableName;
 		logger.fine("Load All query("+c.getName()+"): "+sql);
@@ -326,9 +334,7 @@ public abstract class DBBean {
 	 */
 	public static <T extends DBBean> T load(DBConnection db, Class<T> c, long id) throws SQLException {
 		// Initiate a BeanConfig if there is non
-		if( !beanConfigs.containsKey( c ) )
-			initBeanConfig( c );
-		DBBeanConfig config = beanConfigs.get(c);
+		DBBeanConfig config = getBeanConfig( c );
 		// Generate query
 		String sql = "SELECT * FROM "+config.tableName+" WHERE id=? LIMIT 1";
 		logger.fine("Load query("+c.getName()+" id:"+id+"): "+sql);
@@ -344,9 +350,7 @@ public abstract class DBBean {
 	 * WARNING: Experimental
 	 */
 	public static void create(DBConnection sql, Class<? extends DBBean> c) throws SQLException{
-		if( !beanConfigs.containsKey( c ) )
-			initBeanConfig( c );
-		DBBeanConfig config = beanConfigs.get(c);
+		DBBeanConfig config = getBeanConfig( c );
 
 		// Generate the SQL
 		StringBuilder query = new StringBuilder();
