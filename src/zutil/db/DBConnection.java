@@ -6,14 +6,19 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
 
 import zutil.db.handler.SimpleResultHandler;
+import zutil.log.LogUtil;
 
 public class DBConnection{
+	private static final Logger logger = LogUtil.getLogger();
+	
 	public enum DBMS{
 		MySQL
 	}
@@ -90,8 +95,9 @@ public class DBConnection{
 		try{
 			return exec("SELECT LAST_INSERT_ID()", new SimpleResultHandler<Object>());
 		}catch(SQLException e){
-			return null;
-		}	
+			logger.log(Level.WARNING, null, e);
+		}
+		return null;
 	}
 
 	/**
@@ -137,7 +143,7 @@ public class DBConnection{
 				try {
 					return stmt.getUpdateCount();
 				} catch (SQLException e) {
-					e.printStackTrace();
+					logger.log(Level.WARNING, null, e);
 				}
 				return -1;
 			}			
@@ -240,9 +246,10 @@ public class DBConnection{
 	public void forceClose(){
 		if (conn != null) {
 			try {
-				conn.close();
-			} catch (SQLException sqlex) {
-				sqlex.printStackTrace();
+				if( conn.isClosed() )
+					conn.close();
+			} catch (SQLException e) {
+				logger.log(Level.WARNING, null, e);
 			}
 			conn = null;
 		}
