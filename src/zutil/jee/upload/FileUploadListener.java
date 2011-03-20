@@ -126,7 +126,7 @@ public class FileUploadListener implements ProgressListener{
 		node.add("id", id);
 		
 		node.add("status", status.toString());
-		node.add("message", message.replaceAll("\"", "\\\""));
+		node.add("message", message.replaceAll("\"", "\\\"") );
 		node.add("filename", filename);
 		node.add("percent", getPercentComplete());
 		

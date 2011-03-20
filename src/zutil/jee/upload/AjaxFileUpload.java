@@ -195,7 +195,7 @@ public abstract class AjaxFileUpload extends HttpServlet {
 				FileItemStream item = it.next();
 				// Is the file type allowed?
 				if( !item.isFormField() && !ALLOWED_EXTENSIONS.contains( FileUtil.getFileExtension(item.getName()) )){
-					String msg = "Filetype "+FileUtil.getFileExtension(item.getName())+" is not allowed!";
+					String msg = "Filetype '"+FileUtil.getFileExtension(item.getName())+"' is not allowed!";
 					logger.warning( msg );
 					listener.setStatus(Status.Error);
 					listener.setFileName( item.getName() );
