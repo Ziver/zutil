@@ -246,7 +246,7 @@ public class DBConnection{
 	public void forceClose(){
 		if (conn != null) {
 			try {
-				if( conn.isClosed() )
+				if( !conn.isClosed() )
 					conn.close();
 			} catch (SQLException e) {
 				logger.log(Level.WARNING, null, e);
