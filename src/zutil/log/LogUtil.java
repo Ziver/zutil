@@ -12,6 +12,8 @@ import java.util.logging.Logger;
  * @author Ziver
  */
 public class LogUtil {
+	private static final Logger logger = Logger.getLogger( LogUtil.class.getName() );
+	
 	private LogUtil(){}
 
 	/**
@@ -31,6 +33,7 @@ public class LogUtil {
 			//name = name.substring( name.lastIndexOf('.')+1 );
 			if( !name.equals( LogUtil.class.getName() ) ){
 				//System.out.println("\""+name+"\"");
+				logger.fine("Caling class: \""+name+"\"");
 				return name;
 			}
 		}
@@ -67,6 +70,7 @@ public class LogUtil {
 	 * Sets the log level for a specified logger
 	 */
 	public static void setLevel(String name, Level level){
+		logger.fine("Changing log level of \""+name+"\" to \""+level.getLocalizedName()+"\"");
 		Logger logger = Logger.getLogger(name);
 		logger.setLevel(level);
 		// Check if the logger has a handler
