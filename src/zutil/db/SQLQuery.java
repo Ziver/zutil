@@ -30,16 +30,16 @@ public class SQLQuery {
 	// Main Types
 	/**
 	 * <XMP>
-SELECT
-    [ALL | DISTINCT | DISTINCTROW ]
-    [FROM table_references
-    [WHERE where_condition]
-    [GROUP BY {col_name | expr | position}
-      [ASC | DESC], ... [WITH ROLLUP]]
-    [HAVING where_condition]
-    [ORDER BY {col_name | expr | position}
-      [ASC | DESC], ...]
-    [LIMIT {[offset,] row_count | row_count OFFSET offset}]
+	 *	SELECT
+	 *	    [ALL | DISTINCT | DISTINCTROW ]
+	 *	    [FROM table_references
+	 *	    [WHERE where_condition]
+	 *	    [GROUP BY {col_name | expr | position}
+	 *	      [ASC | DESC], ... [WITH ROLLUP]]
+	 *	    [HAVING where_condition]
+	 *	    [ORDER BY {col_name | expr | position}
+	 *	      [ASC | DESC], ...]
+	 *	    [LIMIT {[offset,] row_count | row_count OFFSET offset}]
 	 * </XMP>
 	 */
 	public static class SQLSelect extends SQLQueryItem{
@@ -74,6 +74,15 @@ SELECT
 		}
 	}
 	
+	/*
+	 * <XMP>
+	 *	UPDATE [LOW_PRIORITY] [IGNORE] table_reference
+	 *	    SET col_name1={expr1|DEFAULT} [, col_name2={expr2|DEFAULT}] ...
+	 *	    [WHERE where_condition]
+	 *	    [ORDER BY ...]
+	 *	    [LIMIT row_count]
+	 * </XMP>
+	 */
 	public static class SQLUpdate extends SQLQueryItem{
 		protected SQLUpdate(){
 			setRoot(this);
@@ -84,6 +93,33 @@ SELECT
 		}
 	}
 	
+	/*
+	 * <XMP>
+	 *	INSERT [INTO] tbl_name
+	 *	    SET col_name={expr | DEFAULT}, ...
+	 *	
+	 *	INSERT [INTO] tbl_name [(col_name,...)]
+	 *	    {VALUES | VALUE} ({expr | DEFAULT},...),(...),...
+	 * </XMP>
+	 */
+	public static class SQLInsert extends SQLQueryItem{
+		protected SQLInsert(){
+			setRoot(this);
+		}
+		
+		protected void build(StringBuilder query) {
+			
+		}
+	}
+	
+	/*
+	 * <XMP>
+	 *	DELETE FROM tbl_name
+	 *	    [WHERE where_condition]
+	 *	    [ORDER BY ...]
+	 *	    [LIMIT row_count]
+	 * </XMP>
+	 */
 	public static class SQLDelete extends SQLQueryItem{
 		protected SQLDelete(){
 			setRoot(this);
@@ -351,6 +387,10 @@ SELECT
 	
 	public static SQLUpdate UPDATE(){
 		return new SQLUpdate();
+	}
+	
+	public static SQLInsert INSERT(){
+		return new SQLInsert();
 	}
 	
 	public static SQLDelete DELETE(){
