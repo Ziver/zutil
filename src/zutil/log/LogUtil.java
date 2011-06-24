@@ -43,10 +43,22 @@ public class LogUtil {
 	/**
 	 * Sets the global log formatter to the specified one
 	 * 
-	 * @param f is the formatter class
+	 * @param 		f 		is the formatter class
 	 */
 	public static void setGlobalFormatter(Formatter f){
 		Logger root = Logger.getLogger("");
+		for (Handler handler : root.getHandlers()) {
+			handler.setFormatter(f);
+		}
+	}
+	
+	/**
+	 * Adds the log formatter
+	 * 
+	 * @param 		f 		is the formatter class
+	 */
+	public static void setFormatter(String name, Formatter f){
+		Logger root = Logger.getLogger(name);
 		for (Handler handler : root.getHandlers()) {
 			handler.setFormatter(f);
 		}

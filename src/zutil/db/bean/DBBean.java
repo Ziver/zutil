@@ -25,7 +25,7 @@ import zutil.log.LogUtil;
  * <XMP>
  * The class that extends this will be able to save its state to a DB.
  * Fields that are transient will be ignored, and fields that extend 
- * DBBean will be replaced by the id field of that class.
+ * DBBean will be replaced with the id field of that class in the database.
  * 
  * Supported fields:
  * 	*Boolean
@@ -54,8 +54,10 @@ public abstract class DBBean {
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target(ElementType.TYPE)
 	public @interface DBTable {
-		/** This is the name of the table, SQL rules apply, No " or whitespace **/
+		/** This is the name of the table, SQL rules apply should not contain any strange characters or spaces **/
 		String value();
+		/** Change the id column name of the bean, default column name is "id", SQL rules apply should not contain any strange characters or spaces **/
+		String idColumn() default "id";
 		/** Sets if the fields in the super classes is also part of the bean **/
 		boolean superBean() default false;
 	}
@@ -66,11 +68,11 @@ public abstract class DBBean {
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target(ElementType.FIELD)
 	public @interface DBLinkTable {
-		/** The name of the Link table, should not contain any strange characters or spaces */
-		String name();
+		/** The name of the Link table, SQL rules apply should not contain any strange characters or spaces */
+		String table();
 		/** The class of the linked bean */
 		Class<? extends DBBean> beanClass();
-		/** The name of the column that contains the main objects id */
+		/** The name of the column that contains the main objects id, SQL rules apply should not contain any strange characters or spaces */
 		String idColumn() default "";
 	}
 
@@ -78,9 +80,11 @@ public abstract class DBBean {
 	 * A Class that contains information about a bean
 	 */
 	protected static class DBBeanConfig{
-		/** The name of the table in the DB */
+		/** The name of the table in the DB **/
 		protected String tableName;
-		/** All the fields in the bean */
+		/** The name of the id column **/
+		protected String idColumn;
+		/** All the fields in the bean **/
 		protected ArrayList<Field> fields;
 
 		protected DBBeanConfig(){
@@ -128,8 +132,14 @@ public abstract class DBBean {
 		DBBeanConfig config = new DBBeanConfig();
 		// Find the table name
 		DBTable tableAnn = c.getAnnotation(DBTable.class);
-		if( tableAnn != null )
-			config.tableName = tableAnn.value().replace('\"', '_');
+		if( tableAnn != null ){
+			config.tableName = tableAnn.value();
+			config.idColumn  = tableAnn.idColumn();
+		}
+		else{
+			config.tableName = c.getSimpleName();
+			config.idColumn  = "id";
+		}
 		// Add the fields in the bean and all the super classes fields
 		for(Class<?> cc = c; cc != DBBean.class ;cc = cc.getSuperclass()){
 			Field[] fields = cc.getDeclaredFields();
@@ -196,7 +206,7 @@ public abstract class DBBean {
 				query.append( " SET" );
 				query.append( params );
 				if( id != null )
-					query.append( " WHERE id=?" );
+					query.append(" WHERE ").append(config.idColumn).append("=?");
 			}
 			logger.finest("Save query("+c.getName()+" id:"+this.getId()+"): "+query.toString());
 			PreparedStatement stmt = db.getPreparedStatement( query.toString() );
@@ -243,7 +253,7 @@ public abstract class DBBean {
 					List<DBBean> list = (List<DBBean>)getFieldValue(field);
 					if( list != null ){
 						DBLinkTable linkTable = field.getAnnotation( DBLinkTable.class );
-						String subtable = linkTable.name();
+						String subtable = linkTable.table();
 						String idcol = (linkTable.idColumn().isEmpty() ? config.tableName : linkTable.idColumn() );
 						String sub_idcol = "id";
 
@@ -257,8 +267,10 @@ public abstract class DBBean {
 								continue;
 							}
 							// Get the Sub object configuration
-							if(subConfig == null)
+							if(subConfig == null){
 								subConfig = getBeanConfig( subobj.getClass() );
+								sub_idcol = subConfig.idColumn;
+							}
 							// Save links in link table
 							String subsql = "";
 							if( subtable.equals(subConfig.tableName) )
@@ -294,7 +306,7 @@ public abstract class DBBean {
 		if( this.getId() == null )
 			throw new NoSuchElementException("ID field is null( Has the bean been saved?)!");
 
-		String sql = "DELETE FROM "+config.tableName+" WHERE id=?";
+		String sql = "DELETE FROM "+config.tableName+" WHERE "+config.idColumn+"=?";
 		logger.fine("Delete query("+c.getName()+" id:"+this.getId()+"): "+sql);
 		PreparedStatement stmt = db.getPreparedStatement( sql );
 		// Put in the variables in the SQL
@@ -336,7 +348,7 @@ public abstract class DBBean {
 		// Initiate a BeanConfig if there is non
 		DBBeanConfig config = getBeanConfig( c );
 		// Generate query
-		String sql = "SELECT * FROM "+config.tableName+" WHERE id=? LIMIT 1";
+		String sql = "SELECT * FROM "+config.tableName+" WHERE "+config.idColumn+"=? LIMIT 1";
 		logger.fine("Load query("+c.getName()+" id:"+id+"): "+sql);
 		PreparedStatement stmt = db.getPreparedStatement( sql );
 		stmt.setObject(1, id );
@@ -357,7 +369,7 @@ public abstract class DBBean {
 		query.append("CREATE TABLE "+config.tableName+" (  ");
 
 		// ID
-		query.append(" id ");
+		query.append(" ").append(config.idColumn).append(" ");
 		query.append( classToDBName( Long.class ) );
 		query.append(" PRIMARY KEY AUTO_INCREMENT, ");
 
@@ -424,7 +436,10 @@ public abstract class DBBean {
 	 */
 	protected void setFieldValue(Field field, Object o){
 		try {
-			field.setAccessible(true);
+			if( !Modifier.isPublic( field.getModifiers()))
+				field.setAccessible(true);
+			
+			// Set basic datatype
 			if( o == null && !Object.class.isAssignableFrom( field.getType() ) ){
 				logger.fine("Trying to set primitive data type to null!");
 				if( 	 field.getType() == Integer.TYPE )	field.setInt(this, 0);
@@ -449,4 +464,9 @@ public abstract class DBBean {
 	public Long getId(){
 		return id;
 	}
+	
+	/**
+	 * Will be called whenever the bean has been updated from the database.
+	 */
+	protected void updatePerformed(){}
 }

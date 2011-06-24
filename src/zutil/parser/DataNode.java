@@ -1,4 +1,4 @@
-package zutil.parser.json;
+package zutil.parser;
 
 import java.util.HashMap;
 import java.util.Iterator;
@@ -8,66 +8,65 @@ import java.util.Map;
 
 
 /**
- * This is an node in an JSON tree,
- * it may contain a Map, list or value
+ * This is a data node used in JSON and BEncoding and other types
  * 
  * @author Ziver
  */
-public class JSONNode implements Iterable<JSONNode>{
-	public enum JSONType{
+public class DataNode implements Iterable<DataNode>{
+	public enum DataType{
 		Map, List, String, Number, Boolean
 	}
-	private Map<String,JSONNode> map = null;
-	private List<JSONNode> list = null;
+	private Map<String,DataNode> map = null;
+	private List<DataNode> list = null;
 	private String value = null;
-	private JSONType type;
+	private DataType type;
 
 
 	/**
 	 * Creates an instance with an Boolean value
 	 */
-	public JSONNode(boolean value){
-		this.type = JSONType.Boolean;
+	public DataNode(boolean value){
+		this.type = DataType.Boolean;
 		this.value = ""+value;
 	}
 	/**
 	 * Creates an instance with an int value
 	 */
-	public JSONNode(int value){
-		this.type = JSONType.Number;
+	public DataNode(int value){
+		this.type = DataType.Number;
 		this.value = ""+value;
 	}
 	/**
 	 * Creates an instance with an double value
 	 */
-	public JSONNode(double value){
-		this.type = JSONType.Number;
+	public DataNode(double value){
+		this.type = DataType.Number;
 		this.value = ""+value;
 	}
 	/**
 	 * Creates an instance with an long value
 	 */
-	public JSONNode(long value){
-		this.type = JSONType.Number;
+	public DataNode(long value){
+		this.type = DataType.Number;
 		this.value = ""+value;
 	}
 	/**
 	 * Creates an instance with an String value
 	 */
-	public JSONNode(String value){
-		this.type = JSONType.String;
+	public DataNode(String value){
+		this.type = DataType.String;
 		this.value = value;
 	}
 	/**
 	 * Creates an instance with a specific type
 	 */
-	public JSONNode(JSONType type){
+	public DataNode(DataType type){
 		this.type = type;
 		switch(type){
 		case Map:
-			map = new HashMap<String,JSONNode>(); break;
+			map = new HashMap<String,DataNode>(); break;
 		case List:
-			list = new LinkedList<JSONNode>(); break;
+			list = new LinkedList<DataNode>(); break;
 		}
 	}
 
@@ -75,7 +74,7 @@ public class JSONNode implements Iterable<JSONNode>{
 	 * @param index is the index of the List or Map
 	 * @return an JSONNode that contains the next level of the List or Map
 	 */
-	public JSONNode get(int index){
+	public DataNode get(int index){
 		if(map != null)
 			return map.get(""+index);
 		else if(list != null)
@@ -86,7 +85,7 @@ public class JSONNode implements Iterable<JSONNode>{
 	 * @param index is the key in the Map
 	 * @return an JSONNode that contains the next level of the Map
 	 */
-	public JSONNode get(String index){
+	public DataNode get(String index){
 		if(map != null)
 			return map.get(index);
 		return null;
@@ -95,7 +94,7 @@ public class JSONNode implements Iterable<JSONNode>{
 	/**
 	 * @return a iterator for the Map or List or null if the node contains a value
 	 */
-	public Iterator<JSONNode> iterator(){
+	public Iterator<DataNode> iterator(){
 		if(map != null)
 			return map.values().iterator();
 		else if(list != null)
@@ -125,51 +124,51 @@ public class JSONNode implements Iterable<JSONNode>{
 	/**
 	 * Adds a node to the List
 	 */
-	public void add(JSONNode node){
+	public void add(DataNode node){
 		list.add(node);
 	}
 	public void add(boolean value){
-		list.add(new JSONNode( value ));
+		list.add(new DataNode( value ));
 	}
 	public void add(int value){
-		list.add(new JSONNode( value ));
+		list.add(new DataNode( value ));
 	}
 	public void add(double value){
-		list.add(new JSONNode( value ));
+		list.add(new DataNode( value ));
 	}
 	public void add(long value){
-		list.add(new JSONNode( value ));
+		list.add(new DataNode( value ));
 	}
 	public void add(String value){
-		list.add(new JSONNode( value ));
+		list.add(new DataNode( value ));
 	}
 	/**
 	 * Adds a node to the Map
 	 */
-	public void add(String key, JSONNode node){
+	public void set(String key, DataNode node){
 		map.put(key, node);
 	}
-	public void add(String key, boolean value){
-		map.put(key, new JSONNode(value));
+	public void set(String key, boolean value){
+		map.put(key, new DataNode(value));
 	}
-	public void add(String key, int value){
-		map.put(key, new JSONNode(value));
+	public void set(String key, int value){
+		map.put(key, new DataNode(value));
 	}
-	public void add(String key, double value){
-		map.put(key, new JSONNode(value));
+	public void set(String key, double value){
+		map.put(key, new DataNode(value));
 	}
-	public void add(String key, long value){
-		map.put(key, new JSONNode(value));
+	public void set(String key, long value){
+		map.put(key, new DataNode(value));
 	}
-	public void add(String key, String value){
-		map.put(key, new JSONNode(value));
+	public void set(String key, String value){
+		map.put(key, new DataNode(value));
 	}
 	/**
 	 * Sets the value of the node, but only if it is setup as an JSONType.Value
 	 */
 	public void set(int value){
 		if( !this.isValue() ) throw new NullPointerException("The node is not setup as a value");
-		type = JSONType.Number;
+		type = DataType.Number;
 		this.value = ""+value;
 	}
 	/**
@@ -177,7 +176,7 @@ public class JSONNode implements Iterable<JSONNode>{
 	 */
 	public void set(double value){
 		if( !this.isValue() ) throw new NullPointerException("The node is not setup as a value");
-		type = JSONType.Number;
+		type = DataType.Number;
 		this.value = ""+value;
 	}
 	/**
@@ -185,7 +184,7 @@ public class JSONNode implements Iterable<JSONNode>{
 	 */
 	public void set(boolean value){
 		if( !this.isValue() ) throw new NullPointerException("The node is not setup as a value");
-		type = JSONType.Boolean;
+		type = DataType.Boolean;
 		this.value = ""+value;
 	}
 	/**
@@ -193,7 +192,7 @@ public class JSONNode implements Iterable<JSONNode>{
 	 */
 	public void set(long value){
 		if( !this.isValue() ) throw new NullPointerException("The node is not setup as a value");
-		type = JSONType.Number;
+		type = DataType.Number;
 		this.value = ""+value;
 	}
 	/**
@@ -201,7 +200,7 @@ public class JSONNode implements Iterable<JSONNode>{
 	 */
 	public void set(String value){
 		if( !this.isValue() ) throw new NullPointerException("The node is not setup as a value");
-		type = JSONType.String;
+		type = DataType.String;
 		this.value = value;
 	}
 
@@ -210,27 +209,70 @@ public class JSONNode implements Iterable<JSONNode>{
 	 * @return if this node contains an Map
 	 */
 	public boolean isMap(){
-		return type == JSONType.Map;
+		return type == DataType.Map;
 	}
 	/**
 	 * @return if this node contains an List
 	 */
 	public boolean isList(){
-		return type == JSONType.List;
+		return type == DataType.List;
 	}
 	/**
 	 * @return if this node contains an value
 	 */
 	public boolean isValue(){
-		return type != JSONType.Map && type != JSONType.List;
+		return type != DataType.Map && type != DataType.List;
 	}
 	/**
 	 * @return the type of the node
 	 */
-	public JSONType getType(){
+	public DataType getType(){
 		return type;
 	}
 
+	
+	/**
+	 * @return the String value in this map
+	 */
+	public String getString(String key){
+		if( !this.isMap() ) throw new NullPointerException("The node is not setup as a map");
+		if( !this.map.containsKey(key) ) 
+			return null;
+		return this.get(key).getString();
+	}
+	/**
+	 * @return the boolean value in this map
+	 */
+	public boolean getBoolean(String key){
+		if( !this.isMap() ) throw new NullPointerException("The node is not setup as a map");
+		if( !this.map.containsKey(key) ) throw new NullPointerException("No such key in map");
+		return this.get(key).getBoolean();
+	}
+	/**
+	 * @return the integer value in this map
+	 */
+	public int getInt(String key){
+		if( !this.isMap() ) throw new NullPointerException("The node is not setup as a map");
+		if( !this.map.containsKey(key) ) throw new NullPointerException("No such key in map");
+		return this.get(key).getInt();
+	}
+	/**
+	 * @return the double value in this map
+	 */
+	public double getDouble(String key){
+		if( !this.isMap() ) throw new NullPointerException("The node is not setup as a map");
+		if( !this.map.containsKey(key) ) throw new NullPointerException("No such key in map");
+		return this.get(key).getDouble();
+	}
+	/**
+	 * @return the long value in this map
+	 */
+	public long getLong(String key){
+		if( !this.isMap() ) throw new NullPointerException("The node is not setup as a map");
+		if( !this.map.containsKey(key) ) throw new NullPointerException("No such key in map");
+		return this.get(key).getLong();
+	}
+	
 
 	/**
 	 * @return the String value in this node, null if its a Map or List
@@ -255,6 +297,12 @@ public class JSONNode implements Iterable<JSONNode>{
 	 */
 	public double getDouble(){
 		return Double.parseDouble(value);
+	}
+	/**
+	 * @return the long value in this node
+	 */
+	public long getLong(){
+		return Long.parseLong(value);
 	}
 
 

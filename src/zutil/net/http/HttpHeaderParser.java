@@ -6,7 +6,7 @@ import java.util.HashMap;
 import java.util.Scanner;
 import java.util.regex.Pattern;
 
-public class HTTPHeaderParser {
+public class HttpHeaderParser {
 	// Some Cached regex's
 	private static final Pattern colonPattern = Pattern.compile(":");	
 	private static final Pattern equalPattern = Pattern.compile("=");
@@ -30,7 +30,7 @@ public class HTTPHeaderParser {
 	 * @param 	in 				is the stream
 	 * @throws 	IOException 
 	 */
-	public HTTPHeaderParser(BufferedReader in) throws IOException{
+	public HttpHeaderParser(BufferedReader in) throws IOException{
 		url_attr = new HashMap<String, String>();
 		headers = new HashMap<String, String>();
 		cookies = new HashMap<String, String>();
@@ -50,7 +50,7 @@ public class HTTPHeaderParser {
 	 * 
 	 * @param 		in 		is the string
 	 */
-	public HTTPHeaderParser(String in){
+	public HttpHeaderParser(String in){
 		url_attr = new HashMap<String, String>();
 		headers = new HashMap<String, String>();
 		cookies = new HashMap<String, String>();
@@ -92,7 +92,7 @@ public class HTTPHeaderParser {
 			if(index > -1){ 
 				url = line.substring(0, index );
 				line = line.substring( index+1, line.length());
-				parseUrlAttributes(line, url_attr);
+				parseURLParameters(line, url_attr);
 			}
 			else{
 				url = line;
@@ -108,9 +108,9 @@ public class HTTPHeaderParser {
 	 * 
 	 * @param 	attributes 		is the String containing all the attributes
 	 */
-	public static HashMap<String, String> parseUrlAttributes( String attributes ){
+	public static HashMap<String, String> parseURLParameters( String attributes ){
 		HashMap<String, String> map = new HashMap<String, String>();
-		parseUrlAttributes(attributes, map);
+		parseURLParameters(attributes, map);
 		return map;
 	}
 	
@@ -121,7 +121,7 @@ public class HTTPHeaderParser {
 	 * @param 	attributes 		is the String containing all the attributes
 	 * @param 	map 			is the HashMap to put all the values into
 	 */
-	public static void parseUrlAttributes(String attributes, HashMap<String, String> map){
+	public static void parseURLParameters(String attributes, HashMap<String, String> map){
 		String[] tmp;
 		// get the variables
 		String[] data = andPattern.split( attributes );

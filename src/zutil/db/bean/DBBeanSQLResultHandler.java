@@ -95,7 +95,7 @@ public class DBBeanSQLResultHandler<T> implements SQLResultHandler<T>{
 	}
 
 	/**
-	 * Is called to handle an result from an query.
+	 *  Is called to handle a result from a query.
 	 * 
 	 * @param stmt 		is the query
 	 * @param result 	is the ResultSet
@@ -179,13 +179,13 @@ public class DBBeanSQLResultHandler<T> implements SQLResultHandler<T>{
 					if(db != null){
 						DBLinkTable linkTable = field.getAnnotation( DBLinkTable.class );
 						DBBeanConfig subConfig = DBBean.getBeanConfig( linkTable.beanClass() );
-						String linkTableName = linkTable.name();
+						String linkTableName = linkTable.table();
 						String subTable = subConfig.tableName;
 						String idcol = (linkTable.idColumn().isEmpty() ? bean_config.tableName : linkTable.idColumn() );
 
 						// Load list from link table
 						//String subsql = "SELECT * FROM "+linkTableName+" NATURAL JOIN "+subConfig.tableName+" WHERE "+idcol+"=?";
-						String subsql = "SELECT obj.* FROM "+linkTableName+" as link, "+subTable+" as obj WHERE obj."+idcol+"=? AND obj.id=link.id";
+						String subsql = "SELECT obj.* FROM "+linkTableName+" as link, "+subTable+" as obj WHERE obj."+idcol+"=? AND obj."+bean_config.idColumn+"=link.id";
 						logger.finest("List Load Query: "+subsql);
 						PreparedStatement subStmt = db.getPreparedStatement( subsql );
 						subStmt.setObject(1, obj.getId() );
@@ -203,6 +203,8 @@ public class DBBeanSQLResultHandler<T> implements SQLResultHandler<T>{
 		} finally{
 			obj.processing_update = false;
 		}
+		
+		obj.updatePerformed();
 	}
 
 	/**

@@ -11,7 +11,7 @@ import zutil.db.SQLResultHandler;
  * 
  * @author Ziver
  */
-public class SimpleResultHandler<T> implements SQLResultHandler<T> {
+public class SimpleSQLHandler<T> implements SQLResultHandler<T> {
 	/**
 	 * Is called to handle an result from an query.
 	 * 

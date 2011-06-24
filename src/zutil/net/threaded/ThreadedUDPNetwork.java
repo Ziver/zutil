@@ -10,8 +10,7 @@ import java.net.SocketException;
 
 
 /**
- * A simple web server that handles both cookies and
- * sessions for all the clients
+ *  * A simple network server that handles UDP communication
  * 
  * @author Ziver
  */

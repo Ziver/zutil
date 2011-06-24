@@ -1,7 +1,7 @@
 package zutil.net.threaded;
 
 /**
- * The class that will handle the TCP connection will incclude 
+ * The class that will handle the a TCP connection will include 
  * this interface
  * 
  * @author Ziver

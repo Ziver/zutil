@@ -151,7 +151,7 @@ public class HttpServer extends ThreadedTCPNetworkServer{
 			try {
 				logger.finer("Reciving Http Request!!!");
 
-				HTTPHeaderParser parser = new HTTPHeaderParser(in);
+				HttpHeaderParser parser = new HttpHeaderParser(in);
 				logger.finest(parser.toString());
 				client_info = parser.getHeaders();
 				request = parser.getURLAttributes();
@@ -173,7 +173,7 @@ public class HttpServer extends ThreadedTCPNetworkServer{
 					tmp = parser.getHeader("Content-Type");
 					if( tmp.contains("application/x-www-form-urlencoded") ){
 						// get the variables
-						HTTPHeaderParser.parseUrlAttributes( tmpb.toString(), request );
+						HttpHeaderParser.parseURLParameters( tmpb.toString(), request );
 					}
 					else if( tmp.contains("application/soap+xml" ) || 
 							tmp.contains("text/xml") || 

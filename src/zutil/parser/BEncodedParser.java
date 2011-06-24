@@ -1,34 +1,13 @@
-package zutil.net.torrent;
+package zutil.parser;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.LinkedList;
-
-import zutil.io.MultiPrintStream;
-import zutil.io.file.FileUtil;
+import zutil.parser.DataNode.DataType;
 
 /**
  * http://wiki.theory.org/BitTorrentSpecification
  * @author Ziver
  *
  */
-public class TorrentParser {
-	/**
-	 * Example use
-	 */
-	public static void main(String[] args){
-		try {
-			String tmp = FileUtil.getFileContent(FileUtil.find("C:\\Users\\Ziver\\Desktop\\test.torrent"));
-			MultiPrintStream.out.dump(TorrentParser.decode(tmp));
-			
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
-
+public class BEncodedParser {
 
 	/**
 	 * Returns the representation of the data in the BEncoded string
@@ -36,7 +15,7 @@ public class TorrentParser {
 	 * @param data The data to be decoded
 	 * @return
 	 */
-	public static Object decode(String data){
+	public static DataNode parse(String data){
 		return decode_BEncoded(new StringBuffer(data));
 	}
 
@@ -47,7 +26,7 @@ public class TorrentParser {
 	 * @param index The index in data to start from
 	 * @return
 	 */
-	private static Object decode_BEncoded(StringBuffer data){
+	private static DataNode decode_BEncoded(StringBuffer data){
 		String tmp;
 		char c = ' ';
 
@@ -63,7 +42,7 @@ public class TorrentParser {
 			tmp = data.substring(0, data.indexOf("e"));
 			data.delete(0, tmp.length() + 1);
 			//System.out.println(tmp);
-			return new Long(tmp);
+			return new DataNode( new Long(tmp));
 		/**
 		 * Lists are prefixed with a l and terminated by an e. The list
 		 * should contain a series of bEncoded elements. For example, the
@@ -74,15 +53,15 @@ public class TorrentParser {
 		case 'l':
 			//System.out.println("Found List at "+index);
 			data.deleteCharAt(0);
-			LinkedList<Object> list = new LinkedList<Object>();
+			DataNode list = new DataNode( DataType.List );
 			c = data.charAt(0);
 			while(c != 'e'){
-				list.add(decode_BEncoded(data));
+				list.add( decode_BEncoded(data) );
 				c = data.charAt(0);
 			}
 			data.deleteCharAt(0);
 			//MultiPrintStream.out.dump(list);
-			if(list.size() == 1) return list.poll();
+			if(list.size() == 1) return list.get(0);
 			else return list;
 		/**
 		 * Dictionaries are prefixed with a d and terminated by an e. They
@@ -93,11 +72,11 @@ public class TorrentParser {
 		case 'd':
 			//System.out.println("Found Dictionary at "+index);
 			data.deleteCharAt(0);
-			HashMap<Object,Object> map = new HashMap<Object,Object>();
+			DataNode map = new DataNode( DataType.Map );
 			c = data.charAt(0);
 			while(c != 'e'){
-				Object tmp2 = decode_BEncoded(data);
-				map.put(tmp2, decode_BEncoded(data));
+				DataNode tmp2 = decode_BEncoded(data);
+				map.set(tmp2.getString(), decode_BEncoded(data));
 				c = data.charAt(0);
 			}
 			data.deleteCharAt(0);
@@ -116,7 +95,7 @@ public class TorrentParser {
 			String ret = data.substring(0, length);
 			data.delete(0, length);
 			//System.out.println(data.substring(i, i+length));
-			return ret;
+			return new DataNode( ret );
 		}
 	}
 }

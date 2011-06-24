@@ -5,7 +5,8 @@ import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.util.Iterator;
 
-import zutil.parser.json.JSONNode.JSONType;
+import zutil.parser.DataNode;
+import zutil.parser.DataNode.DataType;
 
 /**
  * Writes An JSONNode to an String or stream
@@ -47,7 +48,7 @@ public class JSONWriter{
 	 * 
 	 * @param root is the root node
 	 */
-	public void write(JSONNode root){
+	public void write(DataNode root){
 		boolean first = true;
 		switch(root.getType()){
 		// Write Map
@@ -74,7 +75,7 @@ public class JSONWriter{
 		// Write an list
 		case List:
 			out.print('[');
-			for(JSONNode node : root){
+			for(DataNode node : root){
 				if(!first)
 					out.print(", ");
 				write( node );
@@ -83,7 +84,7 @@ public class JSONWriter{
 			out.print(']');
 			break;		
 		default:
-			if(root.getString() != null && root.getType() == JSONType.String){
+			if(root.getString() != null && root.getType() == DataType.String){
 				out.print('\"');
 				out.print(root.toString());
 				out.print('\"');

@@ -1,5 +1,6 @@
 package zutil.log;
 
+import java.io.PrintStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
@@ -7,13 +8,15 @@ import java.util.logging.Formatter;
 import java.util.logging.LogRecord;
 import java.util.regex.Pattern;
 
+import zutil.io.StringOutputStream;
+
 public class CompactLogFormatter extends Formatter{
 	// The split pattern where the 
 	private static final Pattern splitter = Pattern.compile("\n");
 	// the stream should print time stamp
 	private boolean timeStamp = true;
 	//The time stamp style
-	private SimpleDateFormat dateFormatter = new SimpleDateFormat("HH:mm:ss ");
+	private SimpleDateFormat dateFormatter = new SimpleDateFormat();
 	// If displaying class names are enabled
 	private boolean className = true;
 	// If displaying method names are enabled
@@ -24,26 +27,28 @@ public class CompactLogFormatter extends Formatter{
 	private static HashMap<String,String> padd_cache = new HashMap<String,String>();
 	// Date temp file
 	private Date date = new Date();
-	
+
 	@Override 
 	public String format(LogRecord record) {
 		StringBuilder data = new StringBuilder();
-		
+
 		if( timeStamp ){
 			date.setTime( record.getMillis() );
-			data.append( dateFormatter.format(date) );	
+			data.append( dateFormatter.format(date) );
+			data.append(' ');
 		}
-		
+
 		switch( record.getLevel().intValue() ){
-		case /* SEVERE  */	1000: data.append("SEVERE  "); break;
-		case /* WARNING */	900 : data.append("WARNING "); break;
-		case /* INFO    */	800 : data.append("INFO    "); break;
-		case /* CONFIG  */	700 : data.append("CONFIG  "); break;		
-		case /* FINE    */	500 : data.append("FINE    "); break;
-		case /* FINER   */	400 : data.append("FINER   "); break;
-		case /* FINEST  */	300 : data.append("FINEST  "); break;
+		case /* SEVERE  */	1000: data.append("[SEVERE] "); break;
+		case /* WARNING */	900 : data.append("[WARNING]"); break;
+		case /* INFO    */	800 : data.append("[INFO]   "); break;
+		case /* CONFIG  */	700 : data.append("[CONFIG] "); break;		
+		case /* FINE    */	500 : data.append("[FINE]   "); break;
+		case /* FINER   */	400 : data.append("[FINER]  "); break;
+		case /* FINEST  */	300 : data.append("[FINEST] "); break;
 		}
-		
+		data.append(' ');
+
 		if( className ){
 			data.append( paddClassName(record.getSourceClassName()) );
 		}
@@ -51,20 +56,35 @@ public class CompactLogFormatter extends Formatter{
 			data.append( record.getSourceMethodName() );
 		}
 		data.append( ": " );
-		
+
 		StringBuffer ret = new StringBuffer();
-		String[] array = splitter.split( record.getMessage() );
-		for( int i=0; i<array.length ;++i ){
-			if( i!=0 )
-				ret.append( '\n' );
-			if( data.length() > 0 )
-				ret.append( data );
-			ret.append( array[i] );
+		if( record.getMessage() != null ){
+			String[] array = splitter.split( record.getMessage() );
+			for( int i=0; i<array.length ;++i ){
+				if( i!=0 )
+					ret.append( '\n' );
+				if( data.length() > 0 )
+					ret.append( data );
+				ret.append( array[i] );
+			}
 		}
-		ret.append( '\n' );	
+		ret.append( '\n' );
+		if( record.getThrown() != null ){
+			StringOutputStream out = new StringOutputStream();
+			record.getThrown().printStackTrace(new PrintStream(out));
+			String[] array = splitter.split( out.toString() );
+			for( int i=0; i<array.length ;++i ){
+				if( i!=0 )
+					ret.append( '\n' );
+				if( data.length() > 0 )
+					ret.append( data );
+				ret.append( array[i] );
+			}
+			ret.append( '\n' );
+		}
 		return ret.toString();
 	}
-	
+
 	/**
 	 * If the formatter should add a time stamp in front of the log message
 	 * 
@@ -82,7 +102,7 @@ public class CompactLogFormatter extends Formatter{
 	public void setTimeStamp(String ts){
 		dateFormatter = new SimpleDateFormat(ts);
 	}
-	
+
 	/**
 	 * If the formatter should add the class/source name in front of the log message
 	 * 
@@ -91,7 +111,7 @@ public class CompactLogFormatter extends Formatter{
 	public void enableClassName(boolean enable){
 		className = enable;
 	}
-	
+
 	/**
 	 * If the formatter should add the class/source name in front of the log message
 	 * 
@@ -100,7 +120,7 @@ public class CompactLogFormatter extends Formatter{
 	public void enableMethodName(boolean enable){
 		methodName = enable;
 	}
-	
+
 	/**
 	 * @return the Class name
 	 */
@@ -108,18 +128,18 @@ public class CompactLogFormatter extends Formatter{
 		String tmp = padd_cache.get(source);
 		if( tmp != null )
 			return tmp;
-		
+
 		String c_name = source.substring( source.lastIndexOf('.')+1 );
 		if( c_name.length() > max_class_name )
 			max_class_name = c_name.length();
-		
+
 		StringBuilder sb = new StringBuilder( c_name );
-	    for( int i=c_name.length(); i<max_class_name; ++i ) {
-	        sb.append( ' ' ); 
-	    }
-	    tmp = sb.toString();
-	    padd_cache.put(source, tmp);
-	    return tmp;
+		for( int i=c_name.length(); i<max_class_name; ++i ) {
+			sb.append( ' ' ); 
+		}
+		tmp = sb.toString();
+		padd_cache.put(source, tmp);
+		return tmp;
 
 	}
 

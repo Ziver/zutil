@@ -10,7 +10,7 @@ import java.util.logging.Logger;
 
 import zutil.io.StringOutputStream;
 import zutil.log.LogUtil;
-import zutil.net.http.HTTPHeaderParser;
+import zutil.net.http.HttpHeaderParser;
 import zutil.net.http.HttpPrintStream;
 import zutil.net.threaded.ThreadedUDPNetwork;
 import zutil.net.threaded.ThreadedUDPNetworkThread;
@@ -75,7 +75,7 @@ public class SSDPClient extends ThreadedUDPNetwork implements ThreadedUDPNetwork
 			
 			// Generate an SSDP discover message
 			StringOutputStream msg = new StringOutputStream();
-			HttpPrintStream http = new HttpPrintStream( msg, HttpPrintStream.HTTPMessageType.REQUEST );
+			HttpPrintStream http = new HttpPrintStream( msg, HttpPrintStream.HttpMessageType.REQUEST );
 			http.setRequestType("M-SEARCH");
 			http.setRequestURL("*");
 			http.setHeader("Host", SSDPServer.SSDP_MULTICAST_ADDR+":"+SSDPServer.SSDP_PORT );
@@ -150,7 +150,7 @@ public class SSDPClient extends ThreadedUDPNetwork implements ThreadedUDPNetwork
 	 * Location: http://localhost:80
 	 */
 	public void receivedPacket(DatagramPacket packet, ThreadedUDPNetwork network) {
-		HTTPHeaderParser header = new HTTPHeaderParser( new String( packet.getData() ) );
+		HttpHeaderParser header = new HttpHeaderParser( new String( packet.getData() ) );
 		logger.log(Level.FINEST, "*********** Recived\n"+header);
 		
 		String usn = header.getHeader("USN");

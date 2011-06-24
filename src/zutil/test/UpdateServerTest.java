@@ -1,11 +1,18 @@
 package zutil.test;
 
-import zutil.net.UpdateServer;
+import java.util.logging.Level;
+
+import zutil.log.CompactLogFormatter;
+import zutil.log.LogUtil;
+import zutil.net.update.UpdateServer;
 
 public class UpdateServerTest {
 	public static void main(String[] args){
 		try {
-			new UpdateServer(2000, "server");			
+			LogUtil.setGlobalLevel(Level.FINEST);
+			LogUtil.setGlobalFormatter(new CompactLogFormatter());
+			
+			new UpdateServer(2000, "C:\\Users\\Ziver\\Desktop\\server");			
 		}catch (Exception e) {
 			e.printStackTrace();
 		}

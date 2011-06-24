@@ -3,8 +3,8 @@ package zutil.jee.upload;
 import org.apache.commons.fileupload.ProgressListener;
 
 import zutil.StringUtil;
-import zutil.parser.json.JSONNode;
-import zutil.parser.json.JSONNode.JSONType;
+import zutil.parser.DataNode;
+import zutil.parser.DataNode.DataType;
 
 
 /**
@@ -121,18 +121,18 @@ public class FileUploadListener implements ProgressListener{
 		return (int)((100 * bytes) / length);
 	}
 
-	public JSONNode getJSON() {
-		JSONNode node = new JSONNode( JSONType.Map );
-		node.add("id", id);
+	public DataNode getJSON() {
+		DataNode node = new DataNode( DataType.Map );
+		node.set("id", id);
 		
-		node.add("status", status.toString());
-		node.add("message", message.replaceAll("\"", "\\\"") );
-		node.add("filename", filename);
-		node.add("percent", getPercentComplete());
+		node.set("status", status.toString());
+		node.set("message", message.replaceAll("\"", "\\\"") );
+		node.set("filename", filename);
+		node.set("percent", getPercentComplete());
 		
-		node.add("uploaded", StringUtil.formatBytesToString( bytes ));
-		node.add("total", StringUtil.formatBytesToString( length ));
-		node.add("speed", StringUtil.formatBytesToString( speed )+"/s");
+		node.set("uploaded", StringUtil.formatBytesToString( bytes ));
+		node.set("total", StringUtil.formatBytesToString( length ));
+		node.set("speed", StringUtil.formatBytesToString( speed )+"/s");
 		return node;
 	}
 }

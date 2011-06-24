@@ -21,7 +21,7 @@ public class Hasher {
 	 * @return 					a String with the hash
 	 */
 	public static String hash(File file, String hashType) throws NoSuchAlgorithmException, IOException {
-		MessageDigest digest = MessageDigest.getInstance(hashType);//"MD5"
+		MessageDigest digest = MessageDigest.getInstance(hashType); //"MD5"
 		InputStream is = new FileInputStream(file);
 		String output = "";
 		byte[] buffer = new byte[8192];
@@ -71,6 +71,22 @@ public class Hasher {
 		}
 		return null;
 	}
+	
+	/**
+	 * Returns the MD5 hash of the given file
+	 * 
+	 * @param 		object 		is the file to hash
+	 * @return 					an String containing the hash
+	 */
+	public static String MD5(File file) throws IOException{
+		try {
+			return hash(file, "MD5");
+		} catch (NoSuchAlgorithmException e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+	
 
 	/**
 	 * Returns the SHA-1 hash of the given object

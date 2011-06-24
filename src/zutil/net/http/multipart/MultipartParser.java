@@ -13,7 +13,7 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 
 import zutil.ProgressListener;
-import zutil.net.http.HTTPHeaderParser;
+import zutil.net.http.HttpHeaderParser;
 
 /**
  * Parses a multipart/form-data http request, 
@@ -35,11 +35,11 @@ public class MultipartParser {
 	private BufferedReader in;
 	
 	/** This is the listener that will listen on the progress */
-	private ProgressListener<MultipartField> listener;
+	private ProgressListener<MultipartParser,MultipartField> listener;
 	
 	
 	
-	public MultipartParser(BufferedReader in, HTTPHeaderParser header){
+	public MultipartParser(BufferedReader in, HttpHeaderParser header){
 		this.in = in;
 		
 		String cotype = header.getHeader("Content-type");
@@ -69,7 +69,7 @@ public class MultipartParser {
 	/**
 	 * @param listener is the listener that will be called for progress
 	 */
-	public void setListener(ProgressListener<MultipartField> listener){
+	public void setListener(ProgressListener<MultipartParser,MultipartField> listener){
 		this.listener = listener;
 	}
 	

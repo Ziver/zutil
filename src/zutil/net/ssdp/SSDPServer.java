@@ -12,7 +12,7 @@ import java.util.logging.Logger;
 import zutil.io.MultiPrintStream;
 import zutil.io.StringOutputStream;
 import zutil.log.LogUtil;
-import zutil.net.http.HTTPHeaderParser;
+import zutil.net.http.HttpHeaderParser;
 import zutil.net.http.HttpPrintStream;
 import zutil.net.threaded.ThreadedUDPNetworkThread;
 import zutil.net.threaded.ThreadedUDPNetwork;
@@ -155,7 +155,7 @@ public class SSDPServer extends ThreadedUDPNetwork implements ThreadedUDPNetwork
 		try {
 			String msg = new String( packet.getData() );
 
-			HTTPHeaderParser header = new HTTPHeaderParser( msg );
+			HttpHeaderParser header = new HttpHeaderParser( msg );
 			logger.log(Level.FINEST, "**** Received:\n"+header);
 
 			// ******* Respond
@@ -233,7 +233,7 @@ public class SSDPServer extends ThreadedUDPNetwork implements ThreadedUDPNetwork
 		try {
 			// Generate the SSDP response
 			StringOutputStream msg = new StringOutputStream();
-			HttpPrintStream http = new HttpPrintStream( msg, HttpPrintStream.HTTPMessageType.REQUEST );
+			HttpPrintStream http = new HttpPrintStream( msg, HttpPrintStream.HttpMessageType.REQUEST );
 			http.setRequestType("NOTIFY");
 			http.setRequestURL("*");
 			http.setHeader("Server", SERVER_INFO );
@@ -284,7 +284,7 @@ public class SSDPServer extends ThreadedUDPNetwork implements ThreadedUDPNetwork
 		try {
 			// Generate the SSDP response
 			StringOutputStream msg = new StringOutputStream();
-			HttpPrintStream http = new HttpPrintStream( msg, HttpPrintStream.HTTPMessageType.REQUEST );
+			HttpPrintStream http = new HttpPrintStream( msg, HttpPrintStream.HttpMessageType.REQUEST );
 			http.setRequestType("NOTIFY");
 			http.setRequestURL("*");
 			http.setHeader("Server", SERVER_INFO );

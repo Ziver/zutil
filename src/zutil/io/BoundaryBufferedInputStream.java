@@ -27,7 +27,7 @@ public class BoundaryBufferedInputStream extends FilterInputStream{
 	/**
 	 * Creates a instance of this class with a default buffer size of 64K
 	 * 
-	 * @param 	in	is the InputStream that the buffer will use
+	 * @param 	in			is the InputStream that the buffer will use
 	 */
 	public BoundaryBufferedInputStream(InputStream in){
 		this(in, DEFAULT_BUF_SIZE);
@@ -41,7 +41,8 @@ public class BoundaryBufferedInputStream extends FilterInputStream{
 	 */
 	public BoundaryBufferedInputStream(InputStream in, int buf_size){
 		super(in);
-		reset();
+		buf_end = 0;
+		buf_pos = 0;
 		buffer = new byte[buf_size];
 	}
 
@@ -50,7 +51,7 @@ public class BoundaryBufferedInputStream extends FilterInputStream{
 	 * buffer and then fills the buffer with data from 
 	 * the source stream to the buffer
 	 * 
-	 * @return the size of the buffer
+	 * @return 			the size of the buffer
 	 * @throws IOException
 	 */
 	protected int fillBuffer() throws IOException {
@@ -64,38 +65,28 @@ public class BoundaryBufferedInputStream extends FilterInputStream{
 		return n+leftover;
 	}
 
-	/**
-	 * Resets the buffer
-	 * 
-	 * @throws IOException
-	 */
-	public synchronized void reset(){
-		buf_end = 0;
-		buf_pos = 0;
-	}
 	
 	/**
-	 * @return the next byte in the buffer
+	 * @return 			the next byte in the buffer
 	 */
 	public final int read() throws IOException{
-		if(buf_pos >= buf_end) {
+		if(buf_pos >= buf_end-boundary.length) {
 			if(fillBuffer() < 0)
 				return -1;
 		}
 		if(buf_end == 0) {
 			return -1;
 		} else {
-			buf_pos++;
-			return buffer[buf_pos-1];
+			return buffer[buf_pos++];
 		}
 	}
 
 	/**
 	 * Fills the given array with data from the buffer
 	 * 
-	 * @param 	b 	is the array that will be filled
-	 * @return 		the amount of bytes read or -1 if eof
-	 */
+	 * @param 	b 		is the array that will be filled
+	 * @return 			the amount of bytes read or -1 if EOF
+	 */	
 	public int read(byte b[]) throws IOException {
 		return read(b, 0, b.length);
 	}
@@ -106,10 +97,10 @@ public class BoundaryBufferedInputStream extends FilterInputStream{
 	 * @param 	b 		is the array that will be filled
 	 * @param 	off 	is the offset in the array
 	 * @param 	len 	is the amount to read
-	 * @return 			the amount of bytes read or -1 if eof
+	 * @return 			the amount of bytes read or -1 if EOF
 	 */
 	public int read(byte b[], int off, int len) throws IOException {
-		if(buf_pos >= buf_end) {
+		if(buf_pos >= buf_end-boundary.length) {
 			if(fillBuffer() < 0)
 				return -1; // EOF
 		}
@@ -130,6 +121,13 @@ public class BoundaryBufferedInputStream extends FilterInputStream{
 	}
 
 	/**
+	 * TODO: Skips over the boundary
+	 */
+	public void next(){
+		
+	}
+	
+	/**
      * @param	n 	the number of bytes to be skipped.
      * @return		the actual number of bytes skipped.
 	 */
@@ -140,6 +138,21 @@ public class BoundaryBufferedInputStream extends FilterInputStream{
 			return leftover;
 		}
 		return buf_pos += n;
+	}
+	
+	/**
+	 * Sets the boundary for the stream
+	 */
+	public void setBoundary(String b){
+		this.boundary = b.getBytes();
+	}
+	
+	/**
+	 * Sets the boundary for the stream
+	 */
+	public void setBoundary(byte[] b){
+		boundary = new byte[b.length];
+		System.arraycopy(b, 0, boundary, 0, b.length);
 	}
 
 	/**
@@ -152,7 +165,10 @@ public class BoundaryBufferedInputStream extends FilterInputStream{
 	}
 
 	/**
-	 * Unimplemented
-	 */
-	public synchronized void mark(int readlimit) {}
+     * Tests if this input stream supports the mark and 
+     * reset methods.
+     */
+	public boolean markSupported(){
+		return false;
+	}
 }

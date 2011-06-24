@@ -10,10 +10,12 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
 
 import zutil.io.IOUtil;
 import zutil.io.MultiPrintStream;
+import zutil.log.LogUtil;
 
 /**
  * File path utilities
@@ -21,6 +23,7 @@ import zutil.io.MultiPrintStream;
  * @author Ziver
  */
 public class FileUtil {
+	public static final Logger logger = LogUtil.getLogger();
 	
 	/**
 	 * Returns a String with a relative path from the given path
@@ -30,6 +33,8 @@ public class FileUtil {
 	 * @return 					A String with a relative path
 	 */
 	public static String relativePath(File file, String path){
+		if( file == null || path == null )
+			return null;
 		String absolute = file.getAbsolutePath();
 		String tmpPath = path.replaceAll(
 				"[/\\\\]", 
@@ -231,10 +236,11 @@ public class FileUtil {
 			for(int i=0; i<temp.length ;i++){
 				file = new File(dir.getPath()+File.separator+temp[i]);
 				if(file.isDirectory()){
+					logger.finer("Found Folder: "+file);
 					search(new File(dir.getPath()+File.separator+temp[i]+File.separator), fileList, folders, recurse);
 				}
 				else if(file.isFile()){
-					MultiPrintStream.out.println("File Found: "+file);
+					logger.finer("Found File: "+file);
 					fileList.add(file);
 				}			
 			}

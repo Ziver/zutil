@@ -33,9 +33,9 @@ import zutil.StringUtil;
 import zutil.io.file.FileUtil;
 import zutil.jee.upload.FileUploadListener.Status;
 import zutil.log.LogUtil;
-import zutil.parser.json.JSONNode;
+import zutil.parser.DataNode;
+import zutil.parser.DataNode.DataType;
 import zutil.parser.json.JSONWriter;
-import zutil.parser.json.JSONNode.JSONType;
 
 /**
  * <XMP>
@@ -139,7 +139,7 @@ public abstract class AjaxFileUpload extends HttpServlet {
 		}
 
 		// Generate JSON
-		JSONNode root = new JSONNode( JSONType.List );
+		DataNode root = new DataNode( DataType.List );
 		Iterator<FileUploadListener> it = list.iterator();
 		while( it.hasNext() ) {
 			FileUploadListener listener = it.next();

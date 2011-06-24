@@ -14,7 +14,7 @@ import zutil.ProgressListener;
  */
 public abstract class ImageFilterProcessor {
 	private BufferedImage img;
-	private ProgressListener<?> progress;
+	private ProgressListener<ImageFilterProcessor,?> progress;
 
 	public ImageFilterProcessor(BufferedImage img){
 		this.img = img;
@@ -22,16 +22,16 @@ public abstract class ImageFilterProcessor {
 	
 	/**
 	 * Sets the listener
-	 * @param listener is the listener, null to disable the progress
+	 * @param 		listener 		is the listener, null to disable the progress
 	 */
-	public void setProgressListener(ProgressListener<?> listener){
+	public void setProgressListener(ProgressListener<ImageFilterProcessor,?> listener){
 		this.progress = listener;
 	}
 	
 	/**
 	 * Returns the listener
 	 */
-	public ProgressListener<?> getProgressListener(){
+	public ProgressListener<?,?> getProgressListener(){
 		return this.progress;
 	}
 	
@@ -45,9 +45,9 @@ public abstract class ImageFilterProcessor {
 	/**
 	 * Applies a effect to a given image
 	 * 
-	 * @param effect The effect to use
-	 * @param img The image to process
-	 * @return The processed image
+	 * @param 		effect 		The effect to use
+	 * @param 		img			The image to process
+	 * @return 					The processed image
 	 */
 	public static ImageFilterProcessor getProcessor(String effect, BufferedImage img) throws InstantiationException, IllegalAccessException, ClassNotFoundException, InterruptedException{
 		ImageFilterProcessor processor = (ImageFilterProcessor)Class.forName(effect).newInstance();
@@ -58,8 +58,7 @@ public abstract class ImageFilterProcessor {
 	/**
 	 * Adds the chosen effect to the image
 	 * 
-	 * @return The Image with the effect
-	 * @throws InterruptedException
+	 * @return 					The Image with the effect
 	 */
 	public BufferedImage process() throws InterruptedException{
 		int cols = img.getWidth();
@@ -78,18 +77,17 @@ public abstract class ImageFilterProcessor {
 	}
 
 	/**
-	 * Creates a Integer array with the pixel data of the image
-	 * int[row][col][4]
+	 * Creates a Integer array with the pixel data of the image <XMP>
+	 * int[row][col][4] 
 	 * 0 -> Alpha data
-	 * 		Red data
-	 * 		Green data
-	 * 4 ->	Blue data
+	 *      Red data
+	 *      Green data
+	 * 4 -> Blue data </XMP>
 	 * 
-	 * @param img is the image to convert
-	 * @param cols is the columns of the image
-	 * @param rows is the rows of the image
-	 * @return A is the integer array
-	 * @throws InterruptedException
+	 * @param 		img 		is the image to convert
+	 * @param 		cols 		is the columns of the image
+	 * @param 		rows 		is the rows of the image
+	 * @return 					A is the integer array
 	 */
 	public static int[][][] convertToArray(BufferedImage img, int cols, int rows) throws InterruptedException{
 		int[][][] data = new int[rows][cols][4];
@@ -124,10 +122,10 @@ public abstract class ImageFilterProcessor {
 	/**
 	 * Converts a pixel data array to a java Image object
 	 * 
-	 * @param pixels is the pixel data array
-	 * @param cols is the columns of the image
-	 * @param rows is the rows of the image
-	 * @return A Image
+	 * @param 		pixels 		is the pixel data array
+	 * @param 		cols 		is the columns of the image
+	 * @param 		rows 		is the rows of the image
+	 * @return 					A Image
 	 */
 	public static BufferedImage convertToImage(int[][][] pixels, int cols, int rows){
 		int[] data = new int[cols * rows * 4];
@@ -156,7 +154,8 @@ public abstract class ImageFilterProcessor {
 
 	/**
 	 * Runs the image thru the processor
-	 * @param data is the raw image to apply the effect to. This will NOT be altered
+	 * 
+	 * @param 	data 		is the raw image to apply the effect to. This will NOT be altered
 	 */
 	public int[][][] process(int[][][] data){
 		return process(data, 0, 0, data[0].length, data.length);
@@ -165,12 +164,12 @@ public abstract class ImageFilterProcessor {
 	/**
 	 * The underlying effect is run here
 	 * 
-	 * @param data is the raw image to apply the effect to. This will NOT be altered
-	 * @param startX is the x pixel of the image to start from
-	 * @param startY is the y pixel of the image to start from
-	 * @param stopX is the x pixel of the image to stop
-	 * @param stopY is the y pixel of the image to stop
-	 * @return either the modified data parameter or an new array
+	 * @param 		data is 	the raw image to apply the effect to. This will NOT be altered
+	 * @param 		startX 		is the x pixel of the image to start from
+	 * @param 		startY 		is the y pixel of the image to start from
+	 * @param 		stopX 		is the x pixel of the image to stop
+	 * @param 		stopY 		is the y pixel of the image to stop
+	 * @return 					either the modified data parameter or an new array
 	 */
 	public abstract int[][][] process(int[][][] data, int startX, int startY, int stopX, int stopY);
 }

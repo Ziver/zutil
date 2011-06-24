@@ -13,7 +13,7 @@ import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
 
-import zutil.db.handler.SimpleResultHandler;
+import zutil.db.handler.SimpleSQLHandler;
 import zutil.log.LogUtil;
 
 public class DBConnection{
@@ -93,7 +93,7 @@ public class DBConnection{
 	 */
 	public Object getLastInsertID(){
 		try{
-			return exec("SELECT LAST_INSERT_ID()", new SimpleResultHandler<Object>());
+			return exec("SELECT LAST_INSERT_ID()", new SimpleSQLHandler<Object>());
 		}catch(SQLException e){
 			logger.log(Level.WARNING, null, e);
 		}
