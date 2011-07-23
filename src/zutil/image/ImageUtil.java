@@ -66,4 +66,47 @@ public class ImageUtil {
 		g2d.dispose();
 		return tmp;
 	}
+
+
+	/**
+	 * Crops a image to a specific aspect ration
+	 *
+	 * @param		image		is the actual image to crop
+	 * @param		aspect		is the aspect ratio to convert the image to
+	 * @return					a new image with the specified aspect ratio
+	 */
+	public static BufferedImage cropToAspectRatio(BufferedImage image, float aspect){
+		int x = 0, y = 0;
+		int width = image.getWidth();
+		int height = image.getHeight();
+
+		// Check if the width is larger than the heigth
+		if( width > height ){
+			width = (int) (height * aspect);
+			x = image.getWidth()/2 - width/2;
+		}
+		else{
+			height = (int) (width * aspect);
+			y = image.getHeight()/2 - height/2;
+		}
+
+		return image.getSubimage(x, y, width, height);
+	}
+
+	/**
+	 * This function crops the image to the aspect ratio of 
+	 * the width and height and then scales the image to the 
+	 * given values 
+	 *
+	 * @param               source          is the image to resize
+	 * @param               width           is the wanted width
+	 * @param               height          is the wanted height
+	 * @return								a new image with the specified width and height
+	 */
+	public static BufferedImage cropScale(BufferedImage source, int width, int height){
+		float aspect = width/height;
+		BufferedImage tmp = cropToAspectRatio(source, aspect);
+		tmp = scale(tmp, width, height, false);
+		return tmp;
+	}
 }
