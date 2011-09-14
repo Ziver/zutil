@@ -71,11 +71,12 @@ public class FileUploadListener implements ProgressListener{
 		this.item = pItems;
 		
 		// Calculate Speed
-		if(speedTime == 0 || speedTime+1000<System.currentTimeMillis()){
+		if(speedTime == 0 || speedTime+1000 < System.currentTimeMillis() || pBytesRead == pContentLength){
 			speedTime = System.currentTimeMillis();
 			speed = (int)(pBytesRead-speedRead);
 			speedRead = pBytesRead;
 		}
+		//try{Thread.sleep(10);}catch(Exception e){}
 
 		// Set Status
 		status = Status.Uploading;

@@ -21,7 +21,7 @@
  ******************************************************************************/
 package zutil.db;
 
-import java.sql.SQLException;
+import java.io.Closeable;
 import java.util.LinkedList;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -33,7 +33,7 @@ import zutil.db.DBConnection.DBMS;
  * 
  * @author Ziver
  */
-public class DBConnectionPool extends TimerTask {
+public class DBConnectionPool extends TimerTask implements Closeable{
 	public static final long DEFAULT_TIMEOUT = 10*60*60*1000; // 10 minutes;
 	public static final int DEFAULT_MAX_SIZE = 5;
 	
@@ -150,7 +150,7 @@ public class DBConnectionPool extends TimerTask {
 	/**
 	 * Closes all the connections
 	 */
-	public synchronized void close() throws SQLException{
+	public synchronized void close(){
 		for( PoolItem item : inusePool ){
 			item.conn.forceClose();
 		}

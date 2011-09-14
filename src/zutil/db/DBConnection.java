@@ -21,6 +21,7 @@
  ******************************************************************************/
 package zutil.db;
 
+import java.io.Closeable;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -37,7 +38,7 @@ import javax.sql.DataSource;
 import zutil.db.handler.SimpleSQLHandler;
 import zutil.log.LogUtil;
 
-public class DBConnection{
+public class DBConnection implements Closeable{
 	private static final Logger logger = LogUtil.getLogger();
 	
 	public enum DBMS{
