@@ -128,6 +128,6 @@ public class DynamicByteArrayStream extends InputStream{
 	}
 
 	public void close() throws IOException {
-		//bytes = null;
+		clear();
 	}
 }
