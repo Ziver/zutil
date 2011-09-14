@@ -32,6 +32,7 @@ import zutil.net.http.soap.SOAPHttpPage;
 import zutil.net.ssdp.SSDPServer;
 import zutil.net.upnp.UPnPMediaServer;
 import zutil.net.upnp.services.UPnPContentDirectory;
+import zutil.net.ws.WebServiceDef;
 
 public class UPnPServerTest {
 	
@@ -40,13 +41,15 @@ public class UPnPServerTest {
 		MultiPrintStream.out.println("UPNP Server running");
 		
 		UPnPContentDirectory cds = new UPnPContentDirectory(new File("C:\\Users\\Ziver\\Desktop\\lan"));
+		WebServiceDef ws = new WebServiceDef( UPnPContentDirectory.class );
 		
 		HttpServer http = new HttpServer("http://192.168.0.60/", 8080);
 		//http.setDefaultPage(upnp);
 		http.setPage("/RootDesc", upnp );
 		http.setPage("/SCP/ContentDir", cds );
-		SOAPHttpPage soap = new SOAPHttpPage("Action/ContentDir", cds);
-		soap.enableSession(false);
+		SOAPHttpPage soap = new SOAPHttpPage(ws);
+		soap.setObject( cds );
+		soap.enableSession( false );
 		http.setPage("/Action/ContentDir", soap );
 		http.start();
 		MultiPrintStream.out.println("HTTP Server running");

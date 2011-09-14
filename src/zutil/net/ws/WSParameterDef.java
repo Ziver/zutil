@@ -21,17 +21,29 @@
  ******************************************************************************/
 package zutil.net.ws;
 
+/**
+ * This is a web service parameter definition class
+ * 
+ * @author Ziver
+ */
 public class WSParameterDef{
+	/** The parent method **/
+	private WSMethodDef mDef;
 	/** The class type of the parameter **/
-	protected Class<?> paramClass;
+	private Class<?> paramClass;
 	/** The web service name of the parameter **/
-	protected String name;
+	private String name;
 	/** Developer documentation **/
-	protected String doc;
+	private String doc;
 	/** If this parameter is optional **/
-	protected boolean optional;
+	private boolean optional;
 	/** Is it an header parameter **/
 	//boolean header;
+	
+	protected WSParameterDef( WSMethodDef mDef ){
+		this.mDef = mDef;
+		this.optional = false;
+	}
 	
 	
 	public Class<?> getParamClass() {
@@ -60,5 +72,9 @@ public class WSParameterDef{
 	}
 	protected void setOptional(boolean optional) {
 		this.optional = optional;
+	}
+	
+	public WSMethodDef getMethod(){
+		return mDef;
 	}
 }

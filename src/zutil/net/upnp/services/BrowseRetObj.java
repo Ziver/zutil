@@ -21,9 +21,10 @@
  ******************************************************************************/
 package zutil.net.upnp.services;
 
-import zutil.net.ws.WSReturnValueList;
+import zutil.net.ws.WSReturnObject;
 
-public class BrowseRetObj extends WSReturnValueList{
+
+public class BrowseRetObj extends WSReturnObject{
 		@WSValueName("Result")
 		public String Result;
 		@WSValueName("NumberReturned")

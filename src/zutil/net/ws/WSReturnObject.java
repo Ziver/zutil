@@ -28,16 +28,29 @@ import java.lang.annotation.Target;
 import java.lang.reflect.Field;
 
 /**
- * This interface is for returning multiple object.
- * All the public fields in the class that implements 
- * this class will be set as return values. And the 
- * implementing class will be transparent.
+ * This class is used as an return Object for a web service.
+ * If an class implements this interface then it can return 
+ * multiple values through the WSInterface. And the 
+ * implementing class will be transparent. Example:
+ * 
+ * <pre>
+ * 	private static class TestObject implements WSReturnObject{
+ *		@WSValueName("name")
+ *		public String name;
+ *		@WSValueName("lastname")
+ *		public String lastname;
+ *
+ *		public TestObject(String n, String l){
+ *			name = n;
+ *			lastname = l;
+ *		}
+ *	}
+ * </pre>
  * 
  * @author Ziver
  *
  */
-public class WSReturnValueList {
-	
+public class WSReturnObject{
 	/**
 	 * Method comments for the WSDL. 
 	 * These comments are put in the operation part of the WSDL
@@ -50,15 +63,6 @@ public class WSReturnValueList {
 	}
 	
 	/**
-	 * Disables publication of the given field.
-	 * 
-	 * @author Ziver
-	 */
-	/*@Retention(RetentionPolicy.RUNTIME)
-	@Target(ElementType.METHOD)
-	public @interface SOAPDisabledValue { }*/
-	
-	/**
 	 * Annotation that assigns a name to the return value
 	 * to the field.
 	 * 
@@ -68,6 +72,7 @@ public class WSReturnValueList {
 	@Target(ElementType.FIELD)
 	public @interface WSValueName {
 	    String value();
+	    boolean optional() default false;
 	}
 	
 	
@@ -75,4 +80,3 @@ public class WSReturnValueList {
 		return field.get(this);
 	}
 }
-

@@ -55,6 +55,17 @@ public class StringOutputStream extends OutputStream{
 		buffer.append( new String(b, off, len) );
 	}
 
+	/**
+	 * Same as {@link clear()}
+	 */
+	@Override
+	public void close() {
+		clear();
+	}
+	
+	/**
+	 * Clears the String buffer
+	 */
 	public void clear(){
 		buffer = new StringBuilder();
 	}

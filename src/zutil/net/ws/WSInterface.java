@@ -121,12 +121,12 @@ public interface WSInterface {
 	public @interface WSHeader { }
 	
 	/**
-	 * Specifies the name space for the method.
+	 * Specifies the name space for method.
 	 * 
 	 * @author Ziver
 	 */
 	@Retention(RetentionPolicy.RUNTIME)
-	@Target(ElementType.METHOD)
+	//@Target(ElementType.TYPE)
 	public @interface WSNamespace {
 		String value();
 	}

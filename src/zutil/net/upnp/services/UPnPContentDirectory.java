@@ -33,7 +33,7 @@ import zutil.net.http.HttpPage;
 import zutil.net.http.HttpPrintStream;
 import zutil.net.upnp.UPnPService;
 import zutil.net.ws.WSInterface;
-import zutil.net.ws.WSReturnValueList;
+import zutil.net.ws.WSReturnObject;
 
 /**
  * Information about a UPNP Service
@@ -137,7 +137,7 @@ public class UPnPContentDirectory implements UPnPService, HttpPage, WSInterface 
 		}
 		return ret;
 	}
-	public class BrowseRetObj extends WSReturnValueList{
+	public class BrowseRetObj extends WSReturnObject{
 		@WSValueName("Result")
 		public String Result;
 		@WSValueName("NumberReturned")
