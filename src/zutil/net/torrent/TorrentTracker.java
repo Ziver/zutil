@@ -39,7 +39,7 @@ public class TorrentTracker {
 	
 	
 	
-	private void update() throws IOException {
+	public void update() throws IOException {
 		HttpClient request = HttpClient.GET();
 		request.setURL( trackerURL );
 		HttpHeaderParser response = request.send();

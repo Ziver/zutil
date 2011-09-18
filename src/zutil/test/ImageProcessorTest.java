@@ -52,7 +52,7 @@ import zutil.image.filters.ResizeImage;
 import zutil.image.filters.SobelEdgeDetectionFilter;
 import zutil.image.filters.SpotLightFilter;
 
-@SuppressWarnings("unused")
+@SuppressWarnings({ "unused", "rawtypes" })
 public class ImageProcessorTest implements ProgressListener{
 	private static String imgPath = "test.gif";
 	//private static String imgPath = "test2.jpg";
@@ -65,6 +65,7 @@ public class ImageProcessorTest implements ProgressListener{
 		new ImageProcessorTest();
 	}
 
+	@SuppressWarnings("unchecked")
 	public ImageProcessorTest(){
 		JFrame frame = getJFrame();
 		BufferedImage img = null;
