@@ -441,7 +441,9 @@ public abstract class DBBean {
 	 */
 	protected Object getFieldValue(Field field){
 		try {
-			field.setAccessible(true);
+			if( !Modifier.isPublic( field.getModifiers()))
+				field.setAccessible(true);
+			
 			return field.get(this);
 		} catch (Exception e) {
 			logger.log(Level.WARNING, e.getMessage(), e);
