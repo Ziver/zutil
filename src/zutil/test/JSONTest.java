@@ -5,18 +5,13 @@ import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 
-import com.carrotsearch.junitbenchmarks.AbstractBenchmark;
-import com.carrotsearch.junitbenchmarks.BenchmarkOptions;
-
 import zutil.parser.DataNode;
 import zutil.parser.json.JSONParser;
 
 
-public class JSONTest extends AbstractBenchmark{
-	public static final int ITERATION = 200;
+public class JSONTest{
 
 	@Test
-	@BenchmarkOptions(benchmarkRounds = ITERATION)
 	public void JSONParser() {
 		JSONParser parser = new JSONParser();
 		

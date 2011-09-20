@@ -23,6 +23,7 @@ package zutil.parser.json;
 
 import zutil.parser.DataNode;
 import zutil.parser.DataNode.DataType;
+import zutil.struct.MutableInt;
 
 /**
  * This is a JSON parser class
@@ -30,12 +31,6 @@ import zutil.parser.DataNode.DataType;
  * @author Ziver
  */
 public class JSONParser{
-	/**
-	 * A dumb class for persisting an index
-	 */
-	protected class Index{
-		protected int i = 0;
-	}
 
 	/**
 	 * Starts parsing
@@ -44,7 +39,7 @@ public class JSONParser{
 	 * @return a JSONNode object that is the root of the JSON
 	 */
 	public DataNode read(String json){
-		return parse(new Index(), new StringBuffer(json));
+		return parse(new MutableInt(), new StringBuilder(json));
 	}
 
 	
@@ -54,7 +49,7 @@ public class JSONParser{
 	 * @param json
 	 * @return
 	 */
-	protected static DataNode parse(Index index, StringBuffer json){
+	protected static DataNode parse(MutableInt index, StringBuilder json){
 		DataNode root = null;
 		DataNode key = null;
 		DataNode node = null;

@@ -22,6 +22,7 @@
 package zutil.parser;
 
 import zutil.parser.DataNode.DataType;
+import zutil.struct.MutableInt;
 
 /**
  * http://wiki.theory.org/BitTorrentSpecification
@@ -36,8 +37,8 @@ public class BEncodedParser {
 	 * @param data The data to be decoded
 	 * @return
 	 */
-	public static DataNode parse(String data){
-		return decode_BEncoded(new StringBuffer(data));
+	public static DataNode read(String data){
+		return decode_BEncoded(new MutableInt(), new StringBuilder(data));
 	}
 
 	/**
@@ -47,11 +48,11 @@ public class BEncodedParser {
 	 * @param index The index in data to start from
 	 * @return
 	 */
-	private static DataNode decode_BEncoded(StringBuffer data){
+	private static DataNode decode_BEncoded(MutableInt index, StringBuilder data){
 		String tmp;
 		char c = ' ';
 
-		switch (data.charAt(0)) {
+		switch (data.charAt(index.i)) {
 		/**
 		 * Integers are prefixed with an i and terminated by an e. For
 		 * example, 123 would bEcode to i123e, -3272002 would bEncode to
@@ -59,9 +60,9 @@ public class BEncodedParser {
 		 */
 		case 'i':
 			//System.out.println("Found Integer at "+index);
-			data.deleteCharAt(0);
-			tmp = data.substring(0, data.indexOf("e"));
-			data.delete(0, tmp.length() + 1);
+			index.i++;
+			tmp = data.substring(index.i, data.indexOf("e"));
+			index.i += tmp.length() + 1;
 			//System.out.println(tmp);
 			return new DataNode( new Long(tmp));
 		/**
@@ -73,14 +74,14 @@ public class BEncodedParser {
 		 */
 		case 'l':
 			//System.out.println("Found List at "+index);
-			data.deleteCharAt(0);
+			index.i++;
 			DataNode list = new DataNode( DataType.List );
-			c = data.charAt(0);
+			c = data.charAt(index.i);
 			while(c != 'e'){
-				list.add( decode_BEncoded(data) );
-				c = data.charAt(0);
+				list.add( decode_BEncoded(index, data) );
+				c = data.charAt(index.i);
 			}
-			data.deleteCharAt(0);
+			index.i++;
 			//MultiPrintStream.out.dump(list);
 			if(list.size() == 1) return list.get(0);
 			else return list;
@@ -92,15 +93,15 @@ public class BEncodedParser {
 		 */
 		case 'd':
 			//System.out.println("Found Dictionary at "+index);
-			data.deleteCharAt(0);
+			index.i++;
 			DataNode map = new DataNode( DataType.Map );
-			c = data.charAt(0);
+			c = data.charAt(index.i);
 			while(c != 'e'){
-				DataNode tmp2 = decode_BEncoded(data);
-				map.set(tmp2.getString(), decode_BEncoded(data));
-				c = data.charAt(0);
+				DataNode tmp2 = decode_BEncoded(index, data);
+				map.set(tmp2.getString(), decode_BEncoded(index, data));
+				c = data.charAt(index.i);
 			}
-			data.deleteCharAt(0);
+			index.i++;
 			//MultiPrintStream.out.dump(map);
 			return map;
 		/**
@@ -110,11 +111,11 @@ public class BEncodedParser {
 		 */
 		default:
 			//System.out.println("Found String at "+index);
-			tmp = data.substring(0, data.indexOf(":"));
+			tmp = data.substring(index.i, data.indexOf(":"));
 			int length = Integer.parseInt(tmp);
-			data.delete(0, tmp.length()+1);
-			String ret = data.substring(0, length);
-			data.delete(0, length);
+			index.i += tmp.length() + 1;
+			String ret = data.substring(index.i, length);
+			index.i += length;
 			//System.out.println(data.substring(i, i+length));
 			return new DataNode( ret );
 		}

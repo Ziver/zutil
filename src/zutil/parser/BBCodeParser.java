@@ -23,6 +23,8 @@ package zutil.parser;
 
 import java.util.HashMap;
 
+import zutil.struct.MutableInt;
+
 /**
  * Parses BBCode and replaces them with the corresponding HTML.
  * 
@@ -32,15 +34,6 @@ public class BBCodeParser {
 	/** Contains all the BBCodes and the corresponding HTML **/
 	private HashMap<String, String> bbcodes;
 	
-	public static void main(String[] args){
-		BBCodeParser parser = new BBCodeParser();
-		System.out.println(parser.parse("jshdkj [u]lol [apa]lol[/apa]"));
-		System.out.println(parser.parse("jshdkj [m]lol[/k] [i]lol[/i]"));
-		System.out.println(parser.parse("jshdkj [m"));
-		System.out.println(parser.parse("jshdkj [/m"));
-		System.out.println(parser.parse("jshdkj m]"));
-		System.out.println(parser.parse("jshdkj <br />"));
-	}
 	
 	/**
 	 * Initiates a instance of the parser with the most used BBCodes.
@@ -86,20 +79,20 @@ public class BBCodeParser {
 	 * @param text is a String with BBCode
 	 * @return a String where all BBCode has been replaced by HTML
 	 */
-	public String parse(String text){
+	public String read(String text){
 		StringBuilder out = new StringBuilder();
 		StringBuilder t = new StringBuilder(text);
 		
-		parse(t, out, "");
+		read(new MutableInt(), t, out, "");
 		
 		return out.toString();
 	}
 	
-	private void parse(StringBuilder text, StringBuilder out, String rootBBC){
+	private void read(MutableInt index, StringBuilder text, StringBuilder out, String rootBBC){
 		StringBuilder bbcode = null;
 		boolean closeTag = false;
-		while(text.length() > 0){
-			char c = text.charAt(0);
+		while(index.i < text.length()){
+			char c = text.charAt(index.i);
 			if(c == '['){
 				bbcode = new StringBuilder();
 			}
@@ -110,7 +103,7 @@ public class BBCodeParser {
 				String param = "";
 				switch(c){
 				case '=':
-					param = parseParam(text);
+					param = parseParam(index, text);
 				case ']':
 					String bbcode_cache = bbcode.toString();
 					if(closeTag){
@@ -119,7 +112,7 @@ public class BBCodeParser {
 						}
 						return;
 					}
-					String value = parseValue(text, bbcode_cache);
+					String value = parseValue(index, text, bbcode_cache);
 					if(bbcodes.containsKey( bbcode_cache )){
 						String html = bbcodes.get( bbcode_cache );
 						html = html.replaceAll("%1", param);
@@ -142,8 +135,8 @@ public class BBCodeParser {
 			}
 			else
 				out.append(c);
-			if(text.length()>0)
-				text.deleteCharAt(0);
+			
+			index.i++;
 		}
 		if(bbcode!=null)
 			if(closeTag)out.append("[/").append(bbcode);
@@ -156,15 +149,15 @@ public class BBCodeParser {
 	 * @param text is the text to parse from
 	 * @return only the parameter string
 	 */
-	private String parseParam(StringBuilder text){
+	private String parseParam(MutableInt index, StringBuilder text){
 		StringBuilder param = new StringBuilder();
-		while(text.length() > 0){
-			char c = text.charAt(0);
+		while(index.i < text.length()){
+			char c = text.charAt(index.i);
 			if(c == ']')
 				break;
 			else if(c != '=') 
 				param.append(c);
-			text.deleteCharAt(0);
+			index.i++;
 		}
 		return param.toString();
 	}
@@ -174,17 +167,17 @@ public class BBCodeParser {
 	 * 
 	 * @param text is the text to parse the value from
 	 */
-	private String parseValue(StringBuilder text, String bbcode){
+	private String parseValue(MutableInt index, StringBuilder text, String bbcode){
 		StringBuilder value = new StringBuilder();
-		while(text.length() > 0){
-			char c = text.charAt(0);
+		while(index.i < text.length()){
+			char c = text.charAt(index.i);
 			if(c == '['){
-				parse(text, value, bbcode);
+				read(index, text, value, bbcode);
 				break;
 			}
 			else if(c != ']') 
 				value.append(c);
-			text.deleteCharAt(0);
+			index.i++;
 		}
 		return value.toString();
 	}

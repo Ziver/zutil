@@ -38,7 +38,7 @@ public class TorrentTracker {
 	private URL trackerURL;
 	
 	
-	
+	// TODO: incomplete
 	public void update() throws IOException {
 		HttpClient request = HttpClient.GET();
 		request.setURL( trackerURL );

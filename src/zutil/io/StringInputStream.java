@@ -40,6 +40,11 @@ public class StringInputStream extends InputStream{
 		clear();
 	}
 	
+	public StringInputStream(String data) {
+		clear();
+		add(data);
+	}
+
 	/**
 	 * Returns an estimate of the number of bytes 
 	 * that can be read (or skipped over) from this 

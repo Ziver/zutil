@@ -70,7 +70,7 @@ public class TorrentMetainfo {
 
 
 	private void decode(String data){
-		DataNode metainfo = BEncodedParser.parse(data);
+		DataNode metainfo = BEncodedParser.read(data);
 		
 		// Main values
 		announce 	= metainfo.getString("announce");
