@@ -26,11 +26,12 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.ResultSet;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 
 import zutil.db.DBConnection;
@@ -42,10 +43,12 @@ import zutil.log.LogUtil;
 public class DBBeanSQLResultHandler<T> implements SQLResultHandler<T>{
 	public static final Logger logger = LogUtil.getLogger();
 	/** This is the time to live for the cached items **/
-	public static final long CACHE_TTL = 1000*60*1; // 1 min in ms
+	public static final long CACHE_TTL = 1000*60*5; // 5 min in ms
 	/** A cache for detecting recursion **/
 	protected static Map<Class<?>, Map<Long,DBBeanCache>> cache =
-		Collections.synchronizedMap(new HashMap<Class<?>, Map<Long,DBBeanCache>>());
+		new ConcurrentHashMap<Class<?>, Map<Long,DBBeanCache>>();
+	private static Timer timer;
+
 	/**
 	 * A cache container that contains a object and last read time
 	 */
@@ -113,8 +116,64 @@ public class DBBeanSQLResultHandler<T> implements SQLResultHandler<T>{
 		this.list = list;
 		this.db = db;
 		this.bean_config = DBBean.getBeanConfig( cl );
+		
+		// Initiate DBBeanGarbageCollector
+		if( timer == null ){
+			timer = new Timer( true ); // Run as daemon
+			timer.schedule( new DBBeanGarbageCollector(), 10000, CACHE_TTL );
+		}
 	}
 
+	/**
+	 * This function cancels the internal cache garbage collector in DBBean
+	 */
+	public static void cancelGBC(){
+		if( timer != null ){
+			timer.cancel();
+			timer = null;
+		}
+	}
+	
+	/**
+	 * This class acts as an garbage collector that removes old DBBeans
+	 * 
+	 * @author Ziver
+	 */
+	private static class DBBeanGarbageCollector extends TimerTask {
+		public void run(){
+			logger.fine("DBBean GarbageCollector has started.");
+			if( cache == null ){
+				logger.severe("DBBeanSQLResultHandler not initialized, stopping DBBeanGarbageCollector timer.");
+				this.cancel();
+				return;
+			}
+			
+			int removed = 0;
+			long time = System.currentTimeMillis();
+			Object[] class_keys = cache.keySet().toArray();
+			for(Object key : class_keys){
+				if( key == null ) continue;
+					
+				Map<Long,DBBeanCache> class_cache = cache.get(key);
+				Object[] bean_keys = class_cache.keySet().toArray();
+				for(Object sub_key : bean_keys){
+					if( sub_key == null ) continue;
+					
+					DBBeanCache beanCache = class_cache.get(sub_key);
+					// Check if session is still valid
+					if( beanCache.timestamp + CACHE_TTL*2 < time ){
+						class_cache.remove(sub_key);
+						removed++;
+						logger.finer("Removing old DBBean(id: "+beanCache.bean.getId()+") from cache.");
+					}
+				}
+			}
+			
+			if( removed > 0 )
+				logger.info("DBBeanGarbageCollector has cleard "+removed+" beans from cache.");
+		}
+	}
+	
 	/**
 	 *  Is called to handle a result from a query.
 	 * 
@@ -289,7 +348,7 @@ public class DBBeanSQLResultHandler<T> implements SQLResultHandler<T>{
 		if( cache.containsKey(obj.getClass()) )
 			cache.get(obj.getClass()).put(id, item);
 		else{
-			HashMap<Long, DBBeanCache> map = new HashMap<Long, DBBeanCache>();
+			Map<Long, DBBeanCache> map = new ConcurrentHashMap<Long, DBBeanCache>();
 			map.put(id, item);
 			cache.put(obj.getClass(), map);
 		}

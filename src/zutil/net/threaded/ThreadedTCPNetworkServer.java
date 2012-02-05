@@ -94,12 +94,12 @@ public abstract class ThreadedTCPNetworkServer extends Thread{
 			}
 		} catch(Exception e) {
 			logger.log(Level.SEVERE, null, e);
-		}
-		
-		if( ss!=null ){
-			try{
-				ss.close();
-			}catch(IOException e){ logger.log(Level.SEVERE, null, e); }
+		} finally {
+			if( ss!=null ){
+				try{
+					ss.close();
+				}catch(IOException e){ logger.log(Level.SEVERE, null, e); }
+			}	
 		}
 	}
 
@@ -134,5 +134,13 @@ public abstract class ThreadedTCPNetworkServer extends Thread{
 	protected void registerCertificate(File keyStore, String keyStorePass) throws CertificateException, IOException, KeyStoreException, NoSuchProviderException, NoSuchAlgorithmException{
 		System.setProperty("javax.net.ssl.keyStore", keyStore.getAbsolutePath());
 		System.setProperty("javax.net.ssl.keyStorePassword", keyStorePass);
+	}
+	
+	/**
+	 * Stops the server and interrupts its internal thread. 
+	 * This is a permanent action that will not be able to recover from
+	 */
+	public void close(){
+		this.interrupt();
 	}
 }

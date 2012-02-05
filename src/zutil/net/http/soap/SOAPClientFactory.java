@@ -37,6 +37,7 @@ import zutil.net.ws.WebServiceDef;
  * This is an factory that generates clients for web services
  * 
  * @author Ziver
+ * TODO: Incomplete
  */
 public class SOAPClientFactory {
 	

@@ -132,5 +132,12 @@ public class ThreadedUDPNetwork extends Thread{
 		this.thread = thread;
 	}
 	
-	
+	/**
+	 * Stops the server and interrupts its internal thread. 
+	 * This is a permanent action that will not be able to recover from
+	 */
+	public void close(){
+		this.interrupt();
+		socket.close();
+	}
 }

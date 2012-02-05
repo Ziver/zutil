@@ -31,6 +31,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -54,7 +55,7 @@ public class HttpServer extends ThreadedTCPNetworkServer{
 	public final String server_url;
 	public final int server_port;
 
-	private HashMap<String,HttpPage> pages;
+	private Map<String,HttpPage> pages;
 	private HttpPage defaultPage;
 	private Map<String,Map<String,Object>> sessions;
 	private int nextSessionId;
@@ -83,12 +84,12 @@ public class HttpServer extends ThreadedTCPNetworkServer{
 		this.server_url = url;
 		this.server_port = port;
 
-		pages = new HashMap<String,HttpPage>();
-		sessions = Collections.synchronizedMap(new HashMap<String,Map<String,Object>>());
+		pages = new ConcurrentHashMap<String,HttpPage>();
+		sessions = new ConcurrentHashMap<String,Map<String,Object>>();
 		nextSessionId = 0;
 
 		Timer timer = new Timer();
-		timer.schedule(new GarbageCollector(), 0, SESSION_TTL / 2);
+		timer.schedule(new GarbageCollector(), 10000, SESSION_TTL / 2);
 
 		logger.info("HTTP"+(keyStore==null?"":"S")+" Server ready!");
 	}
