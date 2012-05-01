@@ -318,7 +318,7 @@ public abstract class NioNetwork implements Runnable {
 			pendingReadData.put(socketChannel, new DynamicByteArrayStream());
 		}
 		DynamicByteArrayStream dynBuf = pendingReadData.get(socketChannel);
-		dynBuf.add(rspByteData);
+		dynBuf.append(rspByteData);
 		 
 		
 		Object rspData = null;		

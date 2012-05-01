@@ -50,11 +50,27 @@ public class DynamicByteArrayStream extends InputStream{
 
 	/**
 	 * Append an byte array to the stream
-	 * @param b The byte array to add
+	 * 
+	 * @param 		b 			is the byte array to add.
 	 */
-	public synchronized void add(byte[] b){
+	public synchronized void append(byte[] b){
 		bytes.add(b);
 		size += b.length;
+	}
+	
+	/**
+	 * Append an byte array to the stream.
+	 * WARNING: This function will copy data.
+	 * 
+	 * @param 		b 			is the byte array to add
+	 * @param 		offset		is the offset in the byte array
+	 * @param 		length		is the amount of data to add
+	 */
+	public synchronized void append(byte[] b, int offset, int length){
+		byte[] new_b = new byte[length];
+		System.arraycopy(b, offset, new_b, 0, length);
+		bytes.add(b);
+		size += length;
 	}
 
 	@Override
@@ -72,10 +88,6 @@ public class DynamicByteArrayStream extends InputStream{
 	}
 
 	public synchronized int read(byte b[], int off, int len) {
-		//System.out.println("*****************************************************");
-		//System.out.println("off: "+off+" len: "+len);
-		//System.out.println("size: "+size+" arraylen: "+bytes.size());
-		//System.out.println("pos: "+pos+" localPointer: "+localPointer);
 		if(len <= 0) return 0;
 		if(pos >= size)	return -1;
 		
@@ -84,7 +96,6 @@ public class DynamicByteArrayStream extends InputStream{
 		for(int i=0; i<len ;i++){
 			byte[] src = bytes.get(byteArrayIndex);
 			if(localPointer+len-i >= src.length){
-				//System.out.println("1");
 				int length = src.length-localPointer;
 				System.arraycopy(src, localPointer, b, off+i, length);
 				
@@ -94,7 +105,6 @@ public class DynamicByteArrayStream extends InputStream{
 				i += length;
 			}
 			else{
-				//System.out.println("2");
 				int length = len-i;
 				System.arraycopy(src, localPointer, b, off+i, length);
 				
@@ -104,7 +114,6 @@ public class DynamicByteArrayStream extends InputStream{
 			}
 		}
 		pos += len;
-		//System.out.println("new_pos: "+pos+" read: "+bytes_read);
 		return bytes_read;
 	}
 
@@ -129,5 +138,25 @@ public class DynamicByteArrayStream extends InputStream{
 
 	public void close() throws IOException {
 		clear();
+	}
+	
+	/**
+	 * @return 		all of the buffers content as a byte array.
+	 */
+	public byte[] getByte(){
+		byte[] data = new byte[size];
+		this.read(data, 0, size);
+		return data;
+	}
+	
+	
+	/**
+	 * WARNING: This function might return a malformed String.
+	 * 
+	 * @return 		all of the buffers content as a String.
+	 */
+	public String getString(){
+		String data = new String( this.getByte() );
+		return data;
 	}
 }

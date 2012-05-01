@@ -1,5 +1,8 @@
 package zutil.parser;
 
+import zutil.converters.Converter;
+import zutil.io.DynamicByteArrayStream;
+
 public class Base64Decoder {
 	public static final char[] B64_ENCODE_TABLE = {
 		'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H',	'I', 
@@ -14,15 +17,27 @@ public class Base64Decoder {
 		'9', '+', '/'
 	};
 	
-	private StringBuilder output;
+	private DynamicByteArrayStream output;
 	private byte rest_data;
 	private int rest = 0;
 	
 	public Base64Decoder(){
-		output = new StringBuilder();
+		output = new DynamicByteArrayStream();
 	}
 	
-	public void decode( String data ){
+	public static String decodeToHex( String data ){
+		Base64Decoder base64 = new Base64Decoder();
+		base64.write( data );
+		return Converter.toHexString( base64.getByte() );
+	}
+	
+	public static String decode( String data ){
+		Base64Decoder base64 = new Base64Decoder();
+		base64.write( data );
+		return base64.getString();
+	}
+	
+	public void write( String data ){
 		byte[] buffer = new byte[ (data.length()*6/8) + 1 ];
 		int buffi = 0;
 		if( rest != 0 )
@@ -58,17 +73,32 @@ public class Base64Decoder {
 		
 		if( rest != 0 )
 			rest_data = buffer[buffi--];
-		output.append(new String(buffer, 0, buffi));
+		output.append( buffer, 0, buffi );
 	}
 	
-	public String toString(){
-		return output.toString();
+	public String getString(){
+		return output.getString();
+	}
+	
+	public byte[] getByte(){
+		return output.getByte();
 	}
 	
 	public void reset(){
-		output = new StringBuilder();
+		output.reset();
 		rest = 0;
 		rest_data = 0;
+	}
+	
+	public static String addPadding( String data ){
+		int padding = 4 - (data.length() % 4);
+		switch( padding ){
+		case 0: return data;
+		case 1: return data + "=";
+		case 2: return data + "==";
+		case 3: return data + "===";
+		}
+		return null;
 	}
 	
 	private byte getByte( char c ){
