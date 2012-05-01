@@ -30,6 +30,11 @@ import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
+
+import org.apache.geronimo.mail.util.Hex;
+
 import zutil.converters.Converter;
 
 public class Hasher {
@@ -138,7 +143,45 @@ public class Hasher {
 		}
 		return null;
 	}
-
+	
+	/**
+	 * Returns the SHA-256 hash with a key for the given String
+	 * 
+	 * @param 		str 		is the String to hash
+	 * @param		key			is the key to use with the hash
+	 * @return 					an String containing the hash
+	 */
+	public static String HMAC_SHA256(String str, String key){
+		return HMAC("HmacSHA256", str.getBytes(), key.getBytes());
+	}
+	
+	/**
+	 * Returns a HMAC hash with a key for the given String
+	 * 
+	 * @param 		algo 		specifies the algorithm to be used
+	 * @param 		data 		is the String to hash
+	 * @param		key			is the key to use with the hash
+	 * @return 					an String containing the hash
+	 */
+	public static String HMAC(String algo, byte[] data, byte[] key){
+		try {	
+			// Get an hmac_sha1 key from the raw key bytes       
+            SecretKeySpec signingKey = new SecretKeySpec(key, algo);
+            
+            // Get a MAC instance and initialize with the signing key
+            Mac mac = Mac.getInstance(algo);
+            mac.init(signingKey);
+            
+            // Compute the HMAC on input data bytes
+            byte[] raw = mac.doFinal( data );
+            
+            return Converter.toHexString(raw);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+	
 	/**
 	 * Hashes the given String as UTF8
 	 * 
