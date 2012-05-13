@@ -34,7 +34,6 @@ import zutil.parser.DataNode.DataType;
  * uploaded file.
  */
 public class FileUploadListener implements ProgressListener{
-	private static final long serialVersionUID = 1L;
 	public static enum Status{
 		Initializing,
 		Uploading,

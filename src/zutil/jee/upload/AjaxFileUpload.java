@@ -125,7 +125,7 @@ public abstract class AjaxFileUpload extends HttpServlet {
 				String[] tmp = config.getInitParameter("ALLOWED_EXTENSIONS").split(",");
 				StringBuilder ext_log = new StringBuilder("Allowed extensions: ");
 				for( String ext : tmp ){
-					ALLOWED_EXTENSIONS.add(ext.trim());
+					ALLOWED_EXTENSIONS.add(ext.trim().toLowerCase());
 					ext_log.append(ext).append(", ");
 				}
 				logger.info( ext_log.toString() );
@@ -215,7 +215,7 @@ public abstract class AjaxFileUpload extends HttpServlet {
 			while( it.hasNext() ) {
 				FileItemStream item = it.next();
 				// Is the file type allowed?
-				if( !item.isFormField() && !ALLOWED_EXTENSIONS.contains( FileUtil.getFileExtension(item.getName()) )){
+				if( !item.isFormField() && !ALLOWED_EXTENSIONS.contains( FileUtil.getFileExtension(item.getName()).toLowerCase() )){
 					String msg = "Filetype '"+FileUtil.getFileExtension(item.getName())+"' is not allowed!";
 					logger.warning( msg );
 					listener.setStatus(Status.Error);
