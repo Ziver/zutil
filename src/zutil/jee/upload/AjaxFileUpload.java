@@ -91,7 +91,7 @@ import zutil.parser.json.JSONWriter;
  *
  */
 public abstract class AjaxFileUpload extends HttpServlet {
-	public static final Logger logger = LogUtil.getLogger();
+	private static final Logger logger = LogUtil.getLogger();
 	private static final long serialVersionUID = 1L;
 
 	public static final String SESSION_FILEUPLOAD_LISTENER = "FILEUPLOAD_LISTENER";
