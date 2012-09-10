@@ -71,13 +71,12 @@ public class OneInstanceFile implements OneInstance{
 				lock = channel.tryLock();
 			}
 			catch (OverlappingFileLockException e) {
-				// already locked
-				closeLock();
+				// already locked by this application
 				return false;
 			}
 
 			if (lock == null || lock.isShared()) {
-				closeLock();
+				// already locked by another application
 				return false;
 			}
 
