@@ -24,39 +24,15 @@ package zutil.parser.wsdl;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
+import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
-
-import javax.wsdl.Binding;
-import javax.wsdl.BindingInput;
-import javax.wsdl.BindingOperation;
-import javax.wsdl.BindingOutput;
-import javax.wsdl.Definition;
-import javax.wsdl.Fault;
-import javax.wsdl.Import;
-import javax.wsdl.Input;
-import javax.wsdl.Message;
-import javax.wsdl.Operation;
-import javax.wsdl.Output;
-import javax.wsdl.Part;
-import javax.wsdl.Port;
-import javax.wsdl.PortType;
-import javax.wsdl.Service;
-import javax.wsdl.WSDLException;
-import javax.wsdl.extensions.soap.SOAPAddress;
-import javax.wsdl.extensions.soap.SOAPBinding;
-import javax.wsdl.extensions.soap.SOAPBody;
-import javax.wsdl.extensions.soap.SOAPOperation;
-import javax.wsdl.factory.WSDLFactory;
-import javax.xml.namespace.QName;
 
 import org.dom4j.Document;
 import org.dom4j.DocumentHelper;
 import org.dom4j.Element;
-
-import com.ibm.wsdl.extensions.PopulatedExtensionRegistry;
-import com.ibm.wsdl.extensions.soap.SOAPConstants;
-import com.sun.org.apache.xerces.internal.dom.DocumentImpl;
+import org.dom4j.io.OutputFormat;
+import org.dom4j.io.XMLWriter;
 
 import zutil.io.StringOutputStream;
 import zutil.net.ws.WSMethodDef;
@@ -66,294 +42,273 @@ import zutil.net.ws.WSReturnObject.WSValueName;
 import zutil.net.ws.WebServiceDef;
 
 public class WSDLWriter{
-	
+
 	private WebServiceDef ws;
+
 	private String cache;
-	private String soapURL;
-	
+
 	public WSDLWriter( WebServiceDef ws ){
 		this.ws = ws;
-		try {
-			Definition  wsdl = generateWSDL( );
-			
-			StringOutputStream out = new StringOutputStream();
-			
-			javax.wsdl.xml.WSDLWriter writer = WSDLFactory.newInstance().newWSDLWriter();
-			writer.writeWSDL(wsdl, out);
-			
-			//OutputFormat format = OutputFormat.createPrettyPrint();
-			//XMLWriter writer = new XMLWriter( out, format );
-			//writer.write( wsdlType );
-			
-			this.cache = out.toString();
-			out.close();			
-		} catch (WSDLException e) {
-			e.printStackTrace();
-		}
-		
 	}
 
-	/**
-	 * @param 		binding		adds this binding to the WSDL generation
-	 */
-	public void setSOAPAddress( String url ){
-		this.soapURL = url;
-	}
-	
-	
-	
+
 	public void write( PrintStream out ) {
-		out.print( cache );
+		out.print(generate());
 	}
-	
+
 	public void write( OutputStream out ) throws IOException {
-		out.write( cache.getBytes() );
+		out.write(generate().getBytes() );
 	}
-	
-	/**
-	 * Generates an WSDL document for the class
-	 * 
-	 * @throws WSDLException
-	 */
-	private Definition generateWSDL( ) throws WSDLException {
-		ArrayList<Class<?>> types = new ArrayList<Class<?>>();
-		
-		String tns = ws.getNamespace()+"?wsdl";
-		String xsd = "http://www.w3.org/2001/XMLSchema";
-		String soap = "http://schemas.xmlsoap.org/wsdl/soap/";
-		String wsdln = "http://schemas.xmlsoap.org/wsdl/";
-		String td = ws.getNamespace()+"?type";
 
-		PopulatedExtensionRegistry extReg = new PopulatedExtensionRegistry();
-		WSDLFactory factory = WSDLFactory.newInstance();
-		String portTypeName = ws.getName()+"PortType";
 
-		Definition wsdl = factory.newDefinition();
-		wsdl.setQName(new QName(tns, ws.getName()));
-		wsdl.setTargetNamespace(tns);
-		wsdl.addNamespace("tns", tns);
-		wsdl.addNamespace("xsd", xsd);
-		wsdl.addNamespace("soap", soap);
-		wsdl.addNamespace("wsdl", wsdln);
-		wsdl.addNamespace("td", td);
+	private String generate(){
+		if(cache == null){
+			try {
+				OutputFormat outformat = OutputFormat.createPrettyPrint();
+				StringOutputStream out = new StringOutputStream();			
+				XMLWriter writer = new XMLWriter(out, outformat);
 
-		Message exception = wsdl.createMessage();
-		exception.setQName(new QName(tns, "exception"));
-		exception.setUndefined(true);
-		Part epart = wsdl.createPart();
-		epart.setName("message");
-		epart.setTypeName(new QName(xsd, "string"));
-		exception.addPart(epart);
-		wsdl.addMessage(exception);
-		
-		Message empty = wsdl.createMessage();
-		empty.setQName(new QName(tns, "empty"));
-		empty.setUndefined(false);
-		epart = wsdl.createPart();
-		epart.setName("empty");
-		epart.setTypeName(new QName(td, "empty"));
-		empty.addPart(epart);
-		wsdl.addMessage(empty);	
+				Document docroot = generateDefinition();
+				writer.write(docroot);
 
-		// Types import
-		Import imp = wsdl.createImport();
-		imp.setNamespaceURI(td);
-		imp.setLocationURI(td);
-		wsdl.addImport(imp);
-		
-		// PortType
-		PortType portType = wsdl.createPortType();
-		portType.setQName(new QName(tns, portTypeName));
-		portType.setUndefined(false);
+				writer.flush();
+				this.cache = out.toString();
+				out.close();
+			} catch (UnsupportedEncodingException e) {
+				e.printStackTrace();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}			
+		return cache;
+	}
+
+	private Document generateDefinition(){
+		Document wsdl = DocumentHelper.createDocument();
+		Element definitions = wsdl.addElement("wsdl:definitions");		
+		definitions.addNamespace("wsdl", "http://schemas.xmlsoap.org/wsdl/"); 
+		definitions.addNamespace("soap", "http://schemas.xmlsoap.org/wsdl/soap/");
+		definitions.addNamespace("http", "http://schemas.xmlsoap.org/wsdl/http/");
+		definitions.addNamespace("xsd", "http://www.w3.org/2001/XMLSchema");
+		definitions.addNamespace("soap-enc", "http://schemas.xmlsoap.org/soap/encoding/");
+		definitions.addNamespace("tns", ws.getNamespace()+"?type");
+		definitions.addAttribute("targetNamespace", ws.getNamespace());
+
+		generateType(definitions);
+		generateMessages(definitions);
+		generatePortType(definitions);
+		generateBinding(definitions);
+		generateService(definitions);
+
+		return wsdl;
+	}
+
+	private void generateMessages(Element definitions){
 		for( WSMethodDef method : ws.getMethods() ){
-			Operation operation = wsdl.createOperation();			
-			//********* Request Messages
+			generateMessage(definitions, method);
+		}
+
+		// Default message used for functions without input parameters
+		// definitions -> message: empty
+		Element empty = definitions.addElement("wsdl:message");
+		empty.addAttribute("name", "empty");
+		// definitions -> message: empty -> part
+		Element empty_part = empty.addElement("wsdl:part");
+		empty_part.addAttribute("name", "empty");
+		empty_part.addAttribute("type", "td:empty");
+
+		// Exception message
+		// definitions -> message: exception
+		Element exception = definitions.addElement("wsdl:message");
+		exception.addAttribute("name", "exception");
+		// definitions -> message: exception -> part
+		Element exc_part = exception.addElement("wsdl:part");
+		exc_part.addAttribute("name", "exception");
+		exc_part.addAttribute("type", "td:string");
+	}
+
+	private void generateMessage(Element parent, WSMethodDef method){
+		//*************************** Input
+		if( method.getInputCount() > 0 ){
+			// definitions -> message
+			Element input = parent.addElement("wsdl:message");
+			input.addAttribute("name", method.getName()+"Request");
+
+			// Parameters
+			for( WSParameterDef param : method.getInputs() ){
+				// definitions -> message -> part
+				Element part = input.addElement("wsdl:part");
+				part.addAttribute("name", param.getName());
+				part.addAttribute("type", "xsd:"+getClassName( param.getParamClass()));
+
+				if( param.isOptional() )
+					part.addAttribute("minOccurs", "0");
+			}
+		}
+		//*************************** Output
+		if( method.getOutputCount() > 0 ){
+			// definitions -> message
+			Element output = parent.addElement("wsdl:message");
+			output.addAttribute("name", method.getName()+"Response");
+
+			// Parameters
+			for( WSParameterDef param : method.getOutputs() ){
+				// definitions -> message -> part
+				Element part = output.addElement("wsdl:part");
+				part.addAttribute("name", param.getName());
+
+				Class<?> paramClass = param.getParamClass();
+				Class<?> valueClass = getClass( paramClass );
+				// is an binary array
+				if(byte[].class.isAssignableFrom( paramClass )){
+					part.addAttribute("type", "xsd:base64Binary");
+				}
+				// is an array?
+				else if( paramClass.isArray()){
+					part.addAttribute("type", "td:" +getArrayClassName(paramClass));
+				}
+				else if( WSReturnObject.class.isAssignableFrom(valueClass) ){
+					// its an SOAPObject
+					part.addAttribute("type", "td:"+getClassName( paramClass ));
+				}
+				else{// its an Object 
+					part.addAttribute("type", "xsd:"+getClassName( paramClass ));
+				}
+			}
+		}
+	}
+
+	private void generatePortType(Element definitions){
+		// definitions -> portType
+		Element portType = definitions.addElement("wsdl:portType");
+		portType.addAttribute("name", ws.getName()+"PortType");
+
+		for( WSMethodDef method : ws.getMethods() ){
+			// definitions -> portType -> operation
+			Element operation = portType.addElement("wsdl:operation");
+			operation.addAttribute("name", method.getName());
+
+			// Documentation
+			if(method.getDocumentation() != null){
+				Element doc = operation.addElement("wsdl:documentation");
+				doc.setText(method.getDocumentation());
+			}
+
+			//*************************** Input
 			if( method.getInputCount() > 0 ){
-				Message msgIn = wsdl.createMessage();
-				msgIn.setQName(new QName(tns, method.getName()+"Request"));
-				msgIn.setUndefined(false);
-
-				//***** Documentation
-				if(method.getDocumentation() != null){
-					org.w3c.dom.Document xmldoc= new DocumentImpl();
-					org.w3c.dom.Element paramDoc = xmldoc.createElement("wsdl:documentation");
-					paramDoc.setTextContent( method.getDocumentation() );
-					msgIn.setDocumentationElement(paramDoc);
-				}
-
-				// Parameters
-				for( WSParameterDef param : method.getInputs() ){
-					// Parts
-					Part part = wsdl.createPart();
-					part.setName( param.getName() );
-					part.setTypeName(new QName( xsd, 
-							getClassSOAPName( param.getParamClass() )));
-					if( param.isOptional() )
-						part.getExtensionAttribute(new QName("minOccurs", "0"));
-					msgIn.addPart(part);
-				}
-				wsdl.addMessage(msgIn);
-				Input input = wsdl.createInput();
-				input.setMessage(msgIn);
-				operation.setInput(input);
+				// definitions -> message
+				Element input = operation.addElement("wsdl:input");
+				input.addAttribute("message", "tns:"+method.getName()+"Request");
 			}
-			else{
-				Input input = wsdl.createInput();
-				input.setMessage(empty);
-				operation.setInput(input);
-			}
-			//********** Response Message
+			//*************************** Output
 			if( method.getOutputCount() > 0 ){
-				Message msgOut = wsdl.createMessage();
-				msgOut.setQName(new QName(tns, method.getName()+"Response"));
-				msgOut.setUndefined(false);
-				
-				for( WSParameterDef param : method.getOutputs() ){					
-					// Parts
-					Part part = wsdl.createPart();
-					part.setName( param.getName() );
-					msgOut.addPart(part);
-					
+				// definitions -> message
+				Element output = operation.addElement("wsdl:output");
+				output.addAttribute("message", "tns:"+method.getName()+"Response");
+			}
+			//*************************** Fault
+			if( method.getOutputCount() > 0 ){
+				// definitions -> message
+				Element fault = operation.addElement("wsdl:fault");
+				fault.addAttribute("message", "tns:exception");
+			}
+		}
+	}
+
+
+	private void generateBinding(Element definitions){
+		// definitions -> binding
+		Element binding = definitions.addElement("wsdl:binding");
+		binding.addAttribute("name", ws.getName()+"Binding");
+		binding.addAttribute("type", "tns:"+ws.getName()+"PortType");
+
+		generateSOAPOBinding(binding);
+
+		for(WSMethodDef method : ws.getMethods()){
+			generateSOAPOperation(binding, method);
+		}
+	}
+
+	private void generateSOAPOBinding(Element definitions){
+		// definitions -> binding -> soap:binding
+		Element soap_binding = definitions.addElement("soap:binding");
+		soap_binding.addAttribute("style", "rpc");
+		soap_binding.addAttribute("transport", "http://schemas.xmlsoap.org/soap/http");
+	}
+
+	private void generateSOAPOperation(Element definitions, WSMethodDef method){
+		// definitions -> binding -> operation
+		Element operation = definitions.addElement("wsdl:operation");
+		operation.addAttribute("name", method.getName());
+
+		// definitions -> binding -> operation -> soap:operation
+		Element soap_operation = operation.addElement("soap:operation");
+		soap_operation.addAttribute("soapAction", method.getNamespace());
+
+		//*************************** Input
+		// definitions -> binding -> operation -> input
+		Element input = operation.addElement("wsdl:input");
+		// definitions -> binding -> operation -> input -> body
+		Element input_body = input.addElement("soap:body");
+		input_body.addAttribute("use", "literal");
+		input_body.addAttribute("namespace", method.getNamespace());
+
+		//*************************** output
+		if( method.getOutputCount() > 0 ){
+			// definitions -> binding -> operation -> output
+			Element output = operation.addElement("wsdl:output");
+			// definitions -> binding -> operation -> input -> body
+			Element output_body = output.addElement("soap:body");
+			output_body.addAttribute("use", "literal");
+			output_body.addAttribute("namespace", method.getNamespace());
+		}
+	}
+
+	private void generateService(Element parent){
+		// definitions -> service
+		Element root = parent.addElement("wsdl:service");
+		root.addAttribute("name", ws.getName()+"Service");
+
+		// definitions -> service -> port
+		Element port = root.addElement("wsdl:port");
+		port.addAttribute("name", ws.getName()+"Port");
+		port.addAttribute("binding", "tns:"+ws.getName()+"Binding");
+
+		// definitions -> service-> port -> address
+		Element address = port.addElement("soap:address");
+		address.addAttribute("location", null);
+	}
+
+	/**
+	 * This function generates the Type section of the WSDL.
+	 * <b><pre>
+	 * -wsdl:definitions
+	 *     -wsdl:type
+	 *  </pre></b>
+	 */
+	private void generateType(Element definitions){
+		ArrayList<Class<?>> types = new ArrayList<Class<?>>();
+		// Find types
+		for( WSMethodDef method : ws.getMethods() ){
+			if( method.getOutputCount() > 0 ){
+				for( WSParameterDef param : method.getOutputs() ){
 					Class<?> paramClass = param.getParamClass();
-					Class<?> valueClass = getClass( paramClass );
-					// is an binary array
-					if(byte[].class.isAssignableFrom( paramClass )){
-						part.setTypeName(new QName(xsd, "base64Binary"));
-					}
-					// is an array?
-					else if( paramClass.isArray()){
-						part.setTypeName(new QName(td, 
-								"ArrayOf"+getClassSOAPName( paramClass ).replaceAll("[\\[\\]]", "")));
+					Class<?> valueClass = getClass(paramClass);
+					// is an array? or special class 
+					if( paramClass.isArray() || WSReturnObject.class.isAssignableFrom(valueClass)){
 						// add to type generation list
 						if(!types.contains( paramClass ))
 							types.add( paramClass );
 					}
-					else if( WSReturnObject.class.isAssignableFrom(valueClass) ){					
-						// its an SOAPObject
-						part.setTypeName(new QName(td, getClassSOAPName( paramClass )));
-						// add to type generation list
-						if(!types.contains(valueClass))
-							types.add(valueClass);
-					}
-					else{// its an Object 
-						part.setTypeName(new QName(xsd, getClassSOAPName( paramClass )));
-					}
 				}
-
-				wsdl.addMessage(msgOut);				
-				Output output = wsdl.createOutput();			
-				output.setMessage(msgOut);			
-				operation.setOutput(output);			
 			}
-			//************* Exceptions	
-			if( method.exceptionCount() > 0){
-				Fault fault = wsdl.createFault();
-				fault.setMessage(exception);
-				operation.addFault(fault);
-			}
-			//************* Operations			
-			operation.setName(method.getName());			
-			operation.setUndefined(false);			
-
-			//***** Documentation
-			if(method.getDocumentation() != null){
-				// <!-- example -->
-				org.w3c.dom.Document xmldoc= new DocumentImpl();
-				org.w3c.dom.Element doc = xmldoc.createElement("wsdl:documentation");
-				doc.setTextContent( method.getDocumentation() );
-				operation.setDocumentationElement(doc);
-			}
-
-			portType.addOperation(operation);
 		}
-		wsdl.addPortType(portType);
 
-		// Binding
-		Binding binding = wsdl.createBinding();
-		binding.setQName(new QName(tns, ws.getName()+"Binding"));
-		binding.setPortType(portType);
-		binding.setUndefined(false);
-
-		SOAPBinding soapBinding = (SOAPBinding)extReg.createExtension(Binding.class, SOAPConstants.Q_ELEM_SOAP_BINDING);
-		soapBinding.setStyle("rpc");
-		//soapBinding.setRequired(true);
-		soapBinding.setTransportURI("http://schemas.xmlsoap.org/soap/http");
-		binding.addExtensibilityElement(soapBinding);
-
-		for(WSMethodDef method : ws.getMethods()){
-			BindingOperation operation = wsdl.createBindingOperation();
-			operation.setName(method.getName());
-
-			SOAPOperation soapOperation = (SOAPOperation)extReg.createExtension(BindingOperation.class, SOAPConstants.Q_ELEM_SOAP_OPERATION);
-			soapOperation.setSoapActionURI(method.getNamespace());
-			operation.addExtensibilityElement(soapOperation);
-
-			//********************************* input
-			BindingInput input = wsdl.createBindingInput();
-			// TODO: Header
-			// Body
-			//else{
-				SOAPBody soapBody = (SOAPBody)extReg.createExtension(BindingInput.class, SOAPConstants.Q_ELEM_SOAP_BODY);
-				soapBody.setUse("literal");
-				soapBody.setNamespaceURI(method.getNamespace());
-				input.addExtensibilityElement(soapBody);
-			//}
-			operation.setBindingInput(input);
-
-			//********************************** output
-			if( method.getOutputCount() > 0 ){
-				BindingOutput output = wsdl.createBindingOutput();
-				// TODO: Header
-				// Body
-				//else{
-					SOAPBody soapBodyBind = (SOAPBody)extReg.createExtension(BindingInput.class, SOAPConstants.Q_ELEM_SOAP_BODY);
-					soapBodyBind.setUse("literal");
-					soapBodyBind.setNamespaceURI(method.getNamespace());
-					output.addExtensibilityElement(soapBodyBind);
-				//}
-				operation.setBindingOutput(output);
-			}
-
-			binding.addBindingOperation(operation);
-		}
-		wsdl.addBinding(binding);
-
-		//******************* Service
-		Port port = wsdl.createPort();
-		port.setName( ws.getName()+"Port" );
-		port.setBinding(binding);
-		SOAPAddress addr = (SOAPAddress)extReg.createExtension(Port.class, SOAPConstants.Q_ELEM_SOAP_ADDRESS);
-		addr.setLocationURI( soapURL );
-		port.addExtensibilityElement(addr);
-
-		Service ser = wsdl.createService();
-		ser.setQName(new QName(tns, ws.getName()+"Service"));
-		ser.addPort(port);
-		wsdl.addService(ser);
-
-		// generate the complexTypes
-		generateWSDLType(types);
-		return wsdl;
-	}
-
-	/**
-	 * This function generates the Type part of the WSDL.
-	 * Should be cabled after generateWSDL has finished.
-	 * 
-	 */
-	private void generateWSDLType(ArrayList<Class<?>> types){
-		Document wsdlType = DocumentHelper.createDocument();
-		Element definitions = wsdlType.addElement( "wsdl:definitions" );
-		definitions.addAttribute("targetNamespace", ws.getNamespace());
-		definitions.addNamespace("tns", ws.getNamespace()+"?type");
-		definitions.addNamespace("xsd", "http://www.w3.org/2001/XMLSchema");
-		definitions.addNamespace("wsdl", "http://schemas.xmlsoap.org/wsdl/"); 
-		definitions.addNamespace("SOAP-ENC", "http://schemas.xmlsoap.org/soap/encoding/");
-
+		// definitions -> types
 		Element typeE = definitions.addElement("wsdl:types");	
 		Element schema = typeE.addElement("xsd:schema");
 		schema.addAttribute("targetNamespace", ws.getNamespace()+"?type");
-		
+
 		// empty type
 		Element empty = schema.addElement("xsd:complexType");
 		empty.addAttribute("name", "empty");
@@ -364,30 +319,29 @@ public class WSDLWriter{
 			// Generate Array type
 			if(c.isArray()){
 				Class<?> ctmp = getClass(c);
-				
+
 				Element type = schema.addElement("xsd:complexType");
-				type.addAttribute("name", 
-						"ArrayOf"+getClassSOAPName(c).replaceAll("[\\[\\]]", ""));
-								
+				type.addAttribute("name", getArrayClassName(c));
+
 				Element sequence = type.addElement("xsd:sequence");
-				
+
 				Element element = sequence.addElement("xsd:element");
 				element.addAttribute("minOccurs", "0");
 				element.addAttribute("maxOccurs", "unbounded");
 				element.addAttribute("name", "element");
 				element.addAttribute("nillable", "true");
 				if( WSReturnObject.class.isAssignableFrom(ctmp) )
-					element.addAttribute("type", "tns:"+getClassSOAPName(c).replace("[]", ""));
+					element.addAttribute("type", "tns:"+getClassName(c).replace("[]", ""));
 				else
-					element.addAttribute("type", "xsd:"+getClassSOAPName(c).replace("[]", ""));
-				
+					element.addAttribute("type", "xsd:"+getClassName(c).replace("[]", ""));
+
 				if(!types.contains(ctmp))
 					types.add(ctmp);
 			}
 			// Generate SOAPObject type
 			else if(WSReturnObject.class.isAssignableFrom(c)){
 				Element type = schema.addElement("xsd:complexType");
-				type.addAttribute("name", getClassSOAPName(c));
+				type.addAttribute("name", getClassName(c));
 
 				Element sequence = type.addElement("xsd:sequence");
 
@@ -404,12 +358,12 @@ public class WSDLWriter{
 					// Check if the object is an SOAPObject
 					Class<?> cTmp = getClass(fields[i].getType());
 					if( WSReturnObject.class.isAssignableFrom(cTmp) ){
-						element.addAttribute("type", "tns:"+getClassSOAPName(cTmp));
+						element.addAttribute("type", "tns:"+getClassName(cTmp));
 						if(!types.contains(cTmp))
 							types.add(cTmp);
 					}
 					else{
-						element.addAttribute("type", "xsd:"+getClassSOAPName(fields[i].getType()));
+						element.addAttribute("type", "xsd:"+getClassName(fields[i].getType()));
 					}
 					// Is the Field optional
 					if(tmp != null && tmp.optional())
@@ -418,20 +372,24 @@ public class WSDLWriter{
 			}
 		}
 	}
-	
-	
+
+
 	///////////////////////////////////////////////////////////////////////////////////////////////
 	// TODO: FIX THESE ARE DUPLICATES FROM SOAPHttpPage
 	///////////////////////////////////////////////////////////////////////////////////////////////
-	
+
 	private Class<?> getClass(Class<?> c){
 		if(c!=null && c.isArray()){
 			return getClass(c.getComponentType());
 		}
 		return c;
 	}
-	
-	private String getClassSOAPName(Class<?> c){
+
+	private String getArrayClassName(Class<?> c){
+		return "ArrayOf"+getClassName(c).replaceAll("[\\[\\]]", "");
+	}
+
+	private String getClassName(Class<?> c){
 		Class<?> cTmp = getClass(c);
 		if( byte[].class.isAssignableFrom(c) ){
 			return "base64Binary";
@@ -441,14 +399,14 @@ public class WSDLWriter{
 		}
 		else{
 			String ret = c.getSimpleName().toLowerCase();
-			
+
 			if( 	 cTmp == Integer.class ) 	ret = ret.replaceAll("integer", "int");
 			else if( cTmp == Character.class )	ret = ret.replaceAll("character", "char");
-			
+
 			return ret;
 		}
 	}
-	
+
 	public void close() {}
 
 }
