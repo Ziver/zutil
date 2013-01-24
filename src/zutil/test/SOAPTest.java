@@ -30,6 +30,7 @@ import zutil.net.ws.WSInterface;
 import zutil.net.ws.WSInterface.*;
 import zutil.net.ws.WSReturnObject;
 import zutil.net.ws.WebServiceDef;
+import zutil.parser.wsdl.WSDLWriterOld;
 import zutil.parser.wsdl.WSDLWriter;
 
 
@@ -45,8 +46,11 @@ public class SOAPTest {
 		WebServiceDef wsDef = new WebServiceDef( SOAPTestClass.class );
 		SOAPHttpPage soap = new SOAPHttpPage( wsDef );
 		
-		WSDLWriter wsdl = new WSDLWriter( wsDef );
+		WSDLWriterOld wsdl = new WSDLWriterOld( wsDef );
 		wsdl.write(System.out);
+		System.out.println( "****************** new *********************" );	
+		WSDLWriter wsdl2 = new WSDLWriter( wsDef );
+		wsdl2.write(System.out);
 		
 		// Response		
 		try {	
