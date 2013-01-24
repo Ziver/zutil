@@ -33,8 +33,6 @@ import java.security.NoSuchAlgorithmException;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 
-import org.apache.geronimo.mail.util.Hex;
-
 import zutil.converters.Converter;
 
 public class Hasher {
