@@ -52,24 +52,6 @@ public class WSDLWriterNew{
 	
 	public WSDLWriterNew( WebServiceDef ws ){
 		this.ws = ws;
-		try {
-			Definition  wsdl = generateWSDL( );
-			
-			StringOutputStream out = new StringOutputStream();
-			
-			javax.wsdl.xml.WSDLWriter writer = WSDLFactory.newInstance().newWSDLWriter();
-			writer.writeWSDL(wsdl, out);
-			
-			//OutputFormat format = OutputFormat.createPrettyPrint();
-			//XMLWriter writer = new XMLWriter( out, format );
-			//writer.write( wsdlType );
-			
-			this.cache = out.toString();
-			out.close();			
-		} catch (WSDLException e) {
-			e.printStackTrace();
-		}
-		
 	}
 
 	/**
@@ -92,13 +74,15 @@ public class WSDLWriterNew{
 	
 	private Document generateDefinition(){
 		Document wsdl = DocumentHelper.createDocument();
-		Element definitions = wsdl.addElement("wsdl:definitions");
-		definitions.addAttribute("targetNamespace", ws.getNamespace());
-		definitions.addNamespace("tns", ws.getNamespace()+"?type");
-		definitions.addNamespace("xsd", "http://www.w3.org/2001/XMLSchema");
+		Element definitions = wsdl.addElement("wsdl:definitions");		
 		definitions.addNamespace("wsdl", "http://schemas.xmlsoap.org/wsdl/"); 
-		definitions.addNamespace("SOAP-ENC", "http://schemas.xmlsoap.org/soap/encoding/");
-		
+		definitions.addNamespace("wsdl:soap", "http://schemas.xmlsoap.org/wsdl/soap/");
+		definitions.addNamespace("wsdl:http", "http://schemas.xmlsoap.org/wsdl/http/");
+		definitions.addNamespace("wsdl:xsd", "http://www.w3.org/2001/XMLSchema");
+		definitions.addNamespace("wsdl:soap-enc", "http://schemas.xmlsoap.org/soap/encoding/");
+		definitions.addNamespace("wsdl:tns", ws.getNamespace()+"?type");
+		definitions.addAttribute("targetNamespace", ws.getNamespace());
+		  
 		generateType(definitions, null);
 		generateMessages(definitions);
 		generatePortType(definitions);
@@ -108,43 +92,51 @@ public class WSDLWriterNew{
 		return wsdl;
 	}
 	
-	private void generateMessegas(Element definitions){
-
+	private void generateMessages(Element definitions){
+		//TODO
 	}
 	
 	private void generateMessage(Element parent){
+		// definitions -> message
 		Element root = parent.addElement("wsdl:message");
 		//TODO
 	}
 	
 	private void generatePortType(Element definitions){
+		// definitions -> portType
 		Element root = definitions.addElement("wsdl:portType");
 		//TODO
 	}
 	
 	private void generatePortOperation(Element parent){
+		// definitions -> portType -> operation
 		Element root = parent.addElement("wsdl:operation");
 		//TODO
 	}
 	
 	private void generateBinding(Element definitions){
+		// definitions -> binding
 		Element root = definitions.addElement("wsdl:binding");
 		//TODO
 	}
 	
 	private void generateSOAPOperation(Element definitions){
+		// definitions -> service
 		Element root = definitions.addElement("soap:operation");
 		//TODO
 	}
 	
 	private void generateService(Element parent){
+		// definitions -> service
 		Element root = parent.addElement("wsdl:service");
 		root.setName(ws.getName()+"Service");
 		
+		// definitions -> service -> port
 		Element port = root.addElement("wsdl:port");
 		port.addAttribute("name", "");
 		port.addAttribute("binding", "tns:"+ws.getName()+"Port");
 		
+		// definitions -> service-> port -> address
 		Element address = port.addElement("soap:address");
 		address.addAttribute("location", null);
 	}
