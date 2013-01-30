@@ -41,17 +41,17 @@ public class BoundaryBufferedInputStreamTest {
 		in.setBoundary("#");
 		
 		int n = 0;
-		for(n=0; in.read() != -1 ;n++);
+		for(n=0; in.read() != -1; n++);
 		assertEquals(3, n);
 		
 		in.next();
 		n = 0;
-		for(n=0; in.read() != -1 ;n++);
+		for(n=0; in.read() != -1; n++);
 		assertEquals(16, n);
 		
 		in.next();
 		n = 0;
-		for(n=0; in.read() != -1 ;n++);
+		for(n=0; in.read() != -1; n++);
 		assertEquals(15, n);
 		
 		in.next();
@@ -60,13 +60,38 @@ public class BoundaryBufferedInputStreamTest {
 	}
 
 	@Test
-	public void testReadByteArray() {
-		fail("Not yet implemented");
+	public void testOnlyBoundaries() throws IOException {
+		StringInputStream inin = new StringInputStream();
+		BoundaryBufferedInputStream in = new BoundaryBufferedInputStream(inin);
+		inin.add("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
+		
+		in.setBoundary("a");
+		
+		int n;
+		for(n=1; true; n++){
+			assertEquals(-1, in.read());
+			assertEquals(-1, in.read());
+			in.next();
+			if(!in.isBoundary())
+				break;
+		}
+		assertEquals(35, n);
 	}
-
+	
 	@Test
-	public void testReadByteArrayIntInt() {
-		fail("Not yet implemented");
+	public void testNoBounds() throws IOException {
+		String data = "1234567891011121314151617181920";
+		StringInputStream inin = new StringInputStream();
+		BoundaryBufferedInputStream in = new BoundaryBufferedInputStream(inin);
+		inin.add(data);		
+		in.setBoundary("#");
+		
+		int out;
+		StringBuilder output = new StringBuilder();
+		while((out = in.read()) != -1){
+			output.append((char)out);
+		}
+		assertEquals(data, output.toString());
 	}
 
 }

@@ -35,14 +35,16 @@ public class BoundaryBufferedInputStream extends FilterInputStream{
 	/** The size of the buffer in Byte */
 	public static final int DEFAULT_BUF_SIZE = 64*1024;
 
-	/** The Buffer */
+	/** The raw buffer */
 	protected byte buffer[];
-	/** The end of the buffer */
+	/** The end position of the buffer */
 	protected int buf_end = 0;
-	/** The position in the buffer */
+	/** The current position in the buffer */
 	protected int buf_pos = 0;
-	/** The boundary */
+	/** The boundary (the delimiter)  */
 	protected byte[] boundary;
+	/** Boundary position, 0< means no boundary found */
+	protected int bound_pos;
 
 
 	/**
@@ -65,6 +67,7 @@ public class BoundaryBufferedInputStream extends FilterInputStream{
 		buf_end = 0;
 		buf_pos = 0;
 		buffer = new byte[buf_size];
+		bound_pos = -1;
 	}
 
 	/**
@@ -73,16 +76,23 @@ public class BoundaryBufferedInputStream extends FilterInputStream{
 	 * the source stream to the buffer
 	 * 
 	 * @return 			the size of the buffer
-	 * @throws IOException
 	 */
 	protected int fillBuffer() throws IOException {
 		int leftover = buf_end - buf_pos;
+		// is there any data available
+		if(leftover < 0 && super.available() <= 0)
+			return -1; // EOF
+		
+		// Move the end of the buffer to the start to not miss any split boundary
 		System.arraycopy(buffer, buf_pos, buffer, 0, buf_end);
+		// Copy in new data from the stream
 		int n = super.read(buffer, leftover, buffer.length );
+		// Reset positions
 		if(n+leftover >= 0) {
 			buf_end = leftover + n;
 			buf_pos = 0;
 		}
+		searchNextBoundary();
 		return n+leftover;
 	}
 
@@ -92,14 +102,13 @@ public class BoundaryBufferedInputStream extends FilterInputStream{
 	 */
 	public final int read() throws IOException{
 		if(buf_pos >= buf_end-boundary.length) {
-			if(fillBuffer() < 0)
-				return -1;
+			if(fillBuffer() <= 0)
+				return -1;  // EOF
 		}
-		if(buf_end == 0) {
-			return -1;
-		} else {
-			return buffer[buf_pos++];
-		}
+		
+		if(bound_pos == buf_pos)
+			return -1; // boundary
+		return buffer[buf_pos++];
 	}
 
 	/**
@@ -121,34 +130,60 @@ public class BoundaryBufferedInputStream extends FilterInputStream{
 	 * @return 			the amount of bytes read or -1 if EOF
 	 */
 	public int read(byte b[], int off, int len) throws IOException {
+		if(bound_pos == buf_pos)
+			return -1; // boundary
+			
 		if(buf_pos >= buf_end-boundary.length) {
-			if(fillBuffer() < 0)
+			if(fillBuffer() <= 0)
 				return -1; // EOF
 		}
 		int leftover = buf_end - buf_pos;
-		// Copy from buffer
-		if(len <= leftover) {
-			System.arraycopy(buffer, buf_pos, b, off, len);
-			buf_pos += len;
-			return len;
+
+		// The request is larger then the buffer size
+		if(len > leftover){
+			len = leftover;
+		}
+		// the boundary is in the read range
+		if(buf_pos < bound_pos && bound_pos < buf_pos+len){
+			len = buf_pos - bound_pos;
 		}
 		
-		System.arraycopy(buffer, buf_pos, b, off, leftover);
-		int n = super.read(b, off+leftover, len-leftover );
-		fillBuffer();
-		if( n >= 0 )
-			return leftover + n;
-		return leftover;
+		System.arraycopy(buffer, buf_pos, b, off, len);
+		buf_pos += len;
+		return len;
 	}
 
 	/**
-	 * TODO: Skips over the boundary
+	 * Skips over the boundary at the current position in the buffer
 	 */
 	public void next(){
-		
+		if(bound_pos == buf_pos){
+			buf_pos += boundary.length;
+			searchNextBoundary();
+		}
 	}
 	
 	/**
+	 * Searches for the nearest boundary from the current position
+	 */
+	protected void searchNextBoundary(){
+		for(int i=buf_pos; i<buf_end; i++){
+			for(int b=0; b < boundary.length; b++){
+				if(buffer[i] != boundary[b])
+					break;
+				else if(b == boundary.length-1){
+					bound_pos = i;
+					return;
+				}
+			}
+		}
+		bound_pos = -1;
+	}
+	
+	/**
+	 * Skips a specific amounts of bytes in the buffer.
+	 * Note that his method does not check for boundaries.
+	 * 
      * @param	n 	the number of bytes to be skipped.
      * @return		the actual number of bytes skipped.
 	 */
@@ -160,6 +195,7 @@ public class BoundaryBufferedInputStream extends FilterInputStream{
 		}
 		return buf_pos += n;
 	}
+	
 	
 	/**
 	 * Sets the boundary for the stream
@@ -177,8 +213,15 @@ public class BoundaryBufferedInputStream extends FilterInputStream{
 	}
 
 	/**
+	 * @return if current position in the buffer is a boundary
+	 */
+	public boolean isBoundary(){
+		return bound_pos == buf_pos;
+	}
+	
+	/**
 	 * @return     an estimate of the number of bytes that can be read (or skipped
-	 *             over) from this input stream without blocking.
+	 *             over) from this buffered input stream without blocking.
 	 * @exception  IOException  if an I/O error occurs.
 	 */
 	public int available() throws IOException {

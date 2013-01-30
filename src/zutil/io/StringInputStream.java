@@ -85,6 +85,7 @@ public class StringInputStream extends InputStream{
     	buffer.getChars(0, len, ctmp, 0);
     	byte[] btmp = new String( ctmp ).getBytes();
     	System.arraycopy(btmp, 0, b, off, len);
+    	buffer.delete(0, len);
 		return len;
     }
     
