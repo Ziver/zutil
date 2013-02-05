@@ -43,7 +43,7 @@ public class SOAPTest {
 	}
 	
 	public SOAPTest(){
-		WebServiceDef wsDef = new WebServiceDef( SOAPTestClass.class );
+		WebServiceDef wsDef = new WebServiceDef( MainSOAPClass.class );
 		SOAPHttpPage soap = new SOAPHttpPage( wsDef );
 		
 		WSDLWriterOld wsdl = new WSDLWriterOld( wsDef );
@@ -53,23 +53,22 @@ public class SOAPTest {
 		wsdl2.write(System.out);
 		
 		// Response		
-		try {	
+		try {
+			System.out.println( "****************** LOG *********************" );
 			Document document = soap.genSOAPResponse(
 					"<?xml version=\"1.0\"?>" +
 					"<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\n" +
 					"	<soap:Body xmlns:m=\"http://www.example.org/stock\">\n" +
-					//"		<m:pubA>\n" +
-					//"			<m:Ztring>IBM</m:Ztring>\n" +
-					//"		</m:pubA>\n" +
-					//"		<m:pubZ>\n" +
-					//"			<m:olle>66</m:olle>\n" +
-					//"		</m:pubZ>\n" +
-					"		<m:pubB>\n" +
+					"		<m:stringArrayMethod>\n" +
+					"			<m:StringName>IBM</m:StringName>\n" +
+					"		</m:stringArrayMethod>\n" +
+					
+					"		<m:simpleReturnClassMethod>\n" +
 					"			<m:byte>IBM</m:byte>\n" +
-					"		</m:pubB>\n" +
+					"		</m:simpleReturnClassMethod>\n" +
 					"	</soap:Body>\n" +
 			"</soap:Envelope>");
-			System.out.println( "****************** RESPONSE *********************" );	
+			System.out.println( "****************** RESPONSE *********************" );
 
 			OutputFormat format = OutputFormat.createPrettyPrint();
 			XMLWriter writer = new XMLWriter( System.out, format );
@@ -81,66 +80,73 @@ public class SOAPTest {
 		}
 	}
 	
-	public static class SOAPTestClass3 extends WSReturnObject{
-		public String lol = "lol11";
-		public String lol2 = "lol22";
-	}
-
-	public static class SOAPTestClass2 extends WSReturnObject{
-		@WSValueName(value="lolz")
-		public String lol = "lol1";
-		@WSValueName("lolx")
-		public String lol2 = "lol2";
+	public static class SpecialReturnClass extends WSReturnObject{
+		@WSValueName(value="otherValue1")
+		public String param1 = "otherValue1";
+		@WSValueName("otherValue2")
+		public String param2 = "otherValue2";
 		public byte[] b = new byte[]{0x12, 0x23};
-		public SOAPTestClass3 l = new SOAPTestClass3();
+		public InnerClass inner = new InnerClass();
+	}
+	
+	public static class InnerClass extends WSReturnObject{
+		public String innerClassParam1 = "innerClass1";
+		public String innerClassParam2 = "innerClass2";
 	}
 
-	public static class SOAPTestRetClass extends WSReturnObject{
-		@WSValueName("retTest")
-		public String lol = "lol1";
-		public String lol2 = "lol2";
+	public static class SimpleReturnClass extends WSReturnObject{
+		@WSValueName("otherParam1")
+		public String param1 = "param1";
+		public String param2 = "param2";
 	}
 
 	@WSNamespace("http://test.se:8080/")
-	public static class SOAPTestClass implements WSInterface{
-		public SOAPTestClass(){}
+	public static class MainSOAPClass implements WSInterface{
+		public MainSOAPClass(){}
 		
 		@WSHeader()
-		@WSDocumentation("hello")
-		public void pubZ(
-				@WSParamName(value="olle", optional=true) int lol,
-				@WSParamName(value="olle2", optional=true) int lol2) throws Exception{ 
-			//System.out.println("Param: "+lol);
+		@WSDocumentation("Documentation of method exceptionMethod()")
+		public void exceptionMethod(
+				@WSParamName(value="otherParam1", optional=true) int param1,
+				@WSParamName(value="otherParam2", optional=true) int param2) throws Exception{ 
+			System.out.println("Executing method: exceptionMethod()");
 			throw new Exception("Ziver is the fizle");
 		}
 
-		@WSReturnName("param")
-		@WSParamDocumentation("null is the shizzle")
-		public String[][] pubA (
-				@WSParamName("Ztring") String lol) throws Exception{ 
-			//System.out.println("ParamZ: "+lol); 
+		@WSReturnName("stringArray")
+		@WSParamDocumentation("Documentation of stringArrayMethod()")
+		public String[][] stringArrayMethod (
+				@WSParamName("StringName") String str) throws Exception{ 
+			System.out.println("Executing method: stringArrayMethod()");
 			return new String[][]{{"test","test2"},{"test3","test4"}};
 		}
 
-		@WSReturnName("zivarray")
-		@WSParamDocumentation("null is the bla")
-		public SOAPTestClass2[] pubX (
-				@WSParamName("Ztring") String lol) throws Exception{ 
-			return new SOAPTestClass2[]{new SOAPTestClass2(), new SOAPTestClass2()};
+		@WSReturnName("specialReturnClass")
+		@WSParamDocumentation("Documentation of specialReturnMethod()")
+		public SpecialReturnClass[] specialReturnMethod (
+				@WSParamName("StringName2") String str) throws Exception{ 
+			System.out.println("Executing method: specialReturnMethod()");
+			return new SpecialReturnClass[]{new SpecialReturnClass(), new SpecialReturnClass()};
 		}
 
-		@WSReturnName("zivarray")
+		@WSReturnName("SimpleReturnClass")
 		@WSParamDocumentation("null is the kala")
-		public SOAPTestRetClass pubB (
+		public SimpleReturnClass simpleReturnClassMethod (
 				@WSParamName("byte") String lol) throws Exception{ 
-			SOAPTestRetClass tmp = new SOAPTestRetClass();
-			tmp.lol = "test";
-			tmp.lol2 = "test2";
+			System.out.println("Executing method: simpleReturnClassMethod()");
+			SimpleReturnClass tmp = new SimpleReturnClass();
+			tmp.param1 = "newParam1";
+			tmp.param2 = "newParam2";
 			return tmp;
 		}
 		
+		@WSParamDocumentation("void method documentation")
+		public void voidMethod (){ }
+		
 		@WSDisabled()
-		public void privaZ(){ }
-		protected void protZ(){ }			
+		public void disabledMethod(){ }
+		protected void protectedMethod(){ }	
+		@SuppressWarnings("unused")
+		private void privateMethod(){ }
 	}
 }

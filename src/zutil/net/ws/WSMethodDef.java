@@ -125,7 +125,7 @@ public class WSMethodDef {
 				outputs.add( ret_param );
 			}
 		}
-		else{
+		else if( method.getReturnType() != void.class ){
 			WSParameterDef ret_param = new WSParameterDef( this );
 			if(returnName != null) 
 				ret_param.setName(returnName.value());

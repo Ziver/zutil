@@ -283,6 +283,7 @@ public class SOAPHttpPage implements HttpPage{
 					response.addNamespace("m",  m.getNamespace() );
 					response.setName("m:"+m.getName()+"Response");
 					
+					// TODO: problem does not work for other returns than WSReturnObject
 					Field[] f = ret.getClass().getFields();
 					for(int i=0;  i<m.getOutputCount() ;i++){
 						WSParameterDef param = m.getOutput( i );

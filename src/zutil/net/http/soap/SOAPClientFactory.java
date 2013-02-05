@@ -21,6 +21,8 @@
  ******************************************************************************/
 package zutil.net.http.soap;
 
+import java.util.List;
+
 import javax.wsdl.WSDLException;
 
 import javassist.CannotCompileException;
@@ -31,6 +33,7 @@ import javassist.CtNewMethod;
 import javassist.NotFoundException;
 import zutil.net.ws.WSInterface;
 import zutil.net.ws.WSMethodDef;
+import zutil.net.ws.WSParameterDef;
 import zutil.net.ws.WebServiceDef;
 
 /**
@@ -44,8 +47,8 @@ public class SOAPClientFactory {
 	/**
 	 * Generates a Client Object for the web service.
 	 * 
-	 * @param <T> is the class of the web service definition
-	 * @param intf is the class of the web service definition
+	 * @param 	<T> 	is the class of the web service definition
+	 * @param 	intf 	is the class of the web service definition
 	 * @return a client Object
 	 */
 	@SuppressWarnings("unchecked")
@@ -59,12 +62,11 @@ public class SOAPClientFactory {
 	/**
 	 * Generates a Client Object for the web service.
 	 * 
-	 * @param <T> is the class of the web service definition
-	 * @param intf is the class of the web service definition
-	 * @param wsDef is the web service definition of the intf parameter
+	 * @param 	<T> 	is the class of the web service definition
+	 * @param 	intf 	is the class of the web service definition
+	 * @param 	wsDef 	is the web service definition of the intf parameter
 	 * @return a client Object
 	 */
-	@SuppressWarnings("unchecked")
 	public static <T> T getClient(Class<T> intf, WebServiceDef wsDef) throws InstantiationException, IllegalAccessException, CannotCompileException, NotFoundException{
 		if( !WSInterface.class.isAssignableFrom( intf )){
 			throw new ClassCastException("The Web Service class is not a subclass of WSInterface!");
@@ -86,16 +88,47 @@ public class SOAPClientFactory {
 		}
 		
 		// Generate the methods
-		// TODO:
 		for(WSMethodDef methodDef : wsDef.getMethods()){
-			CtMethod method = CtNewMethod.make("public int m(int i){}", cc);
-			method.insertBefore("System.out.println(\"Hello.say():\");");
+			CtMethod method = CtNewMethod.make(
+									getOutputClass(methodDef.getOutputs()),			// Return type 
+									methodDef.getName(),							// Method name
+									getParameterClasses(methodDef.getInputs()),		// Parameters
+									new CtClass[]{pool.get("zutil.net.http.soap.SOAPException")},	// Exceptions 
+									"System.out.println(\"Hello.say():\");", 
+									cc); // Class
+			cc.addMethod(method);
 		}
 		
 		// Initiate the class
+		@SuppressWarnings("unchecked")
 		Class<T> c = cc.toClass();
         T obj = c.newInstance();
         
 		return obj;		
+	}
+	
+	private static CtClass getParameterClass(WSParameterDef param) throws NotFoundException{
+		return ClassPool.getDefault().get( param.getClass().getName() );
+	}
+	
+	private static CtClass[] getParameterClasses(List<WSParameterDef> params) throws NotFoundException{
+		CtClass[] c = new CtClass[params.size()];
+		
+		int i = 0;
+		for(WSParameterDef param : params){
+			c[i++] = getParameterClass(param);
+		}
+		
+		return c;
+	}
+	
+	private static CtClass getOutputClass(List<WSParameterDef> params) throws NotFoundException{
+		if(params.isEmpty()){
+			return CtClass.voidType;
+		}
+		else if(params.size() == 1){
+			return ClassPool.getDefault().get( params.get(0).getClass().getName() );
+		}
+		throw new IllegalArgumentException("Unknown return type");
 	}
 }
