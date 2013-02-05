@@ -53,8 +53,8 @@ import zutil.parser.wsdl.WSDLWriter;
  * handles soap messages.
  * 
  * TODO: Header should be variables not methods
- * TODO: Read SOAPObjects as input parameter
- * TODO: Ability to have multiple arrays of same SOAPObject
+ * TODO: Read WSReturnObjects as input parameter
+ * TODO: Ability to have multiple arrays of same WSReturnObject
  * 
  * Features:
  * Input:
@@ -64,11 +64,10 @@ import zutil.parser.wsdl.WSDLWriter;
  * <br>-char
  * <br>-String
  * <br>-byte[]
- * <br>-And the Wrappers except byte
+ * <br>-And the Wrappers Classes except for Byte
  * 
  * Output:
- * <br>-SOAPObjects
- * <br>-SOAPReturnObjectList
+ * <br>-WSReturnObject
  * <br>-byte[]
  * <br>-int
  * <br>-double
@@ -76,7 +75,7 @@ import zutil.parser.wsdl.WSDLWriter;
  * <br>-char
  * <br>-String
  * <br>-Arrays of Output
- * <br>-And the Wrappers except byte
+ * <br>-And the Wrappers Classes except for Byte
  * 
  * @author Ziver
  */
@@ -299,7 +298,7 @@ public class SOAPHttpPage implements HttpPage{
 	
 	/**
 	 * Generates an return XML Element. This function can
-	 * handle return values as XML Elements, SOAPObject and the
+	 * handle return values as XML Elements, WSReturnObject and the
 	 * Java basic data types.
 	 * 
 	 * @param		root 		is the parent Element
