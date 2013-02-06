@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011 Ziver Koc
+ * Copyright (c) 2013 Ziver Koc
  * 
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,16 +21,20 @@
  ******************************************************************************/
 package zutil.net.http.soap;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.logging.Logger;
 
 import javax.wsdl.WSDLException;
 
 import javassist.CannotCompileException;
 import javassist.ClassPool;
 import javassist.CtClass;
+import javassist.CtField;
 import javassist.CtMethod;
 import javassist.CtNewMethod;
 import javassist.NotFoundException;
+import zutil.log.LogUtil;
 import zutil.net.ws.WSInterface;
 import zutil.net.ws.WSMethodDef;
 import zutil.net.ws.WSParameterDef;
@@ -40,9 +44,9 @@ import zutil.net.ws.WebServiceDef;
  * This is an factory that generates clients for web services
  * 
  * @author Ziver
- * TODO: Incomplete
  */
 public class SOAPClientFactory {
+	private static Logger logger = LogUtil.getLogger();
 	
 	/**
 	 * Generates a Client Object for the web service.
@@ -74,9 +78,8 @@ public class SOAPClientFactory {
 		
 		// Generate the class
 		ClassPool pool = ClassPool.getDefault();
-		CtClass cc = pool.makeClass(intf.getName()+"Impl_"+Math.random());
-		
 		CtClass intfClass = pool.get( intf.getName() );
+		CtClass cc = pool.makeClass(intf.getName()+"Impl_"+ (int)(Math.random()*10000));
 		
 		// Is intf an interface
 		if( intf.isInterface() ){
@@ -87,15 +90,22 @@ public class SOAPClientFactory {
 			cc.setSuperclass( intfClass );
 		}
 		
+		// Add the logger class
+		CtField logger = CtField.make(
+				"private static "+Logger.class.getName()+" logger = "+LogUtil.class.getName()+".getLogger();", 
+				cc);
+		cc.addField(logger);
+		
 		// Generate the methods
-		for(WSMethodDef methodDef : wsDef.getMethods()){
+		for(WSMethodDef methodDef : wsDef.getMethods()){			
+			// Create method
 			CtMethod method = CtNewMethod.make(
 									getOutputClass(methodDef.getOutputs()),			// Return type 
 									methodDef.getName(),							// Method name
 									getParameterClasses(methodDef.getInputs()),		// Parameters
-									new CtClass[]{pool.get("zutil.net.http.soap.SOAPException")},	// Exceptions 
-									"System.out.println(\"Hello.say():\");", 
-									cc); // Class
+									new CtClass[]{pool.get( SOAPException.class.getName() )},	// Exceptions 
+									generateCodeBody(methodDef),					// Code Body 
+									cc); 											// Class
 			cc.addMethod(method);
 		}
 		
@@ -107,6 +117,34 @@ public class SOAPClientFactory {
 		return obj;		
 	}
 	
+	/**
+	 * Generates a generic method code body that calls the SOAPAbstractClient class
+	 */
+	private static String generateCodeBody(WSMethodDef m) {
+		logger.finer("Generating method "+m.getName()+"(...)");
+		
+		StringBuilder body = new StringBuilder("{\n");
+		// Logging
+		body.append( "logger.fine(\"Executing method: "+m.getName()+"(...)\");\n" );
+		
+		// Generate parameter list
+		body.append( HashMap.class.getName()+"<String,Object> params = new "+HashMap.class.getName()+"<String,Object>();\n" );
+		for(WSParameterDef param : m.getInputs()){
+			body.append( "params.put(\""+param.getName()+"\", "+param.getName()+");\n");
+		}
+		
+		// Call SOAPAbstractClient class
+		if(m.getOutputCount() > 0) // non void function
+			body.append( "return " );
+		body.append( SOAPAbstractClient.class.getName()+".request(\""+m.getName()+"\", params);\n" );
+		
+		body.append("}");
+		logger.finest("######################  BODY  #########################");
+		logger.finest(body.toString());
+		logger.finest("#######################################################");
+		return body.toString();
+	}
+
 	private static CtClass getParameterClass(WSParameterDef param) throws NotFoundException{
 		return ClassPool.getDefault().get( param.getClass().getName() );
 	}

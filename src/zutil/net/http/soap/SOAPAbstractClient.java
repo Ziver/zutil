@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011 Ziver Koc
+ * Copyright (c) 2013 Ziver Koc
  * 
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -19,36 +19,26 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  ******************************************************************************/
-package zutil.test;
+package zutil.net.http.soap;
 
-import java.util.logging.Level;
+import java.util.HashMap;
 
-import javassist.CannotCompileException;
-import javassist.NotFoundException;
-
-import javax.wsdl.WSDLException;
-
-import zutil.log.CompactLogFormatter;
-import zutil.log.LogUtil;
-import zutil.net.http.soap.SOAPClientFactory;
-import zutil.net.ws.WSInterface;
-
-public class SOAPClientTest {
-
-	public static void main(String[] args) throws InstantiationException, IllegalAccessException, CannotCompileException, NotFoundException, WSDLException{
-		LogUtil.setGlobalLevel(Level.ALL);
-		LogUtil.setFormatter("", new CompactLogFormatter());
-		
-		TestClient intf = SOAPClientFactory.getClient(TestClient.class);
-		intf.m();
-		intf.c();
-	}
+/**
+ * This is an abstract client that will do generic requests to a 
+ * SOAP Web service
+ * 
+ * @author Ziver
+ */
+public class SOAPAbstractClient {
+	/** Web address of the web service */
+	protected String url;
 	
-	
-	public interface TestClient extends WSInterface{
-		public void m();
-		
-		public void c();
-
+	/**
+	 * Makes a request to the target web service
+	 * @return
+	 */
+	public static Object request(String methodName, HashMap<String,Object> input){
+		return null;
 	}
+
 }

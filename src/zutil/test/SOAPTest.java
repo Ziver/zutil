@@ -110,7 +110,7 @@ public class SOAPTest {
 				@WSParamName(value="otherParam1", optional=true) int param1,
 				@WSParamName(value="otherParam2", optional=true) int param2) throws Exception{ 
 			System.out.println("Executing method: exceptionMethod()");
-			throw new Exception("Ziver is the fizle");
+			throw new Exception("This is an Exception");
 		}
 
 		@WSReturnName("stringArray")
