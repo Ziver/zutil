@@ -1,63 +1,78 @@
 package zutil.log.netlog;
 
+import java.net.URL;
+import java.util.ResourceBundle;
+
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.Event;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
+import javafx.fxml.Initializable;
 import javafx.scene.control.ProgressBar;
+import javafx.scene.control.TableColumn;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.TableView;
 import javafx.scene.control.Label;
-import javafx.scene.control.Tab;
-import javafx.scene.Parent;
-import javafx.scene.layout.AnchorPane;
-import java.io.IOException;
+import javafx.scene.control.cell.PropertyValueFactory;
  
-public class NetLoggerClientInstance extends Tab{
+public class NetLoggerClientInstance implements Initializable {
 	private enum Status{RUNNING, PAUSED, DISCONNECTED}
 
 	// Logic variables
 	private Status status;
 
+	private final ObservableList<NLExceptionData> exceptionData =
+	        FXCollections.observableArrayList(
+	            new NLExceptionData("java.lang.NullPointerException", "", " at com.example.myproject.Book.getTitle(Book.java:16) \n at com.example.myproject.Author.getBookTitles(Author.java:25) \n at com.example.myproject.Bootstrap.main(Bootstrap.java:14)"),
+	            new NLExceptionData("java.lang.NullPointerException", "", " at com.example.myproject.Book.getTitle(Book.java:16) \n at com.example.myproject.Author.getBookTitles(Author.java:25) \n at com.example.myproject.Bootstrap.main(Bootstrap.java:14)"),
+	            new NLExceptionData("java.io.FileNotFoundException", "fred.txt", " at java.io.FileInputStream.<init>(FileInputStream.java) \n at java.io.FileInputStream.<init>(FileInputStream.java) \n at ExTest.readMyFile(ExTest.java:19) \n at ExTest.main(ExTest.java:7)")
+	        );
+	
 	// UI elements
-	@FXML 
-	private ToggleButton statusBt;
+	@FXML private ToggleButton pauseButton;
 	
-    @FXML 
-	private TableView logTb;
-	@FXML 
-	private TableView exceptionTb;
-	
-	@FXML 
-	private Label logCountLb;
-	@FXML 
-	private ProgressBar progressBar;
+    @FXML private TableView<NLLogData> logTable;
+    @FXML private TableColumn<NLLogData, Long> logTimestampColumn;
+    @FXML private TableColumn<NLLogData, String> logLevelColumn;
+    @FXML private TableColumn<NLLogData, String> logColumn;
     
-	public NetLoggerClientInstance(){}
+	@FXML private TableView<NLExceptionData> exceptionTable;
+    @FXML private TableColumn<NLExceptionData, Long> exCountColumn;
+    @FXML private TableColumn<NLExceptionData, String> exNameColumn;
+    @FXML private TableColumn<NLExceptionData, String> exMessageColumn;
+    @FXML private TableColumn<NLExceptionData, String> exStackTraceColumn;
 	
-	public NetLoggerClientInstance(String host, int port) throws IOException{
-		this.setText( host+":"+port );
-		
-		Parent tabRoot = FXMLLoader.load(getClass().getResource("NetLoggerClientInstance.fxml"));
-		this.setContent(tabRoot);
-		AnchorPane.setRightAnchor(tabRoot, 0.0);
-		this.setOnClosed(new EventHandler<Event>() {
-			public void handle(Event e) {
-				handleDisconnectAction(e);
-			}
-		});
+	@FXML private Label logCountLabel;
+	@FXML private ProgressBar progressBar;
+    
+
+	public void initialize(URL arg0, ResourceBundle arg1) {
+		status = Status.RUNNING;
 		updateStatus();
+		
+		logTimestampColumn.setCellValueFactory(new PropertyValueFactory<NLLogData, Long>("timestamp"));
+		logLevelColumn.setCellValueFactory(new PropertyValueFactory<NLLogData, String>("level"));
+		logColumn.setCellValueFactory(new PropertyValueFactory<NLLogData, String>("log"));
+		
+		exCountColumn.setCellValueFactory(new PropertyValueFactory<NLExceptionData, Long>("count"));
+		exNameColumn.setCellValueFactory(new PropertyValueFactory<NLExceptionData, String>("name"));
+		exMessageColumn.setCellValueFactory(new PropertyValueFactory<NLExceptionData, String>("message"));
+		exStackTraceColumn.setCellValueFactory(new PropertyValueFactory<NLExceptionData, String>("stackTrace"));
+		
+		//logTable.setItems(logData);
+		exceptionTable.setItems(exceptionData);
 	}
 	
     @FXML 
 	protected void handlePauseAction(ActionEvent event) {
-		System.out.println("Pause changed");
 		if(status == Status.RUNNING){
 			status = Status.PAUSED;
+			System.out.println("Logging Paused");
 		}
 		else if(status == Status.PAUSED){
 			status = Status.RUNNING;
+			System.out.println("Logging Unpaused");
 		}
 		updateStatus();
     }
@@ -80,20 +95,25 @@ public class NetLoggerClientInstance extends Tab{
     }
 
 	private void updateStatus(){
-		if(progressBar == null || statusBt == null)
+		if(progressBar == null || pauseButton == null){
+			System.out.println("progressBar="+progressBar+" pauseButton="+pauseButton);
 			return;
+		}
+		
+		System.out.println("Status: "+status);
 	
 		if(status == Status.RUNNING){
-			progressBar.setProgress(1);
-			statusBt.setText("Pause");
+			progressBar.setProgress(-1.0);			
+			pauseButton.setText("Pause");
 		}
 		else if(status == Status.PAUSED){
-			progressBar.setProgress(-1);
-			statusBt.setText("Unpause");
+			progressBar.setProgress(1.0);
+			pauseButton.setText("Unpause");
 		}
 		else if(status == Status.DISCONNECTED){
 			progressBar.setProgress(0);
-			statusBt.disableProperty();
+			pauseButton.disableProperty();
 		}
 	}
+
 }

@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import java.lang.*?>
+<?import java.net.*?>
 <?import java.util.*?>
 <?import javafx.collections.*?>
 <?import javafx.scene.*?>
@@ -15,7 +16,7 @@
         <ProgressBar fx:id="progressBar" prefWidth="200.0" progress="0.0" style="" />
         <Region HBox.Hgrow="ALWAYS" />
         <Separator orientation="VERTICAL" prefHeight="200.0" valignment="CENTER" />
-        <Label fx:id="logCountLb" text="80">
+        <Label fx:id="logCountLable" text="80">
           <graphic>
             <Label text="Log Count:" />
           </graphic>
@@ -28,23 +29,23 @@
       <items>
         <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
           <children>
-            <TableView fx:id="logTb" prefHeight="146.0" prefWidth="598.0" tableMenuButtonVisible="true" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+            <TableView fx:id="logTable" prefHeight="146.0" prefWidth="598.0" tableMenuButtonVisible="true" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
               <columns>
-                <TableColumn editable="false" prefWidth="75.0" sortable="false" text="#" />
-                <TableColumn editable="false" prefWidth="75.0" sortable="false" text="Timestamp" />
-                <TableColumn editable="false" prefWidth="75.0" sortable="false" text="Level" />
-                <TableColumn editable="false" prefWidth="400.0" sortable="false" text="Log" />
+                <TableColumn editable="false" prefWidth="75.0" sortable="false" text="Timestamp" fx:id="logTimestampColumn" />
+                <TableColumn editable="false" prefWidth="75.0" sortable="false" text="Level" fx:id="logLevelColumn" />
+                <TableColumn editable="false" prefWidth="400.0" sortable="false" text="Log" fx:id="logColumn" />
               </columns>
             </TableView>
           </children>
         </AnchorPane>
         <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
           <children>
-            <TableView fx:id="exceptionTb" prefHeight="147.0" prefWidth="598.0" tableMenuButtonVisible="true" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+            <TableView fx:id="exceptionTable" prefHeight="147.0" prefWidth="598.0" tableMenuButtonVisible="true" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
               <columns>
-                <TableColumn editable="false" prefWidth="75.0" text="Count" />
-                <TableColumn editable="false" prefWidth="75.0" text="Exception" />
-                <TableColumn editable="false" prefWidth="450.0" text="StackTrace" />
+                <TableColumn editable="false" prefWidth="45.0" style="-fx-alignment: TOP_CENTER;" text="#" fx:id="exCountColumn" />
+                <TableColumn editable="false" prefWidth="250.0" style="-fx-alignment: TOP_LEFT;&#10;-fx-font-weight: bold;" text="Exception" fx:id="exNameColumn" />
+                <TableColumn editable="false" prefWidth="300.0" style="-fx-alignment: TOP_LEFT;" text="Message" fx:id="exMessageColumn" />
+                <TableColumn editable="false" prefWidth="450.0" text="StackTrace" fx:id="exStackTraceColumn" />
               </columns>
             </TableView>
           </children>
@@ -52,10 +53,13 @@
       </items>
     </SplitPane>
   </center>
+  <stylesheets>
+    <URL value="@NetLoggerClientInstance.css" />
+  </stylesheets>
   <top>
     <ToolBar maxHeight="30.0" minHeight="22.0" prefHeight="30.0" prefWidth="839.0">
       <items>
-        <ToggleButton fx:id="pauseBt" mnemonicParsing="false" onAction="#handlePauseAction" text="Pause" />
+        <ToggleButton fx:id="pauseButton" mnemonicParsing="false" onAction="#handlePauseAction" text="Pause" />
         <Region HBox.Hgrow="ALWAYS" />
         <Group id="Group">
           <children>
