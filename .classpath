@@ -11,5 +11,6 @@
 	<classpathentry kind="lib" path="libs/commons-io-1.4.jar"/>
 	<classpathentry kind="lib" path="libs/mysql-connector-java-5.1.14-bin.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
+	<classpathentry kind="lib" path="C:/Program Files/Java/jre7/lib/jfxrt.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
