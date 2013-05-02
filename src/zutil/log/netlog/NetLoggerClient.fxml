@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import java.util.*?>
+<?import javafx.collections.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.paint.*?>
+
+<AnchorPane id="AnchorPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns:fx="http://javafx.com/fxml" fx:controller="zutil.log.netlog.NetLoggerClient">
+  <children>
+    <MenuBar prefWidth="598.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+      <menus>
+        <Menu mnemonicParsing="false" text="File">
+          <items>
+            <MenuItem mnemonicParsing="false" onAction="#handleConnectAction" text="Connect" />
+            <Menu mnemonicParsing="false" text="Previous">
+              <items>
+                <MenuItem mnemonicParsing="false" text="Koc.se:8080" />
+                <MenuItem mnemonicParsing="false" text="localhost:8080" />
+              </items>
+            </Menu>
+            <SeparatorMenuItem mnemonicParsing="false" />
+            <MenuItem mnemonicParsing="false" text="Export" />
+            <SeparatorMenuItem disable="true" mnemonicParsing="false" />
+            <MenuItem mnemonicParsing="false" onAction="#handleExitAction" text="Exit" />
+          </items>
+        </Menu>
+        <Menu mnemonicParsing="false" text="Edit">
+          <items>
+            <MenuItem disable="true" mnemonicParsing="false" text="Copy" />
+          </items>
+        </Menu>
+        <Menu mnemonicParsing="false" text="Help">
+          <items>
+            <MenuItem mnemonicParsing="false" onAction="#handleAboutAction" text="About" />
+          </items>
+        </Menu>
+      </menus>
+    </MenuBar>
+    <TabPane fx:id="tabPane" prefHeight="364.0" prefWidth="586.0" tabClosingPolicy="ALL_TABS" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="22.0" />
+  </children>
+</AnchorPane>

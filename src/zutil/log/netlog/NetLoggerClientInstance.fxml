@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import java.util.*?>
+<?import javafx.collections.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.paint.*?>
+
+<BorderPane xmlns:fx="http://javafx.com/fxml" fx:controller="zutil.log.netlog.NetLoggerClientInstance">
+  <bottom>
+    <ToolBar maxHeight="22.0" minHeight="19.0" prefHeight="22.0" prefWidth="839.0">
+      <items>
+        <ProgressBar fx:id="progressBar" prefWidth="200.0" progress="0.0" style="" />
+        <Region HBox.Hgrow="ALWAYS" />
+        <Separator orientation="VERTICAL" prefHeight="200.0" valignment="CENTER" />
+        <Label fx:id="logCountLb" text="80">
+          <graphic>
+            <Label text="Log Count:" />
+          </graphic>
+        </Label>
+      </items>
+    </ToolBar>
+  </bottom>
+  <center>
+    <SplitPane dividerPositions="0.7491525423728813" focusTraversable="true" orientation="VERTICAL" prefHeight="297.0" prefWidth="600.0">
+      <items>
+        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
+          <children>
+            <TableView fx:id="logTb" prefHeight="146.0" prefWidth="598.0" tableMenuButtonVisible="true" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+              <columns>
+                <TableColumn editable="false" prefWidth="75.0" sortable="false" text="#" />
+                <TableColumn editable="false" prefWidth="75.0" sortable="false" text="Timestamp" />
+                <TableColumn editable="false" prefWidth="75.0" sortable="false" text="Level" />
+                <TableColumn editable="false" prefWidth="400.0" sortable="false" text="Log" />
+              </columns>
+            </TableView>
+          </children>
+        </AnchorPane>
+        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
+          <children>
+            <TableView fx:id="exceptionTb" prefHeight="147.0" prefWidth="598.0" tableMenuButtonVisible="true" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+              <columns>
+                <TableColumn editable="false" prefWidth="75.0" text="Count" />
+                <TableColumn editable="false" prefWidth="75.0" text="Exception" />
+                <TableColumn editable="false" prefWidth="450.0" text="StackTrace" />
+              </columns>
+            </TableView>
+          </children>
+        </AnchorPane>
+      </items>
+    </SplitPane>
+  </center>
+  <top>
+    <ToolBar maxHeight="30.0" minHeight="22.0" prefHeight="30.0" prefWidth="839.0">
+      <items>
+        <ToggleButton fx:id="pauseBt" mnemonicParsing="false" onAction="#handlePauseAction" text="Pause" />
+        <Region HBox.Hgrow="ALWAYS" />
+        <Group id="Group">
+          <children>
+            <Label layoutX="0.0" layoutY="-7.0" text="Log Level: " />
+            <ComboBox layoutX="60.0" layoutY="-9.0" onAction="#handleLevelChanged">
+              <items>
+                <FXCollections fx:factory="observableArrayList">
+                  <String fx:value="01 - ERROR" />
+                  <String fx:value="02 - WARNING" />
+                  <String fx:value="03 - INFO" />
+                  <String fx:value="04 - FINE" />
+                  <String fx:value="05 - FINER" />
+                  <String fx:value="06 - FINEST" />
+                </FXCollections>
+              </items>
+            </ComboBox>
+          </children>
+        </Group>
+        <Group id="Group">
+          <children>
+            <Label alignment="CENTER_RIGHT" layoutX="0.0" layoutY="-7.0" prefWidth="60.0" text="Interval: " />
+            <ComboBox layoutX="65.0" layoutY="-9.0" onAction="#handleIntervalChanged">
+              <items>
+                <FXCollections fx:factory="observableArrayList">
+                  <String fx:value="Instant" />
+                  <String fx:value="3 sec" />
+                  <String fx:value="5 sec" />
+                  <String fx:value="10 sec" />
+                  <String fx:value="30 sec" />
+                  <String fx:value="60 sec" />
+                </FXCollections>
+              </items>
+            </ComboBox>
+          </children>
+        </Group>
+      </items>
+    </ToolBar>
+  </top>
+</BorderPane>
