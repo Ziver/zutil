@@ -54,8 +54,7 @@ import zutil.ui.wizard.listener.BlockingWizardListener;
  */
 public class Wizard implements ActionListener{
 	public static final boolean DEBUG = false;
-	private static final long serialVersionUID = 1L;
-
+	
 	/** Some defoult backgrounds for the sidebar */
 	public static final String BACKGROUND_1 = "zutil/data/wizard1.jpg";
 	public static final String BACKGROUND_2 = "zutil/data/wizard2.jpg";

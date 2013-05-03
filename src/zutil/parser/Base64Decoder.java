@@ -34,7 +34,7 @@ public class Base64Decoder {
 	public static String decode( String data ){
 		Base64Decoder base64 = new Base64Decoder();
 		base64.write( data );
-		return base64.getString();
+		return base64.toString();
 	}
 	
 	public void write( String data ){
@@ -76,7 +76,7 @@ public class Base64Decoder {
 		output.append( buffer, 0, buffi );
 	}
 	
-	public String getString(){
+	public String toString(){
 		return output.getString();
 	}
 	
@@ -84,8 +84,8 @@ public class Base64Decoder {
 		return output.getByte();
 	}
 	
-	public void reset(){
-		output.reset();
+	public void clear(){
+		output.clear();
 		rest = 0;
 		rest_data = 0;
 	}

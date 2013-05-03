@@ -85,6 +85,7 @@ public class HttpHeaderParser {
 				parseLine( tmp );
 			}
 		}
+		sc.close();
 		parseCookies();
 	}
 

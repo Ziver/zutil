@@ -21,11 +21,6 @@
  ******************************************************************************/
 package zutil.net.http.multipart;
 
-import java.io.BufferedReader;
-import java.io.File;
-
-import zutil.ProgressListener;
-
 
 /**
  * A class for handling multipart field

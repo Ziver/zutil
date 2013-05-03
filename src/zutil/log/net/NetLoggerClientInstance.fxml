@@ -9,7 +9,7 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.paint.*?>
 
-<BorderPane xmlns:fx="http://javafx.com/fxml" fx:controller="zutil.log.netlog.NetLoggerClientInstance">
+<BorderPane xmlns:fx="http://javafx.com/fxml" fx:controller="zutil.log.net.NetLogGuiClientInstance">
   <bottom>
     <ToolBar maxHeight="22.0" minHeight="19.0" prefHeight="22.0" prefWidth="839.0">
       <items>

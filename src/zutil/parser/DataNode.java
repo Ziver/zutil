@@ -88,6 +88,8 @@ public class DataNode implements Iterable<DataNode>{
 			map = new HashMap<String,DataNode>(); break;
 		case List:
 			list = new LinkedList<DataNode>(); break;
+		default:
+			break;
 		}
 	}
 

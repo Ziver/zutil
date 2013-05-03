@@ -43,7 +43,7 @@ import zutil.log.LogUtil;
  * @author Ziver
  */
 public abstract class ThreadedTCPNetworkServer extends Thread{
-	public static final Logger logger = LogUtil.getLogger();
+	private static final Logger logger = LogUtil.getLogger();
 	
 	public final int port;
 	private File keyStore;

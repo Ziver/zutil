@@ -83,7 +83,7 @@ public class WizardActionHandler implements ActionListener, FocusListener, ListS
 		 * JList
 		 */
 		else if(c instanceof JList){
-			JList o = (JList) c;
+			JList<?> o = (JList<?>) c;
 			o.addListSelectionListener( this );
 		}
 	}
@@ -115,7 +115,7 @@ public class WizardActionHandler implements ActionListener, FocusListener, ListS
 		 * JList
 		 */
 		else if(c instanceof JList){
-			JList o = (JList) c;
+			JList<?> o = (JList<?>) c;
 			values.put( o.getName() , o.getSelectedValue() );
 		}
 	}

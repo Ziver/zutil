@@ -21,12 +21,8 @@
  ******************************************************************************/
 package zutil.net.http.multipart;
 
-import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -101,83 +97,15 @@ public class MultipartParser {
 	 */
 	public List<MultipartField> parse() throws IOException{
 		ArrayList<MultipartField> list = new ArrayList<MultipartField>();
-		// TODO: parse(list, delimiter);
+		parse(list, delimiter);
 		return list;
 	}
 
-// TODO: 
-/* 
+
 	private void parse(List<MultipartField> list, String delimiter) throws IOException{
-		String line = "";
-		MultipartField field = null;
-		delimiter = "--"+delimiter;
-		String endDelimiter = delimiter+"--";
-		BufferedWriter out = null;
-		// Parsing the stream
-		while(line != null){
-			line = in.readLine();
-			// Skip empty lines
-			if(line == null || line.trim().isEmpty())
-				continue;
-			// End of field
-			else if(line.equals( endDelimiter )){
-				list.add(field);
-				if(out != null)	out.close();
-				field.length = field.file.length();
-				out = null;
-				field = null;
-				continue;
-			}
-			// New field
-			else if(line.equals( delimiter )){
-				if(field != null){
-					list.add(field);
-					if(out != null)	out.close();
-					field.length = field.file.length();
-					out = null;
-					field = null;
-				}
-				// Read the content-disposition
-				line = in.readLine();
-				if(line.toLowerCase().startsWith("content-disposition")){
-					line = line.split(":", 2)[1];
-					String[] fieldData = line.split(" *; *");
-					//String type = fieldData[0].toLowerCase();
-					field = new MultipartField();
-					field.type = MultipartField.FieldType.Field;
-					
-					// Parse content-disposition parameters
-					for(String param : fieldData){
-						String[] temp = param.split(" *= *");
-						if(temp[0].equalsIgnoreCase("name"))
-							field.fieldname = temp[1];
-						else if(temp[0].equalsIgnoreCase("filename")){
-							field.filename = temp[1];
-							field.file = createTempFile();
-							out = new BufferedWriter(new FileWriter(field.file));
-							field.type = MultipartField.FieldType.File;
-						}
-					}
-				}
-				else 
-					throw new IOException("MultipartForm parse error unrecognized line: "+line);
-			}
-			// Read field data
-			else if(field != null){
-				if(field.type == MultipartField.FieldType.File){
-					out.append(line);
-				}
-				else{
-					field.value += line;
-				}
-				field.received += line.length();
-			}
-		}
-		
-		if(field != null)
-			throw new IOException("MultipartForm parse error stream ended prematurely");
+		// TODO: 
 	}
-*/
+
 	
 	/**
 	 * Creates a temporary file in either the system 

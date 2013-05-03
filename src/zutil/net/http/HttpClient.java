@@ -107,7 +107,7 @@ public class HttpClient {
 		}
 		else
 			request.println("");
-		request.flush();
+		request.close();
 		
 		// Response
 		BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));

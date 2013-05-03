@@ -30,6 +30,7 @@ import org.junit.Test;
 import zutil.io.BoundaryBufferedInputStream;
 import zutil.io.StringInputStream;
 
+@SuppressWarnings("resource")
 public class BoundaryBufferedInputStreamTest {
 
 	@Test
