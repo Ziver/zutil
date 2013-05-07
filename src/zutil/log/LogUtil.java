@@ -60,7 +60,7 @@ public class LogUtil {
 	}
 
 	/**
-	 * Sets the global log formatter to the specified one
+	 * Sets the log formatter to all root Handlers
 	 * 
 	 * @param 		f 		is the formatter class
 	 */
@@ -72,7 +72,7 @@ public class LogUtil {
 	}
 	
 	/**
-	 * Adds the log formatter
+	 * Adds the log formatter to all handlers in the namespace
 	 * 
 	 * @param 		f 		is the formatter class
 	 */
@@ -90,6 +90,14 @@ public class LogUtil {
 		setLevel("", level);
 	}
 
+	/**
+	 * Addsd a Handler to the root namespace
+	 */
+	public static void addGlobalHandler(Handler handler){
+		Logger root = Logger.getLogger("");
+		root.addHandler(handler);
+	}
+	
 	/**
 	 * Sets the log level for a specified class
 	 */

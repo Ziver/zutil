@@ -81,6 +81,7 @@ public abstract class ThreadedTCPNetworkServer extends Thread{
 			else{
 				ss = new ServerSocket( port );
 			}
+			logger.info("Listening for TCP Connections on port: "+port);
 
 			while(true){
 				Socket s = ss.accept();

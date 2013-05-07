@@ -49,7 +49,7 @@ public class ThreadedUDPNetwork extends Thread{
 	protected ThreadedUDPNetworkThread thread = null;
 
 	/**
-	 * Creates a new unicast Clien instance of the class
+	 * Creates a new unicast Client instance of the class
 	 * 
 	 * @param thread is the class that will handle incoming packets
 	 * @throws SocketException

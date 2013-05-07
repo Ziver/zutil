@@ -35,11 +35,13 @@ import javafx.event.Event;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.ProgressBar;
+import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.TableView;
 import javafx.scene.control.Label;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.util.Callback;
  
 public class NetLogGuiClientInstance implements Initializable, NetLogListener {
 	private static final Logger logger = LogUtil.getLogger();
@@ -77,7 +79,7 @@ public class NetLogGuiClientInstance implements Initializable, NetLogListener {
 	public void initialize(URL arg0, ResourceBundle arg1) {
 		// Connect to Server
 		try{
-			net = new NetLogClient("localhost", 5050);
+			net = new NetLogClient("127.0.0.1", 5050);
 			net.addListener( this );
 			status = Status.RUNNING;		
 		}catch(Exception e){

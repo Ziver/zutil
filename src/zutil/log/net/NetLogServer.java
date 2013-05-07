@@ -49,7 +49,7 @@ public class NetLogServer extends Handler {
 	public NetLogServer(int port) {
 		super();
 		net = new NetLogNetwork(port);
-
+		net.start();
 	}
 
 
@@ -116,19 +116,22 @@ public class NetLogServer extends Handler {
 			}
 
 			public void queueMessage(Message log){
-				queue.add( log );
-				queue.notify();
+				synchronized(queue){
+					queue.add( log );
+					queue.notify();
+				}
 			}
 
 			public void run() {
 				try {
 					while( true ){
-						while( !queue.isEmpty() ){
-							Message msg = queue.poll();
-							out.writeObject( msg );
+						synchronized(queue){
+							while( !queue.isEmpty() ){
+								Message msg = queue.poll();
+								out.writeObject( msg );
+							}
+							queue.wait();
 						}
-						queue.wait();
-
 					}
 				} catch (Exception e) {
 					logger.log(Level.SEVERE, null, e);
@@ -142,8 +145,8 @@ public class NetLogServer extends Handler {
 				try {
 					out.close();
 					s.close();
-					queue = null;
 					threads.remove(this);
+					queue = null;
 				} catch (IOException e) {
 					logger.log(Level.SEVERE, "Unable to close Client Socket", e);
 				}

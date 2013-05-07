@@ -1,12 +1,15 @@
-
-
 /* LOG LEVELS */
+.SEVERE { 
+  -fx-control-inner-background: palevioletred;
+  -fx-accent: derive(-fx-control-inner-background, -40%);
+  -fx-cell-hover-color: derive(-fx-control-inner-background, -20%);
+}
 .WARNING { 
   -fx-control-inner-background: paleyellow;
   -fx-accent: derive(-fx-control-inner-background, -40%);
   -fx-cell-hover-color: derive(-fx-control-inner-background, -20%);
 }
-
+.INFO { }
 .FINE { 
   -fx-control-inner-background: skyblue;
   -fx-accent: derive(-fx-control-inner-background, -40%);
@@ -23,8 +26,10 @@
   -fx-cell-hover-color: derive(-fx-control-inner-background, -20%);
 }
 
-.ERROR { 
-  -fx-control-inner-background: palevioletred;
-  -fx-accent: derive(-fx-control-inner-background, -40%);
-  -fx-cell-hover-color: derive(-fx-control-inner-background, -20%);
+/* Clear empty rows */
+.table-row-cell:empty {
+    -fx-background-color: null;
+} 
+.table-row-cell:empty .table-cell {
+    -fx-border-width: 0px;
 }
