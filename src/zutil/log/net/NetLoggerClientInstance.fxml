@@ -8,12 +8,18 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.paint.*?>
+<?import javafx.scene.text.*?>
 
 <BorderPane xmlns:fx="http://javafx.com/fxml" fx:controller="zutil.log.net.NetLogGuiClientInstance">
   <bottom>
     <ToolBar maxHeight="22.0" minHeight="19.0" prefHeight="22.0" prefWidth="839.0">
       <items>
         <ProgressBar fx:id="progressBar" prefWidth="200.0" progress="0.0" style="" />
+        <Label fx:id="errorLabel" text="" textFill="RED">
+          <font>
+            <Font size="11.0" />
+          </font>
+        </Label>
         <Region HBox.Hgrow="ALWAYS" />
         <Separator orientation="VERTICAL" prefHeight="200.0" valignment="CENTER" />
         <Label fx:id="logCountLable" text="80">

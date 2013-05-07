@@ -60,6 +60,7 @@ public class NetLogGuiClientInstance implements Initializable, NetLogListener {
 	@FXML private ToggleButton pauseButton;
 	@FXML private Label logCountLabel;
 	@FXML private ProgressBar progressBar;
+	@FXML private Label errorLabel;
 	
     @FXML private TableView<NetLogMessage> logTable;
     @FXML private TableColumn<NetLogMessage, Long> logTimestampColumn;
@@ -82,6 +83,7 @@ public class NetLogGuiClientInstance implements Initializable, NetLogListener {
 		}catch(Exception e){
 			logger.log(Level.SEVERE, null, e);
 			status = Status.DISCONNECTED;
+			errorLabel.setText(e.getMessage());
 		}
 		updateStatus();
 		
