@@ -30,6 +30,7 @@ import zutil.log.LogUtil;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.event.Event;
 import javafx.fxml.FXML;
@@ -37,12 +38,14 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableRow;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.TableView;
 import javafx.scene.control.Label;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.layout.Priority;
 import javafx.util.Callback;
- 
+
 public class NetLogGuiClientInstance implements Initializable, NetLogListener {
 	private static final Logger logger = LogUtil.getLogger();
 	private static enum Status{RUNNING, PAUSED, DISCONNECTED}
@@ -52,29 +55,29 @@ public class NetLogGuiClientInstance implements Initializable, NetLogListener {
 	private Status status;
 
 	private final ObservableList<NetLogExceptionMessage> exceptionData =
-	        FXCollections.observableArrayList(
-	            new NetLogExceptionMessage("java.lang.NullPointerException", "", " at com.example.myproject.Book.getTitle(Book.java:16) \n at com.example.myproject.Author.getBookTitles(Author.java:25) \n at com.example.myproject.Bootstrap.main(Bootstrap.java:14)"),
-	            new NetLogExceptionMessage("java.lang.NullPointerException", "", " at com.example.myproject.Book.getTitle(Book.java:16) \n at com.example.myproject.Author.getBookTitles(Author.java:25) \n at com.example.myproject.Bootstrap.main(Bootstrap.java:14)"),
-	            new NetLogExceptionMessage("java.io.FileNotFoundException", "fred.txt", " at java.io.FileInputStream.<init>(FileInputStream.java) \n at java.io.FileInputStream.<init>(FileInputStream.java) \n at ExTest.readMyFile(ExTest.java:19) \n at ExTest.main(ExTest.java:7)")
-	        );
-	
+			FXCollections.observableArrayList(
+					new NetLogExceptionMessage("java.lang.NullPointerException", "", " at com.example.myproject.Book.getTitle(Book.java:16) \n at com.example.myproject.Author.getBookTitles(Author.java:25) \n at com.example.myproject.Bootstrap.main(Bootstrap.java:14)"),
+					new NetLogExceptionMessage("java.lang.NullPointerException", "", " at com.example.myproject.Book.getTitle(Book.java:16) \n at com.example.myproject.Author.getBookTitles(Author.java:25) \n at com.example.myproject.Bootstrap.main(Bootstrap.java:14)"),
+					new NetLogExceptionMessage("java.io.FileNotFoundException", "fred.txt", " at java.io.FileInputStream.<init>(FileInputStream.java) \n at java.io.FileInputStream.<init>(FileInputStream.java) \n at ExTest.readMyFile(ExTest.java:19) \n at ExTest.main(ExTest.java:7)")
+					);
+
 	// UI elements
 	@FXML private ToggleButton pauseButton;
 	@FXML private Label logCountLabel;
 	@FXML private ProgressBar progressBar;
 	@FXML private Label errorLabel;
-	
-    @FXML private TableView<NetLogMessage> logTable;
-    @FXML private TableColumn<NetLogMessage, Long> logTimestampColumn;
-    @FXML private TableColumn<NetLogMessage, String> logLevelColumn;
-    @FXML private TableColumn<NetLogMessage, String> logColumn;
-    
+
+	@FXML private TableView<NetLogMessage> logTable;
+	@FXML private TableColumn<NetLogMessage, Long> logTimestampColumn;
+	@FXML private TableColumn<NetLogMessage, String> logLevelColumn;
+	@FXML private TableColumn<NetLogMessage, String> logColumn;
+
 	@FXML private TableView<NetLogExceptionMessage> exceptionTable;
-    @FXML private TableColumn<NetLogExceptionMessage, Long> exCountColumn;
-    @FXML private TableColumn<NetLogExceptionMessage, String> exNameColumn;
-    @FXML private TableColumn<NetLogExceptionMessage, String> exMessageColumn;
-    @FXML private TableColumn<NetLogExceptionMessage, String> exStackTraceColumn;
-    
+	@FXML private TableColumn<NetLogExceptionMessage, Long> exCountColumn;
+	@FXML private TableColumn<NetLogExceptionMessage, String> exNameColumn;
+	@FXML private TableColumn<NetLogExceptionMessage, String> exMessageColumn;
+	@FXML private TableColumn<NetLogExceptionMessage, String> exStackTraceColumn;
+
 
 	public void initialize(URL arg0, ResourceBundle arg1) {
 		// Connect to Server
@@ -88,21 +91,26 @@ public class NetLogGuiClientInstance implements Initializable, NetLogListener {
 			errorLabel.setText(e.getMessage());
 		}
 		updateStatus();
-		
+
 		// Setup Gui
 		logTimestampColumn.setCellValueFactory(new PropertyValueFactory<NetLogMessage, Long>("timestamp"));
 		logLevelColumn.setCellValueFactory(new PropertyValueFactory<NetLogMessage, String>("level"));
+		logLevelColumn.setCellFactory(new RowCssCellFactory<NetLogMessage,String>(){
+			public String getStyleName(String item){
+				return item;
+			}
+		});
 		logColumn.setCellValueFactory(new PropertyValueFactory<NetLogMessage, String>("log"));
-		
+
 		exCountColumn.setCellValueFactory(new PropertyValueFactory<NetLogExceptionMessage, Long>("count"));
 		exNameColumn.setCellValueFactory(new PropertyValueFactory<NetLogExceptionMessage, String>("name"));
 		exMessageColumn.setCellValueFactory(new PropertyValueFactory<NetLogExceptionMessage, String>("message"));
 		exStackTraceColumn.setCellValueFactory(new PropertyValueFactory<NetLogExceptionMessage, String>("stackTrace"));
-		
+
 		//logTable.setItems(logData);
 		exceptionTable.setItems(exceptionData);
 	}
-	
+
 	/************* NETWORK *****************/
 	public void handleLogMessage(NetLogMessage log) {
 		logTable.getItems().add( log );		
@@ -114,11 +122,11 @@ public class NetLogGuiClientInstance implements Initializable, NetLogListener {
 
 	public void handleStatusMessage(NetLogStatusMessage status) {
 		// TODO Auto-generated method stub
-		
+
 	}
-	
+
 	/*************** GUI *******************/
-    @FXML 
+	@FXML 
 	protected void handlePauseAction(ActionEvent event) {
 		if(status == Status.RUNNING){
 			status = Status.PAUSED;
@@ -129,7 +137,7 @@ public class NetLogGuiClientInstance implements Initializable, NetLogListener {
 			logger.info("Logging Unpaused");
 		}
 		updateStatus();
-    }
+	}
 
 	@FXML 
 	protected void handleDisconnectAction(Event event) {
@@ -137,23 +145,23 @@ public class NetLogGuiClientInstance implements Initializable, NetLogListener {
 		net.close();
 		status = Status.DISCONNECTED;
 		updateStatus();
-    }
-	
+	}
+
 	@FXML 
 	protected void handleLevelChanged(ActionEvent event) {
 		logger.info("Updating Log Level");
-    }
-	
+	}
+
 	@FXML 
 	protected void handleIntervalChanged(ActionEvent event) {
 		logger.info("Updating Log Interval");
-    }
+	}
 
 	private void updateStatus(){
 		if(progressBar == null || pauseButton == null){
 			return;
 		}
-	
+
 		if(status == Status.RUNNING){
 			progressBar.setProgress(-1.0);			
 			pauseButton.setText("Pause");
@@ -168,4 +176,39 @@ public class NetLogGuiClientInstance implements Initializable, NetLogListener {
 		}
 	}
 
+	/**
+	 * http://stackoverflow.com/questions/13697115/javafx-tableview-colors
+	 */
+	public abstract class RowCssCellFactory<S,T> implements Callback<TableColumn<S,T>, TableCell<S,T>> {
+
+		public TableCell<S,T> call(TableColumn<S,T> p) {
+			TableCell<S, T> cell = new TableCell<S, T>() {
+				@Override
+				public void updateItem(T item, boolean empty) {
+					super.updateItem(item, empty);
+					setText(empty ? null : getString());
+					setGraphic(null);
+
+					String style = getStyleName(item);
+					if(style != null){
+						TableRow<?> row = getTableRow();
+						row.getStyleClass().add(style);
+					}
+				}
+
+				@Override
+				public void updateSelected(boolean upd){
+					super.updateSelected(upd);
+				}
+
+
+				private String getString() {
+					return getItem() == null ? "NULL" : getItem().toString();
+				}
+			};
+			return cell;
+		}
+
+		public abstract String getStyleName(T item);
+	}
 }
