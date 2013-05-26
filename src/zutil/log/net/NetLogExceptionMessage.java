@@ -53,35 +53,50 @@ public class NetLogExceptionMessage extends Message {
 	}
 
 
-	public int getCount() {
-		return count;
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((name == null) ? 0 : name.hashCode());
+		result = prime * result + ((message == null) ? 0 : message.hashCode());
+		result = prime * result
+				+ ((stackTrace == null) ? 0 : stackTrace.hashCode());
+		return result;
+	}
+	
+	
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null || getClass() != obj.getClass())
+			return false;
+		
+		NetLogExceptionMessage other = (NetLogExceptionMessage) obj;
+		if (name.equals(other.name) || message.equals(other.message) || 
+				stackTrace.equals(other.stackTrace)) {
+			return true;
+		}
+		return false;
 	}
 
-	public void setCount(int count) {
-		this.count = count;
+	public void addCount(int add){
+		count += add;
+	}
+	
+	public int getCount() {
+		return count;
 	}
 
 	public String getName() {
 		return name;
 	}
 
-	public void setName(String name) {
-		this.name = name;
-	}
-
 	public String getMessage() {
 		return message;
 	}
 
-	public void setMessage(String message) {
-		this.message = message;
-	}
-
 	public String getStackTrace() {
 		return stackTrace;
-	}
-
-	public void setStackTrace(String stackTrace) {
-		this.stackTrace = stackTrace;
 	}
 }

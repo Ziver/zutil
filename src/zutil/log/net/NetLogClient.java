@@ -23,6 +23,7 @@ package zutil.log.net;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -37,9 +38,11 @@ public class NetLogClient extends Thread{
 	
 	private ConcurrentLinkedQueue<NetLogListener> listeners;
 	private Socket s;
+	private ObjectOutputStream out;
 
 	public NetLogClient(String host, int port) throws UnknownHostException, IOException{
 		s = new Socket(host, port);
+		out = new ObjectOutputStream(s.getOutputStream());
 		listeners = new ConcurrentLinkedQueue<NetLogListener>();
 		this.start();
 	}
@@ -51,7 +54,7 @@ public class NetLogClient extends Thread{
 
 	public void run(){
 		try{
-			ObjectInputStream in = new ObjectInputStream( s.getInputStream() );
+			ObjectInputStream in = new ObjectInputStream(s.getInputStream());
 			while( true ){
 				Object o = in.readObject();
 

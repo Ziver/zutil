@@ -5,24 +5,24 @@
   -fx-cell-hover-color: derive(-fx-control-inner-background, -20%);
 }
 .WARNING { 
-  -fx-control-inner-background: paleyellow;
+  -fx-control-inner-background: yellow;
   -fx-accent: derive(-fx-control-inner-background, -40%);
   -fx-cell-hover-color: derive(-fx-control-inner-background, -20%);
 }
 .INFO { }
 .FINE { 
-  -fx-control-inner-background: skyblue;
+  -fx-control-inner-background: lavender;
   -fx-accent: derive(-fx-control-inner-background, -40%);
   -fx-cell-hover-color: derive(-fx-control-inner-background, -20%);
 }
 .FINER { 
-  -fx-control-inner-background: skyblue;
-  -fx-accent: derive(-fx-control-inner-background, -25%);
+  -fx-control-inner-background: lightblue ;
+  -fx-accent: derive(-fx-control-inner-background, -40%);
   -fx-cell-hover-color: derive(-fx-control-inner-background, -20%);
 }
 .FINEST { 
   -fx-control-inner-background: skyblue;
-  -fx-accent: derive(-fx-control-inner-background, -10%);
+  -fx-accent: derive(-fx-control-inner-background, -40%);
   -fx-cell-hover-color: derive(-fx-control-inner-background, -20%);
 }
 

@@ -28,9 +28,6 @@ import java.util.logging.Logger;
 
 import zutil.log.LogUtil;
 
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
-import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.event.Event;
 import javafx.fxml.FXML;
@@ -43,7 +40,6 @@ import javafx.scene.control.ToggleButton;
 import javafx.scene.control.TableView;
 import javafx.scene.control.Label;
 import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.layout.Priority;
 import javafx.util.Callback;
 
 public class NetLogGuiClientInstance implements Initializable, NetLogListener {
@@ -53,13 +49,6 @@ public class NetLogGuiClientInstance implements Initializable, NetLogListener {
 	// Logic variables
 	private NetLogClient net;
 	private Status status;
-
-	private final ObservableList<NetLogExceptionMessage> exceptionData =
-			FXCollections.observableArrayList(
-					new NetLogExceptionMessage("java.lang.NullPointerException", "", " at com.example.myproject.Book.getTitle(Book.java:16) \n at com.example.myproject.Author.getBookTitles(Author.java:25) \n at com.example.myproject.Bootstrap.main(Bootstrap.java:14)"),
-					new NetLogExceptionMessage("java.lang.NullPointerException", "", " at com.example.myproject.Book.getTitle(Book.java:16) \n at com.example.myproject.Author.getBookTitles(Author.java:25) \n at com.example.myproject.Bootstrap.main(Bootstrap.java:14)"),
-					new NetLogExceptionMessage("java.io.FileNotFoundException", "fred.txt", " at java.io.FileInputStream.<init>(FileInputStream.java) \n at java.io.FileInputStream.<init>(FileInputStream.java) \n at ExTest.readMyFile(ExTest.java:19) \n at ExTest.main(ExTest.java:7)")
-					);
 
 	// UI elements
 	@FXML private ToggleButton pauseButton;
@@ -106,23 +95,26 @@ public class NetLogGuiClientInstance implements Initializable, NetLogListener {
 		exNameColumn.setCellValueFactory(new PropertyValueFactory<NetLogExceptionMessage, String>("name"));
 		exMessageColumn.setCellValueFactory(new PropertyValueFactory<NetLogExceptionMessage, String>("message"));
 		exStackTraceColumn.setCellValueFactory(new PropertyValueFactory<NetLogExceptionMessage, String>("stackTrace"));
-
-		//logTable.setItems(logData);
-		exceptionTable.setItems(exceptionData);
 	}
 
 	/************* NETWORK *****************/
-	public void handleLogMessage(NetLogMessage log) {
-		logTable.getItems().add( log );		
+	public void handleLogMessage(NetLogMessage msg) {
+		if(status == Status.RUNNING){
+			logTable.getItems().add(msg);		
+		}
 	}
 
-	public void handleExceptionMessage(NetLogExceptionMessage exception) {
-		exceptionTable.getItems().add( exception );		
+	public void handleExceptionMessage(NetLogExceptionMessage msg) {
+		if(status == Status.RUNNING){
+			exceptionTable.getItems().remove(msg);
+			exceptionTable.getItems().add(msg);	
+		}	
 	}
 
-	public void handleStatusMessage(NetLogStatusMessage status) {
-		// TODO Auto-generated method stub
-
+	public void handleStatusMessage(NetLogStatusMessage msg) {
+		if(status == Status.RUNNING){
+			
+		}	
 	}
 
 	/*************** GUI *******************/

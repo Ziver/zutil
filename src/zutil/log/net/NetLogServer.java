@@ -22,10 +22,10 @@
 package zutil.log.net;
 
 import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
-import java.util.LinkedList;
-import java.util.Queue;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.logging.Handler;
 import java.util.logging.Level;
@@ -40,14 +40,16 @@ import zutil.net.threaded.ThreadedTCPNetworkServerThread;
 
 public class NetLogServer extends Handler {
 	private static final Logger logger = LogUtil.getLogger();
-	
+
 	private NetLogNetwork net;
+	private ConcurrentHashMap<NetLogExceptionMessage,NetLogExceptionMessage> exceptions;
 
 	/**
 	 * @param 		port		the port the server will listen on
 	 */
 	public NetLogServer(int port) {
 		super();
+		exceptions = new ConcurrentHashMap<NetLogExceptionMessage,NetLogExceptionMessage>();
 		net = new NetLogNetwork(port);
 		net.start();
 	}
@@ -61,7 +63,17 @@ public class NetLogServer extends Handler {
 		// Output the formatted data to the file
 		if(record.getThrown() != null){
 			NetLogExceptionMessage exception = new NetLogExceptionMessage(record);
-			net.sendMessage( exception );
+			if(!exceptions.containsKey(exception)){
+				logger.finest("Received new exception: "+exception);
+				exceptions.put(exception, exception);
+				net.sendMessage( exception );
+			}
+			else{
+				exception = exceptions.get(exception);
+				exception.addCount(1);
+				logger.finest("Received known exception(Count: "+exception.getCount()+"): "+exception);
+				net.sendMessage( exception );
+			}
 		}
 		else{
 			NetLogMessage log = new NetLogMessage(record);
@@ -86,7 +98,7 @@ public class NetLogServer extends Handler {
 
 		public void sendMessage(Message log){
 			for( NetLogServerThread thread : threads ){
-				thread.queueMessage( log );
+				thread.sendMessage( log );
 			}
 		}
 
@@ -94,8 +106,6 @@ public class NetLogServer extends Handler {
 		protected ThreadedTCPNetworkServerThread getThreadInstance(Socket s) {
 			try {
 				NetLogServerThread thread = new NetLogServerThread(s);
-				logger.info("Client connection from: "+s.getInetAddress());
-				threads.add( thread );
 				return thread;
 			} catch (IOException e) {
 				logger.log(Level.SEVERE, "Unable to start Client thread", e);
@@ -105,33 +115,40 @@ public class NetLogServer extends Handler {
 
 
 		class NetLogServerThread implements ThreadedTCPNetworkServerThread{
-			private Queue<Message> queue;
 			private ObjectOutputStream out;
+			private ObjectInputStream in;
 			private Socket s;
 
 			public NetLogServerThread(Socket s) throws IOException{
-				queue = new LinkedList<Message>();
 				this.s = s;
+				logger.info("Client connected: "+s.getInetAddress());
 				out = new ObjectOutputStream( s.getOutputStream() );
+				in = new ObjectInputStream( s.getInputStream() );
+				
+				sendAllExceptions();
+				threads.add( this );
 			}
 
-			public void queueMessage(Message log){
-				synchronized(queue){
-					queue.add( log );
-					queue.notify();
+			public void sendMessage(Message msg){
+				try {
+					out.writeObject( msg );
+					out.reset();
+				} catch (Exception e) {
+					this.close();
+					logger.log(Level.SEVERE, "Unable to send message to client: "+s.getInetAddress(), e);
 				}
+			}
+			
+			public void sendAllExceptions(){
+				logger.fine("Sending all exceptions to client: "+s.getInetAddress());
+				for(NetLogExceptionMessage e : exceptions.values())
+					sendMessage(e);
 			}
 
 			public void run() {
 				try {
 					while( true ){
-						synchronized(queue){
-							while( !queue.isEmpty() ){
-								Message msg = queue.poll();
-								out.writeObject( msg );
-							}
-							queue.wait();
-						}
+						in.readObject();
 					}
 				} catch (Exception e) {
 					logger.log(Level.SEVERE, null, e);
@@ -143,10 +160,10 @@ public class NetLogServer extends Handler {
 
 			public void close(){
 				try {
+					threads.remove(this);
+					logger.info("Client disconnected: "+s.getInetAddress());					
 					out.close();
 					s.close();
-					threads.remove(this);
-					queue = null;
 				} catch (IOException e) {
 					logger.log(Level.SEVERE, "Unable to close Client Socket", e);
 				}
