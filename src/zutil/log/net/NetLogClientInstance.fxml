@@ -33,6 +33,9 @@
   -->
 
 <BorderPane xmlns:fx="http://javafx.com/fxml" fx:controller="zutil.log.net.NetLogGuiClientInstance">
+  <stylesheets>
+    <URL value="@NetLogClientInstance.css" />
+  </stylesheets>
   <bottom>
     <ToolBar maxHeight="22.0" minHeight="19.0" prefHeight="22.0" prefWidth="839.0">
       <items>
@@ -81,9 +84,6 @@
       </items>
     </SplitPane>
   </center>
-  <stylesheets>
-    <URL value="@NetLoggerClientInstance.css" />
-  </stylesheets>
   <top>
     <ToolBar maxHeight="30.0" minHeight="22.0" prefHeight="30.0" prefWidth="839.0">
       <items>

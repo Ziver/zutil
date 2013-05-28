@@ -27,6 +27,7 @@ import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javafx.application.Platform;
 import javafx.scene.control.*;
 import zutil.log.LogUtil;
 
@@ -100,7 +101,13 @@ public class NetLogGuiClientInstance implements Initializable, NetLogListener {
 	public void handleLogMessage(NetLogMessage msg) {
 		if(status == Status.RUNNING){
 			logTable.getItems().add(msg);
-            logCountLabel.setText(""+Integer.parseInt(logCountLabel.getText())+1);
+
+            Platform.runLater(new Runnable() {
+                @Override
+                public void run() {
+                    logCountLabel.setText("" + (Long.parseLong(logCountLabel.getText()) + 1));
+                }
+            });
 		}
 	}
 
