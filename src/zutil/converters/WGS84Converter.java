@@ -1,16 +1,16 @@
 /*******************************************************************************
- * Copyright (c) 2011 Ziver Koc
- * 
+ * Copyright (c) 2013 Ziver
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included in
  * all copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -19,13 +19,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  ******************************************************************************/
+
 package zutil.converters;
 
 public class WGS84Converter {
 	public static void main(String[] args){
-		System.out.println(toWGS84Decimal("N 59° 47' 43\"")+" "+toWGS84Decimal(" E 17° 42' 55\""));
-		System.out.println(toWGS84Decimal("55° 0' 0\"")+" "+toWGS84Decimal("68° 59' 59,999\""));
-		System.out.println(toWGS84Decimal("55° 0.001'")+" "+toWGS84Decimal("68° 59.999'"));
+		System.out.println(toWGS84Decimal("N 59ï¿½ 47' 43\"")+" "+toWGS84Decimal(" E 17ï¿½ 42' 55\""));
+		System.out.println(toWGS84Decimal("55ï¿½ 0' 0\"")+" "+toWGS84Decimal("68ï¿½ 59' 59,999\""));
+		System.out.println(toWGS84Decimal("55ï¿½ 0.001'")+" "+toWGS84Decimal("68ï¿½ 59.999'"));
 		System.out.println(toWGS84Decimal("3444.0000S")+" "+toWGS84Decimal("13521.0000E"));
 		System.out.println(toWGS84Decimal("-44.0001")+" "+toWGS84Decimal("521.0001"));
 	}
@@ -42,9 +43,9 @@ public class WGS84Converter {
 		if(coordinate.contains("S") || coordinate.contains("W"))
 			neg = -1;
 		
-		// 55° 0' 68° 59,999 or 55° 0' 0" 68° 59' 59,999"
-		if(coordinate.matches("[NSWE ]? ?[0-9]{1,3}° [0-9]{1,2}.?[0-9]*'[ 0-9.\\\"]*")){
-			coordinate = coordinate.replaceAll("[NSEW°'\\\"]", "").trim();
+		// 55ï¿½ 0' 68ï¿½ 59,999 or 55ï¿½ 0' 0" 68ï¿½ 59' 59,999"
+		if(coordinate.matches("[NSWE ]? ?[0-9]{1,3}ï¿½ [0-9]{1,2}.?[0-9]*'[ 0-9.\\\"]*")){
+			coordinate = coordinate.replaceAll("[NSEWï¿½'\\\"]", "").trim();
 			String[] tmp = coordinate.split(" ");
 			deg = Float.parseFloat(tmp[0]);
 			min = Float.parseFloat(tmp[1]);

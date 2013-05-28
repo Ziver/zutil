@@ -1,16 +1,16 @@
 /*******************************************************************************
- * Copyright (c) 2011 Ziver Koc
- * 
+ * Copyright (c) 2013 Ziver
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included in
  * all copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -19,6 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  ******************************************************************************/
+
 package zutil.algo.path;
 
 public class DynamicProgramming {
@@ -26,7 +27,7 @@ public class DynamicProgramming {
 		"bibba".toCharArray(),
 		"bitas".toCharArray(),
 		"brott".toCharArray(),
-		"blöja".toCharArray(),
+		"blï¿½ja".toCharArray(),
 		"boson".toCharArray()
 	};
 
@@ -42,25 +43,25 @@ int search(words[][][])
 	for w=0->length(words)
 		for y=0->length(words)
 			for x=0->length(words)
-				// första raden i matrisen
+				// fï¿½rsta raden i matrisen
 				if y == 0
-					// finns första bokstaven i rätt position i första ordet?
+					// finns fï¿½rsta bokstaven i rï¿½tt position i fï¿½rsta ordet?
 					if words[0][x] != words[w][0]
 						matrix[w][y][x] = -1
 					else
 						matrix[w][y][x] = 0
 				else
-					// om föregående är negativ sätt nuvarande till negativ
+					// om fï¿½regï¿½ende ï¿½r negativ sï¿½tt nuvarande till negativ
 					if matrix[w][y-1][x] < 0
 						matrix[w][y-1][x] = -1
-					// här så händer det riktiga i algoritmen
+					// hï¿½r sï¿½ hï¿½nder det riktiga i algoritmen
 					else
 						tmp = minstaForskjutning(words[y], words[w][y], x)
 						if tmp >= 0
 							matrix[w][y][x] = matrix[w][y-1][x] + tmp
 						else
 							matrix[w][y][x] = -1
-					// kolla om det är sista raden i matrisen
+					// kolla om det ï¿½r sista raden i matrisen
 					if y == length(matrix)
 						if (tmp < shortest || shortest < 0) && tmp >= 0
 							shortest = tmp;
@@ -81,12 +82,12 @@ int minstaForskjutning(word[], find, index){
 		int[][][] matrix = new int[words.length][words.length][words.length];
 		int shortest = -1;
 
-		for(int w=0; w<words.length ;w++){ //lodräta ordet
+		for(int w=0; w<words.length ;w++){ //lodrï¿½ta ordet
 			System.out.print("\n\n"+new String(words[w])+"\n ");
-			for(int y=0; y<words.length ;y++){ // vågräta ordet
+			for(int y=0; y<words.length ;y++){ // vï¿½grï¿½ta ordet
 				System.out.print("\n"+ new String(words[y])+": ");
 				for(int x=0; x<words.length ;x++){ // psition i y
-					// första vågräta ordet
+					// fï¿½rsta vï¿½grï¿½ta ordet
 					if(y == 0){
 						if(words[0][x] != words[w][0]){
 							matrix[w][y][x] = -1;
@@ -95,7 +96,7 @@ int minstaForskjutning(word[], find, index){
 							matrix[w][y][x] = 0;
 						}
 					}
-					//resten av de vågräta orden
+					//resten av de vï¿½grï¿½ta orden
 					else{
 						if(matrix[w][y-1][x] < 0){
 							matrix[w][y][x] = -1;
@@ -122,7 +123,7 @@ int minstaForskjutning(word[], find, index){
 			}	
 		}
 
-		System.out.println("\n\nKortaste förflyttningen: "+shortest);
+		System.out.println("\n\nKortaste fï¿½rflyttningen: "+shortest);
 		return shortest;
 	}
 
