@@ -162,7 +162,7 @@ public class DBQueue<E> implements Queue<E>{
 	}
 
 	public Iterator<E> iterator() {
-		// TODO Auto-generated method stub
+		// TODO: Auto-generated method stub
 		return null;
 	}
 

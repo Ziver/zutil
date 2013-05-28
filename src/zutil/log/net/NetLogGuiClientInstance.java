@@ -26,19 +26,13 @@ import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javafx.scene.control.*;
 import zutil.log.LogUtil;
 
 import javafx.event.ActionEvent;
 import javafx.event.Event;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.control.ProgressBar;
-import javafx.scene.control.TableCell;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableRow;
-import javafx.scene.control.ToggleButton;
-import javafx.scene.control.TableView;
-import javafx.scene.control.Label;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.util.Callback;
 
@@ -52,9 +46,13 @@ public class NetLogGuiClientInstance implements Initializable, NetLogListener {
 
 	// UI elements
 	@FXML private ToggleButton pauseButton;
-	@FXML private Label logCountLabel;
-	@FXML private ProgressBar progressBar;
-	@FXML private Label errorLabel;
+    @FXML private Label levelLabel;
+    @FXML private ComboBox levelComboBox;
+    @FXML private Label intervalLabel;
+    @FXML private ComboBox intervalComboBox;
+    @FXML private ProgressBar progressBar;
+    @FXML private Label errorLabel;
+    @FXML private Label logCountLabel;
 
 	@FXML private TableView<NetLogMessage> logTable;
 	@FXML private TableColumn<NetLogMessage, Long> logTimestampColumn;
@@ -100,7 +98,8 @@ public class NetLogGuiClientInstance implements Initializable, NetLogListener {
 	/************* NETWORK *****************/
 	public void handleLogMessage(NetLogMessage msg) {
 		if(status == Status.RUNNING){
-			logTable.getItems().add(msg);		
+			logTable.getItems().add(msg);
+            logCountLabel.setText(""+Integer.parseInt(logCountLabel.getText())+1);
 		}
 	}
 
@@ -163,8 +162,17 @@ public class NetLogGuiClientInstance implements Initializable, NetLogListener {
 			pauseButton.setText("Unpause");
 		}
 		else if(status == Status.DISCONNECTED){
-			progressBar.setProgress(0);
-			pauseButton.disableProperty();
+			pauseButton.setDisable(true);
+            levelLabel.setDisable(true);
+            levelComboBox.setDisable(true);
+            intervalLabel.setDisable(true);
+            intervalComboBox.setDisable(true);
+
+            logTable.setDisable(true);
+            exceptionTable.setDisable(true);
+
+            progressBar.setProgress(0);
+            logCountLabel.setDisable(true);
 		}
 	}
 

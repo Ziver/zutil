@@ -48,7 +48,7 @@ public class NetLogGuiClient extends Application{
     
     @Override
     public void start(Stage stage) throws Exception {
-        Parent root = FXMLLoader.load(getClass().getResource("NetLoggerClient.fxml"));
+        Parent root = FXMLLoader.load(getClass().getResource("NetLogClient.fxml"));
         
         stage.setTitle("NetLoggerClient ("+VERSION+")");
         stage.setScene(new Scene(root));
@@ -79,7 +79,7 @@ public class NetLogGuiClient extends Application{
 		public NetLoggerClientTab(String host, int port) throws IOException{
 			this.setText( host+":"+port );
 			
-			Parent tabRoot = FXMLLoader.load(getClass().getResource("NetLoggerClientInstance.fxml"));
+			Parent tabRoot = FXMLLoader.load(getClass().getResource("NetLogClientInstance.fxml"));
 			this.setContent(tabRoot);
 			AnchorPane.setRightAnchor(tabRoot, 0.0);
 			//this.setOnClosed(new EventHandler<Event>() {

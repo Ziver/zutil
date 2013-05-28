@@ -22,7 +22,7 @@
         </Label>
         <Region HBox.Hgrow="ALWAYS" />
         <Separator orientation="VERTICAL" prefHeight="200.0" valignment="CENTER" />
-        <Label fx:id="logCountLable" text="80">
+        <Label fx:id="logCountLabel" text="0">
           <graphic>
             <Label text="Log Count:" />
           </graphic>
@@ -69,8 +69,8 @@
         <Region HBox.Hgrow="ALWAYS" />
         <Group id="Group">
           <children>
-            <Label layoutX="0.0" layoutY="-7.0" text="Log Level: " />
-            <ComboBox layoutX="60.0" layoutY="-9.0" onAction="#handleLevelChanged">
+            <Label fx:id="levelLabel" layoutX="0.0" layoutY="-7.0" text="Log Level: " />
+            <ComboBox fx:id="levelComboBox" layoutX="60.0" layoutY="-9.0" onAction="#handleLevelChanged">
               <items>
                 <FXCollections fx:factory="observableArrayList">
                   <String fx:value="01 - ERROR" />
@@ -86,8 +86,8 @@
         </Group>
         <Group id="Group">
           <children>
-            <Label alignment="CENTER_RIGHT" layoutX="0.0" layoutY="-7.0" prefWidth="60.0" text="Interval: " />
-            <ComboBox layoutX="65.0" layoutY="-9.0" onAction="#handleIntervalChanged">
+            <Label fx:id="intervalLabel" alignment="CENTER_RIGHT" layoutX="0.0" layoutY="-7.0" prefWidth="60.0" text="Interval: " />
+            <ComboBox fx:id="intervalComboBox" layoutX="65.0" layoutY="-9.0" onAction="#handleIntervalChanged">
               <items>
                 <FXCollections fx:factory="observableArrayList">
                   <String fx:value="Instant" />
