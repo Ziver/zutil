@@ -27,6 +27,7 @@ import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.util.Iterator;
 
+import zutil.io.StringOutputStream;
 import zutil.parser.DataNode;
 import zutil.parser.DataNode.DataType;
 
@@ -123,5 +124,15 @@ public class JSONWriter{
 	public void close(){
 		out.close();
 	}
-	
+
+    /**
+     * @return JSON String that is generated from the input DataNode graph
+     */
+    public String toString(DataNode root){
+        StringOutputStream out = new StringOutputStream();
+        JSONWriter writer = new JSONWriter(out);
+        writer.write(root);
+        writer.close();
+        return out.toString();
+    }
 }

@@ -26,29 +26,95 @@ import zutil.parser.DataNode;
 import zutil.parser.DataNode.DataType;
 import zutil.struct.MutableInt;
 
+import java.io.BufferedReader;
+
 /**
  * This is a JSON parser class
  * 
  * @author Ziver
  */
 public class JSONParser{
+    protected Readable in;
+
+    public JSONParser(Readable in){
+       this.in = in;
+    }
+
+    /**
+     * Starts parsing from the InputStream.
+     * This method will block until one root tree has been parsed.
+     *
+     * @return a DataNode object representing the input JSON
+     */
+    public DataNode read(){
+        return parse(in);
+    }
 
 	/**
-	 * Starts parsing
+	 * Starts parsing from a string
 	 * 
 	 * @param 	json	is the JSON String to parse
-	 * @return a JSONNode object that is the root of the JSON
+	 * @return a DataNode object representing the JSON in the input String
 	 */
-	public DataNode read(String json){
+	public static DataNode read(String json){
 		return parse(new MutableInt(), new StringBuilder(json));
 	}
 
-	
+    /**
+     * This is the real recursive parsing method
+     */
+    protected static DataNode parse(Readable in){
+        DataNode root = null;
+        DataNode key = null;
+        DataNode node = null;
+        int next_index;
+
+        while(Character.isWhitespace( json.charAt(index.i) ) ||
+                json.charAt(index.i) == ',' || json.charAt(index.i) == ':')
+            index.i++;
+        char c = json.charAt(index.i++);
+
+        switch( c ){
+            case ']':
+            case '}':
+                return null;
+            case '{':
+                root = new DataNode(DataType.Map);
+                while((key = parse( index, json )) != null && (node = parse( index, json )) != null){
+                    root.set( key.toString(), node );
+                }
+                break;
+            case '[':
+                root = new DataNode(DataType.List);
+                while((node = parse( index, json )) != null){
+                    root.add( node );
+                }
+                break;
+            // Parse String
+            case '\"':
+                root = new DataNode(DataType.String);
+                next_index = json.indexOf( "\"", index.i);
+                root.set( json.substring(index.i, next_index) );
+                index.i = next_index+1;
+                break;
+            default:
+                root = new DataNode(DataType.Number);
+                for(next_index=index.i; next_index<json.length() ;++next_index)
+                    if( json.charAt(next_index)==',' ||
+                            json.charAt(next_index)==']' ||
+                            json.charAt(next_index)=='}'){
+                        break;
+                    }
+                root.set( c+json.substring(index.i, next_index) );
+                index.i = next_index;
+                break;
+        }
+
+        return root;
+    }
+
 	/**
 	 * This is the real recursive parsing method
-	 * 
-	 * @param json
-	 * @return
 	 */
 	protected static DataNode parse(MutableInt index, StringBuilder json){
 		DataNode root = null;
