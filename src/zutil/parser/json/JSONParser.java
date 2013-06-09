@@ -22,11 +22,12 @@
 
 package zutil.parser.json;
 
+import zutil.io.StringInputStream;
 import zutil.parser.DataNode;
 import zutil.parser.DataNode.DataType;
 import zutil.struct.MutableInt;
 
-import java.io.BufferedReader;
+import java.io.*;
 
 /**
  * This is a JSON parser class
@@ -34,9 +35,9 @@ import java.io.BufferedReader;
  * @author Ziver
  */
 public class JSONParser{
-    protected Readable in;
+    protected Reader in;
 
-    public JSONParser(Readable in){
+    public JSONParser(Reader in){
        this.in = in;
     }
 
@@ -46,8 +47,8 @@ public class JSONParser{
      *
      * @return a DataNode object representing the input JSON
      */
-    public DataNode read(){
-        return parse(in);
+    public DataNode read() throws IOException {
+        return parse(in, new MutableInt());
     }
 
 	/**
@@ -57,112 +58,76 @@ public class JSONParser{
 	 * @return a DataNode object representing the JSON in the input String
 	 */
 	public static DataNode read(String json){
-		return parse(new MutableInt(), new StringBuilder(json));
+        try{
+		    return parse(new StringReader(json), new MutableInt());
+        }catch (IOException e){
+            e.printStackTrace();
+        }catch (NullPointerException e){}
+        return null;
 	}
 
     /**
      * This is the real recursive parsing method
      */
-    protected static DataNode parse(Readable in){
+    protected static DataNode parse(Reader in, MutableInt end) throws IOException {
         DataNode root = null;
         DataNode key = null;
         DataNode node = null;
-        int next_index;
+        end.i = 0;
 
-        while(Character.isWhitespace( json.charAt(index.i) ) ||
-                json.charAt(index.i) == ',' || json.charAt(index.i) == ':')
-            index.i++;
-        char c = json.charAt(index.i++);
+        char c = '_';
+        while((c=(char)in.read()) < 0 || Character.isWhitespace(c) ||
+                c == ',' || c == ':');
 
         switch( c ){
+            // This is the end of an Map or List
             case ']':
             case '}':
+            case (char)-1:
+                end.i = 1;
                 return null;
+            // Parse Map
             case '{':
                 root = new DataNode(DataType.Map);
-                while((key = parse( index, json )) != null && (node = parse( index, json )) != null){
+                while(end.i != 1 &&
+                        (key = parse(in, end)) != null &&
+                        (node = parse(in, end)) != null){
                     root.set( key.toString(), node );
                 }
+                end.i = 0;
                 break;
+            // Parse List
             case '[':
                 root = new DataNode(DataType.List);
-                while((node = parse( index, json )) != null){
+                while(end.i != 1 && (node = parse(in, end)) != null){
                     root.add( node );
                 }
+                end.i = 0;
                 break;
             // Parse String
             case '\"':
                 root = new DataNode(DataType.String);
-                next_index = json.indexOf( "\"", index.i);
-                root.set( json.substring(index.i, next_index) );
-                index.i = next_index+1;
+                StringBuilder str = new StringBuilder();
+                while((c=(char)in.read()) != (char)-1 && c != '\"')
+                    str.append(c);
+                root.set(str.toString());
                 break;
+            // Parse Number
             default:
                 root = new DataNode(DataType.Number);
-                for(next_index=index.i; next_index<json.length() ;++next_index)
-                    if( json.charAt(next_index)==',' ||
-                            json.charAt(next_index)==']' ||
-                            json.charAt(next_index)=='}'){
+                StringBuilder num = new StringBuilder().append(c);
+                while((c=(char)in.read()) != (char)-1 && !Character.isWhitespace(c) &&
+                        c != ',' && c != '='){
+                    if(c == ']' || c == '}'){
+                        end.i = 1;
                         break;
                     }
-                root.set( c+json.substring(index.i, next_index) );
-                index.i = next_index;
+                    num.append(c);
+                }
+                root.set(num.toString());
                 break;
         }
 
         return root;
     }
-
-	/**
-	 * This is the real recursive parsing method
-	 */
-	protected static DataNode parse(MutableInt index, StringBuilder json){
-		DataNode root = null;
-		DataNode key = null;
-		DataNode node = null;
-		int next_index;
-
-		while(Character.isWhitespace( json.charAt(index.i) ) ||
-				json.charAt(index.i) == ',' || json.charAt(index.i) == ':')
-			index.i++;
-		char c = json.charAt(index.i++);
-		
-		switch( c ){
-		case ']':
-		case '}':
-			return null;
-		case '{':
-			root = new DataNode(DataType.Map);
-			while((key = parse( index, json )) != null && (node = parse( index, json )) != null){
-				root.set( key.toString(), node );
-			}
-			break;
-		case '[':
-			root = new DataNode(DataType.List);
-			while((node = parse( index, json )) != null){
-				root.add( node );
-			}
-			break;
-		// Parse String
-		case '\"':
-			root = new DataNode(DataType.String);
-			next_index = json.indexOf( "\"", index.i);
-			root.set( json.substring(index.i, next_index) );
-			index.i = next_index+1;
-			break;
-		default:
-			root = new DataNode(DataType.Number);
-			for(next_index=index.i; next_index<json.length() ;++next_index)
-				if( json.charAt(next_index)==',' || 
-						json.charAt(next_index)==']' ||
-						json.charAt(next_index)=='}'){
-					break;
-				}
-			root.set( c+json.substring(index.i, next_index) );
-			index.i = next_index;
-			break;
-		}
-
-		return root;
-	}
 }

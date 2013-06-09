@@ -23,6 +23,7 @@
 package zutil.test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 
 import org.junit.Test;
@@ -33,20 +34,69 @@ import zutil.parser.json.JSONParser;
 
 public class JSONTest{
 
+    @Test
+    public void nullString(){
+        DataNode data = JSONParser.read(null);
+        assertNull(data);
+    }
+
+    @Test
+    public void emptyString(){
+        DataNode data = JSONParser.read("");
+        assertNull(data);
+    }
+
+    @Test
+    public void emptyMap(){
+        DataNode data = JSONParser.read("{}");
+        assert(data.isMap());
+        assertEquals( 0, data.size());
+    }
+
+    @Test
+    public void emptyList(){
+        DataNode data = JSONParser.read("[]");
+        assert(data.isList());
+        assertEquals( 0, data.size());
+    }
+
+    @Test
+    public void number(){
+        DataNode data = JSONParser.read("1234");
+        assert(data.isValue());
+        assertEquals( 1234, data.getInt());
+    }
+
+    @Test
+    public void toManyCommasInList(){
+        DataNode data = JSONParser.read("[1,2,3,]");
+        assert(data.isList());
+        assertEquals( 1, data.get(0).getInt());
+        assertEquals( 2, data.get(1).getInt());
+        assertEquals( 3, data.get(2).getInt());
+    }
+
+    @Test
+    public void toManyCommasInMap(){
+        DataNode data = JSONParser.read("{1=1,2=2,3=3,}");
+        assert(data.isMap());
+        assertEquals( 1, data.get("1").getInt());
+        assertEquals( 2, data.get("2").getInt());
+        assertEquals( 3, data.get("3").getInt());
+    }
+
 	@Test
-	public void JSONParser() {
-		JSONParser parser = new JSONParser();
-		
+	public void complexMap() {
 		String json = "{" +
 				"\"test1\": 1234," +
 				"\"TEST1\": 5678," +
 				"\"test3\": 1234.99," +
 				"\"test4\": \"91011\"," +
 				"\"test5\": [12,13,14,15]," +
-				"\"test6\": [\"a\",\"b\",\"c\",\"d\"]," +
+				"\"test6\": [\"a\",\"b\",\"c\",\"d\"]" +
 				"}";
 		
-		DataNode data = parser.read(json); 
+		DataNode data = JSONParser.read(json);
 		assert( data.isMap() );
 		assert( 1234 == data.get("test1").getInt() );
 		assert( 5678 == data.get("TEST1").getInt() );

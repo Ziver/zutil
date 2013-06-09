@@ -61,9 +61,12 @@ public class StringInputStream extends InputStream{
      * Reads the next byte of data from the input stream.
      */
     public int read(){
-    	int ret = Character.getNumericValue( buffer.charAt( 0 ));
-    	buffer.deleteCharAt( 0 );
-    	return ret;
+        if(buffer.length() > 0){
+            int ret = Character.getNumericValue( buffer.charAt( 0 ));
+            buffer.deleteCharAt( 0 );
+            return ret;
+        }
+        return -1;
     }
 	
     /**
