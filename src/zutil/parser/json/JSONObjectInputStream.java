@@ -22,16 +22,111 @@
 
 package zutil.parser.json;
 
-import java.io.Closeable;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.ObjectInput;
+import zutil.parser.Base64Decoder;
+import zutil.parser.DataNode;
+
+import java.io.*;
+import java.lang.reflect.Array;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
+import java.util.List;
+import java.util.Map;
 
 public class JSONObjectInputStream extends InputStream implements ObjectInput, Closeable{
+    private JSONParser parser;
 
-	public JSONObjectInputStream(InputStream bout) {
-		// TODO Auto-generated constructor stub
+	public JSONObjectInputStream(Reader in) {
+		this.parser = new JSONParser(in);
 	}
+
+    public Object readObject() throws ClassNotFoundException, IOException {
+        try{
+            DataNode root = parser.read();
+            if(root != null){
+                readObject(root);
+            }
+        } catch (InstantiationException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    protected static Object readObject(DataNode json) throws IllegalAccessException, InstantiationException, ClassNotFoundException {
+        Class objClass = Class.forName(json.getString("@class"));
+        Object obj = objClass.newInstance();
+
+        // Read all fields from the new object instance
+        for(Field field : obj.getClass().getDeclaredFields()){
+            if((field.getModifiers() & Modifier.STATIC) == 0 &&
+                    (field.getModifiers() & Modifier.TRANSIENT) == 0 &&
+                    json.get(field.getName()) != null){
+                // Parse field
+                field.setAccessible(true);
+                field.set(obj, readValue(
+                        field.getDeclaringClass(),
+                        json.get(field.getName())));
+            }
+        }
+        return obj;
+    }
+
+    protected static Object readValue(Class type, DataNode json) throws IllegalAccessException, ClassNotFoundException, InstantiationException {
+        // Field type is a primitive?
+        if(type.isPrimitive()){
+            return readPrimitive(type, json);
+        }
+        else if(type.isArray()){
+            if(type.getComponentType() == Byte.class)
+                return Base64Decoder.decodeToByte(json.getString());
+            else{
+                Object array = Array.newInstance(type.getComponentType(), json.size());
+                for(int i=0; i<json.size(); i++){
+                    Array.set(array, i, readValue(type.getComponentType(), json.get(i)));
+                }
+                return array;
+            }
+        }
+        else if(List.class.isAssignableFrom(type)){
+            // TODO Add List Support
+            List list = (List)type.newInstance();
+            for(int i=0; i<json.size(); i++){
+                list.add(readValue(null, json.get(i)));
+            }
+            return list;
+        }
+        else if(Map.class.isAssignableFrom(type)){
+            // TODO Add Map Support
+            Map map = (Map)type.newInstance();
+            for(int i=0; i<json.size(); i++){
+                map.put(
+                        readValue(null, json.get(i)),
+                        readValue(null, json.get(i)));
+            }
+            return map;
+        }
+        // Field is a new Object
+        else{
+            return readObject(json);
+        }
+    }
+
+    protected static Object readPrimitive(Class<?> type, DataNode json){
+        //if     (type == Short.class)  return json.getShort();
+        if     (type == Integer.class) return json.getInt();
+        else if(type == Long.class)    return json.getLong();
+
+        //else if(type == Float.class) field.setFloat(obj, json.getFloat());
+        else if(type == Double.class)  return json.getDouble();
+
+        else if(type == Boolean.class) return json.getBoolean();
+        //else if(type == Character.class) return json.getChar();
+        else if(type == String.class)  return json.getString();
+        //else if(type == Byte.class) return Base64Decoder.decodeToByte(json.getString());
+        return null;
+    }
+
 
 	public void readFully(byte[] b) throws IOException {
 		// TODO Auto-generated method stub
@@ -104,11 +199,6 @@ public class JSONObjectInputStream extends InputStream implements ObjectInput, C
 	}
 
 	public String readUTF() throws IOException {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	public Object readObject() throws ClassNotFoundException, IOException {
 		// TODO Auto-generated method stub
 		return null;
 	}

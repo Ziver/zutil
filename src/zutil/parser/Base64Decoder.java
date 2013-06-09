@@ -46,18 +46,25 @@ public class Base64Decoder {
 	public Base64Decoder(){
 		output = new DynamicByteArrayStream();
 	}
-	
-	public static String decodeToHex( String data ){
-		Base64Decoder base64 = new Base64Decoder();
-		base64.write( data );
-		return Converter.toHexString( base64.getByte() );
-	}
+
 	
 	public static String decode( String data ){
 		Base64Decoder base64 = new Base64Decoder();
 		base64.write( data );
 		return base64.toString();
 	}
+
+    public static String decodeToHex( String data ){
+        Base64Decoder base64 = new Base64Decoder();
+        base64.write( data );
+        return Converter.toHexString( base64.getByte() );
+    }
+
+    public static byte[] decodeToByte( String data ){
+        Base64Decoder base64 = new Base64Decoder();
+        base64.write( data );
+        return base64.getByte();
+    }
 	
 	public void write( String data ){
 		byte[] buffer = new byte[ (data.length()*6/8) + 1 ];

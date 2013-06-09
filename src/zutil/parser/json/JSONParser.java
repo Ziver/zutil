@@ -35,7 +35,7 @@ import java.io.*;
  * @author Ziver
  */
 public class JSONParser{
-    protected Reader in;
+    private Reader in;
 
     public JSONParser(Reader in){
        this.in = in;

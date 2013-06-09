@@ -24,12 +24,7 @@ package zutil.test;
 
 import static org.junit.Assert.assertEquals;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.Serializable;
+import java.io.*;
 
 import org.junit.Test;
 
@@ -50,6 +45,7 @@ public class JSONSerializerTest{
         out.flush();
         out.close();
         String data = bout.toString();
+        System.out.println(data);
 
         assertEquals(
                 "{\"str\": \"1234\", \"@class\": \"zutil.test.JSONSerializerTest$TestClass\", \"obj1\": {\"@class\": \"zutil.test.JSONSerializerTest$TestObj\", \"value\": \"42\", \"@object_id\": 2}, \"obj2\": {\"@class\": \"zutil.test.JSONSerializerTest$TestObj\", \"value\": \"42\", \"@object_id\": 3}, \"@object_id\": 1}",
@@ -85,8 +81,9 @@ public class JSONSerializerTest{
 		out.flush();
 		out.close();
 		String data = bout.toString();
+        System.out.println(data);
 		
-		StringInputStream bin = new StringInputStream(data);
+		StringReader bin = new StringReader(data);
 		JSONObjectInputStream in = new JSONObjectInputStream(bin);
 		TestClass targetObj = (TestClass) in.readObject();
 		in.close();

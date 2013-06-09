@@ -22,7 +22,6 @@
 
 package zutil.parser.json;
 
-import zutil.log.LogUtil;
 import zutil.parser.DataNode;
 
 import java.io.*;
@@ -30,17 +29,17 @@ import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.HashMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.List;
+import java.util.Map;
 
 public class JSONObjectOutputStream extends OutputStream implements ObjectOutput, Closeable{
-    private boolean generateMetaDeta;
+    private boolean generateMetaData;
 
     private HashMap<Object,Integer> objectCache;
     private JSONWriter out;
 
     public JSONObjectOutputStream(OutputStream out) {
-        this.generateMetaDeta = true;
+        this.generateMetaData = true;
         this.objectCache = new HashMap<Object, Integer>();
         this.out = new JSONWriter(out);
     }
@@ -102,7 +101,7 @@ public class JSONObjectOutputStream extends OutputStream implements ObjectOutput
         //    throw new UnSerializable
         DataNode root = new DataNode(DataNode.DataType.Map);
         // Generate meta data
-        if(generateMetaDeta){
+        if(generateMetaData){
             root.set("@class", obj.getClass().getName());
             // Cache
             if(objectCache.containsKey(obj)){ // Hit
@@ -119,8 +118,13 @@ public class JSONObjectOutputStream extends OutputStream implements ObjectOutput
             if((field.getModifiers() & Modifier.STATIC) == 0 &&
                     (field.getModifiers() & Modifier.TRANSIENT) == 0){
                 field.setAccessible(true);
+                // Add basic type (int, float...)
+                if(field.getType().isPrimitive() ||
+                        field.getType() == String.class){
+                    root.set(field.getName(), field.get(obj).toString());
+                }
                 // Add an array
-                if(field.getType().isArray()){
+                else if(field.getType().isArray()){
                     DataNode arrayNode = new DataNode(DataNode.DataType.List);
                     Object array = field.get(obj);
                     for(int i=0; i< Array.getLength(array) ;i++){
@@ -128,10 +132,11 @@ public class JSONObjectOutputStream extends OutputStream implements ObjectOutput
                     }
                     root.set(field.getName(), arrayNode);
                 }
-                // Add basic type (int, float...)
-                else if(field.getType().isPrimitive() ||
-                        field.getType() == String.class){
-                    root.set(field.getName(), field.get(obj).toString());
+                else if(List.class.isAssignableFrom(field.getType())){
+                    // TODO Add List Support
+                }
+                else if(Map.class.isAssignableFrom(field.getType())){
+                    // TODO Add Map Support
                 }
                 else{
                     root.set(field.getName(), getDataNode(field.get(obj)));
@@ -152,8 +157,8 @@ public class JSONObjectOutputStream extends OutputStream implements ObjectOutput
      * Should only be disabled if the input is not a JSONObjectInputStream.
      * All the meta-data tags will start with a '@'
      */
-    public void generateMetaDeta(boolean generate){
-        generateMetaDeta = generate;
+    public void generateMetaData(boolean generate){
+        generateMetaData = generate;
     }
 
     /**
