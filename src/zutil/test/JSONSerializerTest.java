@@ -28,7 +28,6 @@ import java.io.*;
 
 import org.junit.Test;
 
-import zutil.io.StringInputStream;
 import zutil.io.StringOutputStream;
 import zutil.parser.json.JSONObjectInputStream;
 import zutil.parser.json.JSONObjectOutputStream;
@@ -36,8 +35,8 @@ import zutil.parser.json.JSONObjectOutputStream;
 public class JSONSerializerTest{
 
     @Test
-    public void testJSONObjectOutputStream() throws InterruptedException, IOException, ClassNotFoundException{
-        TestClass sourceObj = new TestClass();
+    public void testOutputSerializer() throws InterruptedException, IOException, ClassNotFoundException{
+        TestClass sourceObj = new TestClass().init();
 
         StringOutputStream bout = new StringOutputStream();
         JSONObjectOutputStream out = new JSONObjectOutputStream(bout);
@@ -48,13 +47,13 @@ public class JSONSerializerTest{
         System.out.println(data);
 
         assertEquals(
-                "{\"str\": \"1234\", \"@class\": \"zutil.test.JSONSerializerTest$TestClass\", \"obj1\": {\"@class\": \"zutil.test.JSONSerializerTest$TestObj\", \"value\": \"42\", \"@object_id\": 2}, \"obj2\": {\"@class\": \"zutil.test.JSONSerializerTest$TestObj\", \"value\": \"42\", \"@object_id\": 3}, \"@object_id\": 1}",
+                "{\"str\": \"1234\", \"@class\": \"zutil.test.JSONSerializerTest$TestClass\", \"obj1\": {\"@class\": \"zutil.test.JSONSerializerTest$TestObj\", \"value\": \"42\", \"@object_id\": 2}, \"obj2\": {\"@class\": \"zutil.test.JSONSerializerTest$TestObj\", \"value\": \"42\", \"@object_id\": 3}, \"decimal\": \"1.1\", \"@object_id\": 1}",
                 data);
     }
 
 	@Test
-	public void testJavaObjectInOutSerialize() throws InterruptedException, IOException, ClassNotFoundException{
-		TestClass sourceObj = new TestClass();
+	public void testJavaLegacySerialize() throws InterruptedException, IOException, ClassNotFoundException{
+		TestClass sourceObj = new TestClass().init();
 		
 		ByteArrayOutputStream bout = new ByteArrayOutputStream();
 		ObjectOutputStream out = new ObjectOutputStream(bout);
@@ -72,9 +71,31 @@ public class JSONSerializerTest{
 	}
 	
 	@Test
-	public void testJSONObjectInOutSerialize2() throws InterruptedException, IOException, ClassNotFoundException{
-		TestClass sourceObj = new TestClass();
+	public void testInputSerializerWithPrimitives() throws InterruptedException, IOException, ClassNotFoundException{
+		TestClass sourceObj = new TestClass().init();
 		
+		TestClass targetObj = sendReceiveObject(sourceObj);
+		
+		assertEquals( sourceObj, targetObj );
+	}
+	
+	@Test
+	public void testInputSerializerWithClones() throws InterruptedException, IOException, ClassNotFoundException{
+		TestClassObjClone sourceObj = new TestClassObjClone().init();
+		
+		TestClassObjClone targetObj = sendReceiveObject(sourceObj);
+		
+		assertEquals( sourceObj, targetObj );
+	}
+	
+	
+	
+
+	/******************* Utility Functions ************************************/
+	
+	@SuppressWarnings("unchecked")
+	private static <T> T sendReceiveObject(T sourceObj) throws IOException{
+		// Send
 		StringOutputStream bout = new StringOutputStream();
 		JSONObjectOutputStream out = new JSONObjectOutputStream(bout);
 		out.writeObject(sourceObj);
@@ -83,35 +104,65 @@ public class JSONSerializerTest{
 		String data = bout.toString();
         System.out.println(data);
 		
+        // Receive
 		StringReader bin = new StringReader(data);
 		JSONObjectInputStream in = new JSONObjectInputStream(bin);
-		TestClass targetObj = (TestClass) in.readObject();
+		T targetObj = (T) in.readObject();
 		in.close();
-		
-		assertEquals( sourceObj, targetObj );
+		return targetObj;
 	}
 	
-	
-	
-	
+	/******************** Test Classes ************************************/
 	
 	public static class TestClass implements Serializable{
 		private static final long serialVersionUID = 1L;
-		String str = "1234";
-		TestObj obj1 = new TestObj();
-		TestObj obj2 = new TestObj();
+		String str;
+		double decimal;
+		TestObj obj1;
+		TestObj obj2;
+		
+		public TestClass init(){
+			this.str = "1234";
+			this.decimal = 1.1;
+			this.obj1 = new TestObj().init();
+			this.obj2 = new TestObj().init();
+			return this;
+		}
 		
 		public boolean equals(Object obj){
 			return obj instanceof TestClass && 
-					this.str.equals(((TestClass)obj).str) && 
+					this.str.equals(((TestClass)obj).str) &&
+					this.decimal == ((TestClass)obj).decimal &&
 					this.obj1.equals(((TestClass)obj).obj1) &&
 					this.obj2.equals(((TestClass)obj).obj2);
 		}
 	}
 	
+	public static class TestClassObjClone{
+		TestObj obj1;
+		TestObj obj2;
+		
+		public TestClassObjClone init(){
+			this.obj1 = this.obj2 = new TestObj().init();
+			return this;
+		}
+		
+		public boolean equals(Object obj){
+			return obj instanceof TestClassObjClone && 
+					this.obj1.equals(((TestClass)obj).obj1) &&
+					this.obj1 == this.obj2 &&
+					((TestClass)obj).obj1 == ((TestClass)obj).obj2;
+		}
+	}
+	
 	public static class TestObj implements Serializable{
 		private static final long serialVersionUID = 1L;
-		int value = 42;
+		int value;
+		
+		public TestObj init(){
+			this.value = 42;
+			return this;
+		}
 		
 		public boolean equals(Object obj){
 			return obj instanceof TestObj && this.value == ((TestObj)obj).value;

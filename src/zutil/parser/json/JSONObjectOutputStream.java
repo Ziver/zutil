@@ -120,7 +120,7 @@ public class JSONObjectOutputStream extends OutputStream implements ObjectOutput
                 field.setAccessible(true);
                 // Add basic type (int, float...)
                 if(field.getType().isPrimitive() ||
-                        field.getType() == String.class){
+                		String.class.isAssignableFrom(field.getType())){
                     root.set(field.getName(), field.get(obj).toString());
                 }
                 // Add an array

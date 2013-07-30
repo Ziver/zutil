@@ -32,6 +32,8 @@ import java.lang.reflect.Modifier;
 import java.util.List;
 import java.util.Map;
 
+import javax.activation.UnsupportedDataTypeException;
+
 public class JSONObjectInputStream extends InputStream implements ObjectInput, Closeable{
     private JSONParser parser;
 
@@ -39,22 +41,27 @@ public class JSONObjectInputStream extends InputStream implements ObjectInput, C
 		this.parser = new JSONParser(in);
 	}
 
-    public Object readObject() throws ClassNotFoundException, IOException {
+    public Object readObject() throws IOException {
         try{
             DataNode root = parser.read();
             if(root != null){
-                readObject(root);
+                return readObject(root);
             }
+        // TODO: Fix Exceptions
         } catch (InstantiationException e) {
             e.printStackTrace();
         } catch (IllegalAccessException e) {
             e.printStackTrace();
-        }
+        } catch (IllegalArgumentException e) {
+			e.printStackTrace();
+		} catch (ClassNotFoundException e) {
+			e.printStackTrace();
+		}
         return null;
     }
 
-    protected static Object readObject(DataNode json) throws IllegalAccessException, InstantiationException, ClassNotFoundException {
-        Class objClass = Class.forName(json.getString("@class"));
+    protected static Object readObject(DataNode json) throws IllegalAccessException, InstantiationException, ClassNotFoundException, IllegalArgumentException, UnsupportedDataTypeException {
+        Class<?> objClass = Class.forName(json.getString("@class"));
         Object obj = objClass.newInstance();
 
         // Read all fields from the new object instance
@@ -65,16 +72,17 @@ public class JSONObjectInputStream extends InputStream implements ObjectInput, C
                 // Parse field
                 field.setAccessible(true);
                 field.set(obj, readValue(
-                        field.getDeclaringClass(),
+                        field.getType(),
                         json.get(field.getName())));
             }
         }
         return obj;
     }
 
-    protected static Object readValue(Class type, DataNode json) throws IllegalAccessException, ClassNotFoundException, InstantiationException {
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    protected static Object readValue(Class<?> type, DataNode json) throws IllegalAccessException, ClassNotFoundException, InstantiationException, UnsupportedDataTypeException {
         // Field type is a primitive?
-        if(type.isPrimitive()){
+        if(type.isPrimitive() || String.class.isAssignableFrom(type)){
             return readPrimitive(type, json);
         }
         else if(type.isArray()){
@@ -90,9 +98,9 @@ public class JSONObjectInputStream extends InputStream implements ObjectInput, C
         }
         else if(List.class.isAssignableFrom(type)){
             // TODO Add List Support
-            List list = (List)type.newInstance();
+			List list = (List)type.newInstance();
             for(int i=0; i<json.size(); i++){
-                list.add(readValue(null, json.get(i)));
+                list.add(readPrimitive(json.get(i)));
             }
             return list;
         }
@@ -101,8 +109,8 @@ public class JSONObjectInputStream extends InputStream implements ObjectInput, C
             Map map = (Map)type.newInstance();
             for(int i=0; i<json.size(); i++){
                 map.put(
-                        readValue(null, json.get(i)),
-                        readValue(null, json.get(i)));
+                		readPrimitive(json.get(i)),
+                		readPrimitive(json.get(i)));
             }
             return map;
         }
@@ -112,18 +120,25 @@ public class JSONObjectInputStream extends InputStream implements ObjectInput, C
         }
     }
 
+    /**
+     * Unknown type, this method will try to guess
+     */
+    protected static Object readPrimitive(DataNode json) throws UnsupportedDataTypeException{
+  		throw new UnsupportedDataTypeException("Complex datatype like Lists and Maps not supported");
+    }
+    
     protected static Object readPrimitive(Class<?> type, DataNode json){
-        //if     (type == Short.class)  return json.getShort();
-        if     (type == Integer.class) return json.getInt();
-        else if(type == Long.class)    return json.getLong();
+        if     (type == int.class ||
+        		type == Integer.class) return json.getInt();
+        else if(type == long.class ||
+        		type == Long.class)    return json.getLong();
+        
+        else if(type == double.class ||
+        		type == Double.class)  return json.getDouble();
 
-        //else if(type == Float.class) field.setFloat(obj, json.getFloat());
-        else if(type == Double.class)  return json.getDouble();
-
-        else if(type == Boolean.class) return json.getBoolean();
-        //else if(type == Character.class) return json.getChar();
+        else if(type == boolean.class || 
+        		type == Boolean.class) return json.getBoolean();
         else if(type == String.class)  return json.getString();
-        //else if(type == Byte.class) return Base64Decoder.decodeToByte(json.getString());
         return null;
     }
 
