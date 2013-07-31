@@ -34,23 +34,6 @@ import zutil.parser.json.JSONObjectOutputStream;
 
 public class JSONSerializerTest{
 
-    @Test
-    public void testOutputSerializer() throws InterruptedException, IOException, ClassNotFoundException{
-        TestClass sourceObj = new TestClass().init();
-
-        StringOutputStream bout = new StringOutputStream();
-        JSONObjectOutputStream out = new JSONObjectOutputStream(bout);
-        out.writeObject(sourceObj);
-        out.flush();
-        out.close();
-        String data = bout.toString();
-        System.out.println(data);
-
-        assertEquals(
-                "{\"str\": \"1234\", \"@class\": \"zutil.test.JSONSerializerTest$TestClass\", \"obj1\": {\"@class\": \"zutil.test.JSONSerializerTest$TestObj\", \"value\": \"42\", \"@object_id\": 2}, \"obj2\": {\"@class\": \"zutil.test.JSONSerializerTest$TestObj\", \"value\": \"42\", \"@object_id\": 3}, \"decimal\": \"1.1\", \"@object_id\": 1}",
-                data);
-    }
-
 	@Test
 	public void testJavaLegacySerialize() throws InterruptedException, IOException, ClassNotFoundException{
 		TestClass sourceObj = new TestClass().init();
@@ -70,6 +53,18 @@ public class JSONSerializerTest{
 		assertEquals( sourceObj, targetObj );
 	}
 	
+    @Test
+    public void testOutputSerializerWithPrimitives() throws InterruptedException, IOException, ClassNotFoundException{
+        TestClass sourceObj = new TestClass().init();
+
+        String data = writeObjectToJson(sourceObj);
+        data = data.replace("\"", "'");
+
+        assertEquals(
+        		"{'str': '1234', '@class': 'zutil.test.JSONSerializerTest$TestClass', 'obj1': {'@class': 'zutil.test.JSONSerializerTest$TestObj', 'value': '42', '@object_id': 2}, 'obj2': {'@class': 'zutil.test.JSONSerializerTest$TestObj', 'value': '42', '@object_id': 3}, 'decimal': '1.1', '@object_id': 1}",
+                data);
+    }
+	
 	@Test
 	public void testInputSerializerWithPrimitives() throws InterruptedException, IOException, ClassNotFoundException{
 		TestClass sourceObj = new TestClass().init();
@@ -78,6 +73,18 @@ public class JSONSerializerTest{
 		
 		assertEquals( sourceObj, targetObj );
 	}
+	
+    @Test
+    public void testOutputSerializerWithClones() throws InterruptedException, IOException, ClassNotFoundException{
+    	TestClassObjClone sourceObj = new TestClassObjClone().init();
+
+        String data = writeObjectToJson(sourceObj);
+        data = data.replace("\"", "'");
+
+        assertEquals(
+                "{'@class': 'zutil.test.JSONSerializerTest$TestClassObjClone', 'obj1': {'@class': 'zutil.test.JSONSerializerTest$TestObj', 'value': '42', '@object_id': 2}, 'obj2': {'@class': 'zutil.test.JSONSerializerTest$TestObj', '@object_id': 2}, '@object_id': 1}",
+                data);
+    }
 	
 	@Test
 	public void testInputSerializerWithClones() throws InterruptedException, IOException, ClassNotFoundException{
@@ -93,23 +100,33 @@ public class JSONSerializerTest{
 
 	/******************* Utility Functions ************************************/
 	
+	private static <T> T sendReceiveObject(T sourceObj) throws IOException{ 
+		return readObjectFromJson(
+				writeObjectToJson(sourceObj));
+	}
+	
 	@SuppressWarnings("unchecked")
-	private static <T> T sendReceiveObject(T sourceObj) throws IOException{
-		// Send
-		StringOutputStream bout = new StringOutputStream();
-		JSONObjectOutputStream out = new JSONObjectOutputStream(bout);
-		out.writeObject(sourceObj);
-		out.flush();
-		out.close();
-		String data = bout.toString();
-        System.out.println(data);
-		
-        // Receive
-		StringReader bin = new StringReader(data);
+	private static <T> T readObjectFromJson(String json) throws IOException{
+		StringReader bin = new StringReader(json);
 		JSONObjectInputStream in = new JSONObjectInputStream(bin);
 		T targetObj = (T) in.readObject();
 		in.close();
+		
 		return targetObj;
+	}
+	
+	private static <T> String writeObjectToJson(T sourceObj) throws IOException{
+		StringOutputStream bout = new StringOutputStream();
+		JSONObjectOutputStream out = new JSONObjectOutputStream(bout);
+		
+		out.writeObject(sourceObj);
+		out.flush();
+		out.close();
+		
+		String data = bout.toString();
+        System.out.println(data);
+        
+        return data;
 	}
 	
 	/******************** Test Classes ************************************/
@@ -149,9 +166,9 @@ public class JSONSerializerTest{
 		
 		public boolean equals(Object obj){
 			return obj instanceof TestClassObjClone && 
-					this.obj1.equals(((TestClass)obj).obj1) &&
+					this.obj1.equals(((TestClassObjClone)obj).obj1) &&
 					this.obj1 == this.obj2 &&
-					((TestClass)obj).obj1 == ((TestClass)obj).obj2;
+					((TestClassObjClone)obj).obj1 == ((TestClassObjClone)obj).obj2;
 		}
 	}
 	

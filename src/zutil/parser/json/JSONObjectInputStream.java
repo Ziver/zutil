@@ -29,6 +29,7 @@ import java.io.*;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -36,9 +37,11 @@ import javax.activation.UnsupportedDataTypeException;
 
 public class JSONObjectInputStream extends InputStream implements ObjectInput, Closeable{
     private JSONParser parser;
+    private HashMap<Integer, Object> objCache;
 
 	public JSONObjectInputStream(Reader in) {
 		this.parser = new JSONParser(in);
+		this.objCache = new HashMap<Integer, Object>();
 	}
 
     public Object readObject() throws IOException {
@@ -56,12 +59,18 @@ public class JSONObjectInputStream extends InputStream implements ObjectInput, C
 			e.printStackTrace();
 		} catch (ClassNotFoundException e) {
 			e.printStackTrace();
+		} finally {
+			objCache.clear();
 		}
         return null;
     }
 
-    protected static Object readObject(DataNode json) throws IllegalAccessException, InstantiationException, ClassNotFoundException, IllegalArgumentException, UnsupportedDataTypeException {
-        Class<?> objClass = Class.forName(json.getString("@class"));
+    protected Object readObject(DataNode json) throws IllegalAccessException, InstantiationException, ClassNotFoundException, IllegalArgumentException, UnsupportedDataTypeException {
+        // See if the Object id is in the cache before continuing
+    	if(json.getString("@object_id") != null && objCache.containsKey(json.getInt("@object_id")))
+        	return objCache.get(json.getInt("@object_id"));
+    	
+    	Class<?> objClass = Class.forName(json.getString("@class"));
         Object obj = objClass.newInstance();
 
         // Read all fields from the new object instance
@@ -76,11 +85,14 @@ public class JSONObjectInputStream extends InputStream implements ObjectInput, C
                         json.get(field.getName())));
             }
         }
+        // Add object to the cache
+        if(json.getString("@object_id") != null)
+        	objCache.put(json.getInt("@object_id"), obj);
         return obj;
     }
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
-    protected static Object readValue(Class<?> type, DataNode json) throws IllegalAccessException, ClassNotFoundException, InstantiationException, UnsupportedDataTypeException {
+    protected Object readValue(Class<?> type, DataNode json) throws IllegalAccessException, ClassNotFoundException, InstantiationException, UnsupportedDataTypeException {
         // Field type is a primitive?
         if(type.isPrimitive() || String.class.isAssignableFrom(type)){
             return readPrimitive(type, json);
