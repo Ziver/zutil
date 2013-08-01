@@ -20,16 +20,17 @@
  * THE SOFTWARE.
  */
 
-package zutil.zutil.osal;
+package zutil.osal;
 
 import java.io.File;
+import java.io.IOException;
 
 /**
  * User: ezivkoc
  */
 public class OsalWindowsImpl extends OSAbstractionLayer {
     @Override
-    public String getOSType() {
+    public OSType getOSType() {
         return null;  //To change body of implemented methods use File | Settings | File Templates.
     }
 
@@ -45,7 +46,12 @@ public class OsalWindowsImpl extends OSAbstractionLayer {
 
     @Override
     public String getKernelVersion() {
-        return runCommand("ver");
+        try {
+            return runCommand("ver");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
     @Override

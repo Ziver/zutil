@@ -22,6 +22,8 @@
 
 package zutil.parser.json;
 
+import sun.misc.ClassLoaderUtil;
+import zutil.ClassUtil;
 import zutil.parser.DataNode;
 import zutil.parser.DataNode.DataType;
 
@@ -100,58 +102,65 @@ public class JSONObjectOutputStream extends OutputStream implements ObjectOutput
     }
 
     protected DataNode getDataNode(Object obj) throws IOException, IllegalArgumentException, IllegalAccessException {
-        //if(!(obj instanceof Serializable))
-        //    throw new UnSerializable
-    	
-        DataNode root = new DataNode(DataNode.DataType.Map);
-        // Generate meta data
-        if(generateMetaData){
-            // Cache
-            if(objectCache.containsKey(obj)){ // Hit
-                root.set("@object_id", objectCache.get(obj));
-                return root;
-            }
-            else{ // Miss
-                objectCache.put(obj, objectCache.size()+1);
-                root.set("@object_id", objectCache.size());
-            }
-            root.set("@class", obj.getClass().getName());
+        DataNode root = null;
+
+        // Check if the object is a primitive
+        if(ClassUtil.isPrimitive(obj.getClass()) ||
+                ClassUtil.isWrapper(obj.getClass())){
+            root = getPrimitiveDataNode(obj.getClass(), obj);
         }
-        // Add all the fields to the DataNode
-        for(Field field : obj.getClass().getDeclaredFields()){
-            if((field.getModifiers() & Modifier.STATIC) == 0 &&
-                    (field.getModifiers() & Modifier.TRANSIENT) == 0){
-                field.setAccessible(true);
-                // Add basic type (int, float...)
-                if(field.getType().isPrimitive() ||
-                		String.class.isAssignableFrom(field.getType())){
-                    root.set(field.getName(), getPrimitiveDataNode(field, obj));
+        // Object is a complex data type
+    	else {
+            root = new DataNode(DataNode.DataType.Map);
+            // Generate meta data
+            if(generateMetaData){
+                // Cache
+                if(objectCache.containsKey(obj)){ // Hit
+                    root.set("@object_id", objectCache.get(obj));
+                    return root;
                 }
-                // Add an array
-                else if(field.getType().isArray()){
-                    DataNode arrayNode = new DataNode(DataNode.DataType.List);
-                    Object array = field.get(obj);
-                    for(int i=0; i< Array.getLength(array) ;i++){
-                        arrayNode.add(Array.get(array, i).toString());
+                else{ // Miss
+                    objectCache.put(obj, objectCache.size()+1);
+                    root.set("@object_id", objectCache.size());
+                }
+                root.set("@class", obj.getClass().getName());
+            }
+            // Add all the fields to the DataNode
+            for(Field field : obj.getClass().getDeclaredFields()){
+                if((field.getModifiers() & Modifier.STATIC) == 0 &&
+                        (field.getModifiers() & Modifier.TRANSIENT) == 0){
+                    field.setAccessible(true);
+
+                    // Add basic type (int, float...)
+                    if(ClassUtil.isPrimitive(field.getType()) ||
+                            ClassUtil.isWrapper(field.getType())){
+                        root.set(field.getName(), getPrimitiveDataNode(field.getType(), field.get(obj)));
                     }
-                    root.set(field.getName(), arrayNode);
-                }
-                else if(List.class.isAssignableFrom(field.getType())){
-                    // TODO Add List Support
-                }
-                else if(Map.class.isAssignableFrom(field.getType())){
-                    // TODO Add Map Support
-                }
-                else{
-                    root.set(field.getName(), getDataNode(field.get(obj)));
+                    // Add an array
+                    else if(field.getType().isArray()){
+                        DataNode arrayNode = new DataNode(DataNode.DataType.List);
+                        Object array = field.get(obj);
+                        for(int i=0; i< Array.getLength(array) ;i++){
+                            arrayNode.add(getDataNode(Array.get(array, i)));
+                        }
+                        root.set(field.getName(), arrayNode);
+                    }
+                    else if(List.class.isAssignableFrom(field.getType())){
+                        // TODO Add List Support
+                    }
+                    else if(Map.class.isAssignableFrom(field.getType())){
+                        // TODO Add Map Support
+                    }
+                    else{
+                        root.set(field.getName(), getDataNode(field.get(obj)));
+                    }
                 }
             }
         }
         return root;
     }
 
-    private DataNode getPrimitiveDataNode(Field field, Object obj) throws UnsupportedDataTypeException, IllegalArgumentException, IllegalAccessException {
-    	Class<?> type = field.getType();
+    private DataNode getPrimitiveDataNode(Class<?> type, Object value) throws UnsupportedDataTypeException, IllegalArgumentException, IllegalAccessException {
     	DataNode node = null;
         if     (type == int.class ||
         		type == Integer.class ||
@@ -172,7 +181,7 @@ public class JSONObjectOutputStream extends OutputStream implements ObjectOutput
         else
         	throw new UnsupportedDataTypeException("Unsupported primitive data type: "+type.getName());
         
-    	node.set(field.get(obj).toString());
+    	node.set(value.toString());
 		return node;
 	}
 

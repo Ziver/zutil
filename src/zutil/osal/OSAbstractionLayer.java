@@ -20,7 +20,7 @@
  * THE SOFTWARE.
  */
 
-package zutil.zutil.osal;
+package zutil.osal;
 
 import java.io.BufferedReader;
 import java.io.File;

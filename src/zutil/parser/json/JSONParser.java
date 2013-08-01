@@ -128,7 +128,6 @@ public class JSONParser{
                 }
                 // Check what type of type the data is
                 String data = tmp.toString();
-                System.out.println("\""+data+"\"");
                 if( BOOLEAN_PATTERN.matcher(data).matches() )
                 	root = new DataNode(DataType.Boolean);
                 else if( NUMBER_PATTERN.matcher(data).matches() )

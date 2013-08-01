@@ -25,6 +25,7 @@ package zutil.test;
 import static org.junit.Assert.assertEquals;
 
 import java.io.*;
+import java.util.Arrays;
 
 import org.junit.Test;
 
@@ -61,7 +62,7 @@ public class JSONSerializerTest{
         data = data.replace("\"", "'");
 
         assertEquals(
-        		"{'str': 'abcd', '@class': 'zutil.test.JSONSerializerTest$TestClass', 'obj1': {'@class': 'zutil.test.JSONSerializerTest$TestObj', 'value': 42, '@object_id': 2}, 'obj2': {'@class': 'zutil.test.JSONSerializerTest$TestObj', 'value': 42, '@object_id': 3}, 'decimal': 1.1, '@object_id': 1}",
+                "{'str': 'abcd', '@class': 'zutil.test.JSONSerializerTest$TestClass', 'obj1': {'@class': 'zutil.test.JSONSerializerTest$TestObj', 'value': 42, '@object_id': 2}, 'obj2': {'@class': 'zutil.test.JSONSerializerTest$TestObj', 'value': 42, '@object_id': 3}, 'decimal': 1.1, '@object_id': 1}",
                 data);
     }
 	
@@ -94,6 +95,27 @@ public class JSONSerializerTest{
 		
 		assertEquals( sourceObj, targetObj );
 	}
+
+    @Test
+    public void testOutputSerializerWithArrays() throws InterruptedException, IOException, ClassNotFoundException{
+        TestClassArray sourceObj = new TestClassArray().init();
+
+        String data = writeObjectToJson(sourceObj);
+        data = data.replace("\"", "'");
+
+        assertEquals(
+                "{'@class': 'zutil.test.JSONSerializerTest$TestClassArray', 'array': [1, 2, 3, 4], '@object_id': 1}",
+                data);
+    }
+
+    @Test
+    public void testInputSerializerWithArrays() throws InterruptedException, IOException, ClassNotFoundException{
+        TestClassArray sourceObj = new TestClassArray().init();
+
+        TestClassArray targetObj = sendReceiveObject(sourceObj);
+
+        assertEquals( sourceObj, targetObj );
+    }
 	
 	
 	
@@ -182,7 +204,22 @@ public class JSONSerializerTest{
 		}
 		
 		public boolean equals(Object obj){
-			return obj instanceof TestObj && this.value == ((TestObj)obj).value;
+			return obj instanceof TestObj &&
+                    this.value == ((TestObj)obj).value;
 		}
 	}
+
+    public static class TestClassArray{
+        private int[] array;
+
+        public TestClassArray init(){
+            array = new int[]{1,2,3,4};
+            return this;
+        }
+
+        public boolean equals(Object obj){
+            return obj instanceof TestClassArray &&
+                    Arrays.equals(this.array ,((TestClassArray)obj).array);
+        }
+    }
 }
