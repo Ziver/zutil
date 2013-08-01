@@ -29,6 +29,7 @@ import static org.junit.Assert.assertNull;
 import org.junit.Test;
 
 import zutil.parser.DataNode;
+import zutil.parser.DataNode.DataType;
 import zutil.parser.json.JSONParser;
 
 
@@ -61,12 +62,45 @@ public class JSONTest{
     }
 
     @Test
-    public void number(){
+    public void valueInt(){
         DataNode data = JSONParser.read("1234");
         assert(data.isValue());
+        assertEquals( DataType.Number, data.getType());
         assertEquals( 1234, data.getInt());
     }
 
+    @Test
+    public void valueDouble(){
+        DataNode data = JSONParser.read("12.34");
+        assert(data.isValue());
+        assertEquals( DataType.Number, data.getType());
+        assertEquals( 12.34, data.getDouble(), 0);
+    }
+    
+    @Test
+    public void valueBoolean(){
+        DataNode data = JSONParser.read("false");
+        assert(data.isValue());
+        assertEquals( DataType.Boolean, data.getType());
+        assertEquals( false, data.getBoolean());
+    }
+    
+    @Test
+    public void valueBooleanUpperCase(){
+        DataNode data = JSONParser.read("TRUE");
+        assert(data.isValue());
+        assertEquals( DataType.Boolean, data.getType());
+        assertEquals( true, data.getBoolean());
+    }
+    
+    @Test
+    public void valueStringNoQuotes(){
+        DataNode data = JSONParser.read("teststring");
+        assert(data.isValue());
+        assertEquals( DataType.String, data.getType());
+        assertEquals( "teststring", data.getString());
+    }
+    
     @Test
     public void toManyCommasInList(){
         DataNode data = JSONParser.read("[1,2,3,]");

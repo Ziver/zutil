@@ -22,12 +22,12 @@
 
 package zutil.parser.json;
 
-import zutil.io.StringInputStream;
 import zutil.parser.DataNode;
 import zutil.parser.DataNode.DataType;
 import zutil.struct.MutableInt;
 
 import java.io.*;
+import java.util.regex.Pattern;
 
 /**
  * This is a JSON parser class
@@ -35,6 +35,9 @@ import java.io.*;
  * @author Ziver
  */
 public class JSONParser{
+	public static final Pattern NUMBER_PATTERN = Pattern.compile("^[0-9.]++$");
+	public static final Pattern BOOLEAN_PATTERN = Pattern.compile("^(true|false)$", Pattern.CASE_INSENSITIVE);
+	
     private Reader in;
 
     public JSONParser(Reader in){
@@ -112,19 +115,27 @@ public class JSONParser{
                     str.append(c);
                 root.set(str.toString());
                 break;
-            // Parse Number
+            // Parse unknown type
             default:
-                root = new DataNode(DataType.Number);
-                StringBuilder num = new StringBuilder().append(c);
+                StringBuilder tmp = new StringBuilder().append(c);
                 while((c=(char)in.read()) != (char)-1 && !Character.isWhitespace(c) &&
                         c != ',' && c != '='){
                     if(c == ']' || c == '}'){
                         end.i = 1;
                         break;
                     }
-                    num.append(c);
+                    tmp.append(c);
                 }
-                root.set(num.toString());
+                // Check what type of type the data is
+                String data = tmp.toString();
+                System.out.println("\""+data+"\"");
+                if( BOOLEAN_PATTERN.matcher(data).matches() )
+                	root = new DataNode(DataType.Boolean);
+                else if( NUMBER_PATTERN.matcher(data).matches() )
+                	root = new DataNode(DataType.Number);
+                else 
+                	root = new DataNode(DataType.String);
+                root.set(data);
                 break;
         }
 

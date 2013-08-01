@@ -23,6 +23,7 @@
 package zutil.parser.json;
 
 import zutil.parser.DataNode;
+import zutil.parser.DataNode.DataType;
 
 import java.io.*;
 import java.lang.reflect.Array;
@@ -31,6 +32,8 @@ import java.lang.reflect.Modifier;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import javax.activation.UnsupportedDataTypeException;
 
 public class JSONObjectOutputStream extends OutputStream implements ObjectOutput, Closeable{
     private boolean generateMetaData;
@@ -96,13 +99,13 @@ public class JSONObjectOutputStream extends OutputStream implements ObjectOutput
         }
     }
 
-    protected DataNode getDataNode(Object obj) throws IllegalAccessException {
+    protected DataNode getDataNode(Object obj) throws IOException, IllegalArgumentException, IllegalAccessException {
         //if(!(obj instanceof Serializable))
         //    throw new UnSerializable
+    	
         DataNode root = new DataNode(DataNode.DataType.Map);
         // Generate meta data
         if(generateMetaData){
-            root.set("@class", obj.getClass().getName());
             // Cache
             if(objectCache.containsKey(obj)){ // Hit
                 root.set("@object_id", objectCache.get(obj));
@@ -112,6 +115,7 @@ public class JSONObjectOutputStream extends OutputStream implements ObjectOutput
                 objectCache.put(obj, objectCache.size()+1);
                 root.set("@object_id", objectCache.size());
             }
+            root.set("@class", obj.getClass().getName());
         }
         // Add all the fields to the DataNode
         for(Field field : obj.getClass().getDeclaredFields()){
@@ -121,7 +125,7 @@ public class JSONObjectOutputStream extends OutputStream implements ObjectOutput
                 // Add basic type (int, float...)
                 if(field.getType().isPrimitive() ||
                 		String.class.isAssignableFrom(field.getType())){
-                    root.set(field.getName(), field.get(obj).toString());
+                    root.set(field.getName(), getPrimitiveDataNode(field, obj));
                 }
                 // Add an array
                 else if(field.getType().isArray()){
@@ -146,7 +150,33 @@ public class JSONObjectOutputStream extends OutputStream implements ObjectOutput
         return root;
     }
 
-    @Override
+    private DataNode getPrimitiveDataNode(Field field, Object obj) throws UnsupportedDataTypeException, IllegalArgumentException, IllegalAccessException {
+    	Class<?> type = field.getType();
+    	DataNode node = null;
+        if     (type == int.class ||
+        		type == Integer.class ||
+        		type == long.class ||
+        		type == Long.class ||
+		        type == double.class ||
+        		type == Double.class)
+        	node = new DataNode(DataType.Number);
+
+        else if(type == boolean.class || 
+        		type == Boolean.class)
+        	node = new DataNode(DataType.Boolean);
+        
+        else if(type == String.class ||
+        		type == char.class ||
+        		type == Character.class)
+        	node = new DataNode(DataType.String);
+        else
+        	throw new UnsupportedDataTypeException("Unsupported primitive data type: "+type.getName());
+        
+    	node.set(field.get(obj).toString());
+		return node;
+	}
+
+	@Override
     public void write(int b) throws IOException {
         // TODO:
     }

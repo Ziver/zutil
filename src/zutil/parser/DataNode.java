@@ -188,43 +188,47 @@ public class DataNode implements Iterable<DataNode>{
 		map.put(key, new DataNode(value));
 	}
 	/**
-	 * Sets the value of the node, but only if it is setup as an JSONType.Value
+	 * Sets the value of the node
+	 * @exception NullPointerException 	if the node is setup as anything other than a DataType.Number
 	 */
 	public void set(int value){
-		if( !this.isValue() ) throw new NullPointerException("The node is not setup as a value");
-		type = DataType.Number;
+		if( this.type != DataType.Number ) 
+			throw new NullPointerException("The node is not setup as a DataType.Number");
 		this.value = ""+value;
 	}
 	/**
-	 * Sets the value of the node, but only if it is setup as an JSONType.Value
+	 * Sets the value of the node
+	 * @exception NullPointerException 	if the node is setup as anything other than a DataType.Number
 	 */
 	public void set(double value){
-		if( !this.isValue() ) throw new NullPointerException("The node is not setup as a value");
-		type = DataType.Number;
+		if( this.type != DataType.Number ) 
+			throw new NullPointerException("The node is not setup as a DataType.Number");
 		this.value = ""+value;
 	}
 	/**
-	 * Sets the value of the node, but only if it is setup as an JSONType.Value
+	 * Sets the value of the node
+	 * @exception NullPointerException 	if the node is setup as anything other than a DataType.Boolean
 	 */
 	public void set(boolean value){
-		if( !this.isValue() ) throw new NullPointerException("The node is not setup as a value");
-		type = DataType.Boolean;
+		if( this.type != DataType.Boolean ) 
+			throw new NullPointerException("The node is not setup as a DataType.Boolean");
 		this.value = ""+value;
 	}
 	/**
-	 * Sets the value of the node, but only if it is setup as an JSONType.Value
+	 * Sets the value of the node, but only
+	 * @exception NullPointerException 	if the node is setup as anything other than a DataType.Number
 	 */
 	public void set(long value){
-		if( !this.isValue() ) throw new NullPointerException("The node is not setup as a value");
-		type = DataType.Number;
+		if( this.type != DataType.Number ) 
+			throw new NullPointerException("The node is not setup as a DataType.Number");
 		this.value = ""+value;
 	}
 	/**
-	 * Sets the value of the node, but only if it is setup as an JSONType.Value
+	 * Sets the value of the node
+	 * @exception NullPointerException 	if the method DataType.isValue() returns false
 	 */
 	public void set(String value){
-		if( !this.isValue() ) throw new NullPointerException("The node is not setup as a value");
-		type = DataType.String;
+		if( !this.isValue() ) throw new NullPointerException("The node is not setup as a value node");
 		this.value = value;
 	}
 

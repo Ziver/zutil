@@ -61,7 +61,7 @@ public class JSONSerializerTest{
         data = data.replace("\"", "'");
 
         assertEquals(
-        		"{'str': '1234', '@class': 'zutil.test.JSONSerializerTest$TestClass', 'obj1': {'@class': 'zutil.test.JSONSerializerTest$TestObj', 'value': '42', '@object_id': 2}, 'obj2': {'@class': 'zutil.test.JSONSerializerTest$TestObj', 'value': '42', '@object_id': 3}, 'decimal': '1.1', '@object_id': 1}",
+        		"{'str': 'abcd', '@class': 'zutil.test.JSONSerializerTest$TestClass', 'obj1': {'@class': 'zutil.test.JSONSerializerTest$TestObj', 'value': 42, '@object_id': 2}, 'obj2': {'@class': 'zutil.test.JSONSerializerTest$TestObj', 'value': 42, '@object_id': 3}, 'decimal': 1.1, '@object_id': 1}",
                 data);
     }
 	
@@ -82,7 +82,7 @@ public class JSONSerializerTest{
         data = data.replace("\"", "'");
 
         assertEquals(
-                "{'@class': 'zutil.test.JSONSerializerTest$TestClassObjClone', 'obj1': {'@class': 'zutil.test.JSONSerializerTest$TestObj', 'value': '42', '@object_id': 2}, 'obj2': {'@class': 'zutil.test.JSONSerializerTest$TestObj', '@object_id': 2}, '@object_id': 1}",
+                "{'@class': 'zutil.test.JSONSerializerTest$TestClassObjClone', 'obj1': {'@class': 'zutil.test.JSONSerializerTest$TestObj', 'value': 42, '@object_id': 2}, 'obj2': {'@object_id': 2}, '@object_id': 1}",
                 data);
     }
 	
@@ -139,7 +139,7 @@ public class JSONSerializerTest{
 		TestObj obj2;
 		
 		public TestClass init(){
-			this.str = "1234";
+			this.str = "abcd";
 			this.decimal = 1.1;
 			this.obj1 = new TestObj().init();
 			this.obj2 = new TestObj().init();
