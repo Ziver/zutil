@@ -35,25 +35,6 @@ import zutil.parser.json.JSONObjectOutputStream;
 
 public class JSONSerializerTest{
 
-	@Test
-	public void testJavaLegacySerialize() throws InterruptedException, IOException, ClassNotFoundException{
-		TestClass sourceObj = new TestClass().init();
-		
-		ByteArrayOutputStream bout = new ByteArrayOutputStream();
-		ObjectOutputStream out = new ObjectOutputStream(bout);
-		out.writeObject(sourceObj);
-		out.flush();
-		out.close();
-		byte[] data = bout.toByteArray();
-		
-		ByteArrayInputStream bin = new ByteArrayInputStream(data);
-		ObjectInputStream in = new ObjectInputStream(bin);
-		TestClass targetObj = (TestClass) in.readObject();
-		in.close();
-		
-		assertEquals( sourceObj, targetObj );
-	}
-	
     @Test
     public void testOutputSerializerWithPrimitives() throws InterruptedException, IOException, ClassNotFoundException{
         TestClass sourceObj = new TestClass().init();
@@ -116,19 +97,26 @@ public class JSONSerializerTest{
 
         assertEquals( sourceObj, targetObj );
     }
-	
-	
+
+    @Test
+    public void testInputSerializerWithStringArrays() throws InterruptedException, IOException, ClassNotFoundException{
+        TestClassStringArray sourceObj = new TestClassStringArray().init();
+
+        TestClassStringArray targetObj = sendReceiveObject(sourceObj);
+
+        assertEquals( sourceObj, targetObj );
+    }
 	
 
 	/******************* Utility Functions ************************************/
 	
-	private static <T> T sendReceiveObject(T sourceObj) throws IOException{ 
+	public static <T> T sendReceiveObject(T sourceObj) throws IOException{
 		return readObjectFromJson(
 				writeObjectToJson(sourceObj));
 	}
 	
 	@SuppressWarnings("unchecked")
-	private static <T> T readObjectFromJson(String json) throws IOException{
+    public static <T> T readObjectFromJson(String json) throws IOException{
 		StringReader bin = new StringReader(json);
 		JSONObjectInputStream in = new JSONObjectInputStream(bin);
 		T targetObj = (T) in.readObject();
@@ -136,8 +124,8 @@ public class JSONSerializerTest{
 		
 		return targetObj;
 	}
-	
-	private static <T> String writeObjectToJson(T sourceObj) throws IOException{
+
+    public static <T> String writeObjectToJson(T sourceObj) throws IOException{
 		StringOutputStream bout = new StringOutputStream();
 		JSONObjectOutputStream out = new JSONObjectOutputStream(bout);
 		
@@ -146,7 +134,7 @@ public class JSONSerializerTest{
 		out.close();
 		
 		String data = bout.toString();
-        System.out.println(data);
+        //System.out.println(data);
         
         return data;
 	}
@@ -220,6 +208,20 @@ public class JSONSerializerTest{
         public boolean equals(Object obj){
             return obj instanceof TestClassArray &&
                     Arrays.equals(this.array ,((TestClassArray)obj).array);
+        }
+    }
+
+    public static class TestClassStringArray{
+        private String[] array;
+
+        public TestClassStringArray init(){
+            array = new String[]{"test","string","array"};
+            return this;
+        }
+
+        public boolean equals(Object obj){
+            return obj instanceof TestClassStringArray &&
+                    Arrays.equals(this.array ,((TestClassStringArray)obj).array);
         }
     }
 }

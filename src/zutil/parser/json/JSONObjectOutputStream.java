@@ -89,6 +89,11 @@ public class JSONObjectOutputStream extends OutputStream implements ObjectOutput
         out.write(new DataNode(s));
     }
 
+    @Override
+    public void write(int b) throws IOException {
+        out.write(new DataNode(b));
+    }
+
     public void writeUTF(String s) throws IOException {
         out.write(new DataNode(s));
     }
@@ -98,6 +103,8 @@ public class JSONObjectOutputStream extends OutputStream implements ObjectOutput
             out.write(getDataNode(obj));
         } catch (IllegalAccessException e) {
             throw new IOException("Unable to serialize object", e);
+        } finally {
+            objectCache.clear();
         }
     }
 
@@ -185,11 +192,6 @@ public class JSONObjectOutputStream extends OutputStream implements ObjectOutput
 		return node;
 	}
 
-	@Override
-    public void write(int b) throws IOException {
-        // TODO:
-    }
-
     /**
      * Enable or disables the use of meta data in the JSON
      * stream for class def and caching.
@@ -198,13 +200,6 @@ public class JSONObjectOutputStream extends OutputStream implements ObjectOutput
      */
     public void generateMetaData(boolean generate){
         generateMetaData = generate;
-    }
-
-    /**
-     * Reset the Object stream (clears the cache)
-     */
-    public void reset(){
-        objectCache.clear();
     }
 
 }

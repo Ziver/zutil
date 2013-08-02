@@ -37,11 +37,11 @@ import javax.activation.UnsupportedDataTypeException;
 
 public class JSONObjectInputStream extends InputStream implements ObjectInput, Closeable{
     private JSONParser parser;
-    private HashMap<Integer, Object> objCache;
+    private HashMap<Integer, Object> objectCache;
 
 	public JSONObjectInputStream(Reader in) {
 		this.parser = new JSONParser(in);
-		this.objCache = new HashMap<Integer, Object>();
+		this.objectCache = new HashMap<Integer, Object>();
 	}
 
     public Object readObject() throws IOException {
@@ -60,15 +60,15 @@ public class JSONObjectInputStream extends InputStream implements ObjectInput, C
 		} catch (ClassNotFoundException e) {
 			e.printStackTrace();
 		} finally {
-			objCache.clear();
+			objectCache.clear();
 		}
         return null;
     }
 
     protected Object readObject(DataNode json) throws IllegalAccessException, InstantiationException, ClassNotFoundException, IllegalArgumentException, UnsupportedDataTypeException {
         // See if the Object id is in the cache before continuing
-    	if(json.getString("@object_id") != null && objCache.containsKey(json.getInt("@object_id")))
-        	return objCache.get(json.getInt("@object_id"));
+    	if(json.getString("@object_id") != null && objectCache.containsKey(json.getInt("@object_id")))
+        	return objectCache.get(json.getInt("@object_id"));
     	
     	Class<?> objClass = Class.forName(json.getString("@class"));
         Object obj = objClass.newInstance();
@@ -87,7 +87,7 @@ public class JSONObjectInputStream extends InputStream implements ObjectInput, C
         }
         // Add object to the cache
         if(json.getString("@object_id") != null)
-        	objCache.put(json.getInt("@object_id"), obj);
+        	objectCache.put(json.getInt("@object_id"), obj);
         return obj;
     }
 
