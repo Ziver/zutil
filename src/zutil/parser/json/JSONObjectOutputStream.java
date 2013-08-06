@@ -22,7 +22,6 @@
 
 package zutil.parser.json;
 
-import sun.misc.ClassLoaderUtil;
 import zutil.ClassUtil;
 import zutil.parser.DataNode;
 import zutil.parser.DataNode.DataType;
@@ -109,7 +108,7 @@ public class JSONObjectOutputStream extends OutputStream implements ObjectOutput
     }
 
     protected DataNode getDataNode(Object obj) throws IOException, IllegalArgumentException, IllegalAccessException {
-        DataNode root = null;
+        DataNode root;
 
         // Check if the object is a primitive
         if(ClassUtil.isPrimitive(obj.getClass()) ||
@@ -168,7 +167,7 @@ public class JSONObjectOutputStream extends OutputStream implements ObjectOutput
     }
 
     private DataNode getPrimitiveDataNode(Class<?> type, Object value) throws UnsupportedDataTypeException, IllegalArgumentException, IllegalAccessException {
-    	DataNode node = null;
+    	DataNode node;
         if     (type == int.class ||
         		type == Integer.class ||
         		type == long.class ||
@@ -202,4 +201,8 @@ public class JSONObjectOutputStream extends OutputStream implements ObjectOutput
         generateMetaData = generate;
     }
 
+    public void flush() throws IOException {
+        super.flush();
+        out.flush();
+    }
 }

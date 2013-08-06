@@ -31,14 +31,11 @@ import zutil.net.ws.WSInterface;
 import zutil.net.ws.WSInterface.*;
 import zutil.net.ws.WSReturnObject;
 import zutil.net.ws.WebServiceDef;
-import zutil.parser.wsdl.WSDLWriterOld;
 import zutil.parser.wsdl.WSDLWriter;
 
 
 public class SOAPTest {
-	//*******************************************************************************************
-	//**************************** TEST *********************************************************
-
+    /************************* TEST CASES ************************/
 	public static void main(String[] args){
 		new SOAPTest();
 	}
@@ -47,7 +44,7 @@ public class SOAPTest {
 		WebServiceDef wsDef = new WebServiceDef( MainSOAPClass.class );
 		SOAPHttpPage soap = new SOAPHttpPage( wsDef );
 		
-		WSDLWriterOld wsdl = new WSDLWriterOld( wsDef );
+		WSDLWriter wsdl = new WSDLWriter( wsDef );
 		wsdl.write(System.out);
 		System.out.println( "****************** new *********************" );	
 		WSDLWriter wsdl2 = new WSDLWriter( wsDef );
@@ -80,7 +77,9 @@ public class SOAPTest {
 			e.printStackTrace();
 		}
 	}
-	
+
+    /************************* TEST CLASSES ************************/
+    @SuppressWarnings("unused")
 	public static class SpecialReturnClass extends WSReturnObject{
 		@WSValueName(value="otherValue1")
 		public String param1 = "otherValue1";
@@ -89,18 +88,21 @@ public class SOAPTest {
 		public byte[] b = new byte[]{0x12, 0x23};
 		public InnerClass inner = new InnerClass();
 	}
-	
+
+    @SuppressWarnings("unused")
 	public static class InnerClass extends WSReturnObject{
 		public String innerClassParam1 = "innerClass1";
 		public String innerClassParam2 = "innerClass2";
 	}
 
+    @SuppressWarnings("unused")
 	public static class SimpleReturnClass extends WSReturnObject{
 		@WSValueName("otherParam1")
 		public String param1 = "param1";
 		public String param2 = "param2";
 	}
 
+    @SuppressWarnings("unused")
 	@WSNamespace("http://test.se:8080/")
 	public static class MainSOAPClass implements WSInterface{
 		public MainSOAPClass(){}
@@ -147,7 +149,7 @@ public class SOAPTest {
 		@WSDisabled()
 		public void disabledMethod(){ }
 		protected void protectedMethod(){ }	
-		@SuppressWarnings("unused")
+
 		private void privateMethod(){ }
 	}
 }

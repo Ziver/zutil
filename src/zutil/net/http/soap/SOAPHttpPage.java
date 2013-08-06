@@ -47,7 +47,7 @@ import zutil.net.ws.WSParameterDef;
 import zutil.net.ws.WSReturnObject;
 import zutil.net.ws.WSReturnObject.WSValueName;
 import zutil.net.ws.WebServiceDef;
-import zutil.parser.wsdl.WSDLWriterOld;
+import zutil.parser.wsdl.WSDLWriter;
 
 /**
  * This is an HTTPPage for the HTTPServer that 
@@ -88,7 +88,7 @@ public class SOAPHttpPage implements HttpPage{
 	/** This instance of the web service class is used if session is disabled **/
 	private WSInterface ws;
 	/** The WSDL document **/
-	private WSDLWriterOld wsdl;
+	private WSDLWriter wsdl;
 	/** Session enabled **/
 	private boolean session_enabled;
 
@@ -96,7 +96,7 @@ public class SOAPHttpPage implements HttpPage{
 		this.wsDef = wsDef;
 		this.session_enabled = false;
 
-		wsdl = new WSDLWriterOld( wsDef );
+		wsdl = new WSDLWriter( wsDef );
 	}
 	
 	/**
@@ -238,7 +238,7 @@ public class SOAPHttpPage implements HttpPage{
 	/**
 	 * Converts an String XML to an Element
 	 * 
-	 * @param 		msg 		is the string XML
+	 * @param 		xml 		is the string XML
 	 * @return 					the XML root Element
 	 */
 	private Element getXMLRoot(String xml) throws Exception {
