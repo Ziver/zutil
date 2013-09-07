@@ -25,8 +25,6 @@ package zutil.test;
 import java.io.File;
 import java.io.IOException;
 
-import javax.wsdl.WSDLException;
-
 import zutil.io.MultiPrintStream;
 import zutil.net.http.HttpServer;
 import zutil.net.http.soap.SOAPHttpPage;
@@ -37,7 +35,7 @@ import zutil.net.ws.WebServiceDef;
 
 public class UPnPServerTest {
 	
-	public static void main(String[] args) throws IOException, WSDLException{		
+	public static void main(String[] args) throws IOException{		
 		UPnPMediaServer upnp = new UPnPMediaServer("http://192.168.0.60:8080/");
 		MultiPrintStream.out.println("UPNP Server running");
 		

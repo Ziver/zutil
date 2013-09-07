@@ -266,7 +266,7 @@ public abstract class DBBean {
 			// Execute the SQL
 			DBConnection.exec(stmt);
 			if( id == null )
-				this.id = (Long) db.getLastInsertID();
+				this.id = db.getLastInsertID();
 			
 			// Save the list, after we get the object id
 			for(Field field : config.fields){

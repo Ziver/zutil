@@ -26,8 +26,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.logging.Logger;
 
-import javax.wsdl.WSDLException;
-
 import javassist.CannotCompileException;
 import javassist.ClassPool;
 import javassist.CtClass;
@@ -57,7 +55,7 @@ public class SOAPClientFactory {
 	 * @return a client Object
 	 */
 	@SuppressWarnings("unchecked")
-	public static <T> T getClient(Class<T> intf) throws InstantiationException, IllegalAccessException, CannotCompileException, NotFoundException, WSDLException{
+	public static <T> T getClient(Class<T> intf) throws InstantiationException, IllegalAccessException, CannotCompileException, NotFoundException{
 		if( !WSInterface.class.isAssignableFrom( intf )){
 			throw new ClassCastException("The Web Service class is not a subclass of WSInterface!");
 		}

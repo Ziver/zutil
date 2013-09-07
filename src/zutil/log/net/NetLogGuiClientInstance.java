@@ -103,7 +103,6 @@ public class NetLogGuiClientInstance implements Initializable, NetLogListener {
 			logTable.getItems().add(msg);
 
             Platform.runLater(new Runnable() {
-                @Override
                 public void run() {
                     logCountLabel.setText("" + (Long.parseLong(logCountLabel.getText()) + 1));
                 }

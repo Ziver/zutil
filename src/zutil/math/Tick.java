@@ -77,9 +77,9 @@ public class Tick {
 	 */
 	public static char increment(char c){
 		switch(Character.toLowerCase(c)){
-		case 'z': return 'Ã¥';
-		case 'Ã¥': return 'Ã¤';
-		case 'Ã¤': return 'Ã¶';
+		case 'z': return 'å';
+		case 'å': return 'ä';
+		case 'ä': return 'ö';
 		}
 		c = (char)(Character.toLowerCase(c) + 1);
 		if(isAlfa(c)){
@@ -123,9 +123,9 @@ public class Tick {
 		case 'x':
 		case 'y':
 		case 'z':
-		case 'Ã¥':
-		case 'Ã¤':
-		case 'Ã¶': return true;
+		case 'å':
+		case 'ä':
+		case 'ö': return true;
 		default: return false;
 		}
 	}

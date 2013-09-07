@@ -23,6 +23,7 @@
 package zutil.db;
 
 import java.io.Closeable;
+import java.math.BigInteger;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -114,13 +115,13 @@ public class DBConnection implements Closeable{
 	/**
 	 * @return the last inserted id or -1 if there was an error
 	 */
-	public Object getLastInsertID(){
+	public long getLastInsertID(){
 		try{
-			return exec("SELECT LAST_INSERT_ID()", new SimpleSQLHandler<Object>());
+			return exec("SELECT LAST_INSERT_ID()", new SimpleSQLHandler<BigInteger>()).longValue();
 		}catch(SQLException e){
 			logger.log(Level.WARNING, null, e);
 		}
-		return null;
+		return -1;
 	}
 
 	/**

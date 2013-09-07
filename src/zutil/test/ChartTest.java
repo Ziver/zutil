@@ -19,35 +19,42 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  ******************************************************************************/
-
 package zutil.test;
 
 import java.util.logging.Level;
 
-import javassist.CannotCompileException;
-import javassist.NotFoundException;
+import javax.swing.JFrame;
 
-import zutil.log.CompactLogFormatter;
+import zutil.chart.ChartData;
+import zutil.chart.LineChart;
 import zutil.log.LogUtil;
-import zutil.net.http.soap.SOAPClientFactory;
-import zutil.net.ws.WSInterface;
 
-public class SOAPClientTest {
+public class ChartTest extends JFrame{
+	private static final long serialVersionUID = 1L;
 
-	public static void main(String[] args) throws InstantiationException, IllegalAccessException, CannotCompileException, NotFoundException{
-		LogUtil.setGlobalLevel(Level.ALL);
-		LogUtil.setFormatter("", new CompactLogFormatter());
-		
-		TestClient intf = SOAPClientFactory.getClient(TestClient.class);
-		intf.m();
-		intf.c();
+	public static void main(String[] args) {
+		LogUtil.setLevel("zutil", Level.FINEST);
+		ChartTest frame = new ChartTest();
+		frame.setVisible(true);
 	}
 	
-	
-	public interface TestClient extends WSInterface{
-		public void m();
+	public ChartTest(){
+		ChartData data = new ChartData();
+		data.addPoint(1,1);
+		data.addPoint(2,1);
+		data.addPoint(3,1);
+		data.addPoint(4,1);
+		data.addPoint(5,1);
+		data.addPoint(6,1);
+		data.addPoint(7,1);
+		data.addPoint(8,1);
 		
-		public void c();
+		LineChart chart = new LineChart();
+		chart.setChartData( data );
+		this.add( chart );
 
+		this.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );
+		this.setSize(600, 400);
 	}
+
 }
