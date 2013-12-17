@@ -1,3 +1,9 @@
 Manifest-Version: 1.0
-Class-Path: 
+Class-Path: el-api.jar jasper.jar jsp-api.jar catalina.jar ecj-4.2.2.j
+ ar jasper-el.jar tomcat-api.jar catalina-ha.jar servlet-api.jar tomca
+ t-dbcp.jar tomcat-jdbc.jar tomcat-util.jar catalina-ant.jar tomcat-co
+ yote.jar tomcat-i18n-es.jar tomcat-i18n-fr.jar tomcat-i18n-ja.jar ann
+ otations-api.jar catalina-tribes.jar commons-fileupload-1.2.1.jar dom
+ 4j-1.6.1.jar junit-4.10.jar mysql-connector-java-5.1.14-bin.jar junit
+ -benchmarks-0.7.0.jar commons-io-1.4.jar javassist.jar
 
