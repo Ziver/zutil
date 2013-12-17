@@ -64,7 +64,7 @@ import zutil.net.threaded.ThreadedUDPNetwork;
  * NTS: same as Man but for Notify messages
  */
 public class SSDPServer extends ThreadedUDPNetwork implements ThreadedUDPNetworkThread{
-	public static final Logger logger = LogUtil.getLogger();
+	private static final Logger logger = LogUtil.getLogger();
 	public static final String SERVER_INFO = "SSDP Java Server by Ziver Koc";
 	public static final int DEFAULT_CACHE_TIME = 60*30; // 30 min
 	public static final int BUFFER_SIZE = 512;

@@ -29,13 +29,13 @@ import java.util.ArrayList;
 public class DynamicByteArrayStream extends InputStream{
 	/** The byte array container */
 	private ArrayList<byte[]> bytes;
-	/** The current size of the stream */
+	/** Current virtual size of the stream */
 	private int size;
-	/** points to the current index in the ArrayList */
-	private int byteArrayIndex;
-	/** points locally in the current index in the ArrayList */
-	private int localPointer;
-	/** The current position */
+	/** Points the current byte array index */
+	private int arrayIndex;
+	/** Points to a local index in the current byte array */
+	private int arrayLocalIndex;
+	/** Current virtual position of the stream */
 	private int pos;
 
 	/**
@@ -44,8 +44,8 @@ public class DynamicByteArrayStream extends InputStream{
 	public DynamicByteArrayStream(){
 		bytes = new ArrayList<byte[]>();
 		size = 0;
-		byteArrayIndex = 0;
-		localPointer = 0;
+		arrayIndex = 0;
+		arrayLocalIndex = 0;
 		pos = 0;
 	}
 
@@ -61,7 +61,7 @@ public class DynamicByteArrayStream extends InputStream{
 	
 	/**
 	 * Append an byte array to the stream.
-	 * WARNING: This function will copy data.
+	 * NOTE: This function will copy data.
 	 * 
 	 * @param 		b 			is the byte array to add
 	 * @param 		offset		is the offset in the byte array
@@ -70,7 +70,7 @@ public class DynamicByteArrayStream extends InputStream{
 	public synchronized void append(byte[] b, int offset, int length){
 		byte[] new_b = new byte[length];
 		System.arraycopy(b, offset, new_b, 0, length);
-		bytes.add(b);
+		bytes.add(new_b);
 		size += length;
 	}
 
@@ -78,12 +78,12 @@ public class DynamicByteArrayStream extends InputStream{
 	public synchronized int read() throws IOException {
 		if(pos >= size)	return -1;
 		
-		int ret = bytes.get(byteArrayIndex)[localPointer] & 0xff;
+		int ret = bytes.get(arrayIndex)[arrayLocalIndex] & 0xff;
 		pos++;
-		localPointer++;
-		if(localPointer >= bytes.get(byteArrayIndex).length){
-			byteArrayIndex++;
-			localPointer = 0;
+		arrayLocalIndex++;
+		if(arrayLocalIndex >= bytes.get(arrayIndex).length){
+			arrayIndex++;
+			arrayLocalIndex = 0;
 		}
 		return ret;
 	}
@@ -91,27 +91,27 @@ public class DynamicByteArrayStream extends InputStream{
 	public synchronized int read(byte b[], int off, int len) {
 		if(len <= 0) return 0;
 		if(pos >= size)	return -1;
-		
-		int bytes_read = 0;
+
+        int bytes_read=0;
 		if(pos+len >= size) len = size - pos;
-		for(int i=0; i<len ;i++){
-			byte[] src = bytes.get(byteArrayIndex);
-			if(localPointer+len-i >= src.length){
-				int length = src.length-localPointer;
-				System.arraycopy(src, localPointer, b, off+i, length);
+		for(; bytes_read<len ;bytes_read++){
+			byte[] src = bytes.get(arrayIndex);
+            // Read length is LONGER than local array
+			if(arrayLocalIndex +len-bytes_read >= src.length){
+				int length = src.length- arrayLocalIndex;
+				System.arraycopy(src, arrayLocalIndex, b, off+bytes_read, length);
 				
-				localPointer = 0;
-				byteArrayIndex++;
+				arrayLocalIndex = 0;
+			    arrayIndex++;
 				bytes_read += length;
-				i += length;
 			}
+            // Read length is SHORTER than local array
 			else{
-				int length = len-i;
-				System.arraycopy(src, localPointer, b, off+i, length);
+				int length = len-bytes_read;
+				System.arraycopy(src, arrayLocalIndex, b, off+bytes_read, length);
 				
-				localPointer += length;
+				arrayLocalIndex += length;
 				bytes_read += length;
-				i += length;
 			}
 		}
 		pos += len;
@@ -132,8 +132,8 @@ public class DynamicByteArrayStream extends InputStream{
 	}
 	
 	public synchronized void reset() {
-		byteArrayIndex = 0;
-		localPointer = 0;
+		arrayIndex = 0;
+		arrayLocalIndex = 0;
 		pos = 0;
 	}
 
@@ -144,7 +144,7 @@ public class DynamicByteArrayStream extends InputStream{
 	/**
 	 * @return 		all of the buffers content as a byte array.
 	 */
-	public byte[] getByte(){
+	public byte[] getBytes(){
 		byte[] data = new byte[size];
 		this.read(data, 0, size);
 		return data;
@@ -154,10 +154,9 @@ public class DynamicByteArrayStream extends InputStream{
 	/**
 	 * WARNING: This function might return a malformed String.
 	 * 
-	 * @return 		all of the buffers content as a String.
+	 * @return all the contents of the buffers as a String.
 	 */
-	public String getString(){
-		String data = new String( this.getByte() );
-		return data;
+	public String toString(){
+        return new String( this.getBytes() );
 	}
 }

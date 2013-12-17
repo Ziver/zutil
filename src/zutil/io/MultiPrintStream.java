@@ -22,20 +22,15 @@
 
 package zutil.io;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.PrintStream;
-import java.io.Reader;
+import zutil.Dumpable;
+
+import java.io.*;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
-
-import zutil.Dumpable;
 
 /**
  * @author Ziver
@@ -71,7 +66,7 @@ public class MultiPrintStream extends PrintStream {
 
 	/**
 	 * This constructor takes a array of PrintStreams to be used
-	 * @param streams is a array of the streams that will be used
+	 * @param   streams         is a array of the streams that will be used
 	 */
 	public MultiPrintStream(PrintStream[] streams){
 		super(streams[0]);
@@ -83,7 +78,7 @@ public class MultiPrintStream extends PrintStream {
 
 	/**
 	 * This constructor takes a array of PrintStreams to be used
-	 * @param streams is a array of the streams that will be used
+	 * @param   instanceStream      is a array of the streams that will be used
 	 */
 	public static void makeInstance(MultiPrintStream instanceStream){
 		out = instanceStream;
@@ -99,7 +94,7 @@ public class MultiPrintStream extends PrintStream {
 
 	/**
 	 * Remove a PrintStream from the list
-	 * @param p is the PrintStream to remove
+	 * @param   p   is the PrintStream to remove
 	 */
 	public void removePrintStream(PrintStream p){
 		streams.remove(p);
@@ -107,7 +102,7 @@ public class MultiPrintStream extends PrintStream {
 
 	/**
 	 * Remove a PrintStream from the list
-	 * @param p is the index of the PrintStream to remove
+	 * @param   p   is the index of the PrintStream to remove
 	 */
 	public void removePrintStream(int p){
 		streams.remove(p);
@@ -206,8 +201,8 @@ public class MultiPrintStream extends PrintStream {
 	 * <br>- Reader content (Prints out until the end of the reader)
 	 * <br>- Instance variables of a Object
 	 * 
-	 * @param o is the Object to dump
-	 * @return A String with all the printed data
+	 * @param   o   is the Object to dump
+	 * @return a String with all the printed data
 	 */
 	public String dumpToString( Object o) {
 		return dumpToString(o, "");
@@ -222,8 +217,8 @@ public class MultiPrintStream extends PrintStream {
 	 * <br>- Reader content (Prints out until the end of the reader)
 	 * <br>- Instance variables of a Object
 	 * 
-	 * @param o is the Object to dump
-	 * @param head is the string that will be put in front of every line
+	 * @param   o       is the Object to dump
+	 * @param   head    is the string that will be put in front of every line
 	 * @return A String with all the printed data
 	 */
 

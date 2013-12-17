@@ -106,11 +106,11 @@ public class Base64Decoder {
 	}
 	
 	public String toString(){
-		return output.getString();
+		return output.toString();
 	}
 	
 	public byte[] getByte(){
-		return output.getByte();
+		return output.getBytes();
 	}
 	
 	public void clear(){

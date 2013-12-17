@@ -22,6 +22,9 @@
 
 package zutil.db;
 
+import zutil.converters.Converter;
+import zutil.io.MultiPrintStream;
+
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -30,31 +33,28 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.Queue;
 
-import zutil.converters.Converter;
-import zutil.io.MultiPrintStream;
-
 /**
- * This class creates a queue that stors the 
+ * This class creates a queue that stores the
  * data in a mysql table.
  * The table should look like this:
+ * <PRE>
  * CREATE TABLE `queue` (
  * 		`id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY ,
  * 		`data` BINARY NOT NULL
  * 	);
+ * 	</PRE>
  * @author Ziver
  *
  */
 public class DBQueue<E> implements Queue<E>{
-	// GO TO KNOW = SELECT LAST_INSERT_ID() as pos_id
 	private DBConnection db;
 	private String table;
 	
 	/**
 	 * Initiates the queue.<br>
-	 * <b>WARNING!!<b> this will erase all rows in the table
 	 * 
-	 * @param db is the connection to the DB
-	 * @param table is the name of the table
+	 * @param   db      is the connection to the DB
+	 * @param   table   is the name of the table
 	 */
 	public DBQueue(DBConnection db, String table){
 		this.db = db;
@@ -63,8 +63,9 @@ public class DBQueue<E> implements Queue<E>{
 
 	public boolean add(Object arg0){
 		try {
-			PreparedStatement sql = db.getPreparedStatement("INSERT INTO "+table+" (data) VALUES(?)");
-			sql.setObject(1, arg0);
+			PreparedStatement sql = db.getPreparedStatement("INSERT INTO ? (data) VALUES(?)");
+            sql.setObject(1, table);
+			sql.setObject(2, arg0);
 			DBConnection.exec(sql);
 		} catch (Exception e) {
 			e.printStackTrace(MultiPrintStream.out);
@@ -81,7 +82,6 @@ public class DBQueue<E> implements Queue<E>{
 		return add(arg0);
 	}
 
-	@SuppressWarnings("unchecked")
 	public synchronized E peek() {
 		try {
 			return db.exec("SELECT * FROM "+table+" LIMIT 1", new SQLResultHandler<E>(){
@@ -101,7 +101,6 @@ public class DBQueue<E> implements Queue<E>{
 		return null;
 	}
 
-	@SuppressWarnings("unchecked")
 	public synchronized E poll() {
 		try {
 			return db.exec("SELECT * FROM "+table+" LIMIT 1", new SQLResultHandler<E>(){
@@ -207,7 +206,6 @@ public class DBQueue<E> implements Queue<E>{
 		return null;
 	}
 
-	@SuppressWarnings("unchecked")
 	public E[] toArray(Object[] arg0) {
 		// TODO Auto-generated method stub
 		return null;

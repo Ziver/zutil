@@ -42,7 +42,7 @@ import zutil.db.bean.DBBean.DBLinkTable;
 import zutil.log.LogUtil;
 
 public class DBBeanSQLResultHandler<T> implements SQLResultHandler<T>{
-	public static final Logger logger = LogUtil.getLogger();
+	private static final Logger logger = LogUtil.getLogger();
 	/** This is the time to live for the cached items **/
 	public static final long CACHE_TTL = 1000*60*5; // 5 min in ms
 	/** A cache for detecting recursion **/

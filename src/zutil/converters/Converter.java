@@ -22,14 +22,10 @@
 
 package zutil.converters;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.util.BitSet;
-
 import zutil.io.DynamicByteArrayStream;
+
+import java.io.*;
+import java.util.BitSet;
 
 public class Converter {
 	private Converter(){}
@@ -37,8 +33,8 @@ public class Converter {
 	/** 
 	 * Converts an object to an array of bytes.
 	 * 
-	 * @param 	object 	the object to convert.
-	 * @return 			the associated byte array.
+	 * @param   object  the object to convert.
+	 * @return the associated byte array.
 	 */
 	public static byte[] toBytes(Object object) throws IOException{
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -55,7 +51,7 @@ public class Converter {
 	 * Converts a Integer to an byte array
 	 * 
 	 * @param 	num 	is the number to convert
-	 * @return 			an byte array of four bytes
+	 * @return a byte array of four bytes
 	 */
 	public static byte[] toBytes(int num){
 		return new byte[]{ 
@@ -69,7 +65,7 @@ public class Converter {
 	 * Converts a Integer to a byte
 	 * 
 	 * @param 	num 	is the number to convert
-	 * @return 			an byte
+	 * @return a byte value of the integer
 	 */
 	public static byte toByte(int num){
 		return (byte)(num & 0xff);
@@ -78,9 +74,9 @@ public class Converter {
 	/**
 	 * Converts hex chars to a byte
 	 * 
-	 * @param 	quad1	is the first hex value
-	 * @param 	quad2	is the second hex value
-	 * @return			a byte that corresponds to the hex
+	 * @param   quad1   is the first hex value
+	 * @param   quad2   is the second hex value
+	 * @return a byte that corresponds to the hex
 	 */
 	public static int hexToByte( char quad1, char quad2){
 		byte b = hexToByte( quad2 );
@@ -91,8 +87,8 @@ public class Converter {
 	/**
 	 * Converts a hex chars to a byte
 	 * 
-	 * @param 	quad1	is the hex value
-	 * @return			a byte that corresponds to the hex
+	 * @param 	hex     is the hex value
+	 * @return a byte that corresponds to the hex
 	 */
 	public static byte hexToByte( char hex ){
 		switch( Character.toLowerCase(hex) ){
@@ -120,8 +116,8 @@ public class Converter {
 	 * Converts an array of bytes back to its constituent object. The 
 	 * input array is assumed to have been created from the original object.
 	 * 
-	 * @param 	bytes 	the byte array to convert.
-	 * @return 			the associated object.
+	 * @param   bytes   the byte array to convert.
+	 * @return the associated object.
 	 */
 	public static Object toObject(byte[] bytes) throws Exception{
 		Object object = null;
@@ -137,8 +133,8 @@ public class Converter {
 	 * Converts an array of bytes back to its constituent object. The 
 	 * input array is assumed to have been created from the original object.
 	 * 
-	 * @param 	bytes 	the byte array to convert.
-	 * @return 			the associated object.
+	 * @param   bytes   the byte array to convert.
+	 * @return the associated object.
 	 */
 	public static Object toObject(DynamicByteArrayStream bytes) throws Exception{
 		Object object = null;
@@ -153,9 +149,9 @@ public class Converter {
 	/**
 	 * Checks if the given interface is implemented in the object
 	 * 
-	 * @param 	object 	the object to look for the interface
-	 * @param 	interf 	the interface to look for
-	 * @return 			true if the interface is implemented else false
+	 * @param   object  the object to look for the interface
+	 * @param   interf  the interface to look for
+	 * @return true if the interface is implemented else false
 	 */
 	public static boolean isInstanceOf(Object object, Class<?> interf){
 		Class<?>[] objectInterf = object.getClass().getInterfaces();
@@ -172,8 +168,8 @@ public class Converter {
 	/**
 	 * Converts a byte Array to a Hex String
 	 * 
-	 * @param 	raw 	the byte array to convert
-	 * @return 			a Hex String
+	 * @param   raw     the byte array to convert
+	 * @return a hex String
 	 */
 	public static String toHexString(byte[][] raw){
 		StringBuffer ret = new StringBuffer();
@@ -204,8 +200,8 @@ public class Converter {
 	/**
 	 * Converts a byte Array to a Hex String
 	 * 
-	 * @param 	raw 	the byte array to convert
-	 * @return 			a Hex String
+	 * @param   raw     the byte array to convert
+	 * @return a hex String
 	 */
 	public static String toHexString(byte[] raw){
 		StringBuffer ret = new StringBuffer();
@@ -221,8 +217,8 @@ public class Converter {
 	/**
 	 * Converts a byte to a Hex String
 	 * 
-	 * @param 	raw 	the byte to convert
-	 * @return 			a Hex String
+	 * @param   raw     the byte to convert
+	 * @return a hex String
 	 */
 	public static String toHexString(byte raw){
 		String ret = ""+HEX_CHARS[(int) (raw >>> 0x04)& 0x0F ];
@@ -234,8 +230,8 @@ public class Converter {
 	/**
 	 * Converts the given byte to a String with 1's and 0's
 	 * 
-	 * @param 	raw 	the byte to convert
-	 * @return 			a String with 1's and 0's
+	 * @param   raw     the byte to convert
+	 * @return a String with 1's and 0's
 	 */
 	public static String toString(byte raw){
 		StringBuffer ret = new StringBuffer();
@@ -248,8 +244,8 @@ public class Converter {
 	/**
 	 * Converts the given byte array to a String with 1's and 0's
 	 * 
-	 * @param 	raw 	the byte array to convert
-	 * @return 			a String with 1's and 0's
+	 * @param   raw     the byte array to convert
+	 * @return a String with 1's and 0's
 	 */
 	public static String toString(byte[] raw){
 		StringBuffer ret = new StringBuffer();
@@ -264,8 +260,8 @@ public class Converter {
 	/**
 	 * Converts a BitSet to a Integer
 	 * 
-	 * @param 	bits 	the BitSet to convert
-	 * @return 			a Integer
+	 * @param   bits    the BitSet to convert
+	 * @return a Integer
 	 */
 	public static int toInt(BitSet bits){
 		int ret = 0;
@@ -280,8 +276,8 @@ public class Converter {
 	/**
 	 * Converts a boolean array(bit sequence whit most significant bit at index 0) to a Integer
 	 * 
-	 * @param 	bits 	the boolean array to convert
-	 * @return 			a Integer
+	 * @param   bits    the boolean array to convert
+	 * @return a Integer
 	 */
 	public static int toInt(boolean[] bits){
 		int ret = 0;
@@ -296,8 +292,8 @@ public class Converter {
 	/**
 	 * Converts a byte to a integer
 	 * 
-	 * @param 	num 	is the byte to convert
-	 * @return 			an integer
+	 * @param   b   is the byte to convert
+	 * @return the integer value of the byte
 	 */
 	public static int toInt(byte b){
 		return (int)(b & 0xff);
@@ -306,8 +302,8 @@ public class Converter {
 	/**
 	 * Converts a Integer to a BitSet
 	 * 
-	 * @param 	i 		the Integer to convert
-	 * @return 			a BitSet object
+	 * @param   num     the Integer to convert
+	 * @return a BitSet object
 	 */
 	public static BitSet toBitSet(int num){
 		BitSet ret = new BitSet();		
@@ -323,10 +319,10 @@ public class Converter {
 	/**
 	 * Converts a given String to a specified class
 	 * 
-	 * @param 	<T> 	is the resulting class
-	 * @param 	data 	is the String data to be converted
-	 * @param 	c 		is the class to convert to
-	 * @return 			a instance of the class with the value in the string or null if there was an problem
+	 * @param   <T>     is the resulting class
+	 * @param   data    is the String data to be converted
+	 * @param   c       is the class to convert to
+	 * @return a instance of the class with the value in the string or null if there was an problem
 	 */
 	@SuppressWarnings("unchecked")
 	public static <T> T fromString(String data, Class<T> c){

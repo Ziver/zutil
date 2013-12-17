@@ -81,7 +81,7 @@ import zutil.parser.wsdl.WSDLWriter;
  * @author Ziver
  */
 public class SOAPHttpPage implements HttpPage{
-	public static final Logger logger = LogUtil.getLogger();
+	private static final Logger logger = LogUtil.getLogger();
 	
 	/** The object that the functions will be invoked from **/
 	private WebServiceDef wsDef;

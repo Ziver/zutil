@@ -22,30 +22,32 @@
 
 package zutil.test;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.junit.Test;
+import zutil.io.DynamicByteArrayStream;
 
-import zutil.log.LogUtil;
-import zutil.log.net.NetLogServer;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
-public class NetLogServerTest {
-	private static final Logger logger = LogUtil.getLogger();
+/**
+ * User: Ziver
+ */
+public class DynamicByteArrayStreamTest {
 
-	public static void main(String[] args){
-		LogUtil.setGlobalLevel(Level.FINEST);
-		LogUtil.addGlobalHandler(new NetLogServer(5050));
-		
-		while(true){
-			logger.log(Level.SEVERE,  "Test Severe");
-			logger.log(Level.WARNING, "Test Warning");
-			logger.log(Level.INFO,    "Test Info");
-			logger.log(Level.FINE,    "Test Fine");
-			logger.log(Level.FINER,   "Test Finer");
-			logger.log(Level.FINEST,  "Test Finest");
-			
-			logger.log(Level.SEVERE,  "Test Exception", new Exception("Test"));
-			
-			try{Thread.sleep(3000);}catch(Exception e){}
-		}
-	}
+    @Test
+    public void emptyArray(){
+        DynamicByteArrayStream out = new DynamicByteArrayStream();
+        assertEquals(0, out.available());
+        assertEquals(0, out.getBytes().length);
+        assertTrue(out.toString().isEmpty());
+    }
+
+    @Test
+    public void oneByteArray(){
+        byte[] b = new byte[]{0x01,0x02,0x03,0x04};
+
+        DynamicByteArrayStream out = new DynamicByteArrayStream();
+        out.append(b);
+
+        assertEquals(b, out.getBytes());
+    }
 }

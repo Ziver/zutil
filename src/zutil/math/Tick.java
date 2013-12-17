@@ -25,22 +25,11 @@ package zutil.math;
 public class Tick {
 
 	/**
-	 * TEST
-	 */
-	public static void main(String[] args){
-		String temp = "a";
-		while(true){
-			temp = tick(temp,3);
-			System.out.println(temp);
-		}
-	}
-	
-	/**
 	 * Ticks a given string(increments the string with one)
 	 * 
-	 * @param ts The string to tick
-	 * @param maxChar The maximum number of characters in the string
-	 * @return The ticked string
+	 * @param   ts      is the string to tick
+	 * @param   maxChar is the maximum number of characters in the string
+	 * @return the ticked string
 	 */
 	public static String tick(String ts, int maxChar){
 		StringBuffer ret = new StringBuffer(ts.trim());
@@ -72,17 +61,17 @@ public class Tick {
 	/**
 	 * Increments the char with one after the swedish alfabet
 	 * 
-	 * @param c The char to increment
-	 * @return The incremented char in lowercase 0 if it reached the end
+	 * @param   c   is the char to increment
+	 * @return the incremented char in lowercase 0 if it reached the end
 	 */
 	public static char increment(char c){
 		switch(Character.toLowerCase(c)){
-		case 'z': return 'å';
-		case 'å': return 'ä';
-		case 'ä': return 'ö';
+		case 'z':       return (char)134;
+		case (char)134: return (char)132;
+		case (char)132: return (char)148;
 		}
 		c = (char)(Character.toLowerCase(c) + 1);
-		if(isAlfa(c)){
+		if(isAlphabetic(c)){
 			return c;
 		}
 		return 0;
@@ -90,12 +79,12 @@ public class Tick {
 	
 	/**
 	 * Checks if the char is a valid character in 
-	 * the Swedish alfabet
+	 * the Swedish alphabet
 	 * 
-	 * @param c The char to check
-	 * @return True if the char is a valid letter 
+	 * @param   c   is the char to check
+	 * @return true if the char is a valid letter
 	 */
-	public static boolean isAlfa(char c){
+	public static boolean isAlphabetic(char c){
 		switch(Character.toLowerCase(c)){
 		case 'a':
 		case 'b':
@@ -123,10 +112,12 @@ public class Tick {
 		case 'x':
 		case 'y':
 		case 'z':
-		case 'å':
-		case 'ä':
-		case 'ö': return true;
-		default: return false;
+		case (char)134:
+		case (char)132:
+		case (char)148:
+            return true;
+		default:
+            return false;
 		}
 	}
 }

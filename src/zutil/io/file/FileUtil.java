@@ -45,7 +45,7 @@ import zutil.log.LogUtil;
  * @author Ziver
  */
 public class FileUtil {
-	public static final Logger logger = LogUtil.getLogger();
+	private static final Logger logger = LogUtil.getLogger();
 	
 	/**
 	 * Returns a String with a relative path from the given path
@@ -123,24 +123,28 @@ public class FileUtil {
 	 * Reads and returns the content of a file as a String.
 	 * Or use FileUtils.readFileToString(file);
 	 * 
-	 * @param 		file 		is the file to read
-	 * @return 					The file content
-	 * @throws IOException
+	 * @param 		file
+	 * @return the file content
 	 */
 	public static String getFileContent(File file) throws IOException{
-		return IOUtil.getContent( new FileInputStream(file) );
+        InputStream in = new FileInputStream(file);
+        String data = new String(IOUtil.getContent( in ));
+        in.close();
+        return data;
 	}
 	
 	/**
 	 * Reads and returns the content of a file as a String.
 	 * Or use FileUtils.readFileToString(file);
 	 * 
-	 * @param 		url 		is the url to read
-	 * @return 					The file content
-	 * @throws IOException
+	 * @param 		url
+	 * @return the file content
 	 */
 	public static String getContent(URL url) throws IOException{
-		return IOUtil.getContent( url.openStream() );
+        InputStream in = url.openStream();
+        String data = new String(IOUtil.getContent( in ));
+        in.close();
+        return data;
 	}
 	
 	/**

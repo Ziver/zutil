@@ -48,7 +48,7 @@ import zutil.net.threaded.ThreadedTCPNetworkServerThread;
  * @author Ziver
  */
 public class HttpServer extends ThreadedTCPNetworkServer{
-	public static final Logger logger = LogUtil.getLogger();
+	private static final Logger logger = LogUtil.getLogger();
 	public static final String SERVER_VERSION = "Ziver HttpServer 1.0";
 	public static final int COOKIE_TTL = 200;
 	public static final int SESSION_TTL = 10*60*1000; // in milliseconds

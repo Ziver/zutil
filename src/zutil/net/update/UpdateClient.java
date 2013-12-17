@@ -43,7 +43,7 @@ import zutil.log.LogUtil;
  *
  */
 public class UpdateClient{
-	public static final Logger logger = LogUtil.getLogger();
+	private static final Logger logger = LogUtil.getLogger();
 
 	private String path;
 	private Socket socket;

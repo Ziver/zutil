@@ -36,7 +36,7 @@ import zutil.net.threaded.ThreadedTCPNetworkServer;
 import zutil.net.threaded.ThreadedTCPNetworkServerThread;
 
 public class UpdateServer extends ThreadedTCPNetworkServer{
-	public static final Logger logger = LogUtil.getLogger();
+	private static final Logger logger = LogUtil.getLogger();
 
 	private FileListMessage fileList;
 

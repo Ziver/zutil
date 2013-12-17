@@ -44,7 +44,7 @@ import zutil.net.threaded.ThreadedUDPNetworkThread;
  * @author Ziver
  */
 public class SSDPClient extends ThreadedUDPNetwork implements ThreadedUDPNetworkThread{
-	public static final Logger logger = LogUtil.getLogger();
+	private static final Logger logger = LogUtil.getLogger();
 	// Contains all the received services
 	private HashMap<String, LinkedList<SSDPServiceInfo>> services_st;
 	private HashMap<String, SSDPServiceInfo> 			 services_usn;

@@ -22,10 +22,7 @@
 
 package zutil.io;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 
 /**
  * Utility class for streams and general IO stuff
@@ -36,23 +33,30 @@ import java.io.InputStreamReader;
 public class IOUtil {
 
 	/**
-	 * Reads and returns the content of a file as a String.
-	 * Or use FileUtils.readFileToString(file);
+	 * Reads and returns all the contents of a stream.
 	 * 
-	 * @param 		stream 		is the file stream to read
-	 * @return 					The file content
-	 * @throws IOException
+	 * @param 		stream
+	 * @return the stream contents
 	 */
-	public static String getContent(InputStream stream) throws IOException{
-		BufferedReader in = new BufferedReader(new InputStreamReader(stream));
-		StringBuffer ret = new StringBuffer();
-		int tmp;
-
-		while((tmp=in.read()) != -1){
-			ret.append((char)tmp);
+	public static byte[] getContent(InputStream stream) throws IOException{
+        DynamicByteArrayStream dyn_buff = new DynamicByteArrayStream();
+        byte[] buff = new byte[256];
+        int len = 0;
+		while((len = stream.read(buff)) != -1){
+			dyn_buff.append(buff, 0, len);
 		}
-		
-		in.close();
-		return ret.toString();
+
+		return dyn_buff.getBytes();
 	}
+
+    /**
+     * Copies all data from the input stream to the output stream
+     */
+    public static void copyStream(InputStream in, OutputStream out) throws IOException {
+        byte[] buff = new byte[256];
+        int len;
+        while((len = in.read(buff)) > 0){
+            out.write(buff, 0, len);
+        }
+    }
 }
