@@ -46,7 +46,7 @@ public class OsalLinuxImpl extends OSAbstractionLayer {
     @Override
     public String getKernelVersion() {
         try{
-            return super.runCommand("uname -r");
+            return super.getFirstLineFromCommand("uname -r");
         } catch(Exception e){
             e.printStackTrace();
         }
@@ -56,7 +56,7 @@ public class OsalLinuxImpl extends OSAbstractionLayer {
     @Override
     public String getUsername() {
         try{
-            return super.runCommand("whoami");
+            return super.getFirstLineFromCommand("whoami");
         } catch(Exception e){
             e.printStackTrace();
         }

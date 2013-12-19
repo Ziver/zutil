@@ -26,7 +26,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.LinkedList;
+import java.util.ArrayList;
 
 /**
  * User: Ziver
@@ -53,15 +53,15 @@ public abstract class OSAbstractionLayer {
     }
 
     /**
-     * Executes a command and returns the result
+     * Executes a command and returns the first line of the result
      *
      * @param   cmd             the command to run
-     * @return the first line of the output of the command or null if there where no output
+     * @return first line of the command
      */
-    protected String runCommand(String cmd) throws InterruptedException, IOException {
-        LinkedList<String> output = runCommand(cmd, 0, 1);
-        if(!output.isEmpty())
-            return output.getFirst();
+    protected String getFirstLineFromCommand(String cmd) throws InterruptedException, IOException {
+        String[] tmp = runCommand(cmd);
+        if(tmp.length > 1)
+            return tmp[0];
         return null;
     }
 
@@ -69,39 +69,22 @@ public abstract class OSAbstractionLayer {
      * Executes a command and returns the result
      *
      * @param   cmd             the command to run
-     * @param   offsetLine      the number of lines to skip at the beginning
-     * @return the first line after the offset of the output of the command or null if there where no output
-     */
-    protected String runCommand(String cmd, int offsetLine) throws InterruptedException, IOException {
-        LinkedList<String> output = runCommand(cmd, offsetLine, 1);
-        if(!output.isEmpty())
-            return output.getFirst();
-        return null;
-    }
-
-    /**
-     * Executes a command and returns the result
-     *
-     * @param   cmd             the command to run
-     * @param   offsetLine      the number of lines to skip at the beginning
-     * @param   lineCount       the number of lines to read
      * @return a String list of the output of the command
      */
-    protected LinkedList<String> runCommand(String cmd, int offsetLine, int lineCount) throws InterruptedException, IOException {
+    public String[] runCommand(String cmd) throws InterruptedException, IOException {
         Runtime runtime = Runtime.getRuntime();
-        Process proc = runtime.exec( cmd );
+        Process proc = runtime.exec(cmd);
         proc.waitFor();
         BufferedReader output = new BufferedReader(new InputStreamReader(proc.getInputStream()));
 
-        LinkedList<String> ret = new LinkedList<String>();
-        String line = "";
-        for(int i=0; (line = output.readLine()) != null &&
-                (lineCount <= 0 || i < offsetLine+lineCount); i++) {
-            if(i >= offsetLine)
-                ret.addLast(line);
+        ArrayList<String> ret = new ArrayList<String>();
+        String line;
+        while((line = output.readLine()) != null){
+            ret.add(line);
         }
         output.close();
-        return ret;
+
+        return ret.toArray(new String[1]);
     }
 
     /**

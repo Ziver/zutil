@@ -23,7 +23,6 @@
 package zutil.osal;
 
 import java.io.File;
-import java.io.IOException;
 
 /**
  * User: ezivkoc
@@ -47,7 +46,7 @@ public class OsalWindowsImpl extends OSAbstractionLayer {
     @Override
     public String getKernelVersion() {
         try {
-            return runCommand("ver");
+            return getFirstLineFromCommand("ver");
         } catch (Exception e) {
             e.printStackTrace();
         }
