@@ -22,16 +22,16 @@
 
 package zutil.test;
 
-import java.io.File;
-import java.io.IOException;
-
 import zutil.io.MultiPrintStream;
 import zutil.net.http.HttpServer;
-import zutil.net.http.soap.SOAPHttpPage;
 import zutil.net.ssdp.SSDPServer;
 import zutil.net.upnp.UPnPMediaServer;
 import zutil.net.upnp.services.UPnPContentDirectory;
 import zutil.net.ws.WebServiceDef;
+import zutil.net.ws.soap.SOAPHttpPage;
+
+import java.io.File;
+import java.io.IOException;
 
 public class UPnPServerTest {
 	

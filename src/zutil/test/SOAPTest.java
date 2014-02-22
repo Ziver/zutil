@@ -25,12 +25,11 @@ package zutil.test;
 import org.dom4j.Document;
 import org.dom4j.io.OutputFormat;
 import org.dom4j.io.XMLWriter;
-
-import zutil.net.http.soap.SOAPHttpPage;
 import zutil.net.ws.WSInterface;
-import zutil.net.ws.WSInterface.*;
+import zutil.net.ws.WSInterface.WSNamespace;
 import zutil.net.ws.WSReturnObject;
 import zutil.net.ws.WebServiceDef;
+import zutil.net.ws.soap.SOAPHttpPage;
 import zutil.parser.wsdl.WSDLWriter;
 
 

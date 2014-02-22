@@ -20,7 +20,7 @@
  * THE SOFTWARE.
  ******************************************************************************/
 
-package zutil.net.http.soap;
+package zutil.net.ws.soap;
 
 import org.dom4j.Document;
 import org.dom4j.DocumentException;
