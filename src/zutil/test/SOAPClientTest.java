@@ -22,15 +22,14 @@
 
 package zutil.test;
 
-import java.util.logging.Level;
-
 import javassist.CannotCompileException;
 import javassist.NotFoundException;
-
 import zutil.log.CompactLogFormatter;
 import zutil.log.LogUtil;
-import zutil.net.http.soap.SOAPClientFactory;
 import zutil.net.ws.WSInterface;
+import zutil.net.ws.soap.SOAPClientFactory;
+
+import java.util.logging.Level;
 
 public class SOAPClientTest {
 

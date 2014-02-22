@@ -22,13 +22,6 @@
 
 package zutil.net.http.soap;
 
-import java.lang.reflect.Array;
-import java.lang.reflect.Field;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import org.dom4j.Document;
 import org.dom4j.DocumentException;
 import org.dom4j.DocumentHelper;
@@ -36,18 +29,20 @@ import org.dom4j.Element;
 import org.dom4j.io.OutputFormat;
 import org.dom4j.io.XMLWriter;
 import org.xml.sax.SAXException;
-
 import zutil.converters.Converter;
 import zutil.log.LogUtil;
 import zutil.net.http.HttpPage;
 import zutil.net.http.HttpPrintStream;
-import zutil.net.ws.WSInterface;
-import zutil.net.ws.WSMethodDef;
-import zutil.net.ws.WSParameterDef;
-import zutil.net.ws.WSReturnObject;
+import zutil.net.ws.*;
 import zutil.net.ws.WSReturnObject.WSValueName;
-import zutil.net.ws.WebServiceDef;
 import zutil.parser.wsdl.WSDLWriter;
+
+import java.lang.reflect.Array;
+import java.lang.reflect.Field;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * This is an HTTPPage for the HTTPServer that 

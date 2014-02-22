@@ -20,24 +20,18 @@
  * THE SOFTWARE.
  ******************************************************************************/
 
-package zutil.net.http.soap;
+package zutil.net.ws.soap;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.logging.Logger;
-
-import javassist.CannotCompileException;
-import javassist.ClassPool;
-import javassist.CtClass;
-import javassist.CtField;
-import javassist.CtMethod;
-import javassist.CtNewMethod;
-import javassist.NotFoundException;
+import javassist.*;
 import zutil.log.LogUtil;
 import zutil.net.ws.WSInterface;
 import zutil.net.ws.WSMethodDef;
 import zutil.net.ws.WSParameterDef;
 import zutil.net.ws.WebServiceDef;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.logging.Logger;
 
 /**
  * This is an factory that generates clients for web services
@@ -102,7 +96,7 @@ public class SOAPClientFactory {
 									getOutputClass(methodDef.getOutputs()),			// Return type 
 									methodDef.getName(),							// Method name
 									getParameterClasses(methodDef.getInputs()),		// Parameters
-									new CtClass[]{pool.get( SOAPException.class.getName() )},	// Exceptions 
+									new CtClass[]{pool.get( SOAPException.class.getName() )},	// Exceptions
 									generateCodeBody(methodDef),					// Code Body 
 									cc); 											// Class
 			cc.addMethod(method);
