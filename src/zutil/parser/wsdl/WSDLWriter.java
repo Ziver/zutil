@@ -22,19 +22,11 @@
 
 package zutil.parser.wsdl;
 
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.PrintStream;
-import java.io.UnsupportedEncodingException;
-import java.lang.reflect.Field;
-import java.util.ArrayList;
-
 import org.dom4j.Document;
 import org.dom4j.DocumentHelper;
 import org.dom4j.Element;
 import org.dom4j.io.OutputFormat;
 import org.dom4j.io.XMLWriter;
-
 import zutil.io.StringOutputStream;
 import zutil.net.ws.WSMethodDef;
 import zutil.net.ws.WSParameterDef;
@@ -42,16 +34,33 @@ import zutil.net.ws.WSReturnObject;
 import zutil.net.ws.WSReturnObject.WSValueName;
 import zutil.net.ws.WebServiceDef;
 
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.PrintStream;
+import java.io.UnsupportedEncodingException;
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+
 public class WSDLWriter{
-
-	private WebServiceDef ws;
-
-	private String cache;
+    /** Current Web service definition ***/
+    private WebServiceDef ws;
+    /** Cache of generated WSDL **/
+    private String cache;
+    /** A list of services **/
+    private ArrayList<WSDLService> services;
 
 	public WSDLWriter( WebServiceDef ws ){
+        this.services = new ArrayList<WSDLService>();
 		this.ws = ws;
 	}
 
+    /**
+     * Add a service to be published with the WSDL
+     */
+    public void addService(WSDLService serv){
+        cache = null;
+        services.add(serv);
+    }
 
 	public void write( PrintStream out ) {
 		out.print(generate());
@@ -223,47 +232,15 @@ public class WSDLWriter{
 		binding.addAttribute("name", ws.getName()+"Binding");
 		binding.addAttribute("type", "tns:"+ws.getName()+"PortType");
 
-		generateSOAPOBinding(binding);
+        for(WSDLService serv : services){
+            serv.generateBinding(binding);
 
-		for(WSMethodDef method : ws.getMethods()){
-			generateSOAPOperation(binding, method);
-		}
+            for(WSMethodDef method : ws.getMethods()){
+                serv.generateOperation(binding, method);
+            }
+        }
 	}
 
-	private void generateSOAPOBinding(Element definitions){
-		// definitions -> binding -> soap:binding
-		Element soap_binding = definitions.addElement("soap:binding");
-		soap_binding.addAttribute("style", "rpc");
-		soap_binding.addAttribute("transport", "http://schemas.xmlsoap.org/soap/http");
-	}
-
-	private void generateSOAPOperation(Element definitions, WSMethodDef method){
-		// definitions -> binding -> operation
-		Element operation = definitions.addElement("wsdl:operation");
-		operation.addAttribute("name", method.getName());
-
-		// definitions -> binding -> operation -> soap:operation
-		Element soap_operation = operation.addElement("soap:operation");
-		soap_operation.addAttribute("soapAction", method.getNamespace());
-
-		//*************************** Input
-		// definitions -> binding -> operation -> input
-		Element input = operation.addElement("wsdl:input");
-		// definitions -> binding -> operation -> input -> body
-		Element input_body = input.addElement("soap:body");
-		input_body.addAttribute("use", "literal");
-		input_body.addAttribute("namespace", method.getNamespace());
-
-		//*************************** output
-		if( method.getOutputCount() > 0 ){
-			// definitions -> binding -> operation -> output
-			Element output = operation.addElement("wsdl:output");
-			// definitions -> binding -> operation -> input -> body
-			Element output_body = output.addElement("soap:body");
-			output_body.addAttribute("use", "literal");
-			output_body.addAttribute("namespace", method.getNamespace());
-		}
-	}
 
 	private void generateService(Element parent){
 		// definitions -> service
@@ -275,9 +252,11 @@ public class WSDLWriter{
 		port.addAttribute("name", ws.getName()+"Port");
 		port.addAttribute("binding", "tns:"+ws.getName()+"Binding");
 
-		// definitions -> service-> port -> address
-		Element address = port.addElement("soap:address");
-		address.addAttribute("location", null);
+        for(WSDLService serv : services){
+            // definitions -> service-> port -> address
+            Element address = port.addElement(serv.getServiceType()+":address");
+            address.addAttribute("location", serv.getServiceAddress());
+        }
 	}
 
 	/**

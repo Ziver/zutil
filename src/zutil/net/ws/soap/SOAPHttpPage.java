@@ -35,7 +35,6 @@ import zutil.net.http.HttpPage;
 import zutil.net.http.HttpPrintStream;
 import zutil.net.ws.*;
 import zutil.net.ws.WSReturnObject.WSValueName;
-import zutil.parser.wsdl.WSDLWriter;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
@@ -82,16 +81,12 @@ public class SOAPHttpPage implements HttpPage{
 	private WebServiceDef wsDef;
 	/** This instance of the web service class is used if session is disabled **/
 	private WSInterface ws;
-	/** The WSDL document **/
-	private WSDLWriter wsdl;
 	/** Session enabled **/
 	private boolean session_enabled;
 
 	public SOAPHttpPage( WebServiceDef wsDef ){
 		this.wsDef = wsDef;
 		this.session_enabled = false;
-
-		wsdl = new WSDLWriter( wsDef );
 	}
 	
 	/**
@@ -124,43 +119,37 @@ public class SOAPHttpPage implements HttpPage{
 			out.setHeader("Content-Type", "text/xml");
 			out.flush();
 
-			if(request.containsKey("wsdl")){
-				wsdl.write( out );
-			}
-			else{
-				WSInterface obj = null;
-				if(session_enabled){ 
-					if( session.containsKey("SOAPInterface"))
-						obj = (WSInterface)session.get("SOAPInterface");
-					else{
-						obj = wsDef.newInstance();
-						session.put("SOAPInterface", obj);
-					}
-				}
-				else{
-					if( ws == null )
-						ws = wsDef.newInstance();
-					obj = ws;
-				}
-				
-				Document document = genSOAPResponse( request.get(""), obj);
-				
-				OutputFormat format = OutputFormat.createCompactFormat();
-				XMLWriter writer = new XMLWriter( out, format );
-				writer.write( document );
-				
-				
-				// DEBUG
-				if( logger.isLoggable(Level.FINEST) ){
-					OutputFormat format2 = OutputFormat.createPrettyPrint();
-					System.err.println("********** Request");
-					System.err.println(request);
-					System.out.println("********** Response");
-					writer = new XMLWriter( System.out, format2 );
-					writer.write( document );
-				}
-				
-			}
+            WSInterface obj = null;
+            if(session_enabled){
+                if( session.containsKey("SOAPInterface"))
+                    obj = (WSInterface)session.get("SOAPInterface");
+                else{
+                    obj = wsDef.newInstance();
+                    session.put("SOAPInterface", obj);
+                }
+            }
+            else{
+                if( ws == null )
+                    ws = wsDef.newInstance();
+                obj = ws;
+            }
+
+            Document document = genSOAPResponse( request.get(""), obj);
+
+            OutputFormat format = OutputFormat.createCompactFormat();
+            XMLWriter writer = new XMLWriter( out, format );
+            writer.write( document );
+
+
+            // DEBUG
+            if( logger.isLoggable(Level.FINEST) ){
+                OutputFormat format2 = OutputFormat.createPrettyPrint();
+                System.err.println("********** Request");
+                System.err.println(request);
+                System.out.println("********** Response");
+                writer = new XMLWriter( System.out, format2 );
+                writer.write( document );
+            }
 		} catch (Exception e) {
 			logger.log(Level.WARNING, "Unhandled request", e);
 		}
@@ -299,57 +288,57 @@ public class SOAPHttpPage implements HttpPage{
 	
 	/**
 	 * Generates an return XML Element. This function can
-	 * handle return values as XML Elements, WSReturnObject and the
+	 * handle return values as XML Elements, WSReturnObject and
 	 * Java basic data types.
 	 * 
 	 * @param		root 		is the parent Element
-	 * @param 		ret 		is the object that is the return value
+	 * @param 		retObj 		is the object that is the return value
 	 * @param 		ename 		is the name of the parent Element
 	 */
-	private void generateReturnXML(Element root, Object ret, String ename) throws IllegalArgumentException, IllegalAccessException{
-		if(ret == null) return;
-		if(byte[].class.isAssignableFrom(ret.getClass())){
+	private void generateReturnXML(Element root, Object retObj, String ename) throws IllegalArgumentException, IllegalAccessException{
+		if(retObj == null) return;
+		if(byte[].class.isAssignableFrom(retObj.getClass())){
 			Element valueE = root.addElement( ename );
-			valueE.addAttribute("type", "xsd:"+getClassSOAPName(ret.getClass()));
-			String tmp = new sun.misc.BASE64Encoder().encode((byte[])ret);
+			valueE.addAttribute("type", "xsd:"+ getSOAPClassName(retObj.getClass()));
+			String tmp = new sun.misc.BASE64Encoder().encode((byte[])retObj);
 			tmp = tmp.replaceAll("\\s", "");
 			valueE.setText(tmp);
 		}
 		// return an array
-		else if(ret.getClass().isArray()){
+		else if(retObj.getClass().isArray()){
 			Element array = root.addElement( (ename.equals("element") ? "Array" : ename) );
-			String arrayType = "xsd:"+getClassSOAPName(ret.getClass());
-			arrayType = arrayType.replaceFirst("\\[\\]", "["+Array.getLength(ret)+"]");
+			String arrayType = "xsd:"+ getSOAPClassName(retObj.getClass());
+			arrayType = arrayType.replaceFirst("\\[\\]", "["+Array.getLength(retObj)+"]");
 
 			array.addAttribute("type", "soap:Array");
 			array.addAttribute("soap:arrayType", arrayType);
-			for(int i=0; i<Array.getLength(ret) ;i++){
-				generateReturnXML(array, Array.get(ret, i), "element");
+			for(int i=0; i<Array.getLength(retObj) ;i++){
+				generateReturnXML(array, Array.get(retObj, i), "element");
 			}
 		}		
 		else{
 			Element objectE = root.addElement( ename );
-			if(ret instanceof Element)
-				objectE.add( (Element)ret );
-			else if(ret instanceof WSReturnObject){
-				Field[] fields = ret.getClass().getFields();
+			if(retObj instanceof Element)
+				objectE.add( (Element)retObj );
+			else if(retObj instanceof WSReturnObject){
+				Field[] fields = retObj.getClass().getFields();
 				for(int i=0; i<fields.length ;i++){
 					WSValueName tmp = fields[i].getAnnotation( WSValueName.class );
 					String name;
 					if(tmp != null) name = tmp.value();
 					else name = "field"+i;
-					generateReturnXML(objectE, fields[i].get(ret), name);
+					generateReturnXML(objectE, fields[i].get(retObj), name);
 				}
 			}
 			else {
-				objectE.addAttribute("type", "xsd:"+getClassSOAPName(ret.getClass()));
-				objectE.addText( ""+ret );
+				objectE.addAttribute("type", "xsd:"+ getSOAPClassName(retObj.getClass()));
+				objectE.addText( ""+retObj );
 			}
 		}
 	}
 
 	
-	public static String getClassSOAPName(Class<?> c){
+	public static String getSOAPClassName(Class<?> c){
 		Class<?> cTmp = getClass(c);
 		if(byte[].class.isAssignableFrom(c)){
 			return "base64Binary";
