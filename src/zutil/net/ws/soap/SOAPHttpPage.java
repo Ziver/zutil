@@ -250,13 +250,13 @@ public class SOAPHttpPage implements HttpPage{
 				Object[] params = new Object[ m.getInputCount() ];
 
 				// Get the parameter values
-				for(int i=0;  i<m.getInputCount() ;i++){
+				for(int i=0; i<m.getInputCount() ;i++){
 					WSParameterDef param = m.getInput( i );
-					if( e.element(param.getName()) != null )
+					if( e.element(param.getName()) != null ){
 						params[i] = Converter.fromString(
 								e.element(param.getName()).getTextTrim(),
 								param.getParamClass());
-					i++;
+                    }
 				}
 				
 				// Invoke
