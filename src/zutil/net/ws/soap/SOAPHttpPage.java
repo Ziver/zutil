@@ -287,7 +287,7 @@ public class SOAPHttpPage implements HttpPage{
 	}
 	
 	/**
-	 * Generates an return XML Element. This function can
+	 * Generates a return XML Element. This function can
 	 * handle return values as XML Elements, WSReturnObject and
 	 * Java basic data types.
 	 * 
