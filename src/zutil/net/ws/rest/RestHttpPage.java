@@ -20,7 +20,7 @@
  * THE SOFTWARE.
  */
 
-package zutil.net.ws.zutil.net.ws.rest;
+package zutil.net.ws.rest;
 
 import zutil.net.http.HttpPage;
 import zutil.net.http.HttpPrintStream;
