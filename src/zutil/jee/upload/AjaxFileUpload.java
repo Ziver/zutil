@@ -22,35 +22,10 @@
 
 package zutil.jee.upload;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
-
-import org.apache.commons.fileupload.FileItem;
-import org.apache.commons.fileupload.FileItemHeaders;
-import org.apache.commons.fileupload.FileItemHeadersSupport;
-import org.apache.commons.fileupload.FileItemIterator;
-import org.apache.commons.fileupload.FileItemStream;
+import org.apache.commons.fileupload.*;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.commons.fileupload.util.Streams;
-
 import zutil.StringUtil;
 import zutil.io.file.FileUtil;
 import zutil.jee.upload.FileUploadListener.Status;
@@ -58,6 +33,19 @@ import zutil.log.LogUtil;
 import zutil.parser.DataNode;
 import zutil.parser.DataNode.DataType;
 import zutil.parser.json.JSONWriter;
+
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+import java.io.File;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * <XMP>
@@ -240,7 +228,7 @@ public abstract class AjaxFileUpload extends HttpServlet {
 				}
 				else{
 					files.add( fileItem );
-					logger.info("Recieved file: "+fileItem.getName()+" ("+StringUtil.formatBytesToString( fileItem.getSize() )+")");
+					logger.info("Recieved file: "+fileItem.getName()+" ("+StringUtil.formatByteSizeToString(fileItem.getSize())+")");
 				}
 			}
 			// Process the upload

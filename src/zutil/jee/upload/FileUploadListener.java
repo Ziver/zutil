@@ -23,7 +23,6 @@
 package zutil.jee.upload;
 
 import org.apache.commons.fileupload.ProgressListener;
-
 import zutil.StringUtil;
 import zutil.parser.DataNode;
 import zutil.parser.DataNode.DataType;
@@ -152,9 +151,9 @@ public class FileUploadListener implements ProgressListener{
 		node.set("filename", filename);
 		node.set("percent", getPercentComplete());
 		
-		node.set("uploaded", StringUtil.formatBytesToString( bytes ));
-		node.set("total", StringUtil.formatBytesToString( length ));
-		node.set("speed", StringUtil.formatBytesToString( speed )+"/s");
+		node.set("uploaded", StringUtil.formatByteSizeToString(bytes));
+		node.set("total", StringUtil.formatByteSizeToString(length));
+		node.set("speed", StringUtil.formatByteSizeToString(speed)+"/s");
 		return node;
 	}
 }

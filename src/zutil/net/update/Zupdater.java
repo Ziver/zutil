@@ -22,25 +22,17 @@
 
 package zutil.net.update;
 
-import java.awt.EventQueue;
-
-import javax.swing.JFrame;
-import javax.swing.JPanel;
-import javax.swing.border.EmptyBorder;
-import javax.swing.GroupLayout;
-import javax.swing.GroupLayout.Alignment;
-import javax.swing.JLabel;
-import javax.swing.JProgressBar;
-import javax.swing.LayoutStyle.ComponentPlacement;
-import javax.swing.SwingConstants;
-import javax.swing.JSeparator;
-import javax.swing.JButton;
-
 import zutil.ProgressListener;
 import zutil.StringUtil;
-import java.awt.event.ActionListener;
-import java.awt.event.ActionEvent;
+
+import javax.swing.*;
+import javax.swing.GroupLayout.Alignment;
+import javax.swing.LayoutStyle.ComponentPlacement;
+import javax.swing.border.EmptyBorder;
 import java.awt.Dialog.ModalExclusionType;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 
 public class Zupdater extends JFrame implements ProgressListener<UpdateClient, FileInfo>{
@@ -71,10 +63,10 @@ public class Zupdater extends JFrame implements ProgressListener<UpdateClient, F
 	public void progressUpdate(UpdateClient source, FileInfo info, double percent) {
 			lblFile.setText( info.getPath() );
 			progressBar.setValue( (int)percent );
-			progressBar.setString( StringUtil.formatBytesToString( source.getTotalReceived() ) +
-					" / "+StringUtil.formatBytesToString( source.getTotalSize() ));
+			progressBar.setString( StringUtil.formatByteSizeToString(source.getTotalReceived()) +
+					" / "+StringUtil.formatByteSizeToString(source.getTotalSize()));
 			
-			lblSpeed.setText( StringUtil.formatBytesToString(((UpdateClient)source).getSpeed())+"/s" );
+			lblSpeed.setText( StringUtil.formatByteSizeToString(((UpdateClient) source).getSpeed())+"/s" );
 	}
 	
 	

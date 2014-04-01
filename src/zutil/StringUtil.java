@@ -22,6 +22,8 @@
 
 package zutil;
 
+import zutil.converters.Converter;
+
 /**
  * This is a class whit utility methods.
  * 
@@ -33,10 +35,10 @@ public class StringUtil {
 	/**
 	 * Present a size (in bytes) as a human-readable value
 	 *
-	 * @param size size (in bytes)
+	 * @param   bytes   size (in bytes)
 	 * @return string
 	 */
-	public static String formatBytesToString(long bytes){
+	public static String formatByteSizeToString(long bytes){
 		int total = sizes.length-1;
 		double value = bytes;
 		
@@ -143,7 +145,7 @@ public class StringUtil {
 	/**
 	 * Trims the whitespace and quotes if the string starts and ends with one
 	 * 
-	 * @param 		str		is the string to trim
+	 * @param       str		is the string to trim
 	 * @return
 	 */
 	public static String trimQuotes(String str){
@@ -155,4 +157,54 @@ public class StringUtil {
 		}
 		return str;
 	}
+
+    /**
+     * Presents a binary array in HEX and ASCII
+     *
+     * @param       data     The source binary data to format
+     * @return A multiline String with human readable HEX and ASCII
+     */
+    public static String formatBytesToString(byte[] data){
+        StringBuffer output = new StringBuffer();
+
+        //000  XX XX XX XX XX XX XX XX  '........'
+        int maxOffset = (""+data.length).length();
+        for(int offset=0; offset<data.length; offset+=8){
+            if(offset != 0)
+                output.append('\n');
+
+            // Offset
+            String offsetStr = ""+offset;
+            for(int i=offsetStr.length(); i<3 || i<maxOffset; ++i){
+                output.append('0');
+            }
+            output.append(offsetStr);
+            output.append("  ");
+
+            // HEX
+            for(int i=0; i<8; ++i){
+                if(offset+i < data.length)
+                    output.append(Converter.toHexString(data[offset+i]));
+                else
+                    output.append("  ");
+                output.append(' ');
+            }
+            output.append(' ');
+
+            // ACII
+            output.append('\'');
+            for(int i=0; i<8; ++i){
+                if(offset+i < data.length)
+                    if( 32 <= data[offset+i] && data[offset+i] <= 126 )
+                        output.append((char)data[offset+i]);
+                    else
+                        output.append('.');
+                else
+                    output.append(' ');
+            }
+            output.append('\'');
+        }
+
+        return output.toString();
+    }
 }
