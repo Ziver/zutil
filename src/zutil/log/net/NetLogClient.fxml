@@ -36,6 +36,7 @@
       <menus>
         <Menu mnemonicParsing="false" text="File">
           <items>
+            <MenuItem mnemonicParsing="false" text="Open File" />
             <MenuItem mnemonicParsing="false" onAction="#handleConnectAction" text="Connect" />
             <Menu mnemonicParsing="false" text="Previous">
               <items>

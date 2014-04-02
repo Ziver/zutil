@@ -113,7 +113,7 @@ public class NetLogGuiClientInstance implements Initializable, NetLogListener {
 	public void handleExceptionMessage(NetLogExceptionMessage msg) {
 		if(status == Status.RUNNING){
 			exceptionTable.getItems().remove(msg);
-			exceptionTable.getItems().add(msg);	
+			exceptionTable.getItems().add(msg);
 		}	
 	}
 

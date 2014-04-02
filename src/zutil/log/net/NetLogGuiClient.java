@@ -79,8 +79,9 @@ public class NetLogGuiClient extends Application{
 	private class NetLoggerClientTab extends Tab{
 		public NetLoggerClientTab(String host, int port) throws IOException{
 			this.setText( host+":"+port );
-			
-			Parent tabRoot = FXMLLoader.load(getClass().getResource("NetLogClientInstance.fxml"));
+
+            FXMLLoader loader = new FXMLLoader();
+			Parent tabRoot = loader.load(getClass().getResource("NetLogClientInstance.fxml"));
 			this.setContent(tabRoot);
 			AnchorPane.setRightAnchor(tabRoot, 0.0);
 			//this.setOnClosed(new EventHandler<Event>() {

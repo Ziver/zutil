@@ -74,7 +74,7 @@ public class NetLogExceptionMessage extends Message {
 			return false;
 		
 		NetLogExceptionMessage other = (NetLogExceptionMessage) obj;
-		if (name.equals(other.name) || message.equals(other.message) || 
+		if (name.equals(other.name) && message.equals(other.message) &&
 				stackTrace.equals(other.stackTrace)) {
 			return true;
 		}

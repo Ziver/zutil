@@ -22,12 +22,16 @@
 
 package zutil.log.net;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.logging.LogRecord;
 
 import zutil.net.nio.message.Message;
 
 public class NetLogMessage extends Message {
 	private static final long serialVersionUID = 1L;
+    private static final SimpleDateFormat dataFormat =
+            new SimpleDateFormat("yyyy--MM-dd HH:mm:ss");
 	
 	private long   timestamp;
 	private String level;
@@ -53,8 +57,8 @@ public class NetLogMessage extends Message {
 
 	
 	
-	public long getTimestamp() {
-		return timestamp;
+	public String getTimestamp() {
+		return dataFormat.format(new Date(timestamp));
 	}
 
 	public void setTimestamp(long timestamp) {

@@ -62,7 +62,7 @@
           <children>
             <TableView fx:id="logTable" prefHeight="146.0" prefWidth="598.0" tableMenuButtonVisible="true" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
               <columns>
-                <TableColumn editable="false" prefWidth="75.0" sortable="false" text="Timestamp" fx:id="logTimestampColumn" />
+                <TableColumn editable="false" prefWidth="130.0" sortable="false" text="Timestamp" fx:id="logTimestampColumn" />
                 <TableColumn editable="false" prefWidth="75.0" sortable="false" text="Level" fx:id="logLevelColumn" />
                 <TableColumn editable="false" prefWidth="400.0" sortable="false" text="Log" fx:id="logColumn" />
               </columns>
