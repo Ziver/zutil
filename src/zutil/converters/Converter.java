@@ -23,6 +23,7 @@
 package zutil.converters;
 
 import zutil.io.DynamicByteArrayStream;
+import zutil.parser.Base64Decoder;
 
 import java.io.*;
 import java.util.BitSet;
@@ -343,7 +344,7 @@ public class Converter {
 			else if(c == Byte.class) 		return (T) new Byte(data);
 			else if(c == byte.class) 		return (T) new Byte(data);
 			else if(byte[].class.isAssignableFrom(c))
-											return (T) new sun.misc.BASE64Decoder().decodeBuffer(data);
+											return (T) Base64Decoder.decode(data);
 		}catch(Exception e){
 			e.printStackTrace();
 		}

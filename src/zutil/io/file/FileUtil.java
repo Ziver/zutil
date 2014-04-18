@@ -36,7 +36,6 @@ import java.util.logging.Logger;
 import java.util.regex.Matcher;
 
 import zutil.io.IOUtil;
-import zutil.io.MultiPrintStream;
 import zutil.log.LogUtil;
 
 /**
@@ -252,7 +251,6 @@ public class FileUtil {
 			return fileList;
 		--recurse;
 		if(folders){
-			MultiPrintStream.out.println("Dir Found : "+dir);
 			fileList.add( dir );
 		}
 		
