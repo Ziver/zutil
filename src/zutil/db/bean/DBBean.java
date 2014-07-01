@@ -43,12 +43,13 @@ import java.util.logging.Logger;
 import zutil.db.DBConnection;
 import zutil.log.LogUtil;
 
-/**
- * <XMP>
- * The class that extends this will be able to save its state to a DB.
+/** 
+ * The class that extends this will be able to save its state to a database.
  * Fields that are transient will be ignored, and fields that extend 
- * DBBean will be replaced with the id field of that class in the database.
+ * DBBean will be replaced with the an id which corresponds to the field 
+ * of that object.
  * 
+ * <XMP>
  * Supported fields:
  * 	*Boolean
  * 	*Integer
@@ -59,8 +60,7 @@ import zutil.log.LogUtil;
  * 	*Character
  * 	*DBBean
  * 	*java.sql.Timestamp
- * 	*List<DBBean>
- * 
+ * 	*List<DBBean> 
  * </XMP>
  * @author Ziver
  */
@@ -340,11 +340,11 @@ public abstract class DBBean {
 	}
 
 	/**
-	 * Loads all the rows in the table into a LinkedList
+	 * Loads all rows from the table into a LinkedList
 	 * 
 	 * @param 	<T> 	is the class of the bean
 	 * @param 	c 		is the class of the bean
-	 * @return			a LinkedList with all the Beans in the DB
+	 * @return			a LinkedList with all the beans in the DB
 	 */
 	public static <T extends DBBean> List<T> load(DBConnection db, Class<T> c) throws SQLException {
 		// Initiate a BeanConfig if there is non
@@ -359,12 +359,12 @@ public abstract class DBBean {
 	}
 
 	/**
-	 * Loads all the rows in the table into a LinkedList
+	 * Loads a specific instance of the bean from the table  with the specific id
 	 * 
 	 * @param 	<T> 	is the class of the bean
 	 * @param 	c 		is the class of the bean
 	 * @param	id		is the id value of the bean
-	 * @return			a DBBean Object with the specific id or null
+	 * @return			a DBBean Object with the specific id or null if the id was not found
 	 */
 	public static <T extends DBBean> T load(DBConnection db, Class<T> c, long id) throws SQLException {
 		// Initiate a BeanConfig if there is non

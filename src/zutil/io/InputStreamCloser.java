@@ -20,37 +20,40 @@
  * THE SOFTWARE.
  ******************************************************************************/
 
-package zutil.test;
+package zutil.io;
 
-import org.junit.Test;
-import zutil.io.DynamicByteArrayStream;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import java.io.Closeable;
+import java.io.IOException;
+import java.io.InputStream;
 
 /**
- * User: Ziver
+ * A simple Class that mirrors a InputStream but
+ * also has an additional Closeable object that 
+ * will be closed with the InputStream
+ * 
+ * @author Ziver
  */
-public class DynamicByteArrayStreamTest {
+public class InputStreamCloser extends InputStream{
+	private Closeable c;
+	private InputStream in;
+	
+	public InputStreamCloser(InputStream in, Closeable c){
+		this.c = c;
+		this.in = in;
+	}
 
-    @Test
-    public void emptyArray(){
-        DynamicByteArrayStream out = new DynamicByteArrayStream();
-        assertEquals(0, out.available());
-        assertEquals(0, out.getBytes().length);
-        assertTrue(out.toString().isEmpty());
-    }
+	public void close() throws IOException {
+		in.close();
+		c.close();
+	}
 
-    @Test
-    public void oneByteArray(){
-        byte[] b = new byte[]{0x01,0x02,0x03,0x04};
-
-        DynamicByteArrayStream out = new DynamicByteArrayStream();
-        out.append(b);
-
-        byte[] result = out.getBytes();
-        for(int i=0; i<b.length; i++){
-        	assertEquals(b[i], result[i]);
-        }
-    }
+	// Mirror functions
+	public int read() throws IOException                { return in.read(); }
+	public int read(byte b[]) throws IOException        { return in.read(b); }
+	public int read(byte b[], int off, int len) throws IOException { return in.read(b, off, len); }
+	public long skip(long n) throws IOException         { return in.skip(n); }
+	public int available() throws IOException           { return in.available(); }
+	public synchronized void mark(int readlimit)        { in.mark(readlimit); }
+	public synchronized void reset() throws IOException { in.reset(); }
+	public boolean markSupported()                      { return in.markSupported(); }
 }

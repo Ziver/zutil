@@ -44,7 +44,8 @@ public class DBConnection implements Closeable{
 	private static final Logger logger = LogUtil.getLogger();
 	
 	public enum DBMS{
-		MySQL
+		MySQL,
+		SQLite
 	}
 	// The connection
 	private Connection conn = null;
@@ -88,6 +89,17 @@ public class DBConnection implements Closeable{
 		String dbms_name = initDriver(dbms);
 		conn = DriverManager.getConnection ("jdbc:"+dbms_name+"://"+url+"/"+db, user, password);
 	}
+	
+	/**
+	 * Creates an Connection to a DB file
+	 * 
+	 * @param dbms is the DB type
+	 * @param db is the database to connect to
+	 */
+	public DBConnection(DBMS dbms, String db) throws Exception{
+		String dbms_name = initDriver(dbms);
+		conn = DriverManager.getConnection ("jdbc:"+dbms_name+":"+db);
+	}
 
 	/**
 	 * @return the underlying connection
@@ -105,11 +117,15 @@ public class DBConnection implements Closeable{
 	public String initDriver(DBMS db) throws InstantiationException, IllegalAccessException, ClassNotFoundException{
 		switch(db){
 		case MySQL:
-			Class.forName ("com.mysql.jdbc.Driver").newInstance();
+			Class.forName("com.mysql.jdbc.Driver").newInstance();
 			DriverManager.setLoginTimeout(10);
 			return "mysql";
+		case SQLite:
+			Class.forName("org.sqlite.JDBC");
+			return "sqlite";
+		default:
+			return null;
 		}
-		return null;
 	}
 
 	/**
@@ -162,16 +178,23 @@ public class DBConnection implements Closeable{
 	 * @return update count or -1 if the query is not an update query
 	 */
 	public static int exec(PreparedStatement stmt) throws SQLException {
-		return exec(stmt, new SQLResultHandler<Integer>(){
+		Integer ret = exec(stmt, new SQLResultHandler<Integer>(){
 			public Integer handleQueryResult(Statement stmt, ResultSet result) {
 				try {
-					return stmt.getUpdateCount();
+					if(stmt != null)
+						return stmt.getUpdateCount();
+					else
+						return -1;
 				} catch (SQLException e) {
 					logger.log(Level.WARNING, null, e);
 				}
 				return -1;
 			}			
 		});
+		
+		if(ret != null)
+			return ret;
+		return -1;
 	}
 	
 	/**
@@ -203,23 +226,35 @@ public class DBConnection implements Closeable{
 			if( handler != null ){
 				ResultSet result = null;
 				try{
-					result = stmt.getResultSet();
-					return handler.handleQueryResult(stmt, result);		
+					if(stmt.getMoreResults()){
+						result = stmt.getResultSet();
+						return handler.handleQueryResult(stmt, result);
+					}
+					else
+						return null;
+				}catch(SQLException sqlex){
+					logger.throwing(null, null, sqlex);
 				}finally{
 					if(result != null){
 						try {
 							result.close();
-						} catch (SQLException e) { }
+						} catch (SQLException sqlex) { 
+							logger.throwing(null, null, sqlex);
+						}
 						result = null;
 					}
 				}
 			}
+		}catch(SQLException sqlex){
+			logger.throwing(null, null, sqlex);
 		// Cleanup
 		} finally {		
 			if (stmt != null) {
 				try {
 					stmt.close();
-				} catch (SQLException sqlex) { }
+				} catch (SQLException sqlex) { 
+					logger.throwing(null, null, sqlex);
+				}
 				stmt = null;
 			}
 		}

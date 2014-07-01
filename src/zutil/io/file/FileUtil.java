@@ -23,8 +23,12 @@
 package zutil.io.file;
 
 import java.io.BufferedInputStream;
+import java.io.BufferedReader;
+import java.io.EOFException;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
@@ -310,4 +314,43 @@ public class FileUtil {
 		return file.substring(0, file.lastIndexOf(".")+1)+ext;
 	}
 	
+	/**
+	 * This function will replace some data between two boundaries.
+	 * If the boundary is not found it will be added  to the end of the file.
+	 * 
+	 * @param 	file		is the file to modify
+	 * @param 	boundary	is the start and end boundary to put the data between, this is a full line boundary.
+	 * @param 	data		is the data that will be written to the file
+	 */
+	public static void writeBetweenBoundary(File file, String boundary, String data) throws IOException{
+		BufferedReader in = new BufferedReader(new FileReader(file));
+		StringBuilder output = new StringBuilder();
+		
+		String line;
+		while((line = in.readLine()) != null){
+			// Found starting boundary
+			if(line.equals(boundary)){ 
+				while((line = in.readLine()) != null)
+					// Find ending boundary
+					if(line.equals(boundary)) break; 
+				// EOF and no ending boundary found
+				if(line == null){
+					in.close();
+					throw new EOFException("No ending boundary found");
+				}
+				// Write the new data
+				output.append(boundary).append('\n');
+				output.append(data).append('\n');
+				output.append(boundary).append('\n');
+			}
+			else
+				output.append(line).append('\n');
+		}
+		in.close();
+		
+		// Save changes
+		FileWriter out = new FileWriter(file);
+		out.write(output.toString());
+		out.close();
+	}
 }

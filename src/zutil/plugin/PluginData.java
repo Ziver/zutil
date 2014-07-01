@@ -54,7 +54,8 @@ public class PluginData<T> {
 	@SuppressWarnings("unchecked")
 	public T getObject() throws InstantiationException, IllegalAccessException, ClassNotFoundException{
 		if(obj == null)
-			obj = (T) Class.forName(pluginClass).newInstance();
+			new URLClassLoader(urls);
+			//obj = (T) Class.forName(pluginClass).newInstance();
 		return obj;
 	}
 

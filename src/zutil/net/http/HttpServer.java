@@ -123,6 +123,8 @@ public class HttpServer extends ThreadedTCPNetworkServer{
 	 * @param page The page itself
 	 */
 	public void setPage(String name, HttpPage page){
+		if(name.charAt(0) != '/')
+			name = "/"+name;
 		pages.put(name, page);
 	}
 
@@ -268,9 +270,12 @@ public class HttpServer extends ThreadedTCPNetworkServer{
 				} catch (Exception e1) {}
 				if(e.getMessage() != null)
 					out.println( "500 Internal Server Error: "+e.getMessage() );
-				else{
+				else if(e.getCause() != null){
 					out.println( "500 Internal Server Error: "+e.getCause().getMessage() );
-				}				
+				}
+				else{
+					out.println( "500 Internal Server Error: "+e);
+				}
 			}
 
 			try{

@@ -39,13 +39,13 @@ public abstract class OSAbstractionLayer {
     // Variables
     private static OSAbstractionLayer instance;
 
-    public OSAbstractionLayer getInstance(){
+    public static OSAbstractionLayer getInstance(){
         if(instance == null)
             instance = getAbstractionLayer();
         return instance;
     }
 
-    private OSAbstractionLayer getAbstractionLayer(){
+    private static OSAbstractionLayer getAbstractionLayer(){
         String os = System.getProperty("os.name");
         if     (os.contains("Linux"))   return new OsalLinuxImpl();
         else if(os.contains("Windows")) return new OsalWindowsImpl();
