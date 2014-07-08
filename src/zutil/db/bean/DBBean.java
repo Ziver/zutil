@@ -456,7 +456,6 @@ public abstract class DBBean {
 	 * This is a workaround if the field is not visible to other classes
 	 * 
 	 * @param 	field	is the field
-	 * @return 			the value of the field
 	 */
 	protected void setFieldValue(Field field, Object o){
 		try {

@@ -222,7 +222,7 @@ public class SQLQuery {
 		protected void build(StringBuilder query) {
 			query.append(" FROM ");
 			if( tables.isEmpty() )
-				throw new RuntimeException("The FROM query item must hav atleast 1 table!");
+				throw new RuntimeException("The FROM query item must have at least 1 table!");
 			for(int i=0; i<tables.size() ;i++){
 				query.append(tables.get(i));
 				if( i != tables.size()-1 )
