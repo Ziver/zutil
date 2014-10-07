@@ -25,6 +25,7 @@ package zutil.net.upnp;
 import java.util.Map;
 import java.util.UUID;
 
+import zutil.net.http.HttpHeaderParser;
 import zutil.net.http.HttpPrintStream;
 
 /**
@@ -43,7 +44,7 @@ public class UPnPMediaServer extends UPnPRootDevice{
 		url = location;
 	}
 
-	public void respond(HttpPrintStream out, Map<String, String> clientInfo,
+	public void respond(HttpPrintStream out, HttpHeaderParser clientInfo,
 			Map<String, Object> session, Map<String, String> cookie,
 			Map<String, String> request) {
 

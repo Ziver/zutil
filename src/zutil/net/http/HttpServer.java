@@ -64,8 +64,8 @@ public class HttpServer extends ThreadedTCPNetworkServer{
 	/**
 	 * Creates a new instance of the sever
 	 * 
-	 * @param url The address to the server
-	 * @param port The port that the server should listen to
+	 * @param   url     The address to the server
+	 * @param   port    The port that the server should listen to
 	 */
 	public HttpServer(String url, int port){
 		this(url, port, null, null);
@@ -75,10 +75,10 @@ public class HttpServer extends ThreadedTCPNetworkServer{
 	/**
 	 * Creates a new instance of the sever
 	 * 
-	 * @param url The address to the server
-	 * @param port The port that the server should listen to
-	 * @param sslCert If this is not null then the server will use SSL connection with this keyStore file path
-	 * @param sslCert If this is not null then the server will use a SSL connection with the given certificate
+	 * @param   url             The address to the server
+	 * @param   port            The port that the server should listen to
+	 * @param   keyStore        If this is not null then the server will use SSL connection with this keyStore file path
+	 * @param   keyStorePass    If this is not null then the server will use a SSL connection with the given certificate
 	 */
 	public HttpServer(String url, int port, File keyStore, String keyStorePass){
 		super( port, keyStore, keyStorePass );
@@ -119,8 +119,8 @@ public class HttpServer extends ThreadedTCPNetworkServer{
 	/**
 	 * Add a HttpPage to a specific URL
 	 * 
-	 * @param name The URL or name of the page
-	 * @param page The page itself
+	 * @param   name    The URL or name of the page
+	 * @param   page    The page itself
 	 */
 	public void setPage(String name, HttpPage page){
 		if(name.charAt(0) != '/')
@@ -132,7 +132,7 @@ public class HttpServer extends ThreadedTCPNetworkServer{
 	 * This is a default page that will be shown
 	 * if there is no other matching page,
 	 * 
-	 * @param page The HttpPage that will be shown
+	 * @param   page    The HttpPage that will be shown
 	 */
 	public void setDefaultPage(HttpPage page){
 		defaultPage = page;
@@ -168,7 +168,6 @@ public class HttpServer extends ThreadedTCPNetworkServer{
 		public void run(){
 			String tmp = null;
 
-			HashMap<String,String> client_info = new HashMap<String,String>();
 			HashMap<String,String> cookie = new HashMap<String,String>();
 			HashMap<String,String> request = new HashMap<String,String>();
 
@@ -178,7 +177,6 @@ public class HttpServer extends ThreadedTCPNetworkServer{
 
 				HttpHeaderParser parser = new HttpHeaderParser(in);
 				logger.finest(parser.toString());
-				client_info = parser.getHeaders();
 				request = parser.getURLAttributes();
 				cookie = parser.getCookies();
 
@@ -238,9 +236,8 @@ public class HttpServer extends ThreadedTCPNetworkServer{
 				// Debug
 				if(logger.isLoggable(Level.FINE)){
 					logger.finest( "# page_url: "+parser.getRequestURL() );
+                    logger.finest( "# client_session: "+client_session );
 					logger.finest( "# cookie: "+cookie );
-					logger.finest( "# client_session: "+client_session );
-					logger.finest( "# client_info: "+client_info );
 					logger.finest( "# request: "+request );
 				}
 				//****************************  RESPONSE  ************************************
@@ -251,10 +248,10 @@ public class HttpServer extends ThreadedTCPNetworkServer{
 				out.setCookie( "session_id", ""+client_session.get("session_id") );
 
 				if( !parser.getRequestURL().isEmpty() && pages.containsKey(parser.getRequestURL()) ){
-					pages.get(parser.getRequestURL()).respond(out, client_info, client_session, cookie, request);
+					pages.get(parser.getRequestURL()).respond(out, parser, client_session, cookie, request);
 				}
 				else if( defaultPage != null ){
-					defaultPage.respond(out, client_info, client_session, cookie, request);
+					defaultPage.respond(out, parser, client_session, cookie, request);
 				}
 				else{
 					out.setStatusCode( 404 );
@@ -279,7 +276,7 @@ public class HttpServer extends ThreadedTCPNetworkServer{
 			}
 
 			try{
-				logger.fine("Conection Closed!!!");
+				logger.fine("Connection Closed!!!");
 				out.close();
 				in.close();
 				socket.close();

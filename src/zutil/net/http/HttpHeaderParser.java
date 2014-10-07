@@ -70,7 +70,7 @@ public class HttpHeaderParser {
 	/**
 	 * Parses the HTTP header information from an String
 	 * 
-	 * @param 		in 		is the string
+	 * @param   in 		is the string
 	 */
 	public HttpHeaderParser(String in){
 		url_attr = new HashMap<String, String>();
@@ -94,8 +94,7 @@ public class HttpHeaderParser {
 	 * Parses the first header line and ads the values to 
 	 * the map and returns the file name and path
 	 * 
-	 * @param 	header 		The header String
-	 * @param 	map 		The HashMap to put the variables to
+	 * @param 	line 		The header String
 	 * @return 				The path and file name as a String
 	 */
 	protected void parseStatusLine(String line){

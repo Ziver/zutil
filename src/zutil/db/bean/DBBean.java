@@ -456,12 +456,13 @@ public abstract class DBBean {
 	 * This is a workaround if the field is not visible to other classes
 	 * 
 	 * @param 	field	is the field
+	 * @return 			the value of the field
 	 */
 	protected void setFieldValue(Field field, Object o){
 		try {
 			if( !Modifier.isPublic( field.getModifiers()))
 				field.setAccessible(true);
-			
+
 			// Set basic datatype
 			if( o == null && !Object.class.isAssignableFrom( field.getType() ) ){
 				logger.fine("Trying to set primitive data type to null!");

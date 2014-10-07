@@ -31,6 +31,7 @@ import org.dom4j.io.XMLWriter;
 import org.xml.sax.SAXException;
 import zutil.converters.Converter;
 import zutil.log.LogUtil;
+import zutil.net.http.HttpHeaderParser;
 import zutil.net.http.HttpPage;
 import zutil.net.http.HttpPrintStream;
 import zutil.net.ws.*;
@@ -110,7 +111,7 @@ public class SOAPHttpPage implements HttpPage{
 	
 
 	public void respond(HttpPrintStream out,
-			Map<String, String> client_info,
+			HttpHeaderParser client_info,
 			Map<String, Object> session, 
 			Map<String, String> cookie,
 			Map<String, String> request) {

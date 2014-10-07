@@ -30,6 +30,7 @@ import java.util.Map;
 import org.dom4j.DocumentException;
 
 import zutil.io.file.FileUtil;
+import zutil.net.http.HttpHeaderParser;
 import zutil.net.http.HttpPage;
 import zutil.net.http.HttpPrintStream;
 import zutil.net.upnp.UPnPService;
@@ -151,7 +152,7 @@ public class UPnPContentDirectory implements UPnPService, HttpPage, WSInterface 
 	
 
 	@WSDisabled
-	public void respond(HttpPrintStream out, Map<String, String> clientInfo,
+	public void respond(HttpPrintStream out, HttpHeaderParser clientInfo,
 			Map<String, Object> session, Map<String, String> cookie,
 			Map<String, String> request) {
 
