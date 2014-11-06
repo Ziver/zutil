@@ -38,7 +38,7 @@ import java.util.zip.ZipFile;
 
 import zutil.io.InputStreamCloser;
 
-public class FileSearch implements Iterable<FileSearchItem>{
+public class FileSearch implements Iterable<FileSearch.FileSearchItem>{
 	// Constants
 	private static final List<String> compressedFileExtensions = Arrays.asList(new String[]{
 			"jar", "zip"
@@ -72,7 +72,7 @@ public class FileSearch implements Iterable<FileSearchItem>{
 	}
 
 	/**
-	 * Sets the file extensions to search for (should not include . at the beggining)
+	 * Sets the file extensions to search for (should not include . at the beginning)
 	 */
 	public void setExtension(String ext){
 
@@ -180,65 +180,67 @@ public class FileSearch implements Iterable<FileSearchItem>{
 		}
 
 	}
-}
 
 
-interface FileSearchItem{
-	/** @return a file or folder name **/
-	public String getName();
-	/** @return a URL to the file or folder, in case of a compressed file the URL to the package will be returned **/
-	public URL getUrl()  throws MalformedURLException ;
 
-	public boolean isCompressed();
-	public boolean isFile();
-	public boolean isDirectory();
+	public interface FileSearchItem{
+		/** @return a file or folder name **/
+		public String getName();
+		/** @return a URL to the file or folder, in case of a compressed file the URL to the package will be returned **/
+		public URL getUrl()  throws MalformedURLException ;
 
-	/** @return an InputStream if this is a file otherwise null **/
-	public InputStream getInputStream() throws IOException;
-	/** @return an String array with all files if this is a folder otherwise null **/
-	public String[] listFiles(); 
-}
+		public boolean isCompressed();
+		public boolean isFile();
+		public boolean isDirectory();
 
-
-class FileSearchFileItem implements FileSearchItem{
-	private File file;
-
-	protected FileSearchFileItem(File file){
-		this.file = file;
+		/** @return an InputStream if this is a file otherwise null **/
+		public InputStream getInputStream() throws IOException;
+		/** @return an String array with all files if this is a folder otherwise null **/
+		public String[] listFiles();
 	}
 
-	public String getName()             { return file.getName(); }
-	public URL getUrl() throws MalformedURLException { return new URL(file.getAbsolutePath()); }
 
-	public boolean isCompressed()       { return false; }
-	public boolean isFile()             { return file.isFile(); }
-	public boolean isDirectory()        { return file.isDirectory(); }
+	public class FileSearchFileItem implements FileSearchItem{
+		private File file;
 
-	public InputStream getInputStream() throws IOException { return new FileInputStream(file); }
-	public String[] listFiles()         { return file.list(); }
+		protected FileSearchFileItem(File file){
+			this.file = file;
+		}
 
-}
+		public String getName()             { return file.getName(); }
+		public URL getUrl() throws MalformedURLException { return new URL(file.getAbsolutePath()); }
 
-class FileSearchZipItem implements FileSearchItem{
-	private String file;
-	private ZipEntry entry;
+		public boolean isCompressed()       { return false; }
+		public boolean isFile()             { return file.isFile(); }
+		public boolean isDirectory()        { return file.isDirectory(); }
 
-	protected FileSearchZipItem(String file, ZipEntry entry){
-		this.file = file;
-		this.entry = entry;
+		public InputStream getInputStream() throws IOException { return new FileInputStream(file); }
+		public String[] listFiles()         { return file.list(); }
+
 	}
 
-	public String getName()                           { return entry.getName(); }
-	public URL getUrl()  throws MalformedURLException { return new URL(file); }
+	public class FileSearchZipItem implements FileSearchItem{
+		private String file;
+		private ZipEntry entry;
 
-	public boolean isCompressed()                     { return true; }
-	public boolean isFile()                           { return !entry.isDirectory(); }
-	public boolean isDirectory()                      { return entry.isDirectory();	}
+		protected FileSearchZipItem(String file, ZipEntry entry){
+			this.file = file;
+			this.entry = entry;
+		}
 
-	public InputStream getInputStream() throws IOException {
-		ZipFile zip = new ZipFile(file);
-		return new InputStreamCloser(zip.getInputStream(entry), zip);
+		public String getName()                           { return entry.getName(); }
+		public URL getUrl()  throws MalformedURLException { return new URL(file); }
+
+		public boolean isCompressed()                     { return true; }
+		public boolean isFile()                           { return !entry.isDirectory(); }
+		public boolean isDirectory()                      { return entry.isDirectory();	}
+
+		public InputStream getInputStream() throws IOException {
+			ZipFile zip = new ZipFile(file);
+			return new InputStreamCloser(zip.getInputStream(entry), zip);
+		}
+		public String[] listFiles()         { return null; }
+
 	}
-	public String[] listFiles()         { return null; }
 
 }

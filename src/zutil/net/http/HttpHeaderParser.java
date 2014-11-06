@@ -104,7 +104,7 @@ public class HttpHeaderParser {
 			httpCode = Integer.parseInt( line.substring( 9, 12 ));
 		}
 		// Client Request
-		else{
+		else if(line.contains("HTTP/")){
 			type = (line.substring(0, line.indexOf(" "))).trim();
 			version = Float.parseFloat( line.substring(line.lastIndexOf("HTTP/")+5 , line.length()).trim() );
 			line = (line.substring(type.length()+1, line.lastIndexOf("HTTP/"))).trim();

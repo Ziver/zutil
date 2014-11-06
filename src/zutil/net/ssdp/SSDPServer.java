@@ -79,6 +79,7 @@ public class SSDPServer extends ThreadedUDPNetwork implements ThreadedUDPNetwork
 
 
 	public static void main(String[] args) throws IOException{
+		LogUtil.setGlobalLevel(Level.FINEST);
 		SSDPServer ssdp = new SSDPServer();
 		StandardSSDPInfo service = new StandardSSDPInfo();
 		service.setLocation("nowhere");
@@ -101,8 +102,7 @@ public class SSDPServer extends ThreadedUDPNetwork implements ThreadedUDPNetwork
 	/**
 	 * Adds an service that will be announced.
 	 * 
-	 * @param searchTarget is the ST value in SSDP
-	 * @param location is the location of the service
+	 * @param service add a new service to be announced
 	 */
 	public void addService(SSDPServiceInfo service){
 		services.put( service.getSearchTarget(), service );
@@ -178,11 +178,11 @@ public class SSDPServer extends ThreadedUDPNetwork implements ThreadedUDPNetwork
 			String msg = new String( packet.getData() );
 
 			HttpHeaderParser header = new HttpHeaderParser( msg );
-			logger.log(Level.FINEST, "**** Received:\n"+header);
+			logger.log(Level.FINEST, "#### Received:\n"+header);
 
 			// ******* Respond
 			// Check that the message is an ssdp discovery message
-			if( header.getRequestType().equalsIgnoreCase("M-SEARCH") ){
+			if( header.getRequestType() != null && header.getRequestType().equalsIgnoreCase("M-SEARCH") ){
 				String man = header.getHeader("Man").replace("\"", "");
 				String st = header.getHeader("ST");
 				// Check that its the correct URL and that its an ssdp:discover message
@@ -199,15 +199,17 @@ public class SSDPServer extends ThreadedUDPNetwork implements ThreadedUDPNetwork
 						http.setHeader("EXT", "" );
 						http.setHeader("Cache-Control", "max-age = "+cache_time );
 						http.setHeader("USN", services.get(st).getUSN() );
+						http.flush();
 
-						http.close();
-						logger.log(Level.FINEST, "********** Response:\n"+response);
-						byte[] data = response.toString().getBytes();
+						String strData = response.toString();
+						logger.log(Level.FINEST, "#### Response:\n"+strData);
+						byte[] data = strData.getBytes();
 						packet = new DatagramPacket( 
 								data, data.length, 
 								packet.getAddress(), 
 								packet.getPort());
 						network.send( packet );
+						http.close();
 					}
 				}
 			}
@@ -267,7 +269,7 @@ public class SSDPServer extends ThreadedUDPNetwork implements ThreadedUDPNetwork
 			http.setHeader("USN", services.get(searchTarget).getUSN() );
 
 			http.close();
-			logger.log(Level.FINEST, "******** Notification:\n"+msg);
+			logger.log(Level.FINEST, "#### Notification:\n"+msg);
 			byte[] data = msg.toString().getBytes();
 			DatagramPacket packet = new DatagramPacket( 
 					data, data.length, 

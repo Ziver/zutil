@@ -48,6 +48,8 @@ public class SSDPClient extends ThreadedUDPNetwork implements ThreadedUDPNetwork
 	// Contains all the received services
 	private HashMap<String, LinkedList<SSDPServiceInfo>> services_st;
 	private HashMap<String, SSDPServiceInfo> 			 services_usn;
+
+	private SSDPServiceListener listener;
 	
 	
 	public static void main(String[] args) throws IOException{
@@ -104,8 +106,8 @@ public class SSDPClient extends ThreadedUDPNetwork implements ThreadedUDPNetwork
 			http.setHeader("ST", st );
 			http.setHeader("Man", "\"ssdp:discover\"" );
 			http.setHeader("MX", "3" );
+			http.flush();
 
-			http.close();
 			logger.log(Level.FINEST, "***** REQUEST: \n"+msg);
 			byte[] data = msg.toString().getBytes();
 			DatagramPacket packet = new DatagramPacket( 
@@ -113,6 +115,7 @@ public class SSDPClient extends ThreadedUDPNetwork implements ThreadedUDPNetwork
 					InetAddress.getByName( SSDPServer.SSDP_MULTICAST_ADDR ), 
 					SSDPServer.SSDP_PORT );
 			super.send( packet );
+			http.close();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -173,10 +176,11 @@ public class SSDPClient extends ThreadedUDPNetwork implements ThreadedUDPNetwork
 	 */
 	public void receivedPacket(DatagramPacket packet, ThreadedUDPNetwork network) {
 		HttpHeaderParser header = new HttpHeaderParser( new String( packet.getData() ) );
-		logger.log(Level.FINEST, "*********** Recived\n"+header);
+		logger.log(Level.FINEST, "Recived: \n"+header);
 		
 		String usn = header.getHeader("USN");
 		String st = header.getHeader("ST");
+		boolean newService = false;
 		StandardSSDPInfo service;
 		// Get existing service
 		if( services_usn.containsKey( usn )){
@@ -184,6 +188,7 @@ public class SSDPClient extends ThreadedUDPNetwork implements ThreadedUDPNetwork
 		}
 		// Add new service
 		else{
+			newService = true;
 			service = new StandardSSDPInfo();
 			services_usn.put( usn, service);
 			if( !services_st.containsKey(st) )
@@ -197,7 +202,10 @@ public class SSDPClient extends ThreadedUDPNetwork implements ThreadedUDPNetwork
 		service.setExpirationTime( 
 				System.currentTimeMillis() +
 				1000 * getCacheTime(header.getHeader("Cache-Control")) );
-		logger.log(Level.FINEST, "*********** Recived\n"+service);
+
+		logger.log(Level.FINEST, "Recived:\n"+service);
+		if(listener != null && newService)
+			listener.newService(service);
 	}
 	
 	private long getCacheTime(String cache_control){
@@ -212,4 +220,7 @@ public class SSDPClient extends ThreadedUDPNetwork implements ThreadedUDPNetwork
 		return ret;
 	}
 
+	public interface SSDPServiceListener{
+		public void newService(StandardSSDPInfo service);
+	}
 }

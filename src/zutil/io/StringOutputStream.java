@@ -57,7 +57,7 @@ public class StringOutputStream extends OutputStream{
 	}
 
 	/**
-	 * Same as {@link clear()}
+	 * Same as {@link OutputStream:clear()}
 	 */
 	@Override
 	public void close() {

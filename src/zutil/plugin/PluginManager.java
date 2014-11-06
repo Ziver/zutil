@@ -54,8 +54,8 @@ public class PluginManager<T> implements Iterable<PluginData<T>>{
 		search.searchFolders(false);
 		search.setFileName("plugin.json");
 		
-		for(File file : search){
-			DataNode node = JSONParser.read(FileUtil.getFileContent(file));
+		for(FileSearch.FileSearchItem file : search){
+			DataNode node = JSONParser.read(FileUtil.getContent(file.getUrl()));
 			PluginData<T> plugin = new PluginData<T>(intfClass.getName(), node);
 			
 			if(node.get("interfaces").getString(intfClass.getName()) != null){

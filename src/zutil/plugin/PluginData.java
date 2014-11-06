@@ -24,6 +24,8 @@ package zutil.plugin;
 
 import zutil.parser.DataNode;
 
+import java.net.URLClassLoader;
+
 /**
  * This class contains information about a plugin
  * and implementation instances of the plugin interfaces
@@ -53,9 +55,9 @@ public class PluginData<T> {
 	
 	@SuppressWarnings("unchecked")
 	public T getObject() throws InstantiationException, IllegalAccessException, ClassNotFoundException{
-		if(obj == null)
-			new URLClassLoader(urls);
-			//obj = (T) Class.forName(pluginClass).newInstance();
+		//if(obj == null)
+		//	new URLClassLoader(pluginClass);
+		//	//obj = (T) Class.forName(pluginClass).newInstance();
 		return obj;
 	}
 
