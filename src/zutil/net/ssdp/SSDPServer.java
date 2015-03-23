@@ -25,6 +25,7 @@ package zutil.net.ssdp;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
+import java.net.MulticastSocket;
 import java.util.HashMap;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -80,10 +81,14 @@ public class SSDPServer extends ThreadedUDPNetwork implements ThreadedUDPNetwork
 
 	public static void main(String[] args) throws IOException{
 		LogUtil.setGlobalLevel(Level.FINEST);
-		SSDPServer ssdp = new SSDPServer();
 		StandardSSDPInfo service = new StandardSSDPInfo();
 		service.setLocation("nowhere");
-		service.setST("upnp:rootdevice");
+		service.setST("zep:discover");
+		HashMap<String, String> headers = new HashMap<String, String>();
+		headers.put("Alias", "Desktop");
+		headers.put("PublicKey", "SuperDesktopKey");
+		service.setHeaders(headers);
+		SSDPServer ssdp = new SSDPServer();
 		ssdp.addService(service);
 		ssdp.start();
 		MultiPrintStream.out.println("SSDP Server running");
@@ -178,31 +183,36 @@ public class SSDPServer extends ThreadedUDPNetwork implements ThreadedUDPNetwork
 			String msg = new String( packet.getData() );
 
 			HttpHeaderParser header = new HttpHeaderParser( msg );
-			logger.log(Level.FINEST, "#### Received:\n"+header);
 
 			// ******* Respond
 			// Check that the message is an ssdp discovery message
 			if( header.getRequestType() != null && header.getRequestType().equalsIgnoreCase("M-SEARCH") ){
-				String man = header.getHeader("Man").replace("\"", "");
+				String man = header.getHeader("Man");
+				if(man != null)
+					man = man.replace("\"", "");
 				String st = header.getHeader("ST");
 				// Check that its the correct URL and that its an ssdp:discover message
-				if( header.getRequestURL().equals("*") && man.equalsIgnoreCase("ssdp:discover") ){
+				if( header.getRequestURL().equals("*") && "ssdp:discover".equalsIgnoreCase(man) ){
 					// Check if the requested service exists
 					if( services.containsKey( st ) ){
+						logger.log(Level.FINEST, "Received Multicast(from: "+packet.getAddress()+"):\n"+header);
+
 						// Generate the SSDP response
 						StringOutputStream response = new StringOutputStream();
 						HttpPrintStream http = new HttpPrintStream( response );
 						http.setStatusCode(200);
+						http.setHeader("Location", services.get(st).getLocation() );
+						http.setHeader("USN", services.get(st).getUSN() );
 						http.setHeader("Server", SERVER_INFO );
 						http.setHeader("ST", st );
-						http.setHeader("Location", services.get(st).getLocation() );
 						http.setHeader("EXT", "" );
 						http.setHeader("Cache-Control", "max-age = "+cache_time );
-						http.setHeader("USN", services.get(st).getUSN() );
+						if(services.get(st) instanceof SSDPCustomInfo)
+							((SSDPCustomInfo)services.get(st)).setHeaders(http);
 						http.flush();
 
 						String strData = response.toString();
-						logger.log(Level.FINEST, "#### Response:\n"+strData);
+						logger.log(Level.FINEST, "Response:\n"+strData);
 						byte[] data = strData.getBytes();
 						packet = new DatagramPacket( 
 								data, data.length, 
@@ -269,7 +279,7 @@ public class SSDPServer extends ThreadedUDPNetwork implements ThreadedUDPNetwork
 			http.setHeader("USN", services.get(searchTarget).getUSN() );
 
 			http.close();
-			logger.log(Level.FINEST, "#### Notification:\n"+msg);
+			logger.log(Level.FINEST, "Notification:\n" + msg);
 			byte[] data = msg.toString().getBytes();
 			DatagramPacket packet = new DatagramPacket( 
 					data, data.length, 
@@ -318,7 +328,7 @@ public class SSDPServer extends ThreadedUDPNetwork implements ThreadedUDPNetwork
 			http.setHeader("USN", services.get(searchTarget).getUSN() );
 
 			http.close();
-			logger.log(Level.FINEST, "******** ByeBye:\n"+msg);
+			logger.log(Level.FINEST, "ByeBye:\n" + msg);
 			byte[] data = msg.toString().getBytes();
 			DatagramPacket packet = new DatagramPacket( 
 					data, data.length, 

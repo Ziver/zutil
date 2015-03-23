@@ -24,11 +24,17 @@ package zutil.plugin;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.NoSuchElementException;
+import java.util.logging.Logger;
 
+import com.sun.xml.internal.stream.util.ReadOnlyIterator;
+import zutil.io.IOUtil;
 import zutil.io.file.FileSearch;
 import zutil.io.file.FileUtil;
+import zutil.log.LogUtil;
 import zutil.parser.DataNode;
 import zutil.parser.json.JSONParser;
 
@@ -40,39 +46,85 @@ import zutil.parser.json.JSONParser;
  * 
  * @author Ziver
  */
-public class PluginManager<T> implements Iterable<PluginData<T>>{
-	private HashMap<String, PluginData<T>> plugins;
-	
-	public static <T> PluginManager<T> load(Class<T> intfClass) throws IOException{
-		return new PluginManager<T>(intfClass);
+public class PluginManager<T> implements Iterable<PluginData>{
+	private static Logger log = LogUtil.getLogger();
+
+	private HashMap<String, PluginData> plugins;
+
+
+	public static <T> PluginManager<T> load(String path){
+		return new PluginManager<T>(path);
 	}
 
-	
-	private PluginManager(Class<T> intfClass) throws IOException{
-		FileSearch search = new FileSearch(new File("."));
+	public PluginManager(){
+		this("./");
+	}
+	public PluginManager(String path){
+		plugins = new HashMap<String, PluginData>();
+
+		FileSearch search = new FileSearch(new File(path));
 		search.setRecursive(true);
 		search.searchFolders(false);
 		search.setFileName("plugin.json");
-		
+
+		log.fine("Searching for plugins...");
 		for(FileSearch.FileSearchItem file : search){
-			DataNode node = JSONParser.read(FileUtil.getContent(file.getUrl()));
-			PluginData<T> plugin = new PluginData<T>(intfClass.getName(), node);
-			
-			if(node.get("interfaces").getString(intfClass.getName()) != null){
-				if(plugins.containsKey(plugin.getName())){
-					if(plugins.get(plugin.getName()).getVersion() < plugin.getVersion())
-						plugins.put(plugin.getName(), plugin);
-				}
-				else{
+			try {
+				DataNode node = JSONParser.read(IOUtil.getContentString(file.getInputStream()));
+				PluginData plugin = new PluginData(node);
+
+				if (!plugins.containsKey(plugin.getName()) ||
+						plugins.get(plugin.getName()).getVersion() < plugin.getVersion()){
 					plugins.put(plugin.getName(), plugin);
 				}
+			} catch (Exception e) {
+				e.printStackTrace();
 			}
 		}
 	}
 	
 	@Override
-	public Iterator<PluginData<T>> iterator() {
+	public Iterator<PluginData> iterator() {
 		return plugins.values().iterator();
 	}
-	
+
+	public <T> Iterator<T> iterator(Class<T> intf) {
+		return new PluginInterfaceIterator<T>(plugins.values().iterator(), intf);
+	}
+
+	public class PluginInterfaceIterator<T> implements Iterator<T> {
+		private Class<T> intf;
+		private Iterator<PluginData> it;
+		private PluginData next;
+
+		PluginInterfaceIterator(Iterator<PluginData> it, Class<T> intf){
+			this.intf = intf;
+			this.it = it;
+		}
+
+		@Override
+		public boolean hasNext() {
+			if(next != null)
+				return true;
+			while(it.hasNext()) {
+				next = it.next();
+				if(next.contains(intf))
+					return true;
+			}
+			next = null;
+			return false;
+		}
+
+		@Override
+		public T next() {
+			if(!hasNext())
+				throw new NoSuchElementException();
+			return next.getObject(intf);
+		}
+
+		@Override
+		public void remove() {
+			throw new RuntimeException("Iterator is ReadOnly");
+		}
+	}
 }

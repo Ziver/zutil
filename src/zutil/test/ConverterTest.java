@@ -43,17 +43,28 @@ public class ConverterTest {
 		assertEquals( 0x00, Converter.hexToByte('0','0') );
 		assertEquals( 0x11, Converter.hexToByte('1','1') );
 		assertEquals( 0x75, Converter.hexToByte('7','5') );
-		assertEquals( 0xDA, Converter.hexToByte('D','A') );
-		assertEquals( 0xFA, Converter.hexToByte('F','a') );
-		assertEquals( 0xFF, Converter.hexToByte('f','f') );
+		assertEquals( 0xDA, Converter.hexToByte('D','A') & 0xFF );
+		assertEquals( 0xFA, Converter.hexToByte('F','a') & 0xFF );
+		assertEquals( 0xFF, Converter.hexToByte('f','f') & 0xFF );
 	}
-	
+
+    @Test
+    public void testHexStringToByte() {
+        assertArrayEquals( null, Converter.hexToByte(null) );
+        assertArrayEquals( new byte[]{}, Converter.hexToByte("") );
+        assertArrayEquals( new byte[]{0x00}, Converter.hexToByte("0x00") );
+        assertArrayEquals( new byte[]{0x00}, Converter.hexToByte("00") );
+        assertArrayEquals(new byte[]{0x07,0x06,0x05,0x04,0x03,0x02,0x01},
+                Converter.hexToByte("01020304050607") );
+        assertArrayEquals( new byte[]{0x11,0x0F}, Converter.hexToByte("F11") );
+    }
+
 	@Test
 	public void testUrlEncode() {
-		assertEquals( "fas8dg7%20a0d1%2313f9g8d7%200h9a%a4%25h0", 
-				Converter.urlEncode("fas8dg7 a0d1#13f9g8d7 0h9a�%h0") );
-		assertEquals( "9i34%e5%202y92%a452%25%2623%20463765%a4(%2f%26(", 
-				Converter.urlEncode("9i34� 2y92�52%&23 463765�(/&(") );
+		assertEquals( "fas8dg7%20a0d1%2313f9g8d7%200h9a%25h0",
+				Converter.urlEncode("fas8dg7 a0d1#13f9g8d7 0h9a%h0") );
+		assertEquals( "9i34%202y9252%25%2623%20463765(%2f%26(",
+				Converter.urlEncode("9i34 2y9252%&23 463765(/&(") );
 		
 	}
 	
@@ -61,8 +72,8 @@ public class ConverterTest {
 	public void testUrlDecode() {
 		assertEquals( "fas8dg7 a0d1#13f9g8d7 0h9a%h0", 
 				Converter.urlDecode("fas8dg7%20a0d1%2313f9g8d7%200h9a%25h0") );
-		assertEquals( "9i34� 2y9252%&23 463765(/&(", 
-				Converter.urlDecode("9i34%e5%202y9252%25%2623%20463765(%2f%26(") );
+		assertEquals( "9i34 2y9252%&23 463765(/&(",
+				Converter.urlDecode("9i34%202y9252%25%2623%20463765(%2f%26(") );
 	}
 
 }

@@ -62,7 +62,7 @@ public class TorrentMetainfo {
 
 
 	public TorrentMetainfo(File torrent) throws IOException{
-		this(FileUtil.getFileContent(	torrent ));
+		this(FileUtil.getContent(torrent));
 	}
 
 	public TorrentMetainfo(String data){

@@ -99,11 +99,11 @@ public class DataNode implements Iterable<DataNode>{
 	 * @return an JSONNode that contains the next level of the List or Map
 	 */
 	public DataNode get(int index){
-		if(map != null)
-			return map.get(""+index);
-		else if(list != null)
-			return list.get(index);
-		return null;
+        if(map != null)
+            return map.get(""+index);
+        else if(list != null)
+            return list.get(index);
+        return null;
 	}	
 	/**
 	 * @param index is the key in the Map

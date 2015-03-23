@@ -199,7 +199,7 @@ public class HttpPrintStream extends PrintStream{
 					super.print(req_type+" "+req_url+" HTTP/1.0");	
 				else 
 					super.print("HTTP/1.0 "+res_status_code+" "+getStatusString(res_status_code));				
-				super.println();
+				super.print(System.lineSeparator());
 				res_status_code = null;
 				req_type = null;
 				req_url = null;
@@ -207,7 +207,7 @@ public class HttpPrintStream extends PrintStream{
 			if(headers != null){
 				for(String key : headers.keySet()){					
 					super.print(key+": "+headers.get(key));
-					super.println();
+					super.print(System.lineSeparator());
 				}
 				headers = null;
 			}
@@ -218,16 +218,16 @@ public class HttpPrintStream extends PrintStream{
 						for(String key : cookies.keySet()){					
 							super.print(key+"="+cookies.get(key)+"; ");
 						}
-						super.println();
+						super.print(System.lineSeparator());
 					}
 					else{
 						for(String key : cookies.keySet()){					
 							super.print("Set-Cookie: "+key+"="+cookies.get(key)+";");
-							super.println();
+							super.print(System.lineSeparator());
 						}
 					}
 				}
-				super.println();
+				super.print(System.lineSeparator());
 				cookies = null;
 			}
 			super.print(s);

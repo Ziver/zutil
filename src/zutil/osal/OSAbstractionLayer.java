@@ -58,7 +58,7 @@ public abstract class OSAbstractionLayer {
      * @param   cmd             the command to run
      * @return first line of the command
      */
-    protected String getFirstLineFromCommand(String cmd) throws InterruptedException, IOException {
+    protected String getFirstLineFromCommand(String cmd) {
         String[] tmp = runCommand(cmd);
         if(tmp.length > 1)
             return tmp[0];
@@ -71,18 +71,25 @@ public abstract class OSAbstractionLayer {
      * @param   cmd             the command to run
      * @return a String list of the output of the command
      */
-    public String[] runCommand(String cmd) throws InterruptedException, IOException {
-        Runtime runtime = Runtime.getRuntime();
-        Process proc = runtime.exec(cmd);
-        proc.waitFor();
-        BufferedReader output = new BufferedReader(new InputStreamReader(proc.getInputStream()));
-
+    public String[] runCommand(String cmd) {
         ArrayList<String> ret = new ArrayList<String>();
-        String line;
-        while((line = output.readLine()) != null){
-            ret.add(line);
+        try {
+            Runtime runtime = Runtime.getRuntime();
+            Process proc = runtime.exec(cmd);
+            proc.waitFor();
+            BufferedReader output = new BufferedReader(new InputStreamReader(proc.getInputStream()));
+
+
+            String line;
+            while ((line = output.readLine()) != null) {
+                ret.add(line);
+            }
+            output.close();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
-        output.close();
 
         return ret.toArray(new String[1]);
     }

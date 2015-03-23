@@ -53,7 +53,6 @@ public class HttpServer extends ThreadedTCPNetworkServer{
 	public static final int COOKIE_TTL = 200;
 	public static final int SESSION_TTL = 10*60*1000; // in milliseconds
 
-	public final String server_url;
 	public final int server_port;
 
 	private Map<String,HttpPage> pages;
@@ -63,26 +62,23 @@ public class HttpServer extends ThreadedTCPNetworkServer{
 
 	/**
 	 * Creates a new instance of the sever
-	 * 
-	 * @param   url     The address to the server
+	 *
 	 * @param   port    The port that the server should listen to
 	 */
-	public HttpServer(String url, int port){
-		this(url, port, null, null);
+	public HttpServer(int port){
+		this(port, null, null);
 	}
 
 
 	/**
 	 * Creates a new instance of the sever
-	 * 
-	 * @param   url             The address to the server
+	 *
 	 * @param   port            The port that the server should listen to
 	 * @param   keyStore        If this is not null then the server will use SSL connection with this keyStore file path
 	 * @param   keyStorePass    If this is not null then the server will use a SSL connection with the given certificate
 	 */
-	public HttpServer(String url, int port, File keyStore, String keyStorePass){
+	public HttpServer(int port, File keyStore, String keyStorePass){
 		super( port, keyStore, keyStorePass );
-		this.server_url = url;
 		this.server_port = port;
 
 		pages = new ConcurrentHashMap<String,HttpPage>();

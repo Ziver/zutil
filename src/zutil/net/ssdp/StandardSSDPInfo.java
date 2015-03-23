@@ -22,7 +22,11 @@
 
 package zutil.net.ssdp;
 
+import zutil.net.http.HttpPrintStream;
+
+import java.net.InetAddress;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.UUID;
 
 /**
@@ -31,12 +35,15 @@ import java.util.UUID;
  * 
  * @author Ziver
  */
-public class StandardSSDPInfo implements SSDPServiceInfo{
+public class StandardSSDPInfo implements SSDPServiceInfo, SSDPCustomInfo{
 	private String location;
 	private String st;
 	private String usn;
 	private long expiration_time;
-	
+	// All header parameters
+	private HashMap<String, String> headers;
+	private InetAddress inetAddress;
+
 	/**
 	 * @param l is the value to set the Location variable
 	 */
@@ -103,11 +110,10 @@ public class StandardSSDPInfo implements SSDPServiceInfo{
 			usn = genUSN();
 		return usn;
 	}
-	
+
 	/**
 	 * Generates an unique USN for the service
 	 * 
-	 * @param searchTarget is the service ST name
 	 * @return an unique string that corresponds to the service
 	 */
 	private String genUSN(){
@@ -116,5 +122,31 @@ public class StandardSSDPInfo implements SSDPServiceInfo{
 	
 	public String toString(){
 		return "USN: "+usn+"\nLocation: "+location+"\nST: "+st+"\nExpiration-Time: "+new Date(expiration_time);
+	}
+
+	public void setHeaders(HashMap<String, String> headers) {
+		this.headers = headers;
+	}
+
+	public String getHeader(String header){
+		return headers.get(header.toUpperCase());
+	}
+
+
+	@Override
+	public void setHeaders(HttpPrintStream http) {
+		if(headers != null) {
+			for (String key : headers.keySet()) {
+				http.setHeader(key, headers.get(key));
+			}
+		}
+	}
+
+	public InetAddress getInetAddress(){
+		return inetAddress;
+	}
+
+	public void setInetAddress(InetAddress inetAddress) {
+		this.inetAddress = inetAddress;
 	}
 }

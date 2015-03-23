@@ -113,18 +113,19 @@ public class FileSearch implements Iterable<FileSearch.FileSearchItem>{
 	protected class FileSearchIterator implements Iterator<FileSearchItem>{
 		private ArrayList<FileSearchItem> fileList;
 		private int currentIndex;
+		private FileSearchItem nextItem;
 
 		public FileSearchIterator(){
 			fileList = new ArrayList<FileSearchItem>();
 			currentIndex = 0;
 
-			addFiles(root.list());
+			addFiles(new FileSearchFileItem(root), root.list());
 			next();
 		}
 
 		@Override
 		public boolean hasNext() {
-			return currentIndex != fileList.size();
+			return currentIndex < fileList.size();
 		}
 
 		@Override
@@ -134,28 +135,28 @@ public class FileSearch implements Iterable<FileSearch.FileSearchItem>{
 
 		@Override
 		public FileSearchItem next() {
-			if(currentIndex < 0)
+			if(currentIndex < 0 || currentIndex >= fileList.size())
 				return null;
 			// Temporarily save the current file
 			FileSearchItem ret = fileList.get(currentIndex);
+			currentIndex++;
 
 			// Find the next file
 			for(; currentIndex<fileList.size(); currentIndex++){
 				FileSearchItem file = fileList.get(currentIndex);
 				if(recursive && file.isDirectory()){
-					addFiles(file.listFiles());
+					addFiles(file, file.listFiles());
 					if(searchFolders && file.getName().equalsIgnoreCase(fileName))
 						break;						
 				}
 				else if(searchCompressedFiles && file.isFile() &&
 						compressedFileExtensions.contains(FileUtil.getFileExtension(file.getName()).toLowerCase())){
 					try {
-						String url = file.getUrl().getFile();
-						ZipFile zipFile = new ZipFile(url);
+						ZipFile zipFile = new ZipFile(file.getPath());
 						Enumeration<? extends ZipEntry> e = zipFile.entries();
 						while(e.hasMoreElements()){
 							ZipEntry entry = e.nextElement();
-							fileList.add(new FileSearchZipItem(url, entry));
+							fileList.add(new FileSearchZipItem(file.getPath(), entry));
 						}
 						zipFile.close();
 					} catch (IOException e) {
@@ -173,9 +174,12 @@ public class FileSearch implements Iterable<FileSearch.FileSearchItem>{
 			return ret;
 		}
 
-		private void addFiles(String[] list){
-			for(String file : list){
-				fileList.add(new FileSearchFileItem(new File(file)));
+		private void addFiles(FileSearchItem root, String[] list){
+			if(root instanceof FileSearchFileItem) {
+				for (String file : list) {
+					fileList.add(new FileSearchFileItem(
+							new File(((FileSearchFileItem)root).file, file)));
+				}
 			}
 		}
 
@@ -186,8 +190,8 @@ public class FileSearch implements Iterable<FileSearch.FileSearchItem>{
 	public interface FileSearchItem{
 		/** @return a file or folder name **/
 		public String getName();
-		/** @return a URL to the file or folder, in case of a compressed file the URL to the package will be returned **/
-		public URL getUrl()  throws MalformedURLException ;
+		/** @return a path to the file or folder, in case of a compressed file the path to the package will be returned **/
+		public String getPath();
 
 		public boolean isCompressed();
 		public boolean isFile();
@@ -208,7 +212,7 @@ public class FileSearch implements Iterable<FileSearch.FileSearchItem>{
 		}
 
 		public String getName()             { return file.getName(); }
-		public URL getUrl() throws MalformedURLException { return new URL(file.getAbsolutePath()); }
+		public String getPath()             { return file.getAbsolutePath(); }
 
 		public boolean isCompressed()       { return false; }
 		public boolean isFile()             { return file.isFile(); }
@@ -229,7 +233,7 @@ public class FileSearch implements Iterable<FileSearch.FileSearchItem>{
 		}
 
 		public String getName()                           { return entry.getName(); }
-		public URL getUrl()  throws MalformedURLException { return new URL(file); }
+		public String getPath()                           { return file; }
 
 		public boolean isCompressed()                     { return true; }
 		public boolean isFile()                           { return !entry.isDirectory(); }

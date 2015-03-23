@@ -42,7 +42,7 @@ public class UPnPServerTest {
 		UPnPContentDirectory cds = new UPnPContentDirectory(new File("C:\\Users\\Ziver\\Desktop\\lan"));
 		WebServiceDef ws = new WebServiceDef( UPnPContentDirectory.class );
 		
-		HttpServer http = new HttpServer("http://192.168.0.60/", 8080);
+		HttpServer http = new HttpServer(8080);
 		//http.setDefaultPage(upnp);
 		http.setPage("/RootDesc", upnp );
 		http.setPage("/SCP/ContentDir", cds );

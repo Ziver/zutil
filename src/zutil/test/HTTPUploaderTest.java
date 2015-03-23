@@ -35,7 +35,7 @@ import zutil.net.http.HttpServer;
 public class HTTPUploaderTest implements HttpPage{
 
 	public static void main(String[] args) throws IOException{
-		HttpServer server = new HttpServer("localhost", 80);
+		HttpServer server = new HttpServer(80);
 		server.setDefaultPage(new HTTPUploaderTest());
 		server.run();
 	}

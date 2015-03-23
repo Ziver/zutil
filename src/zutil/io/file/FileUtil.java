@@ -129,7 +129,7 @@ public class FileUtil {
 	 * @param 		file
 	 * @return the file content
 	 */
-	public static String getFileContent(File file) throws IOException{
+	public static String getContent(File file) throws IOException{
         InputStream in = new FileInputStream(file);
         String data = new String(IOUtil.getContent( in ));
         in.close();
@@ -302,8 +302,8 @@ public class FileUtil {
 	/**
 	 * Replaces the current extension on the file withe the given one.
 	 * 
-	 * @param 		filename	is the name of the file
-	 * @param 		string		is the new extension, without the dot
+	 * @param 		file		is the name of the file
+	 * @param 		ext			is the new extension, without the dot
 	 * @return
 	 */
 	public static String changeExtension(String file, String ext) {

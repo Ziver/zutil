@@ -71,7 +71,28 @@ public class Converter {
 	public static byte toByte(int num){
 		return (byte)(num & 0xff);
 	}
-	
+
+    /**
+     * Converts hex string to a byte array
+     *
+     * @param   hex   a String containing data coded in hex
+     * @return a byte array
+     */
+    public static byte[] hexToByte(String hex){
+        if(hex == null)
+            return null;
+        if(hex.startsWith("0x"))
+            hex = hex.substring(2);
+        byte[] b = new byte[(int)Math.ceil(hex.length()/2.0)];
+        for(int i=hex.length()-1; i>=0; i-=2){
+            if(i-1 < 0)
+                b[(hex.length()-i-1)/2] = hexToByte(hex.charAt(i));
+            else
+                b[(hex.length()-i-1)/2] = hexToByte(hex.charAt(i-1), hex.charAt(i));
+        }
+        return b;
+    }
+
 	/**
 	 * Converts hex chars to a byte
 	 * 
@@ -79,10 +100,10 @@ public class Converter {
 	 * @param   quad2   is the second hex value
 	 * @return a byte that corresponds to the hex
 	 */
-	public static int hexToByte( char quad1, char quad2){
+	public static byte hexToByte( char quad1, char quad2){
 		byte b = hexToByte( quad2 );
 		b |= hexToByte( quad1 ) << 4;
-		return toInt(b);
+		return b;
 	}
 	
 	/**

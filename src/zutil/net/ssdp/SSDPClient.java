@@ -56,7 +56,8 @@ public class SSDPClient extends ThreadedUDPNetwork implements ThreadedUDPNetwork
 		System.out.println(LogUtil.getCalingClass());
 		LogUtil.setGlobalLevel(Level.FINEST);
 		SSDPClient ssdp = new SSDPClient();
-		ssdp.requestService("upnp:rootdevice");
+		//ssdp.requestService("upnp:rootdevice");
+		ssdp.requestService("zap:discover");
 		ssdp.start();
 		
 		for(int i=0; true ;++i){
@@ -73,13 +74,13 @@ public class SSDPClient extends ThreadedUDPNetwork implements ThreadedUDPNetwork
 	 * @throws IOException
 	 */
 	public SSDPClient() throws IOException{
-		super( null );
-		super.setThread( this );
+		super(null);
+		super.setThread(this);
 		
 		services_st = new HashMap<String, LinkedList<SSDPServiceInfo>>();
 		services_usn = new HashMap<String, SSDPServiceInfo>();
 	}
-	
+
 	/**
 	 * Sends an request for an service
 	 * 
@@ -94,6 +95,9 @@ public class SSDPClient extends ThreadedUDPNetwork implements ThreadedUDPNetwork
 	 * 
 	 */
 	public void requestService(String st){
+		requestService(st, null);
+	}
+	public void requestService(String st, HashMap<String,String> headers){
 		try {
 			services_st.put( st, new LinkedList<SSDPServiceInfo>() );
 			
@@ -106,9 +110,14 @@ public class SSDPClient extends ThreadedUDPNetwork implements ThreadedUDPNetwork
 			http.setHeader("ST", st );
 			http.setHeader("Man", "\"ssdp:discover\"" );
 			http.setHeader("MX", "3" );
+			if(headers != null) {
+				for (String key : headers.keySet()) {
+					http.setHeader(key, headers.get(key));
+				}
+			}
 			http.flush();
 
-			logger.log(Level.FINEST, "***** REQUEST: \n"+msg);
+			logger.log(Level.FINEST, "Sending Multicast: \n"+msg);
 			byte[] data = msg.toString().getBytes();
 			DatagramPacket packet = new DatagramPacket( 
 					data, data.length, 
@@ -120,7 +129,14 @@ public class SSDPClient extends ThreadedUDPNetwork implements ThreadedUDPNetwork
 			e.printStackTrace();
 		}
 	}
-	
+
+	/**
+	 * Set a listener that will be notified when new services are detected
+	 */
+	public void setListener(SSDPServiceListener listener){
+		this.listener = listener;
+	}
+
 	/**
 	 * Returns a list of received services by 
 	 * the given search target. 
@@ -176,7 +192,7 @@ public class SSDPClient extends ThreadedUDPNetwork implements ThreadedUDPNetwork
 	 */
 	public void receivedPacket(DatagramPacket packet, ThreadedUDPNetwork network) {
 		HttpHeaderParser header = new HttpHeaderParser( new String( packet.getData() ) );
-		logger.log(Level.FINEST, "Recived: \n"+header);
+		logger.log(Level.FINEST, "Recived(from: "+packet.getAddress()+"): \n" + header);
 		
 		String usn = header.getHeader("USN");
 		String st = header.getHeader("ST");
@@ -199,11 +215,13 @@ public class SSDPClient extends ThreadedUDPNetwork implements ThreadedUDPNetwork
 		service.setLocation( header.getHeader("LOCATION") );
 		service.setST( st );
 		service.setUSN( usn );
-		service.setExpirationTime( 
-				System.currentTimeMillis() +
-				1000 * getCacheTime(header.getHeader("Cache-Control")) );
+		service.setInetAddress(packet.getAddress());
+		if(header.getHeader("Cache-Control") != null) {
+			service.setExpirationTime(
+					System.currentTimeMillis() + 1000 * getCacheTime(header.getHeader("Cache-Control")));
+		}
+		service.setHeaders(header.getHeaders());
 
-		logger.log(Level.FINEST, "Recived:\n"+service);
 		if(listener != null && newService)
 			listener.newService(service);
 	}

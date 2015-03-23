@@ -33,7 +33,8 @@ import java.io.*;
 public class IOUtil {
 
 	/**
-	 * Reads and returns all the contents of a stream.
+	 * Reads and returns all the content of a stream.
+     * This function will close the inout stream at the end.
 	 * 
 	 * @param 		stream
 	 * @return the stream contents
@@ -45,9 +46,29 @@ public class IOUtil {
 		while((len = stream.read(buff)) != -1){
 			dyn_buff.append(buff, 0, len);
 		}
+        stream.close();
 
 		return dyn_buff.getBytes();
 	}
+
+    /**
+     * Reads and returns all the content of a stream as a String.
+     * This function will close the inout stream at the end.
+     *
+     * @param 		stream
+     * @return a String with the content of the stream
+     */
+    public static String getContentString(InputStream stream) throws IOException{
+        StringBuilder str = new StringBuilder();
+        String line;
+        BufferedReader in = new BufferedReader(new InputStreamReader(stream));
+        while((line = in.readLine()) != null){
+            str.append(line).append("\n");
+        }
+        in.close();
+
+        return str.toString();
+    }
 
     /**
      * Copies all data from the input stream to the output stream

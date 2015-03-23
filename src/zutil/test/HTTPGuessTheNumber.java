@@ -35,7 +35,7 @@ public class HTTPGuessTheNumber implements HttpPage{
 
 	public static void main(String[] args) throws IOException{
 		//HttpServer server = new HttpServer("localhost", 443, FileFinder.find("keySSL"), "rootroot");//SSL
-		HttpServer server = new HttpServer("localhost", 8080);
+		HttpServer server = new HttpServer(8080);
 		server.setDefaultPage(new HTTPGuessTheNumber());
 		server.run();
 	}

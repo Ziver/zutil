@@ -111,15 +111,14 @@ public class JSONParser{
             case '\"':
                 root = new DataNode(DataType.String);
                 StringBuilder str = new StringBuilder();
-                while((c=(char)in.read()) != (char)-1 && c != '\"')
+                while((c=(char)in.read()) >= 0 && c != '\"')
                     str.append(c);
                 root.set(str.toString());
                 break;
             // Parse unknown type
             default:
                 StringBuilder tmp = new StringBuilder().append(c);
-                while((c=(char)in.read()) != (char)-1 && !Character.isWhitespace(c) &&
-                        c != ',' && c != '='){
+                while((c=(char)in.read()) >= 0 && c != ',' && c != '='){
                     if(c == ']' || c == '}'){
                         end.i = 1;
                         break;
@@ -127,7 +126,7 @@ public class JSONParser{
                     tmp.append(c);
                 }
                 // Check what type of type the data is
-                String data = tmp.toString();
+                String data = tmp.toString().trim();
                 if( BOOLEAN_PATTERN.matcher(data).matches() )
                 	root = new DataNode(DataType.Boolean);
                 else if( NUMBER_PATTERN.matcher(data).matches() )
@@ -140,4 +139,6 @@ public class JSONParser{
 
         return root;
     }
+
+
 }
