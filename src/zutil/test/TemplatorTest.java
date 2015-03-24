@@ -38,13 +38,11 @@ public class TemplatorTest {
         tmpl.setData("test", "1234");
         assertEquals("<HTML>1234</HTML>", tmpl.compile());
     }
-
     @Test
     public void emptyAttributeTest(){
         Templator tmpl = new Templator("<HTML>{{test}}</HTML>");
         assertEquals("<HTML>{{test}}</HTML>", tmpl.compile());
     }
-
     @Test
     public void incorrectTagsTest(){
         assertEquals("<HTML>{{</HTML>",
@@ -64,4 +62,35 @@ public class TemplatorTest {
         assertEquals("<HTML>{test}</HTML>",
                 new Templator("<HTML>{test}</HTML>").compile());
     }
+
+
+    @Test
+    public void emptyConditionTest(){
+        Templator tmpl = new Templator(
+                "<HTML>{{#key}}123456789{{/key}}</HTML>");
+        assertEquals(
+                "<HTML></HTML>",
+                tmpl.compile());
+    }
+    @Test
+    public void simpleConditionTest(){
+        Templator tmpl = new Templator(
+                "<HTML>{{#key}}123456789{{/key}}</HTML>");
+        tmpl.setData("key", true);
+        assertEquals(
+                "<HTML></HTML>",
+                tmpl.compile());
+    }
+    @Test
+    public void incompleteConditionTest(){
+        assertEquals("<HTML>{{#key}}</HTML>",
+                new Templator("<HTML>{{#key}}</HTML>").compile());
+        assertEquals("<HTML>{{/key}}</HTML>",
+                new Templator("<HTML>{{/key}}</HTML>").compile());
+        assertEquals("",
+                new Templator("{{#key}}{{/key}}").compile());
+        assertEquals("<HTML></HTML>",
+                new Templator("<HTML>{{#key}}{{/key}}</HTML>").compile());
+    }
+
 }

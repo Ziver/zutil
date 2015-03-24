@@ -25,14 +25,9 @@ package zutil.test;
 import com.carrotsearch.junitbenchmarks.BenchmarkRule;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.MethodRule;
-import zutil.io.StringOutputStream;
-import zutil.parser.json.JSONObjectInputStream;
-import zutil.parser.json.JSONObjectOutputStream;
-import zutil.test.JSONSerializerTest.*;
+import zutil.test.JSONSerializerTest.TestClass;
 
 import java.io.*;
-import java.util.Arrays;
 
 import static org.junit.Assert.assertEquals;
 

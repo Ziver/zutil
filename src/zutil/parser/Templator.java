@@ -32,11 +32,16 @@ import java.util.List;
  * Class for generating dynamic text/code from set data.
  * The syntax is similar to the javascript mustache library.
  *
+ * <br /><br />
  * Supported tags:
- *  * {{key}}: will be replaced with the string from the key
+ * <ul>
+ *  <li><b> {{key}} </b><br>
+ *      will be replaced with the string from the key</li>
+ *  <li><b> {{#key}}...{{/key}} </b><br>
+ *      will display content between the tags if key is defined</li>
+ * </ul>
  *
- *
- * Created by Ziver on 2015-03-23.
+ * @author Ziver koc
  */
 public class Templator {
     private HashMap<String,Object> data;
@@ -70,10 +75,10 @@ public class Templator {
      */
     private void parseTemplate(String tmpl){
         TemplateNode node = new TemplateNode();
-        parseTemplate(node, tmpl, new MutableInt());
+        parseTemplate(node, tmpl, new MutableInt(), null);
         tmplRoot = node;
     }
-    private void parseTemplate(TemplateNode root, String tmpl, MutableInt m){
+    private void parseTemplate(TemplateNode root, String tmpl, MutableInt m, String parentTag){
         StringBuilder data = new StringBuilder();
         StringBuilder tags = new StringBuilder();
         boolean tagOpen = false;
@@ -89,7 +94,6 @@ public class Templator {
                     tags.append("{{");
                     tagOpen = true;
                     ++m.i;
-
                     break;
                 case "}}":
                     if(!tagOpen){ // Tag not opened, incorrect enclosure
@@ -98,8 +102,20 @@ public class Templator {
                     }
                     tagOpen = false;
                     ++m.i;
-                    root.addEntity(new TmplDataAttribute(data.toString()));
+                    String tagName = data.toString();
                     data.delete(0, data.length());
+                    switch(tagName.charAt(0)) {
+                        case '#':
+                            TemplateCondition conTmpl = new TemplateCondition(tagName);
+                            parseTemplate(conTmpl, tmpl, m, tagName.substring(1));
+                            root.addEntity(conTmpl);
+                            break;
+                        case '/':
+                            if(tagName.endsWith(parentTag))
+                                return;
+                        default:
+                            root.addEntity(new TmplDataAttribute(tagName));
+                    }
                     break;
                 default:
                     data.append(c);
@@ -133,6 +149,19 @@ public class Templator {
         public void compile(StringBuilder str) {
             for(TemplateEntity sec : entities)
                 sec.compile(str);
+        }
+    }
+
+    protected class TemplateCondition extends TemplateNode {
+        private String key;
+
+        public TemplateCondition(String key){
+            this.key = key;
+        }
+
+        public void compile(StringBuilder str) {
+            if(data.containsKey(key))
+                super.compile(str);
         }
     }
 
