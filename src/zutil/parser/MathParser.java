@@ -29,7 +29,7 @@ import java.io.InputStreamReader;
 /**
  * This class parses a string with math
  * and solves it
- * 
+ *
  * @author Ziver
  */
 public class MathParser {
@@ -82,20 +82,20 @@ public class MathParser {
 						previousParanteses.math2 = parenteses;
 						System.out.println(parenteses);
 						container = parenteses;
-						
+
 						// get the next operation
 						c = functionString.charAt(0);
 						functionString.deleteCharAt(0);
 						System.out.println("char: "+c);
 					}
-					
-						current = getOperation(c);
-						System.out.println("operation: "+current.getClass().getName());
-						current.math1 = container;
-						previus.math2 = current;
-					
+
+					current = getOperation(c);
+					System.out.println("operation: "+current.getClass().getName());
+					current.math1 = container;
+					previus.math2 = current;
+
 					if(c == ')'){
-						return;	
+						return;
 					}
 				}
 			}
@@ -115,15 +115,15 @@ public class MathParser {
 
 	private static MathOperation getOperation(char c){
 		switch(c){
-		case '+': return new MathAddition();
-		case '-': return new MathSubtraction();
-		case '*': return new MathMultiplication();
-		case '/': return new MathDivision();
-		case '%': return new MathModulus();
-		case '^': return new MathPow();
-		case ')':
-		case (char)0: return new EmptyMath();
-		default: return null;
+			case '+': return new MathAddition();
+			case '-': return new MathSubtraction();
+			case '*': return new MathMultiplication();
+			case '/': return new MathDivision();
+			case '%': return new MathModulus();
+			case '^': return new MathPow();
+			case ')':
+			case (char)0: return new EmptyMath();
+			default: return null;
 		}
 	}
 
@@ -138,117 +138,118 @@ public class MathParser {
 			e.printStackTrace();
 		}
 	}
-}
 
-abstract class Math{
-	public abstract double exec();
+	static abstract class Math{
+		public abstract double exec();
 
-	public abstract String toString();
-}
-
-class MathNode extends Math{
-	Math math;
-
-	public double exec() {
-		return math.exec();
+		public abstract String toString();
 	}
 
-	public String toString() {
-		return "( "+math.toString()+" )";
-	}
-}
+	static class MathNode extends Math{
+		Math math;
 
-class MathNumber extends Math{
-	double num;
-
-	public double exec() {
-		return num;
-	}
-
-	public String toString() {
-		return ""+num;
-	}
-}
-
-abstract class MathOperation extends Math{
-	Math math1;
-	Math math2;
-
-	public abstract double exec();
-}
-
-class MathAddition extends MathOperation{
-	public double exec() {
-		return math1.exec() + math2.exec();
-	}
-
-	public String toString() {
-		return math1.toString()+" + "+math2.toString();
-	}
-}
-
-class MathSubtraction extends MathOperation{
-	public double exec() {
-		return math1.exec() - math2.exec();
-	}
-
-	public String toString() {
-		return math1.toString()+" - "+math2.toString();
-	}
-}
-
-class MathMultiplication extends MathOperation{
-	public double exec() {
-		return math1.exec() * math2.exec();
-	}
-
-	public String toString() {
-		return math1.toString()+" * "+math2.toString();
-	}
-}
-
-class MathDivision extends MathOperation{
-	public double exec() {
-		return math1.exec() / math2.exec();
-	}
-
-	public String toString() {
-		return math1.toString()+" / "+math2.toString();
-	}
-}
-
-class MathModulus extends MathOperation{
-	public double exec() {
-		return math1.exec() % math2.exec();
-	}
-
-	public String toString() {
-		return math1.toString()+" % "+math2.toString();
-	}
-}
-
-class MathPow extends MathOperation{
-	public double exec() {
-		double ret = 1;
-		double tmp1 = math1.exec();
-		double tmp2 = math2.exec();
-		for(int i=0; i<tmp2 ;i++){
-			ret *= tmp1;
+		public double exec() {
+			return math.exec();
 		}
-		return ret;
+
+		public String toString() {
+			return "( "+math.toString()+" )";
+		}
 	}
 
-	public String toString() {
-		return math1.toString()+"^"+math2.toString();
-	}
-}
+	static class MathNumber extends Math{
+		double num;
 
-class EmptyMath extends MathOperation{
-	public double exec() {
-		return math1.exec();
+		public double exec() {
+			return num;
+		}
+
+		public String toString() {
+			return ""+num;
+		}
 	}
 
-	public String toString() {
-		return math1.toString();
+	static abstract class MathOperation extends Math{
+		Math math1;
+		Math math2;
+
+		public abstract double exec();
 	}
+
+	static class MathAddition extends MathOperation{
+		public double exec() {
+			return math1.exec() + math2.exec();
+		}
+
+		public String toString() {
+			return math1.toString()+" + "+math2.toString();
+		}
+	}
+
+	static class MathSubtraction extends MathOperation{
+		public double exec() {
+			return math1.exec() - math2.exec();
+		}
+
+		public String toString() {
+			return math1.toString()+" - "+math2.toString();
+		}
+	}
+
+	static class MathMultiplication extends MathOperation{
+		public double exec() {
+			return math1.exec() * math2.exec();
+		}
+
+		public String toString() {
+			return math1.toString()+" * "+math2.toString();
+		}
+	}
+
+	static class MathDivision extends MathOperation{
+		public double exec() {
+			return math1.exec() / math2.exec();
+		}
+
+		public String toString() {
+			return math1.toString()+" / "+math2.toString();
+		}
+	}
+
+	static class MathModulus extends MathOperation{
+		public double exec() {
+			return math1.exec() % math2.exec();
+		}
+
+		public String toString() {
+			return math1.toString()+" % "+math2.toString();
+		}
+	}
+
+	static class MathPow extends MathOperation{
+		public double exec() {
+			double ret = 1;
+			double tmp1 = math1.exec();
+			double tmp2 = math2.exec();
+			for(int i=0; i<tmp2 ;i++){
+				ret *= tmp1;
+			}
+			return ret;
+		}
+
+		public String toString() {
+			return math1.toString()+"^"+math2.toString();
+		}
+	}
+
+	static class EmptyMath extends MathOperation{
+		public double exec() {
+			return math1.exec();
+		}
+
+		public String toString() {
+			return math1.toString();
+		}
+	}
+
 }
