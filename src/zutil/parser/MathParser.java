@@ -76,12 +76,12 @@ public class MathParser {
 				}
 				else{
 					if(c == '('){
-						MathNode parantes = new MathNode();
-						MathOperation previusParantes = previus;
-						parse(functionString, temp, previus, parantes);
-						previusParantes.math2 = parantes;
-						System.out.println(parantes);
-						container = parantes;
+						MathNode parenteses = new MathNode();
+						MathOperation previousParanteses = previus;
+						parse(functionString, temp, previus, parenteses);
+						previousParanteses.math2 = parenteses;
+						System.out.println(parenteses);
+						container = parenteses;
 						
 						// get the next operation
 						c = functionString.charAt(0);

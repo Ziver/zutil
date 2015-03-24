@@ -52,14 +52,14 @@ public class TemplatorTest {
         assertEquals("<HTML>}}</HTML>",
                 new Templator("<HTML>}}</HTML>").compile());
         assertEquals("<HTML></HTML>}}",
-                new Templator("<HTML>}}</HTML>}}").compile());
+                new Templator("<HTML></HTML>}}").compile());
         assertEquals("<HTML></HTML>{{",
                 new Templator("<HTML></HTML>{{").compile());
         assertEquals("<HTML>{</HTML>",
                 new Templator("<HTML>{</HTML>").compile());
-        assertEquals("<HTML>}</HTML>{{",
+        assertEquals("<HTML>}</HTML>",
                 new Templator("<HTML>}</HTML>").compile());
-        assertEquals("<HTML>{}</HTML>{{",
+        assertEquals("<HTML>{}</HTML>",
                 new Templator("<HTML>{}</HTML>").compile());
         assertEquals("<HTML>{test}</HTML>",
                 new Templator("<HTML>{test}</HTML>").compile());

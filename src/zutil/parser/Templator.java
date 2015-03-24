@@ -75,37 +75,39 @@ public class Templator {
     }
     private void parseTemplate(TemplateNode root, String tmpl, MutableInt m){
         StringBuilder data = new StringBuilder();
+        StringBuilder tags = new StringBuilder();
         boolean tagOpen = false;
-        boolean secondOpenBracet = false;
-        boolean secondCloseBracet = false;
 
         for(; m.i<tmpl.length(); ++m.i){
             char c = tmpl.charAt(m.i);
-            switch(c){
-                case '{':
-                    c = tmpl.charAt(++m.i);
-                    switch(c){
-                        case '{':
-                            root.addEntity(new TmplStaticString(data.toString()));
-                            data = new StringBuilder();
-                            break;
-                        default:
-                            data.append('{').append(c);
-                    }
+            String d = ""+ c + (m.i+1<tmpl.length() ? tmpl.charAt(m.i+1) : ' ');
+            switch( d ){
+                case "{{":
+                    root.addEntity(new TmplStaticString(data.toString()));
+                    data.delete(0, data.length());
+                    tags.delete(0, data.length());
+                    tags.append("{{");
+                    tagOpen = true;
+                    ++m.i;
+
                     break;
-                case '}':
-                    c = tmpl.charAt(++m.i);
-                    switch(c){
-                        case '}':
-                            break;
-                        default:
-                            data.append('}').append(c);
+                case "}}":
+                    if(!tagOpen){ // Tag not opened, incorrect enclosure
+                        data.append(c);
+                        continue;
                     }
+                    tagOpen = false;
+                    ++m.i;
+                    root.addEntity(new TmplDataAttribute(data.toString()));
+                    data.delete(0, data.length());
                     break;
                 default:
                     data.append(c);
+                    break;
             }
         }
+        if(tagOpen)
+            data.insert(0, tags);
         if(data.length() > 0)
             root.addEntity(new TmplStaticString(data.toString()));
     }
