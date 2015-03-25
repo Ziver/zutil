@@ -22,11 +22,13 @@
 
 package zutil.parser;
 
+import zutil.log.LogUtil;
 import zutil.struct.MutableInt;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.logging.Logger;
 
 /**
  * Class for generating dynamic text/code from set data.
@@ -44,6 +46,7 @@ import java.util.List;
  * @author Ziver koc
  */
 public class Templator {
+    private static final Logger log = LogUtil.getLogger();
     private HashMap<String,Object> data;
     private TemplateEntity tmplRoot;
 
@@ -74,13 +77,11 @@ public class Templator {
      * Will pare or re-parse the source template.
      */
     private void parseTemplate(String tmpl){
-        TemplateNode node = new TemplateNode();
-        parseTemplate(node, tmpl, new MutableInt(), null);
-        tmplRoot = node;
+        tmplRoot = parseTemplate(new TemplateNode(), tmpl, new MutableInt(), null);
     }
-    private void parseTemplate(TemplateNode root, String tmpl, MutableInt m, String parentTag){
+    private TemplateNode parseTemplate(TemplateNode root, String tmpl, MutableInt m, String parentTag){
         StringBuilder data = new StringBuilder();
-        StringBuilder tags = new StringBuilder();
+        StringBuilder tag = new StringBuilder();
         boolean tagOpen = false;
 
         for(; m.i<tmpl.length(); ++m.i){
@@ -88,10 +89,10 @@ public class Templator {
             String d = ""+ c + (m.i+1<tmpl.length() ? tmpl.charAt(m.i+1) : ' ');
             switch( d ){
                 case "{{":
-                    root.addEntity(new TmplStaticString(data.toString()));
+                    root.add(new TmplStaticString(data.toString()));
                     data.delete(0, data.length());
-                    tags.delete(0, data.length());
-                    tags.append("{{");
+                    tag.delete(0, data.length());
+                    tag.append("{{");
                     tagOpen = true;
                     ++m.i;
                     break;
@@ -104,28 +105,44 @@ public class Templator {
                     ++m.i;
                     String tagName = data.toString();
                     data.delete(0, data.length());
+                    tag.append(tagName).append("}}");
                     switch(tagName.charAt(0)) {
                         case '#':
-                            TemplateCondition conTmpl = new TemplateCondition(tagName);
-                            parseTemplate(conTmpl, tmpl, m, tagName.substring(1));
-                            root.addEntity(conTmpl);
+                            ++m.i;
+                            root.add(parseTemplate(new TemplateCondition(tagName),
+                                            tmpl, m, tagName));
                             break;
                         case '/':
-                            if(tagName.endsWith(parentTag))
-                                return;
+                            if(parentTag != null && tagName.endsWith(parentTag.substring(1)))
+                                return root;
+                            log.severe("Closing non-opened tag: "+tag.toString());
+                            root.add(new TmplStaticString(tag.toString()));
+                            break;
                         default:
-                            root.addEntity(new TmplDataAttribute(tagName));
+                            root.add(new TmplDataAttribute(tagName));
                     }
                     break;
                 default:
+                    if(Character.isWhitespace(c)) // Not a valid tag if it contains whitespace
+                        tagOpen = false;
                     data.append(c);
                     break;
             }
         }
         if(tagOpen)
-            data.insert(0, tags);
+            data.insert(0, tag);
         if(data.length() > 0)
-            root.addEntity(new TmplStaticString(data.toString()));
+            root.add(new TmplStaticString(data.toString()));
+
+        // If we get to this point means that this node is incorrectly close
+        // or this is the end of the file, so we convert it to a normal node
+        if(parentTag != null) {
+            root = new TemplateNode(root);
+            String tagName = "{{"+parentTag+"}}";
+            log.severe("Missing closure of tag: "+tagName);
+            root.addFirst(new TmplStaticString(tagName));
+        }
+        return root;
     }
 
 
@@ -141,8 +158,14 @@ public class Templator {
         public TemplateNode(){
             this.entities = new ArrayList<TemplateEntity>();
         }
+        public TemplateNode(TemplateNode node){
+            this.entities = node.entities;
+        }
 
-        public void addEntity(TemplateEntity s){
+        public void addFirst(TemplateEntity s){
+            entities.add(0, s);
+        }
+        public void add(TemplateEntity s){
             entities.add(s);
         }
 
