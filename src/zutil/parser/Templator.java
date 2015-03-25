@@ -81,7 +81,6 @@ public class Templator {
     }
     private TemplateNode parseTemplate(TemplateNode root, String tmpl, MutableInt m, String parentTag){
         StringBuilder data = new StringBuilder();
-        StringBuilder tag = new StringBuilder();
         boolean tagOpen = false;
 
         for(; m.i<tmpl.length(); ++m.i){
@@ -91,8 +90,6 @@ public class Templator {
                 case "{{":
                     root.add(new TmplStaticString(data.toString()));
                     data.delete(0, data.length());
-                    tag.delete(0, data.length());
-                    tag.append("{{");
                     tagOpen = true;
                     ++m.i;
                     break;
@@ -105,7 +102,6 @@ public class Templator {
                     ++m.i;
                     String tagName = data.toString();
                     data.delete(0, data.length());
-                    tag.append(tagName).append("}}");
                     switch(tagName.charAt(0)) {
                         case '#':
                             ++m.i;
@@ -113,10 +109,11 @@ public class Templator {
                                             tmpl, m, tagName));
                             break;
                         case '/':
+                            // Is this tag closing the parent?
                             if(parentTag != null && tagName.endsWith(parentTag.substring(1)))
                                 return root;
-                            log.severe("Closing non-opened tag: "+tag.toString());
-                            root.add(new TmplStaticString(tag.toString()));
+                            log.severe("Closing non-opened tag: {{"+tagName+"}}");
+                            root.add(new TmplStaticString("{{"+tagName+"}}"));
                             break;
                         default:
                             root.add(new TmplDataAttribute(tagName));
@@ -129,9 +126,9 @@ public class Templator {
                     break;
             }
         }
-        if(tagOpen)
-            data.insert(0, tag);
-        if(data.length() > 0)
+        if(tagOpen) // Incomplete tag, insert it as normal text
+            data.insert(0, "{{");
+        if(data.length() > 0) // Still some text left, add to node
             root.add(new TmplStaticString(data.toString()));
 
         // If we get to this point means that this node is incorrectly close
