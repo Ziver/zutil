@@ -31,17 +31,28 @@ import static org.junit.Assert.*;
  * Created by Ziver on 2015-03-23.
  */
 public class TemplatorTest {
+    class TestClass{
+        public String attr;
+    }
 
     @Test
-    public void simpleAttributeTest(){
+    public void emptyAttributeTest(){
+        Templator tmpl = new Templator("<HTML>{{test}}</HTML>");
+        assertEquals("<HTML>{{test}}</HTML>", tmpl.compile());
+    }
+    @Test
+    public void simpleAttributeTest() {
         Templator tmpl = new Templator("<HTML>{{test}}</HTML>");
         tmpl.setData("test", "1234");
         assertEquals("<HTML>1234</HTML>", tmpl.compile());
     }
     @Test
-    public void emptyAttributeTest(){
-        Templator tmpl = new Templator("<HTML>{{test}}</HTML>");
-        assertEquals("<HTML>{{test}}</HTML>", tmpl.compile());
+    public void objectAttributeTest(){
+        Templator tmpl = new Templator("<HTML>{{test.attr}}</HTML>");
+        TestClass obj = new TestClass();
+        obj.attr = "1234";
+        tmpl.setData("test", obj);
+        assertEquals("<HTML>1234</HTML>", tmpl.compile());
     }
     @Test
     public void incorrectTagsTest(){
