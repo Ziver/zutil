@@ -41,16 +41,18 @@ import java.util.logging.Logger;
  * <ul>
  *  <li><b> {{key}} </b><br>
  *      <b> {{obj.attr}} </b><br>
- *      will be replaced with the string from the key</li>
+ *      Will be replaced with the string from the key.</li>
  *  <li><b> {{#key}}...{{/key}} </b><br>
- *      will display content between the tags if key is defined</li>
+ *      Will display content between the tags if key is defined.</li>
+ *  <li><b>{{^key}}</b><br>
+ *      A negative condition, will display content if key is not set.</li>
+ *  <li><b>{{! ignore me }}</b><br>
+ *      Comment, will be ignored.</li>
  * </ul>
  *
  * TODO:
- *  * {{! ignore me }}: Comment
- *  * {{^key}}: negative condition
  *  * {{#person}}: support for boolean
- *  * {{#person}}: support for loops
+ *  * {{#person}}: support for iterators
  *  * {{> file}}: include file
  *  * {{=<% %>=}}: change delimiter
  * @author Ziver koc
@@ -65,7 +67,7 @@ public class Templator {
         parseTemplate(tmpl);
     }
 
-    public void setData(String key, Object data){
+    public void set(String key, Object data){
         this.data.put(key, data);
     }
 
@@ -98,7 +100,7 @@ public class Templator {
             String d = ""+ c + (m.i+1<tmpl.length() ? tmpl.charAt(m.i+1) : ' ');
             switch( d ){
                 case "{{":
-                    root.add(new TmplStaticString(data.toString()));
+                    root.add(new TemplateStaticString(data.toString()));
                     data.delete(0, data.length());
                     tagOpen = true;
                     ++m.i;
@@ -113,25 +115,30 @@ public class Templator {
                     String tagName = data.toString();
                     data.delete(0, data.length());
                     switch(tagName.charAt(0)) {
-                        case '#':
+                        case '#': // Condition
                             ++m.i;
-                            root.add(parseTemplate(new TemplateCondition(tagName),
+                            root.add(parseTemplate(new TemplateCondition(tagName.substring(1)),
                                             tmpl, m, tagName));
                             break;
-                        case '/':
+                        case '^': // Negative condition
+                            ++m.i;
+                            root.add(parseTemplate(new TemplateNegativeCondition(tagName.substring(1)),
+                                    tmpl, m, tagName));
+                            break;
+                        case '/': // End tag
                             // Is this tag closing the parent?
                             if(parentTag != null && tagName.endsWith(parentTag.substring(1)))
                                 return root;
-                            log.severe("Closing non-opened tag: {{"+tagName+"}}");
-                            root.add(new TmplStaticString("{{"+tagName+"}}"));
+                            log.severe("Closing non-opened tag: {{" + tagName + "}}");
+                            root.add(new TemplateStaticString("{{"+tagName+"}}"));
+                            break;
+                        case '!': // Comment
                             break;
                         default:
-                            root.add(new TmplDataAttribute(tagName));
+                            root.add(new TemplateDataAttribute(tagName));
                     }
                     break;
                 default:
-                    if(Character.isWhitespace(c)) // Not a valid tag if it contains whitespace
-                        tagOpen = false;
                     data.append(c);
                     break;
             }
@@ -139,20 +146,23 @@ public class Templator {
         if(tagOpen) // Incomplete tag, insert it as normal text
             data.insert(0, "{{");
         if(data.length() > 0) // Still some text left, add to node
-            root.add(new TmplStaticString(data.toString()));
+            root.add(new TemplateStaticString(data.toString()));
 
         // If we get to this point means that this node is incorrectly close
         // or this is the end of the file, so we convert it to a normal node
         if(parentTag != null) {
             root = new TemplateNode(root);
             String tagName = "{{"+parentTag+"}}";
-            log.severe("Missing closure of tag: "+tagName);
-            root.addFirst(new TmplStaticString(tagName));
+            log.severe("Missing closure of tag: " + tagName);
+            root.addFirst(new TemplateStaticString(tagName));
         }
         return root;
     }
 
 
+
+
+    /**************************** Utility functions *************************************/
     public static Object getFieldValue(Object obj, String attrib){
         try {
             for (Field field : obj.getClass().getDeclaredFields()) {
@@ -200,7 +210,7 @@ public class Templator {
         private String key;
 
         public TemplateCondition(String key){
-            this.key = key;
+            this.key = key.trim();
         }
 
         public void compile(StringBuilder str) {
@@ -209,10 +219,23 @@ public class Templator {
         }
     }
 
-    protected class TmplStaticString implements TemplateEntity {
+    protected class TemplateNegativeCondition extends TemplateNode {
+        private String key;
+
+        public TemplateNegativeCondition(String key){
+            this.key = key.trim();
+        }
+
+        public void compile(StringBuilder str) {
+            if( ! data.containsKey(key))
+                super.compile(str);
+        }
+    }
+
+    protected class TemplateStaticString implements TemplateEntity {
         private String text;
 
-        public TmplStaticString(String text){
+        public TemplateStaticString(String text){
             this.text = text;
         }
 
@@ -221,12 +244,12 @@ public class Templator {
         }
     }
 
-    protected class TmplDataAttribute implements TemplateEntity {
+    protected class TemplateDataAttribute implements TemplateEntity {
         private String key;
         private String attrib;
 
-        public TmplDataAttribute(String key){
-            String[] s = key.split("\\.", 2);
+        public TemplateDataAttribute(String key){
+            String[] s = key.trim().split("\\.", 2);
             this.key = s[0];
             if(s.length > 1)
                 this.attrib = s[1];
