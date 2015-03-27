@@ -60,7 +60,7 @@ import java.util.logging.Logger;
  *      Comment, will be ignored.</li>
  * </ul>
  *
-  * TODO: {{> file}}: include file
+ * TODO: {{> file}}: include file
  * TODO: {{=<% %>=}}: change delimiter
  *
  * @author Ziver koc
