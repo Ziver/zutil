@@ -25,6 +25,10 @@ package zutil.test;
 import org.junit.Test;
 import zutil.parser.Templator;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 import static org.junit.Assert.*;
 
 /**
@@ -35,27 +39,10 @@ public class TemplatorTest {
         public String attr;
     }
 
+
+
     @Test
-    public void emptyAttributeTest(){
-        Templator tmpl = new Templator("<HTML>{{test}}</HTML>");
-        assertEquals("<HTML>{{test}}</HTML>", tmpl.compile());
-    }
-    @Test
-    public void simpleAttributeTest() {
-        Templator tmpl = new Templator("<HTML>{{test}}</HTML>");
-        tmpl.set("test", "1234");
-        assertEquals("<HTML>1234</HTML>", tmpl.compile());
-    }
-    @Test
-    public void objectAttributeTest(){
-        Templator tmpl = new Templator("<HTML>{{test.attr}}</HTML>");
-        TestClass obj = new TestClass();
-        obj.attr = "1234";
-        tmpl.set("test", obj);
-        assertEquals("<HTML>1234</HTML>", tmpl.compile());
-    }
-    @Test
-    public void incorrectTagsTest(){
+    public void tagIncorrectTest(){
         assertEquals("<HTML>{{</HTML>",
                 new Templator("<HTML>{{</HTML>").compile());
         assertEquals("<HTML>}}</HTML>",
@@ -73,27 +60,30 @@ public class TemplatorTest {
         assertEquals("<HTML>{test}</HTML>",
                 new Templator("<HTML>{test}</HTML>").compile());
     }
-
-
     @Test
-    public void emptyConditionTest(){
-        Templator tmpl = new Templator(
-                "<HTML>{{#key}}123456789{{/key}}</HTML>");
-        assertEquals(
-                "<HTML></HTML>",
-                tmpl.compile());
+    public void attributeEmptyTest(){
+        Templator tmpl = new Templator("<HTML>{{test}}</HTML>");
+        assertEquals("<HTML>{{test}}</HTML>", tmpl.compile());
     }
     @Test
-    public void simpleConditionTest(){
-        Templator tmpl = new Templator(
-                "<HTML>{{#key}}123456789{{/key}}</HTML>");
-        tmpl.set("key", "set");
-        assertEquals(
-                "<HTML>123456789</HTML>",
-                tmpl.compile());
+    public void attributeSimpleTest() {
+        Templator tmpl = new Templator("<HTML>{{test}}</HTML>");
+        tmpl.set("test", "1234");
+        assertEquals("<HTML>1234</HTML>", tmpl.compile());
     }
     @Test
-    public void incompleteConditionTest(){
+    public void attributeObjectTest(){
+        Templator tmpl = new Templator("<HTML>{{test.attr}}</HTML>");
+        TestClass obj = new TestClass();
+        obj.attr = "1234";
+        tmpl.set("test", obj);
+        assertEquals("<HTML>1234</HTML>", tmpl.compile());
+    }
+
+
+
+    @Test
+    public void conditionIncompleteTest(){
         assertEquals("<HTML>{{#key}}</HTML>",
                 new Templator("<HTML>{{#key}}</HTML>").compile());
         assertEquals("<HTML>{{/key}}</HTML>",
@@ -103,25 +93,122 @@ public class TemplatorTest {
         assertEquals("<HTML></HTML>",
                 new Templator("<HTML>{{#key}}{{/key}}</HTML>").compile());
     }
-
-
     @Test
-    public void emptyNegativeConditionTest(){
+    public void conditionEmptyTest(){
         Templator tmpl = new Templator(
-                "<HTML>{{^key}}123456789{{/key}}</HTML>");
+                "<HTML>{{#key}}123456789{{/key}}</HTML>");
+        assertEquals(
+                "<HTML></HTML>",
+                tmpl.compile());
+    }
+    @Test
+    public void conditionSimpleTest(){
+        Templator tmpl = new Templator(
+                "<HTML>{{#key}}123456789{{/key}}</HTML>");
+        tmpl.set("key", "set");
         assertEquals(
                 "<HTML>123456789</HTML>",
                 tmpl.compile());
     }
     @Test
-    public void setNegativeConditionTest(){
+    public void conditionObjectTest(){
+        Templator tmpl = new Templator("<HTML>{{#test.attr}}5678{{/test.attr}}</HTML>");
+        TestClass obj = new TestClass();
+        obj.attr = "1234";
+        tmpl.set("test", obj);
+        assertEquals("<HTML>5678</HTML>", tmpl.compile());
+
+        tmpl.clear();
+        tmpl.set("test", new TestClass());
+        assertEquals("<HTML></HTML>", tmpl.compile());
+    }
+    @Test
+    public void conditionBooleanTest(){
+        Templator tmpl = new Templator(
+                "<HTML>{{#key}}123456789{{/key}}</HTML>");
+        tmpl.set("key", true);
+        assertEquals(
+                "<HTML>123456789</HTML>", tmpl.compile());
+
+        tmpl.set("key", false);
+        assertEquals(
+                "<HTML></HTML>", tmpl.compile());
+    }
+
+
+
+    @Test
+    public void conditionIteratorEmptyTest(){
+        Templator tmpl = new Templator("<HTML>{{#list}}1234 {{.}} {{/list}}</HTML>");
+        tmpl.set("list", new ArrayList());
+        assertEquals(
+                "<HTML></HTML>", tmpl.compile());
+    }
+    @Test
+    public void conditionIteratorTest(){
+        Templator tmpl = new Templator("<HTML>{{#list}}{{.}}{{/list}}</HTML>");
+        tmpl.set("list", Arrays.asList(1,2,3,4,5,6,7,8,9));
+        assertEquals(
+                "<HTML>123456789</HTML>", tmpl.compile());
+    }
+
+
+    @Test
+    public void negativeConditionEmptyTest(){
+        Templator tmpl = new Templator(
+                "<HTML>{{^key}}123456789{{/key}}</HTML>");
+        assertEquals(
+                "<HTML>123456789</HTML>", tmpl.compile());
+    }
+    @Test
+    public void negativeConditionSetTest(){
         Templator tmpl = new Templator(
                 "<HTML>{{^key}}123456789{{/key}}</HTML>");
         tmpl.set("key", "set");
         assertEquals(
-                "<HTML></HTML>",
-                tmpl.compile());
+                "<HTML></HTML>", tmpl.compile());
     }
+    @Test
+    public void negativeConditionObjectTest(){
+        Templator tmpl = new Templator("<HTML>{{^test.attr}}5678{{/test.attr}}</HTML>");
+        TestClass obj = new TestClass();
+        obj.attr = "1234";
+        tmpl.set("test", obj);
+        assertEquals("<HTML></HTML>", tmpl.compile());
+
+        tmpl.clear();
+        tmpl.set("test", new TestClass());
+        assertEquals("<HTML>5678</HTML>", tmpl.compile());
+    }
+    @Test
+    public void negativeConditionIteratorTest(){
+        Templator tmpl = new Templator(
+                "<HTML>{{^key}}123456789{{/key}}</HTML>");
+        tmpl.set("key", Arrays.asList(1,2,3,4,5,6,7,8,9));
+        assertEquals(
+                "<HTML></HTML>", tmpl.compile());
+    }
+    @Test
+    public void negativeConditionIteratorEmptyTest(){
+        Templator tmpl = new Templator(
+                "<HTML>{{^key}}123456789{{/key}}</HTML>");
+        tmpl.set("key", new ArrayList());
+        assertEquals(
+                "<HTML>123456789</HTML>", tmpl.compile());
+    }
+    @Test
+    public void negativeConditionBooleanTest(){
+        Templator tmpl = new Templator(
+                "<HTML>{{^key}}123456789{{/key}}</HTML>");
+        tmpl.set("key", true);
+        assertEquals(
+                "<HTML></HTML>", tmpl.compile());
+
+        tmpl.set("key", false);
+        assertEquals(
+                "<HTML>123456789</HTML>", tmpl.compile());
+    }
+
 
 
     @Test
@@ -129,7 +216,6 @@ public class TemplatorTest {
         Templator tmpl = new Templator(
                 "<HTML>{{! This is a comment}}</HTML>");
         assertEquals(
-                "<HTML></HTML>",
-                tmpl.compile());
+                "<HTML></HTML>", tmpl.compile());
     }
 }
