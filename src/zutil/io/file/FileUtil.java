@@ -278,7 +278,7 @@ public class FileUtil {
 	}
 	
 	/**
-	 * Returns the extension of the file
+	 * Returns the extension(without the dot) of the file. e.g. "png" "avi"
 	 * 
 	 * @param 		file 		is the file
 	 * @return 					The extension

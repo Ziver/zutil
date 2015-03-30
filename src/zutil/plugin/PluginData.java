@@ -56,13 +56,13 @@ public class PluginData {
 
 		pluginVersion = data.getDouble("version");
 		pluginName = data.getString("name");
-		log.fine("Found plugin: "+pluginName);
+		log.fine("Plugin: "+this);
 
 		DataNode node = data.get("interfaces");
 		Iterator<String> intfIt = node.keyIterator();
 		while (intfIt.hasNext()) {
 			String intf = intfIt.next();
-			log.finer("Plugin interface: "+ intf+"-->"+node.get(intf).getString());
+			log.finer("Plugin interface: "+ intf+" --> "+node.get(intf).getString());
 			classMap.put(
 					getClassByName(intf),
 					getClassByName(node.get(intf).getString()));
@@ -97,5 +97,9 @@ public class PluginData {
 
 	public boolean contains(Class<?> intf){
 		return classMap.containsKey(intf);
+	}
+
+	public String toString(){
+		return getName()+"(ver: "+getVersion()+")";
 	}
 }

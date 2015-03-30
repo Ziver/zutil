@@ -235,9 +235,20 @@ public class HttpPrintStream extends PrintStream{
 	}
 
 	/**
+	 * @return if headers has been sent. The setHeader, setStatusCode, setCookie method will throw Exceptions
+	 */
+	public boolean isHeaderSent() {
+		return res_status_code == null && headers == null && cookies == null;
+	}
+
+	/**
 	 * Sends out the buffer and clears it
 	 */
 	public void flush(){
+		flushBuffer();
+		super.flush();
+	}
+	protected void flushBuffer(){
 		if(buffer_enabled){
 			buffer_enabled = false;
 			printOrBuffer(buffer.toString());
@@ -247,7 +258,6 @@ public class HttpPrintStream extends PrintStream{
 		else if(res_status_code != null || headers != null || cookies != null){
 			printOrBuffer("");
 		}
-		super.flush();
 	}
 
 	public void close(){
@@ -255,30 +265,36 @@ public class HttpPrintStream extends PrintStream{
 		super.close();
 	}
 
-	public void println(){			println("");}
-	public void println(boolean x){	println(String.valueOf(x));}
-	public void println(char x){	println(String.valueOf(x));}
-	public void println(char[] x){	println(new String(x));}
-	public void println(double x){	println(String.valueOf(x));}
-	public void println(float x){	println(String.valueOf(x));}
-	public void println(int x){		println(String.valueOf(x));}
-	public void println(long x){	println(String.valueOf(x));}
-	public void println(Object x){	println(String.valueOf(x));}
 
 	public void print(boolean x){	printOrBuffer(String.valueOf(x));}
 	public void print(char x){		printOrBuffer(String.valueOf(x));}
 	public void print(char[] x){	printOrBuffer(new String(x));}
 	public void print(double x){	printOrBuffer(String.valueOf(x));}
 	public void print(float x){		printOrBuffer(String.valueOf(x));}
-	public void print(int x){		printOrBuffer(String.valueOf(x));}
+	public void print(int x) {		printOrBuffer(String.valueOf(x));}
 	public void print(long x){		printOrBuffer(String.valueOf(x));}
 	public void print(Object x){	printOrBuffer(String.valueOf(x));}
 
-	/*
-	public void write(int b) {		print((char)b);}	
+	public void println(){			println("");}
+	public void println(boolean x){	println(String.valueOf(x));}
+	public void println(char x){	println(String.valueOf(x));}
+	public void println(char[] x){	println(new String(x));}
+	public void println(double x){	println(String.valueOf(x));}
+	public void println(float x) {	println(String.valueOf(x));}
+	public void println(int x){		println(String.valueOf(x));}
+	public void println(long x){	println(String.valueOf(x));}
+	public void println(Object x){	println(String.valueOf(x));}
+
+	/* java.lang.StackOverflowError
+	public void write(int b) {
+		flushBuffer();
+		super.write(b);
+	}
 	public void write(byte buf[], int off, int len){
-									print(new String(buf, off, len));}
-	 */
+		flushBuffer();
+		super.write(buf, off, len);
+	}*/
+
 	private String getStatusString(int type){
 		switch(type){
 		case 100: return "Continue";

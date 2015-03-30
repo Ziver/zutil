@@ -53,8 +53,6 @@ public class HttpServer extends ThreadedTCPNetworkServer{
 	public static final int COOKIE_TTL = 200;
 	public static final int SESSION_TTL = 10*60*1000; // in milliseconds
 
-	public final int server_port;
-
 	private Map<String,HttpPage> pages;
 	private HttpPage defaultPage;
 	private Map<String,Map<String,Object>> sessions;
@@ -79,7 +77,6 @@ public class HttpServer extends ThreadedTCPNetworkServer{
 	 */
 	public HttpServer(int port, File keyStore, String keyStorePass){
 		super( port, keyStore, keyStorePass );
-		this.server_port = port;
 
 		pages = new ConcurrentHashMap<String,HttpPage>();
 		sessions = new ConcurrentHashMap<String,Map<String,Object>>();
@@ -158,7 +155,7 @@ public class HttpServer extends ThreadedTCPNetworkServer{
 			out = new HttpPrintStream(socket.getOutputStream());
 			in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 			this.socket = socket;
-			logger.fine("New Connection!!! "+socket.getInetAddress().getHostName());
+			logger.fine("New Connection: " + socket.getInetAddress().getHostName());
 		}
 
 		public void run(){
@@ -169,10 +166,10 @@ public class HttpServer extends ThreadedTCPNetworkServer{
 
 			//****************************  REQUEST *********************************
 			try {
-				logger.finer("Reciving Http Request!!!");
+				logger.finer("Receiving Http Request");
 
 				HttpHeaderParser parser = new HttpHeaderParser(in);
-				logger.finest(parser.toString());
+				//logger.finest(parser.toString());
 				request = parser.getURLAttributes();
 				cookie = parser.getCookies();
 
@@ -202,7 +199,7 @@ public class HttpServer extends ThreadedTCPNetworkServer{
 					}
 					else if( tmp.contains("multipart/form-data") ){
 						// TODO: File upload					
-						throw new Exception( "\"multipart-form-data\" Not implemented!!!" );
+						throw new Exception( "\"multipart-form-data\" Not implemented." );
 					}						
 				}
 
@@ -227,17 +224,17 @@ public class HttpServer extends ThreadedTCPNetworkServer{
 					client_session.put( "session_id", nextSessionId );
 					client_session.put( "ttl", ttl_time );
 					sessions.put( ""+nextSessionId, client_session );
-					nextSessionId++;
+					++nextSessionId;
 				}
 				// Debug
-				if(logger.isLoggable(Level.FINE)){
-					logger.finest( "# page_url: "+parser.getRequestURL() );
-                    logger.finest( "# client_session: "+client_session );
-					logger.finest( "# cookie: "+cookie );
-					logger.finest( "# request: "+request );
+				if(logger.isLoggable(Level.FINEST)){
+					logger.finest( "page_url: "+parser.getRequestURL() );
+                    logger.finest( "client_session: "+client_session );
+					logger.finest( "cookie: "+cookie );
+					logger.finest( "request: "+request );
 				}
 				//****************************  RESPONSE  ************************************
-				logger.finer("Sending Http Response!!!");
+				logger.finer("Sending Http Response");
 				out.setStatusCode(200);
 				out.setHeader( "Server", SERVER_VERSION );
 				out.setHeader( "Content-Type", "text/html" );
@@ -252,15 +249,14 @@ public class HttpServer extends ThreadedTCPNetworkServer{
 				else{
 					out.setStatusCode( 404 );
 					out.println( "404 Page Not Found: "+parser.getRequestURL() );
-					logger.fine( "404 Page Not Found: "+parser.getRequestURL() );
+					logger.warning("Page not defined: " + parser.getRequestURL());
 				}
 
 				//********************************************************************************
 			} catch (Exception e) {
 				logger.log(Level.WARNING, "500 Internal Server Error", e);
-				try {
+				if(!out.isHeaderSent())
 					out.setStatusCode( 500 );
-				} catch (Exception e1) {}
 				if(e.getMessage() != null)
 					out.println( "500 Internal Server Error: "+e.getMessage() );
 				else if(e.getCause() != null){
@@ -272,7 +268,7 @@ public class HttpServer extends ThreadedTCPNetworkServer{
 			}
 
 			try{
-				logger.fine("Connection Closed!!!");
+				logger.fine("Connection Closed.");
 				out.close();
 				in.close();
 				socket.close();

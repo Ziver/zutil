@@ -71,11 +71,21 @@ public class PluginManager<T> implements Iterable<PluginData>{
 		for(FileSearch.FileSearchItem file : search){
 			try {
 				DataNode node = JSONParser.read(IOUtil.getContentString(file.getInputStream()));
+				log.fine("Found plugin: "+file.getPath());
 				PluginData plugin = new PluginData(node);
 
-				if (!plugins.containsKey(plugin.getName()) ||
-						plugins.get(plugin.getName()).getVersion() < plugin.getVersion()){
+				if (!plugins.containsKey(plugin.getName())){
 					plugins.put(plugin.getName(), plugin);
+				}
+				else {
+					double version = plugins.get(plugin.getName()).getVersion();
+					if(version < plugin.getVersion())
+						plugins.put(plugin.getName(), plugin);
+					else if(version == plugin.getVersion())
+						log.fine("Ignoring duplicate plugin: " + plugin);
+					else
+						log.fine("Ignoring outdated plugin: "+plugin);
+
 				}
 			} catch (Exception e) {
 				e.printStackTrace();
