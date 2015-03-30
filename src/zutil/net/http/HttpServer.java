@@ -228,10 +228,10 @@ public class HttpServer extends ThreadedTCPNetworkServer{
 				}
 				// Debug
 				if(logger.isLoggable(Level.FINEST)){
-					logger.finest( "page_url: "+parser.getRequestURL() );
-                    logger.finest( "client_session: "+client_session );
-					logger.finest( "cookie: "+cookie );
-					logger.finest( "request: "+request );
+					logger.finest( "	page_url: "+parser.getRequestURL() );
+                    logger.finest( "	client_session: "+client_session );
+					logger.finest( "	cookie: "+cookie );
+					logger.finest( "	request: "+request );
 				}
 				//****************************  RESPONSE  ************************************
 				logger.finer("Sending Http Response");

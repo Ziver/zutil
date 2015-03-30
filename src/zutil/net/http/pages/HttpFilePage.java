@@ -83,7 +83,10 @@ public class HttpFilePage implements HttpPage{
                             out.println("<HTML><BODY><H1>Directory: " + client_info.getRequestURL() + "</H1>");
                             out.println("<HR><UL>");
                             for (String f : file.list()) {
-                                out.println("<LI><A href='" + client_info.getRequestURL() + f + "'>" + f + "</A></LI>");
+                                String url = client_info.getRequestURL();
+                                out.println("<LI><A href='" +
+                                        url + (url.charAt(url.length()-1)=='/'?"":"/")+ f
+                                        +"'>" + f + "</A></LI>");
                             }
                             out.println("</UL><HR></BODY></HTML>");
                         }
@@ -100,12 +103,12 @@ public class HttpFilePage implements HttpPage{
         }catch (FileNotFoundException e){
             if(!out.isHeaderSent())
                 out.setStatusCode(404);
-            log.log(Level.WARNING, null, e);
+            log.log(Level.WARNING, e.getMessage());
             out.println("404 Page Not Found: " + client_info.getRequestURL());
         }catch (SecurityException e){
             if(!out.isHeaderSent())
                 out.setStatusCode(404);
-            log.log(Level.WARNING, null, e);
+            log.log(Level.WARNING, e.getMessage());
             out.println("404 Page Not Found: " + client_info.getRequestURL() );
         }catch (IOException e){
             if(!out.isHeaderSent())
