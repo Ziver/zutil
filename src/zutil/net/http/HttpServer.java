@@ -155,7 +155,7 @@ public class HttpServer extends ThreadedTCPNetworkServer{
 			out = new HttpPrintStream(socket.getOutputStream());
 			in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 			this.socket = socket;
-			logger.fine("New Connection: " + socket.getInetAddress().getHostName());
+			logger.finest("New Connection: " + socket.getInetAddress().getHostName());
 		}
 
 		public void run(){
@@ -166,8 +166,6 @@ public class HttpServer extends ThreadedTCPNetworkServer{
 
 			//****************************  REQUEST *********************************
 			try {
-				logger.finer("Receiving Http Request");
-
 				HttpHeaderParser parser = new HttpHeaderParser(in);
 				//logger.finest(parser.toString());
 				request = parser.getURLAttributes();
@@ -228,13 +226,15 @@ public class HttpServer extends ThreadedTCPNetworkServer{
 				}
 				// Debug
 				if(logger.isLoggable(Level.FINEST)){
-					logger.finest( "	page_url: "+parser.getRequestURL() );
-                    logger.finest( "	client_session: "+client_session );
-					logger.finest( "	cookie: "+cookie );
-					logger.finest( "	request: "+request );
+					logger.finer("Received request: "
+							+ parser.getRequestURL()
+                    		+ " (client_session: " + client_session
+							+ ", cookie: " + cookie
+							+ ", request: " + request + ")");
+				} else if(logger.isLoggable(Level.FINER)){
+					logger.finer("Received request: " + parser.getRequestURL());
 				}
 				//****************************  RESPONSE  ************************************
-				logger.finer("Sending Http Response");
 				out.setStatusCode(200);
 				out.setHeader( "Server", SERVER_VERSION );
 				out.setHeader( "Content-Type", "text/html" );
@@ -268,7 +268,7 @@ public class HttpServer extends ThreadedTCPNetworkServer{
 			}
 
 			try{
-				logger.fine("Connection Closed.");
+				logger.finest("Closing Connection: "+socket.getInetAddress().getHostName());
 				out.close();
 				in.close();
 				socket.close();
