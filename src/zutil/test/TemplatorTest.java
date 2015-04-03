@@ -151,6 +151,26 @@ public class TemplatorTest {
         assertEquals(
                 "<HTML>123456789</HTML>", tmpl.compile());
     }
+    @Test
+    public void conditionArrayTest(){
+        Templator tmpl = new Templator("<HTML>{{#list}}{{.}}{{/list}}</HTML>");
+        tmpl.set("list", new int[]{1,2,3,4,5,6,7,8,9});
+        assertEquals(
+                "<HTML>123456789</HTML>", tmpl.compile());
+    }
+    @Test
+    public void conditionArrayLength(){
+        Templator tmpl = new Templator("<HTML>{{#list.length}}run once{{/list.length}}</HTML>");
+        tmpl.set("list", new int[]{});
+        assertEquals(
+                "<HTML></HTML>", tmpl.compile());
+        tmpl.set("list", new int[]{1});
+        assertEquals(
+                "<HTML>run once</HTML>", tmpl.compile());
+        tmpl.set("list", new int[]{1,2,3,4,5,6,7,8,9});
+        assertEquals(
+                "<HTML>run once</HTML>", tmpl.compile());
+    }
 
 
     @Test

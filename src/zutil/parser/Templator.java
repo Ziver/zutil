@@ -22,14 +22,15 @@
 
 package zutil.parser;
 
+import zutil.io.file.FileUtil;
 import zutil.log.LogUtil;
 import zutil.struct.MutableInt;
 
+import java.io.File;
+import java.io.IOException;
+import java.lang.reflect.Array;
 import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -47,36 +48,62 @@ import java.util.logging.Logger;
  *      <b> {{#obj.attr}}...{{/obj.attr}} </b><br>
  *      Will display content between the tags if:
  *      key is defined,
- *      if the key references a list the content will be iterated
+ *      if the key references a list or array the content will be iterated
  *          for every element, the element can be referenced by the tag {{.}},
- *      if key is a true boolean (false will not display content).</li>
+ *      if key is a boolean with the value true,
+ *      if key is a Integer with the value anything other then 0.</li>
  *  <li><b> {{^key}}</b><br>
  *      <b> {{^obj.attr}}...{{/obj.attr}} </b><br>
  *      A negative condition, will display content if:
  *      the key is undefined,
  *      the key is a empty list,
- *      the key is a false boolean.</li>
+ *      the key is a zero length array,
+ *      the key is a false boolean,
+ *      the key is a 0 Integer</li>
  *  <li><b>{{! ignore me }}</b><br>
  *      Comment, will be ignored.</li>
  * </ul>
  *
  * TODO: {{> file}}: include file
  * TODO: {{=<% %>=}}: change delimiter
+ * TODO: {{obj.func()}}: execute functions
  *
  * @author Ziver koc
  */
 public class Templator {
     private static final Logger log = LogUtil.getLogger();
+
     private HashMap<String,Object> data;
     private TemplateEntity tmplRoot;
 
+    // File metadata
+    private File file;
+    private long lastModified;
+
+    /**
+     * A template file will be read from the disk. The template will
+     * be regenerated if the file changes.
+     */
+    public Templator(File tmpl) throws IOException {
+        this.data = new HashMap<String, Object>();
+        this.file = tmpl;
+        parseTemplate(FileUtil.getContent(file));
+        this.lastModified = file.lastModified();
+    }
     public Templator(String tmpl){
         this.data = new HashMap<String, Object>();
         parseTemplate(tmpl);
     }
 
+
     public void set(String key, Object data){
         this.data.put(key, data);
+    }
+    public Object get(String key){
+        return this.data.get(key);
+    }
+    public void remove(String key){
+        this.data.remove(key);
     }
 
     /**
@@ -87,6 +114,16 @@ public class Templator {
     }
 
     public String compile(){
+        if(file != null && lastModified != file.lastModified()){
+            try {
+                log.info("Template file changed. Regenerating template...");
+                parseTemplate(FileUtil.getContent(file));
+                this.lastModified = file.lastModified();
+            } catch(IOException e) {
+                log.log(Level.WARNING, "Unable to regenerate template", e);
+            }
+        }
+
         StringBuilder str = new StringBuilder();
         if(tmplRoot != null)
             tmplRoot.compile(str);
@@ -207,8 +244,15 @@ public class Templator {
         public void compile(StringBuilder str) {
             Object obj = attrib.getObject();
             if(obj != null) {
+                Object prevObj = get(".");
+                set(".", obj);
+
                 if(obj instanceof Boolean){
                     if ((Boolean) obj)
+                        super.compile(str);
+                }
+                else if(obj instanceof Integer){
+                    if ((Integer) obj > 0)
                         super.compile(str);
                 }
                 else if(obj instanceof Iterable){
@@ -216,10 +260,22 @@ public class Templator {
                         set(".", o);
                         super.compile(str);
                     }
-                    set(".", null);
+                }
+                else if (obj.getClass().isArray()) {
+                    int length = Array.getLength(obj);
+                    for (int i = 0; i < length; i ++) {
+                        set(".", Array.get(obj, i));
+                        super.compile(str);
+                    }
                 }
                 else
                     super.compile(str);
+
+                // Reset map to parent object
+                if(prevObj != null)
+                    set(".", obj);
+                else
+                    remove(".");
             }
         }
     }
@@ -240,8 +296,16 @@ public class Templator {
                     if ( ! (Boolean) obj)
                         super.compile(str);
                 }
+                else if(obj instanceof Integer){
+                    if ((Integer) obj == 0)
+                        super.compile(str);
+                }
                 else if(obj instanceof Collection) {
                     if (((Collection) obj).isEmpty())
+                        super.compile(str);
+                }
+                else if(obj.getClass().isArray()) {
+                    if (((Object[]) obj).length <= 0)
                         super.compile(str);
                 }
             }
@@ -269,6 +333,8 @@ public class Templator {
             this.tag = tag;
             String[] s = tag.trim().split("\\.", 2);
             this.key = s[0];
+            if(this.key.isEmpty()) // tag starts with "."
+                this.key = ".";
             if(s.length > 1)
                 this.attrib = s[1];
         }
@@ -277,7 +343,7 @@ public class Templator {
         public Object getObject(){
             if (data.containsKey(tag))
                 return data.get(tag);
-            else if (data.containsKey(key)) {
+            else if (data.containsKey(key) && data.get(key) != null) {
                 if (attrib != null) {
                     Object obj = getFieldValue(data.get(key), attrib);
                     if(obj != null)
@@ -290,6 +356,8 @@ public class Templator {
         }
         protected Object getFieldValue(Object obj, String attrib){
             try {
+                if(obj.getClass().isArray() && "length".equals(attrib))
+                    return Array.getLength(obj);
                 for (Field field : obj.getClass().getDeclaredFields()) {
                     if(field.getName().equals(attrib)) {
                         field.setAccessible(true);
