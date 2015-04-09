@@ -252,7 +252,7 @@ public class Templator {
                         super.compile(str);
                 }
                 else if(obj instanceof Integer){
-                    if ((Integer) obj > 0)
+                    if ((Integer) obj != 0)
                         super.compile(str);
                 }
                 else if(obj instanceof Iterable){
@@ -273,7 +273,7 @@ public class Templator {
 
                 // Reset map to parent object
                 if(prevObj != null)
-                    set(".", obj);
+                    set(".", prevObj);
                 else
                     remove(".");
             }
@@ -326,31 +326,29 @@ public class Templator {
 
     protected class TemplateDataAttribute implements TemplateEntity {
         private String tag;
-        private String key;
-        private String attrib;
+        private String[] keys;
 
         public TemplateDataAttribute(String tag){
             this.tag = tag;
-            String[] s = tag.trim().split("\\.", 2);
-            this.key = s[0];
-            if(this.key.isEmpty()) // tag starts with "."
-                this.key = ".";
-            if(s.length > 1)
-                this.attrib = s[1];
+            this.keys = tag.trim().split("\\.");
+            if(this.keys.length == 0)
+                this.keys = new String[]{"."};
+            if(this.keys[0].isEmpty()) // if tag starts with "."
+                this.keys[0] = ".";
         }
 
 
         public Object getObject(){
             if (data.containsKey(tag))
                 return data.get(tag);
-            else if (data.containsKey(key) && data.get(key) != null) {
-                if (attrib != null) {
-                    Object obj = getFieldValue(data.get(key), attrib);
-                    if(obj != null)
-                        return obj;
+            else if (data.containsKey(keys[0]) && data.get(keys[0]) != null) {
+                Object obj = data.get(keys[0]);
+                for(int i=1; i<keys.length; ++i){
+                    obj = getFieldValue(obj, keys[i]);
+                    if(obj == null)
+                        return null;
                 }
-                else
-                    return data.get(key);
+                return obj;
             }
             return null;
         }
@@ -358,10 +356,14 @@ public class Templator {
             try {
                 if(obj.getClass().isArray() && "length".equals(attrib))
                     return Array.getLength(obj);
-                for (Field field : obj.getClass().getDeclaredFields()) {
-                    if(field.getName().equals(attrib)) {
-                        field.setAccessible(true);
-                        return field.get(obj);
+                else if(obj instanceof Collection && "length".equals(attrib))
+                    return ((Collection) obj).size();
+                else {
+                    for (Field field : obj.getClass().getDeclaredFields()) {
+                        if (field.getName().equals(attrib)) {
+                            field.setAccessible(true);
+                            return field.get(obj);
+                        }
                     }
                 }
             }catch (IllegalAccessException e){

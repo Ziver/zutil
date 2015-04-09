@@ -33,6 +33,7 @@ import java.net.URLClassLoader;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -51,28 +52,49 @@ public class PluginData {
 
 	
 	protected PluginData(DataNode data) throws ClassNotFoundException, MalformedURLException {
-		classMap  = new HashMap<Class, Class>();
+		classMap = new HashMap<Class, Class>();
 		objectMap = new HashMap<Class, Object>();
 
 		pluginVersion = data.getDouble("version");
 		pluginName = data.getString("name");
-		log.fine("Plugin: "+this);
+		log.fine("Plugin: " + this);
 
 		DataNode node = data.get("interfaces");
-		Iterator<String> intfIt = node.keyIterator();
-		while (intfIt.hasNext()) {
-			String intf = intfIt.next();
-			log.finer("Plugin interface: "+ intf+" --> "+node.get(intf).getString());
-			classMap.put(
-					getClassByName(intf),
-					getClassByName(node.get(intf).getString()));
+		if(node.isMap())
+			addInterfaces(node);
+		else if(node.isList()) {
+			Iterator<DataNode> intfs_it = node.iterator();
+			while (intfs_it.hasNext()) {
+				addInterfaces(intfs_it.next());
+			}
 		}
 	}
-
-	private static Class getClassByName(String name) throws ClassNotFoundException, MalformedURLException {
-		return Class.forName(name);
+	private void addInterfaces(DataNode node){
+		Iterator<String> intf_it = node.keyIterator();
+		while (intf_it.hasNext()) {
+			String pluginIntf = intf_it.next();
+			String className = node.get(pluginIntf).getString();
+			try {
+				Class.forName(className); // Check if class is available, will throw exception if class is not found
+				log.finer("Plugin interface: " + pluginIntf + " --> " + className);
+				classMap.put(
+						getClassByName(pluginIntf),
+						getClassByName(className));
+			}catch (Exception e){
+				log.finer("Plugin interface: " + pluginIntf + " --> (Not Available) " + className);
+			}
+		}
 	}
-	
+	private static Class getClassByName(String name) {
+		try {
+			return Class.forName(name);
+		}catch (Exception e){
+			log.log(Level.WARNING, null, e);
+		}
+		return null;
+	}
+
+
 	public double getVersion(){
 		return pluginVersion;
 	}
@@ -84,11 +106,11 @@ public class PluginData {
 		if(classMap.containsKey(intf)) {
 			try {
 				Class subClass = classMap.get(intf);
-				if (objectMap.containsKey(subClass))
-					objectMap.put(intf, subClass.newInstance());
+				if (!objectMap.containsKey(subClass))
+					objectMap.put(subClass, subClass.newInstance());
 				return (T) objectMap.get(subClass);
 			} catch (Exception e) {
-				e.printStackTrace();
+				log.log(Level.WARNING, null, e);
 			}
 		}
 		return null;

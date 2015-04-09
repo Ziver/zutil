@@ -89,8 +89,9 @@ public class CompactLogFormatter extends Formatter{
 					ret.append( data );
 				ret.append( array[i] );
 			}
+			ret.append( '\n' );
 		}
-		ret.append( '\n' );
+
 		if( record.getThrown() != null ){
 			StringOutputStream out = new StringOutputStream();
 			record.getThrown().printStackTrace(new PrintStream(out));

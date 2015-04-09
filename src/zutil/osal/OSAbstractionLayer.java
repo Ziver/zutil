@@ -58,7 +58,7 @@ public abstract class OSAbstractionLayer {
      * @param   cmd             the command to run
      * @return first line of the command
      */
-    protected String getFirstLineFromCommand(String cmd) {
+    protected static String getFirstLineFromCommand(String cmd) {
         String[] tmp = runCommand(cmd);
         if(tmp.length > 1)
             return tmp[0];
@@ -71,7 +71,7 @@ public abstract class OSAbstractionLayer {
      * @param   cmd             the command to run
      * @return a String list of the output of the command
      */
-    public String[] runCommand(String cmd) {
+    public static String[] runCommand(String cmd) {
         ArrayList<String> ret = new ArrayList<String>();
         try {
             Runtime runtime = Runtime.getRuntime();
@@ -125,4 +125,6 @@ public abstract class OSAbstractionLayer {
      * @return the path to the global configuration folder e.g Linux: "/etc
      */
     public abstract File getGlobalConfigPath();
+
+    public abstract HardwareAbstractionLayer getHAL();
 }

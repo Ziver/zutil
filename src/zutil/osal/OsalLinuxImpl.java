@@ -28,6 +28,8 @@ import java.io.File;
  * User: Ziver
  */
 public class OsalLinuxImpl extends OSAbstractionLayer {
+    private static HALLinuxImpl hal;
+
     @Override
     public OSType getOSType() {
         return OSType.Linux;
@@ -71,5 +73,12 @@ public class OsalLinuxImpl extends OSAbstractionLayer {
     @Override
     public File getGlobalConfigPath() {
         return new File("/etc");
+    }
+
+    @Override
+    public HardwareAbstractionLayer getHAL() {
+        if(hal == null)
+            hal = new HALLinuxImpl();
+        return hal;
     }
 }

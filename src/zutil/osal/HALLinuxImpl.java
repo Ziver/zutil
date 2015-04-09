@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013 ezivkoc
+ * Copyright (c) 2015 Ziver
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,54 +22,10 @@
 
 package zutil.osal;
 
-import java.io.File;
-
 /**
- * User: ezivkoc
+ * Created by Ziver on 2015-04-07.
  */
-public class OsalWindowsImpl extends OSAbstractionLayer {
-    @Override
-    public OSType getOSType() {
-        return null;
-    }
+public class HALLinuxImpl implements HardwareAbstractionLayer{
 
-    @Override
-    public String getOSName() {
-        return null;
-    }
-
-    @Override
-    public String getOSVersion() {
-        return null;
-    }
-
-    @Override
-    public String getKernelVersion() {
-        try {
-            return getFirstLineFromCommand("ver");
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
-    @Override
-    public String getUsername() {
-        return null;
-    }
-
-    @Override
-    public File getUserConfigPath() {
-        return null;
-    }
-
-    @Override
-    public File getGlobalConfigPath() {
-        return null;
-    }
-
-    @Override
-    public HardwareAbstractionLayer getHAL() {
-        return null;
-    }
+    protected HALLinuxImpl(){}
 }
