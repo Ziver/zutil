@@ -44,7 +44,7 @@ public class HTTPGuessTheNumber implements HttpPage{
 			HttpHeaderParser client_info,
 			Map<String, Object> session, 
 			Map<String, String> cookie,
-			Map<String, String> request) {
+			Map<String, String> request) throws IOException {
 
 		out.enableBuffering(true);
 		out.println("<html>");

@@ -22,8 +22,7 @@
 
 package zutil.net.http;
 
-import java.io.OutputStream;
-import java.io.PrintStream;
+import java.io.*;
 import java.util.HashMap;
 
 /**
@@ -33,13 +32,15 @@ import java.util.HashMap;
  * @author Ziver
  *
  */
-public class HttpPrintStream extends PrintStream{
+public class HttpPrintStream extends OutputStream{
 	// Defines the type of message
 	public enum HttpMessageType{
 		REQUEST,
 		RESPONSE
 	}
 
+	// The actual output stream
+	private PrintStream out;
 	// This defines the type of message that will be generated
 	private HttpMessageType message_type;
 	// The status code of the message, ONLY for response
@@ -74,14 +75,13 @@ public class HttpPrintStream extends PrintStream{
 	 * @param type is the type of message
 	 */
 	public HttpPrintStream(OutputStream out, HttpMessageType type) {
-		super(out);
-
+		this.out = new PrintStream(out);
 		this.message_type = type;
-		res_status_code = 0;
-		headers = new HashMap<String, String>();
-		cookies = new HashMap<String, String>();
-		buffer = new StringBuffer();
-		buffer_enabled = false;
+		this.res_status_code = 0;
+		this.headers = new HashMap<String, String>();
+		this.cookies = new HashMap<String, String>();
+		this.buffer = new StringBuffer();
+		this.buffer_enabled = false;
 	}
 
 	/**
@@ -93,7 +93,7 @@ public class HttpPrintStream extends PrintStream{
 	 * 
 	 * @param b
 	 */
-	public void enableBuffering(boolean b){
+	public void enableBuffering(boolean b) throws IOException {
 		buffer_enabled = b;
 		if(!buffer_enabled) flush();
 	}
@@ -103,11 +103,11 @@ public class HttpPrintStream extends PrintStream{
 	 * 
 	 * @param key is the name of the cookie
 	 * @param value is the value of the cookie
-	 * @throws Exception Throws exception if the header has already been sent
+	 * @throws IOException Throws exception if the header has already been sent
 	 */
-	public void setCookie(String key, String value) throws RuntimeException{
+	public void setCookie(String key, String value) throws IOException{
 		if(cookies == null)
-			throw new RuntimeException("Header already sent!!!");
+			throw new IOException("Header already sent!");
 		cookies.put(key, value);
 	}
 
@@ -116,11 +116,11 @@ public class HttpPrintStream extends PrintStream{
 	 * 
 	 * @param key is the header name
 	 * @param value is the value of the header
-	 * @throws Exception Throws exception if the header has already been sent
+	 * @throws IOException Throws exception if the header has already been sent
 	 */
-	public void setHeader(String key, String value) throws RuntimeException{
+	public void setHeader(String key, String value) throws IOException{
 		if(headers == null)
-			throw new RuntimeException("Header already sent!!!");
+			throw new IOException("Header already sent!");
 		headers.put(key, value);
 	}
 
@@ -128,13 +128,13 @@ public class HttpPrintStream extends PrintStream{
 	 * Sets the status code of the message, ONLY available in HTTP RESPONSE
 	 * 
 	 * @param code the code from 100 up to 599
-	 * @throws RuntimeException if the header has already been sent or the message type is wrong
+	 * @throws IOException if the header has already been sent or the message type is wrong
 	 */
-	public void setStatusCode(int code) throws RuntimeException{
+	public void setStatusCode(int code) throws IOException{
 		if( res_status_code == null )
-			throw new RuntimeException("Header already sent!!!");
+			throw new IOException("Header already sent!");
 		if( message_type != HttpMessageType.RESPONSE )
-			throw new RuntimeException("Status Code is only available in HTTP RESPONSE!!!");
+			throw new IOException("Status Code is only available in HTTP RESPONSE!");
 		res_status_code = code;
 	}
 
@@ -142,26 +142,26 @@ public class HttpPrintStream extends PrintStream{
 	 * Sets the request type of the message, ONLY available in HTTP REQUEST
 	 * 
 	 * @param req_type is the type of the message, e.g. GET, POST...
-	 * @throws RuntimeException if the header has already been sent or the message type is wrong
+	 * @throws IOException if the header has already been sent or the message type is wrong
 	 */
-	public void setRequestType(String req_type) throws RuntimeException{
+	public void setRequestType(String req_type) throws IOException{
 		if( req_type == null )
-			throw new RuntimeException("Header already sent!!!");
+			throw new IOException("Header already sent!");
 		if( message_type != HttpMessageType.REQUEST )
-			throw new RuntimeException("Request Message Type is only available in HTTP REQUEST!!!");
+			throw new IOException("Request Message Type is only available in HTTP REQUEST!");
 		this.req_type = req_type;
 	}
 	/**
 	 * Sets the requesting URL of the message, ONLY available in HTTP REQUEST
 	 * 
 	 * @param req_url is the URL
-	 * @throws RuntimeException if the header has already been sent or the message type is wrong
+	 * @throws IOException if the header has already been sent or the message type is wrong
 	 */
-	public void setRequestURL(String req_url) throws RuntimeException{
+	public void setRequestURL(String req_url) throws IOException{
 		if( req_url == null )
-			throw new RuntimeException("Header already sent!!!");
+			throw new IOException("Header already sent!");
 		if( message_type != HttpMessageType.REQUEST )
-			throw new RuntimeException("Request URL is only available in HTTP REQUEST!!!");
+			throw new IOException("Request URL is only available in HTTP REQUEST!");
 		this.req_url = req_url;
 	}
 
@@ -171,66 +171,71 @@ public class HttpPrintStream extends PrintStream{
 	protected void setCookies( HashMap<String,String> map ){
 		cookies = map;
 	}
-	
+
+
+	/**
+	 * Prints a new line
+	 */
+	public void println() throws IOException {
+		printOrBuffer(System.lineSeparator());
+	}
 	/**
 	 * Prints with a new line
 	 */
-	public void println(String s){
-		printOrBuffer(s+"\n");
+	public void println(String s) throws IOException {
+		printOrBuffer(s + System.lineSeparator());
 	}
-
 	/**
 	 * Prints an string
 	 */
-	public void print(String s){
+	public void print(String s) throws IOException {
 		printOrBuffer(s);
 	}
 
 	/**
-	 * prints to all
+	 * Will buffer String or directly output headers if needed and then the String
 	 */
-	private void printOrBuffer(String s){
+	private void printOrBuffer(String s) throws IOException {
 		if(buffer_enabled){
 			buffer.append(s);
 		}
 		else{
 			if(res_status_code != null){
 				if( message_type==HttpMessageType.REQUEST ) 
-					super.print(req_type+" "+req_url+" HTTP/1.0");	
-				else 
-					super.print("HTTP/1.0 "+res_status_code+" "+getStatusString(res_status_code));				
-				super.print(System.lineSeparator());
+					out.print(req_type + " " + req_url + " HTTP/1.0");
+				else
+					out.print("HTTP/1.0 " + res_status_code + " " + getStatusString(res_status_code));
+				out.println();
 				res_status_code = null;
 				req_type = null;
 				req_url = null;
 			}
 			if(headers != null){
-				for(String key : headers.keySet()){					
-					super.print(key+": "+headers.get(key));
-					super.print(System.lineSeparator());
+				for(String key : headers.keySet()){
+					out.println(key + ": " + headers.get(key));
 				}
 				headers = null;
 			}
 			if(cookies != null){
 				if( !cookies.isEmpty() ){
 					if( message_type==HttpMessageType.REQUEST ){
-						super.print("Cookie: ");
-						for(String key : cookies.keySet()){					
-							super.print(key+"="+cookies.get(key)+"; ");
+						out.print("Cookie: ");
+						for(String key : cookies.keySet()){
+							out.print(key + "=" + cookies.get(key) + "; ");
 						}
-						super.print(System.lineSeparator());
+						out.println();
 					}
 					else{
-						for(String key : cookies.keySet()){					
-							super.print("Set-Cookie: "+key+"="+cookies.get(key)+";");
-							super.print(System.lineSeparator());
+						for(String key : cookies.keySet()){
+							out.print("Set-Cookie: " + key + "=" + cookies.get(key) + ";");
+							out.print(System.lineSeparator());
 						}
 					}
 				}
-				super.print(System.lineSeparator());
+				out.print(System.lineSeparator());
 				cookies = null;
 			}
-			super.print(s);
+			out.print(s);
 		}
 	}
 
@@ -241,14 +246,23 @@ public class HttpPrintStream extends PrintStream{
 		return res_status_code == null && headers == null && cookies == null;
 	}
 
+
 	/**
 	 * Sends out the buffer and clears it
 	 */
-	public void flush(){
+	@Override
+	public void flush() throws IOException {
 		flushBuffer();
-		super.flush();
+		out.flush();
 	}
-	protected void flushBuffer(){
+
+	@Override
+	public void close() throws IOException {
+		flush();
+		out.close();
+	}
+
+	protected void flushBuffer() throws IOException {
 		if(buffer_enabled){
 			buffer_enabled = false;
 			printOrBuffer(buffer.toString());
@@ -260,40 +274,26 @@ public class HttpPrintStream extends PrintStream{
 		}
 	}
 
-	public void close(){
-		flush();
-		super.close();
+	/**
+	 * Will flush all buffers and write binary data to stream
+	 */
+	@Override
+	public void write(int b) throws IOException {
+		flushBuffer();
+		out.write(b);
+	}
+	/**
+	 * * Will flush all buffers and write binary data to stream
+	 */
+	@Override
+	public void write(byte[] buf, int off, int len) throws IOException {
+		flushBuffer();
+		out.write(buf, off, len);
 	}
 
-
-	public void print(boolean x){	printOrBuffer(String.valueOf(x));}
-	public void print(char x){		printOrBuffer(String.valueOf(x));}
-	public void print(char[] x){	printOrBuffer(new String(x));}
-	public void print(double x){	printOrBuffer(String.valueOf(x));}
-	public void print(float x){		printOrBuffer(String.valueOf(x));}
-	public void print(int x) {		printOrBuffer(String.valueOf(x));}
-	public void print(long x){		printOrBuffer(String.valueOf(x));}
-	public void print(Object x){	printOrBuffer(String.valueOf(x));}
-
-	public void println(){			println("");}
-	public void println(boolean x){	println(String.valueOf(x));}
-	public void println(char x){	println(String.valueOf(x));}
-	public void println(char[] x){	println(new String(x));}
-	public void println(double x){	println(String.valueOf(x));}
-	public void println(float x) {	println(String.valueOf(x));}
-	public void println(int x){		println(String.valueOf(x));}
-	public void println(long x){	println(String.valueOf(x));}
-	public void println(Object x){	println(String.valueOf(x));}
-
-	/* java.lang.StackOverflowError
-	public void write(int b) {
-		flushBuffer();
-		super.write(b);
+	private void rawWrite(String s) throws IOException {
+		out.write(s.getBytes());
 	}
-	public void write(byte buf[], int off, int len){
-		flushBuffer();
-		super.write(buf, off, len);
-	}*/
 
 	private String getStatusString(int type){
 		switch(type){

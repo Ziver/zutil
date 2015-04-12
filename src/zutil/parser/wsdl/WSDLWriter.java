@@ -34,10 +34,7 @@ import zutil.net.ws.WSReturnObject;
 import zutil.net.ws.WSReturnObject.WSValueName;
 import zutil.net.ws.WebServiceDef;
 
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.PrintStream;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 
@@ -62,10 +59,13 @@ public class WSDLWriter{
         services.add(serv);
     }
 
+
+	public void write( Writer out ) throws IOException {
+		out.write(generate());
+	}
 	public void write( PrintStream out ) {
 		out.print(generate());
 	}
-
 	public void write( OutputStream out ) throws IOException {
 		out.write(generate().getBytes() );
 	}

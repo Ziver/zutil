@@ -22,6 +22,7 @@
 
 package zutil.net.upnp;
 
+import java.io.IOException;
 import java.util.Map;
 import java.util.UUID;
 
@@ -46,7 +47,7 @@ public class UPnPMediaServer extends UPnPRootDevice{
 
 	public void respond(HttpPrintStream out, HttpHeaderParser clientInfo,
 			Map<String, Object> session, Map<String, String> cookie,
-			Map<String, String> request) {
+			Map<String, String> request) throws IOException {
 
 		out.enableBuffering(true);
 		out.setHeader("Content-Type", "text/xml");

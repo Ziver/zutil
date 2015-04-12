@@ -91,7 +91,7 @@ public class SSDPServer extends ThreadedUDPNetwork implements ThreadedUDPNetwork
 		SSDPServer ssdp = new SSDPServer();
 		ssdp.addService(service);
 		ssdp.start();
-		MultiPrintStream.out.println("SSDP Server running");
+		logger.info("SSDP Server running");
 	}
 
 	public SSDPServer() throws IOException{
@@ -224,7 +224,7 @@ public class SSDPServer extends ThreadedUDPNetwork implements ThreadedUDPNetwork
 				}
 			}
 		} catch (IOException e) {
-			e.printStackTrace();
+			logger.log(Level.SEVERE, null, e);
 		}
 	}
 
@@ -288,7 +288,7 @@ public class SSDPServer extends ThreadedUDPNetwork implements ThreadedUDPNetwork
 			super.send( packet );
 
 		} catch (Exception e) {
-			e.printStackTrace();
+			logger.log(Level.SEVERE, null, e);
 		}
 	}
 
@@ -337,7 +337,7 @@ public class SSDPServer extends ThreadedUDPNetwork implements ThreadedUDPNetwork
 			super.send( packet );
 
 		} catch (Exception e) {
-			e.printStackTrace();
+			logger.log(Level.SEVERE, null, e);
 		}
 	}
 }

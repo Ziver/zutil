@@ -41,10 +41,10 @@ public class HTTPUploaderTest implements HttpPage{
 	}
 
 	public void respond(HttpPrintStream out,
-			HttpHeaderParser client_info,
-			Map<String, Object> session, 
-			Map<String, String> cookie,
-			Map<String, String> request) {
+						HttpHeaderParser client_info,
+						Map<String, Object> session,
+						Map<String, String> cookie,
+						Map<String, String> request) throws IOException {
 
 		if(!session.containsKey("file1")){
 			out.println("</html>" +

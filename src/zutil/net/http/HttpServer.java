@@ -255,15 +255,18 @@ public class HttpServer extends ThreadedTCPNetworkServer{
 				//********************************************************************************
 			} catch (Exception e) {
 				logger.log(Level.WARNING, "500 Internal Server Error", e);
-				if(!out.isHeaderSent())
-					out.setStatusCode( 500 );
-				if(e.getMessage() != null)
-					out.println( "500 Internal Server Error: "+e.getMessage() );
-				else if(e.getCause() != null){
-					out.println( "500 Internal Server Error: "+e.getCause().getMessage() );
-				}
-				else{
-					out.println( "500 Internal Server Error: "+e);
+				try {
+					if (!out.isHeaderSent())
+						out.setStatusCode(500);
+					if (e.getMessage() != null)
+						out.println("500 Internal Server Error: " + e.getMessage());
+					else if (e.getCause() != null) {
+						out.println("500 Internal Server Error: " + e.getCause().getMessage());
+					} else {
+						out.println("500 Internal Server Error: " + e);
+					}
+				}catch(IOException ioe){
+					logger.log(Level.SEVERE, null, ioe);
 				}
 			}
 

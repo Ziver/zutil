@@ -104,10 +104,9 @@ public class HttpClient {
 			request.setHeader("Content-Length", data);
 			request.println();
 			request.print( data );
-			
 		}
 		else
-			request.println("");
+			request.println();
 		request.close();
 		
 		// Response

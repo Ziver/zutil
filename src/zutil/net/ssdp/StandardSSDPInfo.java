@@ -24,6 +24,7 @@ package zutil.net.ssdp;
 
 import zutil.net.http.HttpPrintStream;
 
+import java.io.IOException;
 import java.net.InetAddress;
 import java.util.Date;
 import java.util.HashMap;
@@ -135,10 +136,14 @@ public class StandardSSDPInfo implements SSDPServiceInfo, SSDPCustomInfo{
 
 	@Override
 	public void setHeaders(HttpPrintStream http) {
-		if(headers != null) {
-			for (String key : headers.keySet()) {
-				http.setHeader(key, headers.get(key));
+		try {
+			if (headers != null) {
+				for (String key : headers.keySet()) {
+					http.setHeader(key, headers.get(key));
+				}
 			}
+		}catch(IOException e){
+
 		}
 	}
 

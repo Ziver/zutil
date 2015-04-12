@@ -61,7 +61,7 @@ public class HttpFilePage implements HttpPage{
                         HttpHeaderParser client_info,
                         Map<String, Object> session,
                         Map<String, String> cookie,
-                        Map<String, String> request) {
+                        Map<String, String> request) throws IOException{
 
         try {
             // Is the root only one file or a folder

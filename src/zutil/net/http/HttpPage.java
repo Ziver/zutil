@@ -22,6 +22,7 @@
 
 package zutil.net.http;
 
+import java.io.IOException;
 import java.util.Map;
 
 /**
@@ -45,5 +46,5 @@ public interface HttpPage{
 			HttpHeaderParser client_info,
 			Map<String,Object> session,
 			Map<String,String> cookie, 
-			Map<String,String> request);
+			Map<String,String> request) throws IOException;
 }

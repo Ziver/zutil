@@ -23,6 +23,7 @@
 package zutil.net.upnp.services;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -154,7 +155,7 @@ public class UPnPContentDirectory implements UPnPService, HttpPage, WSInterface 
 	@WSDisabled
 	public void respond(HttpPrintStream out, HttpHeaderParser clientInfo,
 			Map<String, Object> session, Map<String, String> cookie,
-			Map<String, String> request) {
+			Map<String, String> request) throws IOException {
 
 		out.enableBuffering(true);
 		out.setHeader("Content-Type", "text/xml");

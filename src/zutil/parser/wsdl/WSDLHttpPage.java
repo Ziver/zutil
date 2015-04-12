@@ -27,6 +27,7 @@ import zutil.net.http.HttpPage;
 import zutil.net.http.HttpPrintStream;
 import zutil.net.ws.WebServiceDef;
 
+import java.io.IOException;
 import java.util.Map;
 
 /**
@@ -44,7 +45,7 @@ public class WSDLHttpPage implements HttpPage {
                         HttpHeaderParser client_info,
                         Map<String, Object> session,
                         Map<String, String> cookie,
-                        Map<String, String> request) {
+                        Map<String, String> request) throws IOException{
         out.setHeader("Content-Type", "text/xml");
         wsdl.write( out );
     }
