@@ -38,7 +38,7 @@ public class CompactLogFormatter extends Formatter{
 	// the stream should print time stamp
 	private boolean timeStamp = true;
 	//The time stamp style
-	private SimpleDateFormat dateFormatter = new SimpleDateFormat();
+	private SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
 	// If displaying class names are enabled
 	private boolean className = true;
 	// If displaying method names are enabled

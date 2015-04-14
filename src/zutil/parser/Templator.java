@@ -116,7 +116,7 @@ public class Templator {
     public String compile(){
         if(file != null && lastModified != file.lastModified()){
             try {
-                log.info("Template file changed. Regenerating template...");
+                log.info("Template file("+file.getName()+") changed. Regenerating template...");
                 parseTemplate(FileUtil.getContent(file));
                 this.lastModified = file.lastModified();
             } catch(IOException e) {

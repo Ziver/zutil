@@ -36,6 +36,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import zutil.StringUtil;
 import zutil.log.LogUtil;
 import zutil.net.threaded.ThreadedTCPNetworkServer;
 import zutil.net.threaded.ThreadedTCPNetworkServerThread;
@@ -155,7 +156,7 @@ public class HttpServer extends ThreadedTCPNetworkServer{
 			out = new HttpPrintStream(socket.getOutputStream());
 			in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 			this.socket = socket;
-			logger.finest("New Connection: " + socket.getInetAddress().getHostName());
+			//logger.finest("New Connection: " + socket.getInetAddress().getHostName());
 		}
 
 		public void run(){
@@ -166,6 +167,7 @@ public class HttpServer extends ThreadedTCPNetworkServer{
 
 			//****************************  REQUEST *********************************
 			try {
+				long time = System.currentTimeMillis();
 				HttpHeaderParser parser = new HttpHeaderParser(in);
 				//logger.finest(parser.toString());
 				request = parser.getURLAttributes();
@@ -215,7 +217,7 @@ public class HttpServer extends ThreadedTCPNetworkServer{
 						sessions.put( ""+session_id, client_session);
 					}
 					// renew the session TTL
-					client_session.put( "ttl", ttl_time );
+					client_session.put("ttl", ttl_time);
 				}
 				else{
 					client_session = Collections.synchronizedMap(new HashMap<String, Object>());
@@ -224,16 +226,7 @@ public class HttpServer extends ThreadedTCPNetworkServer{
 					sessions.put( ""+nextSessionId, client_session );
 					++nextSessionId;
 				}
-				// Debug
-				if(logger.isLoggable(Level.FINEST)){
-					logger.finer("Received request: "
-							+ parser.getRequestURL()
-                    		+ " (client_session: " + client_session
-							+ ", cookie: " + cookie
-							+ ", request: " + request + ")");
-				} else if(logger.isLoggable(Level.FINER)){
-					logger.finer("Received request: " + parser.getRequestURL());
-				}
+
 				//****************************  RESPONSE  ************************************
 				out.setStatusCode(200);
 				out.setHeader( "Server", SERVER_VERSION );
@@ -242,9 +235,11 @@ public class HttpServer extends ThreadedTCPNetworkServer{
 
 				if( !parser.getRequestURL().isEmpty() && pages.containsKey(parser.getRequestURL()) ){
 					pages.get(parser.getRequestURL()).respond(out, parser, client_session, cookie, request);
+					logRequest(parser, client_session, cookie, request, time);
 				}
 				else if( defaultPage != null ){
 					defaultPage.respond(out, parser, client_session, cookie, request);
+					logRequest(parser, client_session, cookie, request, time);
 				}
 				else{
 					out.setStatusCode( 404 );
@@ -271,12 +266,32 @@ public class HttpServer extends ThreadedTCPNetworkServer{
 			}
 
 			try{
-				logger.finest("Closing Connection: "+socket.getInetAddress().getHostName());
+				//logger.finest("Closing Connection: "+socket.getInetAddress().getHostName());
 				out.close();
 				in.close();
 				socket.close();
 			} catch( Exception e ) {
 				logger.log(Level.WARNING, "Could not close connection", e);
+			}
+		}
+
+		private void logRequest(HttpHeaderParser parser,
+								Map<String,Object> client_session,
+								Map<String,String> cookie,
+								Map<String,String> request,
+								long time){
+			// Debug
+			if(logger.isLoggable(Level.FINEST) ){
+				logger.finer(
+						"Received request: " + parser.getRequestURL()
+						+ " (client_session: " + client_session
+						+ ", cookie: " + cookie
+						+ ", request: " + request + ")"
+						+ ", time: "+ StringUtil.formatTimeToString(System.currentTimeMillis() - time));
+			} else if(logger.isLoggable(Level.FINER)){
+				logger.finer(
+						"Received request: " + parser.getRequestURL()
+						+ ", time: "+ StringUtil.formatTimeToString(System.currentTimeMillis() - time));
 			}
 		}
 	}
