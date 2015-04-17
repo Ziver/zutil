@@ -83,7 +83,7 @@ public class JSONWriter{
                         out.append(", ");
                     String key = it.next();
                     out.append('\"');
-                    out.append(key);
+                    out.append(escapeString(key));
                     out.append("\": ");
                     write(root.get(key));
                     first = false;
@@ -104,12 +104,17 @@ public class JSONWriter{
             default:
                 if(root.getString() != null && root.getType() == DataType.String){
                     out.append('\"');
-                    out.append(root.toString());
+                    out.append(escapeString(root.toString()));
                     out.append('\"');
                 } else
                     out.append(root.toString());
                 break;
         }
+    }
+
+    private static String escapeString(String str){
+        // Replace one backslash with two
+        return str.replaceAll("\\\\", "\\\\\\\\");
     }
 
     /**

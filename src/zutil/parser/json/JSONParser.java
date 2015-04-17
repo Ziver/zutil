@@ -108,6 +108,7 @@ public class JSONParser{
                 end.i = 0;
                 break;
             // Parse String
+            // TODO: Support double backslash escaping
             case '\"':
                 root = new DataNode(DataType.String);
                 StringBuilder str = new StringBuilder();
@@ -131,8 +132,10 @@ public class JSONParser{
                 	root = new DataNode(DataType.Boolean);
                 else if( NUMBER_PATTERN.matcher(data).matches() )
                 	root = new DataNode(DataType.Number);
-                else 
-                	root = new DataNode(DataType.String);
+                else {
+                    root = new DataNode(DataType.String);
+                    data = unEscapeString(data);
+                }
                 root.set(data);
                 break;
         }
@@ -140,5 +143,9 @@ public class JSONParser{
         return root;
     }
 
+    private static String unEscapeString(String str){
+        // Replace two backslash with one
+        return str.replaceAll("\\\\\\\\", "\\\\");
+    }
 
 }
