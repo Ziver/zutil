@@ -45,7 +45,7 @@ public class StringUtil {
 		for(; value > 1024 ;total--) {
 			value /= 1024;
 		}
-		
+
 		value = (double)( (int)(value*10) )/10;
 		return value+" "+sizes[total];
 	}

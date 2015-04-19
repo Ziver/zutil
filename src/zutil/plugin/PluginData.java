@@ -30,9 +30,7 @@ import javax.xml.crypto.Data;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -47,12 +45,12 @@ public class PluginData {
 
 	private double pluginVersion;
 	private String pluginName;
-	private HashMap<Class, Class>  classMap;
+	private HashMap<Class, List<Class>>  classMap;
 	private HashMap<Class, Object> objectMap;
 
 	
 	protected PluginData(DataNode data) throws ClassNotFoundException, MalformedURLException {
-		classMap = new HashMap<Class, Class>();
+		classMap = new HashMap<Class, List<Class>>();
 		objectMap = new HashMap<Class, Object>();
 
 		pluginVersion = data.getDouble("version");
@@ -74,22 +72,25 @@ public class PluginData {
 		while (intf_it.hasNext()) {
 			String pluginIntf = intf_it.next();
 			String className = node.get(pluginIntf).getString();
-			try {
-				Class.forName(className); // Check if class is available, will throw exception if class is not found
-				log.finer("Plugin interface: " + pluginIntf + " --> " + className);
-				classMap.put(
-						getClassByName(pluginIntf),
-						getClassByName(className));
-			}catch (Exception e){
-				log.finer("Plugin interface: " + pluginIntf + " --> (Not Available) " + className);
-			}
+
+			Class intfClass = getClassByName(pluginIntf);
+			Class pluginClass = getClassByName(className);
+			log.finer("Plugin interface: " +
+					(intfClass==null ? "(Not Available) " : "") + pluginIntf + " --> " +
+					(pluginClass==null ? "(Not Available) " : "") + className);
+			if(intfClass == null || pluginClass == null)
+				continue;
+
+			if(!classMap.containsKey(intfClass))
+				classMap.put(intfClass, new ArrayList<Class>());
+			classMap.get(intfClass).add(pluginClass);
 		}
 	}
 	private static Class getClassByName(String name) {
 		try {
 			return Class.forName(name);
 		}catch (Exception e){
-			log.log(Level.WARNING, null, e);
+			//log.log(Level.WARNING, null, e); // No need to log, we are handling it
 		}
 		return null;
 	}
@@ -102,16 +103,20 @@ public class PluginData {
 		return pluginName;
 	}
 
-	public <T> T getObject(Class<T> intf) {
-		if(classMap.containsKey(intf)) {
-			try {
-				Class subClass = classMap.get(intf);
-				if (!objectMap.containsKey(subClass))
-					objectMap.put(subClass, subClass.newInstance());
-				return (T) objectMap.get(subClass);
-			} catch (Exception e) {
-				log.log(Level.WARNING, null, e);
-			}
+
+	public <T> Iterator<T> getIterator(Class<T> intf){
+		if(!classMap.containsKey(intf))
+			return Collections.emptyIterator();
+		return new PluginObjectIterator<T>(classMap.get(intf).iterator());
+	}
+
+	private <T> T getObject(Class<T> objClass) {
+		try {
+			if (!objectMap.containsKey(objClass))
+				objectMap.put(objClass, objClass.newInstance());
+			return (T) objectMap.get(objClass);
+		} catch (Exception e) {
+			log.log(Level.WARNING, null, e);
 		}
 		return null;
 	}
@@ -123,5 +128,42 @@ public class PluginData {
 
 	public String toString(){
 		return getName()+"(ver: "+getVersion()+")";
+	}
+
+
+
+	private class PluginObjectIterator<T> implements Iterator<T>{
+		private Iterator<Class> classIt;
+		private T currentObj;
+
+		public PluginObjectIterator(Iterator<Class> it) {
+			classIt = it;
+		}
+
+		@Override
+		public boolean hasNext() {
+			if(currentObj != null)
+				return true;
+			while (classIt.hasNext()){
+				currentObj = (T)getObject(classIt.next());
+				if(currentObj != null)
+					return true;
+			}
+			return false;
+		}
+
+		@Override
+		public T next() {
+			if(!hasNext())
+				throw new NoSuchElementException();
+			T tmp = currentObj;
+			currentObj = null;
+			return tmp;
+		}
+
+		@Override
+		public void remove() {
+			throw new RuntimeException("Iterator is ReadOnly");
+		}
 	}
 }

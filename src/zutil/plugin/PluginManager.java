@@ -23,15 +23,11 @@
 package zutil.plugin;
 
 import java.io.File;
-import java.io.IOException;
-import java.net.MalformedURLException;
 import java.util.*;
 import java.util.logging.Logger;
 
-import com.sun.xml.internal.stream.util.ReadOnlyIterator;
 import zutil.io.IOUtil;
 import zutil.io.file.FileSearch;
-import zutil.io.file.FileUtil;
 import zutil.log.LogUtil;
 import zutil.parser.DataNode;
 import zutil.parser.json.JSONParser;
@@ -117,24 +113,27 @@ public class PluginManager<T> implements Iterable<PluginData>{
 
 	public class PluginInterfaceIterator<T> implements Iterator<T> {
 		private Class<T> intf;
-		private Iterator<PluginData> it;
-		private PluginData next;
+		private Iterator<PluginData> pluginIt;
+		private Iterator<T> objectIt;
 
 		PluginInterfaceIterator(Iterator<PluginData> it, Class<T> intf){
 			this.intf = intf;
-			this.it = it;
+			this.pluginIt = it;
 		}
 
 		@Override
 		public boolean hasNext() {
-			if(next != null)
+			if(pluginIt == null)
+				return false;
+			if(objectIt != null && objectIt.hasNext())
 				return true;
-			while(it.hasNext()) {
-				next = it.next();
-				if(next.contains(intf))
+
+			while(pluginIt.hasNext()) {
+				objectIt = pluginIt.next().getIterator(intf);
+				if(objectIt.hasNext())
 					return true;
 			}
-			next = null;
+			objectIt = null;
 			return false;
 		}
 
@@ -142,9 +141,7 @@ public class PluginManager<T> implements Iterable<PluginData>{
 		public T next() {
 			if(!hasNext())
 				throw new NoSuchElementException();
-			T tmp = next.getObject(intf);
-			next = null;
-			return tmp;
+			return objectIt.next();
 		}
 
 		@Override
