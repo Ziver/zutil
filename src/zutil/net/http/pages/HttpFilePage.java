@@ -122,7 +122,8 @@ public class HttpFilePage implements HttpPage{
         out.setHeader("Content-Type", getMIMEType(file));
         out.flush();
 
-        BufferedInputStream in = new BufferedInputStream(new FileInputStream(file));
+        //InputStream in = new BufferedInputStream(new FileInputStream(file));
+        InputStream in = new FileInputStream(file);
         IOUtil.copyStream(in, out);
         in.close();
     }
