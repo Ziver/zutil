@@ -244,8 +244,6 @@ public class Templator {
         public void compile(StringBuilder str) {
             Object obj = attrib.getObject();
             if(obj != null) {
-                Object prevObj = get(".");
-                set(".", obj);
 
                 if(obj instanceof Boolean){
                     if ((Boolean) obj)
@@ -255,27 +253,32 @@ public class Templator {
                     if ((Integer) obj != 0)
                         super.compile(str);
                 }
-                else if(obj instanceof Iterable){
-                    for(Object o : (Iterable)obj){ // Iterate through the whole list
-                        set(".", o);
-                        super.compile(str);
+                else if(obj instanceof Iterable || obj.getClass().isArray()) {
+                    Object prevObj = get(".");
+                    set(".", obj);
+
+                    if (obj instanceof Iterable) {
+                        for (Object o : (Iterable) obj) { // Iterate through the whole list
+                            set(".", o);
+                            super.compile(str);
+                        }
+                    } else if (obj.getClass().isArray()) {
+                        int length = Array.getLength(obj);
+                        for (int i = 0; i < length; i++) {
+                            set(".", Array.get(obj, i));
+                            super.compile(str);
+                        }
                     }
-                }
-                else if (obj.getClass().isArray()) {
-                    int length = Array.getLength(obj);
-                    for (int i = 0; i < length; i ++) {
-                        set(".", Array.get(obj, i));
-                        super.compile(str);
-                    }
+
+                    // Reset map to parent object
+                    if(prevObj != null)
+                        set(".", prevObj);
+                    else
+                        remove(".");
                 }
                 else
                     super.compile(str);
 
-                // Reset map to parent object
-                if(prevObj != null)
-                    set(".", prevObj);
-                else
-                    remove(".");
             }
         }
     }
