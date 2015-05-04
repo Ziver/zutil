@@ -14,7 +14,7 @@
       <src_folder value="file://$MODULE_DIR$/src" expected_position="0" />
     </src_description>
   </component>
-  <component name="NewModuleRootManager" inherit-compiler-output="false">
+  <component name="NewModuleRootManager" inherit-compiler-output="true">
     <output url="file://$MODULE_DIR$/bin" />
     <exclude-output />
     <content url="file://$MODULE_DIR$">
@@ -52,7 +52,6 @@
         <SOURCES />
       </library>
     </orderEntry>
-    <orderEntry type="library" name="org.eclipse.jst.j2ee.internal.module.container" level="application" />
     <orderEntry type="module-library" exported="">
       <library name="commons-fileupload-1.2.1.jar">
         <CLASSES>
@@ -91,12 +90,20 @@
         <SOURCES />
       </library>
     </orderEntry>
-    <orderEntry type="library" name="org.eclipse.jst.server.core.container/org.eclipse.jst.server.tomcat.runtimeTarget/Apache Tomcat v7.0" level="application" />
     <orderEntry type="inheritedJdk" />
     <orderEntry type="module-library">
       <library name="sqlite-jdbc-3.7.2.jar">
         <CLASSES>
           <root url="jar://$MODULE_DIR$/libs/sqlite-jdbc-3.7.2.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library>
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/libs/servlet-api.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />

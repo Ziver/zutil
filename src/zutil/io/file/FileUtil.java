@@ -84,7 +84,9 @@ public class FileUtil {
 			if(file!=null && file.exists()){
 				return file;
 			}
-			return new File(findURL(path).toURI());
+			URL url = findURL(path);
+			if(url != null)
+				return new File(url.toURI());
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
