@@ -24,6 +24,8 @@ package zutil;
 
 import zutil.converters.Converter;
 
+import java.util.ArrayList;
+
 /**
  * This is a class whit utility methods.
  * 
@@ -207,4 +209,24 @@ public class StringUtil {
 
         return output.toString();
     }
+
+
+	private static ArrayList<String> SPACES = new ArrayList<String>();
+	/**
+	 * @return A string containing a specific amount of spaces
+	 */
+	public static String getSpaces(int i){
+		if(SPACES.size() <= i){ // Generate the String with spaces
+			synchronized (SPACES) { // Make sure no one else updates the list at the same time
+				if(SPACES.size() <= i) { // Make sure the previous synchronized thread hasn't already generated strings
+					if (SPACES.isEmpty())
+						SPACES.add("");
+					for (int j = SPACES.size(); j <= i; j++) {
+						SPACES.add(SPACES.get(j - 1) + " ");
+					}
+				}
+			}
+		}
+		return SPACES.get(i);
+	}
 }
