@@ -43,7 +43,7 @@ public class LevenshteinDistance {
      * changes to equalize the two strings) for two Strings.
      *
      * @param   matrix  is a int matrix that will be used for the dynamic programing algorithm.
-     *                  NOTE: matrix must be 1 larger than the larges string
+     *                  NOTE: matrix must be 1 larger than the largest string
      * @return The number of changes needed to equalize the two Strings
      */
     public static int getDistance(String str1, String str2, int[][] matrix) {
@@ -96,7 +96,9 @@ public class LevenshteinDistance {
         return matrix[len1 - 1][len2 - 1];
     }
 
-    private static int min(int i, int j, int k){
-        return Math.min(i, Math.min(j, k));
+    private static int min(int a, int b, int c){
+        int i = (a < b) ? a : b;
+        return (i < c) ? i : c;
+        //return Math.min(i, Math.min(j, k));
     }
 }
