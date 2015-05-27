@@ -55,7 +55,7 @@ public class ProcDiskstats {
             BufferedReader in = new BufferedReader(new FileReader(PROC_PATH));
             String line = null;
             while((line=in.readLine()) != null){
-                String[] str = line.trim().split("\\W+", 4);
+                String[] str = line.trim().split("\\s+", 4);
                 if(str.length >= 4) {
                     String devName = str[2];
                     if(!hdds.containsKey(devName)){
@@ -112,7 +112,7 @@ public class ProcDiskstats {
             writeThroughput = new ThroughputCalculator();
         }
         protected void update(String line){
-            String[] stats = line.split("\\W+");
+            String[] stats = line.split("\\s+");
             if(stats.length >= 11){
                 readIO =       Long.parseLong(stats[0]);
                 readMerges =   Long.parseLong(stats[1]);

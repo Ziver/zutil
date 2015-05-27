@@ -57,7 +57,7 @@ public class ProcStat {
             BufferedReader in = new BufferedReader(new FileReader(PROC_PATH));
             String line = null;
             while((line=in.readLine()) != null){
-                String[] str = line.split("\\W+");
+                String[] str = line.split("\\s+");
                 if(str[0].equals("cpu")) {
                     cpuTotal.update(str);
                 }
