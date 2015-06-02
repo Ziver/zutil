@@ -22,11 +22,11 @@
 
 package zutil.net.torrent;
 
-import java.io.IOException;
-import java.net.URL;
-
 import zutil.net.http.HttpClient;
 import zutil.net.http.HttpHeaderParser;
+
+import java.io.IOException;
+import java.net.URL;
 
 /**
  * This tracker represents a tracker client 

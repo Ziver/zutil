@@ -22,15 +22,14 @@
 
 package zutil.ui;
 
-import java.awt.Graphics;
-import java.awt.image.BufferedImage;
-import java.io.IOException;
-
-import javax.imageio.ImageIO;
-import javax.swing.JPanel;
-
 import zutil.image.ImageUtil;
 import zutil.io.file.FileUtil;
+
+import javax.imageio.ImageIO;
+import javax.swing.*;
+import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
 
 /**
  * This class is a panel with a background image

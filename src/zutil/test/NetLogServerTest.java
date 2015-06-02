@@ -22,11 +22,11 @@
 
 package zutil.test;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import zutil.log.LogUtil;
 import zutil.log.net.NetLogServer;
+
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class NetLogServerTest {
 	private static final Logger logger = LogUtil.getLogger();

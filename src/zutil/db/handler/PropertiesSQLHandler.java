@@ -22,12 +22,12 @@
 
 package zutil.db.handler;
 
+import zutil.db.SQLResultHandler;
+
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.sql.ResultSet;
 import java.util.Properties;
-
-import zutil.db.SQLResultHandler;
 
 /**
  * Adds the result of the query to a Properties object,

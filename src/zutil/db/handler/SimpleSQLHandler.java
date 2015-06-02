@@ -22,11 +22,11 @@
 
 package zutil.db.handler;
 
+import zutil.db.SQLResultHandler;
+
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.sql.ResultSet;
-
-import zutil.db.SQLResultHandler;
 
 /**
  * Returns the first column of the first row from the query

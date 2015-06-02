@@ -22,15 +22,10 @@
 
 package zutil.io.file;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedReader;
-import java.io.EOFException;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.InputStream;
+import zutil.io.IOUtil;
+import zutil.log.LogUtil;
+
+import java.io.*;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.HashMap;
@@ -38,9 +33,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
-
-import zutil.io.IOUtil;
-import zutil.log.LogUtil;
 
 /**
  * File path utilities

@@ -22,11 +22,11 @@
 
 package zutil.log.net;
 
+import zutil.net.nio.message.Message;
+
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.logging.LogRecord;
-
-import zutil.net.nio.message.Message;
 
 public class NetLogMessage extends Message {
 	private static final long serialVersionUID = 1L;

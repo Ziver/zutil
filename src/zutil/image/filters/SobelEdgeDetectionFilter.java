@@ -22,10 +22,10 @@
 
 package zutil.image.filters;
 
-import java.awt.image.BufferedImage;
-
 import zutil.image.ImageFilterProcessor;
 import zutil.math.ZMath;
+
+import java.awt.image.BufferedImage;
 
 /**
  * Generates an image that contains the edges of the source image

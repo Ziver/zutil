@@ -22,15 +22,14 @@
 
 package zutil.net;
 
+import javax.net.SocketFactory;
+import javax.net.ssl.SSLSocketFactory;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.net.Socket;
 import java.net.UnknownHostException;
-
-import javax.net.SocketFactory;
-import javax.net.ssl.SSLSocketFactory;
 
 /**
  * A simple class that connects and logs in to a POP3

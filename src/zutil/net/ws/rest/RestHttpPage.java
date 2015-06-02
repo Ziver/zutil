@@ -26,7 +26,6 @@ import zutil.converters.Converter;
 import zutil.net.http.HttpHeaderParser;
 import zutil.net.http.HttpPage;
 import zutil.net.http.HttpPrintStream;
-import zutil.net.http.HttpURL;
 import zutil.net.ws.WSInterface;
 import zutil.net.ws.WSMethodDef;
 import zutil.net.ws.WSParameterDef;

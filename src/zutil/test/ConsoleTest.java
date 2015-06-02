@@ -22,11 +22,11 @@
 
 package zutil.test;
 
+import zutil.ui.Console;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-
-import zutil.ui.Console;
 
 public class ConsoleTest {
 	public static void main(String[] args) throws IOException{

@@ -22,13 +22,13 @@
 
 package zutil.net;
 
+import zutil.io.MultiPrintStream;
+
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
-
-import zutil.io.MultiPrintStream;
 
 /**
  * This class broadcast its address in the LAN so that 

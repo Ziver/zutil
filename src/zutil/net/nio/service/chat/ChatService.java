@@ -22,16 +22,16 @@
 
 package zutil.net.nio.service.chat;
 
-import java.nio.channels.SocketChannel;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.logging.Logger;
-
 import zutil.log.LogUtil;
 import zutil.net.nio.NioNetwork;
 import zutil.net.nio.message.ChatMessage;
 import zutil.net.nio.message.Message;
 import zutil.net.nio.service.NetworkService;
+
+import java.nio.channels.SocketChannel;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.logging.Logger;
 
 /**
  * A simple chat service with users and rooms

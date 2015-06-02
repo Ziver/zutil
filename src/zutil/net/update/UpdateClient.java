@@ -22,18 +22,14 @@
 
 package zutil.net.update;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.net.Socket;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import zutil.ProgressListener;
 import zutil.io.file.FileUtil;
 import zutil.log.LogUtil;
+
+import java.io.*;
+import java.net.Socket;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * This class connects to a update server and updates a path

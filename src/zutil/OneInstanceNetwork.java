@@ -22,11 +22,11 @@
 
 package zutil;
 
+import zutil.io.MultiPrintStream;
+
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-
-import zutil.io.MultiPrintStream;
 
 /**
  * This class checks if the app is alredy running

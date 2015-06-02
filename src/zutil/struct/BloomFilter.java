@@ -22,13 +22,13 @@
 
 package zutil.struct;
 
+import zutil.Hasher;
+
 import java.io.Serializable;
 import java.util.BitSet;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Set;
-
-import zutil.Hasher;
 
 /**
  * A implementation of a bloom filter

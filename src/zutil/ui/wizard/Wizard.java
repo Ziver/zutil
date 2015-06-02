@@ -22,31 +22,21 @@
 
 package zutil.ui.wizard;
 
-import java.awt.Color;
-import java.awt.EventQueue;
-import java.awt.Font;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.util.HashMap;
-import java.util.ResourceBundle;
-
-import javax.imageio.ImageIO;
-import javax.swing.BorderFactory;
-import javax.swing.GroupLayout;
-import javax.swing.JButton;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JScrollPane;
-import javax.swing.JSeparator;
-import javax.swing.WindowConstants;
-import javax.swing.GroupLayout.Alignment;
-import javax.swing.LayoutStyle.ComponentPlacement;
-
 import zutil.io.MultiPrintStream;
 import zutil.io.file.FileUtil;
 import zutil.struct.HistoryList;
 import zutil.ui.JImagePanel;
 import zutil.ui.wizard.listener.BlockingWizardListener;
+
+import javax.imageio.ImageIO;
+import javax.swing.*;
+import javax.swing.GroupLayout.Alignment;
+import javax.swing.LayoutStyle.ComponentPlacement;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.util.HashMap;
+import java.util.ResourceBundle;
 
 /**
  * This class manages the whole wizard

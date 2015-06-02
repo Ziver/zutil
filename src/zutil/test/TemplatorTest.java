@@ -27,9 +27,8 @@ import zutil.parser.Templator;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 /**
  * Created by Ziver on 2015-03-23.
@@ -38,7 +37,14 @@ public class TemplatorTest {
     class TestClass{
         public String attr;
     }
-
+    class TestFuncClass{
+        public boolean isTrue(){
+            return true;
+        }
+        public boolean isFalse(){
+            return false;
+        }
+    }
 
 
     @Test
@@ -237,5 +243,31 @@ public class TemplatorTest {
                 "<HTML>{{! This is a comment}}</HTML>");
         assertEquals(
                 "<HTML></HTML>", tmpl.compile());
+    }
+
+
+    @Test
+    public void functionCallTest(){
+        Templator tmpl = new Templator(
+                "<HTML>{{#obj.isTrue()}}it is true{{/obj.isTrue()}}</HTML>");
+        tmpl.set("obj", new TestFuncClass());
+        assertEquals(
+                "<HTML>it is true</HTML>", tmpl.compile());
+
+        tmpl = new Templator(
+                "<HTML>{{#obj.isFalse()}}it is true{{/obj.isFalse()}}</HTML>");
+        tmpl.set("obj", new TestFuncClass());
+        assertEquals(
+                "<HTML></HTML>", tmpl.compile());
+    }
+    @Test
+    public void functionInArrayTest(){
+        Templator tmpl = new Templator(
+                "<HTML>{{#list}}{{#.isTrue()}}1{{/.isTrue()}}{{/list}}</HTML>");
+        tmpl.set("list", new TestFuncClass[]{
+                new TestFuncClass(),new TestFuncClass(),new TestFuncClass()
+        });
+        assertEquals(
+                "<HTML>111</HTML>", tmpl.compile());
     }
 }

@@ -22,9 +22,9 @@
 
 package zutil.image;
 
-import java.awt.image.BufferedImage;
-
 import zutil.ProgressListener;
+
+import java.awt.image.BufferedImage;
 
 /**
  * This is a abstract class for all the effects

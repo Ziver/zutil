@@ -22,12 +22,10 @@
 
 package zutil.ui.wizard;
 
-import java.awt.Component;
+import javax.swing.*;
+import java.awt.*;
 import java.util.HashMap;
 import java.util.LinkedList;
-
-import javax.swing.JComponent;
-import javax.swing.JPanel;
 
 /**
  * This abstract class is one step in the wizard

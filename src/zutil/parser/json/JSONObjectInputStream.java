@@ -25,6 +25,7 @@ package zutil.parser.json;
 import zutil.parser.Base64Decoder;
 import zutil.parser.DataNode;
 
+import javax.activation.UnsupportedDataTypeException;
 import java.io.*;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
@@ -32,8 +33,6 @@ import java.lang.reflect.Modifier;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import javax.activation.UnsupportedDataTypeException;
 
 public class JSONObjectInputStream extends InputStream implements ObjectInput, Closeable{
     private JSONParser parser;

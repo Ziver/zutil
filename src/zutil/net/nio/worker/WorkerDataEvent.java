@@ -22,9 +22,9 @@
 
 package zutil.net.nio.worker;
 
-import java.nio.channels.SocketChannel;
-
 import zutil.net.nio.NioNetwork;
+
+import java.nio.channels.SocketChannel;
 
 
 public class WorkerDataEvent {

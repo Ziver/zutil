@@ -22,9 +22,9 @@
 
 package zutil.test;
 
-import java.io.File;
-
 import zutil.algo.sort.ExternalSort;
+
+import java.io.File;
 
 
 public class ExternalSortTest {

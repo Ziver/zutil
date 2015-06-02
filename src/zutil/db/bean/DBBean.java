@@ -22,6 +22,9 @@
 
 package zutil.db.bean;
 
+import zutil.db.DBConnection;
+import zutil.log.LogUtil;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -39,9 +42,6 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import zutil.db.DBConnection;
-import zutil.log.LogUtil;
 
 /** 
  * The class that extends this will be able to save its state to a database.

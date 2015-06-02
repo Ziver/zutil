@@ -21,9 +21,8 @@
  */
 
 package zutil.test;
+
 import zutil.algo.sort.MergeSort;
-import zutil.algo.sort.QuickSort;
-import zutil.algo.sort.SimpleSort;
 import zutil.algo.sort.sortable.SortableIntArray;
 
 @SuppressWarnings("unused")

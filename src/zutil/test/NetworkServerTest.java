@@ -22,11 +22,10 @@
 
 package zutil.test;
 
+import zutil.net.nio.NioServer;
+
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
-
-import zutil.Encrypter;
-import zutil.net.nio.NioServer;
 
 
 @SuppressWarnings("unused")

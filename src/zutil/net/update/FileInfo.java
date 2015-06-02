@@ -22,12 +22,12 @@
 
 package zutil.net.update;
 
+import zutil.Hasher;
+import zutil.io.file.FileUtil;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
-
-import zutil.Hasher;
-import zutil.io.file.FileUtil;
 
 /**
  * This class is used to store the files

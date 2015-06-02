@@ -25,7 +25,6 @@ package zutil.osal.app.linux;
 import zutil.log.LogUtil;
 import zutil.osal.OSAbstractionLayer;
 
-import java.io.IOException;
 import java.util.logging.Logger;
 
 /**

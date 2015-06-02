@@ -26,7 +26,9 @@ import zutil.parser.DataNode;
 import zutil.parser.DataNode.DataType;
 import zutil.struct.MutableInt;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.Reader;
+import java.io.StringReader;
 import java.util.regex.Pattern;
 
 /**

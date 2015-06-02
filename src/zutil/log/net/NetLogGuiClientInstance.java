@@ -22,21 +22,20 @@
 
 package zutil.log.net;
 
-import java.net.URL;
-import java.util.ResourceBundle;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 import javafx.application.Platform;
-import javafx.scene.control.*;
-import zutil.log.LogUtil;
-
 import javafx.event.ActionEvent;
 import javafx.event.Event;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.util.Callback;
+import zutil.log.LogUtil;
+
+import java.net.URL;
+import java.util.ResourceBundle;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class NetLogGuiClientInstance implements Initializable, NetLogListener {
 	private static final Logger logger = LogUtil.getLogger();

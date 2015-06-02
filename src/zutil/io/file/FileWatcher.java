@@ -22,12 +22,12 @@
 
 package zutil.io.file;
 
+import zutil.io.MultiPrintStream;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.Timer;
 import java.util.TimerTask;
-
-import zutil.io.MultiPrintStream;
 
 /**
  * This class calls a given listener 

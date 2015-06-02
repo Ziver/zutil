@@ -22,14 +22,13 @@
 
 package zutil.test;
 
-import java.io.IOException;
-import java.net.InetAddress;
-import java.security.NoSuchAlgorithmException;
-
-import zutil.Encrypter;
 import zutil.net.nio.NioClient;
 import zutil.net.nio.message.StringMessage;
 import zutil.net.nio.response.PrintRsp;
+
+import java.io.IOException;
+import java.net.InetAddress;
+import java.security.NoSuchAlgorithmException;
 
 
 @SuppressWarnings("unused")

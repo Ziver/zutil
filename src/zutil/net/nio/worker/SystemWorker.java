@@ -22,10 +22,6 @@
 
 package zutil.net.nio.worker;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.logging.Logger;
-
 import zutil.log.LogUtil;
 import zutil.net.nio.NioNetwork;
 import zutil.net.nio.message.ChatMessage;
@@ -37,6 +33,10 @@ import zutil.net.nio.response.ResponseEvent;
 import zutil.net.nio.service.NetworkService;
 import zutil.net.nio.service.chat.ChatService;
 import zutil.net.nio.service.sync.SyncService;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.logging.Logger;
 
 
 public class SystemWorker extends ThreadedEventWorker {

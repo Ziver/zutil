@@ -22,11 +22,10 @@
 
 package zutil.test;
 
-import static org.junit.Assert.*;
-
 import org.junit.Test;
-
 import zutil.net.http.HttpURL;
+
+import static org.junit.Assert.assertEquals;
 
 public class HttpURLTest {
 

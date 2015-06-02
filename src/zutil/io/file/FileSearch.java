@@ -22,21 +22,15 @@
 
 package zutil.io.file;
 
+import zutil.io.InputStreamCloser;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Enumeration;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
-
-import zutil.io.InputStreamCloser;
 
 public class FileSearch implements Iterable<FileSearch.FileSearchItem>{
 	// Constants

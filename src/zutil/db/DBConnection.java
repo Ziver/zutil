@@ -22,23 +22,17 @@
 
 package zutil.db;
 
-import java.io.Closeable;
-import java.math.BigInteger;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import zutil.db.handler.SimpleSQLHandler;
+import zutil.log.LogUtil;
 
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
-
-import zutil.db.handler.SimpleSQLHandler;
-import zutil.log.LogUtil;
+import java.io.Closeable;
+import java.math.BigInteger;
+import java.sql.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class DBConnection implements Closeable{
 	private static final Logger logger = LogUtil.getLogger();

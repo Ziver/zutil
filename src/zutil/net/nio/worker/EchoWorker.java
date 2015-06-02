@@ -22,9 +22,9 @@
 
 package zutil.net.nio.worker;
 
-import java.io.IOException;
-
 import zutil.io.MultiPrintStream;
+
+import java.io.IOException;
 
 public class EchoWorker extends ThreadedEventWorker {
 

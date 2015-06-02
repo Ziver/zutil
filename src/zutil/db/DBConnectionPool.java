@@ -22,12 +22,12 @@
 
 package zutil.db;
 
+import zutil.db.DBConnection.DBMS;
+
 import java.io.Closeable;
 import java.util.LinkedList;
 import java.util.Timer;
 import java.util.TimerTask;
-
-import zutil.db.DBConnection.DBMS;
 
 /**
  * This class is an connection pool

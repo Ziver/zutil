@@ -22,16 +22,17 @@
 
 package zutil.test;
 
-import static org.junit.Assert.assertEquals;
-
-import java.io.*;
-import java.util.Arrays;
-
 import org.junit.Test;
-
 import zutil.io.StringOutputStream;
 import zutil.parser.json.JSONObjectInputStream;
 import zutil.parser.json.JSONObjectOutputStream;
+
+import java.io.IOException;
+import java.io.Serializable;
+import java.io.StringReader;
+import java.util.Arrays;
+
+import static org.junit.Assert.assertEquals;
 
 public class JSONSerializerTest{
 

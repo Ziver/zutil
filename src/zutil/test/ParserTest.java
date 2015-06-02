@@ -22,12 +22,10 @@
 
 package zutil.test;
 
-import static org.junit.Assert.assertEquals;
-
-
 import org.junit.Test;
-
 import zutil.parser.BBCodeParser;
+
+import static org.junit.Assert.assertEquals;
 
 
 public class ParserTest{

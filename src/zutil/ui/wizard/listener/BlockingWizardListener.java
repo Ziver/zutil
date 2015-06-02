@@ -22,10 +22,10 @@
 
 package zutil.ui.wizard.listener;
 
-import java.util.HashMap;
-
 import zutil.ui.wizard.WizardListener;
 import zutil.ui.wizard.WizardPage;
+
+import java.util.HashMap;
 
 /**
  * This listener class will block until the wizard is finished

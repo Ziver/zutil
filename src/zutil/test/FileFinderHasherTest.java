@@ -22,12 +22,12 @@
 
 package zutil.test;
 
+import zutil.Hasher;
+import zutil.io.file.FileUtil;
+
 import java.io.File;
 import java.net.URISyntaxException;
 import java.util.List;
-
-import zutil.Hasher;
-import zutil.io.file.FileUtil;
 
 public class FileFinderHasherTest {
 	public static void main(String[] args) throws URISyntaxException{

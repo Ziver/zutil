@@ -22,10 +22,10 @@
 
 package zutil.image.filters;
 
-import java.awt.image.BufferedImage;
-
 import zutil.image.ImageFilterProcessor;
 import zutil.image.RAWImageUtil;
+
+import java.awt.image.BufferedImage;
 
 public class ContrastBrightnessFilter extends ImageFilterProcessor{
 	private double contrast;

@@ -22,24 +22,20 @@
 
 package zutil.db.bean;
 
-import java.lang.reflect.Field;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.sql.ResultSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Timer;
-import java.util.TimerTask;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.logging.Logger;
-
 import zutil.db.DBConnection;
 import zutil.db.SQLResultHandler;
 import zutil.db.bean.DBBean.DBBeanConfig;
 import zutil.db.bean.DBBean.DBLinkTable;
 import zutil.log.LogUtil;
+
+import java.lang.reflect.Field;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.logging.Logger;
 
 public class DBBeanSQLResultHandler<T> implements SQLResultHandler<T>{
 	private static final Logger logger = LogUtil.getLogger();

@@ -22,11 +22,11 @@
 
 package zutil.net.nio.worker;
 
+import zutil.net.nio.NioNetwork;
+
 import java.nio.channels.SocketChannel;
 import java.util.LinkedList;
 import java.util.List;
-
-import zutil.net.nio.NioNetwork;
 
 
 public abstract class Worker implements Runnable {

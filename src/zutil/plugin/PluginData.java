@@ -22,14 +22,10 @@
 
 package zutil.plugin;
 
-import zutil.ClassUtil;
 import zutil.log.LogUtil;
 import zutil.parser.DataNode;
 
-import javax.xml.crypto.Data;
 import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLClassLoader;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;

@@ -22,13 +22,12 @@
 
 package zutil.wrapper;
 
+import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
-
-import javax.imageio.ImageIO;
 
 public class SerializableBufferedImage implements Serializable{
 	private static final long serialVersionUID = 1L;

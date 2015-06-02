@@ -22,11 +22,11 @@
 
 package zutil.test;
 
-import java.util.logging.Level;
-
 import zutil.log.CompactLogFormatter;
 import zutil.log.LogUtil;
 import zutil.net.update.UpdateServer;
+
+import java.util.logging.Level;
 
 public class UpdateServerTest {
 	public static void main(String[] args){

@@ -22,6 +22,11 @@
 
 package zutil.net.update;
 
+import zutil.io.MultiPrintStream;
+import zutil.log.LogUtil;
+import zutil.net.threaded.ThreadedTCPNetworkServer;
+import zutil.net.threaded.ThreadedTCPNetworkServerThread;
+
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -29,11 +34,6 @@ import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import zutil.io.MultiPrintStream;
-import zutil.log.LogUtil;
-import zutil.net.threaded.ThreadedTCPNetworkServer;
-import zutil.net.threaded.ThreadedTCPNetworkServerThread;
 
 public class UpdateServer extends ThreadedTCPNetworkServer{
 	private static final Logger logger = LogUtil.getLogger();

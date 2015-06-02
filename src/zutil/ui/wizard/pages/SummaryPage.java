@@ -22,11 +22,10 @@
 
 package zutil.ui.wizard.pages;
 
-import java.util.HashMap;
-
-import javax.swing.JTextArea;
-
 import zutil.ui.wizard.WizardPage;
+
+import javax.swing.*;
+import java.util.HashMap;
 
 /**
  * This class will show a summary of all the values

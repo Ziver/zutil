@@ -22,16 +22,15 @@
 
 package zutil.net.http.multipart;
 
+import zutil.ProgressListener;
+import zutil.net.http.HttpHeaderParser;
+
+import javax.servlet.http.HttpServletRequest;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-
-import javax.servlet.http.HttpServletRequest;
-
-import zutil.ProgressListener;
-import zutil.net.http.HttpHeaderParser;
 
 /**
  * Parses a multipart/form-data http request, 

@@ -22,11 +22,11 @@
 
 package zutil.test;
 
-import static org.junit.Assert.*;
-
 import org.junit.Test;
-
 import zutil.converters.Converter;
+
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
 
 public class ConverterTest {
 

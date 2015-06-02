@@ -22,19 +22,14 @@
 
 package zutil;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.Serializable;
-import java.math.BigInteger;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
+import zutil.converters.Converter;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
-
-import zutil.converters.Converter;
+import java.io.*;
+import java.math.BigInteger;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 
 public class Hasher {
 

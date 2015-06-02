@@ -22,15 +22,13 @@
 
 package zutil.test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-
-
 import org.junit.Test;
-
 import zutil.parser.DataNode;
 import zutil.parser.DataNode.DataType;
 import zutil.parser.json.JSONParser;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 
 public class JSONTest{

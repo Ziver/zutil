@@ -22,10 +22,10 @@
 
 package zutil.algo;
 
+import zutil.math.ZMath;
+
 import java.math.BigInteger;
 import java.util.LinkedList;
-
-import zutil.math.ZMath;
 
 /**
  * The Wieners algorithm factorizes two big numbers a and b.

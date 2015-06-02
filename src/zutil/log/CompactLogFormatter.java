@@ -22,6 +22,8 @@
 
 package zutil.log;
 
+import zutil.io.StringOutputStream;
+
 import java.io.PrintStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -29,8 +31,6 @@ import java.util.HashMap;
 import java.util.logging.Formatter;
 import java.util.logging.LogRecord;
 import java.util.regex.Pattern;
-
-import zutil.io.StringOutputStream;
 
 public class CompactLogFormatter extends Formatter{
 	// The split pattern where the 

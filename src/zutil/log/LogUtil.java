@@ -22,11 +22,7 @@
 
 package zutil.log;
 
-import java.util.logging.ConsoleHandler;
-import java.util.logging.Formatter;
-import java.util.logging.Handler;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.logging.*;
 
 /**
  * Utility functions for the standard Java Logger

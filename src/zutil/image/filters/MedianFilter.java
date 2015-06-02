@@ -22,12 +22,12 @@
 
 package zutil.image.filters;
 
-import java.awt.image.BufferedImage;
-
 import zutil.algo.sort.sortable.SortableDataList;
 import zutil.image.ImageFilterProcessor;
 import zutil.image.RAWImageUtil;
 import zutil.math.ZMath;
+
+import java.awt.image.BufferedImage;
 
 /**
  * The MedianFilter is used for noise reduction and things

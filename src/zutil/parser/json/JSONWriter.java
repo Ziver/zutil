@@ -22,14 +22,14 @@
 
 package zutil.parser.json;
 
+import zutil.io.StringOutputStream;
+import zutil.parser.DataNode;
+import zutil.parser.DataNode.DataType;
+
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.util.Iterator;
-
-import zutil.io.StringOutputStream;
-import zutil.parser.DataNode;
-import zutil.parser.DataNode.DataType;
 
 /**
  * Writes An JSONNode to an String or stream

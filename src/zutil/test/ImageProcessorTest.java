@@ -22,14 +22,13 @@
 
 package zutil.test;
 
-import javax.imageio.ImageIO;
-import javax.swing.ImageIcon;
-import javax.swing.JFrame;
-import javax.swing.JPanel;
-import javax.swing.JProgressBar;
+import zutil.ProgressListener;
+import zutil.image.ImageFilterProcessor;
+import zutil.image.filters.GaussianBlurFilter;
 
-import java.awt.BorderLayout;
-import java.awt.Dimension;
+import javax.imageio.ImageIO;
+import javax.swing.*;
+import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
@@ -37,21 +36,6 @@ import java.io.BufferedInputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-
-import javax.swing.JLabel;
-
-import zutil.ProgressListener;
-import zutil.image.ImageFilterProcessor;
-import zutil.image.filters.GaussianBlurFilter;
-import zutil.image.filters.BlurFilter;
-import zutil.image.filters.ColorIntensityFilter;
-import zutil.image.filters.ContrastBrightnessFilter;
-import zutil.image.filters.DitheringFilter;
-import zutil.image.filters.MeanBlurFilter;
-import zutil.image.filters.MedianFilter;
-import zutil.image.filters.ResizeImage;
-import zutil.image.filters.SobelEdgeDetectionFilter;
-import zutil.image.filters.SpotLightFilter;
 
 @SuppressWarnings({ "unused", "rawtypes" })
 public class ImageProcessorTest implements ProgressListener{

@@ -22,15 +22,15 @@
 
 package zutil.net.nio.service.sync;
 
-import java.nio.channels.SocketChannel;
-import java.util.HashMap;
-import java.util.logging.Logger;
-
 import zutil.log.LogUtil;
 import zutil.net.nio.NioNetwork;
 import zutil.net.nio.message.Message;
 import zutil.net.nio.message.SyncMessage;
 import zutil.net.nio.service.NetworkService;
+
+import java.nio.channels.SocketChannel;
+import java.util.HashMap;
+import java.util.logging.Logger;
 
 public class SyncService extends NetworkService{
 	private static Logger logger = LogUtil.getLogger();

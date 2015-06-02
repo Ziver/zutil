@@ -22,12 +22,12 @@
 
 package zutil.net.upnp;
 
+import zutil.net.http.HttpHeaderParser;
+import zutil.net.http.HttpPrintStream;
+
 import java.io.IOException;
 import java.util.Map;
 import java.util.UUID;
-
-import zutil.net.http.HttpHeaderParser;
-import zutil.net.http.HttpPrintStream;
 
 /**
  * This class is a UPnP AV Media Server that handles all the

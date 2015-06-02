@@ -22,15 +22,18 @@
 
 package zutil.plugin;
 
-import java.io.File;
-import java.util.*;
-import java.util.logging.Logger;
-
 import zutil.io.IOUtil;
 import zutil.io.file.FileSearch;
 import zutil.log.LogUtil;
 import zutil.parser.DataNode;
 import zutil.parser.json.JSONParser;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.NoSuchElementException;
+import java.util.logging.Logger;
 
 /**
  * This class will search the file system for files

@@ -22,6 +22,11 @@
 
 package zutil.log.net;
 
+import zutil.log.LogUtil;
+import zutil.net.nio.message.Message;
+import zutil.net.threaded.ThreadedTCPNetworkServer;
+import zutil.net.threaded.ThreadedTCPNetworkServerThread;
+
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -32,11 +37,6 @@ import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
-
-import zutil.log.LogUtil;
-import zutil.net.nio.message.Message;
-import zutil.net.threaded.ThreadedTCPNetworkServer;
-import zutil.net.threaded.ThreadedTCPNetworkServerThread;
 
 
 public class NetLogServer extends Handler {

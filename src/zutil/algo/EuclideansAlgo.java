@@ -22,10 +22,10 @@
 
 package zutil.algo;
 
+import zutil.io.MultiPrintStream;
+
 import java.math.BigInteger;
 import java.util.LinkedList;
-
-import zutil.io.MultiPrintStream;
 
 /**
  * Euclidean algorithm is an algorithm to determine 

@@ -22,13 +22,12 @@
 
 package zutil.test;
 
+import junit.framework.TestCase;
+import zutil.struct.BloomFilter;
+
 import java.text.DecimalFormat;
 import java.util.HashSet;
 import java.util.Random;
-
-import zutil.struct.BloomFilter;
-
-import junit.framework.TestCase;
 
 /**
  * This code may be used, modified, and redistributed provided that the 

@@ -22,14 +22,14 @@
 
 package zutil.net.nio.worker.grid;
 
+import zutil.net.nio.message.GridMessage;
+import zutil.net.nio.worker.ThreadedEventWorker;
+import zutil.net.nio.worker.WorkerDataEvent;
+
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Queue;
-
-import zutil.net.nio.message.GridMessage;
-import zutil.net.nio.worker.ThreadedEventWorker;
-import zutil.net.nio.worker.WorkerDataEvent;
 
 /**
  * Implements a simple network computing server

@@ -22,13 +22,13 @@
 
 package zutil.test;
 
-import java.io.IOException;
-import java.util.Map;
-
 import zutil.net.http.HttpHeaderParser;
 import zutil.net.http.HttpPage;
 import zutil.net.http.HttpPrintStream;
 import zutil.net.http.HttpServer;
+
+import java.io.IOException;
+import java.util.Map;
 
 
 public class HTTPGuessTheNumber implements HttpPage{

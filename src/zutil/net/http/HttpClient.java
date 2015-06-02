@@ -22,14 +22,14 @@
 
 package zutil.net.http;
 
+import zutil.net.http.HttpPrintStream.HttpMessageType;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Socket;
 import java.net.URL;
 import java.util.HashMap;
-
-import zutil.net.http.HttpPrintStream.HttpMessageType;
 
 /**
  * This class connects to a HTTP server and 

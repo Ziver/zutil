@@ -21,17 +21,12 @@
  */
 package zutil.chart;
 
-import java.awt.FontMetrics;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.Point;
-import java.awt.Rectangle;
+import zutil.log.LogUtil;
+
+import javax.swing.*;
+import java.awt.*;
 import java.awt.geom.Line2D;
 import java.util.logging.Logger;
-
-import javax.swing.JPanel;
-
-import zutil.log.LogUtil;
 
 public abstract class AbstractChart extends JPanel{
 	private static final Logger logger = LogUtil.getLogger();

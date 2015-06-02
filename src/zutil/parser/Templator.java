@@ -30,7 +30,12 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
-import java.util.*;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -47,26 +52,35 @@ import java.util.logging.Logger;
  *  <li><b> {{#key}}...{{/key}} </b><br>
  *      <b> {{#obj.attr}}...{{/obj.attr}} </b><br>
  *      Will display content between the tags if:
- *      key is defined,
- *      if the key references a list or array the content will be iterated
- *          for every element, the element can be referenced by the tag {{.}},
- *      if key is a boolean with the value true,
- *      if key is a Integer with the value anything other then 0.</li>
+ *      <ul>
+ *          <li>key is defined,</li>
+ *          <li>if the key references a list or array the content will be iterated
+ *              for every element, the element can be referenced by the tag {{.}},</li>
+ *          <li>if key is a boolean with the value true,</li>
+ *          <li>if key is a Integer with the value anything other then 0,</li>
+ *          <li>if key ends with () it will be evaluated as a method call, the returned
+ *              type will be evaluated against the criteria in this list.</li>
+ *      </ul>
+ *      </li>
  *  <li><b> {{^key}}</b><br>
  *      <b> {{^obj.attr}}...{{/obj.attr}} </b><br>
  *      A negative condition, will display content if:
- *      the key is undefined,
- *      the key is a empty list,
- *      the key is a zero length array,
- *      the key is a false boolean,
- *      the key is a 0 Integer</li>
+ *      <ul>
+ *          <li>the key is undefined,</li>
+ *          <li>the key is a empty list,</li>
+ *          <li>the key is a zero length array,</li>
+ *          <li>the key is a false boolean,</li>
+ *          <li>the key is a 0 Integer</li>
+ *          <li>if key ends with () it will be evaluated as a method call, the returned
+ *              type will be evaluated against the criteria in this list.</li>
+ *      </ul>
+ *      </li>
  *  <li><b>{{! ignore me }}</b><br>
  *      Comment, will be ignored.</li>
  * </ul>
  *
  * TODO: {{> file}}: include file
  * TODO: {{=<% %>=}}: change delimiter
- * TODO: {{obj.func()}}: execute functions
  *
  * @author Ziver koc
  */
@@ -131,7 +145,7 @@ public class Templator {
     }
 
     /**
-     * Will pare or re-parse the source template.
+     * Will parse or re-parse the source template.
      */
     private void parseTemplate(String tmpl){
         tmplRoot = parseTemplate(new TemplateNode(), tmpl, new MutableInt(), null);
@@ -244,7 +258,6 @@ public class Templator {
         public void compile(StringBuilder str) {
             Object obj = attrib.getObject();
             if(obj != null) {
-
                 if(obj instanceof Boolean){
                     if ((Boolean) obj)
                         super.compile(str);
@@ -357,12 +370,27 @@ public class Templator {
         }
         protected Object getFieldValue(Object obj, String attrib){
             try {
-                if(obj.getClass().isArray() && "length".equals(attrib))
+                if(attrib.endsWith("()")){ // Is this a function call?
+                    if(attrib.length() > 2) {
+                        String funcName = attrib.substring(0, attrib.length()-2);
+                        // Using a loop as the direct lookup throws a exception if no field was found
+                        // So this is probably a bit faster
+                        for (Method m : obj.getClass().getMethods()) {
+                            if (m.getParameterTypes().length == 0 && m.getName().equals(funcName)) {
+                                m.setAccessible(true);
+                                return m.invoke(obj);
+                            }
+                        }
+                    }
+                }
+                else if(obj.getClass().isArray() && "length".equals(attrib))
                     return Array.getLength(obj);
                 else if(obj instanceof Collection && "length".equals(attrib))
                     return ((Collection) obj).size();
                 else {
-                    for (Field field : obj.getClass().getDeclaredFields()) {
+                    // Using a loop as the direct lookup throws a exception if no field was found
+                    // So this is probably a bit faster
+                    for (Field field : obj.getClass().getFields()) { // Only look for public fields
                         if (field.getName().equals(attrib)) {
                             field.setAccessible(true);
                             return field.get(obj);
@@ -370,6 +398,8 @@ public class Templator {
                     }
                 }
             }catch (IllegalAccessException e){
+                log.log(Level.WARNING, null, e);
+            } catch (InvocationTargetException e) {
                 log.log(Level.WARNING, null, e);
             }
             return null;

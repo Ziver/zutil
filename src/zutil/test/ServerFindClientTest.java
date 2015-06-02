@@ -22,9 +22,9 @@
 
 package zutil.test;
 
-import java.io.IOException;
-
 import zutil.net.ServerFindClient;
+
+import java.io.IOException;
 
 public class ServerFindClientTest {
 	public static void main(String[] args){

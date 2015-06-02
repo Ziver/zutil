@@ -22,8 +22,6 @@
 
 package zutil.net.ssdp;
 
-import zutil.net.http.HttpPrintStream;
-
 /**
  * This class contains information about a service from
  * or through the SSDP protocol

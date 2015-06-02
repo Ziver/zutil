@@ -22,6 +22,9 @@
 
 package zutil.net.threaded;
 
+import zutil.log.LogUtil;
+
+import javax.net.ssl.SSLServerSocketFactory;
 import java.io.File;
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -32,10 +35,6 @@ import java.security.NoSuchProviderException;
 import java.security.cert.CertificateException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import javax.net.ssl.SSLServerSocketFactory;
-
-import zutil.log.LogUtil;
 
 
 /**

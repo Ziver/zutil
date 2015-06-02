@@ -22,10 +22,10 @@
 
 package zutil.test;
 
-import java.util.Arrays;
-
 import zutil.algo.search.QuickSelect;
 import zutil.algo.sort.sortable.SortableIntArray;
+
+import java.util.Arrays;
 
 public class QuickSelectTest {
 	public static void main(String[] args){

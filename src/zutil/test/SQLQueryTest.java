@@ -22,10 +22,10 @@
 
 package zutil.test;
 
-import org.junit.*;
-import static org.junit.Assert.*;
-
+import org.junit.Test;
 import zutil.db.SQLQuery;
+
+import static org.junit.Assert.assertEquals;
 
 public class SQLQueryTest {
 

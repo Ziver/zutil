@@ -22,6 +22,8 @@
 
 package zutil.log.net;
 
+import zutil.log.LogUtil;
+
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -30,8 +32,6 @@ import java.net.UnknownHostException;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import zutil.log.LogUtil;
 
 
 public class NetLogClient extends Thread{

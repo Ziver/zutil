@@ -22,23 +22,21 @@
 
 package zutil.net.ssdp;
 
+import zutil.io.StringOutputStream;
+import zutil.log.LogUtil;
+import zutil.net.http.HttpHeaderParser;
+import zutil.net.http.HttpPrintStream;
+import zutil.net.threaded.ThreadedUDPNetwork;
+import zutil.net.threaded.ThreadedUDPNetworkThread;
+
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
-import java.net.MulticastSocket;
 import java.util.HashMap;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import zutil.io.MultiPrintStream;
-import zutil.io.StringOutputStream;
-import zutil.log.LogUtil;
-import zutil.net.http.HttpHeaderParser;
-import zutil.net.http.HttpPrintStream;
-import zutil.net.threaded.ThreadedUDPNetworkThread;
-import zutil.net.threaded.ThreadedUDPNetwork;
 
 /**
  * A Server class that announces an service by the SSDP 

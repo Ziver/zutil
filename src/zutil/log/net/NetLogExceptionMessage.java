@@ -22,9 +22,9 @@
 
 package zutil.log.net;
 
-import java.util.logging.LogRecord;
-
 import zutil.net.nio.message.Message;
+
+import java.util.logging.LogRecord;
 
 public class NetLogExceptionMessage extends Message {
 	private static final long serialVersionUID = 1L;

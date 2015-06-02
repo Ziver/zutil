@@ -21,13 +21,12 @@
  */
 package zutil.test;
 
-import java.util.logging.Level;
-
-import javax.swing.JFrame;
-
 import zutil.chart.ChartData;
 import zutil.chart.LineChart;
 import zutil.log.LogUtil;
+
+import javax.swing.*;
+import java.util.logging.Level;
 
 public class ChartTest extends JFrame{
 	private static final long serialVersionUID = 1L;

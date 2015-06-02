@@ -22,14 +22,13 @@
 
 package zutil.test;
 
-import static org.junit.Assert.*;
+import org.junit.Test;
+import zutil.io.BoundaryBufferedInputStream;
+import zutil.io.StringInputStream;
 
 import java.io.IOException;
 
-import org.junit.Test;
-
-import zutil.io.BoundaryBufferedInputStream;
-import zutil.io.StringInputStream;
+import static org.junit.Assert.assertEquals;
 
 @SuppressWarnings("resource")
 public class BoundaryBufferedInputStreamTest {

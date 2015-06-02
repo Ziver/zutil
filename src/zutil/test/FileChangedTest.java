@@ -22,13 +22,13 @@
 
 package zutil.test;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.net.URISyntaxException;
-
 import zutil.io.file.FileChangeListener;
 import zutil.io.file.FileUtil;
 import zutil.io.file.FileWatcher;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.net.URISyntaxException;
 
 public class FileChangedTest implements FileChangeListener{
 	public static void main(String[] args) throws URISyntaxException, FileNotFoundException{

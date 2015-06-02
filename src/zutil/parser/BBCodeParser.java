@@ -22,9 +22,9 @@
 
 package zutil.parser;
 
-import java.util.HashMap;
-
 import zutil.struct.MutableInt;
+
+import java.util.HashMap;
 
 /**
  * Parses BBCode and replaces them with the corresponding HTML.

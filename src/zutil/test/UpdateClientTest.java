@@ -22,15 +22,15 @@
 
 package zutil.test;
 
-import java.awt.EventQueue;
-import java.util.logging.Level;
-
 import zutil.ProgressListener;
 import zutil.log.CompactLogFormatter;
 import zutil.log.LogUtil;
 import zutil.net.update.FileInfo;
 import zutil.net.update.UpdateClient;
 import zutil.net.update.Zupdater;
+
+import java.awt.*;
+import java.util.logging.Level;
 
 public class UpdateClientTest implements ProgressListener<UpdateClient, FileInfo>{
 	public static void main(String[] args){

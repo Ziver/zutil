@@ -22,10 +22,10 @@
 
 package zutil.test;
 
-import java.sql.PreparedStatement;
-
 import zutil.db.DBConnection;
 import zutil.db.handler.SimpleSQLHandler;
+
+import java.sql.PreparedStatement;
 
 public class DBConnectionTest {
 

@@ -26,15 +26,17 @@ import zutil.ClassUtil;
 import zutil.parser.DataNode;
 import zutil.parser.DataNode.DataType;
 
-import java.io.*;
+import javax.activation.UnsupportedDataTypeException;
+import java.io.Closeable;
+import java.io.IOException;
+import java.io.ObjectOutput;
+import java.io.OutputStream;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import javax.activation.UnsupportedDataTypeException;
 
 public class JSONObjectOutputStream extends OutputStream implements ObjectOutput, Closeable{
     private boolean generateMetaData;
