@@ -71,7 +71,7 @@ public class HttpFilePage implements HttpPage{
             else { // Resource root is a folder
                 File file = new File(resource_root,
                         client_info.getRequestURL());
-                if(file.getAbsolutePath().startsWith(resource_root.getAbsolutePath())){
+                if(file.getCanonicalPath().startsWith(resource_root.getCanonicalPath())){
                     if(file.isDirectory() && showFolders){
                         File indexFile = new File(file, "index.html");
                         // Redirect to index.html
@@ -89,6 +89,9 @@ public class HttpFilePage implements HttpPage{
                                         +"'>" + f + "</A></LI>");
                             }
                             out.println("</UL><HR></BODY></HTML>");
+                        }
+                        else {
+                            throw new SecurityException("User not allowed to view folder: root=" + resource_root.getAbsolutePath());
                         }
                     }
                     else {

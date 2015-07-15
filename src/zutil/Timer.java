@@ -1,0 +1,56 @@
+/*
+ * Copyright (c) 2015 ezivkoc
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
+
+package zutil;
+
+/**
+ * This class is a timer, it will track time and
+ * timeout after a specific amount of time.
+ *
+ * Created by Ziver on 2015-07-15.
+ */
+public class Timer {
+    /** The timeout period **/
+    private long period;
+    /** The timestamp when the timer was started, -1 if timer has not been started or has been reset **/
+    private long timestamp;
+
+
+    public Timer(long milisec){
+        this.period = milisec;
+        reset();
+    }
+
+    public void start(){
+        timestamp = System.currentTimeMillis();
+    }
+    public void reset(){
+        timestamp = -1;
+    }
+
+    /**
+     * @return true if the timer has timed out or has been reset, false if timer is running
+     */
+    public boolean hasTimedOut(){
+        return timestamp + period < System.currentTimeMillis();
+    }
+}

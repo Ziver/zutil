@@ -22,9 +22,11 @@
 
 package zutil.osal.app.linux;
 
+import zutil.Timer;
 import zutil.log.LogUtil;
 import zutil.osal.OSAbstractionLayer;
 
+import java.util.HashMap;
 import java.util.logging.Logger;
 
 /**
@@ -33,21 +35,129 @@ import java.util.logging.Logger;
 public class AptGet {
     public static final Logger log = LogUtil.getLogger();
 
-    private static long updateTimestamp;
+    private static Timer updateTimer = new Timer(1000*60*5); // 5min timer
+    private static Timer packageTimer = new Timer(1000*60*5); // 5min timer
+    private static HashMap<String, Package> packages = new HashMap<>();
+
+
+    public static synchronized void update(){
+        // Only run every 5 min
+        if(updateTimer.hasTimedOut()){
+            OSAbstractionLayer.runCommand("apt-get update");
+            updateTimer.start();
+        }
+    }
 
     public static void install(String pkg) {
         update();
         OSAbstractionLayer.runCommand("apt-get install " + pkg);
-    }
-
-    public static void update(){
-        // Only run every 5 min
-        if(updateTimestamp + 1000*60*5 >System.currentTimeMillis()){
-            OSAbstractionLayer.runCommand("apt-get update");
-        }
+        packageTimer.reset();
     }
 
     public static void purge(String pkg) {
         OSAbstractionLayer.runCommand("apt-get --purge remove " + pkg);
+        packageTimer.reset();
+    }
+
+
+    public static Package getPackage(String pkg){
+        updatePackages();
+        return packages.get(pkg);
+    }
+    public static synchronized void updatePackages(){
+        // Only run every 5 min
+        if(packageTimer.hasTimedOut()){
+            String[] output = OSAbstractionLayer.runCommand("dpkg --list");
+            for(int i=5; i<output.length; ++i) {
+                packages.put(output[i], new Package(output[5]));
+            }
+            packageTimer.start();
+        }
+    }
+
+
+
+    /**
+     * This class represents a system package and its current status
+     */
+    public static class Package{
+        public enum PackageState{
+            // Expected States
+            /* u */ Unknown,
+            /* i */ Installed,
+            /* r */ Removed,
+            /* p */ Purged, // remove including config files
+            /* h */ Holding,
+
+            // Current States
+            /* n */ NotInstalled,
+            /* i */ //Installed,
+            /* c */ ConfigFiles, // only the config files are installed
+            /* u */ Unpacked,
+            /* f */ HalfConfigured, // configuration failed for some reason
+            /* h */ HalfInstalled, // installation failed for some reason
+            /* w */ TriggersAwaited, // package is waiting for a trigger from another package
+            /* t */ TriggersPending, //package has been triggered
+
+            // Error States
+            /* r */ ReinstallRequired // package broken, reinstallation required
+        }
+
+
+        private PackageState expectedState = PackageState.Unknown;
+        private PackageState currentState  = PackageState.Unknown;;
+        private PackageState errorState    = PackageState.Unknown;;
+
+        private String name;
+        private String version;
+        private String description;
+
+
+        protected Package(String dpkgStr){
+            switch (dpkgStr.charAt(0)){
+                case 'u': expectedState = PackageState.Unknown; break;
+                case 'i': expectedState = PackageState.Installed; break;
+                case 'r': expectedState = PackageState.Removed; break;
+                case 'p': expectedState = PackageState.Purged; break;
+                case 'h': expectedState = PackageState.Holding; break;
+            }
+            switch (dpkgStr.charAt(0)){
+                case 'n': currentState = PackageState.NotInstalled; break;
+                case 'i': currentState = PackageState.Installed; break;
+                case 'c': currentState = PackageState.ConfigFiles; break;
+                case 'u': currentState = PackageState.Unpacked; break;
+                case 'f': currentState = PackageState.HalfConfigured; break;
+                case 'h': currentState = PackageState.HalfInstalled; break;
+                case 'w': currentState = PackageState.TriggersAwaited; break;
+                case 't': currentState = PackageState.TriggersPending; break;
+            }
+            if(dpkgStr.charAt(2) == 'r')
+                errorState = PackageState.ReinstallRequired;
+
+            String[] tmp = dpkgStr.split("[ \\t]*", 4);
+            name = tmp[1];
+            version = tmp[2];
+            description = tmp[3];
+        }
+
+
+        public PackageState getExpectedState() {
+            return expectedState;
+        }
+        public PackageState getCurrentState() {
+            return currentState;
+        }
+        public PackageState getErrorState() {
+            return errorState;
+        }
+        public String getName() {
+            return name;
+        }
+        public String getVersion() {
+            return version;
+        }
+        public String getDescription() {
+            return description;
+        }
     }
 }
