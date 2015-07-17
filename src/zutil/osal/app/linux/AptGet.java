@@ -39,19 +39,27 @@ public class AptGet {
     private static Timer packageTimer = new Timer(1000*60*5); // 5min timer
     private static HashMap<String, Package> packages = new HashMap<>();
 
+    public static void install(String pkg) {
+        update();
+        OSAbstractionLayer.runCommand("apt-get -y install " + pkg);
+        packageTimer.reset();
+    }
 
-    public static synchronized void update(){
+    public static void upgrade(){
+        update();
+        OSAbstractionLayer.runCommand("apt-get -y " +
+                // Dont display configuration conflicts
+                "-o Dpkg::Options::=\"--force-confdef\" -o Dpkg::Options::=\"--force-confold\" " +
+                "upgrade");
+        packageTimer.reset();
+    }
+
+    public static void update(){
         // Only run every 5 min
         if(updateTimer.hasTimedOut()){
             OSAbstractionLayer.runCommand("apt-get update");
             updateTimer.start();
         }
-    }
-
-    public static void install(String pkg) {
-        update();
-        OSAbstractionLayer.runCommand("apt-get install " + pkg);
-        packageTimer.reset();
     }
 
     public static void purge(String pkg) {
