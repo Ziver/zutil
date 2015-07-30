@@ -40,9 +40,16 @@ public class Timer {
         reset();
     }
 
+    /**
+     * Will start or restart the timer if it is already running
+     */
     public void start(){
         timestamp = System.currentTimeMillis();
     }
+
+    /**
+     * Will reset the timer so that {@link #hasTimedOut()} returns true
+     */
     public void reset(){
         timestamp = -1;
     }

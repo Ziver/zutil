@@ -23,6 +23,7 @@
 package zutil.osal.app.linux;
 
 import zutil.log.LogUtil;
+import zutil.Timer;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -46,13 +47,13 @@ public class ProcStat {
     private static ArrayList<CpuStats> cpus = new ArrayList<CpuStats>();
     private static long uptime;
     private static long processes;
-    private static long updateTimestamp;
+    private static Timer updateTimer = new Timer(TTL);
 
 
     private synchronized static void update(){
-        if(System.currentTimeMillis() - updateTimestamp < TTL)
+        if(updateTimer.hasTimedOut())
             return;
-        updateTimestamp = System.currentTimeMillis();
+        updateTimer.start();
         try {
             BufferedReader in = new BufferedReader(new FileReader(PROC_PATH));
             String line = null;

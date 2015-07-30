@@ -28,7 +28,7 @@ import java.io.File;
  * User: Ziver
  */
 public class OsalLinuxImpl extends OSAbstractionLayer {
-    private static HALLinuxImpl hal;
+    private static HalLinuxImpl hal;
 
     @Override
     public OSType getOSType() {
@@ -78,7 +78,7 @@ public class OsalLinuxImpl extends OSAbstractionLayer {
     @Override
     public HardwareAbstractionLayer getHAL() {
         if(hal == null)
-            hal = new HALLinuxImpl();
+            hal = new HalLinuxImpl();
         return hal;
     }
 }

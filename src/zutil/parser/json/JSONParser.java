@@ -24,6 +24,7 @@ package zutil.parser.json;
 
 import zutil.parser.DataNode;
 import zutil.parser.DataNode.DataType;
+import zutil.parser.Parser;
 import zutil.struct.MutableInt;
 
 import java.io.IOException;
@@ -36,7 +37,7 @@ import java.util.regex.Pattern;
  * 
  * @author Ziver
  */
-public class JSONParser{
+public class JSONParser extends Parser {
 	public static final Pattern NUMBER_PATTERN = Pattern.compile("^[0-9.]++$");
 	public static final Pattern BOOLEAN_PATTERN = Pattern.compile("^(true|false)$", Pattern.CASE_INSENSITIVE);
 	
@@ -47,11 +48,12 @@ public class JSONParser{
     }
 
     /**
-     * Starts parsing from the InputStream.
+     * Starts parsing from the input.
      * This method will block until one root tree has been parsed.
      *
      * @return a DataNode object representing the input JSON
      */
+    @Override
     public DataNode read() throws IOException {
         return parse(in, new MutableInt());
     }
@@ -80,11 +82,13 @@ public class JSONParser{
         DataNode node = null;
         end.i = 0;
 
-        char c = '_';
-        while((c=(char)in.read()) < 0 || Character.isWhitespace(c) ||
-                c == ',' || c == ':');
+        int c = '_';
+        while((c=in.read()) >= 0 &&
+                (Character.isWhitespace(c) || c == ',' || c == ':'));
 
         switch( c ){
+            // End of stream
+            case -1: break;
             // This is the end of an Map or List
             case ']':
             case '}':
@@ -114,19 +118,19 @@ public class JSONParser{
             case '\"':
                 root = new DataNode(DataType.String);
                 StringBuilder str = new StringBuilder();
-                while((c=(char)in.read()) >= 0 && c != '\"')
-                    str.append(c);
+                while((c=in.read()) >= 0 && c != '\"')
+                    str.append((char)c);
                 root.set(str.toString());
                 break;
             // Parse unknown type
             default:
-                StringBuilder tmp = new StringBuilder().append(c);
-                while((c=(char)in.read()) >= 0 && c != ',' && c != '='){
+                StringBuilder tmp = new StringBuilder().append((char)c);
+                while((c=in.read()) >= 0 && c != ',' && c != '='){
                     if(c == ']' || c == '}'){
                         end.i = 1;
                         break;
                     }
-                    tmp.append(c);
+                    tmp.append((char)c);
                 }
                 // Check what type of type the data is
                 String data = tmp.toString().trim();
