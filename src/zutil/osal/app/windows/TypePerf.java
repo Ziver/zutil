@@ -22,11 +22,20 @@
 
 package zutil.osal.app.windows;
 
+import zutil.osal.OSAbstractionLayer;
+import zutil.parser.CSVParser;
+import zutil.parser.DataNode;
+
+import java.io.IOException;
+import java.io.StringReader;
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Created by ezivkoc on 2015-07-30.
  */
 public class TypePerf {
-    // Only available Vista ->
+    // Only available Vista and later...
     //https://www.webperformance.com/support/suite/manual/Content/Locating_Server_Metric_Counters.htm
 
     /*
@@ -53,5 +62,16 @@ public class TypePerf {
      */
     private static final String PERF_NET_PATH = "\\Network Interface(*)\\*";
 
-    //typeperf "path"  -SC 0 -y
+
+
+    private static DataNode[] execute(String path) throws IOException {
+        DataNode[] ret = new DataNode[2];
+
+        String[] output = OSAbstractionLayer.runCommand("typeperf \""+ path +"\"  -SC 0 -y");
+        CSVParser parser = new CSVParser(new StringReader(output[1] + "\n" + output[2]));
+
+        ret[0] = parser.getHeaders();
+        ret[1] = parser.read();
+        return ret;
+    }
 }

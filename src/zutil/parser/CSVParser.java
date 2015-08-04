@@ -53,6 +53,14 @@ public class CSVParser extends Parser{
     }
 
     public DataNode getHeaders() {
+        if(parseHeader) {
+            try {
+                parseHeader = false;
+                headers = read();
+            }catch (IOException e){
+                e.printStackTrace();
+            }
+        }
         return headers;
     }
 
@@ -67,7 +75,7 @@ public class CSVParser extends Parser{
             return new CSVParser(new StringReader(csv)).read();
         }catch (IOException e){
             e.printStackTrace();
-        }catch (NullPointerException e){}
+        }
         return null;
     }
 
@@ -80,9 +88,9 @@ public class CSVParser extends Parser{
      */
     @Override
     public DataNode read() throws IOException {
+        // Make sure we have parsed headers
         if(parseHeader) {
-            parseHeader = false;
-            headers = read();
+            getHeaders();
         }
 
         DataNode data = new DataNode(DataNode.DataType.List);
