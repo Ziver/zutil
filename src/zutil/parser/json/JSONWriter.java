@@ -127,7 +127,7 @@ public class JSONWriter{
     /**
      * @return JSON String that is generated from the input DataNode graph
      */
-    public String toString(DataNode root){
+    public static String toString(DataNode root){
         StringOutputStream out = new StringOutputStream();
         JSONWriter writer = new JSONWriter(out);
         writer.write(root);
