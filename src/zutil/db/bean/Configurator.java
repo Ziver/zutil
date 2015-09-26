@@ -32,6 +32,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -60,19 +61,26 @@ public class Configurator {
     }
 
 
+    private static HashMap<Class, ConfigurationParam[]> classConf = new HashMap<>();
+
     private Object obj;
     private ConfigurationParam[] params;
 
     public Configurator(Object obj){
         this.obj = obj;
-        this.params = getConfiguration(obj.getClass());
+        this.params = getConfiguration(obj.getClass(), obj);
     }
 
     public ConfigurationParam[] getConfiguration(){
         return params;
     }
 
-    protected ConfigurationParam[] getConfiguration(Class c){
+    public static ConfigurationParam[] getConfiguration(Class c){
+        if(!classConf.containsKey(c))
+            classConf.put(c, getConfiguration(c, null));
+        return classConf.get(c);
+    }
+    protected static ConfigurationParam[] getConfiguration(Class c, Object obj){
         ArrayList<ConfigurationParam> conf = new ArrayList<ConfigurationParam>();
 
         Field[] all = c.getDeclaredFields();
@@ -80,7 +88,7 @@ public class Configurator {
             if(f.isAnnotationPresent(Configurable.class) &&
                     !Modifier.isStatic(f.getModifiers()) && !Modifier.isTransient(f.getModifiers())) {
                 try {
-                    conf.add(new ConfigurationParam(f));
+                    conf.add(new ConfigurationParam(f, obj));
                 } catch (IllegalAccessException e) {
                     log.log(Level.WARNING, null, e);
                 }
@@ -103,22 +111,31 @@ public class Configurator {
     }
 
 
-    public class ConfigurationParam implements Comparable<ConfigurationParam>{
+    public static class ConfigurationParam implements Comparable<ConfigurationParam>{
         protected Field field;
         protected String name;
         protected String niceName;
         protected ConfigType type;
+        protected Object obj;
         protected Object value;
         protected int order;
 
 
-        protected ConfigurationParam(Field f) throws IllegalAccessException {
+        protected ConfigurationParam(Field f, Object o) throws IllegalAccessException {
             field = f;
+            obj = o;
             field.setAccessible(true);
-            name =     field.getName();
-            niceName = field.getAnnotation(Configurable.class).value();
-            order =    field.getAnnotation(Configurable.class).order();
-            value =    field.get(obj);
+            name = field.getName();
+            if(obj != null)
+                value = field.get(obj);
+            if(field.isAnnotationPresent(Configurable.class)) {
+                niceName = field.getAnnotation(Configurable.class).value();
+                order = field.getAnnotation(Configurable.class).order();
+            }
+            else{
+                niceName = name;
+                order = Integer.MAX_VALUE;
+            }
 
             if     (f.getType() == String.class) type = ConfigType.STRING;
             else if(f.getType() == int.class)    type = ConfigType.INT;
@@ -136,9 +153,22 @@ public class Configurator {
         public String getString(){
             if(value == null)
                 return null;
-            return value.toString();}
+            return value.toString();
+        }
+        public boolean getBoolean(){
+            if(value == null || type != ConfigType.BOOLEAN)
+                return false;
+            return (boolean)value;
+        }
 
+        /**
+         * This method will set a value for the represented field,
+         * to apply the change to the source object the method
+         * {@link #setConfiguration()} needs to be called
+         */
         public void setValue(String v){
+            if(obj == null)
+                return;
             switch(type){
                 case STRING:
                     value = v; break;
