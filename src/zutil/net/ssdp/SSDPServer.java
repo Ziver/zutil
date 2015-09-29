@@ -77,20 +77,6 @@ public class SSDPServer extends ThreadedUDPNetwork implements ThreadedUDPNetwork
 	private HashMap<String, SSDPServiceInfo> services;
 
 
-	public static void main(String[] args) throws IOException{
-		LogUtil.setGlobalLevel(Level.FINEST);
-		StandardSSDPInfo service = new StandardSSDPInfo();
-		service.setLocation("nowhere");
-		service.setST("zep:discover");
-		HashMap<String, String> headers = new HashMap<String, String>();
-		headers.put("Alias", "Desktop");
-		headers.put("PublicKey", "SuperDesktopKey");
-		service.setHeaders(headers);
-		SSDPServer ssdp = new SSDPServer();
-		ssdp.addService(service);
-		ssdp.start();
-		logger.info("SSDP Server running");
-	}
 
 	public SSDPServer() throws IOException{
 		super( null, SSDP_MULTICAST_ADDR, SSDP_PORT );

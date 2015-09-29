@@ -50,22 +50,7 @@ public class SSDPClient extends ThreadedUDPNetwork implements ThreadedUDPNetwork
 	private HashMap<String, SSDPServiceInfo> 			 services_usn;
 
 	private SSDPServiceListener listener;
-	
-	
-	public static void main(String[] args) throws IOException{
-		System.out.println(LogUtil.getCalingClass());
-		LogUtil.setGlobalLevel(Level.FINEST);
-		SSDPClient ssdp = new SSDPClient();
-		//ssdp.requestService("upnp:rootdevice");
-		ssdp.requestService("zap:discover");
-		ssdp.start();
-		
-		for(int i=0; true ;++i){
-			while( i==ssdp.getServicesCount("upnp:rootdevice") ){ try{Thread.sleep(100);}catch(Exception e){} }
-			logger.log(Level.FINEST, "************************" );	
-			logger.log(Level.FINEST, ""+ssdp.getServices("upnp:rootdevice").get(i) );	
-		}
-	}
+
 	
 	/**
 	 * Creates new instance of this class. An UDP

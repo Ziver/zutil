@@ -25,6 +25,8 @@ package zutil;
 import zutil.converters.Converter;
 
 import javax.crypto.Mac;
+import javax.crypto.SecretKeyFactory;
+import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
 import java.io.*;
 import java.math.BigInteger;
@@ -65,7 +67,7 @@ public class Hasher {
 	/**
 	 * Returns the MD5 hash of the given object
 	 * 
-	 * @param 		object 		is the String to hash
+	 * @param 		str 		is the String to hash
 	 * @return 					an String containing the hash
 	 */
 	public static String MD5(String str){
@@ -175,6 +177,23 @@ public class Hasher {
 		}
 		return null;
 	}
+
+    public static String PBKDF2(String data, String salt, int iterations){
+        try {
+            PBEKeySpec spec = new PBEKeySpec(
+                    data.toCharArray(),
+                    salt.getBytes(),
+                    iterations,
+                    256);
+            SecretKeyFactory f = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
+            byte[] raw = f.generateSecret(spec).getEncoded();
+
+            return Converter.toHexString(raw);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
 	
 	/**
 	 * Hashes the given String as UTF8
