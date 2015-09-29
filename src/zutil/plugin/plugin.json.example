@@ -1,8 +1,8 @@
 {
-	version = 1.0,
-	name = "Nice name of Plugin"
-	interfaces = [
-		{"plugin.interface.class" = "plugin.implementation.class"},
-		{"wa.server.plugin.WAFrontend" = "wa.server.plugin.apache.ApacheFrontend"},
+	"version": 1.0,
+	"name": "Nice name of Plugin",
+	"interfaces": [
+		{"plugin.interface.class": "plugin.implementation.class"},
+		{"wa.server.plugin.WAFrontend": "wa.server.plugin.apache.ApacheFrontend"}
 	]
 }
