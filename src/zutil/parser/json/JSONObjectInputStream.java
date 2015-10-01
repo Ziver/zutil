@@ -48,10 +48,17 @@ public class JSONObjectInputStream extends InputStream implements ObjectInput, C
     private HashMap<Integer, Object> objectCache;
 
 
-	public JSONObjectInputStream(Reader in) {
-		this.parser = new JSONParser(in);
+    private JSONObjectInputStream() {
         this.registeredClasses = new HashMap<>();
-		this.objectCache = new HashMap<>();
+        this.objectCache = new HashMap<>();
+    }
+    public JSONObjectInputStream(Reader in) {
+        this();
+        this.parser = new JSONParser(in);
+    }
+	public JSONObjectInputStream(InputStream in) {
+        this();
+		this.parser = new JSONParser(in);
 	}
 
 

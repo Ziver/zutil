@@ -31,6 +31,7 @@ import zutil.parser.DataNode.DataType;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.io.PrintWriter;
+import java.io.Writer;
 import java.util.Iterator;
 
 /**
@@ -55,7 +56,7 @@ public class JSONWriter{
      *
      * @param out the OutputStream that the Nodes will be sent to
      */
-    public JSONWriter(PrintStream out){
+    public JSONWriter(Writer out){
         this( new PrintWriter(out) );
     }
 

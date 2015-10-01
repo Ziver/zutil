@@ -29,9 +29,7 @@ import zutil.parser.DataNode.DataType;
 import zutil.parser.Parser;
 import zutil.struct.MutableInt;
 
-import java.io.IOException;
-import java.io.Reader;
-import java.io.StringReader;
+import java.io.*;
 import java.util.regex.Pattern;
 
 /**
@@ -47,6 +45,9 @@ public class JSONParser extends Parser {
 
     public JSONParser(Reader in){
        this.in = in;
+    }
+    public JSONParser(InputStream in){
+        this.in = new InputStreamReader(in);
     }
 
     /**

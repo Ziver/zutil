@@ -31,10 +31,7 @@ import zutil.parser.DataNode.DataType;
 import static zutil.parser.json.JSONObjectInputStream.*;
 
 import javax.activation.UnsupportedDataTypeException;
-import java.io.Closeable;
-import java.io.IOException;
-import java.io.ObjectOutput;
-import java.io.OutputStream;
+import java.io.*;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
@@ -50,9 +47,16 @@ public class JSONObjectOutputStream extends OutputStream implements ObjectOutput
     private HashMap<Object,Integer> objectCache;
     private JSONWriter out;
 
-    public JSONObjectOutputStream(OutputStream out) {
+    private JSONObjectOutputStream() {
         this.generateMetaData = true;
         this.objectCache = new HashMap<Object, Integer>();
+    }
+    public JSONObjectOutputStream(OutputStream out) {
+        this();
+        this.out = new JSONWriter(out);
+    }
+    public JSONObjectOutputStream(Writer out) {
+        this();
         this.out = new JSONWriter(out);
     }
 
