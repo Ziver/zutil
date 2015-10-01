@@ -1,5 +1,7 @@
 /*
- * Copyright (c) 2015 ezivkoc
+ * The MIT License (MIT)
+ *
+ * Copyright (c) 2015 Ziver Koc
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,9 +24,11 @@
 
 package zutil.parser.json;
 
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 import zutil.ClassUtil;
 import zutil.parser.DataNode;
 import zutil.parser.DataNode.DataType;
+import static zutil.parser.json.JSONObjectInputStream.*;
 
 import javax.activation.UnsupportedDataTypeException;
 import java.io.Closeable;
@@ -39,8 +43,10 @@ import java.util.List;
 import java.util.Map;
 
 public class JSONObjectOutputStream extends OutputStream implements ObjectOutput, Closeable{
+    /** If the generated JSON should contain class def meta-data **/
     private boolean generateMetaData;
 
+    /** Cache of parsed objects **/
     private HashMap<Object,Integer> objectCache;
     private JSONWriter out;
 
@@ -50,56 +56,9 @@ public class JSONObjectOutputStream extends OutputStream implements ObjectOutput
         this.out = new JSONWriter(out);
     }
 
-    public void writeBoolean(boolean v) throws IOException {
-        out.write(new DataNode(v));
-    }
 
-    public void writeByte(int v) throws IOException {
-        // TODO:
-    }
 
-    public void writeShort(int v) throws IOException {
-        out.write(new DataNode(v));
-    }
-
-    public void writeChar(int v) throws IOException {
-        out.write(new DataNode((char)v));
-    }
-
-    public void writeInt(int v) throws IOException {
-        out.write(new DataNode(v));
-    }
-
-    public void writeLong(long v) throws IOException {
-        out.write(new DataNode(v));
-    }
-
-    public void writeFloat(float v) throws IOException {
-        out.write(new DataNode(v));
-    }
-
-    public void writeDouble(double v) throws IOException {
-        out.write(new DataNode(v));
-    }
-
-    public void writeBytes(String s) throws IOException {
-        // TODO:
-    }
-
-    public void writeChars(String s) throws IOException {
-        out.write(new DataNode(s));
-    }
-
-    @Override
-    public void write(int b) throws IOException {
-        out.write(new DataNode(b));
-    }
-
-    public void writeUTF(String s) throws IOException {
-        out.write(new DataNode(s));
-    }
-
-    public void writeObject(Object obj) throws IOException{
+    public synchronized void writeObject(Object obj) throws IOException{
         try{
             out.write(getDataNode(obj));
         } catch (IllegalAccessException e) {
@@ -124,14 +83,14 @@ public class JSONObjectOutputStream extends OutputStream implements ObjectOutput
             if(generateMetaData){
                 // Cache
                 if(objectCache.containsKey(obj)){ // Hit
-                    root.set("@object_id", objectCache.get(obj));
+                    root.set(MD_OBJECT_ID, objectCache.get(obj));
                     return root;
                 }
                 else{ // Miss
                     objectCache.put(obj, objectCache.size()+1);
-                    root.set("@object_id", objectCache.size());
+                    root.set(MD_OBJECT_ID, objectCache.size());
                 }
-                root.set("@class", obj.getClass().getName());
+                root.set(MD_CLASS, obj.getClass().getName());
             }
             // Add all the fields to the DataNode
             for(Field field : obj.getClass().getDeclaredFields()){
@@ -195,11 +154,13 @@ public class JSONObjectOutputStream extends OutputStream implements ObjectOutput
 
     /**
      * Enable or disables the use of meta data in the JSON
-     * stream for class def and caching.
-     * Should only be disabled if the input is not a JSONObjectInputStream.
+     * stream for class definitions and caching.
+     * If meta data is disabled then all parsed classes need to
+     * be registered in JSONObjectInputStream to be able to decode objects.
+     *
      * All the meta-data tags will start with a '@'
      */
-    public void generateMetaData(boolean generate){
+    public void enableMetaData(boolean generate){
         generateMetaData = generate;
     }
 
@@ -207,4 +168,45 @@ public class JSONObjectOutputStream extends OutputStream implements ObjectOutput
         super.flush();
         out.flush();
     }
+
+
+
+    @Override public void writeBoolean(boolean v) throws IOException {
+        out.write(new DataNode(v));
+    }
+    @Override public void writeByte(int v) throws IOException {
+        throw new NotImplementedException();
+    }
+    @Override public void writeShort(int v) throws IOException {
+        out.write(new DataNode(v));
+    }
+    @Override public void writeChar(int v) throws IOException {
+        out.write(new DataNode((char)v));
+    }
+    @Override public void writeInt(int v) throws IOException {
+        out.write(new DataNode(v));
+    }
+    @Override public void writeLong(long v) throws IOException {
+        out.write(new DataNode(v));
+    }
+    @Override public void writeFloat(float v) throws IOException {
+        out.write(new DataNode(v));
+    }
+    @Override public void writeDouble(double v) throws IOException {
+        out.write(new DataNode(v));
+    }
+    @Override public void writeBytes(String s) throws IOException {
+        throw new NotImplementedException();
+    }
+    @Override public void writeChars(String s) throws IOException {
+        out.write(new DataNode(s));
+    }
+    @Override public void write(int b) throws IOException {
+        out.write(new DataNode(b));
+    }
+    @Override public void writeUTF(String s) throws IOException {
+        out.write(new DataNode(s));
+    }
+
+
 }

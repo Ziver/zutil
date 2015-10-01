@@ -1,5 +1,7 @@
 /*
- * Copyright (c) 2015 ezivkoc
+ * The MIT License (MIT)
+ *
+ * Copyright (c) 2015 Ziver Koc
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,6 +24,8 @@
 
 package zutil.parser.json;
 
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
+import zutil.ClassUtil;
 import zutil.parser.Base64Decoder;
 import zutil.parser.DataNode;
 
@@ -31,23 +35,54 @@ import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 public class JSONObjectInputStream extends InputStream implements ObjectInput, Closeable{
+    protected static final String MD_OBJECT_ID = "@object_id";
+    protected static final String MD_CLASS = "@class";
+
     private JSONParser parser;
+    private HashMap<String, Class> registeredClasses;
     private HashMap<Integer, Object> objectCache;
+
 
 	public JSONObjectInputStream(Reader in) {
 		this.parser = new JSONParser(in);
-		this.objectCache = new HashMap<Integer, Object>();
+        this.registeredClasses = new HashMap<>();
+		this.objectCache = new HashMap<>();
 	}
 
-    public Object readObject() throws IOException {
+
+    /**
+     * If no metadata is available in the stream then this
+     * class will be instantiated and assigned data from the received JSON.
+     *
+     * @param   c       the Class that will be instantiated for the root JSON.
+     */
+    public void registerRootClass(Class<?> c){
+        registeredClasses.put(null, c);
+    }
+
+    /**
+     * A object instance of the given class will be created if the specific key is seen.
+     * This can be used for streams that do not have any class metadata.
+     * NOTE: any meta-data in the stream will override the registered classes.
+     *
+     * @param   key     a String key that will be looked for in the InputStream
+     * @param   c       the Class that will be instantiated for the specific key.
+     */
+    public void registerClass(String key, Class<?> c){
+        registeredClasses.put(key, c);
+    }
+
+
+    public synchronized Object readObject() throws IOException {
         try{
             DataNode root = parser.read();
             if(root != null){
-                return readObject(root);
+                return readObject(null, root);
             }
         // TODO: Fix Exceptions
         } catch (InstantiationException e) {
@@ -64,13 +99,25 @@ public class JSONObjectInputStream extends InputStream implements ObjectInput, C
         return null;
     }
 
-    protected Object readObject(DataNode json) throws IllegalAccessException, InstantiationException, ClassNotFoundException, IllegalArgumentException, UnsupportedDataTypeException {
+    protected Object readObject(String key, DataNode json) throws IllegalAccessException, InstantiationException, ClassNotFoundException, IllegalArgumentException, UnsupportedDataTypeException {
         // See if the Object id is in the cache before continuing
-    	if(json.getString("@object_id") != null && objectCache.containsKey(json.getInt("@object_id")))
-        	return objectCache.get(json.getInt("@object_id"));
-    	
-    	Class<?> objClass = Class.forName(json.getString("@class"));
-        Object obj = objClass.newInstance();
+    	if(json.getString("@object_id") != null && objectCache.containsKey(json.getInt(MD_OBJECT_ID)))
+        	return objectCache.get(json.getInt(MD_OBJECT_ID));
+
+        // Resolve the class
+        Object obj = null;
+        // Try using metadata
+        if(json.getString(MD_CLASS) != null) {
+            Class<?> objClass = Class.forName(json.getString(MD_CLASS));
+            obj = objClass.newInstance();
+        }
+        // Search for registered classes
+        else if(registeredClasses.containsKey(key)){
+            Class<?> objClass = registeredClasses.get(key);
+            obj = objClass.newInstance();
+        }
+        // Unknown Class
+        else return null;
 
         // Read all fields from the new object instance
         for(Field field : obj.getClass().getDeclaredFields()){
@@ -79,19 +126,20 @@ public class JSONObjectInputStream extends InputStream implements ObjectInput, C
                     json.get(field.getName()) != null){
                 // Parse field
                 field.setAccessible(true);
-                field.set(obj, readValue(
+                field.set(obj, readField(
                         field.getType(),
+                        field.getName(),
                         json.get(field.getName())));
             }
         }
         // Add object to the cache
-        if(json.getString("@object_id") != null)
-        	objectCache.put(json.getInt("@object_id"), obj);
+        if(json.getString(MD_OBJECT_ID) != null)
+        	objectCache.put(json.getInt(MD_OBJECT_ID), obj);
         return obj;
     }
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
-    protected Object readValue(Class<?> type, DataNode json) throws IllegalAccessException, ClassNotFoundException, InstantiationException, UnsupportedDataTypeException {
+    protected Object readField(Class<?> type, String key, DataNode json) throws IllegalAccessException, ClassNotFoundException, InstantiationException, UnsupportedDataTypeException {
         // Field type is a primitive?
         if(type.isPrimitive() || String.class.isAssignableFrom(type)){
             return readPrimitive(type, json);
@@ -102,40 +150,32 @@ public class JSONObjectInputStream extends InputStream implements ObjectInput, C
             else{
                 Object array = Array.newInstance(type.getComponentType(), json.size());
                 for(int i=0; i<json.size(); i++){
-                    Array.set(array, i, readValue(type.getComponentType(), json.get(i)));
+                    Array.set(array, i, readField(type.getComponentType(), key, json.get(i)));
                 }
                 return array;
             }
         }
         else if(List.class.isAssignableFrom(type)){
-            // TODO Add List Support
 			List list = (List)type.newInstance();
             for(int i=0; i<json.size(); i++){
-                list.add(readPrimitive(json.get(i)));
+                list.add(readObject(key, json.get(i)));
             }
             return list;
         }
         else if(Map.class.isAssignableFrom(type)){
-            // TODO Add Map Support
             Map map = (Map)type.newInstance();
-            for(int i=0; i<json.size(); i++){
+            for(Iterator<String> it=json.keyIterator(); it.hasNext();){
+                String subKey = it.next();
                 map.put(
-                		readPrimitive(json.get(i)),
-                		readPrimitive(json.get(i)));
+                		subKey,
+                		readObject(subKey, json.get(subKey)));
             }
             return map;
         }
         // Field is a new Object
         else{
-            return readObject(json);
+            return readObject(key, json);
         }
-    }
-
-    /**
-     * Unknown type, this method will try to guess
-     */
-    protected static Object readPrimitive(DataNode json) throws UnsupportedDataTypeException{
-  		throw new UnsupportedDataTypeException("Complex datatype like Lists and Maps not supported");
     }
     
     protected static Object readPrimitive(Class<?> type, DataNode json){
@@ -154,86 +194,55 @@ public class JSONObjectInputStream extends InputStream implements ObjectInput, C
     }
 
 
-	public void readFully(byte[] b) throws IOException {
-		// TODO Auto-generated method stub
-		
+
+
+    @Override public void readFully(byte[] b) throws IOException {
+		throw new NotImplementedException();
+	}
+    @Override public void readFully(byte[] b, int off, int len) throws IOException {
+        throw new NotImplementedException();
+	}
+    @Override public int skipBytes(int n) throws IOException {
+        throw new NotImplementedException();
+	}
+    @Override public boolean readBoolean() throws IOException {
+        throw new NotImplementedException();
+	}
+    @Override public byte readByte() throws IOException {
+        throw new NotImplementedException();
+	}
+    @Override public int readUnsignedByte() throws IOException {
+        throw new NotImplementedException();
+	}
+    @Override public short readShort() throws IOException {
+        throw new NotImplementedException();
+	}
+    @Override public int readUnsignedShort() throws IOException {
+        throw new NotImplementedException();
+	}
+    @Override public char readChar() throws IOException {
+        throw new NotImplementedException();
+	}
+    @Override public int readInt() throws IOException {
+        throw new NotImplementedException();
+	}
+    @Override public long readLong() throws IOException {
+        throw new NotImplementedException();
+	}
+    @Override public float readFloat() throws IOException {
+        throw new NotImplementedException();
+	}
+    @Override public double readDouble() throws IOException {
+        throw new NotImplementedException();
+	}
+    @Override public String readLine() throws IOException {
+        throw new NotImplementedException();
+	}
+    @Override public String readUTF() throws IOException {
+        throw new NotImplementedException();
+	}
+	@Override public int read() throws IOException {
+        throw new NotImplementedException();
 	}
 
-	public void readFully(byte[] b, int off, int len) throws IOException {
-		// TODO Auto-generated method stub
-		
-	}
-
-	public int skipBytes(int n) throws IOException {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	public boolean readBoolean() throws IOException {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	public byte readByte() throws IOException {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	public int readUnsignedByte() throws IOException {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	public short readShort() throws IOException {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	public int readUnsignedShort() throws IOException {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	public char readChar() throws IOException {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	public int readInt() throws IOException {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	public long readLong() throws IOException {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	public float readFloat() throws IOException {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	public double readDouble() throws IOException {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	public String readLine() throws IOException {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	public String readUTF() throws IOException {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public int read() throws IOException {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	
 }
