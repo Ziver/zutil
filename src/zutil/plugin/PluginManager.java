@@ -63,7 +63,8 @@ public class PluginManager<T> implements Iterable<PluginData>{
 
 		FileSearch search = new FileSearch(new File(path));
 		search.setRecursive(true);
-		search.searchFolders(false);
+		search.searchFolders(true);
+		search.searchCompressedFiles(true);
 		search.setFileName("plugin.json");
 
 		log.fine("Searching for plugins...");
