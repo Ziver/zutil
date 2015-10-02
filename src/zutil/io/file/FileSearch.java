@@ -220,23 +220,25 @@ public class FileSearch implements Iterable<FileSearch.FileSearchItem>{
 	}
 
 	public class FileSearchZipItem implements FileSearchItem{
-		private String file;
+		private String zipFile;
 		private ZipEntry entry;
+        private String fileName;
 
 		protected FileSearchZipItem(String file, ZipEntry entry){
-			this.file = file;
+			this.zipFile = file;
 			this.entry = entry;
+            this.fileName = new File(entry.getName()).getName();
 		}
 
-		public String getName()                           { return entry.getName(); }
-		public String getPath()                           { return file; }
+		public String getName()                           { return fileName; }
+		public String getPath()                           { return "zip://"+zipFile+":"+entry.getName(); }
 
 		public boolean isCompressed()                     { return true; }
 		public boolean isFile()                           { return !entry.isDirectory(); }
 		public boolean isDirectory()                      { return entry.isDirectory();	}
 
 		public InputStream getInputStream() throws IOException {
-			ZipFile zip = new ZipFile(file);
+			ZipFile zip = new ZipFile(zipFile);
 			return new InputStreamCloser(zip.getInputStream(entry), zip);
 		}
 		public String[] listFiles()         { return null; }
