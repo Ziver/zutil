@@ -41,14 +41,15 @@ import java.util.Map;
 
 public class JSONObjectOutputStream extends OutputStream implements ObjectOutput, Closeable{
     /** If the generated JSON should contain class def meta-data **/
-    private boolean generateMetaData;
+    private boolean generateMetaData = true;
+    /** If fields that are null should be included in the json **/
+    private boolean ignoreNullFields = true;
 
     /** Cache of parsed objects **/
     private HashMap<Object,Integer> objectCache;
     private JSONWriter out;
 
     private JSONObjectOutputStream() {
-        this.generateMetaData = true;
         this.objectCache = new HashMap<Object, Integer>();
     }
     public JSONObjectOutputStream(OutputStream out) {
@@ -103,18 +104,21 @@ public class JSONObjectOutputStream extends OutputStream implements ObjectOutput
                 if((field.getModifiers() & Modifier.STATIC) == 0 &&
                         (field.getModifiers() & Modifier.TRANSIENT) == 0){
                     field.setAccessible(true);
+                    Object fieldObj = field.get(obj);
 
+                    // has object a value?
+                    if(ignoreNullFields && fieldObj == null)
+                        continue;
                     // Add basic type (int, float...)
-                    if(ClassUtil.isPrimitive(field.getType()) ||
+                    else if(ClassUtil.isPrimitive(field.getType()) ||
                             ClassUtil.isWrapper(field.getType())){
-                        root.set(field.getName(), getPrimitiveDataNode(field.getType(), field.get(obj)));
+                        root.set(field.getName(), getPrimitiveDataNode(field.getType(), fieldObj));
                     }
                     // Add an array
                     else if(field.getType().isArray()){
                         DataNode arrayNode = new DataNode(DataNode.DataType.List);
-                        Object array = field.get(obj);
-                        for(int i=0; i< Array.getLength(array) ;i++){
-                            arrayNode.add(getDataNode(Array.get(array, i)));
+                        for(int i=0; i< Array.getLength(fieldObj) ;i++){
+                            arrayNode.add(getDataNode(Array.get(fieldObj, i)));
                         }
                         root.set(field.getName(), arrayNode);
                     }
@@ -125,7 +129,7 @@ public class JSONObjectOutputStream extends OutputStream implements ObjectOutput
                         // TODO Add Map Support
                     }
                     else{
-                        root.set(field.getName(), getDataNode(field.get(obj)));
+                        root.set(field.getName(), getDataNode(fieldObj));
                     }
                 }
             }
@@ -169,6 +173,14 @@ public class JSONObjectOutputStream extends OutputStream implements ObjectOutput
      */
     public void enableMetaData(boolean generate){
         generateMetaData = generate;
+    }
+
+    /**
+     * Defines if null fields in objects should be included
+     * in the JSON output.
+     */
+    public void ignoreNullFields(boolean enable) {
+        ignoreNullFields = enable;
     }
 
     public void flush() throws IOException {

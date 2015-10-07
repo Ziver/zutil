@@ -38,10 +38,12 @@ import java.util.regex.Pattern;
  * @author Ziver
  */
 public class JSONParser extends Parser {
-	public static final Pattern NUMBER_PATTERN = Pattern.compile("^[0-9.]++$");
-	public static final Pattern BOOLEAN_PATTERN = Pattern.compile("^(true|false)$", Pattern.CASE_INSENSITIVE);
+	private static final Pattern NUMBER_PATTERN = Pattern.compile("^[0-9.]++$");
+	private static final Pattern BOOLEAN_PATTERN = Pattern.compile("^(true|false)$", Pattern.CASE_INSENSITIVE);
+    private static final Pattern NULL_PATTERN = Pattern.compile("^null$", Pattern.CASE_INSENSITIVE);
 	
     private Reader in;
+
 
     public JSONParser(Reader in){
        this.in = in;
@@ -137,7 +139,9 @@ public class JSONParser extends Parser {
                 }
                 // Check what type of type the data is
                 String data = tmp.toString().trim();
-                if( BOOLEAN_PATTERN.matcher(data).matches() )
+                if( NULL_PATTERN.matcher(data).matches() )
+                    root = new DataNode(DataType.Null);
+                else if( BOOLEAN_PATTERN.matcher(data).matches() )
                 	root = new DataNode(DataType.Boolean);
                 else if( NUMBER_PATTERN.matcher(data).matches() )
                 	root = new DataNode(DataType.Number);

@@ -23,6 +23,7 @@
  */
 package zutil.test;
 
+import org.junit.Assert;
 import org.junit.Test;
 import zutil.io.StringOutputStream;
 import zutil.parser.json.JSONObjectInputStream;
@@ -54,8 +55,8 @@ public class JSONSerializerTest{
 		TestClass sourceObj = new TestClass().init();
 		
 		TestClass targetObj = sendReceiveObject(sourceObj);
-		
-		assertEquals( sourceObj, targetObj );
+
+        TestClass.assertEquals(sourceObj, targetObj);
 	}
 	
     @Test
@@ -116,11 +117,11 @@ public class JSONSerializerTest{
 		String data = writeObjectToJson(sourceObj, false);
 		data = data.replace("\"", "'");
 		assertEquals(
-				"{'str': null, 'obj1': null, 'obj2': null, 'decimal': 0.0}",
+				"{'decimal': 0.0}",
 				data);
 
         TestClass targetObj = sendReceiveObject(sourceObj);
-        assertEquals( sourceObj, targetObj );
+		TestClass.assertEquals(sourceObj, targetObj);
 	}
 
 
@@ -176,12 +177,11 @@ public class JSONSerializerTest{
 			return this;
 		}
 		
-		public boolean equals(Object obj){
-			return obj instanceof TestClass && 
-					this.str.equals(((TestClass)obj).str) &&
-					this.decimal == ((TestClass)obj).decimal &&
-					this.obj1.equals(((TestClass)obj).obj1) &&
-					this.obj2.equals(((TestClass)obj).obj2);
+		public static void assertEquals(TestClass obj1, TestClass obj2){
+			Assert.assertEquals(obj1.str, obj2.str);
+			Assert.assertEquals(obj1.decimal, obj2.decimal, 0.001);
+			Assert.assertEquals(obj1.obj1, obj2.obj1);
+			Assert.assertEquals(obj1.obj2, obj2.obj2);
 		}
 	}
 	

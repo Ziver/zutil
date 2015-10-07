@@ -104,6 +104,9 @@ public class JSONObjectInputStream extends InputStream implements ObjectInput, C
     }
 
     protected Object readObject(Class<?> type, String key, DataNode json) throws IllegalAccessException, InstantiationException, ClassNotFoundException, IllegalArgumentException, UnsupportedDataTypeException, NoSuchFieldException {
+        // Only parse if json is a map
+        if(!json.isMap())
+            return null;
         // See if the Object id is in the cache before continuing
     	if(json.getString("@object_id") != null && objectCache.containsKey(json.getInt(MD_OBJECT_ID)))
         	return objectCache.get(json.getInt(MD_OBJECT_ID));
@@ -185,12 +188,19 @@ public class JSONObjectInputStream extends InputStream implements ObjectInput, C
         }
         // Field is a new Object
         else{
-            Field field = type.getField(key);
+            Field field = getFieldInClass(type, key);
             if(field != null)
                 return readObject(field.getType(), key, json);
             else
                 return readObject(null, key, json);
         }
+    }
+    private Field getFieldInClass(Class<?> c, String name){
+        for(Field f : c.getFields()){
+            if(f.getName().equals(name))
+                return f;
+        }
+        return null;
     }
     
     protected static Object readPrimitive(Class<?> type, DataNode json){

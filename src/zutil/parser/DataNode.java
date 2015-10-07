@@ -34,7 +34,7 @@ import java.util.*;
  */
 public class DataNode implements Iterable<DataNode>{
 	public enum DataType{
-		Map, List, String, Number, Boolean
+		Map, List, String, Number, Boolean, Null
 	}
 	private Map<String,DataNode> map = null;
 	private List<DataNode> list = null;
@@ -248,6 +248,9 @@ public class DataNode implements Iterable<DataNode>{
 	 */
 	public boolean isValue(){
 		return type != DataType.Map && type != DataType.List;
+	}
+	public boolean isNull(){
+		return type == DataType.Null;
 	}
 	/**
 	 * @return the type of the node
