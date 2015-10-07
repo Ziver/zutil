@@ -26,6 +26,7 @@ package zutil.parser.json;
 
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 import zutil.ClassUtil;
+import zutil.log.LogUtil;
 import zutil.parser.Base64Decoder;
 import zutil.parser.DataNode;
 
@@ -38,8 +39,11 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class JSONObjectInputStream extends InputStream implements ObjectInput, Closeable{
+    private static final Logger logger = LogUtil.getLogger();
     protected static final String MD_OBJECT_ID = "@object_id";
     protected static final String MD_CLASS = "@class";
 
@@ -89,32 +93,29 @@ public class JSONObjectInputStream extends InputStream implements ObjectInput, C
         try{
             DataNode root = parser.read();
             if(root != null){
-                return readObject(null, root);
+                return readObject(null, null, root);
             }
-        // TODO: Fix Exceptions
-        } catch (InstantiationException e) {
-            e.printStackTrace();
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        } catch (IllegalArgumentException e) {
-			e.printStackTrace();
-		} catch (ClassNotFoundException e) {
-			e.printStackTrace();
-		} finally {
+        } catch (Exception e) {
+            logger.log(Level.WARNING, null, e);
+        } finally {
 			objectCache.clear();
 		}
         return null;
     }
 
-    protected Object readObject(String key, DataNode json) throws IllegalAccessException, InstantiationException, ClassNotFoundException, IllegalArgumentException, UnsupportedDataTypeException {
+    protected Object readObject(Class<?> type, String key, DataNode json) throws IllegalAccessException, InstantiationException, ClassNotFoundException, IllegalArgumentException, UnsupportedDataTypeException, NoSuchFieldException {
         // See if the Object id is in the cache before continuing
     	if(json.getString("@object_id") != null && objectCache.containsKey(json.getInt(MD_OBJECT_ID)))
         	return objectCache.get(json.getInt(MD_OBJECT_ID));
 
         // Resolve the class
         Object obj = null;
+        // Try using explicit class
+        if(type != null){
+            obj = type.newInstance();
+        }
         // Try using metadata
-        if(json.getString(MD_CLASS) != null) {
+        else if(json.getString(MD_CLASS) != null) {
             Class<?> objClass = Class.forName(json.getString(MD_CLASS));
             obj = objClass.newInstance();
         }
@@ -123,8 +124,11 @@ public class JSONObjectInputStream extends InputStream implements ObjectInput, C
             Class<?> objClass = registeredClasses.get(key);
             obj = objClass.newInstance();
         }
-        // Unknown Class
-        else return null;
+        // Unknown class
+        else {
+            logger.warning("Unknown type for key: '"+key+"'");
+            return null;
+        }
 
         // Read all fields from the new object instance
         for(Field field : obj.getClass().getDeclaredFields()){
@@ -146,7 +150,7 @@ public class JSONObjectInputStream extends InputStream implements ObjectInput, C
     }
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
-    protected Object readField(Class<?> type, String key, DataNode json) throws IllegalAccessException, ClassNotFoundException, InstantiationException, UnsupportedDataTypeException {
+    protected Object readField(Class<?> type, String key, DataNode json) throws IllegalAccessException, ClassNotFoundException, InstantiationException, UnsupportedDataTypeException, NoSuchFieldException {
         // Field type is a primitive?
         if(type.isPrimitive() || String.class.isAssignableFrom(type)){
             return readPrimitive(type, json);
@@ -165,7 +169,7 @@ public class JSONObjectInputStream extends InputStream implements ObjectInput, C
         else if(List.class.isAssignableFrom(type)){
 			List list = (List)type.newInstance();
             for(int i=0; i<json.size(); i++){
-                list.add(readObject(key, json.get(i)));
+                list.add(readObject(null, key, json.get(i)));
             }
             return list;
         }
@@ -175,13 +179,17 @@ public class JSONObjectInputStream extends InputStream implements ObjectInput, C
                 String subKey = it.next();
                 map.put(
                 		subKey,
-                		readObject(subKey, json.get(subKey)));
+                		readObject(null, subKey, json.get(subKey)));
             }
             return map;
         }
         // Field is a new Object
         else{
-            return readObject(key, json);
+            Field field = type.getField(key);
+            if(field != null)
+                return readObject(field.getType(), key, json);
+            else
+                return readObject(null, key, json);
         }
     }
     

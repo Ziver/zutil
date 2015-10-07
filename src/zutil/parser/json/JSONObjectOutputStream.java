@@ -73,6 +73,8 @@ public class JSONObjectOutputStream extends OutputStream implements ObjectOutput
     }
 
     protected DataNode getDataNode(Object obj) throws IOException, IllegalArgumentException, IllegalAccessException {
+        if(obj == null)
+            return null;
         DataNode root;
 
         // Check if the object is a primitive
@@ -132,7 +134,7 @@ public class JSONObjectOutputStream extends OutputStream implements ObjectOutput
     }
 
     private DataNode getPrimitiveDataNode(Class<?> type, Object value) throws UnsupportedDataTypeException, IllegalArgumentException, IllegalAccessException {
-    	DataNode node;
+    	DataNode node = null;
         if     (type == int.class ||
         		type == Integer.class ||
         		type == long.class ||
@@ -151,8 +153,9 @@ public class JSONObjectOutputStream extends OutputStream implements ObjectOutput
         	node = new DataNode(DataType.String);
         else
         	throw new UnsupportedDataTypeException("Unsupported primitive data type: "+type.getName());
-        
-    	node.set(value.toString());
+
+        if(value != null)
+    	    node.set(value.toString());
 		return node;
 	}
 

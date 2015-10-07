@@ -108,7 +108,21 @@ public class JSONSerializerTest{
 
         assertEquals( sourceObj, targetObj );
     }
-	
+
+	@Test
+	public void testSerializerWithNullFields() throws InterruptedException, IOException, ClassNotFoundException{
+		TestClass sourceObj = new TestClass();
+
+		String data = writeObjectToJson(sourceObj, false);
+		data = data.replace("\"", "'");
+		assertEquals(
+				"{'str': null, 'obj1': null, 'obj2': null, 'decimal': 0.0}",
+				data);
+
+        TestClass targetObj = sendReceiveObject(sourceObj);
+        assertEquals( sourceObj, targetObj );
+	}
+
 
 	/******************* Utility Functions ************************************/
 	
@@ -127,9 +141,13 @@ public class JSONSerializerTest{
 		return targetObj;
 	}
 
-    public static <T> String writeObjectToJson(T sourceObj) throws IOException{
+	public static <T> String writeObjectToJson(T sourceObj) throws IOException{
+		return writeObjectToJson(sourceObj, true);
+	}
+    public static <T> String writeObjectToJson(T sourceObj, boolean metadata) throws IOException{
 		StringOutputStream bout = new StringOutputStream();
 		JSONObjectOutputStream out = new JSONObjectOutputStream(bout);
+		out.enableMetaData(metadata);
 		
 		out.writeObject(sourceObj);
 		out.flush();

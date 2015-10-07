@@ -75,6 +75,11 @@ public class JSONWriter{
      * @param root is the root node
      */
     public void write(DataNode root){
+        if(root == null){
+            out.print("null");
+            return;
+        }
+
         boolean first = true;
         switch(root.getType()){
             // Write Map
