@@ -25,22 +25,20 @@
 package zutil.parser.json;
 
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
-import zutil.ClassUtil;
 import zutil.log.LogUtil;
 import zutil.parser.Base64Decoder;
 import zutil.parser.DataNode;
 
 import javax.activation.UnsupportedDataTypeException;
 import java.io.*;
-import java.lang.reflect.Array;
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
+import java.lang.reflect.*;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
 
 public class JSONObjectInputStream extends InputStream implements ObjectInput, Closeable{
     private static final Logger logger = LogUtil.getLogger();
@@ -60,10 +58,10 @@ public class JSONObjectInputStream extends InputStream implements ObjectInput, C
         this();
         this.parser = new JSONParser(in);
     }
-	public JSONObjectInputStream(InputStream in) {
+    public JSONObjectInputStream(InputStream in) {
         this();
-		this.parser = new JSONParser(in);
-	}
+        this.parser = new JSONParser(in);
+    }
 
 
     /**
@@ -89,27 +87,47 @@ public class JSONObjectInputStream extends InputStream implements ObjectInput, C
     }
 
 
-    public synchronized Object readObject() throws IOException {
+    /**
+     * @return  the object read from the stream
+     */
+    @Override
+    public Object readObject() throws IOException {
+        return readObject(null);
+    }
+    /**
+     * @param   <T>     is a simple cast to this type
+     * @return  the object read from the stream
+     */
+    public <T> T readGenericObject() throws IOException {
+        return readObject(null);
+    }
+    /**
+     * @param   c   will override the registered root class and use this value instead
+     * @param   <T>
+     * @return  the object read from the stream
+     */
+    public synchronized <T> T readObject(Class<T> c) throws IOException {
         try{
             DataNode root = parser.read();
             if(root != null){
-                return readObject(null, null, root);
+                return (T)readObject(c, null, root);
             }
         } catch (Exception e) {
             logger.log(Level.WARNING, null, e);
         } finally {
-			objectCache.clear();
-		}
+            objectCache.clear();
+        }
         return null;
     }
+
 
     protected Object readObject(Class<?> type, String key, DataNode json) throws IllegalAccessException, InstantiationException, ClassNotFoundException, IllegalArgumentException, UnsupportedDataTypeException, NoSuchFieldException {
         // Only parse if json is a map
         if(!json.isMap())
             return null;
         // See if the Object id is in the cache before continuing
-    	if(json.getString("@object_id") != null && objectCache.containsKey(json.getInt(MD_OBJECT_ID)))
-        	return objectCache.get(json.getInt(MD_OBJECT_ID));
+        if(json.getString("@object_id") != null && objectCache.containsKey(json.getInt(MD_OBJECT_ID)))
+            return objectCache.get(json.getInt(MD_OBJECT_ID));
 
         // Resolve the class
         Object obj = null;
@@ -148,7 +166,7 @@ public class JSONObjectInputStream extends InputStream implements ObjectInput, C
         }
         // Add object to the cache
         if(json.getString(MD_OBJECT_ID) != null)
-        	objectCache.put(json.getInt(MD_OBJECT_ID), obj);
+            objectCache.put(json.getInt(MD_OBJECT_ID), obj);
         return obj;
     }
 
@@ -170,7 +188,7 @@ public class JSONObjectInputStream extends InputStream implements ObjectInput, C
             }
         }
         else if(List.class.isAssignableFrom(type)){
-			List list = (List)type.newInstance();
+            List list = (List)type.newInstance();
             for(int i=0; i<json.size(); i++){
                 list.add(readObject(null, key, json.get(i)));
             }
@@ -181,39 +199,29 @@ public class JSONObjectInputStream extends InputStream implements ObjectInput, C
             for(Iterator<String> it=json.keyIterator(); it.hasNext();){
                 String subKey = it.next();
                 map.put(
-                		subKey,
-                		readObject(null, subKey, json.get(subKey)));
+                        subKey,
+                        readObject(null, subKey, json.get(subKey)));
             }
             return map;
         }
         // Field is a new Object
         else{
-            Field field = getFieldInClass(type, key);
-            if(field != null)
-                return readObject(field.getType(), key, json);
-            else
-                return readObject(null, key, json);
+            return readObject(type, key, json);
         }
     }
-    private Field getFieldInClass(Class<?> c, String name){
-        for(Field f : c.getFields()){
-            if(f.getName().equals(name))
-                return f;
-        }
-        return null;
-    }
-    
+
+
     protected static Object readPrimitive(Class<?> type, DataNode json){
         if     (type == int.class ||
-        		type == Integer.class) return json.getInt();
+                type == Integer.class) return json.getInt();
         else if(type == long.class ||
-        		type == Long.class)    return json.getLong();
-        
-        else if(type == double.class ||
-        		type == Double.class)  return json.getDouble();
+                type == Long.class)    return json.getLong();
 
-        else if(type == boolean.class || 
-        		type == Boolean.class) return json.getBoolean();
+        else if(type == double.class ||
+                type == Double.class)  return json.getDouble();
+
+        else if(type == boolean.class ||
+                type == Boolean.class) return json.getBoolean();
         else if(type == String.class)  return json.getString();
         return null;
     }
@@ -222,52 +230,52 @@ public class JSONObjectInputStream extends InputStream implements ObjectInput, C
 
 
     @Override public void readFully(byte[] b) throws IOException {
-		throw new NotImplementedException();
-	}
+        throw new NotImplementedException();
+    }
     @Override public void readFully(byte[] b, int off, int len) throws IOException {
         throw new NotImplementedException();
-	}
+    }
     @Override public int skipBytes(int n) throws IOException {
         throw new NotImplementedException();
-	}
+    }
     @Override public boolean readBoolean() throws IOException {
         throw new NotImplementedException();
-	}
+    }
     @Override public byte readByte() throws IOException {
         throw new NotImplementedException();
-	}
+    }
     @Override public int readUnsignedByte() throws IOException {
         throw new NotImplementedException();
-	}
+    }
     @Override public short readShort() throws IOException {
         throw new NotImplementedException();
-	}
+    }
     @Override public int readUnsignedShort() throws IOException {
         throw new NotImplementedException();
-	}
+    }
     @Override public char readChar() throws IOException {
         throw new NotImplementedException();
-	}
+    }
     @Override public int readInt() throws IOException {
         throw new NotImplementedException();
-	}
+    }
     @Override public long readLong() throws IOException {
         throw new NotImplementedException();
-	}
+    }
     @Override public float readFloat() throws IOException {
         throw new NotImplementedException();
-	}
+    }
     @Override public double readDouble() throws IOException {
         throw new NotImplementedException();
-	}
+    }
     @Override public String readLine() throws IOException {
         throw new NotImplementedException();
-	}
+    }
     @Override public String readUTF() throws IOException {
         throw new NotImplementedException();
-	}
-	@Override public int read() throws IOException {
+    }
+    @Override public int read() throws IOException {
         throw new NotImplementedException();
-	}
+    }
 
 }
