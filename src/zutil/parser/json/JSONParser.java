@@ -140,7 +140,7 @@ public class JSONParser extends Parser {
                 // Check what type of type the data is
                 String data = tmp.toString().trim();
                 if( NULL_PATTERN.matcher(data).matches() )
-                    root = new DataNode(DataType.Null);
+                    root = null;
                 else if( BOOLEAN_PATTERN.matcher(data).matches() )
                 	root = new DataNode(DataType.Boolean);
                 else if( NUMBER_PATTERN.matcher(data).matches() )
@@ -149,7 +149,8 @@ public class JSONParser extends Parser {
                     root = new DataNode(DataType.String);
                     data = unEscapeString(data);
                 }
-                root.set(data);
+                if(root != null)
+                    root.set(data);
                 break;
         }
 

@@ -25,6 +25,7 @@
 package zutil.parser.json;
 
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
+import zutil.ClassUtil;
 import zutil.log.LogUtil;
 import zutil.parser.Base64Decoder;
 import zutil.parser.DataNode;
@@ -121,6 +122,47 @@ public class JSONObjectInputStream extends InputStream implements ObjectInput, C
     }
 
 
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    protected Object readType(Class<?> type, Class<?>[] genType, String key, DataNode json) throws IllegalAccessException, ClassNotFoundException, InstantiationException, UnsupportedDataTypeException, NoSuchFieldException {
+        // Field type is a primitive?
+        if(type.isPrimitive() || String.class.isAssignableFrom(type)){
+            return readPrimitive(type, json);
+        }
+        else if(type.isArray()){
+            if(type.getComponentType() == Byte.class)
+                return Base64Decoder.decodeToByte(json.getString());
+            else{
+                Object array = Array.newInstance(type.getComponentType(), json.size());
+                for(int i=0; i<json.size(); i++){
+                    Array.set(array, i, readType(type.getComponentType(), null, key, json.get(i)));
+                }
+                return array;
+            }
+        }
+        else if(List.class.isAssignableFrom(type)){
+            List list = (List)type.newInstance();
+            for(int i=0; i<json.size(); i++){
+                list.add(readType(genType[0], null, key, json.get(i)));
+            }
+            return list;
+        }
+        else if(Map.class.isAssignableFrom(type)){
+            Map map = (Map)type.newInstance();
+            for(Iterator<String> it=json.keyIterator(); it.hasNext();){
+                String subKey = it.next();
+                map.put(
+                        subKey,
+                        readType(genType[1], null, subKey, json.get(subKey)));
+            }
+            return map;
+        }
+        // Field is a new Object
+        else{
+            return readObject(type, key, json);
+        }
+    }
+
+
     protected Object readObject(Class<?> type, String key, DataNode json) throws IllegalAccessException, InstantiationException, ClassNotFoundException, IllegalArgumentException, UnsupportedDataTypeException, NoSuchFieldException {
         // Only parse if json is a map
         if(!json.isMap())
@@ -158,8 +200,9 @@ public class JSONObjectInputStream extends InputStream implements ObjectInput, C
                     json.get(field.getName()) != null){
                 // Parse field
                 field.setAccessible(true);
-                field.set(obj, readField(
+                field.set(obj, readType(
                         field.getType(),
+                        ClassUtil.getGenericClasses(field),
                         field.getName(),
                         json.get(field.getName())));
             }
@@ -168,46 +211,6 @@ public class JSONObjectInputStream extends InputStream implements ObjectInput, C
         if(json.getString(MD_OBJECT_ID) != null)
             objectCache.put(json.getInt(MD_OBJECT_ID), obj);
         return obj;
-    }
-
-    @SuppressWarnings({ "rawtypes", "unchecked" })
-    protected Object readField(Class<?> type, String key, DataNode json) throws IllegalAccessException, ClassNotFoundException, InstantiationException, UnsupportedDataTypeException, NoSuchFieldException {
-        // Field type is a primitive?
-        if(type.isPrimitive() || String.class.isAssignableFrom(type)){
-            return readPrimitive(type, json);
-        }
-        else if(type.isArray()){
-            if(type.getComponentType() == Byte.class)
-                return Base64Decoder.decodeToByte(json.getString());
-            else{
-                Object array = Array.newInstance(type.getComponentType(), json.size());
-                for(int i=0; i<json.size(); i++){
-                    Array.set(array, i, readField(type.getComponentType(), key, json.get(i)));
-                }
-                return array;
-            }
-        }
-        else if(List.class.isAssignableFrom(type)){
-            List list = (List)type.newInstance();
-            for(int i=0; i<json.size(); i++){
-                list.add(readObject(null, key, json.get(i)));
-            }
-            return list;
-        }
-        else if(Map.class.isAssignableFrom(type)){
-            Map map = (Map)type.newInstance();
-            for(Iterator<String> it=json.keyIterator(); it.hasNext();){
-                String subKey = it.next();
-                map.put(
-                        subKey,
-                        readObject(null, subKey, json.get(subKey)));
-            }
-            return map;
-        }
-        // Field is a new Object
-        else{
-            return readObject(type, key, json);
-        }
     }
 
 

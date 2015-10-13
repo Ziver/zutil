@@ -123,10 +123,22 @@ public class JSONObjectOutputStream extends OutputStream implements ObjectOutput
                         root.set(field.getName(), arrayNode);
                     }
                     else if(List.class.isAssignableFrom(field.getType())){
-                        // TODO Add List Support
+                        DataNode listNode = new DataNode(DataNode.DataType.List);
+                        List list = (List)fieldObj;
+                        for(Object item : list){
+                            listNode.add(getDataNode(item));
+                        }
+                        root.set(field.getName(), listNode);
                     }
                     else if(Map.class.isAssignableFrom(field.getType())){
-                        // TODO Add Map Support
+                        DataNode mapNode = new DataNode(DataNode.DataType.Map);
+                        Map map = (Map)fieldObj;
+                        for(Object key : map.keySet()){
+                            mapNode.set(
+                                    getDataNode(key).getString(),
+                                    getDataNode(map.get(key)));
+                        }
+                        root.set(field.getName(), mapNode);
                     }
                     else{
                         root.set(field.getName(), getDataNode(fieldObj));

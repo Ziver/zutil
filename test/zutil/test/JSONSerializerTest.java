@@ -32,7 +32,9 @@ import zutil.parser.json.JSONObjectOutputStream;
 import java.io.IOException;
 import java.io.Serializable;
 import java.io.StringReader;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 
 import static org.junit.Assert.assertEquals;
 
@@ -124,6 +126,33 @@ public class JSONSerializerTest{
 		TestClass.assertEquals(sourceObj, targetObj);
 	}
 
+	@Test
+	public void testSerializerWithMapField() throws InterruptedException, IOException, ClassNotFoundException{
+        TestClassMap sourceObj = new TestClassMap().init();
+
+		String data = writeObjectToJson(sourceObj, false);
+		data = data.replace("\"", "'");
+		assertEquals(
+				"{'map': {'key2': 'value2', 'key1': 'value1'}}",
+				data);
+
+        TestClassMap targetObj = sendReceiveObject(sourceObj);
+        TestClassMap.assertEquals(sourceObj, targetObj);
+	}
+
+    @Test
+    public void testSerializerWithListField() throws InterruptedException, IOException, ClassNotFoundException{
+        TestClassList sourceObj = new TestClassList().init();
+
+        String data = writeObjectToJson(sourceObj, false);
+        data = data.replace("\"", "'");
+        assertEquals(
+                "{'list': ['value1', 'value2']}",
+                data);
+
+        TestClassList targetObj = sendReceiveObject(sourceObj);
+        TestClassList.assertEquals(sourceObj, targetObj);
+    }
 
 	/******************* Utility Functions ************************************/
 	
@@ -155,7 +184,7 @@ public class JSONSerializerTest{
 		out.close();
 		
 		String data = bout.toString();
-        //System.out.println(data);
+        System.out.println(data);
         
         return data;
 	}
@@ -242,6 +271,36 @@ public class JSONSerializerTest{
         public boolean equals(Object obj){
             return obj instanceof TestClassStringArray &&
                     Arrays.equals(this.array ,((TestClassStringArray)obj).array);
+        }
+    }
+
+    public static class TestClassMap{
+        private HashMap<String,String> map;
+
+        public TestClassMap init(){
+            map = new HashMap<>();
+            map.put("key1", "value1");
+            map.put("key2", "value2");
+            return this;
+        }
+
+        public static void assertEquals(TestClassMap obj1, TestClassMap obj2){
+            Assert.assertEquals(obj1.map, obj2.map);
+        }
+    }
+
+    public static class TestClassList{
+        private ArrayList<String> list;
+
+        public TestClassList init(){
+            list = new ArrayList<>();
+            list.add("value1");
+            list.add("value2");
+            return this;
+        }
+
+        public static void assertEquals(TestClassList obj1, TestClassList obj2){
+            Assert.assertEquals(obj1.list, obj2.list);
         }
     }
 }
