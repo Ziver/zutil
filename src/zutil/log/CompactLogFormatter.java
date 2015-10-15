@@ -24,6 +24,7 @@
 
 package zutil.log;
 
+import zutil.StringUtil;
 import zutil.io.StringOutputStream;
 
 import java.io.PrintStream;
@@ -35,60 +36,61 @@ import java.util.logging.LogRecord;
 import java.util.regex.Pattern;
 
 public class CompactLogFormatter extends Formatter{
-	// The split pattern where the 
+	/** The split pattern where the **/
 	private static final Pattern splitter = Pattern.compile("\n");
-	// the stream should print time stamp
+	/** the stream should print time stamp **/
 	private boolean timeStamp = true;
-	//The time stamp style
+	/** The time stamp style **/
 	private SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
-	// If displaying class names are enabled
+	/** If displaying class names are enabled **/
 	private boolean className = true;
-	// If displaying method names are enabled
+	/** If displaying method names are enabled **/
 	private boolean methodName = false;
-	// Specifies the max length of the longest class name
+	/** Specifies the max length of the longest class name **/
 	private int max_class_name = 0;
-	// Cache for the class padding
+	/** Cache for the class padding **/
 	private static HashMap<String,String> padd_cache = new HashMap<String,String>();
-	// Date temp file
+	/** Date temp file **/
 	private Date date = new Date();
+
 
 	@Override 
 	public String format(LogRecord record) {
-		StringBuilder data = new StringBuilder();
+		StringBuilder prefix = new StringBuilder();
 
 		if( timeStamp ){
 			date.setTime( record.getMillis() );
-			data.append( dateFormatter.format(date) );
-			data.append(' ');
+			prefix.append(dateFormatter.format(date));
+			prefix.append(' ');
 		}
 
 		switch( record.getLevel().intValue() ){
-		case /* SEVERE  */	1000: data.append("[SEVERE] "); break;
-		case /* WARNING */	900 : data.append("[WARNING]"); break;
-		case /* INFO    */	800 : data.append("[INFO]   "); break;
-		case /* CONFIG  */	700 : data.append("[CONFIG] "); break;		
-		case /* FINE    */	500 : data.append("[FINE]   "); break;
-		case /* FINER   */	400 : data.append("[FINER]  "); break;
-		case /* FINEST  */	300 : data.append("[FINEST] "); break;
+		case /* SEVERE  */	1000: prefix.append("[SEVERE] "); break;
+		case /* WARNING */	900 : prefix.append("[WARNING]"); break;
+		case /* INFO    */	800 : prefix.append("[INFO]   "); break;
+		case /* CONFIG  */	700 : prefix.append("[CONFIG] "); break;
+		case /* FINE    */	500 : prefix.append("[FINE]   "); break;
+		case /* FINER   */	400 : prefix.append("[FINER]  "); break;
+		case /* FINEST  */	300 : prefix.append("[FINEST] "); break;
 		}
-		data.append(' ');
+		prefix.append(' ');
 
 		if( className ){
-			data.append( paddClassName(record.getSourceClassName()) );
+			prefix.append(paddClassName(record.getSourceClassName()));
 		}
 		if(methodName){
-			data.append( record.getSourceMethodName() );
+			prefix.append(record.getSourceMethodName());
 		}
-		data.append( ": " );
+		prefix.append(": ");
 
-		StringBuffer ret = new StringBuffer();
+		StringBuilder ret = new StringBuilder();
 		if( record.getMessage() != null ){
 			String[] array = splitter.split( record.getMessage() );
 			for( int i=0; i<array.length ;++i ){
 				if( i!=0 )
 					ret.append( '\n' );
-				if( data.length() > 0 )
-					ret.append( data );
+				if( prefix.length() > 0 )
+					ret.append( prefix );
 				ret.append( array[i] );
 			}
 			ret.append( '\n' );
@@ -101,8 +103,8 @@ public class CompactLogFormatter extends Formatter{
 			for( int i=0; i<array.length ;++i ){
 				if( i!=0 )
 					ret.append( '\n' );
-				if( data.length() > 0 )
-					ret.append( data );
+				if( prefix.length() > 0 )
+					ret.append( prefix );
 				ret.append( array[i] );
 			}
 			ret.append( '\n' );
@@ -151,21 +153,16 @@ public class CompactLogFormatter extends Formatter{
 	 */
 	private String paddClassName(String source){
 		String tmp = padd_cache.get(source);
-		if( tmp != null )
+		if(tmp != null && tmp.length() == max_class_name)
 			return tmp;
 
 		String c_name = source.substring( source.lastIndexOf('.')+1 );
 		if( c_name.length() > max_class_name )
 			max_class_name = c_name.length();
 
-		StringBuilder sb = new StringBuilder( c_name );
-		for( int i=c_name.length(); i<max_class_name; ++i ) {
-			sb.append( ' ' ); 
-		}
-		tmp = sb.toString();
-		padd_cache.put(source, tmp);
-		return tmp;
-
+		c_name += StringUtil.getSpaces(max_class_name - c_name.length());
+		padd_cache.put(source, c_name);
+		return c_name;
 	}
 
 }

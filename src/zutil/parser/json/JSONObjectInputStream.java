@@ -113,7 +113,13 @@ public class JSONObjectInputStream extends InputStream implements ObjectInput, C
             if(root != null){
                 return (T)readObject(c, null, root);
             }
-        } catch (Exception e) {
+        } catch (ClassNotFoundException e) {
+            logger.log(Level.WARNING, null, e);
+        } catch (NoSuchFieldException e) {
+            logger.log(Level.WARNING, null, e);
+        } catch (InstantiationException e) {
+            logger.log(Level.WARNING, null, e);
+        } catch (IllegalAccessException e) {
             logger.log(Level.WARNING, null, e);
         } finally {
             objectCache.clear();
