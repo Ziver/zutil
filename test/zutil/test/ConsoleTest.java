@@ -31,12 +31,13 @@ import java.io.InputStreamReader;
 
 public class ConsoleTest {
 	public static void main(String[] args) throws IOException{
-		new Console("Console Test");
+		Console terminal = new Console("Console Test");
+		terminal.enableTray(true);
 		BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
 
 		while(true){
 			System.out.println("hello= "+in.readLine());
-			for(int i=0; i<20 ;i++){
+			for(int i=0; i<2 ;i++){
 				System.out.println(i+"Hello World!!!sssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss");
 				System.err.println(i+"Hello World!!!sssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss");
 				try {

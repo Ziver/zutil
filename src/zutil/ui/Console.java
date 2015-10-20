@@ -37,7 +37,7 @@ import java.io.OutputStream;
 import java.io.PrintStream;
 
 /**
- * Creates a Swing console window Thats takes System.in and
+ * Creates a Swing console window That takes System.in and
  * System.out as Streams and has the ability to stay in the tray 
  * when closed
  * 
@@ -86,7 +86,7 @@ public class Console{
 		console = new JTextPane();
 		console.setBackground(Color.black);
 		console.setForeground(Color.white);
-		console.setFont(new Font("Lucida Console", Font.BOLD, 12));
+		console.setFont(new Font("Lucida Console", Font.BOLD, 11));
 		console.setEditable(false);
 		console.addKeyListener(listener);
 		doc = new DefaultStyledDocument();
@@ -133,10 +133,9 @@ public class Console{
 	}
 
 	/**
-	 * Enables the tray
+	 * Enables the  go down to tray functionality
 	 * 
-	 * @param enable True to enable tray
-	 * @param img The Tray image
+	 * @param 	enable	if tray icon is enabled
 	 */
 	public void enableTray(boolean enable){
 		if(enable && SystemTray.isSupported()){
