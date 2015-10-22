@@ -30,7 +30,7 @@ public class StreamLogger {
 
 
     protected void log(int n){
-        if(n == DELIMETER)
+        if(n < 0 || n == DELIMETER)
             flushLog();
         else
             buffer.append(n);
@@ -38,33 +38,26 @@ public class StreamLogger {
             flushLog();
     }
     protected void log(byte[] b, int off, int len){
-        try {
-            if (logger.isLoggable()) {
-                for(int i=0; i<len; ++i){
-                    if(b[off+i] == DELIMETER){
-                        buffer.append(new String(b, off, i, "UTF-8"));
-                        flushLog();
-                        off += i;
-                        len -= i;
-                        i = 0;
-                    }
-                }
-                if(len > 0)
-                    buffer.append(new String(b, off, len, "UTF-8"));
-                if(buffer.length() > MAX_BUFFER_SIZE)
+        if (logger.isLoggable()) {
+            for(int i=0; i<len; ++i){
+                if(b[off+i] == DELIMETER)
                     flushLog();
+                else
+                    buffer.append((char)b[off+i]);
             }
-        } catch (UnsupportedEncodingException e){
-            e.printStackTrace();
+            if(buffer.length() > MAX_BUFFER_SIZE)
+                flushLog();
         }
     }
 
     protected void flushLog(){
-        if(prefix != null)
-            logger.log(prefix + ": " + buffer.toString());
-        else
-            logger.log(buffer.toString());
-        clearLog();
+        if(buffer.length() > 0) {
+            if (prefix != null)
+                logger.log(prefix + ": " + buffer.toString());
+            else
+                logger.log(buffer.toString());
+            clearLog();
+        }
     }
     protected void clearLog(){
         buffer.delete(0, buffer.length());

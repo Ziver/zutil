@@ -42,12 +42,12 @@ public class InputStreamLogger extends InputStream implements StreamLogger.LogCa
     }
     public int read(byte b[]) throws IOException {
         int n = in.read(b);
-        log.log(b, 0, b.length);
+        log.log(b, 0, n);
         return n;
     }
     public int read(byte b[], int off, int len) throws IOException {
         int n = in.read(b, off, len);
-        log.log(b, off, len);
+        log.log(b, off, n);
         return n;
     }
     public long skip(long n) throws IOException {
