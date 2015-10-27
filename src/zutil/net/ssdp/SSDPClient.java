@@ -48,8 +48,8 @@ import java.util.logging.Logger;
 public class SSDPClient extends ThreadedUDPNetwork implements ThreadedUDPNetworkThread{
 	private static final Logger logger = LogUtil.getLogger();
 	// Contains all the received services
-	private HashMap<String, LinkedList<SSDPServiceInfo>> services_st;
-	private HashMap<String, SSDPServiceInfo> 			 services_usn;
+	private HashMap<String, LinkedList<StandardSSDPInfo>> services_st;
+	private HashMap<String, StandardSSDPInfo> 			 services_usn;
 
 	private SSDPServiceListener listener;
 
@@ -64,8 +64,8 @@ public class SSDPClient extends ThreadedUDPNetwork implements ThreadedUDPNetwork
 		super(null);
 		super.setThread(this);
 		
-		services_st = new HashMap<String, LinkedList<SSDPServiceInfo>>();
-		services_usn = new HashMap<String, SSDPServiceInfo>();
+		services_st = new HashMap<>();
+		services_usn = new HashMap<>();
 	}
 
 	/**
@@ -86,7 +86,7 @@ public class SSDPClient extends ThreadedUDPNetwork implements ThreadedUDPNetwork
 	}
 	public void requestService(String st, HashMap<String,String> headers){
 		try {
-			services_st.put( st, new LinkedList<SSDPServiceInfo>() );
+			services_st.put( st, new LinkedList<StandardSSDPInfo>() );
 			
 			// Generate an SSDP discover message
 			StringOutputStream msg = new StringOutputStream();
@@ -131,7 +131,7 @@ public class SSDPClient extends ThreadedUDPNetwork implements ThreadedUDPNetwork
 	 * @param st is the search target
 	 * @return a list of received services
 	 */
-	public LinkedList<SSDPServiceInfo> getServices(String st){
+	public LinkedList<StandardSSDPInfo> getServices(String st){
 		return services_st.get( st );
 	}
 	
@@ -154,7 +154,7 @@ public class SSDPClient extends ThreadedUDPNetwork implements ThreadedUDPNetwork
 	 * @param usn is the unique identifier for the service
 	 * @return an service, null if there is no such service
 	 */
-	public SSDPServiceInfo getService(String usn){
+	public StandardSSDPInfo getService(String usn){
 		return services_usn.get( usn );
 	}
 	
@@ -187,7 +187,7 @@ public class SSDPClient extends ThreadedUDPNetwork implements ThreadedUDPNetwork
 		StandardSSDPInfo service;
 		// Get existing service
 		if( services_usn.containsKey( usn )){
-			service = (StandardSSDPInfo)services_usn.get( usn );
+			service = services_usn.get( usn );
 		}
 		// Add new service
 		else{
@@ -195,7 +195,7 @@ public class SSDPClient extends ThreadedUDPNetwork implements ThreadedUDPNetwork
 			service = new StandardSSDPInfo();
 			services_usn.put( usn, service);
 			if( !services_st.containsKey(st) )
-				services_st.put( st, new LinkedList<SSDPServiceInfo>() );
+				services_st.put( st, new LinkedList<StandardSSDPInfo>() );
 			services_st.get( header.getHeader("ST") ).add( service );
 		}
 		

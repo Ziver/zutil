@@ -24,6 +24,8 @@
 
 package zutil.net.ssdp;
 
+import java.net.InetAddress;
+
 /**
  * This class contains information about a service from
  * or through the SSDP protocol
@@ -33,10 +35,10 @@ package zutil.net.ssdp;
 public interface SSDPServiceInfo {
 	
 	/**
-	 * @return The URL to the Service, e.g. "http://192.168.0.1:80/index.html"
+	 * @return the URL to the Service, e.g. "http://192.168.0.1:80/index.html"
 	 */
 	public String getLocation();
-	
+
 	/**
 	 * @return the Search Target, e.g. "upnp:rootdevice"
 	 */
