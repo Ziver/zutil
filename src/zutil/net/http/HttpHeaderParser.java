@@ -260,31 +260,35 @@ public class HttpHeaderParser {
 
 	public String toString(){
 		StringBuffer tmp = new StringBuffer();
-		tmp.append("Type: ").append(type);
-		tmp.append("\nHTTP Version: HTTP/").append(version);
-		tmp.append("\nURL: ").append(url);
+		tmp.append("{Type: ").append(type);
+		tmp.append(", HTTP Version: HTTP/").append(version);
+		tmp.append(", URL: ").append(url);
 
+		tmp.append(", URL Attr: { ");
 		for( String key : url_attr.keySet() ){
-			tmp.append("\nURL Attr: ");
 			tmp.append(key);
-			tmp.append("=");
+			tmp.append(": ");
 			tmp.append( url_attr.get(key) );
 		}
+		tmp.append('}');
 
+		tmp.append(", Header: {");
 		for( String key : headers.keySet() ){
-			tmp.append("\nHeader: ");
 			tmp.append(key);
-			tmp.append("=");
+			tmp.append(": ");
 			tmp.append( headers.get(key) );
 		}
+		tmp.append('}');
 
+		tmp.append(", Cookie: {");
 		for( String key : cookies.keySet() ){
-			tmp.append("\nCookie: ");
 			tmp.append(key);
-			tmp.append("=");
+			tmp.append(": ");
 			tmp.append( cookies.get(key) );
 		}
+		tmp.append('}');
 
+		tmp.append('}');
 		return tmp.toString();
 	}
 }

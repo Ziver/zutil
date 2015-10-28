@@ -181,7 +181,7 @@ public class SSDPServer extends ThreadedUDPNetwork implements ThreadedUDPNetwork
 				if( header.getRequestURL().equals("*") && "ssdp:discover".equalsIgnoreCase(man) ){
 					// Check if the requested service exists
 					if( services.containsKey( st ) ){
-						logger.log(Level.FINEST, "Received Multicast(from: "+packet.getAddress()+"):\n"+header);
+						logger.log(Level.FINEST, "Received Multicast(from: "+packet.getAddress()+"): "+ header);
 
 						// Generate the SSDP response
 						StringOutputStream response = new StringOutputStream();
@@ -192,20 +192,18 @@ public class SSDPServer extends ThreadedUDPNetwork implements ThreadedUDPNetwork
 						http.setHeader("Server", SERVER_INFO );
 						http.setHeader("ST", st );
 						http.setHeader("EXT", "" );
-						http.setHeader("Cache-Control", "max-age = "+cache_time );
+						http.setHeader("Cache-Control", "max-age = "+ cache_time );
 						if(services.get(st) instanceof SSDPCustomInfo)
 							((SSDPCustomInfo)services.get(st)).setHeaders(http);
-						http.flush();
+                        http.close();
 
 						String strData = response.toString();
-						logger.log(Level.FINEST, "Response:\n"+strData);
 						byte[] data = strData.getBytes();
 						packet = new DatagramPacket( 
 								data, data.length, 
 								packet.getAddress(), 
 								packet.getPort());
 						network.send( packet );
-						http.close();
 					}
 				}
 			}
@@ -228,7 +226,7 @@ public class SSDPServer extends ThreadedUDPNetwork implements ThreadedUDPNetwork
 		}
 	}
 	/**
-	 * Sends keepalive messages to update the cache of the clients
+	 * Sends keep-alive messages to update the cache of the clients
 	 */
 	public void sendNotify(){
 		for(String st : services.keySet()){
@@ -263,15 +261,16 @@ public class SSDPServer extends ThreadedUDPNetwork implements ThreadedUDPNetwork
 			http.setHeader("Location", services.get(searchTarget).getLocation() );
 			http.setHeader("Cache-Control", "max-age = "+cache_time );
 			http.setHeader("USN", services.get(searchTarget).getUSN() );
+            http.flush();
 
-			http.close();
-			logger.log(Level.FINEST, "Notification:\n" + msg);
+			logger.log(Level.FINEST, "Sending Notification: " + msg);
 			byte[] data = msg.toString().getBytes();
 			DatagramPacket packet = new DatagramPacket( 
 					data, data.length, 
 					InetAddress.getByName( SSDP_MULTICAST_ADDR ), 
 					SSDP_PORT );
 			super.send( packet );
+            http.close();
 
 		} catch (Exception e) {
 			logger.log(Level.SEVERE, null, e);
@@ -312,9 +311,9 @@ public class SSDPServer extends ThreadedUDPNetwork implements ThreadedUDPNetwork
 			http.setHeader("NT", searchTarget );
 			http.setHeader("NTS", "ssdp:byebye" );
 			http.setHeader("USN", services.get(searchTarget).getUSN() );
-
 			http.close();
-			logger.log(Level.FINEST, "ByeBye:\n" + msg);
+
+			logger.log(Level.FINEST, "Sending ByeBye: " + msg);
 			byte[] data = msg.toString().getBytes();
 			DatagramPacket packet = new DatagramPacket( 
 					data, data.length, 
