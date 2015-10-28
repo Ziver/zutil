@@ -48,7 +48,7 @@ public class JSONSerializerTest{
         data = data.replace("\"", "'");
 
         assertEquals(
-                "{'str': 'abcd', '@class': 'zutil.test.JSONSerializerTest$TestClass', 'obj1': {'@class': 'zutil.test.JSONSerializerTest$TestObj', 'value': 42, '@object_id': 2}, 'obj2': {'@class': 'zutil.test.JSONSerializerTest$TestObj', 'value': 42, '@object_id': 3}, 'decimal': 1.1, '@object_id': 1}",
+                "{'str': 'abcd', '@class': 'zutil.test.JSONSerializerTest$TestClass', 'obj2': {'@class': 'zutil.test.JSONSerializerTest$TestObj', '@object_id': 3, 'value': 42}, '@object_id': 1, 'obj1': {'@class': 'zutil.test.JSONSerializerTest$TestObj', '@object_id': 2, 'value': 42}, 'decimal': 1.1}\n",
                 data);
     }
 	
@@ -69,7 +69,7 @@ public class JSONSerializerTest{
         data = data.replace("\"", "'");
 
         assertEquals(
-                "{'@class': 'zutil.test.JSONSerializerTest$TestClassObjClone', 'obj1': {'@class': 'zutil.test.JSONSerializerTest$TestObj', 'value': 42, '@object_id': 2}, 'obj2': {'@object_id': 2}, '@object_id': 1}",
+                "{'@class': 'zutil.test.JSONSerializerTest$TestClassObjClone', 'obj2': {'@object_id': 2}, '@object_id': 1, 'obj1': {'@class': 'zutil.test.JSONSerializerTest$TestObj', '@object_id': 2, 'value': 42}}\n",
                 data);
     }
 	
@@ -90,7 +90,7 @@ public class JSONSerializerTest{
         data = data.replace("\"", "'");
 
         assertEquals(
-                "{'@class': 'zutil.test.JSONSerializerTest$TestClassArray', 'array': [1, 2, 3, 4], '@object_id': 1}",
+                "{'@class': 'zutil.test.JSONSerializerTest$TestClassArray', 'array': [1, 2, 3, 4], '@object_id': 1}\n",
                 data);
     }
 
@@ -119,7 +119,7 @@ public class JSONSerializerTest{
 		String data = writeObjectToJson(sourceObj, false);
 		data = data.replace("\"", "'");
 		assertEquals(
-				"{'decimal': 0.0}",
+				"{'decimal': 0.0}\n",
 				data);
 
         TestClass targetObj = sendReceiveObject(sourceObj);
@@ -133,7 +133,7 @@ public class JSONSerializerTest{
 		String data = writeObjectToJson(sourceObj, false);
 		data = data.replace("\"", "'");
 		assertEquals(
-				"{'map': {'key2': 'value2', 'key1': 'value1'}}",
+				"{'map': {'key1': 'value1', 'key2': 'value2'}}\n",
 				data);
 
         TestClassMap targetObj = sendReceiveObject(sourceObj);
@@ -147,7 +147,7 @@ public class JSONSerializerTest{
         String data = writeObjectToJson(sourceObj, false);
         data = data.replace("\"", "'");
         assertEquals(
-                "{'list': ['value1', 'value2']}",
+                "{'list': ['value1', 'value2']}\n",
                 data);
 
         TestClassList targetObj = sendReceiveObject(sourceObj);

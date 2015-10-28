@@ -102,9 +102,9 @@ public class SSDPClient extends ThreadedUDPNetwork implements ThreadedUDPNetwork
 					http.setHeader(key, headers.get(key));
 				}
 			}
+			logger.log(Level.FINEST, "Sending Multicast: "+ http);
 			http.flush();
 
-			logger.log(Level.FINEST, "Sending Multicast: \n"+msg);
 			byte[] data = msg.toString().getBytes();
 			DatagramPacket packet = new DatagramPacket( 
 					data, data.length, 
@@ -179,7 +179,7 @@ public class SSDPClient extends ThreadedUDPNetwork implements ThreadedUDPNetwork
 	 */
 	public void receivedPacket(DatagramPacket packet, ThreadedUDPNetwork network) {
 		HttpHeaderParser header = new HttpHeaderParser( new String( packet.getData() ) );
-		logger.log(Level.FINEST, "Recived(from: "+packet.getAddress()+"): \n" + header);
+		logger.log(Level.FINEST, "Received(from: "+packet.getAddress()+"): "+ header);
 		
 		String usn = header.getHeader("USN");
 		String st = header.getHeader("ST");
