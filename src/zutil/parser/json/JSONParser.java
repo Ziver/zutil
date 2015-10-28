@@ -103,7 +103,7 @@ public class JSONParser extends Parser {
             case ']':
             case '}':
             case (char)-1:
-                end.i = 1;
+                end.i = END_WITH_NULL;
                 return null;
             // Parse Map
             case '{':
@@ -114,7 +114,7 @@ public class JSONParser extends Parser {
                     if(end.i != END_WITH_NULL)
                         root.set( key.toString(), node );
                 }
-                end.i = 0;
+                end.i = CONTINUE;
                 break;
             // Parse List
             case '[':
@@ -124,7 +124,7 @@ public class JSONParser extends Parser {
                     if(end.i != END_WITH_NULL)
                         root.add( node );
                 }
-                end.i = 0;
+                end.i = CONTINUE;
                 break;
             // Parse String
             // TODO: Support double backslash escaping

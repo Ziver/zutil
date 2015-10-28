@@ -138,6 +138,15 @@ public class JSONParserTest {
         assertEquals( "3", data.getString("3"));
     }
 
+    @Test
+    public void emptyStringInMap(){
+        DataNode data = JSONParser.read("{1:{2:\"\"}}");
+        assertEquals(DataType.Map, data.getType());
+        assertEquals(1, data.size());
+        assertEquals( "", data.get("1").getString("2"));
+    }
+
+
 	@Test
 	public void complexMap() {
 		String json = "{" +
