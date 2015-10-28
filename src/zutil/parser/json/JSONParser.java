@@ -38,6 +38,11 @@ import java.util.regex.Pattern;
  * @author Ziver
  */
 public class JSONParser extends Parser {
+    // Values for MutableInt
+    private static final int CONTINUE       = 0;
+    private static final int END_WITH_NULL  = 1;
+    private static final int END_WITH_VALUE = 2;
+    // Regex for parsing primitives
 	private static final Pattern NUMBER_PATTERN = Pattern.compile("^[0-9.]++$");
 	private static final Pattern BOOLEAN_PATTERN = Pattern.compile("^(true|false)$", Pattern.CASE_INSENSITIVE);
     private static final Pattern NULL_PATTERN = Pattern.compile("^null$", Pattern.CASE_INSENSITIVE);
@@ -85,7 +90,7 @@ public class JSONParser extends Parser {
         DataNode root = null;
         DataNode key = null;
         DataNode node = null;
-        end.i = 0;
+        end.i = CONTINUE;
 
         int c = '_';
         while((c=in.read()) >= 0 &&
@@ -93,7 +98,7 @@ public class JSONParser extends Parser {
 
         switch( c ){
             // End of stream
-            case -1: break;
+            case -1:
             // This is the end of an Map or List
             case ']':
             case '}':
@@ -103,18 +108,21 @@ public class JSONParser extends Parser {
             // Parse Map
             case '{':
                 root = new DataNode(DataType.Map);
-                while(end.i != 1 &&
-                        (key = parse(in, end)) != null &&
-                        (node = parse(in, end)) != null){
-                    root.set( key.toString(), node );
+                while(end.i == CONTINUE) {
+                    key = parse(in, end);
+                    node = parse(in, end);
+                    if(end.i != END_WITH_NULL)
+                        root.set( key.toString(), node );
                 }
                 end.i = 0;
                 break;
             // Parse List
             case '[':
                 root = new DataNode(DataType.List);
-                while(end.i != 1 && (node = parse(in, end)) != null){
-                    root.add( node );
+                while(end.i == CONTINUE){
+                    node = parse(in, end);
+                    if(end.i != END_WITH_NULL)
+                        root.add( node );
                 }
                 end.i = 0;
                 break;
@@ -130,9 +138,9 @@ public class JSONParser extends Parser {
             // Parse unknown type
             default:
                 StringBuilder tmp = new StringBuilder().append((char)c);
-                while((c=in.read()) >= 0 && c != ',' && c != '='){
+                while((c=in.read()) >= 0 && c != ',' && c != ':'){
                     if(c == ']' || c == '}'){
-                        end.i = 1;
+                        end.i = END_WITH_VALUE;
                         break;
                     }
                     tmp.append((char)c);
