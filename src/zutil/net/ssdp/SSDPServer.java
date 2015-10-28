@@ -195,7 +195,8 @@ public class SSDPServer extends ThreadedUDPNetwork implements ThreadedUDPNetwork
 						http.setHeader("Cache-Control", "max-age = "+ cache_time );
 						if(services.get(st) instanceof SSDPCustomInfo)
 							((SSDPCustomInfo)services.get(st)).setHeaders(http);
-                        http.close();
+                        logger.log(Level.FINEST, "Sending Response: "+ http);
+                        http.flush();
 
 						String strData = response.toString();
 						byte[] data = strData.getBytes();
@@ -204,6 +205,7 @@ public class SSDPServer extends ThreadedUDPNetwork implements ThreadedUDPNetwork
 								packet.getAddress(), 
 								packet.getPort());
 						network.send( packet );
+                        http.close();
 					}
 				}
 			}
@@ -261,9 +263,9 @@ public class SSDPServer extends ThreadedUDPNetwork implements ThreadedUDPNetwork
 			http.setHeader("Location", services.get(searchTarget).getLocation() );
 			http.setHeader("Cache-Control", "max-age = "+cache_time );
 			http.setHeader("USN", services.get(searchTarget).getUSN() );
+            logger.log(Level.FINEST, "Sending Notification: " + http);
             http.flush();
 
-			logger.log(Level.FINEST, "Sending Notification: " + msg);
 			byte[] data = msg.toString().getBytes();
 			DatagramPacket packet = new DatagramPacket( 
 					data, data.length, 
@@ -311,15 +313,16 @@ public class SSDPServer extends ThreadedUDPNetwork implements ThreadedUDPNetwork
 			http.setHeader("NT", searchTarget );
 			http.setHeader("NTS", "ssdp:byebye" );
 			http.setHeader("USN", services.get(searchTarget).getUSN() );
-			http.close();
+            logger.log(Level.FINEST, "Sending ByeBye: " + http);
+            http.flush();
 
-			logger.log(Level.FINEST, "Sending ByeBye: " + msg);
 			byte[] data = msg.toString().getBytes();
 			DatagramPacket packet = new DatagramPacket( 
 					data, data.length, 
 					InetAddress.getByName( SSDP_MULTICAST_ADDR ), 
 					SSDP_PORT );
 			super.send( packet );
+            http.close();
 
 		} catch (Exception e) {
 			logger.log(Level.SEVERE, null, e);

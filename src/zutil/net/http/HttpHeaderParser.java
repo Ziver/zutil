@@ -259,12 +259,12 @@ public class HttpHeaderParser {
 
 
 	public String toString(){
-		StringBuffer tmp = new StringBuffer();
+		StringBuilder tmp = new StringBuilder();
 		tmp.append("{Type: ").append(type);
-		tmp.append(", HTTP Version: HTTP/").append(version);
+		tmp.append(", HTTP_version: HTTP/").append(version);
 		tmp.append(", URL: ").append(url);
 
-		tmp.append(", URL Attr: { ");
+		tmp.append(", URL_attr: { ");
 		for( String key : url_attr.keySet() ){
 			tmp.append(key);
 			tmp.append(": ");
@@ -272,7 +272,7 @@ public class HttpHeaderParser {
 		}
 		tmp.append('}');
 
-		tmp.append(", Header: {");
+		tmp.append(", Headers: {");
 		for( String key : headers.keySet() ){
 			tmp.append(key);
 			tmp.append(": ");
@@ -280,7 +280,7 @@ public class HttpHeaderParser {
 		}
 		tmp.append('}');
 
-		tmp.append(", Cookie: {");
+		tmp.append(", Cookies: {");
 		for( String key : cookies.keySet() ){
 			tmp.append(key);
 			tmp.append(": ");

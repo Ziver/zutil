@@ -314,4 +314,38 @@ public class HttpPrintStream extends OutputStream{
 		default:  return "";
 		}
 	}
+
+	public String toString() {
+        StringBuilder str = new StringBuilder();
+        str.append("{http_type: ").append(message_type);
+        if (res_status_code != null) {
+                if (message_type == HttpMessageType.REQUEST) {
+                    str.append(", req_type: ").append(req_type);
+                    str.append(", req_url: ").append(req_url);
+                } else {
+                    str.append(", status_code: ").append(res_status_code);
+                    str.append(", status_str: ").append(getStatusString(res_status_code));
+                }
+
+            if (headers != null) {
+                str.append(", Headers: {");
+                for (String key : headers.keySet()) {
+                    str.append(key).append(": ").append(headers.get(key)).append(", ");
+                }
+                str.append('}');
+            }
+            if (cookies != null) {
+                str.append(", Cookies: {");
+                for (String key : cookies.keySet()) {
+                    str.append(key).append(": ").append(cookies.get(key)).append(", ");
+                }
+                str.append('}');
+            }
+        }
+        else
+            str.append(", HEADER ALREADY SENT ");
+        str.append('}');
+
+        return str.toString();
+    }
 }

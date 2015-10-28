@@ -51,7 +51,6 @@ public class LogUtil {
 		for(int i=1; i<stackTraceElements.length ;++i){
 			String name = stackTraceElements[i].getClassName();
 			if( !name.equals( LogUtil.class.getName() ) ){
-				//logger.fine("Calling class: \""+name+"\"");
 				return name;
 			}
 		}
