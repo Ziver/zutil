@@ -262,29 +262,26 @@ public class HttpHeaderParser {
 		StringBuilder tmp = new StringBuilder();
 		tmp.append("{Type: ").append(type);
 		tmp.append(", HTTP_version: HTTP/").append(version);
-		tmp.append(", URL: ").append(url);
+		tmp.append(", URL: \"").append(url).append('\"');
 
 		tmp.append(", URL_attr: { ");
 		for( String key : url_attr.keySet() ){
-			tmp.append(key);
-			tmp.append(": ");
-			tmp.append( url_attr.get(key) );
+			tmp.append(key).append(": \"");
+			tmp.append(url_attr.get(key)).append("\", ");
 		}
 		tmp.append('}');
 
 		tmp.append(", Headers: {");
 		for( String key : headers.keySet() ){
-			tmp.append(key);
-			tmp.append(": ");
-			tmp.append( headers.get(key) );
+			tmp.append(key).append(": \"");
+			tmp.append( headers.get(key) ).append("\", ");
 		}
 		tmp.append('}');
 
 		tmp.append(", Cookies: {");
 		for( String key : cookies.keySet() ){
-			tmp.append(key);
-			tmp.append(": ");
-			tmp.append( cookies.get(key) );
+			tmp.append(key).append(": \"");
+			tmp.append( cookies.get(key) ).append("\", ");
 		}
 		tmp.append('}');
 
