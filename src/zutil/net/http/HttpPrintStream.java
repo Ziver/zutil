@@ -321,7 +321,10 @@ public class HttpPrintStream extends OutputStream{
         if (res_status_code != null) {
                 if (message_type == HttpMessageType.REQUEST) {
                     str.append(", req_type: ").append(req_type);
-                    str.append(", req_url: \"").append(req_url).append('\"');
+					if(req_url == null)
+                        str.append(", req_url: null");
+					else
+                        str.append(", req_url: \"").append(req_url).append('\"');
                 } else {
                     str.append(", status_code: ").append(res_status_code);
                     str.append(", status_str: ").append(getStatusString(res_status_code));

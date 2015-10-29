@@ -178,7 +178,8 @@ public class SSDPClient extends ThreadedUDPNetwork implements ThreadedUDPNetwork
 	 * Location: http://localhost:80
 	 */
 	public void receivedPacket(DatagramPacket packet, ThreadedUDPNetwork network) {
-		HttpHeaderParser header = new HttpHeaderParser( new String( packet.getData() ) );
+		String msg = new String(packet.getData(), packet.getOffset(), packet.getLength());
+		HttpHeaderParser header = new HttpHeaderParser( msg );
 		logger.log(Level.FINEST, "Received(from: "+packet.getAddress()+"): "+ header);
 		
 		String usn = header.getHeader("USN");

@@ -24,6 +24,7 @@
 
 package zutil.net.ssdp;
 
+import zutil.StringUtil;
 import zutil.io.StringOutputStream;
 import zutil.log.LogUtil;
 import zutil.net.http.HttpHeaderParser;
@@ -166,8 +167,7 @@ public class SSDPServer extends ThreadedUDPNetwork implements ThreadedUDPNetwork
 	 */
 	public void receivedPacket(DatagramPacket packet, ThreadedUDPNetwork network) {
 		try {
-			String msg = new String( packet.getData() );
-
+			String msg = new String( packet.getData(), packet.getOffset(), packet.getLength() );
 			HttpHeaderParser header = new HttpHeaderParser( msg );
 
 			// ******* Respond
@@ -175,7 +175,7 @@ public class SSDPServer extends ThreadedUDPNetwork implements ThreadedUDPNetwork
 			if( header.getRequestType() != null && header.getRequestType().equalsIgnoreCase("M-SEARCH") ){
 				String man = header.getHeader("Man");
 				if(man != null)
-					man = man.replace("\"", "");
+					man = StringUtil.trim(man, '\"');
 				String st = header.getHeader("ST");
 				// Check that its the correct URL and that its an ssdp:discover message
 				if( header.getRequestURL().equals("*") && "ssdp:discover".equalsIgnoreCase(man) ){
