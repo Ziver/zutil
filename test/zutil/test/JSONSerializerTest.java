@@ -48,7 +48,7 @@ public class JSONSerializerTest{
         data = data.replace("\"", "'");
 
         assertEquals(
-                "{'str': 'abcd', '@class': 'zutil.test.JSONSerializerTest$TestClass', 'obj2': {'@class': 'zutil.test.JSONSerializerTest$TestObj', '@object_id': 3, 'value': 42}, '@object_id': 1, 'obj1': {'@class': 'zutil.test.JSONSerializerTest$TestObj', '@object_id': 2, 'value': 42}, 'decimal': 1.1}\n",
+                "{'str': 'abcd', '@class': 'zutil.test.JSONSerializerTest$TestClass', 'obj1': {'@class': 'zutil.test.JSONSerializerTest$TestObj', 'value': 42, '@object_id': 2}, 'obj2': {'@class': 'zutil.test.JSONSerializerTest$TestObj', 'value': 42, '@object_id': 3}, 'decimal': 1.1, '@object_id': 1}\n",
                 data);
     }
 	
@@ -69,7 +69,7 @@ public class JSONSerializerTest{
         data = data.replace("\"", "'");
 
         assertEquals(
-                "{'@class': 'zutil.test.JSONSerializerTest$TestClassObjClone', 'obj2': {'@object_id': 2}, '@object_id': 1, 'obj1': {'@class': 'zutil.test.JSONSerializerTest$TestObj', '@object_id': 2, 'value': 42}}\n",
+                "{'@class': 'zutil.test.JSONSerializerTest$TestClassObjClone', 'obj1': {'@class': 'zutil.test.JSONSerializerTest$TestObj', 'value': 42, '@object_id': 2}, 'obj2': {'@object_id': 2}, '@object_id': 1}\n",
                 data);
     }
 	
@@ -113,7 +113,7 @@ public class JSONSerializerTest{
     }
 
 	@Test
-	public void testSerializerWithNullFields() throws InterruptedException, IOException, ClassNotFoundException{
+	public void testSerializerWithNullFieldsHidden() throws InterruptedException, IOException, ClassNotFoundException{
 		TestClass sourceObj = new TestClass();
 
 		String data = writeObjectToJson(sourceObj, false);
@@ -133,12 +133,27 @@ public class JSONSerializerTest{
 		String data = writeObjectToJson(sourceObj, false);
 		data = data.replace("\"", "'");
 		assertEquals(
-				"{'map': {'key1': 'value1', 'key2': 'value2'}}\n",
+				"{'map': {'key2': 'value2', 'key1': 'value1'}}\n",
 				data);
 
         TestClassMap targetObj = sendReceiveObject(sourceObj);
         TestClassMap.assertEquals(sourceObj, targetObj);
 	}
+
+    @Test
+    public void testSerializerWithMapFieldWithNullEntry() throws InterruptedException, IOException, ClassNotFoundException{
+        TestClassMap sourceObj = new TestClassMap().init();
+        sourceObj.map.put("key1", null);
+
+        String data = writeObjectToJson(sourceObj, false);
+        data = data.replace("\"", "'");
+        assertEquals(
+                "{'map': {'key2': 'value2', 'key1': null}}\n",
+                data);
+
+        TestClassMap targetObj = sendReceiveObject(sourceObj);
+        TestClassMap.assertEquals(sourceObj, targetObj);
+    }
 
     @Test
     public void testSerializerWithListField() throws InterruptedException, IOException, ClassNotFoundException{

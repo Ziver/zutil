@@ -130,6 +130,8 @@ public class JSONObjectInputStream extends InputStream implements ObjectInput, C
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
     protected Object readType(Class<?> type, Class<?>[] genType, String key, DataNode json) throws IllegalAccessException, ClassNotFoundException, InstantiationException, UnsupportedDataTypeException, NoSuchFieldException {
+        if(json == null)
+            return null;
         // Field type is a primitive?
         if(type.isPrimitive() || String.class.isAssignableFrom(type)){
             return readPrimitive(type, json);
@@ -171,7 +173,7 @@ public class JSONObjectInputStream extends InputStream implements ObjectInput, C
 
     protected Object readObject(Class<?> type, String key, DataNode json) throws IllegalAccessException, InstantiationException, ClassNotFoundException, IllegalArgumentException, UnsupportedDataTypeException, NoSuchFieldException {
         // Only parse if json is a map
-        if(!json.isMap())
+        if(json == null || !json.isMap())
             return null;
         // See if the Object id is in the cache before continuing
         if(json.getString("@object_id") != null && objectCache.containsKey(json.getInt(MD_OBJECT_ID)))
