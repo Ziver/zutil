@@ -110,8 +110,10 @@ public class JSONParser extends Parser {
                 root = new DataNode(DataType.Map);
                 while(end.i == CONTINUE) {
                     key = parse(in, end);
+                    if(end.i == END_WITH_NULL) // Break if there is no more data
+                        break;
                     node = parse(in, end);
-                    if(end.i != END_WITH_NULL)
+                    if(end.i != END_WITH_NULL) // Only add the entry if it is a value
                         root.set( key.toString(), node );
                 }
                 end.i = CONTINUE;
