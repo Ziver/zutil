@@ -61,7 +61,7 @@ public class SSDPClient extends ThreadedUDPNetwork implements ThreadedUDPNetwork
 	 * @throws IOException
 	 */
 	public SSDPClient() throws IOException{
-		super(null);
+		super( null, SSDPServer.SSDP_MULTICAST_ADDR, SSDPServer.SSDP_PORT );
 		super.setThread(this);
 		
 		services_st = new HashMap<>();
