@@ -27,8 +27,11 @@ package zutil;
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.lang.reflect.TypeVariable;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Objects;
 
 /**
  * This class include some utility functions for classes
@@ -83,15 +86,42 @@ public class ClassUtil {
     }
 
 
+    /**
+     * @param   field       is the field to return the generics from
+     * @return the generics assigned to a specific field or a empty list
+     */
     public static Class<?>[] getGenericClasses(Field field){
-        Class[] classArray = new Class[0];
-        Type genericFieldType = field.getGenericType();
+        return getGenericClasses(field.getGenericType());
+    }
+    /**
+     * Traverses the class hierarchy and searches for the given super class or interface
+     * and returns the assigned generic types.
+     *
+     * @param   c               the source class
+     * @param   superClass      is the super class to search for
+     * @return the generics for a specific super class or a empty list if
+     *         there is no generics or the super class is not found
+     */
+    public static Class<?>[] getGenericClasses(Class<?> c, Class<?> superClass){
+        // Search for the super class
+        while (c.getSuperclass() != Object.class && !superClass.isAssignableFrom(c.getSuperclass()))
+            c = c.getSuperclass();
+        // Did we find the super class?
+        if (superClass.isAssignableFrom(c.getSuperclass()))
+            return getGenericClasses(c.getGenericSuperclass());
 
-        if(genericFieldType instanceof ParameterizedType){
-            ParameterizedType aType = (ParameterizedType) genericFieldType;
-            Type[] fieldArgTypes = aType.getActualTypeArguments();
-            classArray = Arrays.copyOf(fieldArgTypes, fieldArgTypes.length, Class[].class);
+        return new Class[0];
+    }
+    private static Class<?>[] getGenericClasses(Type genericType){
+        if(genericType instanceof ParameterizedType){
+            ParameterizedType aType = (ParameterizedType) genericType;
+            Type[] argTypes = aType.getActualTypeArguments();
+            Class<?>[] classArray = new Class<?>[argTypes.length];
+            for(int i=0; i<classArray.length; ++i) {
+                classArray[i] = (Class<?>) argTypes[i];
+            }
+            return classArray;
         }
-        return classArray;
+        return new Class[0];
     }
 }
