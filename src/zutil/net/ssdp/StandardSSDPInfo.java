@@ -153,7 +153,7 @@ public class StandardSSDPInfo implements SSDPServiceInfo, SSDPCustomInfo{
 		return inetAddress;
 	}
 
-	public void setInetAddress(InetAddress inetAddress) {
+	protected void setInetAddress(InetAddress inetAddress) {
 		this.inetAddress = inetAddress;
 	}
 }

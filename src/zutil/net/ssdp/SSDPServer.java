@@ -67,7 +67,7 @@ import java.util.logging.Logger;
  */
 public class SSDPServer extends ThreadedUDPNetwork implements ThreadedUDPNetworkThread{
 	private static final Logger logger = LogUtil.getLogger();
-	public static final String SERVER_INFO = "SSDP Java Server by Ziver Koc";
+	public static final String SERVER_INFO = "Zutil SSDP Java Server";
 	public static final int DEFAULT_CACHE_TIME = 60*30; // 30 min
 	public static final int BUFFER_SIZE = 512;
 	public static final String SSDP_MULTICAST_ADDR = "239.255.255.250";
@@ -251,6 +251,7 @@ public class SSDPServer extends ThreadedUDPNetwork implements ThreadedUDPNetwork
 	 */
 	public void sendNotify(String searchTarget){
 		try {
+            SSDPServiceInfo service = services.get(searchTarget);
 			// Generate the SSDP response
 			StringOutputStream msg = new StringOutputStream();
 			HttpPrintStream http = new HttpPrintStream( msg, HttpPrintStream.HttpMessageType.REQUEST );
@@ -260,9 +261,11 @@ public class SSDPServer extends ThreadedUDPNetwork implements ThreadedUDPNetwork
 			http.setHeader("Host", SSDP_MULTICAST_ADDR+":"+SSDP_PORT );
 			http.setHeader("NT", searchTarget );
 			http.setHeader("NTS", "ssdp:alive" );
-			http.setHeader("Location", services.get(searchTarget).getLocation() );
+			http.setHeader("Location", service.getLocation() );
 			http.setHeader("Cache-Control", "max-age = "+cache_time );
-			http.setHeader("USN", services.get(searchTarget).getUSN() );
+			http.setHeader("USN", service.getUSN() );
+			if(service instanceof SSDPCustomInfo)
+                ((SSDPCustomInfo) service).setHeaders(http);
             logger.log(Level.FINEST, "Sending Notification: " + http);
             http.flush();
 
