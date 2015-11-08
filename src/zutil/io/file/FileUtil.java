@@ -120,36 +120,39 @@ public class FileUtil {
 	
 	/**
 	 * Reads and returns the content of a file as a String.
-	 * Or use FileUtils.readFileToString(file);
-	 * 
+	 *
 	 * @param 		file
 	 * @return the file content
 	 */
 	public static String getContent(File file) throws IOException{
-        InputStream in = new FileInputStream(file);
-        String data = new String(IOUtil.getContent( in ));
-        in.close();
-        return data;
+        return new String(getByteContent(file));
+	}
+	public static byte[] getByteContent(File file) throws IOException {
+		InputStream in = new FileInputStream(file);
+		byte[] data = IOUtil.getContent(in);
+		in.close();
+		return data;
 	}
 	
 	/**
 	 * Reads and returns the content of a file as a String.
-	 * Or use FileUtils.readFileToString(file);
-	 * 
+	 *
 	 * @param 		url
 	 * @return the file content
 	 */
 	public static String getContent(URL url) throws IOException{
         InputStream in = url.openStream();
-        String data = new String(IOUtil.getContent( in ));
+        String data = new String(IOUtil.getContent(in));
         in.close();
         return data;
 	}
+
 	
 	/**
 	 * Cache for the search functions
 	 */
 	private static HashMap<SearchItem,List<File>> search_cache = new HashMap<SearchItem,List<File>>();
+
 	/**
 	 * An Cache Item class to identify different cached items
 	 * @author Ziver
