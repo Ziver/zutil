@@ -194,7 +194,7 @@ public class SSDPServer extends ThreadedUDPNetwork implements ThreadedUDPNetwork
 						http.setHeader("EXT", "" );
 						http.setHeader("Cache-Control", "max-age = "+ cache_time );
 						if(services.get(st) instanceof SSDPCustomInfo)
-							((SSDPCustomInfo)services.get(st)).setHeaders(http);
+							((SSDPCustomInfo)services.get(st)).writeHeaders(http);
                         logger.log(Level.FINEST, "Sending Response: "+ http);
                         http.flush();
 
@@ -265,7 +265,7 @@ public class SSDPServer extends ThreadedUDPNetwork implements ThreadedUDPNetwork
 			http.setHeader("Cache-Control", "max-age = "+cache_time );
 			http.setHeader("USN", service.getUSN() );
 			if(service instanceof SSDPCustomInfo)
-                ((SSDPCustomInfo) service).setHeaders(http);
+                ((SSDPCustomInfo) service).writeHeaders(http);
             logger.log(Level.FINEST, "Sending Notification: " + http);
             http.flush();
 

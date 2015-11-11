@@ -24,6 +24,7 @@
 
 package zutil.net.ssdp;
 
+import zutil.net.http.HttpHeaderParser;
 import zutil.net.http.HttpPrintStream;
 
 import java.io.IOException;
@@ -44,7 +45,7 @@ public class StandardSSDPInfo implements SSDPServiceInfo, SSDPCustomInfo{
 	private String usn;
 	private long expiration_time;
 	// All header parameters
-	private HashMap<String, String> headers;
+	private HashMap<String, String> headers = new HashMap<>();
 	private InetAddress inetAddress;
 
 	/**
@@ -127,27 +128,28 @@ public class StandardSSDPInfo implements SSDPServiceInfo, SSDPCustomInfo{
 		return "USN: "+usn+"\nLocation: "+location+"\nST: "+st+"\nExpiration-Time: "+new Date(expiration_time);
 	}
 
-	public void setHeaders(HashMap<String, String> headers) {
-		this.headers = headers;
-	}
 
+    public void setHeader(String key, String value) {
+        headers.put(key, value);
+    }
 	public String getHeader(String header){
-		return headers.get(header.toUpperCase());
+		return headers.get(header);
 	}
-
-
 	@Override
-	public void setHeaders(HttpPrintStream http) {
+	public void writeHeaders(HttpPrintStream http) {
 		try {
-			if (headers != null) {
-				for (String key : headers.keySet()) {
-					http.setHeader(key, headers.get(key));
-				}
-			}
+            for (String key : headers.keySet())
+                http.setHeader(key, headers.get(key));
 		}catch(IOException e){
-
+            e.printStackTrace();
 		}
 	}
+    @Override
+    public void readHeaders(HttpHeaderParser http) {
+        HashMap<String,String> httpHeaders = http.getHeaders();
+        for (String key : httpHeaders.keySet())
+            headers.put(key, httpHeaders.get(key));
+    }
 
 	public InetAddress getInetAddress(){
 		return inetAddress;

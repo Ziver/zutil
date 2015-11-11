@@ -219,7 +219,7 @@ public class SSDPClient extends ThreadedUDPNetwork implements ThreadedUDPNetwork
 			service.setExpirationTime(
 					System.currentTimeMillis() + 1000 * getCacheTime(header.getHeader("Cache-Control")));
 		}
-		service.setHeaders(header.getHeaders());
+		service.readHeaders(header);
 
 		if(listener != null && newService)
 			listener.newService(service);

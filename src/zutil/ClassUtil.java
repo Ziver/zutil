@@ -103,13 +103,15 @@ public class ClassUtil {
      *         there is no generics or the super class is not found
      */
     public static Class<?>[] getGenericClasses(Class<?> c, Class<?> superClass){
-        // Search for the super class
-        while (c.getSuperclass() != Object.class && !superClass.isAssignableFrom(c.getSuperclass()))
-            c = c.getSuperclass();
-        // Did we find the super class?
-        if (superClass.isAssignableFrom(c.getSuperclass()))
-            return getGenericClasses(c.getGenericSuperclass());
-
+        if(superClass != null) {
+            // Search for the super class
+            while (c.getSuperclass() != null && c.getSuperclass() != Object.class) {
+                // Did we find the super class?
+                if (superClass.isAssignableFrom(c.getSuperclass()))
+                    return getGenericClasses(c.getGenericSuperclass());
+                c = c.getSuperclass();
+            }
+        }
         return new Class[0];
     }
     private static Class<?>[] getGenericClasses(Type genericType){
@@ -118,7 +120,8 @@ public class ClassUtil {
             Type[] argTypes = aType.getActualTypeArguments();
             Class<?>[] classArray = new Class<?>[argTypes.length];
             for(int i=0; i<classArray.length; ++i) {
-                classArray[i] = (Class<?>) argTypes[i];
+                if(argTypes[i] instanceof Class)
+                    classArray[i] = (Class<?>) argTypes[i];
             }
             return classArray;
         }

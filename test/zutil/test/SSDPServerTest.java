@@ -42,10 +42,9 @@ public class SSDPServerTest {
         StandardSSDPInfo service = new StandardSSDPInfo();
         service.setLocation("nowhere");
         service.setST("zep:discover");
-        HashMap<String, String> headers = new HashMap<String, String>();
-        headers.put("Alias", "Desktop");
-        headers.put("PublicKey", "SuperDesktopKey");
-        service.setHeaders(headers);
+        service.setHeader("Alias", "Desktop");
+        service.setHeader("PublicKey", "SuperDesktopKey");
+
 
         SSDPServer ssdp = new SSDPServer();
         ssdp.addService(service);

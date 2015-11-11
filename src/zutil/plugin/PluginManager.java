@@ -25,7 +25,7 @@
 package zutil.plugin;
 
 import zutil.io.IOUtil;
-import zutil.io.file.FileSearch;
+import zutil.io.file.FileSearcher;
 import zutil.log.LogUtil;
 import zutil.parser.DataNode;
 import zutil.parser.json.JSONParser;
@@ -61,14 +61,14 @@ public class PluginManager<T> implements Iterable<PluginData>{
 	public PluginManager(String path){
 		plugins = new HashMap<String, PluginData>();
 
-		FileSearch search = new FileSearch(new File(path));
+		FileSearcher search = new FileSearcher(new File(path));
 		search.setRecursive(true);
 		search.searchFolders(false);
 		search.searchCompressedFiles(true);
 		search.setFileName("plugin.json");
 
 		log.fine("Searching for plugins...");
-		for(FileSearch.FileSearchItem file : search){
+		for(FileSearcher.FileSearchItem file : search){
 			try {
 				DataNode node = JSONParser.read(IOUtil.getContentString(file.getInputStream()));
 				log.fine("Found plugin: "+file.getPath());
