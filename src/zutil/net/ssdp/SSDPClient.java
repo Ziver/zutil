@@ -47,9 +47,10 @@ import java.util.logging.Logger;
  */
 public class SSDPClient extends ThreadedUDPNetwork implements ThreadedUDPNetworkThread{
 	private static final Logger logger = LogUtil.getLogger();
-	// Contains all the received services
+	/** Mapping of search targets and list of associated services **/
 	private HashMap<String, LinkedList<StandardSSDPInfo>> services_st;
-	private HashMap<String, StandardSSDPInfo> 			 services_usn;
+    /** Map of all unique services received **/
+	private HashMap<String, StandardSSDPInfo> 			  services_usn;
 
 	private SSDPServiceListener listener;
 
@@ -71,7 +72,7 @@ public class SSDPClient extends ThreadedUDPNetwork implements ThreadedUDPNetwork
 	/**
 	 * Sends an request for an service
 	 * 
-	 * @param st is the SearchTarget of the service
+	 * @param   searchTarget    is the SearchTarget of the service
 	 * 
 	 * ***** REQUEST: 
 	 * M-SEARCH * HTTP/1.1 
@@ -81,20 +82,18 @@ public class SSDPClient extends ThreadedUDPNetwork implements ThreadedUDPNetwork
 	 * MX: 3 
 	 * 
 	 */
-	public void requestService(String st){
-		requestService(st, null);
+	public void requestService(String searchTarget){
+		requestService(searchTarget, null);
 	}
-	public void requestService(String st, HashMap<String,String> headers){
+	public void requestService(String searchTarget, HashMap<String,String> headers){
 		try {
-			services_st.put( st, new LinkedList<StandardSSDPInfo>() );
-			
 			// Generate an SSDP discover message
 			StringOutputStream msg = new StringOutputStream();
 			HttpPrintStream http = new HttpPrintStream( msg, HttpPrintStream.HttpMessageType.REQUEST );
 			http.setRequestType("M-SEARCH");
 			http.setRequestURL("*");
-			http.setHeader("Host", SSDPServer.SSDP_MULTICAST_ADDR+":"+SSDPServer.SSDP_PORT );
-			http.setHeader("ST", st );
+			http.setHeader("Host", SSDPServer.SSDP_MULTICAST_ADDR +":"+ SSDPServer.SSDP_PORT );
+			http.setHeader("ST", searchTarget );
 			http.setHeader("Man", "\"ssdp:discover\"" );
 			http.setHeader("MX", "3" );
 			if(headers != null) {
@@ -128,22 +127,24 @@ public class SSDPClient extends ThreadedUDPNetwork implements ThreadedUDPNetwork
 	 * Returns a list of received services by 
 	 * the given search target. 
 	 * 
-	 * @param st is the search target
+	 * @param   searchTarget    is the search target
 	 * @return a list of received services
 	 */
-	public LinkedList<StandardSSDPInfo> getServices(String st){
-		return services_st.get( st );
+	public LinkedList<StandardSSDPInfo> getServices(String searchTarget){
+        if(services_st.get(searchTarget) == null)
+            return new LinkedList<>();
+		return services_st.get(searchTarget);
 	}
 	
 	/**
 	 * Returns the amount of services in the search target
 	 * 
-	 * @param st is the search target
-	 * @return the amount of services
+	 * @param   searchTarget      is the search target
+	 * @return the amount of services cached
 	 */
-	public int getServicesCount(String st){
-		if( services_st.containsKey( st ) ){
-			return services_st.get( st ).size();
+	public int getServicesCount(String searchTarget){
+		if(services_st.containsKey(searchTarget)){
+			return services_st.get(searchTarget).size();
 		}
 		return 0;
 	}
@@ -151,7 +152,7 @@ public class SSDPClient extends ThreadedUDPNetwork implements ThreadedUDPNetwork
 	/**
 	 * Returns a service with the given USN.
 	 * 
-	 * @param usn is the unique identifier for the service
+	 * @param   usn     is the unique identifier for a service
 	 * @return an service, null if there is no such service
 	 */
 	public StandardSSDPInfo getService(String usn){
@@ -164,6 +165,16 @@ public class SSDPClient extends ThreadedUDPNetwork implements ThreadedUDPNetwork
 	public void clearServices(){
 		services_usn.clear();
 		services_st.clear();
+	}
+	/**
+	 * Clears all services matching the search target
+	 */
+	public void clearServices(String st){
+        if(services_st.get(st) != null) {
+            for (StandardSSDPInfo service : services_st.get(st)) {
+                services_usn.remove(service.getUSN());
+            }
+        }
 	}
 	
 	/**
