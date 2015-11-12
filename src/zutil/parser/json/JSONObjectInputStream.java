@@ -129,7 +129,7 @@ public class JSONObjectInputStream extends InputStream implements ObjectInput, C
 
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
-    protected Object readType(Class<?> type, String key, DataNode json) throws IllegalAccessException, ClassNotFoundException, InstantiationException, UnsupportedDataTypeException, NoSuchFieldException {
+    protected Object readType(Class<?> type, Class<?>[] genType, String key, DataNode json) throws IllegalAccessException, ClassNotFoundException, InstantiationException, UnsupportedDataTypeException, NoSuchFieldException {
         if(json == null || type == null)
             return null;
         // Field type is a primitive?
@@ -142,27 +142,29 @@ public class JSONObjectInputStream extends InputStream implements ObjectInput, C
             else{
                 Object array = Array.newInstance(type.getComponentType(), json.size());
                 for(int i=0; i<json.size(); i++){
-                    Array.set(array, i, readType(type.getComponentType(), key, json.get(i)));
+                    Array.set(array, i, readType(type.getComponentType(), null, key, json.get(i)));
                 }
                 return array;
             }
         }
         else if(List.class.isAssignableFrom(type)){
-            Class<?>[] genType = ClassUtil.getGenericClasses(type, List.class);
+            if(genType == null || genType.length < 1)
+                genType = ClassUtil.getGenericClasses(type, List.class);
             List list = (List)type.newInstance();
             for(int i=0; i<json.size(); i++){
-                list.add(readType((genType.length>=1? genType[0] : null), key, json.get(i)));
+                list.add(readType((genType.length>=1? genType[0] : null), null, key, json.get(i)));
             }
             return list;
         }
         else if(Map.class.isAssignableFrom(type)){
-            Class<?>[] genType = ClassUtil.getGenericClasses(type, Map.class);
+            if(genType == null || genType.length < 2)
+                genType = ClassUtil.getGenericClasses(type, Map.class);
             Map map = (Map)type.newInstance();
             for(Iterator<String> it=json.keyIterator(); it.hasNext();){
                 String subKey = it.next();
                 map.put(
                         subKey,
-                        readType((genType.length>=2? genType[1] : null), subKey, json.get(subKey)));
+                        readType((genType.length>=2? genType[1] : null), null, subKey, json.get(subKey)));
             }
             return map;
         }
@@ -210,10 +212,12 @@ public class JSONObjectInputStream extends InputStream implements ObjectInput, C
                     json.get(field.getName()) != null){
                 // Parse field
                 field.setAccessible(true);
-                field.set(obj, readType(
-                        field.getType(),
-                        field.getName(),
-                        json.get(field.getName())));
+                field.set(obj,
+                        readType(
+                                field.getType(),
+                                ClassUtil.getGenericClasses(field),
+                                field.getName(),
+                                json.get(field.getName())));
             }
         }
         // Add object to the cache

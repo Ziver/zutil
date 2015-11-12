@@ -76,12 +76,38 @@ public class JSONObjectOutputStream extends OutputStream implements ObjectOutput
     protected DataNode getDataNode(Object obj) throws IOException, IllegalArgumentException, IllegalAccessException {
         if(obj == null)
             return null;
+        Class objClass = obj.getClass();
         DataNode root;
 
         // Check if the object is a primitive
         if(ClassUtil.isPrimitive(obj.getClass()) ||
                 ClassUtil.isWrapper(obj.getClass())){
             root = getPrimitiveDataNode(obj.getClass(), obj);
+        }
+        // Add an array
+        else if(objClass.isArray()){
+            root = new DataNode(DataNode.DataType.List);
+            for(int i=0; i< Array.getLength(obj) ;i++){
+                root.add(getDataNode(Array.get(obj, i)));
+            }
+        }
+        // List
+        else if(List.class.isAssignableFrom(objClass)){
+            root = new DataNode(DataNode.DataType.List);
+            List list = (List)obj;
+            for(Object item : list){
+                root.add(getDataNode(item));
+            }
+        }
+        // Map
+        else if(Map.class.isAssignableFrom(objClass)){
+            root = new DataNode(DataNode.DataType.Map);
+            Map map = (Map)obj;
+            for(Object key : map.keySet()){
+                root.set(
+                        getDataNode(key).getString(),
+                        getDataNode(map.get(key)));
+            }
         }
         // Object is a complex data type
     	else {
@@ -109,40 +135,8 @@ public class JSONObjectOutputStream extends OutputStream implements ObjectOutput
                     // has object a value?
                     if(ignoreNullFields && fieldObj == null)
                         continue;
-                    // Add basic type (int, float...)
-                    else if(ClassUtil.isPrimitive(field.getType()) ||
-                            ClassUtil.isWrapper(field.getType())){
-                        root.set(field.getName(), getPrimitiveDataNode(field.getType(), fieldObj));
-                    }
-                    // Add an array
-                    else if(field.getType().isArray()){
-                        DataNode arrayNode = new DataNode(DataNode.DataType.List);
-                        for(int i=0; i< Array.getLength(fieldObj) ;i++){
-                            arrayNode.add(getDataNode(Array.get(fieldObj, i)));
-                        }
-                        root.set(field.getName(), arrayNode);
-                    }
-                    else if(List.class.isAssignableFrom(field.getType())){
-                        DataNode listNode = new DataNode(DataNode.DataType.List);
-                        List list = (List)fieldObj;
-                        for(Object item : list){
-                            listNode.add(getDataNode(item));
-                        }
-                        root.set(field.getName(), listNode);
-                    }
-                    else if(Map.class.isAssignableFrom(field.getType())){
-                        DataNode mapNode = new DataNode(DataNode.DataType.Map);
-                        Map map = (Map)fieldObj;
-                        for(Object key : map.keySet()){
-                            mapNode.set(
-                                    getDataNode(key).getString(),
-                                    getDataNode(map.get(key)));
-                        }
-                        root.set(field.getName(), mapNode);
-                    }
-                    else{
+                    else
                         root.set(field.getName(), getDataNode(fieldObj));
-                    }
                 }
             }
         }
