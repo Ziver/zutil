@@ -106,12 +106,12 @@ public class FileSearcher implements Iterable<FileSearcher.FileSearchItem>{
 
 	protected class FileSearchIterator implements Iterator<FileSearchItem>{
 		private ArrayList<FileSearchItem> fileList;
-		private int currentIndex;
+		private int index;
 		private FileSearchItem nextItem;
 
 		public FileSearchIterator(){
 			fileList = new ArrayList<FileSearchItem>();
-			currentIndex = 0;
+			index = 0;
 
 			addFiles(new FileSearchFileItem(root), root.list());
 			next();
@@ -119,7 +119,7 @@ public class FileSearcher implements Iterable<FileSearcher.FileSearchItem>{
 
 		@Override
 		public boolean hasNext() {
-			return currentIndex < fileList.size();
+			return nextItem != null;
 		}
 
 		@Override
@@ -129,20 +129,23 @@ public class FileSearcher implements Iterable<FileSearcher.FileSearchItem>{
 
 		@Override
 		public FileSearchItem next() {
-			if(currentIndex < 0 || currentIndex >= fileList.size())
-				return null;
 			// Temporarily save the current file
-			FileSearchItem ret = fileList.get(currentIndex);
-			currentIndex++;
+			FileSearchItem ret = nextItem;
 
 			// Find the next file
-			for(; currentIndex<fileList.size(); currentIndex++){
-				FileSearchItem file = fileList.get(currentIndex);
+			for(; index <fileList.size(); index++){
+				FileSearchItem file = fileList.get(index);
+				//#### FOLDERS
 				if(recursive && file.isDirectory()){
 					addFiles(file, file.listFiles());
-					if(searchFolders && file.getName().equalsIgnoreCase(fileName))
-						break;						
+					if(searchFolders) {
+                        if(fileName == null) // Match all folders
+                            break;
+                        else if(file.getName().equalsIgnoreCase(fileName))
+                            break;
+                    }
 				}
+				//#### COMPRESSED FILES
 				else if(searchCompressedFiles && file.isFile() &&
 						compressedFileExtensions.contains(
 								FileUtil.getFileExtension(file.getName()).toLowerCase())){
@@ -158,13 +161,25 @@ public class FileSearcher implements Iterable<FileSearcher.FileSearchItem>{
 						e.printStackTrace();
 					}
 				}
+				//#### REGULAR FILES
 				else if(searchFiles && file.isFile()){
-					if(extension != null && FileUtil.getFileExtension(file.getName()).equalsIgnoreCase(extension))
+                    if(extension == null && fileName == null) // Should we match all files
+                        break;
+                    else if(extension != null &&
+                            FileUtil.getFileExtension(file.getName()).equalsIgnoreCase(extension))
 						break;
-					else if(fileName != null && file.getName().equalsIgnoreCase(fileName))
+					else if(fileName != null &&
+                            file.getName().equalsIgnoreCase(fileName))
 						break;
 				}
 			}
+
+            if(index <fileList.size()) {
+                nextItem = fileList.get(index);
+                ++index;
+            }
+            else
+                nextItem = null;
 
 			return ret;
 		}
@@ -215,6 +230,8 @@ public class FileSearcher implements Iterable<FileSearcher.FileSearchItem>{
 
 		public InputStream getInputStream() throws IOException { return new FileInputStream(file); }
 		public String[] listFiles()         { return file.list(); }
+
+		public File getFile()               { return file; }
 
 	}
 
