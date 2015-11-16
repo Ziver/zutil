@@ -411,7 +411,10 @@ public class Templator {
         public void compile(StringBuilder str) {
             Object obj = getObject();
             if(obj != null)
-                str.append(obj.toString());
+                if(obj instanceof Templator)
+                    str.append(((Templator) obj).compile());
+                else
+                    str.append(obj.toString());
             else
                 str.append("{{").append(tag).append("}}");
         }

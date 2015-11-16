@@ -271,4 +271,20 @@ public class TemplatorTest {
         assertEquals(
                 "<HTML>111</HTML>", tmpl.compile());
     }
+
+
+    @Test
+    public void recursiveTemplateorTest(){
+        Templator tmpl2 = new Templator(
+                "{{value1}},{{value2}}");
+        tmpl2.set("value1", "sub1");
+        tmpl2.set("value2", "sub2");
+        Templator tmpl = new Templator(
+                "<HTML>{{parent}}:{{child}}</HTML>");
+        tmpl.set("parent", "super");
+        tmpl.set("child", tmpl2);
+
+        assertEquals(
+                "<HTML>super:sub1,sub2</HTML>", tmpl.compile());
+    }
 }
