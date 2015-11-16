@@ -41,9 +41,8 @@ import java.util.logging.Logger;
 /**
  * Created by Ziver
  */
-public class Configurator {
+public class Configurator<T> {
     private static final Logger log = LogUtil.getLogger();
-
 
     /**
      * Sets a field in a class as externally configurable.
@@ -65,12 +64,16 @@ public class Configurator {
 
     private static HashMap<Class, ConfigurationParam[]> classConf = new HashMap<>();
 
-    private Object obj;
+    private T obj;
     private ConfigurationParam[] params;
 
-    public Configurator(Object obj){
+    public Configurator(T obj){
         this.obj = obj;
         this.params = getConfiguration(obj.getClass(), obj);
+    }
+
+    public T getObject(){
+        return obj;
     }
 
     public ConfigurationParam[] getConfiguration(){
@@ -102,10 +105,10 @@ public class Configurator {
         return list;
     }
 
-    public void setConfiguration(){
+    public void applyConfiguration(){
         for(ConfigurationParam param : params){
             try {
-                param.set();
+                param.apply();
             } catch (IllegalAccessException e) {
                 log.log(Level.WARNING, null, e);
             }
@@ -166,7 +169,7 @@ public class Configurator {
         /**
          * This method will set a value for the represented field,
          * to apply the change to the source object the method
-         * {@link #setConfiguration()} needs to be called
+         * {@link #applyConfiguration()} needs to be called
          */
         public void setValue(String v){
             if(obj == null)
@@ -181,7 +184,7 @@ public class Configurator {
             }
         }
 
-        protected void set() throws IllegalAccessException {
+        protected void apply() throws IllegalAccessException {
             field.set(obj, value);
         }
 
