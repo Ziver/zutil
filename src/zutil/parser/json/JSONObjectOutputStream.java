@@ -26,6 +26,7 @@ package zutil.parser.json;
 
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 import zutil.ClassUtil;
+import zutil.parser.Base64Encoder;
 import zutil.parser.DataNode;
 import zutil.parser.DataNode.DataType;
 import static zutil.parser.json.JSONObjectInputStream.*;
@@ -86,9 +87,17 @@ public class JSONObjectOutputStream extends OutputStream implements ObjectOutput
         }
         // Add an array
         else if(objClass.isArray()){
-            root = new DataNode(DataNode.DataType.List);
-            for(int i=0; i< Array.getLength(obj) ;i++){
-                root.add(getDataNode(Array.get(obj, i)));
+            // Special case for byte arrays
+            if(objClass.getComponentType() == byte[].class) {
+                root = new DataNode(DataType.String);
+                root.set(Base64Encoder.encode((byte[])obj));
+            }
+            // Other arrays
+            else {
+                root = new DataNode(DataType.List);
+                for (int i = 0; i < Array.getLength(obj); i++) {
+                    root.add(getDataNode(Array.get(obj, i)));
+                }
             }
         }
         // List

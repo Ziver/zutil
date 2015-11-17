@@ -170,22 +170,6 @@ public class Converter {
 		return object;
 	}
 
-	/**
-	 * Checks if the given interface is implemented in the object
-	 * 
-	 * @param   object  the object to look for the interface
-	 * @param   interf  the interface to look for
-	 * @return true if the interface is implemented else false
-	 */
-	public static boolean isInstanceOf(Object object, Class<?> interf){
-		Class<?>[] objectInterf = object.getClass().getInterfaces();
-		for(int i=0; i<objectInterf.length ;i++){
-			if(objectInterf[i] == interf){
-				return true;
-			}
-		}
-		return false;
-	}
 
 	/** array needed for byteToHex */
 	private static char[] HEX_CHARS = {'0','1','2','3','4','5','6','7','8','9','a','b','c','d','e','f'};

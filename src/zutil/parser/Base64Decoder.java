@@ -52,23 +52,23 @@ public class Base64Decoder {
 	
 	public static String decode( String data ){
 		Base64Decoder base64 = new Base64Decoder();
-		base64.write( data );
+		base64.read( data );
 		return base64.toString();
 	}
 
     public static String decodeToHex( String data ){
         Base64Decoder base64 = new Base64Decoder();
-        base64.write( data );
+        base64.read( data );
         return Converter.toHexString( base64.getByte() );
     }
 
     public static byte[] decodeToByte( String data ){
         Base64Decoder base64 = new Base64Decoder();
-        base64.write( data );
+        base64.read( data );
         return base64.getByte();
     }
 	
-	public void write( String data ){
+	public void read( String data ){
 		byte[] buffer = new byte[ (data.length()*6/8) + 1 ];
 		int buffi = 0;
 		if( rest != 0 )
@@ -120,19 +120,9 @@ public class Base64Decoder {
 		rest = 0;
 		rest_data = 0;
 	}
+
 	
-	public static String addPadding( String data ){
-		int padding = 4 - (data.length() % 4);
-		switch( padding ){
-		case 0: return data;
-		case 1: return data + "=";
-		case 2: return data + "==";
-		case 3: return data + "===";
-		}
-		return null;
-	}
-	
-	private byte getByte( char c ){
+	private static byte getByte( char c ){
 		switch(c){
 		case 'A': return (byte)( 0 & 0xff);
 		case 'B': return (byte)( 1 & 0xff);

@@ -37,7 +37,7 @@ public class BEncodedParser {
 	/**
 	 * Returns the representation of the data in the BEncoded string
 	 * 
-	 * @param data The data to be decoded
+	 * @param	data	is the data to be decoded
 	 * @return
 	 */
 	public static DataNode read(String data){
@@ -47,8 +47,8 @@ public class BEncodedParser {
 	/**
 	 * Returns the representation of the data in the BEncoded string
 	 * 
-	 * @param data The data to be decoded
-	 * @param index The index in data to start from
+	 * @param	data	is the data to be decoded
+	 * @param	index	is the index in data to start from
 	 * @return
 	 */
 	private static DataNode decode_BEncoded(MutableInt index, StringBuilder data){
@@ -62,11 +62,9 @@ public class BEncodedParser {
 		 * i-3272002e.
 		 */
 		case 'i':
-			//System.out.println("Found Integer at "+index);
 			index.i++;
 			tmp = data.substring(index.i, data.indexOf("e"));
 			index.i += tmp.length() + 1;
-			//System.out.println(tmp);
 			return new DataNode( new Long(tmp));
 		/**
 		 * Lists are prefixed with a l and terminated by an e. The list
@@ -76,7 +74,6 @@ public class BEncodedParser {
 		 * would bEncode to li1e7:Mondunai3el3:Sub4:Listee
 		 */
 		case 'l':
-			//System.out.println("Found List at "+index);
 			index.i++;
 			DataNode list = new DataNode( DataType.List );
 			c = data.charAt(index.i);
@@ -85,7 +82,6 @@ public class BEncodedParser {
 				c = data.charAt(index.i);
 			}
 			index.i++;
-			//MultiPrintStream.out.dump(list);
 			if(list.size() == 1) return list.get(0);
 			else return list;
 		/**
@@ -95,7 +91,6 @@ public class BEncodedParser {
 		 * would bEncode to d3:key5:value7:Monduna3:com3:bit:8:Torrents6:numberi7ee
 		 */
 		case 'd':
-			//System.out.println("Found Dictionary at "+index);
 			index.i++;
 			DataNode map = new DataNode( DataType.Map );
 			c = data.charAt(index.i);
@@ -105,7 +100,6 @@ public class BEncodedParser {
 				c = data.charAt(index.i);
 			}
 			index.i++;
-			//MultiPrintStream.out.dump(map);
 			return map;
 		/**
 		 * Strings are prefixed with their length followed by a colon.
@@ -113,13 +107,11 @@ public class BEncodedParser {
 		 * would bEncode to 11:BitTorrents.
 		 */
 		default:
-			//System.out.println("Found String at "+index);
 			tmp = data.substring(index.i, data.indexOf(":"));
 			int length = Integer.parseInt(tmp);
 			index.i += tmp.length() + 1;
 			String ret = data.substring(index.i, length);
 			index.i += length;
-			//System.out.println(data.substring(i, i+length));
 			return new DataNode( ret );
 		}
 	}

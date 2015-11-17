@@ -59,9 +59,9 @@ public class BBCodeParser {
 	/**
 	 * Registers a new BBCode to the parser. Only one type of BBCode allowed.
 	 * 
-	 * @param bbcode is the BBCode e.g. "b" or "url"
-	 * @param html is the corresponding HTML e.g. "<a href='%1'>%2</a>" 
-	 * 				where the %x corresponds to BBCode like this: [url=%1]%2[/url] 
+	 * @param 	bbcode 		is the BBCode e.g. "b" or "url"
+	 * @param 	html 		is the corresponding HTML e.g. "<a href='%1'>%2</a>"
+	 * 						where the %x corresponds to BBCode like this: [url=%1]%2[/url]
 	 */
 	public void addBBCode(String bbcode, String html){
 		bbcodes.put(bbcode, html);
@@ -70,7 +70,7 @@ public class BBCodeParser {
 	/**
 	 * Removes a BBCode definition from the parser
 	 * 
-	 * @param bbcode is the bbcode to remove
+	 * @param 	bbcode 		is the bbcode to remove
 	 */
 	public void removeBBCode(String bbcode){
 		bbcodes.remove(bbcode);
@@ -79,7 +79,7 @@ public class BBCodeParser {
 	/**
 	 * Parses the text with BBCode and converts it to HTML
 	 * 
-	 * @param text is a String with BBCode
+	 * @param 	text 		is a String with BBCode
 	 * @return a String where all BBCode has been replaced by HTML
 	 */
 	public String read(String text){
@@ -149,7 +149,7 @@ public class BBCodeParser {
 	/**
 	 * Parses a parameter from a BBCode block: [url=param]
 	 * 
-	 * @param text is the text to parse from
+	 * @param	text	is the text to parse from
 	 * @return only the parameter string
 	 */
 	private String parseParam(MutableInt index, StringBuilder text){
@@ -168,7 +168,7 @@ public class BBCodeParser {
 	/**
 	 * Parses the value in the BBCodes e.g. [url]value[/url]
 	 * 
-	 * @param text is the text to parse the value from
+	 * @param	text	is the text to parse the value from
 	 */
 	private String parseValue(MutableInt index, StringBuilder text, String bbcode){
 		StringBuilder value = new StringBuilder();
