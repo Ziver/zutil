@@ -140,7 +140,7 @@ public class Base64Encoder {
 		case (byte)(46 & 0xff): return 'u';
 		case (byte)(47 & 0xff): return 'v';
 		case (byte)(48 & 0xff): return 'w';
-		case (byte)(49 & 0xff): return 'w';
+		case (byte)(49 & 0xff): return 'x';
 		case (byte)(50 & 0xff): return 'y';
 		case (byte)(51 & 0xff): return 'z';
 	

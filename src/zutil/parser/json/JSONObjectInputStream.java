@@ -137,7 +137,7 @@ public class JSONObjectInputStream extends InputStream implements ObjectInput, C
             return readPrimitive(type, json);
         }
         else if(type.isArray()){
-            if(type.getComponentType() == Byte.class)
+            if(type.getComponentType() == byte.class)
                 return Base64Decoder.decodeToByte(json.getString());
             else{
                 Object array = Array.newInstance(type.getComponentType(), json.size());

@@ -88,7 +88,7 @@ public class JSONObjectOutputStream extends OutputStream implements ObjectOutput
         // Add an array
         else if(objClass.isArray()){
             // Special case for byte arrays
-            if(objClass.getComponentType() == byte[].class) {
+            if(objClass.getComponentType() == byte.class) {
                 root = new DataNode(DataType.String);
                 root.set(Base64Encoder.encode((byte[])obj));
             }
