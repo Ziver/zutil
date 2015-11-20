@@ -162,9 +162,11 @@ public class JSONObjectInputStream extends InputStream implements ObjectInput, C
             Map map = (Map)type.newInstance();
             for(Iterator<String> it=json.keyIterator(); it.hasNext();){
                 String subKey = it.next();
-                map.put(
-                        subKey,
-                        readType((genType.length>=2? genType[1] : null), null, subKey, json.get(subKey)));
+                if(json.get(subKey) != null) {
+                    map.put(
+                            subKey,
+                            readType((genType.length >= 2 ? genType[1] : null), null, subKey, json.get(subKey)));
+                }
             }
             return map;
         }

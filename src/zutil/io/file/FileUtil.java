@@ -147,6 +147,17 @@ public class FileUtil {
         return data;
 	}
 
+	/**
+	 * Replaces the contents of a file with the specified data.
+	 *
+	 * @param	file	the file to write the data to
+	 * @param	data	the data to write to the file
+     */
+	public static void setContent(File file, byte[] data) throws IOException{
+		OutputStream out = new FileOutputStream(file);
+        out.write(data);
+        out.close();
+	}
 	
 	/**
 	 * Cache for the search functions
