@@ -216,40 +216,40 @@ public class DBConnection implements Closeable{
 	public static <T> T exec(PreparedStatement stmt, SQLResultHandler<T> handler) throws SQLException{
 		try{
 			// Execute
-			stmt.execute();
+			boolean isResultSet = stmt.execute();
 
 			// Handle result
 			if( handler != null ){
 				ResultSet result = null;
 				try{
-					if(stmt.getMoreResults()){
+					if(isResultSet){
 						result = stmt.getResultSet();
 						return handler.handleQueryResult(stmt, result);
 					}
 					else
 						return null;
 				}catch(SQLException sqlex){
-					logger.throwing(null, null, sqlex);
+					logger.log(Level.WARNING, null, sqlex);
 				}finally{
 					if(result != null){
 						try {
 							result.close();
 						} catch (SQLException sqlex) { 
-							logger.throwing(null, null, sqlex);
+							logger.log(Level.WARNING, null, sqlex);
 						}
 						result = null;
 					}
 				}
 			}
 		}catch(SQLException sqlex){
-			logger.throwing(null, null, sqlex);
+			logger.log(Level.WARNING, null, sqlex);
 		// Cleanup
 		} finally {		
 			if (stmt != null) {
 				try {
 					stmt.close();
 				} catch (SQLException sqlex) { 
-					logger.throwing(null, null, sqlex);
+					logger.log(Level.WARNING, null, sqlex);
 				}
 				stmt = null;
 			}
