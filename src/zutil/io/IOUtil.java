@@ -55,7 +55,7 @@ public class IOUtil {
 
     /**
      * Reads and returns all the content of a stream as a String.
-     * This function will close the inout stream at the end.
+     * This function will close the input stream at the end.
      *
      * @param 		stream
      * @return a String with the content of the stream
@@ -73,7 +73,8 @@ public class IOUtil {
     }
 
     /**
-     * Copies all data from the input stream to the output stream
+     * Copies all data from the input stream to the output stream.
+     * The input stream will not be closed after method has returned.
      */
     public static void copyStream(InputStream in, OutputStream out) throws IOException {
         byte[] buff = new byte[256];
