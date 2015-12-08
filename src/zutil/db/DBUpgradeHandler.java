@@ -74,7 +74,7 @@ public class DBUpgradeHandler {
 
     private void upgradeCreateTabels() throws SQLException {
         List<String> refTables = reference.exec("SELECT name FROM sqlite_master WHERE type='table';", new ListSQLResult<String>());
-        List<String> targetTables = reference.exec("SELECT name FROM sqlite_master WHERE type='table';", new ListSQLResult<String>());
+        List<String> targetTables = target.exec("SELECT name FROM sqlite_master WHERE type='table';", new ListSQLResult<String>());
 
         for(String table : refTables){
             if(!targetTables.contains(table)){
@@ -91,23 +91,20 @@ public class DBUpgradeHandler {
 
     private void upgradeDropTables() throws SQLException {
         List<String> refTables = reference.exec("SELECT name FROM sqlite_master WHERE type='table';", new ListSQLResult<String>());
-        List<String> targetTables = reference.exec("SELECT name FROM sqlite_master WHERE type='table';", new ListSQLResult<String>());
+        List<String> targetTables = target.exec("SELECT name FROM sqlite_master WHERE type='table';", new ListSQLResult<String>());
 
         for(String table : targetTables){
             if(!refTables.contains(table)){
-                logger.fine("Dropping table: ");
-                PreparedStatement stmt = target.getPreparedStatement("DROP TABLE ?");
-                stmt.setString(1, table);
-                DBConnection.exec(stmt);
+                logger.fine("Dropping table: " + table);
+                target.exec("DROP TABLE " + table);
             }
         }
     }
 
     private void upgradeAlterTables() throws SQLException {
         List<String> refTables = reference.exec("SELECT name FROM sqlite_master WHERE type='table';", new ListSQLResult<String>());
-        List<String> targetTables = reference.exec("SELECT name FROM sqlite_master WHERE type='table';", new ListSQLResult<String>());
+        List<String> targetTables = target.exec("SELECT name FROM sqlite_master WHERE type='table';", new ListSQLResult<String>());
 
-        PreparedStatement stmt;
         for(String table : targetTables){
             if(refTables.contains(table)){
                 // Get reference structure
@@ -121,16 +118,12 @@ public class DBUpgradeHandler {
                 for(DBColumn column : refStruct) {
                     if(!targetStruct.contains(column)) {
                         logger.fine("Adding column '" + column.name + "' to table: " + table);
-                        stmt = target.getPreparedStatement("ALTER TABLE ? ADD COLUMN ? ? ?");
-                        stmt.setString(1, table); // Table name
-                        stmt.setString(2, column.name); // Column name
-                        stmt.setString(2, column.type); // Column type
-                        stmt.setString(2, ""+// Column constraints
-                                (column.defaultValue != null ? " DEFAULT '"+column.defaultValue+"'" : "")+
-                                (column.notNull ? " NOT NULL" : "")+
-                                (column.publicKey ? " PRIMARY KEY" : "")
-                        );
-                        DBConnection.exec(stmt);
+                        target.exec("ALTER TABLE "+table+" ADD COLUMN"
+                                + " " + column.name // Column name
+                                + " " + column.type // Column type
+                                + (column.defaultValue != null ? " DEFAULT '"+column.defaultValue+"'" : "")
+                                + (column.notNull ? " NOT NULL" : "")
+                                + (column.publicKey ? " PRIMARY KEY" : ""));
                     }
                 }
                 // Check unnecessary columns
