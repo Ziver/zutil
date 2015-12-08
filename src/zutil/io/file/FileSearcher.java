@@ -87,12 +87,21 @@ public class FileSearcher implements Iterable<FileSearcher.FileSearchItem>{
 	//	this.depth = depth;
 	//}
 
+	/**
+	 * Sets if the searcher should match to files.
+     */
 	public void searchFiles(boolean searchFiles){
 		this.searchFiles = searchFiles;
 	}
+	/**
+	 * Sets if the searcher should match to folders.
+	 */
     public void searchFolders(boolean searchFolders){
         this.searchFolders = searchFolders;
     }
+    /**
+     * Sets if the searcher should go into compressed files.
+     */
     public void searchCompressedFiles(boolean searchCompressedFiles){
 		this.searchCompressedFiles = searchCompressedFiles;
 	}

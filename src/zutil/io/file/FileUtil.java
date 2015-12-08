@@ -24,12 +24,14 @@
 
 package zutil.io.file;
 
+import zutil.StringUtil;
 import zutil.io.IOUtil;
 import zutil.log.LogUtil;
 
 import java.io.*;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -94,12 +96,31 @@ public class FileUtil {
      * @param   source
      * @param   destination
      */
-    public static void copy(String source, String destination) throws IOException{
+    public static void copy(File source, File destination) throws IOException{
         try (BufferedInputStream in = new BufferedInputStream(new FileInputStream(source));
              BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(destination));){
 
             IOUtil.copyStream(in, out);
         }
+    }
+
+    /**
+     * Returns a nonexistent file that has the same name as the
+     * provided file but appended with a number sequence.
+     *
+     * @param   file    is the original file or subsequent files returned by this method
+     * @return a new File object with four numbers.
+     *          First call will return {FILE_NAME}.0001 and each
+     *          subsequent call will return a incremented the number
+     *          if the previous file was created.
+     */
+    public static File getNextFile(File file){
+        for(int i = 1; i<10000; ++i){
+            File next = new File(file.getParentFile(), file.getName()+"."+ StringUtil.prefixInt(i, 4));
+            if(!next.exists())
+                return next;
+        }
+        return null;
     }
 
     /**
@@ -175,106 +196,35 @@ public class FileUtil {
     }
 
     /**
-     * Cache for the search functions
-     */
-    private static HashMap<SearchItem,List<File>> search_cache = new HashMap<SearchItem,List<File>>();
-
-
-    /**
-     * An Cache Item class to identify different cached items
-     * @author Ziver
-     */
-    private static class SearchItem{
-        private File dir;
-        private boolean folders;
-        private int recurse;
-
-        protected SearchItem(File dir, boolean folders, int recurse){
-            this.dir = dir;
-            this.folders = folders;
-            this.recurse = recurse;
-        }
-
-        public boolean equals(Object o){
-            if(o!=null && o instanceof SearchItem){
-                SearchItem si = (SearchItem)o;
-                return dir.equals(si.dir) && folders == si.folders && recurse == si.recurse;
-            }
-            return false;
-        }
-        public int hashCode(){
-            int hash = 133;
-            hash = 23 * hash + dir.hashCode();
-            hash = 23 * hash + (folders ? 1 : 0);
-            hash = 23 * hash + recurse;
-            return 0;
-        }
-    }
-
-    /**
-     * Same as search(File dir) but it caches the result
-     * to be used next time this function is called with
-     * the same parameters.
-     */
-    public static List<File> cachedSearch(File dir){
-        return cachedSearch(dir, new LinkedList<File>(), true);
-    }
-
-    /**
-     * Same as search(File dir, List<File> fileList, boolean recursive)
-     * but is caches the result to be used next time this function is
-     * called with the same parameters.
-     */
-    public static List<File> cachedSearch(File dir, List<File> fileList, boolean recursive){
-        return cachedSearch(dir, new LinkedList<File>(), false, (recursive ? Integer.MAX_VALUE : 0));
-    }
-
-    /**
-     * Same as search(File dir, List<File> fileList, boolean folders, int recurse)
-     * but is caches the result to be used next time this function is called
-     * with the same parameters.
-     */
-    public static List<File> cachedSearch(File dir, List<File> fileList, boolean folders, int recurse){
-        SearchItem si = new SearchItem(dir, folders, recurse);
-        if( search_cache.containsKey(si) ){
-            fileList.addAll( search_cache.get(si) );
-            return fileList;
-        }
-        search(dir, fileList, folders, recurse);
-        search_cache.put(si, fileList);
-        return fileList;
-    }
-
-    /**
-     * Returns a List with all the files in a folder and sub folders
+     * Searches the directory and all its subdirectories
      *
      * @param 		dir 		is the directory to search in
-     * @return 					The List with the files
+     * @return a List of files
      */
     public static List<File> search(File dir){
         return search(dir, new LinkedList<File>(), true);
     }
 
     /**
-     * Returns a ArrayList with all the files in a folder and sub folders
+     * Searches the directory and all its subdirectories
      *
      * @param 		dir 		is the directory to search in
-     * @param 		fileList 	is the List to add the files to
-     * @param 		recursive 	is if the method should search the sub directories to.
-     * @return					A List with the files
+     * @param 		fileList 	an existing List to add all files found
+     * @param 		recursive 	if the search should go into subdirectories
+     * @return A List of files
      */
     public static List<File> search(File dir, List<File> fileList, boolean recursive){
         return search(dir, new LinkedList<File>(), false, (recursive ? Integer.MAX_VALUE : 0));
     }
 
     /**
-     * Returns a ArrayList with all the files in a folder and sub folders
+     * Searches the directory and all its subdirectories
      *
-     * @param 		dir 		is the directory to search in
-     * @param 		fileList 	is the List to add the files to
-     * @param 		folders 	is if the method should add the folders to the List
-     * @param 		recurse 	is how many times it should recurse into folders
-     * @return 					A List with the files and/or folders
+     * @param 		dir 		is the root directory to start searching from
+     * @param 		fileList 	an existing List to add all files found
+     * @param 		folders 	is if the method should add folders to the List also
+     * @param 		recurse 	if the search should go into subdirectories
+     * @return A List with the files and/or folders
      */
     public static List<File> search(File dir, List<File> fileList, boolean folders, int recurse){
         if(recurse<0)
@@ -326,13 +276,13 @@ public class FileUtil {
     }
 
     /**
-     * Replaces the current extension on the file withe the given one.
+     * Replaces the current extension on the file with the given one.
      *
      * @param 		file		is the name of the file
      * @param 		ext			is the new extension, without the dot
      * @return
      */
-    public static String changeExtension(String file, String ext) {
+    public static String replaceExtension(String file, String ext) {
         if( file == null )
             return null;
         if( file.lastIndexOf(".") == -1 )

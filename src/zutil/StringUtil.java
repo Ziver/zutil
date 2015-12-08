@@ -112,7 +112,22 @@ public class StringUtil {
 		
 		return str.toString();
 	}
-	
+
+    /**
+     * Generates a String where the number has been prefixed
+     * with zeros until the string has the wanted size.
+     *
+     * @param      number
+     * @param      length
+     * @return a new String with the given length or longer if the number has more characters.
+     */
+    public static String prefixInt(int number, int length){
+        StringBuilder str = new StringBuilder().append(number).reverse();
+        while (str.length() < length)
+            str.append('0');
+        return str.reverse().toString();
+    }
+
 	/**
 	 * Trims the given char and whitespace at the beginning and the end
 	 * 
@@ -218,7 +233,7 @@ public class StringUtil {
 	 * @return A string containing a specific amount of spaces
 	 */
 	public static String getSpaces(int i){
-		if(SPACES.size() <= i){ // Generate the String with spaces
+		if(SPACES.size() <= i){ // Do we need to generate more spaces?
 			synchronized (SPACES) { // Make sure no one else updates the list at the same time
 				if(SPACES.size() <= i) { // Make sure the previous synchronized thread hasn't already generated strings
 					if (SPACES.isEmpty())
