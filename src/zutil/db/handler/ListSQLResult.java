@@ -62,7 +62,7 @@ public class ListSQLResult<T> implements SQLResultHandler<List<T>> {
 
 	public List<T> handleQueryResult(Statement stmt, ResultSet result) throws SQLException{
 		while( result.next() )
-			list.add((T)result.getObject(0));
+			list.add((T)result.getObject(1));
 		return list;
 	}
 }

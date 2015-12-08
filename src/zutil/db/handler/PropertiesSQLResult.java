@@ -63,7 +63,7 @@ public class PropertiesSQLResult implements SQLResultHandler<Properties> {
 	 */
 	public Properties handleQueryResult(Statement stmt, ResultSet result) throws SQLException{
 		while( result.next() )
-			prop.setProperty(result.getString(0), result.getString(1));
+			prop.setProperty(result.getString(1), result.getString(2));
 		return prop;
 	}
 }
