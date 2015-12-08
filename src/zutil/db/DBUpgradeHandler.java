@@ -1,9 +1,14 @@
 package zutil.db;
 
 import zutil.db.handler.ListSQLResult;
+import zutil.db.handler.SimpleSQLResult;
 import zutil.log.LogUtil;
 
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -47,12 +52,14 @@ public class DBUpgradeHandler {
         - setTransactionSuccessful
          */
         try {
+            logger.fine("Starting upgrade transaction...");
             target.exec("BEGIN IMMEDIATE TRANSACTION");
 
             upgradeCreateTabels();
+            upgradeDropTables();
             upgradeAlterTables();
-            upgradeDeleteTables();
 
+            logger.fine("Committing upgrade transaction...");
             target.exec("COMMIT TRANSACTION");
         } catch(SQLException e){
             try {
@@ -65,7 +72,6 @@ public class DBUpgradeHandler {
     }
 
 
-
     private void upgradeCreateTabels() throws SQLException {
         List<String> refTables = reference.exec("SELECT name FROM sqlite_master WHERE type='table';", new ListSQLResult<String>());
         List<String> targetTables = reference.exec("SELECT name FROM sqlite_master WHERE type='table';", new ListSQLResult<String>());
@@ -73,17 +79,100 @@ public class DBUpgradeHandler {
         for(String table : refTables){
             if(!targetTables.contains(table)){
                 logger.fine("Creating new table: "+ table);
+                // Get reference create sql
+                PreparedStatement stmt = reference.getPreparedStatement("SELECT sql FROM sqlite_master WHERE name == ?");
+                stmt.setString(1, table);
+                String sql = DBConnection.exec(stmt, new SimpleSQLResult<String>());
+                // Execute sql on target
+                target.exec(sql);
+            }
+        }
+    }
 
+    private void upgradeDropTables() throws SQLException {
+        List<String> refTables = reference.exec("SELECT name FROM sqlite_master WHERE type='table';", new ListSQLResult<String>());
+        List<String> targetTables = reference.exec("SELECT name FROM sqlite_master WHERE type='table';", new ListSQLResult<String>());
+
+        for(String table : targetTables){
+            if(!refTables.contains(table)){
+                logger.fine("Dropping table: ");
+                PreparedStatement stmt = target.getPreparedStatement("DROP TABLE ?");
+                stmt.setString(1, table);
+                DBConnection.exec(stmt);
             }
         }
     }
 
     private void upgradeAlterTables() throws SQLException {
-        logger.fine("Altering table: ");
-        //RAGMA table_info([tablename]);
+        List<String> refTables = reference.exec("SELECT name FROM sqlite_master WHERE type='table';", new ListSQLResult<String>());
+        List<String> targetTables = reference.exec("SELECT name FROM sqlite_master WHERE type='table';", new ListSQLResult<String>());
+
+        for(String table : targetTables){
+            if(refTables.contains(table)){
+                // Get reference structure
+                PreparedStatement stmt = reference.getPreparedStatement("PRAGMA table_info(?)");
+                stmt.setString(1, table);
+                List<DBColumn> refStruct = DBConnection.exec(stmt, new TableStructureResultHandler());
+
+                // Get target structure
+                stmt = target.getPreparedStatement("PRAGMA table_info(?)");
+                stmt.setString(1, table);
+                List<DBColumn> targetStruct = DBConnection.exec(stmt, new TableStructureResultHandler());
+
+                // Check existing columns
+                for(DBColumn column : refStruct) {
+                    if(!targetStruct.contains(column)) {
+                        logger.fine("Adding column '" + column.name + "' to table: " + table);
+                        stmt = target.getPreparedStatement("ALTER TABLE ? ADD COLUMN ? ? ?");
+                        stmt.setString(1, table); // Table name
+                        stmt.setString(2, column.name); // Column name
+                        stmt.setString(2, column.type); // Column type
+                        stmt.setString(2, ""+// Column constraints
+                                (column.defaultValue != null ? " DEFAULT '"+column.defaultValue+"'" : "")+
+                                (column.notNull ? " NOT NULL" : "")+
+                                (column.publicKey ? " PRIMARY KEY" : "")
+                        );
+                        DBConnection.exec(stmt);
+                    }
+                }
+                // Check unnecessary columns
+                for(DBColumn column : targetStruct) {
+                    if(!refStruct.contains(column)) {
+                        logger.warning("Unable to drop column: '" + column.name + "' from table: "+ table +" (SQLite does not support dropping columns)");
+                    }
+                }
+            }
+        }
     }
 
-    private void upgradeDeleteTables() throws SQLException {
-        logger.fine("Deleting table: ");
+    private static class DBColumn{
+        String name;
+        String type;
+        boolean notNull;
+        String defaultValue;
+        boolean publicKey;
+
+        public boolean equals(Object obj){
+            return obj instanceof DBColumn &&
+                    name.equals(((DBColumn)obj).name);
+        }
+    }
+
+    private static class TableStructureResultHandler implements SQLResultHandler<List<DBColumn>>{
+
+        @Override
+        public List<DBColumn> handleQueryResult(Statement stmt, ResultSet result) throws SQLException {
+            ArrayList<DBColumn> list = new ArrayList<>();
+            while (result.next()){
+                DBColumn column = new DBColumn();
+                column.name = result.getString("name");
+                column.type = result.getString("type");
+                column.notNull = result.getBoolean("notnull");
+                column.defaultValue = result.getString("dflt_value");
+                column.publicKey = result.getBoolean("pk");
+                list.add(column);
+            }
+            return list;
+        }
     }
 }
