@@ -24,7 +24,7 @@
 package zutil.test;
 
 import zutil.db.DBConnection;
-import zutil.db.handler.SimpleSQLHandler;
+import zutil.db.handler.SimpleSQLResult;
 
 import java.sql.PreparedStatement;
 
@@ -43,13 +43,13 @@ public class DBConnectionTest {
 			db.exec("UPDATE ...");
 			
 			// Query 3
-			String s = db.exec("SELECT hello", new SimpleSQLHandler<String>());
+			String s = db.exec("SELECT hello", new SimpleSQLResult<String>());
 			System.out.println( s );
 			
 			// Query 4
 			PreparedStatement sql2 = db.getPreparedStatement("SELECT ?");
 			sql2.setString(1, "hello");
-			String s2 = DBConnection.exec(sql2, new SimpleSQLHandler<String>());
+			String s2 = DBConnection.exec(sql2, new SimpleSQLResult<String>());
 			System.out.println( s2 );
 			
 			db.close();

@@ -24,7 +24,7 @@
 
 package zutil.db;
 
-import zutil.db.handler.SimpleSQLHandler;
+import zutil.db.handler.SimpleSQLResult;
 import zutil.log.LogUtil;
 
 import javax.naming.InitialContext;
@@ -52,7 +52,7 @@ public class DBConnection implements Closeable{
 	/**
 	 * Creates an Connection from JNDI
 	 * 
-	 * @param jndi the name of the connection, e.g. "jdbc/mysql"
+	 * @param   jndi        the name of the connection, e.g. "jdbc/mysql"
 	 */
 	public DBConnection(String jndi) throws NamingException, SQLException{
 		InitialContext ctx = new InitialContext();
@@ -63,10 +63,10 @@ public class DBConnection implements Closeable{
 	/**
 	 * Creates an Connection to a MySQL server
 	 * 
-	 * @param url is the URL of the MySQL server
-	 * @param db is the database to connect to
-	 * @param user is the user name
-	 * @param password is the password
+	 * @param   url         is the URL of the MySQL server
+	 * @param   db          is the database to connect to
+	 * @param   user        is the user name
+	 * @param   password    is the password
 	 */
 	public DBConnection(String url, String db, String user, String password) throws Exception{
 		this(DBMS.MySQL, url, db, user, password);
@@ -75,11 +75,11 @@ public class DBConnection implements Closeable{
 	/**
 	 * Creates an Connection to a DB server
 	 * 
-	 * @param dbms is the DB type
-	 * @param url is the URL of the MySQL server
-	 * @param db is the database to connect to
-	 * @param user is the user name
-	 * @param password is the password
+	 * @param   dbms        is the DB type
+	 * @param   url         is the URL of the MySQL server
+	 * @param   db          is the database to connect to
+	 * @param   user        is the user name
+	 * @param   password    is the password
 	 */
 	public DBConnection(DBMS dbms, String url, String db, String user, String password) throws Exception{
 		String dbms_name = initDriver(dbms);
@@ -89,8 +89,8 @@ public class DBConnection implements Closeable{
 	/**
 	 * Creates an Connection to a DB file
 	 * 
-	 * @param dbms is the DB type
-	 * @param db is the database to connect to
+	 * @param   dbms    is the DB type
+	 * @param   db      is the database to connect to
 	 */
 	public DBConnection(DBMS dbms, String db) throws Exception{
 		String dbms_name = initDriver(dbms);
@@ -107,7 +107,7 @@ public class DBConnection implements Closeable{
 	/**
 	 * Initiates the DB driver and returns its protocol name.
 	 * 
-	 * @param db is the DB type
+	 * @param   db      is the DB type
 	 * @return the protocol name of the DBMS
 	 */
 	public String initDriver(DBMS db) throws InstantiationException, IllegalAccessException, ClassNotFoundException{
@@ -129,7 +129,7 @@ public class DBConnection implements Closeable{
 	 */
 	public long getLastInsertID(){
 		try{
-			return exec("SELECT LAST_INSERT_ID()", new SimpleSQLHandler<BigInteger>()).longValue();
+			return exec("SELECT LAST_INSERT_ID()", new SimpleSQLResult<BigInteger>()).longValue();
 		}catch(SQLException e){
 			logger.log(Level.WARNING, null, e);
 		}
@@ -140,7 +140,7 @@ public class DBConnection implements Closeable{
 	 * Runs a Prepared Statement.<br>
 	 * <b>NOTE:</b> Don't forget to close the PreparedStatement or it can lead to memory leaks
 	 * 
-	 * @param sql is the SQL query to run
+	 * @param	sql		is the SQL query to run
 	 * @return An PreparedStatement
 	 */
 	public PreparedStatement getPreparedStatement(String sql) throws SQLException{
@@ -159,7 +159,7 @@ public class DBConnection implements Closeable{
 	/**
 	 * Executes an query and cleans up after itself.
 	 * 
-	 * @param query is the query
+	 * @param	query		is the query
 	 * @return update count or -1 if the query is not an update query
 	 */
 	public int exec(String query) throws SQLException {
@@ -170,7 +170,7 @@ public class DBConnection implements Closeable{
 	/**
 	 * Executes an query and cleans up after itself.
 	 * 
-	 * @param stmt is the query
+	 * @param	stmt		is the query
 	 * @return update count or -1 if the query is not an update query
 	 */
 	public static int exec(PreparedStatement stmt) throws SQLException {
@@ -195,10 +195,10 @@ public class DBConnection implements Closeable{
 	
 	/**
 	 * Executes an query and cleans up after itself.
-	 * @param <T> 
-	 * 
-	 * @param query is the query
-	 * @param handler is the result handler
+	 *
+	 * @param	<T>
+	 * @param	query		is the query
+	 * @param	handler		is the result handler
 	 * @return update count or -1 if the query is not an update query
 	 */
 	public <T> T exec(String query, SQLResultHandler<T> handler) throws SQLException {
@@ -209,8 +209,8 @@ public class DBConnection implements Closeable{
 	/**
 	 * Executes an query and cleans up after itself.
 	 * 
-	 * @param stmt is the query
-	 * @param handler is the result handler
+	 * @param	stmt		is the query
+	 * @param	handler		is the result handler
 	 * @return the object from the handler
 	 */
 	public static <T> T exec(PreparedStatement stmt, SQLResultHandler<T> handler) throws SQLException{
@@ -260,7 +260,7 @@ public class DBConnection implements Closeable{
 	/**
 	 * Sets the pool that this connection belongs to
 	 * 
-	 * @param pool is the pool
+	 * @param	pool	is the pool
 	 */
 	protected void setPool(DBConnectionPool pool){
 		if( pool != null )
