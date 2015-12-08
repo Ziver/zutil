@@ -207,10 +207,10 @@ public class DBConnection implements Closeable{
 	}
 
 	/**
-	 * Executes an query and cleans up after itself.
+	 * Executes a query and cleans up after itself.
 	 * 
-	 * @param	stmt		is the query
-	 * @param	handler		is the result handler
+	 * @param	stmt		is the query to run
+	 * @param	handler		is the result handler that will be called with the output of the execution
 	 * @return the object from the handler
 	 */
 	public static <T> T exec(PreparedStatement stmt, SQLResultHandler<T> handler) throws SQLException{
@@ -228,34 +228,60 @@ public class DBConnection implements Closeable{
 					}
 					else
 						return null;
-				}catch(SQLException sqlex){
-					logger.log(Level.WARNING, null, sqlex);
+				}catch(SQLException e){
+					logger.log(Level.WARNING, null, e);
 				}finally{
 					if(result != null){
 						try {
 							result.close();
-						} catch (SQLException sqlex) { 
-							logger.log(Level.WARNING, null, sqlex);
+						} catch (SQLException e) {
+							logger.log(Level.WARNING, null, e);
 						}
 						result = null;
 					}
 				}
 			}
-		}catch(SQLException sqlex){
-			logger.log(Level.WARNING, null, sqlex);
+		}catch(SQLException e){
+			logger.log(Level.WARNING, null, e);
 		// Cleanup
 		} finally {		
 			if (stmt != null) {
 				try {
 					stmt.close();
-				} catch (SQLException sqlex) { 
-					logger.log(Level.WARNING, null, sqlex);
+				} catch (SQLException e) {
+					logger.log(Level.WARNING, null, e);
 				}
 				stmt = null;
 			}
 		}
 		return null;
 	}
+
+    /**
+     * Executes an query and cleans up after itself.
+     *
+     * @param	stmt		is the query to run
+     * @return a array of ints representing the number of updates for each batch statements
+     */
+    public static int[] execBatch(PreparedStatement stmt) throws SQLException{
+        try{
+            // Execute
+            return stmt.executeBatch();
+        }catch(SQLException e){
+            logger.log(Level.WARNING, null, e);
+            // Cleanup
+        } finally {
+            if (stmt != null) {
+                try {
+                    stmt.close();
+                } catch (SQLException e) {
+                    logger.log(Level.WARNING, null, e);
+                }
+                stmt = null;
+            }
+        }
+        return new int[0];
+    }
 
 	/**
 	 * Sets the pool that this connection belongs to

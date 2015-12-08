@@ -107,17 +107,15 @@ public class DBUpgradeHandler {
         List<String> refTables = reference.exec("SELECT name FROM sqlite_master WHERE type='table';", new ListSQLResult<String>());
         List<String> targetTables = reference.exec("SELECT name FROM sqlite_master WHERE type='table';", new ListSQLResult<String>());
 
+        PreparedStatement stmt;
         for(String table : targetTables){
             if(refTables.contains(table)){
                 // Get reference structure
-                PreparedStatement stmt = reference.getPreparedStatement("PRAGMA table_info(?)");
-                stmt.setString(1, table);
-                List<DBColumn> refStruct = DBConnection.exec(stmt, new TableStructureResultHandler());
-
+                List<DBColumn> refStruct = reference.exec("PRAGMA table_info("+table+")",
+                        new TableStructureResultHandler());
                 // Get target structure
-                stmt = target.getPreparedStatement("PRAGMA table_info(?)");
-                stmt.setString(1, table);
-                List<DBColumn> targetStruct = DBConnection.exec(stmt, new TableStructureResultHandler());
+                List<DBColumn> targetStruct = target.exec("PRAGMA table_info("+table+")",
+                        new TableStructureResultHandler());
 
                 // Check existing columns
                 for(DBColumn column : refStruct) {
