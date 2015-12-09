@@ -1,5 +1,6 @@
 package zutil.db;
 
+import com.sun.deploy.util.StringUtils;
 import zutil.db.handler.ListSQLResult;
 import zutil.db.handler.SimpleSQLResult;
 import zutil.log.LogUtil;
@@ -26,7 +27,7 @@ public class DBUpgradeHandler {
 
     private DBConnection reference;
     private DBConnection target;
-    private boolean forceUpgrade = false;
+    private boolean forceUpgradeEnabled = false;
     private HashMap<String,String> tableRenameMap;
 
 
@@ -57,7 +58,7 @@ public class DBUpgradeHandler {
      * @param   enable
      */
     public void forceDBUpgrade(boolean enable){
-        this.forceUpgrade = enable;
+        this.forceUpgradeEnabled = enable;
     }
 
     public void upgrade() throws SQLException {
@@ -84,29 +85,28 @@ public class DBUpgradeHandler {
 
     private void upgradeRenameTables() throws SQLException {
         if(tableRenameMap.size() > 0) {
-            List<String> targetTables = target.exec("SELECT name FROM sqlite_master WHERE type='table';", new ListSQLResult<String>());
+            List<String> targetTables = getTableList(target);
 
             for (String oldTableName : tableRenameMap.keySet()) {
                 if (targetTables.contains(oldTableName)) {
                     String newTableName = tableRenameMap.get(oldTableName);
                     logger.fine("Renaming table from: " + oldTableName + ", to: " + newTableName);
-                    target.exec("ALTER TABLE "+oldTableName+" RENAME TO "+newTableName);
+                    target.exec(String.format(
+                            "ALTER TABLE %s RENAME TO %s", oldTableName, newTableName));
                 }
             }
         }
     }
 
     private void upgradeCreateTables() throws SQLException {
-        List<String> refTables = reference.exec("SELECT name FROM sqlite_master WHERE type='table';", new ListSQLResult<String>());
-        List<String> targetTables = target.exec("SELECT name FROM sqlite_master WHERE type='table';", new ListSQLResult<String>());
+        List<String> refTables = getTableList(reference);
+        List<String> targetTables = getTableList(target);
 
         for(String table : refTables){
             if(!targetTables.contains(table)){
                 logger.fine("Creating new table: "+ table);
                 // Get reference create sql
-                PreparedStatement stmt = reference.getPreparedStatement("SELECT sql FROM sqlite_master WHERE name == ?");
-                stmt.setString(1, table);
-                String sql = DBConnection.exec(stmt, new SimpleSQLResult<String>());
+                String sql = getTableSql(reference, table);
                 // Execute sql on target
                 target.exec(sql);
             }
@@ -114,8 +114,8 @@ public class DBUpgradeHandler {
     }
 
     private void upgradeDropTables() throws SQLException {
-        List<String> refTables = reference.exec("SELECT name FROM sqlite_master WHERE type='table';", new ListSQLResult<String>());
-        List<String> targetTables = target.exec("SELECT name FROM sqlite_master WHERE type='table';", new ListSQLResult<String>());
+        List<String> refTables = getTableList(reference);
+        List<String> targetTables = getTableList(target);
 
         for(String table : targetTables){
             if(!refTables.contains(table)){
@@ -126,53 +126,85 @@ public class DBUpgradeHandler {
     }
 
     private void upgradeAlterTables() throws SQLException {
-        List<String> refTables = reference.exec("SELECT name FROM sqlite_master WHERE type='table';", new ListSQLResult<String>());
-        List<String> targetTables = target.exec("SELECT name FROM sqlite_master WHERE type='table';", new ListSQLResult<String>());
+        List<String> refTables = getTableList(reference);
+        List<String> targetTables = getTableList(target);
 
         for(String table : targetTables){
             if(refTables.contains(table)){
                 // Get reference structure
-                List<DBColumn> refStruct = reference.exec("PRAGMA table_info("+table+")",
-                        new TableStructureResultHandler());
+                List<DBColumn> refStruct = getColumnList(reference, table);
                 // Get target structure
-                List<DBColumn> targetStruct = target.exec("PRAGMA table_info("+table+")",
-                        new TableStructureResultHandler());
+                List<DBColumn> targetStruct = getColumnList(target, table);
 
-                // Check existing columns
-                for(DBColumn column : refStruct) {
-                    if(!targetStruct.contains(column)) {
-                        logger.fine("Adding column '" + column.name + "' to table: " + table);
-                        target.exec("ALTER TABLE "+table+" ADD COLUMN"
-                                + " " + column.name // Column name
-                                + " " + column.type // Column type
-                                + (column.defaultValue != null ? " DEFAULT '"+column.defaultValue+"'" : "")
-                                + (column.notNull ? " NOT NULL" : "")
-                                + (column.publicKey ? " PRIMARY KEY" : ""));
-                    }
-                }
                 // Check unnecessary columns
+                boolean forcedUpgrade = false;
                 for(DBColumn column : targetStruct) {
                     if(!refStruct.contains(column)) {
-                        if(forceUpgrade){
-                        /*
-                        - put in a list the existing columns List<String> columns = DBUtils.GetColumns(db, TableName);
-                        - backup table (ALTER table " + TableName + " RENAME TO 'temp_"                    + TableName)
-                        - create new table (the newest table creation schema)
-                        - get the intersection with the new columns, this time columns taken from the upgraded table (columns.retainAll(DBUtils.GetColumns(db, TableName));)
-                        - restore data (String cols = StringUtils.join(columns, ",");
-                                    db.execSQL(String.format(
-                                            "INSERT INTO %s (%s) SELECT %s from temp_%s",
-                                            TableName, cols, cols, TableName));
-                        )
-                        - remove backup table (DROP table 'temp_" + TableName)
-                         */
-                        }
+                        if(forceUpgradeEnabled)
+                            forcedUpgrade = true;
                         else
-                            logger.warning("Unable to drop column: '" + column.name + "' from table: "+ table +" (SQLite does not support dropping columns)");
+                            logger.warning("Unable to drop column: '" + column.name + "' from table: "+ table
+                                    +" (SQLite does not support dropping columns)");
+                    }
+                }
+
+                // Do a forced upgrade where we create a new table and migrate the old data
+                if(forcedUpgrade){
+                    // Backup table
+                    String backupTable = table+"_temp";
+                    logger.fine("Forced Upgrade: Backing up table: "+table+", to: "+backupTable);
+                    target.exec(String.format("ALTER TABLE %s RENAME TO %s", table, backupTable));
+
+                    // Creating new table
+                    logger.fine("Forced Upgrade: Creating new table: "+table);
+                    String sql = getTableSql(reference, table);
+                    target.exec(sql);
+
+                    // Restoring data
+                    logger.fine("Forced Upgrade: Restoring data for table: "+table);
+                    String cols = StringUtils.join(refStruct, ",");
+                    target.exec(String.format(
+                            "INSERT INTO %s (%s) SELECT %s FROM %s",
+                            table, cols, cols, backupTable));
+
+                    // Remove backup table
+                    logger.fine("Forced Upgrade: Removing backup table: "+backupTable);
+                    target.exec("DROP TABLE " + backupTable);
+                }
+                // Do a
+                else{
+                    // Add new columns
+                    for(DBColumn column : refStruct) {
+                        if(!targetStruct.contains(column)) {
+                            logger.fine("Adding column '" + column.name + "' to table: " + table);
+                            target.exec(
+                                    String.format("ALTER TABLE %s ADD COLUMN %s %s %s%s%s",
+                                            table,
+                                            column.name,
+                                            column.type,
+                                            (column.defaultValue != null ? " DEFAULT '"+column.defaultValue+"'" : ""),
+                                            (column.notNull ? " NOT NULL" : ""),
+                                            (column.publicKey ? " PRIMARY KEY" : "")));
+                        }
                     }
                 }
             }
         }
+    }
+
+
+    private static List<String> getTableList(DBConnection db) throws SQLException {
+        return db.exec("SELECT name FROM sqlite_master WHERE type='table';", new ListSQLResult<String>());
+    }
+    private static String getTableSql(DBConnection db, String table) throws SQLException {
+        PreparedStatement stmt = db.getPreparedStatement("SELECT sql FROM sqlite_master WHERE name == ?");
+        stmt.setString(1, table);
+        return DBConnection.exec(stmt, new SimpleSQLResult<String>());
+    }
+    private static List<DBColumn> getColumnList(DBConnection db, String table) throws SQLException {
+        return db.exec(
+                String.format("PRAGMA table_info(%s)", table),
+                new TableStructureResultHandler());
     }
 
     private static class DBColumn{
