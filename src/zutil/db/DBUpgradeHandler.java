@@ -9,6 +9,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -25,9 +26,12 @@ public class DBUpgradeHandler {
 
     private DBConnection reference;
     private DBConnection target;
+    private boolean forceUpgrade = false;
+    private HashMap<String,String> tableRenameMap;
 
 
     public DBUpgradeHandler(DBConnection reference){
+        this.tableRenameMap = new HashMap<>();
         this.reference = reference;
     }
 
@@ -35,27 +39,34 @@ public class DBUpgradeHandler {
         this.target = db;
     }
 
+    /**
+     * Will create a rename mapping where an existing table will be renamed.
+     *
+     * @param   oldTableName    current name of the table
+     * @param   newTableName    new name that ol table will be renamed to.
+     */
+    public void setTableRenameMap(String oldTableName, String newTableName){
+        this.tableRenameMap.put(oldTableName, newTableName);
+    }
+
+    /**
+     * With the default behaviour unnecessary columns will not be removed.
+     * But if forced upgrade is set to true then the upgrade handler will
+     * create a new table and migrate the data from the old one to the new table.
+     *
+     * @param   enable
+     */
+    public void forceDBUpgrade(boolean enable){
+        this.forceUpgrade = enable;
+    }
+
     public void upgrade() throws SQLException {
-        /*
-        - beginTransaction
-        - run a table creation with if not exists (we are doing an upgrade, so the table might not exists yet, it will fail alter and drop)
-        - put in a list the existing columns List<String> columns = DBUtils.GetColumns(db, TableName);
-        - backup table (ALTER table " + TableName + " RENAME TO 'temp_"                    + TableName)
-        - create new table (the newest table creation schema)
-        - get the intersection with the new columns, this time columns taken from the upgraded table (columns.retainAll(DBUtils.GetColumns(db, TableName));)
-        - restore data (String cols = StringUtils.join(columns, ",");
-                    db.execSQL(String.format(
-                            "INSERT INTO %s (%s) SELECT %s from temp_%s",
-                            TableName, cols, cols, TableName));
-        )
-        - remove backup table (DROP table 'temp_" + TableName)
-        - setTransactionSuccessful
-         */
         try {
             logger.fine("Starting upgrade transaction...");
             target.exec("BEGIN IMMEDIATE TRANSACTION");
 
-            upgradeCreateTabels();
+            upgradeRenameTables();
+            upgradeCreateTables();
             upgradeDropTables();
             upgradeAlterTables();
 
@@ -71,8 +82,21 @@ public class DBUpgradeHandler {
         }
     }
 
+    private void upgradeRenameTables() throws SQLException {
+        if(tableRenameMap.size() > 0) {
+            List<String> targetTables = target.exec("SELECT name FROM sqlite_master WHERE type='table';", new ListSQLResult<String>());
 
-    private void upgradeCreateTabels() throws SQLException {
+            for (String oldTableName : tableRenameMap.keySet()) {
+                if (targetTables.contains(oldTableName)) {
+                    String newTableName = tableRenameMap.get(oldTableName);
+                    logger.fine("Renaming table from: " + oldTableName + ", to: " + newTableName);
+                    target.exec("ALTER TABLE "+oldTableName+" RENAME TO "+newTableName);
+                }
+            }
+        }
+    }
+
+    private void upgradeCreateTables() throws SQLException {
         List<String> refTables = reference.exec("SELECT name FROM sqlite_master WHERE type='table';", new ListSQLResult<String>());
         List<String> targetTables = target.exec("SELECT name FROM sqlite_master WHERE type='table';", new ListSQLResult<String>());
 
@@ -129,7 +153,22 @@ public class DBUpgradeHandler {
                 // Check unnecessary columns
                 for(DBColumn column : targetStruct) {
                     if(!refStruct.contains(column)) {
-                        logger.warning("Unable to drop column: '" + column.name + "' from table: "+ table +" (SQLite does not support dropping columns)");
+                        if(forceUpgrade){
+                        /*
+                        - put in a list the existing columns List<String> columns = DBUtils.GetColumns(db, TableName);
+                        - backup table (ALTER table " + TableName + " RENAME TO 'temp_"                    + TableName)
+                        - create new table (the newest table creation schema)
+                        - get the intersection with the new columns, this time columns taken from the upgraded table (columns.retainAll(DBUtils.GetColumns(db, TableName));)
+                        - restore data (String cols = StringUtils.join(columns, ",");
+                                    db.execSQL(String.format(
+                                            "INSERT INTO %s (%s) SELECT %s from temp_%s",
+                                            TableName, cols, cols, TableName));
+                        )
+                        - remove backup table (DROP table 'temp_" + TableName)
+                         */
+                        }
+                        else
+                            logger.warning("Unable to drop column: '" + column.name + "' from table: "+ table +" (SQLite does not support dropping columns)");
                     }
                 }
             }
