@@ -35,6 +35,7 @@ import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -42,7 +43,7 @@ import java.util.logging.Logger;
  * Created by Ziver
  */
 public class Configurator<T> {
-    private static final Logger log = LogUtil.getLogger();
+    private static final Logger logger = LogUtil.getLogger();
 
     /**
      * Sets a field in a class as externally configurable.
@@ -95,7 +96,7 @@ public class Configurator<T> {
                 try {
                     conf.add(new ConfigurationParam(f, obj));
                 } catch (IllegalAccessException e) {
-                    log.log(Level.WARNING, null, e);
+                    logger.log(Level.SEVERE, null, e);
                 }
             }
         }
@@ -105,14 +106,32 @@ public class Configurator<T> {
         return list;
     }
 
+    public void setConfiguration(Map<String,String> parameters){
+        for(ConfigurationParam param : this.params){
+            if(parameters.containsKey(param.getName()))
+                param.setValue(parameters.get(param.getName()));
+        }
+    }
+
     public void applyConfiguration(){
+        StringBuilder strParams = new StringBuilder();
         for(ConfigurationParam param : params){
             try {
                 param.apply();
+                // Logging
+                if(logger.isLoggable(Level.FINE)) {
+                    strParams.append(param.getName());
+                    if(param.isTypeString())
+                        strParams.append(": '").append(param.getString()).append("', ");
+                    else
+                        strParams.append(param.getString());
+                }
             } catch (IllegalAccessException e) {
-                log.log(Level.WARNING, null, e);
+                logger.log(Level.WARNING, null, e);
             }
         }
+        if(logger.isLoggable(Level.FINE))
+            logger.fine("Configured object: " + obj.getClass().getSimpleName() + "("+ strParams +")");
     }
 
 
