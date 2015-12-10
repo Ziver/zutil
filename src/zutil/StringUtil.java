@@ -27,6 +27,8 @@ package zutil;
 import zutil.converters.Converter;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
 
 /**
  * This is a class whit utility methods.
@@ -126,6 +128,23 @@ public class StringUtil {
         while (str.length() < length)
             str.append('0');
         return str.reverse().toString();
+    }
+
+    /**
+     * @param   list        a list of object that toString() will be called on
+     * @param   delimiter   a String delimiter that will be added between every entry in the list
+     * @return a String containing all entries in the list with the specified delimiter in between entries
+     */
+	public static String join(Iterable<?> list, String delimiter){
+        StringBuilder str = new StringBuilder();
+        Iterator<?> it = list.iterator();
+        if(it.hasNext()) {
+            str.append(it.next());
+            while (it.hasNext()) {
+                str.append(delimiter).append(it.next());
+            }
+        }
+        return str.toString();
     }
 
 	/**

@@ -1,6 +1,6 @@
 package zutil.db;
 
-import com.sun.deploy.util.StringUtils;
+import zutil.StringUtil;
 import zutil.db.handler.ListSQLResult;
 import zutil.db.handler.SimpleSQLResult;
 import zutil.log.LogUtil;
@@ -18,7 +18,7 @@ import java.util.logging.Logger;
 /**
  * This class will take a reference DB and alter
  * the source DB to have the same structure.
- * NOTE: only works with sqllite
+ * NOTE: only works with SQLite
  *
  * Created by Ziver
  */
@@ -162,7 +162,7 @@ public class DBUpgradeHandler {
 
                     // Restoring data
                     logger.fine("Forced Upgrade: Restoring data for table: "+table);
-                    String cols = StringUtils.join(refStruct, ",");
+                    String cols = StringUtil.join(refStruct, ",");
                     target.exec(String.format(
                             "INSERT INTO %s (%s) SELECT %s FROM %s",
                             table, cols, cols, backupTable));

@@ -26,6 +26,9 @@ package zutil.test;
 import org.junit.Test;
 import zutil.StringUtil;
 
+import java.util.Arrays;
+import java.util.Collection;
+
 import static org.junit.Assert.assertEquals;
 
 public class StringUtilTest {
@@ -90,4 +93,12 @@ public class StringUtilTest {
                      "024  00 00 00 00 00 00 00 00  '........'",
                 StringUtil.formatBytesToString(data3));
     }
+
+	@Test
+	public void joinTest(){
+		assertEquals("", StringUtil.join(Arrays.asList(), ","));
+		assertEquals("1,2,3,4,5", StringUtil.join(Arrays.asList(1,2,3,4,5), ","));
+        assertEquals("animal,monkey,dog", StringUtil.join(Arrays.asList("animal", "monkey", "dog"), ","));
+        assertEquals("12345", StringUtil.join(Arrays.asList(1,2,3,4,5), ""));
+	}
 }
