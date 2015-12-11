@@ -24,6 +24,8 @@
 
 package zutil.net.http;
 
+import zutil.parser.URLDecoder;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.HashMap;
@@ -49,7 +51,7 @@ public class HttpHeaderParser {
 	private HashMap<String, String> cookies;
 
 	/**
-	 * Parses the HTTP header information from the stream
+	 * Parses the HTTP header information from a stream
 	 * 
 	 * @param 	in 				is the stream
 	 * @throws 	IOException 
@@ -147,6 +149,7 @@ public class HttpHeaderParser {
 	 */
 	public static void parseURLParameters(String attributes, HashMap<String, String> map){
 		String[] tmp;
+		attributes = URLDecoder.decode(attributes);
 		// get the variables
 		String[] data = andPattern.split( attributes );
 		for(String element : data){
