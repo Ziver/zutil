@@ -418,7 +418,7 @@ public class Templator {
                 else
                     str.append(obj.toString());
             else
-                str.append("{{").append(tag).append("}}");
+                str.append("null");
         }
     }
 }

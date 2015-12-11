@@ -70,7 +70,7 @@ public class TemplatorTest {
     @Test
     public void attributeEmptyTest(){
         Templator tmpl = new Templator("<HTML>{{test}}</HTML>");
-        assertEquals("<HTML>{{test}}</HTML>", tmpl.compile());
+        assertEquals("<HTML>null</HTML>", tmpl.compile());
     }
     @Test
     public void attributeSimpleTest() {

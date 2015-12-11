@@ -465,9 +465,8 @@ public abstract class DBBean {
 			if( !Modifier.isPublic( field.getModifiers()))
 				field.setAccessible(true);
 
-			// Set basic datatype
+			// Set basic data type
 			if( o == null && !Object.class.isAssignableFrom( field.getType() ) ){
-				logger.fine("Trying to set primitive data type to null!");
 				if( 	 field.getType() == Integer.TYPE )	field.setInt(this, 0);
 				else if( field.getType() == Character.TYPE )field.setChar(this, (char) 0);
 				else if( field.getType() == Byte.TYPE )		field.setByte(this, (byte) 0);
@@ -477,8 +476,13 @@ public abstract class DBBean {
 				else if( field.getType() == Double.TYPE )	field.setDouble(this, 0d);
 				else if( field.getType() == Boolean.TYPE )	field.setBoolean(this, false);
 			}
-			else
-				field.set(this, o);
+			else {
+				// Some special cases
+				if(field.getType() == Boolean.TYPE && o instanceof Integer)
+					field.setBoolean(this, ((Integer)o) > 0 ); // Convert an Integer to boolean
+				else
+					field.set(this, o);
+			}
 		} catch (Exception e) {
 			logger.log(Level.SEVERE, e.getMessage(), e);
 		}
