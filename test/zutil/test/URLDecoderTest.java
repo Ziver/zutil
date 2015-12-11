@@ -3,6 +3,8 @@ package zutil.test;
 import org.junit.Test;
 import zutil.parser.URLDecoder;
 
+import java.io.UnsupportedEncodingException;
+
 import static org.junit.Assert.assertEquals;
 
 
@@ -29,7 +31,8 @@ public class URLDecoderTest {
     }
 
     @Test
-    public void percentMultibyteTest(){
+    public void percentMultibyteTest() throws UnsupportedEncodingException {
+        assertEquals("Ängen", java.net.URLDecoder.decode("%C3%84ngen", "UTF-8"));
         assertEquals("Ängen", URLDecoder.decode("%C3%84ngen"));
     }
 }
