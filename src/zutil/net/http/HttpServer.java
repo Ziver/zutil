@@ -231,7 +231,7 @@ public class HttpServer extends ThreadedTCPNetworkServer{
 				out.setHeader( "Content-Type", "text/html" );
 				out.setCookie( "session_id", ""+client_session.get("session_id") );
 
-				if( !parser.getRequestURL().isEmpty() && pages.containsKey(parser.getRequestURL()) ){
+				if( parser.getRequestURL() != null && !parser.getRequestURL().isEmpty() && pages.containsKey(parser.getRequestURL()) ){
 					pages.get(parser.getRequestURL()).respond(out, parser, client_session, cookie, request);
 					logRequest(parser, client_session, cookie, request, time);
 				}
@@ -247,7 +247,7 @@ public class HttpServer extends ThreadedTCPNetworkServer{
 
 				//********************************************************************************
 			} catch (Exception e) {
-				logger.log(Level.WARNING, "500 Internal Server Error", e);
+				logger.log(Level.SEVERE, "500 Internal Server Error", e);
 				try {
 					if (!out.isHeaderSent())
 						out.setStatusCode(500);

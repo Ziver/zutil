@@ -101,6 +101,8 @@ public class Templator {
      * be regenerated if the file changes.
      */
     public Templator(File tmpl) throws IOException {
+        if(tmpl == null)
+            throw new IllegalArgumentException("File can not be null!");
         this.data = new HashMap<String, Object>();
         this.file = tmpl;
         parseTemplate(FileUtil.getContent(file));
