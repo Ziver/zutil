@@ -43,8 +43,9 @@ public class DBConnection implements Closeable{
 		MySQL,
 		SQLite
 	}
+
 	// The connection
-	private Connection conn = null;
+	private Connection conn;
 	// The pool that this connection belongs to
 	private DBConnectionPool pool;
 
@@ -57,8 +58,8 @@ public class DBConnection implements Closeable{
 	public DBConnection(String jndi) throws NamingException, SQLException{
 		InitialContext ctx = new InitialContext();
 		DataSource ds = (DataSource)ctx.lookup("java:comp/env/"+jndi);
-		conn = ds.getConnection();
-	}
+		this.conn = ds.getConnection();
+    }
 
 	/**
 	 * Creates an Connection to a MySQL server
@@ -110,7 +111,7 @@ public class DBConnection implements Closeable{
 	 * @param   db      is the DB type
 	 * @return the protocol name of the DBMS
 	 */
-	public String initDriver(DBMS db) throws InstantiationException, IllegalAccessException, ClassNotFoundException{
+	public static String initDriver(DBMS db) throws InstantiationException, IllegalAccessException, ClassNotFoundException{
 		switch(db){
 		case MySQL:
 			Class.forName("com.mysql.jdbc.Driver").newInstance();
@@ -129,12 +130,35 @@ public class DBConnection implements Closeable{
 	 */
 	public long getLastInsertID(){
 		try{
-			return exec("SELECT LAST_INSERT_ID()", new SimpleSQLResult<BigInteger>()).longValue();
+			return exec("SELECT LAST_INSERT_ID()", new SimpleSQLResult<Long>());
 		}catch(SQLException e){
 			logger.log(Level.WARNING, null, e);
 		}
 		return -1;
 	}
+    /**
+     * @return the last inserted id or -1 if there was an error
+     */
+    public long getLastInsertID(Statement stmt){
+        ResultSet result = null;
+        try{
+            result = stmt.getGeneratedKeys();
+            if(result != null){
+                return new SimpleSQLResult<Integer>().handleQueryResult(stmt, result);
+            }
+        }catch(SQLException e){
+            logger.log(Level.WARNING, null, e);
+        } finally {
+            if(result != null) {
+                try {
+                    result.close();
+                } catch (SQLException e) {
+                    logger.log(Level.WARNING, null, e);
+                }
+            }
+        }
+        return -1;
+    }
 
 	/**
 	 * Runs a Prepared Statement.<br>

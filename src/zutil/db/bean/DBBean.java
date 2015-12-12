@@ -212,28 +212,44 @@ public abstract class DBBean {
 			Long id = this.getId();
 			// Generate the SQL
 			StringBuilder query = new StringBuilder();
-			if( id == null )
-				query.append("INSERT INTO ");
-			else query.append("UPDATE ");
-			query.append( config.tableName );
+			if( id == null ) {
+                query.append("INSERT INTO ").append( config.tableName );
+                query.append( " (" );
+                for( Field field : config.fields ){
+                    if( !List.class.isAssignableFrom(field.getType()) ){
+                        query.append(" ");
+                        query.append(field.getName());
+                        query.append(",");
+                    }
+                }
+                if(query.charAt(query.length()-1) == ',')
+                    query.deleteCharAt(query.length()-1);
+                query.append( ") VALUES(" );
+                for( Field field : config.fields ){
+                    query.append( "?," );
+                }
+                if(query.charAt(query.length()-1) == ',')
+                    query.deleteCharAt(query.length()-1);
+                query.append( ")" );
+            }
+			else{
+                query.append("UPDATE ").append( config.tableName );
+                query.append( " SET" );
+                for( Field field : config.fields ){
+                    if( !List.class.isAssignableFrom(field.getType()) ){
+                        query.append(" ");
+                        query.append(field.getName());
+                        query.append("=?,");
+                    }
+                }
+                if(query.charAt(query.length()-1) == ',')
+                    query.deleteCharAt(query.length()-1);
+                query.append(" WHERE ").append(config.idColumn).append("=?");
+            }
 
-			StringBuilder params = new StringBuilder();
-			for( Field field : config.fields ){
-				if( !List.class.isAssignableFrom(field.getType()) ){
-					params.append(" ");
-					params.append(field.getName());
-					params.append("=?,");
-				}
-			}
-			if( params.length() > 0 ){
-				params.delete( params.length()-1, params.length());
-				query.append( " SET" );
-				query.append( params );
-				if( id != null )
-					query.append(" WHERE ").append(config.idColumn).append("=?");
-			}
-			logger.finest("Save query("+c.getName()+" id:"+this.getId()+"): "+query.toString());
-			PreparedStatement stmt = db.getPreparedStatement( query.toString() );
+            String sql = query.toString();
+			logger.finest("Save query("+c.getName()+" id:"+this.getId()+"): "+ sql);
+			PreparedStatement stmt = db.getPreparedStatement( sql );
 			// Put in the variables in the SQL
 			int index = 1;
 			for(Field field : config.fields){
@@ -253,7 +269,7 @@ public abstract class DBBean {
 				// A list of DBBeans
 				else if( List.class.isAssignableFrom( field.getType() ) && 
 						field.getAnnotation( DBLinkTable.class ) != null){
-					// DO NOTING
+					// Du stuff later
 				}
 				// Normal field
 				else{
@@ -268,7 +284,7 @@ public abstract class DBBean {
 			// Execute the SQL
 			DBConnection.exec(stmt);
 			if( id == null )
-				this.id = db.getLastInsertID();
+				this.id = db.getLastInsertID(stmt);
 			
 			// Save the list, after we get the object id
 			for(Field field : config.fields){
