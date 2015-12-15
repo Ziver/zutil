@@ -38,8 +38,6 @@ import java.math.BigInteger;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.logging.Level;
@@ -87,104 +85,41 @@ public abstract class DBBean {
 	}
 
 	/**
-	 * Sets the name of the table that links different DBBeans together
+	 * Can be used if the column name is different from the field name.
+	 */
+	@Retention(RetentionPolicy.RUNTIME)
+	@Target(ElementType.FIELD)
+	public @interface DBColumn {
+		/** This is the name of the column in the database for the specified field. SQL rules apply, should not contain any strange characters or spaces **/
+		String value();
+	}
+
+	/**
+	 * Should be used for fields with lists of DBBeans.
 	 */
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target(ElementType.FIELD)
 	public @interface DBLinkTable {
-		/** The name of the Link table, SQL rules apply should not contain any strange characters or spaces */
+		/** The name of the Link table, SQL rules apply, should not contain any strange characters or spaces */
 		String table();
 		/** The class of the linked bean */
 		Class<? extends DBBean> beanClass();
-		/** The name of the column that contains the main objects id, SQL rules apply should not contain any strange characters or spaces */
+		/** The name of the column that contains the main objects id, SQL rules apply, should not contain any strange characters or spaces */
 		String idColumn() default "";
 	}
 
-	/**
-	 * A Class that contains information about a bean
-	 */
-	protected static class DBBeanConfig{
-		/** The name of the table in the DB **/
-		protected String tableName;
-		/** The name of the id column **/
-		protected String idColumn;
-		/** All the fields in the bean **/
-		protected ArrayList<Field> fields;
 
-		protected DBBeanConfig(){
-			fields = new ArrayList<Field>();
-		}
-	}
-
-	/** This is a cache of all the initialized beans */	 
-	private static HashMap<String,DBBeanConfig> beanConfigs = new HashMap<String,DBBeanConfig>();
 	/** This value is for preventing recursive loops when saving */
 	protected boolean processing_save;
 	/** This value is for preventing recursive loops when updating */	
 	protected boolean processing_update;
 
 	protected DBBean(){
-		if( !beanConfigs.containsKey( this.getClass() ) )
-			initBeanConfig( this.getClass() );
+		DBBeanConfig.getBeanConfig(this.getClass());
 		processing_save = false;
 		processing_update = false;
 	}
 
-	/**
-	 * @return all the fields except the ID field
-	 */
-	public static ArrayList<Field> getFields(Class<? extends DBBean> c){
-		if( !beanConfigs.containsKey( c.getName() ) )
-			initBeanConfig( c );
-		return beanConfigs.get( c.getName() ).fields;		
-	}
-
-	/**
-	 * @return the configuration object for the specified class
-	 */
-	protected static DBBeanConfig getBeanConfig(Class<? extends DBBean> c){
-		if( !beanConfigs.containsKey( c.getName() ) )
-			initBeanConfig( c );
-		return beanConfigs.get( c.getName() );	
-	}
-
-	/**
-	 * Caches the fields
-	 */
-	private static void initBeanConfig(Class<? extends DBBean> c){
-		logger.fine("Initiating new DBBeanConfig( "+c.getName()+" )");
-		DBBeanConfig config = new DBBeanConfig();
-		// Find the table name
-		DBTable tableAnn = c.getAnnotation(DBTable.class);
-		if( tableAnn != null ){
-			config.tableName = tableAnn.value();
-			config.idColumn  = tableAnn.idColumn();
-		}
-		else{
-			config.tableName = c.getSimpleName();
-			config.idColumn  = "id";
-		}
-		// Add the fields in the bean and all the super classes fields
-		for(Class<?> cc = c; cc != DBBean.class ;cc = cc.getSuperclass()){
-			Field[] fields = cc.getDeclaredFields();
-			for( Field field : fields ){
-				int mod = field.getModifiers();
-				if( !Modifier.isTransient( mod ) &&
-						!Modifier.isAbstract( mod ) &&
-						!Modifier.isFinal( mod ) &&
-						!Modifier.isStatic( mod ) &&
-						!Modifier.isInterface( mod ) &&
-						!Modifier.isNative( mod ) &&
-						!config.fields.contains( field )){
-					config.fields.add( field );
-				}
-			}
-			if( tableAnn == null || !tableAnn.superBean() )
-				break;
-		}
-
-		beanConfigs.put(c.getName(), config);
-	}
 
 	/**
 	 * Saves the object and all the sub objects to the DB
@@ -207,7 +142,7 @@ public abstract class DBBean {
 			return;
 		processing_save = true;
 		Class<? extends DBBean> c = this.getClass();
-		DBBeanConfig config = getBeanConfig( c );
+		DBBeanConfig config = DBBeanConfig.getBeanConfig( c );
 		try {
 			Long id = this.getId();
 			// Generate the SQL
@@ -218,7 +153,7 @@ public abstract class DBBean {
                 for( Field field : config.fields ){
                     if( !List.class.isAssignableFrom(field.getType()) ){
                         query.append(" ");
-                        query.append(field.getName());
+                        query.append(DBBeanConfig.getFieldName(field));
                         query.append(",");
                     }
                 }
@@ -238,7 +173,7 @@ public abstract class DBBean {
                 for( Field field : config.fields ){
                     if( !List.class.isAssignableFrom(field.getType()) ){
                         query.append(" ");
-                        query.append(field.getName());
+                        query.append(DBBeanConfig.getFieldName(field));
                         query.append("=?,");
                     }
                 }
@@ -308,7 +243,7 @@ public abstract class DBBean {
 							}
 							// Get the Sub object configuration
 							if(subConfig == null){
-								subConfig = getBeanConfig( subobj.getClass() );
+								subConfig = DBBeanConfig.getBeanConfig( subobj.getClass() );
 								sub_idcol = subConfig.idColumn;
 							}
 							// Save links in link table
@@ -342,7 +277,7 @@ public abstract class DBBean {
 	 */
 	public void delete(DBConnection db) throws SQLException{
 		Class<? extends DBBean> c = this.getClass();
-		DBBeanConfig config = getBeanConfig( c );
+		DBBeanConfig config = DBBeanConfig.getBeanConfig( c );
 		if( this.getId() == null )
 			throw new NoSuchElementException("ID field is null( Has the bean been saved?)!");
 
@@ -366,7 +301,7 @@ public abstract class DBBean {
 	 */
 	public static <T extends DBBean> List<T> load(DBConnection db, Class<T> c) throws SQLException {
 		// Initiate a BeanConfig if there is non
-		DBBeanConfig config = getBeanConfig( c );
+		DBBeanConfig config = DBBeanConfig.getBeanConfig( c );
 		// Generate query
 		String sql = "SELECT * FROM "+config.tableName;
 		logger.fine("Load All query("+c.getName()+"): "+sql);
@@ -386,7 +321,7 @@ public abstract class DBBean {
 	 */
 	public static <T extends DBBean> T load(DBConnection db, Class<T> c, long id) throws SQLException {
 		// Initiate a BeanConfig if there is non
-		DBBeanConfig config = getBeanConfig( c );
+		DBBeanConfig config = DBBeanConfig.getBeanConfig( c );
 		// Generate query
 		String sql = "SELECT * FROM "+config.tableName+" WHERE "+config.idColumn+"=? LIMIT 1";
 		logger.fine("Load query("+c.getName()+" id:"+id+"): "+sql);
@@ -402,7 +337,7 @@ public abstract class DBBean {
 	 * WARNING: Experimental
 	 */
 	public static void create(DBConnection sql, Class<? extends DBBean> c) throws SQLException{
-		DBBeanConfig config = getBeanConfig( c );
+		DBBeanConfig config = DBBeanConfig.getBeanConfig( c );
 
 		// Generate the SQL
 		StringBuilder query = new StringBuilder();
@@ -415,7 +350,7 @@ public abstract class DBBean {
 
 		for( Field field : config.fields ){
 			query.append(" ");
-			query.append( field.getName() );
+			query.append( DBBeanConfig.getFieldName(field) );
 			query.append( classToDBName(c) );
 			query.append(", ");
 		}
@@ -504,7 +439,7 @@ public abstract class DBBean {
 		}
 	}
 
-	/**
+    /**
 	 * @return the object id or null if the bean has not bean saved yet
 	 */
 	public Long getId(){
@@ -517,7 +452,12 @@ public abstract class DBBean {
 	public static void cancelGBC(){
 		DBBeanSQLResultHandler.cancelGBC();
 	}
-	
+
+
+
+
+    ////////////////// EXTENDABLE METHODS /////////////////////////
+
 	/**
 	 * Will be called whenever the bean has been updated from the database.
 	 */

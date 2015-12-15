@@ -26,7 +26,6 @@ package zutil.db.bean;
 
 import zutil.db.DBConnection;
 import zutil.db.SQLResultHandler;
-import zutil.db.bean.DBBean.DBBeanConfig;
 import zutil.db.bean.DBBean.DBLinkTable;
 import zutil.log.LogUtil;
 
@@ -114,7 +113,7 @@ public class DBBeanSQLResultHandler<T> implements SQLResultHandler<T>{
 		this.bean_class = cl;
 		this.list = list;
 		this.db = db;
-		this.bean_config = DBBean.getBeanConfig( cl );
+		this.bean_config = DBBeanConfig.getBeanConfig( cl );
 		
 		// Initiate DBBeanGarbageCollector
 		if( timer == null ){
@@ -207,7 +206,7 @@ public class DBBeanSQLResultHandler<T> implements SQLResultHandler<T>{
 	 * @return					a new instance of the bean
 	 */
 	protected DBBean createBean(ResultSet result) throws SQLException{
-		try {			
+		try {
 			Long id = result.getLong( "id" );
 			DBBean obj = getCachedDBBean(bean_class, id, result);
 			if( obj != null )
@@ -222,6 +221,8 @@ public class DBBeanSQLResultHandler<T> implements SQLResultHandler<T>{
 			// Update fields
 			updateBean( result, obj );
 			return obj;
+		} catch (SQLException e) {
+			throw e;
 		} catch (Exception e) {
 			throw new SQLException(e);
 		}
@@ -240,7 +241,7 @@ public class DBBeanSQLResultHandler<T> implements SQLResultHandler<T>{
 			obj.processing_update = true;
 			// Get the rest
 			for( Field field : bean_config.fields ){
-				String name = field.getName();
+				String name = DBBeanConfig.getFieldName(field);
 
 				// Another DBBean class
 				if( DBBean.class.isAssignableFrom( field.getType() )){
@@ -257,7 +258,7 @@ public class DBBeanSQLResultHandler<T> implements SQLResultHandler<T>{
 						field.getAnnotation( DBLinkTable.class ) != null){
 					if(db != null){
 						DBLinkTable linkTable = field.getAnnotation( DBLinkTable.class );
-						DBBeanConfig subConfig = DBBean.getBeanConfig( linkTable.beanClass() );
+						DBBeanConfig subConfig = DBBeanConfig.getBeanConfig( linkTable.beanClass() );
 						String linkTableName = linkTable.table();
 						String subTable = subConfig.tableName;
 						String idcol = (linkTable.idColumn().isEmpty() ? bean_config.tableName : linkTable.idColumn() );
@@ -277,8 +278,6 @@ public class DBBeanSQLResultHandler<T> implements SQLResultHandler<T>{
 				else				
 					obj.setFieldValue(field, result.getObject(name));
 			}
-		} catch (Exception e) {
-			throw new SQLException(e);
 		} finally{
 			obj.processing_update = false;
 		}
