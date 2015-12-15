@@ -169,7 +169,7 @@ public class DBBeanSQLResultHandler<T> implements SQLResultHandler<T>{
 			}
 			
 			if( removed > 0 )
-				logger.info("DBBeanGarbageCollector has cleard "+removed+" beans from cache.");
+				logger.info("DBBeanGarbageCollector has cleared "+removed+" beans from cache.");
 		}
 	}
 	
@@ -315,7 +315,7 @@ public class DBBeanSQLResultHandler<T> implements SQLResultHandler<T>{
 			// Check if the cache is valid
 			if( item != null ){
 				// The cache is old, update and return it
-				if( item.timestamp+CACHE_TTL > System.currentTimeMillis() ){
+				if( item.timestamp+CACHE_TTL < System.currentTimeMillis() ){
 					// There is no ResultSet to update from
 					if( result == null )
 						return null;
