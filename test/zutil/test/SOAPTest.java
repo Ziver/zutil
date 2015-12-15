@@ -26,6 +26,7 @@ package zutil.test;
 import org.dom4j.Document;
 import org.dom4j.io.OutputFormat;
 import org.dom4j.io.XMLWriter;
+import zutil.net.nio.message.type.SystemMessage;
 import zutil.net.ws.WSInterface;
 import zutil.net.ws.WSInterface.WSNamespace;
 import zutil.net.ws.WSReturnObject;
@@ -43,30 +44,30 @@ public class SOAPTest {
 	public SOAPTest(){
 		WebServiceDef wsDef = new WebServiceDef( MainSOAPClass.class );
 		SOAPHttpPage soap = new SOAPHttpPage( wsDef );
-		
+
+		System.out.println( "****************** WSDL *********************" );
 		WSDLWriter wsdl = new WSDLWriter( wsDef );
 		wsdl.write(System.out);
-		System.out.println( "****************** new *********************" );	
-		WSDLWriter wsdl2 = new WSDLWriter( wsDef );
-		wsdl2.write(System.out);
 		
 		// Response		
 		try {
-			System.out.println( "****************** LOG *********************" );
-			Document document = soap.genSOAPResponse(
-					"<?xml version=\"1.0\"?>" +
+			System.out.println( "\n****************** REQUEST *********************" );
+			String request = "<?xml version=\"1.0\"?>\n" +
 					"<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\n" +
 					"	<soap:Body xmlns:m=\"http://www.example.org/stock\">\n" +
 					"		<m:stringArrayMethod>\n" +
 					"			<m:StringName>IBM</m:StringName>\n" +
 					"		</m:stringArrayMethod>\n" +
-					
+
 					"		<m:simpleReturnClassMethod>\n" +
 					"			<m:byte>IBM</m:byte>\n" +
 					"		</m:simpleReturnClassMethod>\n" +
 					"	</soap:Body>\n" +
-			"</soap:Envelope>");
-			System.out.println( "****************** RESPONSE *********************" );
+					"</soap:Envelope>";
+			System.out.println(request);
+            System.out.println( "\n****************** EXECUTION *********************" );
+			Document document = soap.genSOAPResponse(request);
+			System.out.println( "\n****************** RESPONSE *********************" );
 
 			OutputFormat format = OutputFormat.createPrettyPrint();
 			XMLWriter writer = new XMLWriter( System.out, format );
@@ -112,7 +113,7 @@ public class SOAPTest {
 		public void exceptionMethod(
 				@WSParamName(value="otherParam1", optional=true) int param1,
 				@WSParamName(value="otherParam2", optional=true) int param2) throws Exception{ 
-			System.out.println("Executing method: exceptionMethod()");
+			System.out.println("Executing method: exceptionMethod(int param1="+param1+", int param2="+param2+",)");
 			throw new Exception("This is an Exception");
 		}
 
@@ -120,7 +121,7 @@ public class SOAPTest {
 		@WSParamDocumentation("Documentation of stringArrayMethod()")
 		public String[][] stringArrayMethod (
 				@WSParamName("StringName") String str) throws Exception{ 
-			System.out.println("Executing method: stringArrayMethod()");
+			System.out.println("Executing method: stringArrayMethod(String str='"+str+"')");
 			return new String[][]{{"test","test2"},{"test3","test4"}};
 		}
 
@@ -128,7 +129,7 @@ public class SOAPTest {
 		@WSParamDocumentation("Documentation of specialReturnMethod()")
 		public SpecialReturnClass[] specialReturnMethod (
 				@WSParamName("StringName2") String str) throws Exception{ 
-			System.out.println("Executing method: specialReturnMethod()");
+			System.out.println("Executing method: specialReturnMethod(String str='"+str+"')");
 			return new SpecialReturnClass[]{new SpecialReturnClass(), new SpecialReturnClass()};
 		}
 

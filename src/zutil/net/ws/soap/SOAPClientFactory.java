@@ -24,144 +24,48 @@
 
 package zutil.net.ws.soap;
 
-import javassist.*;
 import zutil.log.LogUtil;
+import zutil.net.ws.WSClientFactory;
 import zutil.net.ws.WSInterface;
-import zutil.net.ws.WSMethodDef;
-import zutil.net.ws.WSParameterDef;
 import zutil.net.ws.WebServiceDef;
 
-import java.util.HashMap;
-import java.util.List;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Proxy;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
  * This is an factory that generates clients for web services
- * 
+ *
  * @author Ziver
  */
 public class SOAPClientFactory {
-	private static Logger logger = LogUtil.getLogger();
-	
-	/**
-	 * Generates a Client Object for the web service.
-	 * 
-	 * @param 	<T> 	is the class of the web service definition
-	 * @param 	intf 	is the class of the web service definition
-	 * @return a client Object
-	 */
-	@SuppressWarnings("unchecked")
-	public static <T> T getClient(Class<T> intf) throws InstantiationException, IllegalAccessException, CannotCompileException, NotFoundException{
-		if( !WSInterface.class.isAssignableFrom( intf )){
-			throw new ClassCastException("The Web Service class is not a subclass of WSInterface!");
-		}
-		return getClient( intf, new WebServiceDef((Class<? extends WSInterface>)intf) );
-	}
-	
-	/**
-	 * Generates a Client Object for the web service.
-	 * 
-	 * @param 	<T> 	is the class of the web service definition
-	 * @param 	intf 	is the class of the web service definition
-	 * @param 	wsDef 	is the web service definition of the intf parameter
-	 * @return a client Object
-	 */
-	public static <T> T getClient(Class<T> intf, WebServiceDef wsDef) throws InstantiationException, IllegalAccessException, CannotCompileException, NotFoundException{
-		if( !WSInterface.class.isAssignableFrom( intf )){
-			throw new ClassCastException("The Web Service class is not a subclass of WSInterface!");
-		}
-		
-		// Generate the class
-		ClassPool pool = ClassPool.getDefault();
-		CtClass intfClass = pool.get( intf.getName() );
-		CtClass cc = pool.makeClass(intf.getName()+"Impl_"+ (int)(Math.random()*10000));
-		
-		// Is intf an interface
-		if( intf.isInterface() ){
-			cc.addInterface( intfClass );
-		}
-		// or a class
-		else{
-			cc.setSuperclass( intfClass );
-		}
-		
-		// Add the logger class
-		CtField logger = CtField.make(
-				"private static "+Logger.class.getName()+" logger = "+LogUtil.class.getName()+".getLogger();", 
-				cc);
-		cc.addField(logger);
-		
-		// Generate the methods
-		for(WSMethodDef methodDef : wsDef.getMethods()){			
-			// Create method
-			CtMethod method = CtNewMethod.make(
-									getOutputClass(methodDef.getOutputs()),			// Return type 
-									methodDef.getName(),							// Method name
-									getParameterClasses(methodDef.getInputs()),		// Parameters
-									new CtClass[]{pool.get( SOAPException.class.getName() )},	// Exceptions
-									generateCodeBody(methodDef),					// Code Body 
-									cc); 											// Class
-			cc.addMethod(method);
-		}
-		
-		// Initiate the class
-		@SuppressWarnings("unchecked")
-		Class<T> c = cc.toClass();
-        T obj = c.newInstance();
-        
-		return obj;		
-	}
-	
-	/**
-	 * Generates a generic method code body that calls the SOAPAbstractClient class
-	 */
-	private static String generateCodeBody(WSMethodDef m) {
-		logger.finer("Generating method "+m.getName()+"(...)");
-		
-		StringBuilder body = new StringBuilder("{\n");
-		// Logging
-		body.append( "logger.fine(\"Executing method: "+m.getName()+"(...)\");\n" );
-		
-		// Generate parameter list
-		body.append( HashMap.class.getName()+"<String,Object> params = new "+HashMap.class.getName()+"<String,Object>();\n" );
-		for(WSParameterDef param : m.getInputs()){
-			body.append( "params.put(\""+param.getName()+"\", "+param.getName()+");\n");
-		}
-		
-		// Call SOAPAbstractClient class
-		if(m.getOutputCount() > 0) // non void function
-			body.append( "return " );
-		body.append( SOAPAbstractClient.class.getName()+".request(\""+m.getName()+"\", params);\n" );
-		
-		body.append("}");
-		logger.finest("######################  BODY  #########################");
-		logger.finest(body.toString());
-		logger.finest("#######################################################");
-		return body.toString();
-	}
+    private static Logger logger = LogUtil.getLogger();
 
-	private static CtClass getParameterClass(WSParameterDef param) throws NotFoundException{
-		return ClassPool.getDefault().get( param.getClass().getName() );
-	}
-	
-	private static CtClass[] getParameterClasses(List<WSParameterDef> params) throws NotFoundException{
-		CtClass[] c = new CtClass[params.size()];
-		
-		int i = 0;
-		for(WSParameterDef param : params){
-			c[i++] = getParameterClass(param);
-		}
-		
-		return c;
-	}
-	
-	private static CtClass getOutputClass(List<WSParameterDef> params) throws NotFoundException{
-		if(params.isEmpty()){
-			return CtClass.voidType;
-		}
-		else if(params.size() == 1){
-			return ClassPool.getDefault().get( params.get(0).getClass().getName() );
-		}
-		throw new IllegalArgumentException("Unknown return type");
-	}
+    /**
+     * Generates a Client Object for the web service.
+     *
+     * @param 	<T> 	is the class of the web service definition
+     * @param 	intf 	is the class of the web service definition
+     * @return a client Object
+     */
+    @SuppressWarnings("unchecked")
+    public static <T> T createClient(Class<T> intf){
+        return createClient( intf, new WebServiceDef((Class<? extends WSInterface>)intf) );
+    }
+
+    /**
+     * Generates a Client Object for the web service.
+     *
+     * @param 	<T> 	is the class of the web service definition
+     * @param 	intf 	is the class of the web service definition
+     * @param 	wsDef 	is the web service definition of the intf parameter
+     * @return a client Object
+     */
+    public static <T> T createClient(Class<T> intf, WebServiceDef wsDef){
+        T obj = WSClientFactory.createClient(intf, new SOAPClientInvocationHandler());
+        return obj;
+    }
+
 }

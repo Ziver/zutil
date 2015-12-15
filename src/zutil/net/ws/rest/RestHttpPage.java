@@ -25,14 +25,15 @@
 package zutil.net.ws.rest;
 
 import zutil.converters.Converter;
+import zutil.io.StringOutputStream;
 import zutil.net.http.HttpHeaderParser;
 import zutil.net.http.HttpPage;
 import zutil.net.http.HttpPrintStream;
-import zutil.net.ws.WSInterface;
-import zutil.net.ws.WSMethodDef;
-import zutil.net.ws.WSParameterDef;
-import zutil.net.ws.WebServiceDef;
+import zutil.net.ws.*;
+import zutil.parser.json.JSONObjectOutputStream;
 
+import java.io.IOException;
+import java.lang.reflect.Field;
 import java.util.Map;
 
 /**
@@ -57,13 +58,33 @@ public class RestHttpPage implements HttpPage {
                         HttpHeaderParser client_info,
                         Map<String, Object> session,
                         Map<String, String> cookie,
-                        Map<String, String> request) {
-        execute(request);
+                        Map<String, String> request) throws IOException {
+        try {
+            out.println(
+                    execute(client_info.getRequestURL(), request));
+        } catch (Throwable throwable) {
+            throw new IOException(throwable);
+        }
     }
 
 
-    private void execute(Map<String, String> input){
+    private String execute(String targetMethod, Map<String, String> input) throws Throwable {
+        if( wsDef.hasMethod(targetMethod) ){
+            // Parse request
+            WSMethodDef m = wsDef.getMethod(targetMethod);
+            Object[] params = prepareInputParams(m, input);
 
+            // Invoke
+            Object ret = m.invoke(ws, params);
+
+            // Generate Response
+            StringOutputStream dummyOut = new StringOutputStream();
+            JSONObjectOutputStream out = new JSONObjectOutputStream(dummyOut);
+            out.writeObject(ret);
+            out.close();
+            return dummyOut.toString();
+        }
+        return "{error: \"Unknown target: "+targetMethod+"\"}";
     }
 
     private Object[] prepareInputParams(WSMethodDef method, Map<String, String> input){

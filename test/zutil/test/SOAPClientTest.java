@@ -23,8 +23,6 @@
  */
 package zutil.test;
 
-import javassist.CannotCompileException;
-import javassist.NotFoundException;
 import zutil.log.CompactLogFormatter;
 import zutil.log.LogUtil;
 import zutil.net.ws.WSInterface;
@@ -34,11 +32,11 @@ import java.util.logging.Level;
 
 public class SOAPClientTest {
 
-	public static void main(String[] args) throws InstantiationException, IllegalAccessException, CannotCompileException, NotFoundException{
+	public static void main(String[] args) throws InstantiationException, IllegalAccessException{
 		LogUtil.setGlobalLevel(Level.ALL);
 		LogUtil.setFormatter("", new CompactLogFormatter());
 		
-		TestClient intf = SOAPClientFactory.getClient(TestClient.class);
+		TestClient intf = SOAPClientFactory.createClient(TestClient.class);
 		intf.m();
 		intf.c();
 	}

@@ -228,7 +228,7 @@ public class SOAPHttpPage implements HttpPage{
 	 * @param 		xml 		is the string XML
 	 * @return 					the XML root Element
 	 */
-	private Element getXMLRoot(String xml) throws Exception {
+	protected static Element getXMLRoot(String xml) throws DocumentException {
 		if(xml != null && !xml.isEmpty()){
 			Document document = DocumentHelper.parseText(xml);
 			return document.getRootElement();
@@ -275,73 +275,77 @@ public class SOAPHttpPage implements HttpPage{
 						Field[] f = ret.getClass().getFields();
 						for(int i=0;  i<m.getOutputCount() ;i++){
 							WSParameterDef param = m.getOutput( i );
-							generateReturnXML(response,((WSReturnObject)ret).getValue(f[i]) , param.getName());
+							generateSOAPXMLForObj(response,((WSReturnObject)ret).getValue(f[i]) , param.getName());
 						}
 					}
 					else{
-						generateReturnXML(response, ret, m.getOutput(0).getName());
+						generateSOAPXMLForObj(response, ret, m.getOutput(0).getName());
 					}
 				}
 			}
 			else{
-				throw new Exception("No such method: "+e.getQName().getName()+"!");
+				throw new NoSuchMethodException("Unable to find method: "+e.getQName().getName()+"!");
 			}
 		}
 	}
-	
+
+
+
+
+
 	/**
-	 * Generates a return XML Element. This function can
+	 * Generates a XML Element for a given Object. This method can
 	 * handle return values as XML Elements, WSReturnObject and
 	 * Java basic data types.
 	 * 
 	 * @param		root 		is the parent Element
-	 * @param 		retObj 		is the object that is the return value
-	 * @param 		ename 		is the name of the parent Element
+	 * @param 		obj 		is the object that is the return value
+	 * @param 		elementName 		is the name of the parent Element
 	 */
-	private void generateReturnXML(Element root, Object retObj, String ename) throws IllegalArgumentException, IllegalAccessException{
-		if(retObj == null) return;
-		if(byte[].class.isAssignableFrom(retObj.getClass())){
-			Element valueE = root.addElement( ename );
-			valueE.addAttribute("type", "xsd:"+ getSOAPClassName(retObj.getClass()));
-			String tmp = new sun.misc.BASE64Encoder().encode((byte[])retObj);
+	protected static void generateSOAPXMLForObj(Element root, Object obj, String elementName) throws IllegalArgumentException, IllegalAccessException{
+		if(obj == null) return;
+		if(byte[].class.isAssignableFrom(obj.getClass())){
+			Element valueE = root.addElement( elementName );
+			valueE.addAttribute("type", "xsd:"+ getSOAPClassName(obj.getClass()));
+			String tmp = new sun.misc.BASE64Encoder().encode((byte[])obj);
 			tmp = tmp.replaceAll("\\s", "");
 			valueE.setText(tmp);
 		}
 		// return an array
-		else if(retObj.getClass().isArray()){
-			Element array = root.addElement( (ename.equals("element") ? "Array" : ename) );
-			String arrayType = "xsd:"+ getSOAPClassName(retObj.getClass());
-			arrayType = arrayType.replaceFirst("\\[\\]", "["+Array.getLength(retObj)+"]");
+		else if(obj.getClass().isArray()){
+			Element array = root.addElement( (elementName.equals("element") ? "Array" : elementName) );
+			String arrayType = "xsd:"+ getSOAPClassName(obj.getClass());
+			arrayType = arrayType.replaceFirst("\\[\\]", "["+Array.getLength(obj)+"]");
 
 			array.addAttribute("type", "soap:Array");
 			array.addAttribute("soap:arrayType", arrayType);
-			for(int i=0; i<Array.getLength(retObj) ;i++){
-				generateReturnXML(array, Array.get(retObj, i), "element");
+			for(int i=0; i<Array.getLength(obj) ;i++){
+				generateSOAPXMLForObj(array, Array.get(obj, i), "element");
 			}
 		}		
 		else{
-			Element objectE = root.addElement( ename );
-			if(retObj instanceof Element)
-				objectE.add( (Element)retObj );
-			else if(retObj instanceof WSReturnObject){
-				Field[] fields = retObj.getClass().getFields();
+			Element objectE = root.addElement( elementName );
+			if(obj instanceof Element)
+				objectE.add( (Element)obj );
+			else if(obj instanceof WSReturnObject){
+				Field[] fields = obj.getClass().getFields();
 				for(int i=0; i<fields.length ;i++){
 					WSValueName tmp = fields[i].getAnnotation( WSValueName.class );
 					String name;
 					if(tmp != null) name = tmp.value();
 					else name = "field"+i;
-					generateReturnXML(objectE, fields[i].get(retObj), name);
+					generateSOAPXMLForObj(objectE, fields[i].get(obj), name);
 				}
 			}
 			else {
-				objectE.addAttribute("type", "xsd:"+ getSOAPClassName(retObj.getClass()));
-				objectE.addText( ""+retObj );
+				objectE.addAttribute("type", "xsd:"+ getSOAPClassName(obj.getClass()));
+				objectE.addText( ""+obj );
 			}
 		}
 	}
 
 	
-	public static String getSOAPClassName(Class<?> c){
+	protected static String getSOAPClassName(Class<?> c){
 		Class<?> cTmp = getClass(c);
 		if(byte[].class.isAssignableFrom(c)){
 			return "base64Binary";
@@ -359,7 +363,7 @@ public class SOAPHttpPage implements HttpPage{
 		}
 	}
 
-	public static Class<?> getClass(Class<?> c){
+	protected static Class<?> getClass(Class<?> c){
 		if(c!=null && c.isArray()){
 			return getClass(c.getComponentType());
 		}
