@@ -139,9 +139,9 @@ public class StringUtil {
         StringBuilder str = new StringBuilder();
         Iterator<?> it = list.iterator();
         if(it.hasNext()) {
-            str.append(it.next());
+            str.append(it.next().toString());
             while (it.hasNext()) {
-                str.append(delimiter).append(it.next());
+                str.append(delimiter).append(it.next().toString());
             }
         }
         return str.toString();

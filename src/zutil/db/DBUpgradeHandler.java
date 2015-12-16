@@ -57,14 +57,14 @@ public class DBUpgradeHandler {
      *
      * @param   enable
      */
-    public void forceDBUpgrade(boolean enable){
+    public void setForcedDBUpgrade(boolean enable){
         this.forceUpgradeEnabled = enable;
     }
 
     public void upgrade() throws SQLException {
         try {
             logger.fine("Starting upgrade transaction...");
-            target.exec("BEGIN IMMEDIATE TRANSACTION");
+            target.getConnection().setAutoCommit(false);
 
             upgradeRenameTables();
             upgradeCreateTables();
@@ -72,14 +72,12 @@ public class DBUpgradeHandler {
             upgradeAlterTables();
 
             logger.fine("Committing upgrade transaction...");
-            target.exec("COMMIT TRANSACTION");
+            target.getConnection().commit();
         } catch(SQLException e){
-            try {
-                target.exec("ROLLBACK TRANSACTION");
-            } catch (SQLException secondary_e) {
-                logger.log(Level.SEVERE, null, secondary_e);
-            }
+            target.getConnection().rollback();
             throw e;
+        } finally {
+            target.getConnection().setAutoCommit(true);
         }
     }
 
@@ -90,7 +88,7 @@ public class DBUpgradeHandler {
             for (String oldTableName : tableRenameMap.keySet()) {
                 if (targetTables.contains(oldTableName)) {
                     String newTableName = tableRenameMap.get(oldTableName);
-                    logger.fine("Renaming table from: " + oldTableName + ", to: " + newTableName);
+                    logger.fine(String.format("Renaming table from: '%s' to: '%s'", oldTableName, newTableName));
                     target.exec(String.format(
                             "ALTER TABLE %s RENAME TO %s", oldTableName, newTableName));
                 }
@@ -104,7 +102,7 @@ public class DBUpgradeHandler {
 
         for(String table : refTables){
             if(!targetTables.contains(table)){
-                logger.fine("Creating new table: "+ table);
+                logger.fine(String.format("Creating new table: '%s'", table));
                 // Get reference create sql
                 String sql = getTableSql(reference, table);
                 // Execute sql on target
@@ -119,7 +117,7 @@ public class DBUpgradeHandler {
 
         for(String table : targetTables){
             if(!refTables.contains(table)){
-                logger.fine("Dropping table: " + table);
+                logger.fine(String.format("Dropping table: '%s'", table));
                 target.exec("DROP TABLE " + table);
             }
         }
@@ -137,38 +135,51 @@ public class DBUpgradeHandler {
                 List<DBColumn> targetStruct = getColumnList(target, table);
 
                 // Check unnecessary columns
-                boolean forcedUpgrade = false;
+                boolean execForcedUpgrade = false;
                 for(DBColumn column : targetStruct) {
-                    if(!refStruct.contains(column)) {
-                        if(forceUpgradeEnabled)
-                            forcedUpgrade = true;
+                    if(refStruct.contains(column)) {
+                        DBColumn refColumn = refStruct.get(refStruct.indexOf(column));
+                        // Check if the columns have the same type
+                        if(!column.type.equals(refColumn.type)){
+                            if(forceUpgradeEnabled)
+                                execForcedUpgrade = true;
+                            else
+                                logger.warning(String.format(
+                                        "Skipping alter(%s -> %s) column: '%s.%s' (no SQLite support, forced upgrade needed)",
+                                        column.type, refColumn.type, table, column.name));
+                        }
+                    }
+                    else { // Column does not exist in reference DB, column should be removed
+                        if (forceUpgradeEnabled)
+                            execForcedUpgrade = true;
                         else
-                            logger.warning("Unable to drop column: '" + column.name + "' from table: "+ table
-                                    +" (SQLite does not support dropping columns)");
+                            logger.warning(String.format(
+                                    "Skipping drop column: '%s.%s' (no SQLite support, forced upgrade needed)",
+                                    table, column.name));
                     }
                 }
 
                 // Do a forced upgrade where we create a new table and migrate the old data
-                if(forcedUpgrade){
+                if(execForcedUpgrade){
                     // Backup table
                     String backupTable = table+"_temp";
-                    logger.fine("Forced Upgrade: Backing up table: "+table+", to: "+backupTable);
+                    logger.fine(String.format("Forced Upgrade: Backing up table: '%s' to: '%s'", table, backupTable));
                     target.exec(String.format("ALTER TABLE %s RENAME TO %s", table, backupTable));
 
                     // Creating new table
-                    logger.fine("Forced Upgrade: Creating new table: "+table);
+                    logger.fine(String.format("Forced Upgrade: Creating new table: '%s'", table));
                     String sql = getTableSql(reference, table);
                     target.exec(sql);
 
                     // Restoring data
-                    logger.fine("Forced Upgrade: Restoring data for table: "+table);
+                    logger.fine(String.format("Forced Upgrade: Restoring data for table: '%s'", table));
                     String cols = StringUtil.join(refStruct, ",");
                     target.exec(String.format(
                             "INSERT INTO %s (%s) SELECT %s FROM %s",
                             table, cols, cols, backupTable));
 
                     // Remove backup table
-                    logger.fine("Forced Upgrade: Removing backup table: "+backupTable);
+                    logger.fine(String.format("Forced Upgrade: Dropping backup table: '%s'", backupTable));
                     target.exec("DROP TABLE " + backupTable);
                 }
                 // Do a
@@ -176,7 +187,7 @@ public class DBUpgradeHandler {
                     // Add new columns
                     for(DBColumn column : refStruct) {
                         if(!targetStruct.contains(column)) {
-                            logger.fine("Adding column '" + column.name + "' to table: " + table);
+                            logger.fine(String.format("Adding column '%s.%s'", table, column.name));
                             target.exec(
                                     String.format("ALTER TABLE %s ADD COLUMN %s %s %s%s%s",
                                             table,
@@ -217,6 +228,10 @@ public class DBUpgradeHandler {
         public boolean equals(Object obj){
             return obj instanceof DBColumn &&
                     name.equals(((DBColumn)obj).name);
+        }
+
+        public String toString(){
+            return name;
         }
     }
 
