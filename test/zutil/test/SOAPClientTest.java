@@ -28,15 +28,17 @@ import zutil.log.LogUtil;
 import zutil.net.ws.WSInterface;
 import zutil.net.ws.soap.SOAPClientFactory;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.logging.Level;
 
 public class SOAPClientTest {
 
-	public static void main(String[] args) throws InstantiationException, IllegalAccessException{
+	public static void main(String[] args) throws InstantiationException, IllegalAccessException, MalformedURLException {
 		LogUtil.setGlobalLevel(Level.ALL);
 		LogUtil.setFormatter("", new CompactLogFormatter());
 		
-		TestClient intf = SOAPClientFactory.createClient(TestClient.class);
+		TestClient intf = SOAPClientFactory.createClient(new URL("http://localhost:3289"), TestClient.class);
 		intf.m();
 		intf.c();
 	}

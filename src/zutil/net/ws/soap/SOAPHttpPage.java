@@ -139,18 +139,17 @@ public class SOAPHttpPage implements HttpPage{
 
             Document document = genSOAPResponse( request.get(""), obj);
 
-            OutputFormat format = OutputFormat.createCompactFormat();
+			OutputFormat format = OutputFormat.createPrettyPrint();
             XMLWriter writer = new XMLWriter( out, format );
             writer.write( document );
 
 
             // DEBUG
             if( logger.isLoggable(Level.FINEST) ){
-                OutputFormat format2 = OutputFormat.createPrettyPrint();
-                System.err.println("********** Request");
-                System.err.println(request);
+                System.out.println("********** Request");
+                System.out.println(request);
                 System.out.println("********** Response");
-                writer = new XMLWriter( System.out, format2 );
+                writer = new XMLWriter( System.out, format );
                 writer.write( document );
             }
 		} catch (Exception e) {

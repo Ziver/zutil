@@ -28,7 +28,7 @@ import org.dom4j.Document;
 import org.dom4j.DocumentException;
 import org.dom4j.DocumentHelper;
 import org.dom4j.Element;
-import org.xml.sax.SAXException;
+import zutil.io.IOUtil;
 import zutil.log.LogUtil;
 import zutil.net.http.HttpClient;
 import zutil.net.http.HttpHeaderParser;
@@ -39,6 +39,7 @@ import zutil.net.ws.WebServiceDef;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
+import java.net.URL;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -53,22 +54,46 @@ public class SOAPClientInvocationHandler implements InvocationHandler {
 
     private WebServiceDef wsDef;
 	/** Web address of the web service */
-	protected String url;
-	
+	protected URL url;
+
+
+	public SOAPClientInvocationHandler(URL url, WebServiceDef wsDef){
+		this.url = url;
+        this.wsDef = wsDef;
+	}
+
+
 	/**
 	 * Makes a request to the target web service
 	 */
 	@Override
 	public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-        HttpClient request = HttpClient.POST();
+        // Generate XML
+        Document document = genSOAPRequest((WSInterface)proxy, method.getName(), args);
+        String reqXml = document.asXML();
 
+
+        // Send request
+        HttpClient request = new HttpClient(HttpClient.HttpRequestType.POST);
+        request.setURL(url);
+        request.setData(reqXml);
         HttpHeaderParser response = request.send();
+        String rspXml = IOUtil.getContentAsString( request.getResponseReader());
 
-		return null;
+        // DEBUG
+        if( logger.isLoggable(Level.FINEST) ){
+            System.out.println("********** Request");
+            System.out.println(reqXml);
+            System.out.println("********** Response");
+            System.out.println(rspXml);
+        }
+
+		return parseSOAPResponse(rspXml);
 	}
 
 
 	private Document genSOAPRequest(WSInterface obj, String targetMethod, Object[] args){
+		logger.fine("Sending request for "+targetMethod);
 		Document document = DocumentHelper.createDocument();
 		Element envelope = document.addElement("soap:Envelope");
         WSMethodDef methodDef = wsDef.getMethod( targetMethod );

@@ -154,7 +154,6 @@ public class HttpServer extends ThreadedTCPNetworkServer{
 			out = new HttpPrintStream(socket.getOutputStream());
 			in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 			this.socket = socket;
-			//logger.finest("New Connection: " + socket.getInetAddress().getHostName());
 		}
 
 		public void run(){
@@ -167,7 +166,6 @@ public class HttpServer extends ThreadedTCPNetworkServer{
 			try {
 				long time = System.currentTimeMillis();
 				HttpHeaderParser parser = new HttpHeaderParser(in);
-				//logger.finest(parser.toString());
 				request = parser.getURLAttributes();
 				cookie = parser.getCookies();
 
@@ -231,6 +229,7 @@ public class HttpServer extends ThreadedTCPNetworkServer{
 				out.setHeader( "Content-Type", "text/html" );
 				out.setCookie( "session_id", ""+client_session.get("session_id") );
 
+				logRequest(parser, client_session, cookie, request, time);
 				if( parser.getRequestURL() != null && !parser.getRequestURL().isEmpty() && pages.containsKey(parser.getRequestURL()) ){
 					pages.get(parser.getRequestURL()).respond(out, parser, client_session, cookie, request);
 					logRequest(parser, client_session, cookie, request, time);

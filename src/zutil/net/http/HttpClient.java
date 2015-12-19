@@ -39,27 +39,25 @@ import java.util.HashMap;
  * 
  * @author Ziver
  */
-public class HttpClient {
-	public static enum HttpRequestType{
+public class HttpClient implements AutoCloseable{
+    public static enum HttpRequestType{
 		GET, POST
 	}
-	
+
+	// Request variables
 	private HttpURL url;
 	private HttpRequestType type;
 	private HashMap<String,String> headers;
 	private HashMap<String,String> cookies;
+    private String data;
+
+	// Response variables
+    private HttpHeaderParser rspHeader;
+    private BufferedReader   rspReader;
+
 	
 	
-	public static HttpClient POST(){
-		return new HttpClient( HttpRequestType.POST );
-	}
-	
-	public static HttpClient GET(){
-		return new HttpClient( HttpRequestType.GET );
-	}
-	
-	
-	private HttpClient(HttpRequestType type){
+	public HttpClient(HttpRequestType type){
 		this.type = type;
 		headers = new HashMap<String,String>();
 		cookies = new HashMap<String,String>();
@@ -90,7 +88,19 @@ public class HttpClient {
 	public void setHeader( String key, String value ){
 		headers.put(key, value);
 	}
-	
+
+    /**
+     * Sets the content data that will be included in the request.
+     * NOTE: this will override the POST data parameter inclusion.
+     */
+    public void setData( String data ){
+        this.data = data;
+    }
+
+    /**
+     * Will send a HTTP request to the target host.
+     * NOTE: any previous request connections will be closed
+     */
 	public HttpHeaderParser send() throws IOException{
 		Socket conn = new Socket( url.getHost(), url.getPort());
 		
@@ -102,20 +112,40 @@ public class HttpClient {
 		request.setCookies( cookies );
 		
 		if( type == HttpRequestType.POST ){
-			String data = url.getParameterString();
-			request.setHeader("Content-Length", data);
+			String postData = null;
+            if(data != null)
+                postData = data;
+            else
+                postData = url.getParameterString();
+			request.setHeader("Content-Length", ""+postData.length());
 			request.println();
-			request.print( data );
+			request.print( postData );
 		}
 		else
 			request.println();
 		request.close();
 		
 		// Response
-		BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-		HttpHeaderParser response = new HttpHeaderParser( in );
-		conn.close();
-		
-		return response;
+        if(rspHeader != null || rspReader != null) // Close previous request
+            this.close();
+		rspReader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+		rspHeader = new HttpHeaderParser( rspReader );
+
+		return rspHeader;
 	}
+
+    public HttpHeaderParser getResponseHeader(){
+        return rspHeader;
+    }
+    public BufferedReader getResponseReader(){
+        return rspReader;
+    }
+
+    @Override
+    public void close() throws IOException {
+        if(rspReader != null)
+            rspReader.close();
+        rspReader = null;
+        rspHeader = null;
+    }
 }

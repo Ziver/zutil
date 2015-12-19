@@ -60,10 +60,26 @@ public class IOUtil {
      * @param 		stream
      * @return a String with the content of the stream
      */
-    public static String getContentString(InputStream stream) throws IOException{
+    public static String getContentAsString(InputStream stream) throws IOException{
+        return getContentAsString(new InputStreamReader(stream));
+    }
+
+    /**
+     * Reads and returns all the content of a stream as a String.
+     * This function will close the input stream at the end.
+     *
+     * @param 		reader
+     * @return a String with the content of the stream
+     */
+    public static String getContentAsString(Reader reader) throws IOException{
         StringBuilder str = new StringBuilder();
+        BufferedReader in = null;
+        if(reader instanceof BufferedReader)
+            reader = (BufferedReader) reader;
+        else
+            in = new BufferedReader(reader);
+
         String line;
-        BufferedReader in = new BufferedReader(new InputStreamReader(stream));
         while((line = in.readLine()) != null){
             str.append(line).append("\n");
         }

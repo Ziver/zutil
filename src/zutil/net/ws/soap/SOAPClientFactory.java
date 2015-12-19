@@ -32,6 +32,7 @@ import zutil.net.ws.WebServiceDef;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Proxy;
+import java.net.URL;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -47,24 +48,28 @@ public class SOAPClientFactory {
      * Generates a Client Object for the web service.
      *
      * @param 	<T> 	is the class of the web service definition
+     * @param 	url 	is the target service url
      * @param 	intf 	is the class of the web service definition
      * @return a client Object
      */
     @SuppressWarnings("unchecked")
-    public static <T> T createClient(Class<T> intf){
-        return createClient( intf, new WebServiceDef((Class<? extends WSInterface>)intf) );
+    public static <T> T createClient(URL url, Class<T> intf){
+        return createClient(url, intf,
+                new WebServiceDef((Class<? extends WSInterface>)intf) );
     }
 
     /**
      * Generates a Client Object for the web service.
      *
      * @param 	<T> 	is the class of the web service definition
+     * @param 	url 	is the target service url
      * @param 	intf 	is the class of the web service definition
      * @param 	wsDef 	is the web service definition of the intf parameter
      * @return a client Object
      */
-    public static <T> T createClient(Class<T> intf, WebServiceDef wsDef){
-        T obj = WSClientFactory.createClient(intf, new SOAPClientInvocationHandler());
+    public static <T> T createClient(URL url, Class<T> intf, WebServiceDef wsDef){
+        T obj = WSClientFactory.createClient( intf,
+                new SOAPClientInvocationHandler(url, wsDef));
         return obj;
     }
 
