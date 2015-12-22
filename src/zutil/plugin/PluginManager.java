@@ -97,27 +97,25 @@ public class PluginManager<T> implements Iterable<PluginData>{
 	public Iterator<PluginData> iterator() {
 		return plugins.values().iterator();
 	}
-	public <T> Iterator<T> iterator(Class<T> intf) {
+	public <T> Iterator<T> getObjectIterator(Class<T> intf) {
 		return new PluginInterfaceIterator<T>(plugins.values().iterator(), intf);
 	}
 
 	public ArrayList<PluginData> toArray() {
-		ArrayList<PluginData> list = new ArrayList<PluginData>();
-		Iterator<PluginData> it = iterator();
-		while(it.hasNext())
-			list.add(it.next());
-		return list;
+		return toGenericArray(iterator());
 	}
 	public <T> ArrayList<T> toArray(Class<T> intf) {
-		ArrayList<T> list = new ArrayList<T>();
-		Iterator<T> it = iterator(intf);
-		while(it.hasNext())
-			list.add(it.next());
-		return list;
+        return toGenericArray(getObjectIterator(intf));
 	}
+    private <T> ArrayList<T> toGenericArray(Iterator<T> it) {
+        ArrayList<T> list = new ArrayList<>();
+        while(it.hasNext())
+            list.add(it.next());
+        return list;
+    }
 
 
-	public class PluginInterfaceIterator<T> implements Iterator<T> {
+	public static class PluginInterfaceIterator<T> implements Iterator<T> {
 		private Class<T> intf;
 		private Iterator<PluginData> pluginIt;
 		private Iterator<T> objectIt;
@@ -135,7 +133,7 @@ public class PluginManager<T> implements Iterable<PluginData>{
 				return true;
 
 			while(pluginIt.hasNext()) {
-				objectIt = pluginIt.next().getIterator(intf);
+				objectIt = pluginIt.next().getObjectIterator(intf);
 				if(objectIt.hasNext())
 					return true;
 			}

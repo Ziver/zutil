@@ -43,12 +43,12 @@ public class PluginData {
 
 	private double pluginVersion;
 	private String pluginName;
-	private HashMap<Class, List<Class>>  classMap;
+	private HashMap<Class<?>, List<Class<?>>>  classMap;
 	private HashMap<Class, Object> objectMap;
 
 	
 	protected PluginData(DataNode data) throws ClassNotFoundException, MalformedURLException {
-		classMap = new HashMap<Class, List<Class>>();
+		classMap = new HashMap<>();
 		objectMap = new HashMap<Class, Object>();
 
 		pluginVersion = data.getDouble("version");
@@ -80,7 +80,7 @@ public class PluginData {
 				continue;
 
 			if(!classMap.containsKey(intfClass))
-				classMap.put(intfClass, new ArrayList<Class>());
+				classMap.put(intfClass, new ArrayList<Class<?>>());
 			classMap.get(intfClass).add(pluginClass);
 		}
 	}
@@ -102,10 +102,15 @@ public class PluginData {
 	}
 
 
-	public <T> Iterator<T> getIterator(Class<T> intf){
+	public <T> Iterator<T> getObjectIterator(Class<T> intf){
 		if(!classMap.containsKey(intf))
 			return Collections.emptyIterator();
 		return new PluginObjectIterator<T>(classMap.get(intf).iterator());
+	}
+	public Iterator<Class<?>> getClassIterator(Class<?> intf){
+		if(!classMap.containsKey(intf))
+			return Collections.emptyIterator();
+		return classMap.get(intf).iterator();
 	}
 
 	private <T> T getObject(Class<T> objClass) {
@@ -131,10 +136,10 @@ public class PluginData {
 
 
 	private class PluginObjectIterator<T> implements Iterator<T>{
-		private Iterator<Class> classIt;
+		private Iterator<Class<?>> classIt;
 		private T currentObj;
 
-		public PluginObjectIterator(Iterator<Class> it) {
+		public PluginObjectIterator(Iterator<Class<?>> it) {
 			classIt = it;
 		}
 
