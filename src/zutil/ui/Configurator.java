@@ -106,6 +106,9 @@ public class Configurator<T> {
         return list;
     }
 
+    /**
+     * Uses a Map to assign all parameters of the Object
+     */
     public void setConfiguration(Map<String,String> parameters){
         for(ConfigurationParam param : this.params){
             if(parameters.containsKey(param.getName()))
@@ -113,6 +116,12 @@ public class Configurator<T> {
         }
     }
 
+    /**
+     * All configuration parameters that was set
+     * for each parameter will be applied to the object.
+     *
+     * If the target class implements the ConfigurationActionListener interface
+     */
     public void applyConfiguration(){
         StringBuilder strParams = new StringBuilder();
         for(ConfigurationParam param : params){
@@ -129,9 +138,17 @@ public class Configurator<T> {
             } catch (IllegalAccessException e) {
                 logger.log(Level.WARNING, null, e);
             }
+            if(obj instanceof ConfigurationActionListener)
+                ((ConfigurationActionListener) obj).postConfigurationAction();
         }
         if(logger.isLoggable(Level.FINE))
             logger.fine("Configured object: " + obj.getClass().getSimpleName() + "("+ strParams +")");
+    }
+
+
+
+    public interface ConfigurationActionListener{
+        void postConfigurationAction();
     }
 
 
