@@ -11,6 +11,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -29,10 +30,12 @@ public class DBUpgradeHandler {
     private DBConnection target;
     private boolean forceUpgradeEnabled = false;
     private HashMap<String,String> tableRenameMap;
+    private HashSet<String> ignoredTablesSet;
 
 
     public DBUpgradeHandler(DBConnection reference){
         this.tableRenameMap = new HashMap<>();
+        this.ignoredTablesSet = new HashSet<>();
         this.reference = reference;
     }
 
@@ -51,6 +54,13 @@ public class DBUpgradeHandler {
     }
 
     /**
+     * @param   table           a table name that will be ignored from the upgrade procedure
+     */
+    public void addIgnoredTable(String table){
+        ignoredTablesSet.add(table);
+    }
+
+    /**
      * With the default behaviour unnecessary columns will not be removed.
      * But if forced upgrade is set to true then the upgrade handler will
      * create a new table and migrate the data from the old one to the new table.
@@ -60,6 +70,7 @@ public class DBUpgradeHandler {
     public void setForcedDBUpgrade(boolean enable){
         this.forceUpgradeEnabled = enable;
     }
+
 
     public void upgrade() throws SQLException {
         try {
@@ -204,8 +215,18 @@ public class DBUpgradeHandler {
     }
 
 
-    private static List<String> getTableList(DBConnection db) throws SQLException {
-        return db.exec("SELECT name FROM sqlite_master WHERE type='table';", new ListSQLResult<String>());
+    private List<String> getTableList(DBConnection db) throws SQLException {
+        return db.exec("SELECT name FROM sqlite_master WHERE type='table';", new SQLResultHandler<List<String>>() {
+            public List<String> handleQueryResult(Statement stmt, ResultSet result) throws SQLException {
+                ArrayList<String> list = new ArrayList<String>();
+                while( result.next() ) {
+                    String table = result.getString(1);
+                    if(!ignoredTablesSet.contains(table))
+                        list.add(result.getString(1));
+                }
+                return list;
+            }
+        });
     }
     private static String getTableSql(DBConnection db, String table) throws SQLException {
         PreparedStatement stmt = db.getPreparedStatement("SELECT sql FROM sqlite_master WHERE name == ?");
