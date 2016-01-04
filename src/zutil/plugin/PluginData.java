@@ -73,13 +73,17 @@ public class PluginData {
 
 			Class intfClass = getClassByName(pluginIntf);
 			Class pluginClass = getClassByName(className);
-			log.finer("Plugin interface: " +
-					(intfClass==null ? "(Not Available) " : "") + pluginIntf + " --> " +
-					(pluginClass==null ? "(Not Available) " : "") + className);
-			if(intfClass == null || pluginClass == null)
+			if (intfClass == null || pluginClass == null)
+				log.warning("Plugin interface: " +
+						(intfClass==null ? "(Not Available) " : "") + pluginIntf + " --> " +
+						(pluginClass==null ? "(Not Available) " : "") + className);
+			else
+				log.finer("Plugin interface: "+ pluginIntf +" --> "+ className);
+
+			if (intfClass == null || pluginClass == null)
 				continue;
 
-			if(!classMap.containsKey(intfClass))
+			if (!classMap.containsKey(intfClass))
 				classMap.put(intfClass, new ArrayList<Class<?>>());
 			classMap.get(intfClass).add(pluginClass);
 		}
