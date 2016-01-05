@@ -1,5 +1,6 @@
 package zutil.db.bean;
 
+import zutil.ClassUtil;
 import zutil.log.LogUtil;
 
 import java.lang.reflect.Field;
@@ -79,8 +80,9 @@ class DBBeanConfig{
 
     protected static String getFieldName(Field field){
         String name = null;
-        if(field.getDeclaredAnnotation(DBBean.DBColumn.class) != null)
-            name = field.getDeclaredAnnotation(DBBean.DBColumn.class).value();
+        DBBean.DBColumn colAnnotation = field.getAnnotation(DBBean.DBColumn.class);
+        if(colAnnotation != null)
+            name = colAnnotation.value();
         else
             name = field.getName();
         return name;

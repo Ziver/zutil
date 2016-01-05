@@ -33,7 +33,7 @@ public class StreamLogger {
         if(n < 0 || n == DELIMETER)
             flushLog();
         else
-            buffer.append(n);
+            buffer.append((char)n);
         if(buffer.length() > MAX_BUFFER_SIZE)
             flushLog();
     }
