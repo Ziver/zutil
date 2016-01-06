@@ -182,7 +182,6 @@ public class DBBeanSQLResultHandler<T> implements SQLResultHandler<T>{
 	public T handleQueryResult(Statement stmt, ResultSet result) throws SQLException{
 		if( list ){
 			LinkedList<DBBean> bean_list = new LinkedList<DBBean>();
-			logger.fine("Loading new DBBean List");
 			while( result.next() ){
 				DBBean obj = createBean(result);
 				bean_list.add( obj );

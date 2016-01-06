@@ -152,17 +152,19 @@ public class CompactLogFormatter extends Formatter{
 	 * @return the Class name
 	 */
 	private String paddClassName(String source){
-		String tmp = padd_cache.get(source);
-		if(tmp != null && tmp.length() == max_class_name)
-			return tmp;
+		String cStr = padd_cache.get(source);
+		if(cStr == null || cStr.length() != max_class_name) {
+			cStr = source.substring(source.lastIndexOf('.') + 1); // Remove packages
+			if(cStr.lastIndexOf('$') >= 0) // extract subclass name
+				cStr = cStr.substring(cStr.lastIndexOf('$')+1);
 
-		String c_name = source.substring( source.lastIndexOf('.')+1 );
-		if( c_name.length() > max_class_name )
-			max_class_name = c_name.length();
+			if (cStr.length() > max_class_name)
+				max_class_name = cStr.length();
 
-		c_name += StringUtil.getSpaces(max_class_name - c_name.length());
-		padd_cache.put(source, c_name);
-		return c_name;
+			cStr += StringUtil.getSpaces(max_class_name - cStr.length());
+			padd_cache.put(source, cStr);
+		}
+		return cStr;
 	}
 
 }
