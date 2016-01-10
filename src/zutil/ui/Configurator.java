@@ -208,8 +208,6 @@ public class Configurator<T> {
          * {@link #applyConfiguration()} needs to be called
          */
         public void setValue(String v){
-            if(obj == null)
-                return;
             switch(type){
                 case STRING:
                     value = v; break;
@@ -221,7 +219,8 @@ public class Configurator<T> {
         }
 
         protected void apply() throws IllegalAccessException {
-            field.set(obj, value);
+            if(obj != null)
+                field.set(obj, value);
         }
 
 
