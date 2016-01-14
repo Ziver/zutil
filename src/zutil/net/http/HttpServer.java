@@ -229,12 +229,11 @@ public class HttpServer extends ThreadedTCPNetworkServer{
 				out.setHeader( "Content-Type", "text/html" );
 				out.setCookie( "session_id", ""+client_session.get("session_id") );
 
-				logRequest(parser, client_session, cookie, request, time);
-				if( parser.getRequestURL() != null && !parser.getRequestURL().isEmpty() && pages.containsKey(parser.getRequestURL()) ){
+				if( parser.getRequestURL() != null && pages.containsKey(parser.getRequestURL()) ){
 					pages.get(parser.getRequestURL()).respond(out, parser, client_session, cookie, request);
 					logRequest(parser, client_session, cookie, request, time);
 				}
-				else if( defaultPage != null ){
+				else if( parser.getRequestURL() != null && defaultPage != null ){
 					defaultPage.respond(out, parser, client_session, cookie, request);
 					logRequest(parser, client_session, cookie, request, time);
 				}
