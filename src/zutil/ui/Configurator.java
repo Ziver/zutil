@@ -25,6 +25,7 @@
 package zutil.ui;
 
 import zutil.log.LogUtil;
+import zutil.parser.DataNode;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -51,9 +52,9 @@ public class Configurator<T> {
     @Retention(RetentionPolicy.RUNTIME) // Make this annotation accessible at runtime via reflection.
     @Target({ElementType.FIELD})        // This annotation can only be applied to class fields.
     public static @interface Configurable{
-        /* Nice name of this parameter */
+        /** Nice name of this parameter **/
         String value();
-        /* Defines the order the parameters, in ascending order */
+        /** Defines the order the parameters, in ascending order **/
         int order() default Integer.MAX_VALUE;
     }
 
@@ -109,7 +110,7 @@ public class Configurator<T> {
     /**
      * Uses a Map to assign all parameters of the Object
      */
-    public void setConfiguration(Map<String,String> parameters){
+    public void setValues(Map<String,String> parameters){
         for(ConfigurationParam param : this.params){
             if(parameters.containsKey(param.getName()))
                 param.setValue(parameters.get(param.getName()));
@@ -117,16 +118,38 @@ public class Configurator<T> {
     }
 
     /**
+     * Uses a Map to assign all parameters of the Object.
+     * NOTE: the DataNode must be of type Map
+     */
+    public void setValues(DataNode node){
+        if(!node.isMap())
+            return;
+        for(ConfigurationParam param : this.params){
+            if(node.get(param.getName()) != null)
+                param.setValue(node.getString(param.getName()));
+        }
+    }
+
+    public DataNode getValuesAsNode(){
+        DataNode node = new DataNode(DataNode.DataType.Map);
+        for(ConfigurationParam param : this.params){
+            node.set(param.getName(), param.getString());
+        }
+        return node;
+    }
+
+
+    /**
      * All configuration parameters that was set
      * for each parameter will be applied to the object.
      *
-     * If the target class implements the ConfigurationActionListener interface
+     * The postConfigurationAction() method will be called on the target object if it implements the ConfigurationActionListener interface.
      */
     public void applyConfiguration(){
         StringBuilder strParams = new StringBuilder();
         for(ConfigurationParam param : params){
             try {
-                param.apply();
+                param.apply(obj);
                 // Logging
                 if(logger.isLoggable(Level.FINE)) {
                     strParams.append(param.getName());
@@ -157,14 +180,12 @@ public class Configurator<T> {
         protected String name;
         protected String niceName;
         protected ConfigType type;
-        protected Object obj;
         protected Object value;
         protected int order;
 
 
-        protected ConfigurationParam(Field f, Object o) throws IllegalAccessException {
+        protected ConfigurationParam(Field f, Object obj) throws IllegalAccessException {
             field = f;
-            obj = o;
             field.setAccessible(true);
             name = field.getName();
             if(obj != null)
@@ -218,7 +239,7 @@ public class Configurator<T> {
             }
         }
 
-        protected void apply() throws IllegalAccessException {
+        protected void apply(Object obj) throws IllegalAccessException {
             if(obj != null)
                 field.set(obj, value);
         }
