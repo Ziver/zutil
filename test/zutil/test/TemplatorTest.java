@@ -38,6 +38,9 @@ public class TemplatorTest {
     class TestClass{
         public String attr;
     }
+    class TestSubClass extends TestClass{
+        public String subAttr;
+    }
     class TestFuncClass{
         public boolean isTrue(){
             return true;
@@ -286,5 +289,16 @@ public class TemplatorTest {
 
         assertEquals(
                 "<HTML>super:sub1,sub2</HTML>", tmpl.compile());
+    }
+
+
+    @Test
+    public void subClassTest(){
+        Templator tmpl = new Templator("<HTML>{{test.attr}}:{{test.subAttr}}</HTML>");
+        TestSubClass obj = new TestSubClass();
+        obj.attr = "1234";
+        obj.subAttr = "5678";
+        tmpl.set("test", obj);
+        assertEquals("<HTML>1234:5678</HTML>", tmpl.compile());
     }
 }
