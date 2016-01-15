@@ -62,9 +62,7 @@ public class StringOutputStream extends OutputStream{
 	 * Same as {@link OutputStream:clear()}
 	 */
 	@Override
-	public void close() {
-		clear();
-	}
+	public void close() {}
 	
 	/**
 	 * Clears the String buffer

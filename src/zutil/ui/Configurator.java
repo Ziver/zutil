@@ -110,24 +110,26 @@ public class Configurator<T> {
     /**
      * Uses a Map to assign all parameters of the Object
      */
-    public void setValues(Map<String,String> parameters){
+    public Configurator<T> setValues(Map<String,String> parameters){
         for(ConfigurationParam param : this.params){
             if(parameters.containsKey(param.getName()))
                 param.setValue(parameters.get(param.getName()));
         }
+        return this;
     }
 
     /**
      * Uses a Map to assign all parameters of the Object.
      * NOTE: the DataNode must be of type Map
      */
-    public void setValues(DataNode node){
+    public Configurator<T> setValues(DataNode node){
         if(!node.isMap())
-            return;
+            return this;
         for(ConfigurationParam param : this.params){
             if(node.get(param.getName()) != null)
                 param.setValue(node.getString(param.getName()));
         }
+        return this;
     }
 
     public DataNode getValuesAsNode(){
@@ -156,7 +158,7 @@ public class Configurator<T> {
                     if(param.isTypeString())
                         strParams.append(": '").append(param.getString()).append("', ");
                     else
-                        strParams.append(param.getString());
+                        strParams.append(": ").append(param.getString());
                 }
             } catch (IllegalAccessException e) {
                 logger.log(Level.WARNING, null, e);
@@ -165,7 +167,7 @@ public class Configurator<T> {
                 ((ConfigurationActionListener) obj).postConfigurationAction();
         }
         if(logger.isLoggable(Level.FINE))
-            logger.fine("Configured object: " + obj.getClass().getSimpleName() + "("+ strParams +")");
+            logger.fine("Configured object: " + obj.getClass().getName() + " ("+ strParams +")");
     }
 
 
