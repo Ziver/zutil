@@ -158,7 +158,7 @@ public class Configurator<T> {
                     if(param.isTypeString())
                         strParams.append(": '").append(param.getString()).append("', ");
                     else
-                        strParams.append(": ").append(param.getString());
+                        strParams.append(": ").append(param.getString()).append(", ");
                 }
             } catch (IllegalAccessException e) {
                 logger.log(Level.WARNING, null, e);
