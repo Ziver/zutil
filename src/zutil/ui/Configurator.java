@@ -68,6 +68,8 @@ public class Configurator<T> {
 
     private T obj;
     private ConfigurationParam[] params;
+    private PreConfigurationActionListener<T> preListener;
+    private PostConfigurationActionListener<T> postListener;
 
     public Configurator(T obj){
         this.obj = obj;
@@ -142,12 +144,34 @@ public class Configurator<T> {
 
 
     /**
+     * Set a listener that will be called just before the configuration has been applied
+     */
+    public void setPreConfigurationListener(PreConfigurationActionListener<T> listener){
+        preListener = listener;
+    }
+
+    /**
+     * Set a listener that will be called after the configuration has been applied
+     */
+    public void setPostConfigurationListener(PostConfigurationActionListener<T> listener){
+        postListener = listener;
+    }
+
+    /**
      * All configuration parameters that was set
      * for each parameter will be applied to the object.
      *
-     * The postConfigurationAction() method will be called on the target object if it implements the ConfigurationActionListener interface.
+     * The preConfigurationAction() method will be called before the target object has
+     * been configured if it implements the PreConfigurationActionListener interface.
+     * The postConfigurationAction() method will be called after the target object is
+     * configured if it implements the PostConfigurationActionListener interface.
      */
     public void applyConfiguration(){
+        if(preListener != null)
+            preListener.preConfigurationAction(this, obj);
+        if(obj instanceof PreConfigurationActionListener)
+            ((PreConfigurationActionListener<T>) obj).preConfigurationAction(this, obj);
+
         StringBuilder strParams = new StringBuilder();
         for(ConfigurationParam param : params){
             try {
@@ -163,17 +187,22 @@ public class Configurator<T> {
             } catch (IllegalAccessException e) {
                 logger.log(Level.WARNING, null, e);
             }
-            if(obj instanceof ConfigurationActionListener)
-                ((ConfigurationActionListener) obj).postConfigurationAction();
         }
         if(logger.isLoggable(Level.FINE))
             logger.fine("Configured object: " + obj.getClass().getName() + " ("+ strParams +")");
+
+        if(obj instanceof PostConfigurationActionListener)
+            ((PostConfigurationActionListener<T>) obj).postConfigurationAction(this, obj);
+        if(postListener != null)
+            postListener.postConfigurationAction(this, obj);
     }
 
 
-
-    public interface ConfigurationActionListener{
-        void postConfigurationAction();
+    public interface PreConfigurationActionListener<T> {
+        void preConfigurationAction(Configurator<T> configurator, T obj);
+    }
+    public interface PostConfigurationActionListener<T> {
+        void postConfigurationAction(Configurator<T> configurator, T obj);
     }
 
 
