@@ -266,8 +266,24 @@ public class Templator {
                     if ((Boolean) obj)
                         super.compile(str);
                 }
+                else if(obj instanceof Short){
+                    if ((Short) obj != 0)
+                        super.compile(str);
+                }
                 else if(obj instanceof Integer){
                     if ((Integer) obj != 0)
+                        super.compile(str);
+                }
+                else if(obj instanceof Long){
+                    if ((Long) obj != 0l)
+                        super.compile(str);
+                }
+                else if(obj instanceof Float){
+                    if ((Float) obj != 0f)
+                        super.compile(str);
+                }
+                else if(obj instanceof Double){
+                    if ((Double) obj != 0d)
                         super.compile(str);
                 }
                 else if(obj instanceof Iterable || obj.getClass().isArray()) {
