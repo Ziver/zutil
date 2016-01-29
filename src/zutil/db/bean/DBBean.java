@@ -183,7 +183,7 @@ public abstract class DBBean {
             }
 
             String sql = query.toString();
-			logger.finest("Save query("+c.getName()+" id:"+this.getId()+"): "+ sql);
+			logger.finest("Save Bean("+c.getName()+", id: "+this.getId()+") query: "+ sql);
 			PreparedStatement stmt = db.getPreparedStatement( sql );
 			// Put in the variables in the SQL
 			int index = 1;
@@ -191,11 +191,11 @@ public abstract class DBBean {
 
 				// Another DBBean class
 				if( DBBean.class.isAssignableFrom( field.getType() )){
-					DBBean subobj = (DBBean)getFieldValue(field);
-					if(subobj != null){
-						if( recursive || subobj.getId() == null )
-							subobj.save(db);
-						stmt.setObject(index, subobj.getId() );
+					DBBean subObj = (DBBean)getFieldValue(field);
+					if(subObj != null){
+						if( recursive || subObj.getId() == null )
+							subObj.save(db);
+						stmt.setObject(index, subObj.getId() );
 					}
 					else
 						stmt.setObject(index, null);
@@ -204,7 +204,7 @@ public abstract class DBBean {
 				// A list of DBBeans
 				else if( List.class.isAssignableFrom( field.getType() ) && 
 						field.getAnnotation( DBLinkTable.class ) != null){
-					// Du stuff later
+					// Do stuff later
 				}
 				// Normal field
 				else{
@@ -228,34 +228,34 @@ public abstract class DBBean {
 					List<DBBean> list = (List<DBBean>)getFieldValue(field);
 					if( list != null ){
 						DBLinkTable linkTable = field.getAnnotation( DBLinkTable.class );
-						String subtable = linkTable.table();
-						String idcol = (linkTable.idColumn().isEmpty() ? config.tableName : linkTable.idColumn() );
-						String sub_idcol = "id";
+						String subTable = linkTable.table();
+						String idCol = (linkTable.idColumn().isEmpty() ? config.tableName : linkTable.idColumn() );
+						String subIdCol = "id";
 
 						DBBeanConfig subConfig = null;
-						for(DBBean subobj : list){
+						for(DBBean subObj : list){
 							// Save the sub bean
-							if( recursive || subobj.getId() == null )
-								subobj.save(db);
-							if( subobj.getId() == null ){
-								logger.severe("Unable to save field "+c.getSimpleName()+"."+field.getName()+" with "+subobj.getClass().getSimpleName());
+							if( recursive || subObj.getId() == null )
+								subObj.save(db);
+							if( subObj.getId() == null ){
+								logger.severe("Unable to save field "+c.getSimpleName()+"."+field.getName()+" with "+subObj.getClass().getSimpleName());
 								continue;
 							}
 							// Get the Sub object configuration
 							if(subConfig == null){
-								subConfig = DBBeanConfig.getBeanConfig( subobj.getClass() );
-								sub_idcol = subConfig.idColumn;
+								subConfig = DBBeanConfig.getBeanConfig( subObj.getClass() );
+								subIdCol = subConfig.idColumn;
 							}
 							// Save links in link table
-							String subsql = "";
-							if( subtable.equals(subConfig.tableName) )
-								subsql = "UPDATE "+subtable+" SET "+idcol+"=? WHERE "+sub_idcol+"=?";
+							sql = "";
+							if( subTable.equals(subConfig.tableName) )
+								sql = "UPDATE "+subTable+" SET "+idCol+"=? WHERE "+subIdCol+"=?";
 							else
-								subsql = "REPLACE INTO "+subtable+" SET "+idcol+"=?, "+sub_idcol+"=?";
-							logger.finest("List Save query("+c.getName()+" id:"+subobj.getId()+"): "+subsql);
-							PreparedStatement subStmt = db.getPreparedStatement( subsql );
+								sql = "REPLACE INTO "+subTable+" SET "+idCol+"=?, "+subIdCol+"=?";
+							logger.finest("Save Bean("+c.getName()+", id: "+subObj.getId()+") query: "+sql);
+							PreparedStatement subStmt = db.getPreparedStatement( sql );
 							subStmt.setLong(1, this.getId() );
-							subStmt.setLong(2, subobj.getId() );
+							subStmt.setLong(2, subObj.getId() );
 							DBConnection.exec(subStmt);
 						}
 					}
@@ -279,10 +279,10 @@ public abstract class DBBean {
 		Class<? extends DBBean> c = this.getClass();
 		DBBeanConfig config = DBBeanConfig.getBeanConfig( c );
 		if( this.getId() == null )
-			throw new NoSuchElementException("ID field is null( Has the bean been saved?)!");
+			throw new NoSuchElementException("ID field is null? (Has the bean been saved?)");
 
 		String sql = "DELETE FROM "+config.tableName+" WHERE "+config.idColumn+"=?";
-		logger.fine("Delete query("+c.getName()+" id:"+this.getId()+"): "+sql);
+		logger.finest("Delete Bean("+c.getName()+", id: "+this.getId()+") query: "+sql);
 		PreparedStatement stmt = db.getPreparedStatement( sql );
 		// Put in the variables in the SQL
 		stmt.setObject(1, this.getId() );
@@ -304,7 +304,7 @@ public abstract class DBBean {
 		DBBeanConfig config = DBBeanConfig.getBeanConfig( c );
 		// Generate query
 		String sql = "SELECT * FROM "+config.tableName;
-		logger.fine("Load All query("+c.getName()+"): "+sql);
+		logger.finest("Load all Beans("+c.getName()+") query: "+sql);
 		PreparedStatement stmt = db.getPreparedStatement( sql );
 		// Run query
 		List<T> list = DBConnection.exec(stmt, DBBeanSQLResultHandler.createList(c, db) );
@@ -324,7 +324,7 @@ public abstract class DBBean {
 		DBBeanConfig config = DBBeanConfig.getBeanConfig( c );
 		// Generate query
 		String sql = "SELECT * FROM "+config.tableName+" WHERE "+config.idColumn+"=? LIMIT 1";
-		logger.fine("Load query("+c.getName()+" id:"+id+"): "+sql);
+		logger.finest("Load Bean("+c.getName()+", id: "+id+") query: "+sql);
 		PreparedStatement stmt = db.getPreparedStatement( sql );
 		stmt.setObject(1, id );
 		// Run query
@@ -356,7 +356,8 @@ public abstract class DBBean {
 		}
 		query.delete( query.length()-2, query.length());
 		query.append(")");
-		logger.fine("Create query("+c.getName()+"): "+sql.toString());
+
+		logger.finest("Create Bean("+c.getName()+") query: "+sql.toString());
 		PreparedStatement stmt = sql.getPreparedStatement( sql.toString() );
 
 		// Execute the SQL

@@ -144,7 +144,6 @@ public class DBBeanSQLResultHandler<T> implements SQLResultHandler<T>{
 	 */
 	private static class DBBeanGarbageCollector extends TimerTask {
 		public void run(){
-			logger.fine("DBBean GarbageCollector has started.");
 			if( cache == null ){
 				logger.severe("DBBeanSQLResultHandler not initialized, stopping DBBeanGarbageCollector timer.");
 				this.cancel();
@@ -165,14 +164,13 @@ public class DBBeanSQLResultHandler<T> implements SQLResultHandler<T>{
 					if( beanCache.timestamp + CACHE_TTL < time ){
 						class_cache.remove(objKey);
 						removed++;
-						logger.finer("Removing old DBBean(class: "+beanCache.bean.getClass().getName()
-								+", id: "+beanCache.bean.getId()+") from cache.");
+						logger.finer("Removing old Bean("+beanCache.bean.getClass().getName()+")" +
+                                " from cache with id: "+beanCache.bean.getId());
 					}
 				}
 			}
-			
-			if( removed > 0 )
-				logger.info("DBBean GarbageCollector has cleared "+removed+" beans from cache.");
+
+            logger.info("DBBean GarbageCollector has cleared "+removed+" beans from cache.");
 		}
 	}
 	
@@ -214,7 +212,7 @@ public class DBBeanSQLResultHandler<T> implements SQLResultHandler<T>{
 			DBBean obj = getCachedDBBean(bean_class, id, result);
 			if( obj != null )
 				return obj;
-			logger.fine("Creating new DBBean("+bean_class.getName()+") with id: "+id);
+			logger.fine("Creating new Bean("+bean_class.getName()+") with id: "+id);
 			obj = bean_class.newInstance();
 			cacheDBBean(obj, id);
 			
@@ -240,7 +238,7 @@ public class DBBeanSQLResultHandler<T> implements SQLResultHandler<T>{
 	@SuppressWarnings("unchecked")
 	protected void updateBean(ResultSet result, DBBean obj) throws SQLException{
 		try {
-			logger.fine("Updating DBBean("+bean_class.getName()+") with id: "+obj.id);
+			logger.fine("Updating Bean("+bean_class.getName()+") with id: "+obj.id);
 			obj.processing_update = true;
 			// Get the rest
 			for( Field field : bean_config.fields ){
@@ -299,7 +297,7 @@ public class DBBeanSQLResultHandler<T> implements SQLResultHandler<T>{
 		try{
 			return getCachedDBBean( c, id, null );
 		}catch(SQLException e){
-			throw new RuntimeException("This exception sould not be thrown, Somting is realy wrong!", e);
+			throw new RuntimeException("This exception should not be thrown, Something ent ready wrong!", e);
 		}
 	}
 	
@@ -323,7 +321,7 @@ public class DBBeanSQLResultHandler<T> implements SQLResultHandler<T>{
 						return null;
 					// Only update object if there is no update running now
 					if( !item.bean.processing_update ){
-						logger.finer("Cache to old: "+c.getName()+" ID: "+id);
+						logger.finer("Bean("+c.getName()+") cache to old for id: "+id);
 						updateBean( result, item.bean );
 					}
 				}
@@ -332,7 +330,7 @@ public class DBBeanSQLResultHandler<T> implements SQLResultHandler<T>{
 			// The cache is null
 			cache.get(c).remove(id);
 		}
-		logger.finer("Cache miss: "+c.getName()+" ID: "+id);
+		logger.finer("Bean("+c.getName()+") cache miss for id: "+id);
 		return null;
 	}
 	
