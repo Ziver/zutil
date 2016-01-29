@@ -47,6 +47,10 @@ public class DBBeanSQLResultHandler<T> implements SQLResultHandler<T>{
 		new ConcurrentHashMap<Class<?>, Map<Long,DBBeanCache>>();
 	private static Timer timer;
 
+    static {
+        enableBeanGBC(true); // Initiate DBBeanGarbageCollector
+    }
+
 	/**
 	 * A cache container that contains a object and last read time
 	 */
@@ -114,13 +118,11 @@ public class DBBeanSQLResultHandler<T> implements SQLResultHandler<T>{
 		this.list = list;
 		this.db = db;
 		this.bean_config = DBBeanConfig.getBeanConfig( cl );
-		
-		// Initiate DBBeanGarbageCollector
-
 	}
 
 	/**
-	 * This function cancels the internal cache garbage collector in DBBean
+	 * This function cancels the internal cache garbage collector in DBBean.
+     * GBC is enabled by default
 	 */
 	public static void enableBeanGBC(boolean enable){
         if(enable){
