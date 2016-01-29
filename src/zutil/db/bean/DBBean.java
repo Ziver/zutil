@@ -449,8 +449,8 @@ public abstract class DBBean {
 	/**
 	 * This function cancels the internal cache garbage collector in DBBean
 	 */
-	public static void cancelGBC(){
-		DBBeanSQLResultHandler.cancelGBC();
+	public static void enableBeanGBC(boolean enable){
+		DBBeanSQLResultHandler.enableBeanGBC(enable);
 	}
 
 
@@ -461,5 +461,5 @@ public abstract class DBBean {
 	/**
 	 * Will be called whenever the bean has been updated from the database.
 	 */
-	protected void updatePerformed(){}
+	protected void postUpdateAction(){}
 }

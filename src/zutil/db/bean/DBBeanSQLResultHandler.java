@@ -116,20 +116,25 @@ public class DBBeanSQLResultHandler<T> implements SQLResultHandler<T>{
 		this.bean_config = DBBeanConfig.getBeanConfig( cl );
 		
 		// Initiate DBBeanGarbageCollector
-		if( timer == null ){
-			timer = new Timer( true ); // Run as daemon
-			timer.schedule( new DBBeanGarbageCollector(), 10000, CACHE_TTL );
-		}
+
 	}
 
 	/**
 	 * This function cancels the internal cache garbage collector in DBBean
 	 */
-	public static void cancelGBC(){
-		if( timer != null ){
-			timer.cancel();
-			timer = null;
-		}
+	public static void enableBeanGBC(boolean enable){
+        if(enable){
+            if( timer == null ){
+                timer = new Timer( true ); // Run as daemon
+                timer.schedule( new DBBeanGarbageCollector(), 10000, CACHE_TTL*2 );
+            }
+        }
+        else {
+            if (timer != null) {
+                timer.cancel();
+                timer = null;
+            }
+        }
 	}
 	
 	/**
@@ -148,27 +153,26 @@ public class DBBeanSQLResultHandler<T> implements SQLResultHandler<T>{
 			
 			int removed = 0;
 			long time = System.currentTimeMillis();
-			Object[] class_keys = cache.keySet().toArray();
-			for(Object key : class_keys){
-				if( key == null ) continue;
+			for(Object classKey : cache.keySet()){
+				if( classKey == null ) continue;
 					
-				Map<Long,DBBeanCache> class_cache = cache.get(key);
-				Object[] bean_keys = class_cache.keySet().toArray();
-				for(Object sub_key : bean_keys){
-					if( sub_key == null ) continue;
+				Map<Long,DBBeanCache> class_cache = cache.get(classKey);
+				for(Object objKey : class_cache.keySet()){
+					if( objKey == null ) continue;
 					
-					DBBeanCache beanCache = class_cache.get(sub_key);
+					DBBeanCache beanCache = class_cache.get(objKey);
 					// Check if session is still valid
-					if( beanCache.timestamp + CACHE_TTL*2 < time ){
-						class_cache.remove(sub_key);
+					if( beanCache.timestamp + CACHE_TTL < time ){
+						class_cache.remove(objKey);
 						removed++;
-						logger.finer("Removing old DBBean(id: "+beanCache.bean.getId()+") from cache.");
+						logger.finer("Removing old DBBean(class: "+beanCache.bean.getClass().getName()
+								+", id: "+beanCache.bean.getId()+") from cache.");
 					}
 				}
 			}
 			
 			if( removed > 0 )
-				logger.info("DBBeanGarbageCollector has cleared "+removed+" beans from cache.");
+				logger.info("DBBean GarbageCollector has cleared "+removed+" beans from cache.");
 		}
 	}
 	
@@ -281,7 +285,7 @@ public class DBBeanSQLResultHandler<T> implements SQLResultHandler<T>{
 			obj.processing_update = false;
 		}
 		
-		obj.updatePerformed();
+		obj.postUpdateAction();
 	}
 
 	/**
