@@ -308,6 +308,25 @@ public class Converter {
 	}
 
 	/**
+	 * Converts a dynamic sized byte array to a integer
+	 *
+	 * @param   b   is the byte array of size 1-4
+	 * @return the int value of the byte array
+	 */
+	public static int toInt(byte[] b){
+		int i = 0;
+		switch (b.length){
+			default:
+			case 4: i |= 0xFF000000 & (b[3] << 24);
+			case 3: i |= 0x00FF0000 & (b[2] << 16);
+			case 2: i |= 0x0000FF00 & (b[1] << 8);
+			case 1: i |= 0x000000FF & b[0]; break;
+			case 0: break;
+		}
+		return i;
+	}
+
+	/**
 	 * Converts a Integer to a BitSet
 	 * 
 	 * @param   num     the Integer to convert

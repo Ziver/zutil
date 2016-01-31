@@ -5,18 +5,20 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import zutil.ByteUtil;
+import zutil.converters.Converter;
 import zutil.parser.binary.BinaryStruct.*;
 
 /**
- * Created by ezivkoc on 2016-01-28.
+ * Created by Ziver on 2016-01-28.
  */
 public class BinaryStructParser {
 
-    public static void parse(BinaryStruct struct, byte[] bytes) {
+    public static void parse(BinaryStruct struct, byte[] data) {
         List<BinaryFieldData> structDataList = getStructDataList(struct.getClass());
-        int bitIndex;
-        for(BinaryFieldData field : structDataList){
-
+        int bitOffset = 0;
+        for (BinaryFieldData field : structDataList){
+            bitOffset += field.setValue(struct, data, bitOffset);
         }
     }
 
@@ -42,9 +44,38 @@ public class BinaryStructParser {
             field = f;
             BinaryField fieldData = field.getAnnotation(BinaryField.class);
             index = fieldData.index();
-            length = fieldData.index();
+            length = fieldData.length();
         }
 
+        protected int setValue(Object obj, byte[] data, int bitOffset){
+            try {
+                int byteIndex = bitOffset / 8;
+                int bitIndex = 7 - bitOffset % 8;
+                int bitLength = Math.min(bitIndex+1, length);
+
+                int readLength = 0;
+                byte[] valueData = new byte[(int) Math.ceil(length / 8.0)];
+                for (int index = valueData.length - 1; index >= 0; --index) {
+                    valueData[index] = ByteUtil.getBits(data[byteIndex], bitIndex, bitLength);
+                    readLength += bitLength;
+                    byteIndex++;
+                    bitIndex = 7;
+                    bitLength = Math.min(bitIndex+1, length - readLength);
+                }
+
+                field.setAccessible(true);
+                if (field.getType() == Boolean.class || field.getType() == boolean.class)
+                    field.set(obj, valueData[0] != 0);
+                else if (field.getType() == Integer.class || field.getType() == int.class)
+                    field.set(obj, Converter.toInt(valueData));
+                else if (field.getType() == String.class)
+                    field.set(obj, new String(valueData));
+                return readLength;
+            } catch (IllegalAccessException e){
+                e.printStackTrace();
+            }
+            return length; // we return the configured length to not shift the data
+        }
 
         @Override
         public int compareTo(BinaryFieldData o) {
