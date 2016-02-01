@@ -16,7 +16,7 @@ public class BinaryStructTest {
     }
 
     @Test
-    public void basicTest(){
+    public void basicIntTest(){
         BinaryTestStruct struct = new BinaryTestStruct() {
             @BinaryField(index=1, length=32)
             public int i1;
@@ -30,6 +30,39 @@ public class BinaryStructTest {
         };
 
         BinaryStructParser.parse(struct, new byte[]{0,0,0,1, 0,0,0,2});
+        struct.assertObj();
+    }
+
+    @Test
+    public void basicBooleanTest(){
+        BinaryTestStruct struct = new BinaryTestStruct() {
+            @BinaryField(index=1, length=1)
+            public boolean b1;
+            @BinaryField(index=2, length=1)
+            public boolean b2;
+
+            public void assertObj(){
+                assertFalse(b1);
+                assertFalse(b2);
+            }
+        };
+
+        BinaryStructParser.parse(struct, new byte[]{0b0100_000});
+        struct.assertObj();
+    }
+
+    @Test
+    public void basicStringTest(){
+        BinaryTestStruct struct = new BinaryTestStruct() {
+            @BinaryField(index=1, length=8*12)
+            public String s1;
+
+            public void assertObj(){
+                assertEquals(s1, "hello world!");
+            }
+        };
+
+        BinaryStructParser.parse(struct, "hello world!".getBytes());
         struct.assertObj();
     }
 }

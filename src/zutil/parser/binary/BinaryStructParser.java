@@ -14,12 +14,13 @@ import zutil.parser.binary.BinaryStruct.*;
  */
 public class BinaryStructParser {
 
-    public static void parse(BinaryStruct struct, byte[] data) {
+    public static int parse(BinaryStruct struct, byte[] data) {
         List<BinaryFieldData> structDataList = getStructDataList(struct.getClass());
         int bitOffset = 0;
         for (BinaryFieldData field : structDataList){
             bitOffset += field.setValue(struct, data, bitOffset);
         }
+        return bitOffset;
     }
 
 
