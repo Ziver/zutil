@@ -56,7 +56,7 @@ public class BinaryStructParser {
 
                 int readLength = 0;
                 byte[] valueData = new byte[(int) Math.ceil(length / 8.0)];
-                for (int index = valueData.length - 1; index >= 0; --index) {
+                for (int index = 0; index < valueData.length; ++index) {
                     valueData[index] = ByteUtil.getBits(data[byteIndex], bitIndex, bitLength);
                     readLength += bitLength;
                     byteIndex++;
