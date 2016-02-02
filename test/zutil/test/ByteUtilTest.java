@@ -12,13 +12,13 @@ public class ByteUtilTest {
 
 
     @Test
-    public void getBits(){
-        assertEquals(1, ByteUtil.getBits((byte)0b1000_0000, 7, 1));
-        assertEquals(1, ByteUtil.getBits((byte)0b0001_0000, 4, 1));
-        assertEquals(1, ByteUtil.getBits((byte)0b0000_0001, 0, 1));
+    public void getShiftedBits(){
+        assertEquals(1, ByteUtil.getShiftedBits((byte)0b1000_0000, 7, 1));
+        assertEquals(1, ByteUtil.getShiftedBits((byte)0b0001_0000, 4, 1));
+        assertEquals(1, ByteUtil.getShiftedBits((byte)0b0000_0001, 0, 1));
 
-        assertEquals(3, ByteUtil.getBits((byte)0b0110_0000, 6, 2));
+        assertEquals(3, ByteUtil.getShiftedBits((byte)0b0110_0000, 6, 2));
 
-        assertEquals((byte)0xFF, ByteUtil.getBits((byte)0b1111_1111, 7, 8));
+        assertEquals((byte)0xFF, ByteUtil.getShiftedBits((byte)0b1111_1111, 7, 8));
     }
 }

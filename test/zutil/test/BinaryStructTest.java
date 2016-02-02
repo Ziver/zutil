@@ -65,4 +65,22 @@ public class BinaryStructTest {
         BinaryStructParser.parse(struct, "hello world!".getBytes());
         struct.assertObj();
     }
+
+    @Test
+    public void nonLinedLength(){
+        BinaryTestStruct struct = new BinaryTestStruct() {
+            @BinaryField(index=1, length=12)
+            public int i1;
+            @BinaryField(index=2, length=12)
+            public int i2;
+
+            public void assertObj(){
+                assertEquals(17, i1);
+                assertEquals(2048, i2);
+            }
+        };
+
+        BinaryStructParser.parse(struct, new byte[]{0b0000_0001,0b0001_1000,0b0000_0000});
+        struct.assertObj();
+    }
 }
