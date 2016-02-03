@@ -37,7 +37,8 @@ import java.util.logging.*;
  */
 public class LogUtil {
 	private static final Logger logger = Logger.getLogger( LogUtil.class.getName() );
-	
+
+
 	private LogUtil(){}
 
 	/**
@@ -114,19 +115,12 @@ public class LogUtil {
 		logger.fine("Changing log level of \""+name+"\" to \""+level.getLocalizedName()+"\"");
 		Logger newLogger = Logger.getLogger(name);
 		newLogger.setLevel(level);
-        newLogger.info("Changing log level of \""+name+"\" to \""+level.getLocalizedName()+"\"");
 		// Check if the logger has a handler
-		if( newLogger.getHandlers().length == 0 ){
-			// Create a new console handler
-			ConsoleHandler handler = new ConsoleHandler();
-			handler.setLevel( level );
-			newLogger.addHandler( handler );
-			newLogger.setUseParentHandlers( false );
-		}
-		else{
-			// Set the level on the handlers
+		if( newLogger.getHandlers().length > 0 ){
+			// Set the level on the handlers if its level is higher
 			for (Handler handler : newLogger.getHandlers()) {
-				handler.setLevel(level);
+				if(handler.getLevel().intValue() < level.intValue())
+                    handler.setLevel(level);
 			}
 		}
 	}
