@@ -24,6 +24,10 @@
 
 package zutil.log;
 
+import zutil.io.file.FileUtil;
+
+import java.io.FileInputStream;
+import java.util.Enumeration;
 import java.util.logging.*;
 
 /**
@@ -40,13 +44,13 @@ public class LogUtil {
 	 * @return a new Logger for the calling class
 	 */
 	public static Logger getLogger(){
-		return Logger.getLogger(getCalingClass());
+		return Logger.getLogger(getCallingClass());
 	}
 
 	/**
 	 * @return the parent class other than Logger in the stack
 	 */
-	public static String getCalingClass(){
+	public static String getCallingClass(){
 		StackTraceElement[] stackTraceElements = Thread.currentThread().getStackTrace();
 		for(int i=1; i<stackTraceElements.length ;++i){
 			String name = stackTraceElements[i].getClassName();
@@ -108,21 +112,36 @@ public class LogUtil {
 	 */
 	public static void setLevel(String name, Level level){
 		logger.fine("Changing log level of \""+name+"\" to \""+level.getLocalizedName()+"\"");
-		Logger logger = Logger.getLogger(name);
-		logger.setLevel(level);
+		Logger newLogger = Logger.getLogger(name);
+		newLogger.setLevel(level);
+        newLogger.info("Changing log level of \""+name+"\" to \""+level.getLocalizedName()+"\"");
 		// Check if the logger has a handler
-		if( logger.getHandlers().length == 0 ){
+		if( newLogger.getHandlers().length == 0 ){
 			// Create a new console handler
 			ConsoleHandler handler = new ConsoleHandler();
 			handler.setLevel( level );
-			logger.addHandler( handler );
-			logger.setUseParentHandlers( false );
+			newLogger.addHandler( handler );
+			newLogger.setUseParentHandlers( false );
 		}
 		else{
 			// Set the level on the handlers
-			for (Handler handler : logger.getHandlers()) {
+			for (Handler handler : newLogger.getHandlers()) {
 				handler.setLevel(level);
 			}
 		}
 	}
+
+	public static boolean isLoggable(Class clazz, Level level){
+		return Logger.getLogger(clazz.getName()).isLoggable(level);
+	}
+
+    public static void readConfiguration(String file){
+        try{
+            FileInputStream in = new FileInputStream(FileUtil.find(file));
+            LogManager.getLogManager().readConfiguration(in);
+            in.close();
+        } catch (Exception e){
+            logger.log(Level.SEVERE, null, e);
+        }
+    }
 }

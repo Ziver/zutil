@@ -35,7 +35,7 @@ import java.util.logging.Level;
 public class SSDPClientTest {
 
     public static void main(String[] args) throws IOException {
-        System.out.println(LogUtil.getCalingClass());
+        System.out.println(LogUtil.getCallingClass());
         LogUtil.setGlobalLevel(Level.FINEST);
         SSDPClient ssdp = new SSDPClient();
         ssdp.requestService("upnp:rootdevice");

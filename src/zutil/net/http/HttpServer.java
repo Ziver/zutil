@@ -230,12 +230,15 @@ public class HttpServer extends ThreadedTCPNetworkServer{
 				out.setCookie( "session_id", ""+client_session.get("session_id") );
 
 				if( parser.getRequestURL() != null && pages.containsKey(parser.getRequestURL()) ){
-					pages.get(parser.getRequestURL()).respond(out, parser, client_session, cookie, request);
-					logRequest(parser, client_session, cookie, request, time);
+					HttpPage page = pages.get(parser.getRequestURL());
+                    page.respond(out, parser, client_session, cookie, request);
+					if(LogUtil.isLoggable(page.getClass(), Level.FINER))
+                        logRequest(parser, client_session, cookie, request, time);
 				}
 				else if( parser.getRequestURL() != null && defaultPage != null ){
 					defaultPage.respond(out, parser, client_session, cookie, request);
-					logRequest(parser, client_session, cookie, request, time);
+                    if(LogUtil.isLoggable(defaultPage.getClass(), Level.FINER))
+					    logRequest(parser, client_session, cookie, request, time);
 				}
 				else{
 					out.setStatusCode( 404 );
@@ -262,7 +265,6 @@ public class HttpServer extends ThreadedTCPNetworkServer{
 			}
 
 			try{
-				//logger.finest("Closing Connection: "+socket.getInetAddress().getHostName());
 				out.close();
 				in.close();
 				socket.close();
@@ -270,25 +272,25 @@ public class HttpServer extends ThreadedTCPNetworkServer{
 				logger.log(Level.WARNING, "Could not close connection", e);
 			}
 		}
-
-		private void logRequest(HttpHeaderParser parser,
-								Map<String,Object> client_session,
-								Map<String,String> cookie,
-								Map<String,String> request,
-								long time){
-			// Debug
-			if(logger.isLoggable(Level.FINEST) ){
-				logger.finer(
-						"Received request: " + parser.getRequestURL()
-						+ " (client_session: " + client_session
-						+ ", cookie: " + cookie
-						+ ", request: " + request + ")"
-						+ ", time: "+ StringUtil.formatTimeToString(System.currentTimeMillis() - time));
-			} else if(logger.isLoggable(Level.FINER)){
-				logger.finer(
-						"Received request: " + parser.getRequestURL()
-						+ ", time: "+ StringUtil.formatTimeToString(System.currentTimeMillis() - time));
-			}
-		}
 	}
+
+    protected static void logRequest(HttpHeaderParser parser,
+                                   Map<String,Object> client_session,
+                                   Map<String,String> cookie,
+                                   Map<String,String> request,
+                                   long time){
+        // Debug
+        if(logger.isLoggable(Level.FINEST) ){
+            logger.finer(
+                    "Received request: " + parser.getRequestURL()
+                            + " (client_session: " + client_session
+                            + ", cookie: " + cookie
+                            + ", request: " + request + ")"
+                            + ", time: "+ StringUtil.formatTimeToString(System.currentTimeMillis() - time));
+        } else if(logger.isLoggable(Level.FINER)){
+            logger.finer(
+                    "Received request: " + parser.getRequestURL()
+                            + ", time: "+ StringUtil.formatTimeToString(System.currentTimeMillis() - time));
+        }
+    }
 }
