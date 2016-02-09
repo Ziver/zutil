@@ -177,7 +177,7 @@ public class TorrentMetainfo {
 	 */
 	public static void main(String[] args){
 		try {
-			TorrentMetainfo tmp = new TorrentMetainfo(FileUtil.find("C:\\Users\\Ziver\\Desktop\\test.torrent"));
+			TorrentMetainfo tmp = new TorrentMetainfo(FileUtil.find("test.torrent"));
 			MultiPrintStream.out.dump(tmp);
 
 		} catch (FileNotFoundException e) {
