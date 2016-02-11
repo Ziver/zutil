@@ -29,13 +29,12 @@ import zutil.parser.binary.BinaryStruct.*;
 
 /**
  * Created by Ziver on 2016-02-09.
+ * Reference: http://tools.ietf.org/html/rfc1035
  */
 public class DNSPacket implements BinaryStruct {
     public static final int OPCODE_QUERY = 0;
     public static final int OPCODE_IQUERY = 1;
     public static final int OPCODE_STATUS = 2;
-    public static final int OPCODE_NOTIFY = 4;
-    public static final int OPCODE_UPDATE = 5;
 
     public static final int RCODE_NO_ERROR = 0;
     public static final int RCODE_FORMAT_ERROR = 1;
@@ -43,11 +42,6 @@ public class DNSPacket implements BinaryStruct {
     public static final int RCODE_NAME_ERROR = 3;
     public static final int RCODE_NOT_IMPLEMENTED = 4;
     public static final int RCODE_REFUSED = 5;
-    public static final int RCODE_YX_DOMAIN = 6; // A name exists where it should not
-    public static final int RCODE_YX_RR_SET = 7; // A resource record set exists where it should not
-    public static final int RCODE_NX_RR_SET = 8; // A resource record set should exist but does not
-    public static final int RCODE_NOT_AUTH = 9; // Server is not authoritative for the zone
-    public static final int RCODE_NOT_ZONE = 10; // The name is not in the zone specified in the message
 
 
     @BinaryField(index=0, length=16)
@@ -57,95 +51,197 @@ public class DNSPacket implements BinaryStruct {
     //@BinaryField(index=10, length=16)
     //int flags;
     /**
-     * Query/Response Flag.
-     * Differentiates between queries and responses.
-     * Set to 0 when the query is generated; changed to 1 when that
-     * query is changed to a response by a replying server.
+     * A one bit field that specifies whether this message is a
+     * query (0), or a response (1).
      */
     @BinaryField(index=10, length=1)
-    boolean qr;
+    boolean flagQueryResponse;
     /**
-     * Operation Code.
-     * Specifies the type of query in the message. This field is
-     * copied unchanged in the response
+     * A four bit field that specifies kind of query in this message.
+     * <pre>
+     * 0    a standard query (QUERY)
+     * 1    an inverse query (IQUERY)
+     * 2    a server status request (STATUS)
+     * </pre>
      */
     @BinaryField(index=11, length=4)
-    int opcode;
+    int flagOperationCode;
     /**
-     * Authoritative Answer Flag
-     * This bit is set to true in a response to indicate that the server
-     * that created the response is authoritative for the zone in
-     * which the domain name specified in the Question section is located
+     * This bit is valid in responses,
+     * and specifies that the responding name server is an
+     * authority for the domain name in question section.
      */
     @BinaryField(index=12, length=1)
-    boolean aa;
+    boolean flagAuthoritativeAnswer;
     /**
-     * Truncation Flag.
-     * When set to true, indicates that the message was truncated
-     * due to its length
+     * specifies that this message was truncated
+     * due to length greater than that permitted on the
+     * transmission channel.
      */
     @BinaryField(index=13, length=1)
-    boolean tc;
+    boolean flagTruncation;
     /**
-     * Recursion Desired.
-     * When set in a query, requests that the server receiving the
-     * query attempt to answer the query recursively, if the server
-     * supports recursive resolution. The value of this bit is not
-     * changed in the response.
+     * this bit may be set in a query and
+     * is copied into the response.  If RD is set, it directs
+     * the name server to pursue the query recursively.
+     * Recursive query support is optional.
      */
     @BinaryField(index=14, length=1)
-    boolean rd;
+    boolean flagRecursionDesired;
     /**
-     * Recursion Available.
-     * Set to true to indicate whether the server creating the response
-     * supports recursive queries.
+     * this be is set or cleared in a
+     * response, and denotes whether recursive query support is
+     * available in the name server.
      */
     @BinaryField(index=15, length=1)
-    boolean ra;
-    @BinaryField(index=16, length=3)
-    int reserved;
+    boolean flagRecursionAvailable;
     /**
-     * Response Code.
+     * Reserved for future use.  Must be zero in all queries
+     * and responses.
+     */
+    @BinaryField(index=16, length=3)
+    private int z;
+    /**
+     * this field is set as part of responses.
+     * The values have the following interpretation:
+     * <pre>
+     * 0    No error condition
+     * 1    Format error - The name server was
+     *      unable to interpret the query.
+     * 2    Server failure - The name server was
+     *      unable to process this query due to a
+     *      problem with the name server.
+     * 3    Name Error - Meaningful only for
+     *      responses from an authoritative name
+     *      server, this code signifies that the
+     *      domain name referenced in the query does
+     *      not exist.
+     * 4    Not Implemented - The name server does
+     *      not support the requested kind of query.
+     * 5    Refused - The name server refuses to
+     *      perform the specified operation for
+     *      policy reasons.
+     *</pre>
      */
     @BinaryField(index=17, length=4)
-    int rCode;
-
+    int flagResponseCode;
 
 
     //////////////// COUNTS
     /**
      * Question Count.
-     * Specifies the number of questions in the
-     * Question section of the message.
+     * Specifying the number of entries in the question section.
      */
     @BinaryField(index=20, length=16)
-    int qdCount;
+    int countQuestion;
     /**
      * Answer Record Count.
-     * Specifies the number of resource records
-     * in the Answer section of the message.
+     * specifying the number of resource records in
+     * the answer section.
      */
     @BinaryField(index=21, length=16)
-    int anCount;
+    int countAnswerRecord;
     /**
      * Name Server (Authority Record) Count.
-     * Specifies the number of resource records in the
-     * Authority section of the message.
+     * Specifying the number of name server resource records
+     * in the authority records section.
      */
     @BinaryField(index=22, length=16)
-    int nsCount;
+    int countNameServer;
     /**
      * Additional Record Count.
-     * Specifies the number of resource records in the
-     * Additional section of the message.
+     * Specifying the number of resource records in the
+     * additional records section
      */
     @BinaryField(index=23, length=16)
-    int arCount;
+    int countAdditionalRecord;
 
 
 
-    //////////////// REQUEST DATA
-    // char data[?]
-    // char flag[2] => QTYPE=0x00_01 host address query
-    //                 QCLASS=0x00_01 internet query
+    /*
+    Question section format
+                                        1  1  1  1  1  1
+          0  1  2  3  4  5  6  7  8  9  0  1  2  3  4  5
+        +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
+        |                                               |
+        /                     QNAME                     /
+        /                                               /
+        +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
+        |                     QTYPE                     |
+        +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
+        |                     QCLASS                    |
+        +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
+
+    where:
+
+    QNAME           a domain name represented as a sequence of labels, where
+                    each label consists of a length octet followed by that
+                    number of octets.  The domain name terminates with the
+                    zero length octet for the null label of the root.  Note
+                    that this field may be an odd number of octets; no
+                    padding is used.
+
+    QTYPE           a two octet code which specifies the type of the query.
+                    The values for this field include all codes valid for a
+                    TYPE field, together with some more general codes which
+                    can match more than one type of RR.
+
+    QCLASS          a two octet code that specifies the class of the query.
+                    For example, the QCLASS field is IN for the Internet.
+    */
+
+    /*
+    Resource record format
+
+    The answer, authority, and additional sections all share the same
+    format: a variable number of resource records, where the number of
+    records is specified in the corresponding count field in the header.
+    Each resource record has the following format:
+                                        1  1  1  1  1  1
+          0  1  2  3  4  5  6  7  8  9  0  1  2  3  4  5
+        +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
+        |                                               |
+        /                                               /
+        /                      NAME                     /
+        |                                               |
+        +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
+        |                      TYPE                     |
+        +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
+        |                     CLASS                     |
+        +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
+        |                      TTL                      |
+        |                                               |
+        +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
+        |                   RDLENGTH                    |
+        +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--|
+        /                     RDATA                     /
+        /                                               /
+        +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
+
+    where:
+
+    NAME            a domain name to which this resource record pertains.
+
+    TYPE            two octets containing one of the RR type codes.  This
+                    field specifies the meaning of the data in the RDATA
+                    field.
+
+    CLASS           two octets which specify the class of the data in the
+                    RDATA field.
+
+    TTL             a 32 bit unsigned integer that specifies the time
+                    interval (in seconds) that the resource record may be
+                    cached before it should be discarded.  Zero values are
+                    interpreted to mean that the RR can only be used for the
+                    transaction in progress, and should not be cached.
+
+    RDLENGTH        an unsigned 16 bit integer that specifies the length in
+                    octets of the RDATA field.
+
+    RDATA           a variable length string of octets that describes the
+                    resource.  The format of this information varies
+                    according to the TYPE and CLASS of the resource record.
+                    For example, the if the TYPE is A and the CLASS is IN,
+                    the RDATA field is a 4 octet ARPA Internet address.
+     */
 }
