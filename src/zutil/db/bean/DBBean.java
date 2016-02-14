@@ -218,8 +218,11 @@ public abstract class DBBean {
 
 			// Execute the SQL
 			DBConnection.exec(stmt);
-			if( id == null )
-				this.id = db.getLastInsertID(stmt);
+			if( id == null ) {
+                this.id = db.getLastInsertID(stmt);
+                // as this is a new object so add it to the cache
+                DBBeanSQLResultHandler.cacheDBBean(this);
+            }
 			
 			// Save the list, after we get the object id
 			for(Field field : config.fields){
