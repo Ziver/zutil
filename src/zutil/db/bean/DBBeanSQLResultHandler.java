@@ -130,14 +130,14 @@ public class DBBeanSQLResultHandler<T> implements SQLResultHandler<T>{
             if( timer == null ){
                 timer = new Timer( true ); // Run as daemon
                 timer.schedule( new DBBeanGarbageCollector(), CACHE_DATA_TTL, CACHE_DATA_TTL *2 );
-				logger.info("Bean garbage collection daemon enabled");
+				logger.fine("Bean garbage collection daemon enabled");
             }
         }
         else {
             if (timer != null) {
                 timer.cancel();
                 timer = null;
-				logger.info("Bean garbage collection daemon disabled");
+				logger.fine("Bean garbage collection daemon disabled");
             }
         }
 	}
