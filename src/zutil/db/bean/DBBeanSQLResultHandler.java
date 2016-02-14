@@ -29,6 +29,7 @@ import zutil.db.SQLResultHandler;
 import zutil.db.bean.DBBean.DBLinkTable;
 import zutil.log.LogUtil;
 
+import java.lang.ref.WeakReference;
 import java.lang.reflect.Field;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -41,7 +42,7 @@ import java.util.logging.Logger;
 public class DBBeanSQLResultHandler<T> implements SQLResultHandler<T>{
 	private static final Logger logger = LogUtil.getLogger();
 	/** This is the time to live for the cached items **/
-	public static final long CACHE_TTL = 1000*60*5; // 5 min in ms
+	public static final long CACHE_DATA_TTL = 1000*60*5; // 5 min in ms
 	/** A cache for detecting recursion **/
 	protected static Map<Class<?>, Map<Long,DBBeanCache>> cache =
 		new ConcurrentHashMap<Class<?>, Map<Long,DBBeanCache>>();
@@ -54,9 +55,9 @@ public class DBBeanSQLResultHandler<T> implements SQLResultHandler<T>{
 	/**
 	 * A cache container that contains a object and last read time
 	 */
-	protected static class DBBeanCache{
-		public long timestamp;
-		public DBBean bean;
+	private static class DBBeanCache{
+		public long updateTimestamp;
+		public WeakReference<DBBean> bean;
 	}
 	
 	private Class<? extends DBBean> bean_class;
@@ -124,11 +125,11 @@ public class DBBeanSQLResultHandler<T> implements SQLResultHandler<T>{
 	 * This function cancels the internal cache garbage collector in DBBean.
      * GBC is enabled by default
 	 */
-	public static void enableBeanGBC(boolean enable){
+	private static void enableBeanGBC(boolean enable){
         if(enable){
             if( timer == null ){
                 timer = new Timer( true ); // Run as daemon
-                timer.schedule( new DBBeanGarbageCollector(), 10000, CACHE_TTL*2 );
+                timer.schedule( new DBBeanGarbageCollector(), CACHE_DATA_TTL, CACHE_DATA_TTL *2 );
 				logger.info("Bean garbage collection daemon enabled");
             }
         }
@@ -140,7 +141,7 @@ public class DBBeanSQLResultHandler<T> implements SQLResultHandler<T>{
             }
         }
 	}
-	
+
 	/**
 	 * This class acts as an garbage collector that removes old DBBeans
 	 * 
@@ -165,11 +166,9 @@ public class DBBeanSQLResultHandler<T> implements SQLResultHandler<T>{
 					
 					DBBeanCache beanCache = class_cache.get(objKey);
 					// Check if session is still valid
-					if( beanCache.timestamp + CACHE_TTL < time ){
+					if( beanCache.bean.get() == null ){
 						class_cache.remove(objKey);
 						removed++;
-						logger.finer("Removing old Bean("+beanCache.bean.getClass().getName()+")" +
-                                " from cache with id: "+beanCache.bean.getId());
 					}
 				}
 			}
@@ -218,10 +217,8 @@ public class DBBeanSQLResultHandler<T> implements SQLResultHandler<T>{
 				return obj;
 			logger.fine("Creating new Bean("+bean_class.getName()+") with id: "+id);
 			obj = bean_class.newInstance();
-			cacheDBBean(obj, id);
-			
-			// Set id field
-			obj.id = id;
+            obj.id = id; // Set id field
+			cacheDBBean(obj);
 			
 			// Update fields
 			updateBean( result, obj );
@@ -229,7 +226,7 @@ public class DBBeanSQLResultHandler<T> implements SQLResultHandler<T>{
 		} catch (SQLException e) {
 			throw e;
 		} catch (Exception e) {
-			throw new SQLException(e);
+			throw new RuntimeException(e);
 		}
 	}
 	
@@ -315,21 +312,24 @@ public class DBBeanSQLResultHandler<T> implements SQLResultHandler<T>{
 	 */
 	protected DBBean getCachedDBBean(Class<?> c, Long id, ResultSet result) throws SQLException{
 		if( cache.containsKey(c) ){
-			DBBeanCache item = cache.get(c).get(id);
+			DBBeanCache cacheItem = cache.get(c).get(id);
 			// Check if the cache is valid
-			if( item != null ){
-				// The cache is old, update and return it
-				if( item.timestamp+CACHE_TTL < System.currentTimeMillis() ){
-					// There is no ResultSet to update from
-					if( result == null )
-						return null;
-					// Only update object if there is no update running now
-					if( !item.bean.processing_update ){
-						logger.finer("Bean("+c.getName()+") cache to old for id: "+id);
-						updateBean( result, item.bean );
-					}
-				}
-				return item.bean;
+			if( cacheItem != null){
+                DBBean bean = cacheItem.bean.get();
+                if( bean != null) {
+                    // The cache is old, update and return it
+                    if (cacheItem.updateTimestamp + CACHE_DATA_TTL < System.currentTimeMillis()) {
+                        // There is no ResultSet to update from
+                        if (result == null)
+                            return null;
+                        // Only update object if there is no update running now
+                        if (!bean.processing_update) {
+                            logger.finer("Bean(" + c.getName() + ") cache to old for id: " + id);
+                            updateBean(result, bean);
+                        }
+                    }
+                    return bean;
+                }
 			}
 			// The cache is null
 			cache.get(c).remove(id);
@@ -342,17 +342,16 @@ public class DBBeanSQLResultHandler<T> implements SQLResultHandler<T>{
 	 * Adds the given object to the cache
 	 * 
 	 * @param 		obj		is the object to cache
-	 * @param 		id		is the id object of the bean
 	 */
-	protected static synchronized void cacheDBBean(DBBean obj, Long id) {
-		DBBeanCache item = new DBBeanCache();
-		item.timestamp = System.currentTimeMillis();
-		item.bean = obj;
+	protected static synchronized void cacheDBBean(DBBean obj) {
+		DBBeanCache cacheItem = new DBBeanCache();
+		cacheItem.updateTimestamp = System.currentTimeMillis();
+		cacheItem.bean = new WeakReference<DBBean>(obj);
 		if( cache.containsKey(obj.getClass()) )
-			cache.get(obj.getClass()).put(id, item);
+			cache.get(obj.getClass()).put(obj.getId(), cacheItem);
 		else{
 			Map<Long, DBBeanCache> map = new ConcurrentHashMap<Long, DBBeanCache>();
-			map.put(id, item);
+			map.put(obj.getId(), cacheItem);
 			cache.put(obj.getClass(), map);
 		}
 	}

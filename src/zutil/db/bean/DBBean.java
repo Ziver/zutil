@@ -447,14 +447,6 @@ public abstract class DBBean {
 		return id;
 	}
 	
-	/**
-	 * This function cancels the internal cache garbage collector in DBBean
-	 */
-	public static void enableBeanGBC(boolean enable){
-		DBBeanSQLResultHandler.enableBeanGBC(enable);
-	}
-
-
 
 
     ////////////////// EXTENDABLE METHODS /////////////////////////
