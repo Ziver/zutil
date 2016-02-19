@@ -24,7 +24,6 @@
 
 package zutil.db.bean;
 
-import zutil.ClassUtil;
 import zutil.log.LogUtil;
 
 import java.lang.reflect.Field;

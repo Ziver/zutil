@@ -26,14 +26,16 @@ package zutil.net.ws.rest;
 
 import zutil.converters.Converter;
 import zutil.io.StringOutputStream;
-import zutil.net.http.HttpHeaderParser;
+import zutil.net.http.HttpHeader;
 import zutil.net.http.HttpPage;
 import zutil.net.http.HttpPrintStream;
-import zutil.net.ws.*;
+import zutil.net.ws.WSInterface;
+import zutil.net.ws.WSMethodDef;
+import zutil.net.ws.WSParameterDef;
+import zutil.net.ws.WebServiceDef;
 import zutil.parser.json.JSONObjectOutputStream;
 
 import java.io.IOException;
-import java.lang.reflect.Field;
 import java.util.Map;
 
 /**
@@ -55,13 +57,13 @@ public class RestHttpPage implements HttpPage {
 
     @Override
     public void respond(HttpPrintStream out,
-                        HttpHeaderParser client_info,
+                        HttpHeader headers,
                         Map<String, Object> session,
                         Map<String, String> cookie,
                         Map<String, String> request) throws IOException {
         try {
             out.println(
-                    execute(client_info.getRequestURL(), request));
+                    execute(headers.getRequestURL(), request));
         } catch (Throwable throwable) {
             throw new IOException(throwable);
         }

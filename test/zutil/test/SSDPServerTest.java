@@ -29,7 +29,6 @@ import zutil.net.ssdp.SSDPServer;
 import zutil.net.ssdp.StandardSSDPInfo;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.logging.Level;
 
 /**

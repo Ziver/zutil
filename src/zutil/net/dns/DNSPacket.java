@@ -25,7 +25,6 @@
 package zutil.net.dns;
 
 import zutil.parser.binary.BinaryStruct;
-import zutil.parser.binary.BinaryStruct.*;
 
 /**
  * Created by Ziver on 2016-02-09.

@@ -24,8 +24,6 @@
 
 package zutil.net.ssdp;
 
-import java.net.InetAddress;
-
 /**
  * This class contains information about a service from
  * or through the SSDP protocol

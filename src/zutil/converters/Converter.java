@@ -29,6 +29,8 @@ import zutil.parser.Base64Decoder;
 
 import java.io.*;
 import java.util.BitSet;
+import java.util.Iterator;
+import java.util.Map;
 
 public class Converter {
 	private Converter(){}
@@ -263,6 +265,35 @@ public class Converter {
 			}
 		}
 		return ret.toString();
+	}
+
+    /**
+     * Generates a comma separated string with key and value pairs
+     *
+     * @return a comma separated String
+     */
+	public static String toString(Map map){
+		StringBuilder tmp = new StringBuilder();
+		tmp.append("{");
+		Iterator<Object> it = map.keySet().iterator();
+		while(it.hasNext()){
+			Object key = it.next();
+            Object value = map.get(key);
+			tmp.append(key);
+            if (value != null) {
+                if (value instanceof String)
+                    tmp.append(": \"").append(value).append("\"");
+                else
+                    tmp.append(value);
+            }
+            else
+                tmp.append("null");
+
+			if(it.hasNext())
+				tmp.append(", ");
+		}
+		tmp.append('}');
+		return tmp.toString();
 	}
 
 	/**

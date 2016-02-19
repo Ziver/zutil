@@ -27,7 +27,6 @@ package zutil.log;
 import zutil.io.file.FileUtil;
 
 import java.io.FileInputStream;
-import java.util.Enumeration;
 import java.util.logging.*;
 
 /**

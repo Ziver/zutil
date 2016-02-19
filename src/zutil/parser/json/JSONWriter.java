@@ -29,7 +29,6 @@ import zutil.parser.DataNode;
 import zutil.parser.DataNode.DataType;
 
 import java.io.OutputStream;
-import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.io.Writer;
 import java.util.Iterator;

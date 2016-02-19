@@ -24,8 +24,8 @@
 
 package zutil.osal.app.linux;
 
-import zutil.log.LogUtil;
 import zutil.Timer;
+import zutil.log.LogUtil;
 
 import java.io.BufferedReader;
 import java.io.FileReader;

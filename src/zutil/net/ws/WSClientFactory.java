@@ -25,7 +25,6 @@
 package zutil.net.ws;
 
 import zutil.log.LogUtil;
-import zutil.net.ws.soap.SOAPClientInvocationHandler;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationHandler;

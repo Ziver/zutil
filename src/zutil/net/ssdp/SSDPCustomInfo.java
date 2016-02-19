@@ -24,7 +24,7 @@
 
 package zutil.net.ssdp;
 
-import zutil.net.http.HttpHeaderParser;
+import zutil.net.http.HttpHeader;
 import zutil.net.http.HttpPrintStream;
 
 /**
@@ -32,7 +32,7 @@ import zutil.net.http.HttpPrintStream;
  */
 public interface SSDPCustomInfo extends SSDPServiceInfo{
 
-    public void readHeaders(HttpHeaderParser http);
+    public void readHeaders(HttpHeader http);
 
     public void writeHeaders(HttpPrintStream http);
 }

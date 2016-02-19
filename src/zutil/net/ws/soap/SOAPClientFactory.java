@@ -29,11 +29,7 @@ import zutil.net.ws.WSClientFactory;
 import zutil.net.ws.WSInterface;
 import zutil.net.ws.WebServiceDef;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Proxy;
 import java.net.URL;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**

@@ -24,10 +24,7 @@
 
 package zutil.struct;
 
-import java.util.AbstractSet;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
 
 /**
  * This is a timed HashSet. Each entry has a limited time to live.

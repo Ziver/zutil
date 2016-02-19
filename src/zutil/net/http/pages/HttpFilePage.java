@@ -27,7 +27,7 @@ package zutil.net.http.pages;
 import zutil.io.IOUtil;
 import zutil.io.file.FileUtil;
 import zutil.log.LogUtil;
-import zutil.net.http.HttpHeaderParser;
+import zutil.net.http.HttpHeader;
 import zutil.net.http.HttpPage;
 import zutil.net.http.HttpPrintStream;
 
@@ -60,7 +60,7 @@ public class HttpFilePage implements HttpPage{
 
     @Override
     public void respond(HttpPrintStream out,
-                        HttpHeaderParser client_info,
+                        HttpHeader headers,
                         Map<String, Object> session,
                         Map<String, String> cookie,
                         Map<String, String> request) throws IOException{
@@ -72,7 +72,7 @@ public class HttpFilePage implements HttpPage{
             }
             else { // Resource root is a folder
                 File file = new File(resource_root,
-                        client_info.getRequestURL());
+                        headers.getRequestURL());
                 if(file.getCanonicalPath().startsWith(resource_root.getCanonicalPath())){
                     if(file.isDirectory() && showFolders){
                         File indexFile = new File(file, "index.html");
@@ -82,10 +82,10 @@ public class HttpFilePage implements HttpPage{
                         }
                         // Show folder contents
                         else if(showFolders){
-                            out.println("<HTML><BODY><H1>Directory: " + client_info.getRequestURL() + "</H1>");
+                            out.println("<HTML><BODY><H1>Directory: " + headers.getRequestURL() + "</H1>");
                             out.println("<HR><UL>");
                             for (String f : file.list()) {
-                                String url = client_info.getRequestURL();
+                                String url = headers.getRequestURL();
                                 out.println("<LI><A href='" +
                                         url + (url.charAt(url.length()-1)=='/'?"":"/")+ f
                                         +"'>" + f + "</A></LI>");
@@ -109,12 +109,12 @@ public class HttpFilePage implements HttpPage{
             if(!out.isHeaderSent())
                 out.setStatusCode(404);
             log.log(Level.WARNING, e.getMessage());
-            out.println("404 Page Not Found: " + client_info.getRequestURL());
+            out.println("404 Page Not Found: " + headers.getRequestURL());
         }catch (SecurityException e){
             if(!out.isHeaderSent())
                 out.setStatusCode(404);
             log.log(Level.WARNING, e.getMessage());
-            out.println("404 Page Not Found: " + client_info.getRequestURL() );
+            out.println("404 Page Not Found: " + headers.getRequestURL() );
         }catch (IOException e){
             if(!out.isHeaderSent())
                 out.setStatusCode(500);

@@ -27,7 +27,7 @@ package zutil.test;
 import org.junit.Test;
 import zutil.struct.TimedHashSet;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertFalse;
 
 /**
  * Created by Ziver on 2015-11-20.

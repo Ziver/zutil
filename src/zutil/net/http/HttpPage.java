@@ -38,15 +38,16 @@ public interface HttpPage{
 	 * This method has to be implemented for every page.
 	 * This method is called when a client wants a response
 	 * from this specific page.
-	 * @param out           is the PrintStream to the client
-	 * @param client_info   is information about the client
-     * @param session       is session values for the client
-     * @param cookie        is cookie information from the client
-     * @param request       is POST and GET requests from the client
+	 *
+	 * @param out           is a output stream to the client
+	 * @param headers   	is the header received from the client
+     * @param session       is the session associated with the current client
+	 * @param cookie        is cookie information from the client
+	 * @param request       is POST and GET requests from the client
      */
 	public abstract void respond(HttpPrintStream out,
-			HttpHeaderParser client_info,
-			Map<String,Object> session,
-			Map<String,String> cookie, 
-			Map<String,String> request) throws IOException;
+								 HttpHeader headers,
+								 Map<String,Object> session,
+								 Map<String,String> cookie,
+								 Map<String,String> request) throws IOException;
 }

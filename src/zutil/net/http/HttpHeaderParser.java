@@ -28,71 +28,54 @@ import zutil.parser.URLDecoder;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Scanner;
+import java.io.StringReader;
 import java.util.regex.Pattern;
 
 public class HttpHeaderParser {
-	// Some Cached regex's
-	private static final Pattern colonPattern = Pattern.compile(":");	
-	private static final Pattern equalPattern = Pattern.compile("=");
-	private static final Pattern andPattern = Pattern.compile("&");
-	private static final Pattern semiColonPattern = Pattern.compile(";");
+    public static final String HEADER_COOKIE = "COOKIE";
 
-	// HTTP info
-	private String type;
-	private String url;
-	private HashMap<String, String> url_attr;
-	private float version;
-	private int httpCode;
+	private static final Pattern PATTERN_COLON = Pattern.compile(":");
+	private static final Pattern PATTERN_EQUAL = Pattern.compile("=");
+	private static final Pattern PATTERN_AND = Pattern.compile("&");
+	private static final Pattern PATTERN_SEMICOLON = Pattern.compile(";");
 
-	// Parameters
-	private HashMap<String, String> headers;
-	private HashMap<String, String> cookies;
+
+    private BufferedReader in;
+
 
 	/**
 	 * Parses the HTTP header information from a stream
 	 * 
 	 * @param 	in 				is the stream
-	 * @throws 	IOException 
 	 */
-	public HttpHeaderParser(BufferedReader in) throws IOException{
-		url_attr = new HashMap<String, String>();
-		headers = new HashMap<String, String>();
-		cookies = new HashMap<String, String>();
-
-		String tmp = null;
-		if( (tmp=in.readLine()) != null && !tmp.isEmpty() ){
-			parseStatusLine( tmp );
-			while( (tmp=in.readLine()) != null && !tmp.isEmpty() ){
-				parseLine( tmp );
-			}
-		}
-		parseCookies();
+	public HttpHeaderParser(BufferedReader in){
+        this.in = in;
 	}
 
 	/**
-	 * Parses the HTTP header information from an String
+	 * Parses the HTTP header information from a String
 	 * 
-	 * @param   in 		is the string
+	 * @param   in 		is the String
 	 */
 	public HttpHeaderParser(String in){
-		url_attr = new HashMap<String, String>();
-		headers = new HashMap<String, String>();
-		cookies = new HashMap<String, String>();
-
-		Scanner sc = new Scanner(in);
-		sc.useDelimiter("\n");
-		String tmp = null;
-		if( sc.hasNext() && !(tmp=sc.next()).isEmpty() ){
-			parseStatusLine( tmp );
-			while( sc.hasNext() && !(tmp=sc.next()).isEmpty() ){
-				parseLine( tmp );
-			}
-		}
-		sc.close();
-		parseCookies();
+        this.in = new BufferedReader(new StringReader(in));
 	}
+
+
+    public HttpHeader read() throws IOException {
+        HttpHeader header = null;
+        String line = null;
+        if( (line=in.readLine()) != null && !line.isEmpty() ){
+            header = new HttpHeader();
+            parseStatusLine(header, line);
+            while( (line=in.readLine()) != null && !line.isEmpty() ){
+                parseLine(header, line);
+            }
+            parseCookies(header);
+        }
+        return header;
+    }
+
 
 	/**
 	 * Parses the first header line and ads the values to 
@@ -101,197 +84,75 @@ public class HttpHeaderParser {
 	 * @param 	line 		The header String
 	 * @return 				The path and file name as a String
 	 */
-	protected void parseStatusLine(String line){
+	protected static void parseStatusLine(HttpHeader header, String line){
 		// Server Response
 		if( line.startsWith("HTTP/") ){
-			version = Float.parseFloat( line.substring( 5 , 8) );
-			httpCode = Integer.parseInt( line.substring( 9, 12 ));
+			header.setHTTPVersion( Float.parseFloat( line.substring( 5 , 8)));
+			header.setHTTPCode( Integer.parseInt( line.substring( 9, 12 )));
 		}
 		// Client Request
 		else if(line.contains("HTTP/")){
-			type = (line.substring(0, line.indexOf(" "))).trim();
-			version = Float.parseFloat( line.substring(line.lastIndexOf("HTTP/")+5 , line.length()).trim() );
-			line = (line.substring(type.length()+1, line.lastIndexOf("HTTP/"))).trim();
+			header.setRequestType( line.substring(0, line.indexOf(" ")));
+			header.setHTTPVersion( Float.parseFloat( line.substring(line.lastIndexOf("HTTP/")+5 , line.length()).trim()));
+			line = (line.substring(header.getRequestType().length()+1, line.lastIndexOf("HTTP/")));
 
 			// parse URL and attributes
 			int index = line.indexOf('?');
-			if(index > -1){ 
-				url = line.substring(0, index );
+			if(index > -1){
+				header.setRequestURL( line.substring(0, index));
 				line = line.substring( index+1, line.length());
-				parseURLParameters(line, url_attr);
+				parseURLParameters(header, line);
 			}
 			else{
-				url = line;
+				header.setRequestURL(line);
 			}
-			
-			url = url.replaceAll("//", "/");
 		}
 	}
 
+    /**
+     * Parses the rest of the header
+     *
+     * @param 	line 	is the next line in the header
+     */
+    protected void parseLine(HttpHeader header, String line){
+        String[] data = PATTERN_COLON.split( line, 2 );
+        header.putHeader(
+                data[0].trim().toUpperCase(), 					// Key
+                (data.length>1 ? data[1] : "").trim()); 		//Value
+    }
+
+    /**
+     * Parses the header "Cookie" and stores all cookies in the HttpHeader object
+     */
+    protected void parseCookies(HttpHeader header){
+        String cookieHeader = header.getHeader(HEADER_COOKIE);
+        if(cookieHeader != null && !cookieHeader.isEmpty()){
+            String[] tmp = PATTERN_SEMICOLON.split(cookieHeader);
+            for(String cookie : tmp){
+                String[] tmp2 = PATTERN_EQUAL.split(cookie, 2);
+                header.putCookie(
+                        tmp2[0].trim(), 							// Key
+                        (tmp2.length>1 ? tmp2[1] : "").trim()); 	//Value
+            }
+        }
+    }
+
 	/**
 	 * Parses a String with variables from a get or post
-	 * that was sent from a client and puts the data into a HashMap
+	 * that was sent from a client
 	 * 
 	 * @param 	attributes 		is the String containing all the attributes
 	 */
-	public static HashMap<String, String> parseURLParameters( String attributes ){
-		HashMap<String, String> map = new HashMap<String, String>();
-		parseURLParameters(attributes, map);
-		return map;
-	}
-	
-	/**
-	 * Parses a String with variables from a get or post
-	 * that was sent from a client and puts the data into a HashMap
-	 * 
-	 * @param 	attributes 		is the String containing all the attributes
-	 * @param 	map 			is the HashMap to put all the values into
-	 */
-	public static void parseURLParameters(String attributes, HashMap<String, String> map){
+	protected static void parseURLParameters(HttpHeader header, String attributes){
 		String[] tmp;
 		attributes = URLDecoder.decode(attributes);
 		// get the variables
-		String[] data = andPattern.split( attributes );
+		String[] data = PATTERN_AND.split( attributes );
 		for(String element : data){
-			tmp = equalPattern.split(element, 2);
-			map.put(
+			tmp = PATTERN_EQUAL.split(element, 2);
+			header.putURLAttribute(
 					tmp[0].trim(), 								// Key
 					(tmp.length>1 ? tmp[1] : "").trim()); 		//Value
 		}
-	}
-
-	/**
-	 * Parses the rest of the header
-	 * 
-	 * @param 	line 	is the next line in the header
-	 */
-	protected void parseLine(String line){
-		String[] data = colonPattern.split( line, 2 );
-		headers.put(
-				data[0].trim().toUpperCase(), 					// Key
-				(data.length>1 ? data[1] : "").trim()); 		//Value
-	}
-
-	/**
-	 * Parses the attribute "Cookie" and returns a HashMap
-	 * with the values
-	 * 
-	 * @return 		a HashMap with cookie values
-	 */
-	protected void parseCookies(){
-		if( headers.containsKey("COOKIE") ){
-			String[] tmp = semiColonPattern.split( headers.get("COOKIE") );
-			String[] tmp2;
-			for(String cookie : tmp){
-				tmp2 = equalPattern.split(cookie, 2);
-				cookies.put(
-						tmp2[0].trim(), 							// Key
-						(tmp2.length>1 ? tmp2[1] : "").trim()); 	//Value
-			}
-		}
-	}
-
-	/**
-	 * @return 		the HTTP message type( ex. GET,POST...)
-	 */
-	public String getRequestType(){
-		return type;
-	}
-	/**
-	 * @return 		the HTTP version of this header
-	 */
-	public float getHTTPVersion(){
-		return version;
-	}
-	/**
-	 * @return 		the HTTP Return Code from a Server
-	 */
-	public float getHTTPCode(){
-		return httpCode;
-	}
-	/**
-	 * @return 		the URL that the client sent the server
-	 */
-	public String getRequestURL(){
-		return url;
-	}
-	/**
-	 * Returns the URL attribute value of the given name.
-	 * 
-	 * returns 		null if there is no such attribute
-	 */
-	public String getURLAttribute(String name){
-		return url_attr.get( name );
-	}
-	/**
-	 * Returns the HTTP attribute value of the given name.
-	 * 
-	 * returns 		null if there is no such attribute
-	 */
-	public String getHeader(String name){
-		return headers.get( name.toUpperCase() );
-	}
-	/**
-	 * Returns the cookie value of the given name.
-	 * 
-	 * returns 		null if there is no such attribute
-	 */
-	public String getCookie(String name){
-		return cookies.get( name );
-	}	
-
-
-	/**
-	 * @return 		a map of the parsed cookies
-	 */
-	public HashMap<String, String> getCookies(){
-		return cookies;
-	}
-	/**
-	 * @return 		a map of the parsed URL attributes
-	 */
-	public HashMap<String, String> getURLAttributes(){
-		return url_attr;
-	}
-	/**
-	 * @return 		a map of the parsed headers
-	 */
-	public HashMap<String, String> getHeaders(){
-		return headers;
-	}
-
-
-	public String toString(){
-		StringBuilder tmp = new StringBuilder();
-		tmp.append("{Type: ").append(type);
-		tmp.append(", HTTP_version: HTTP/").append(version);
-		if(url == null)
-			tmp.append(", URL: null");
-		else
-			tmp.append(", URL: \"").append(url).append('\"');
-
-		tmp.append(", URL_attr: { ");
-		for( String key : url_attr.keySet() ){
-			tmp.append(key).append(": \"");
-			tmp.append(url_attr.get(key)).append("\", ");
-		}
-		tmp.append('}');
-
-		tmp.append(", Headers: {");
-		for( String key : headers.keySet() ){
-			tmp.append(key).append(": \"");
-			tmp.append( headers.get(key) ).append("\", ");
-		}
-		tmp.append('}');
-
-		tmp.append(", Cookies: {");
-		for( String key : cookies.keySet() ){
-			tmp.append(key).append(": \"");
-			tmp.append( cookies.get(key) ).append("\", ");
-		}
-		tmp.append('}');
-
-		tmp.append('}');
-		return tmp.toString();
 	}
 }

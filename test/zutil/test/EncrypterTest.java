@@ -26,7 +26,7 @@ package zutil.test;
 
 import org.junit.Test;
 import zutil.Encrypter;
-import zutil.Encrypter.*;
+import zutil.Encrypter.Algorithm;
 
 import static org.junit.Assert.assertEquals;
 

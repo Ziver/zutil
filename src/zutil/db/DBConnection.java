@@ -31,7 +31,6 @@ import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
 import java.io.Closeable;
-import java.math.BigInteger;
 import java.sql.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;

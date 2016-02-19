@@ -28,7 +28,6 @@ import org.junit.Test;
 import zutil.StringUtil;
 
 import java.util.Arrays;
-import java.util.Collection;
 
 import static org.junit.Assert.assertEquals;
 

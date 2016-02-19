@@ -26,6 +26,7 @@ package zutil.net.ssdp;
 
 import zutil.io.StringOutputStream;
 import zutil.log.LogUtil;
+import zutil.net.http.HttpHeader;
 import zutil.net.http.HttpHeaderParser;
 import zutil.net.http.HttpPrintStream;
 import zutil.net.threaded.ThreadedUDPNetwork;
@@ -189,40 +190,45 @@ public class SSDPClient extends ThreadedUDPNetwork implements ThreadedUDPNetwork
 	 * Location: http://localhost:80
 	 */
 	public void receivedPacket(DatagramPacket packet, ThreadedUDPNetwork network) {
-		String msg = new String(packet.getData(), packet.getOffset(), packet.getLength());
-		HttpHeaderParser header = new HttpHeaderParser( msg );
-		logger.log(Level.FINEST, "Received(from: "+packet.getAddress()+"): "+ header);
-		
-		String usn = header.getHeader("USN");
-		String st = header.getHeader("ST");
-		boolean newService = false;
-		StandardSSDPInfo service;
-		// Get existing service
-		if( services_usn.containsKey( usn )){
-			service = services_usn.get( usn );
-		}
-		// Add new service
-		else{
-			newService = true;
-			service = new StandardSSDPInfo();
-			services_usn.put( usn, service);
-			if( !services_st.containsKey(st) )
-				services_st.put( st, new LinkedList<StandardSSDPInfo>() );
-			services_st.get( header.getHeader("ST") ).add( service );
-		}
-		
-		service.setLocation( header.getHeader("LOCATION") );
-		service.setST( st );
-		service.setUSN( usn );
-		service.setInetAddress(packet.getAddress());
-		if(header.getHeader("Cache-Control") != null) {
-			service.setExpirationTime(
-					System.currentTimeMillis() + 1000 * getCacheTime(header.getHeader("Cache-Control")));
-		}
-		service.readHeaders(header);
+        try {
+            String msg = new String(packet.getData(), packet.getOffset(), packet.getLength());
+            HttpHeaderParser headerParser = new HttpHeaderParser(msg);
+            HttpHeader header = headerParser.read();
+            logger.log(Level.FINEST, "Received(from: " + packet.getAddress() + "): " + header);
 
-		if(listener != null && newService)
-			listener.newService(service);
+            String usn = header.getHeader("USN");
+            String st = header.getHeader("ST");
+            boolean newService = false;
+            StandardSSDPInfo service;
+            // Get existing service
+            if (services_usn.containsKey(usn)) {
+                service = services_usn.get(usn);
+            }
+            // Add new service
+            else {
+                newService = true;
+                service = new StandardSSDPInfo();
+                services_usn.put(usn, service);
+                if (!services_st.containsKey(st))
+                    services_st.put(st, new LinkedList<StandardSSDPInfo>());
+                services_st.get(header.getHeader("ST")).add(service);
+            }
+
+            service.setLocation(header.getHeader("LOCATION"));
+            service.setST(st);
+            service.setUSN(usn);
+            service.setInetAddress(packet.getAddress());
+            if (header.getHeader("Cache-Control") != null) {
+                service.setExpirationTime(
+                        System.currentTimeMillis() + 1000 * getCacheTime(header.getHeader("Cache-Control")));
+            }
+            service.readHeaders(header);
+
+            if (listener != null && newService)
+                listener.newService(service);
+        } catch (IOException e){
+            logger.log(Level.SEVERE, null, e);
+        }
 	}
 	
 	private long getCacheTime(String cache_control){

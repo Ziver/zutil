@@ -27,7 +27,6 @@ package zutil.test;
 import org.dom4j.Document;
 import org.dom4j.io.OutputFormat;
 import org.dom4j.io.XMLWriter;
-import zutil.net.nio.message.type.SystemMessage;
 import zutil.net.ws.WSInterface;
 import zutil.net.ws.WSInterface.WSNamespace;
 import zutil.net.ws.WSReturnObject;

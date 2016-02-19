@@ -27,7 +27,6 @@ package zutil;
 import zutil.converters.Converter;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Iterator;
 
 /**

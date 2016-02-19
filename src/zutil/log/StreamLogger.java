@@ -24,13 +24,6 @@
 
 package zutil.log;
 
-import com.mysql.jdbc.log.Log;
-
-import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 /**
  * Created by Ziver on 2015-10-15.
  */

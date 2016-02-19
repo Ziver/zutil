@@ -24,10 +24,7 @@
 
 package zutil.parser;
 
-import zutil.struct.MutableInt;
-
 import java.io.IOException;
-import java.io.StringReader;
 
 /**
  * Created by Ziver

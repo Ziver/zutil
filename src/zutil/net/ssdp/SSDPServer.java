@@ -27,6 +27,7 @@ package zutil.net.ssdp;
 import zutil.StringUtil;
 import zutil.io.StringOutputStream;
 import zutil.log.LogUtil;
+import zutil.net.http.HttpHeader;
 import zutil.net.http.HttpHeaderParser;
 import zutil.net.http.HttpPrintStream;
 import zutil.net.threaded.ThreadedUDPNetwork;
@@ -168,7 +169,8 @@ public class SSDPServer extends ThreadedUDPNetwork implements ThreadedUDPNetwork
 	public void receivedPacket(DatagramPacket packet, ThreadedUDPNetwork network) {
 		try {
 			String msg = new String( packet.getData(), packet.getOffset(), packet.getLength() );
-			HttpHeaderParser header = new HttpHeaderParser( msg );
+			HttpHeaderParser headerParser = new HttpHeaderParser( msg );
+			HttpHeader header = headerParser.read();
 
 			// ******* Respond
 			// Check that the message is an ssdp discovery message

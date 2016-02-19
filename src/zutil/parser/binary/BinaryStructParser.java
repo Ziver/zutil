@@ -24,14 +24,14 @@
 
 package zutil.parser.binary;
 
+import zutil.ByteUtil;
+import zutil.converters.Converter;
+import zutil.parser.binary.BinaryStruct.BinaryField;
+
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
-import zutil.ByteUtil;
-import zutil.converters.Converter;
-import zutil.parser.binary.BinaryStruct.*;
 
 /**
  * Created by Ziver on 2016-01-28.

@@ -26,7 +26,7 @@ package zutil.net.upnp.services;
 
 import org.dom4j.DocumentException;
 import zutil.io.file.FileUtil;
-import zutil.net.http.HttpHeaderParser;
+import zutil.net.http.HttpHeader;
 import zutil.net.http.HttpPage;
 import zutil.net.http.HttpPrintStream;
 import zutil.net.upnp.UPnPService;
@@ -154,9 +154,10 @@ public class UPnPContentDirectory implements UPnPService, HttpPage, WSInterface 
 	
 
 	@WSDisabled
-	public void respond(HttpPrintStream out, HttpHeaderParser clientInfo,
-			Map<String, Object> session, Map<String, String> cookie,
-			Map<String, String> request) throws IOException {
+	public void respond(HttpPrintStream out, HttpHeader headers,
+                        Map<String, Object> session,
+                        Map<String, String> cookie,
+                        Map<String, String> request) throws IOException {
 
 		out.enableBuffering(true);
 		out.setHeader("Content-Type", "text/xml");

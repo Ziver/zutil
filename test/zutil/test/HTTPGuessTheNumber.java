@@ -24,7 +24,7 @@
 
 package zutil.test;
 
-import zutil.net.http.HttpHeaderParser;
+import zutil.net.http.HttpHeader;
 import zutil.net.http.HttpPage;
 import zutil.net.http.HttpPrintStream;
 import zutil.net.http.HttpServer;
@@ -43,7 +43,7 @@ public class HTTPGuessTheNumber implements HttpPage{
 	}
 
 	public void respond(HttpPrintStream out,
-			HttpHeaderParser client_info,
+			HttpHeader client_info,
 			Map<String, Object> session, 
 			Map<String, String> cookie,
 			Map<String, String> request) throws IOException {

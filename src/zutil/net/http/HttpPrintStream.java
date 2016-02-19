@@ -24,6 +24,8 @@
 
 package zutil.net.http;
 
+import zutil.converters.Converter;
+
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
@@ -66,7 +68,7 @@ public class HttpPrintStream extends OutputStream{
 	 * Creates an new instance of HttpPrintStream with
 	 * message type of RESPONSE and buffering disabled.
 	 * 
-	 * @param out is the OutputStream to send the message
+	 * @param out is the OutputStream where the data will be written to
 	 */
 	public HttpPrintStream(OutputStream out) {
 		this( out, HttpMessageType.RESPONSE );
@@ -75,7 +77,7 @@ public class HttpPrintStream extends OutputStream{
 	 * Creates an new instance of HttpPrintStream with
 	 * message type buffering disabled.
 	 * 
-	 * @param out is the OutputStream to send the message
+	 * @param out is the OutputStream where the data will be written to
 	 * @param type is the type of message
 	 */
 	public HttpPrintStream(OutputStream out, HttpMessageType type) {
@@ -107,7 +109,7 @@ public class HttpPrintStream extends OutputStream{
 	 * 
 	 * @param key is the name of the cookie
 	 * @param value is the value of the cookie
-	 * @throws IOException Throws exception if the header has already been sent
+	 * @throws IOException if the header has already been sent
 	 */
 	public void setCookie(String key, String value) throws IOException{
 		if(cookies == null)
@@ -120,7 +122,7 @@ public class HttpPrintStream extends OutputStream{
 	 * 
 	 * @param key is the header name
 	 * @param value is the value of the header
-	 * @throws IOException Throws exception if the header has already been sent
+	 * @throws IOException if the header has already been sent
 	 */
 	public void setHeader(String key, String value) throws IOException{
 		if(headers == null)
@@ -325,24 +327,16 @@ public class HttpPrintStream extends OutputStream{
                         str.append(", req_url: null");
 					else
                         str.append(", req_url: \"").append(req_url).append('\"');
-                } else {
+                } else if (message_type == HttpMessageType.RESPONSE){
                     str.append(", status_code: ").append(res_status_code);
                     str.append(", status_str: ").append(getStatusString(res_status_code));
                 }
 
             if (headers != null) {
-                str.append(", Headers: {");
-                for (String key : headers.keySet()) {
-                    str.append(key).append(": \"").append(headers.get(key)).append("\", ");
-                }
-                str.append('}');
+                str.append(", Headers: ").append(Converter.toString(headers));
             }
             if (cookies != null) {
-                str.append(", Cookies: {");
-                for (String key : cookies.keySet()) {
-                    str.append(key).append(": \"").append(cookies.get(key)).append("\", ");
-                }
-                str.append('}');
+                str.append(", Cookies: ").append(Converter.toString(cookies));
             }
         }
         else

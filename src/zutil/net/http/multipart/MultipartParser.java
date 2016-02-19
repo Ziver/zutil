@@ -25,7 +25,7 @@
 package zutil.net.http.multipart;
 
 import zutil.ProgressListener;
-import zutil.net.http.HttpHeaderParser;
+import zutil.net.http.HttpHeader;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.BufferedReader;
@@ -58,7 +58,7 @@ public class MultipartParser {
 	
 	
 	
-	public MultipartParser(BufferedReader in, HttpHeaderParser header){
+	public MultipartParser(BufferedReader in, HttpHeader header){
 		this.in = in;
 		
 		String cotype = header.getHeader("Content-type");

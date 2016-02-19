@@ -24,7 +24,7 @@
 
 package zutil.parser.wsdl;
 
-import zutil.net.http.HttpHeaderParser;
+import zutil.net.http.HttpHeader;
 import zutil.net.http.HttpPage;
 import zutil.net.http.HttpPrintStream;
 import zutil.net.ws.WebServiceDef;
@@ -44,7 +44,7 @@ public class WSDLHttpPage implements HttpPage {
     }
 
     public void respond(HttpPrintStream out,
-                        HttpHeaderParser client_info,
+                        HttpHeader headers,
                         Map<String, Object> session,
                         Map<String, String> cookie,
                         Map<String, String> request) throws IOException{

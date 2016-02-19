@@ -32,7 +32,9 @@ import zutil.parser.DataNode;
 
 import javax.activation.UnsupportedDataTypeException;
 import java.io.*;
-import java.lang.reflect.*;
+import java.lang.reflect.Array;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;

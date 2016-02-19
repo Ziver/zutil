@@ -48,13 +48,16 @@ import java.util.logging.Logger;
  */
 public class HttpServer extends ThreadedTCPNetworkServer{
 	private static final Logger logger = LogUtil.getLogger();
-	public static final String SERVER_VERSION = "Ziver HttpServer 1.0";
-	public static final int COOKIE_TTL = 200;
+
+	public static final String SESSION_ID_KEY = "session_id";
+	public static final String SESSION_TTL_KEY = "session_ttl";
+	public static final String SERVER_VERSION = "Ziver HttpServer 1.1";
 	public static final int SESSION_TTL = 10*60*1000; // in milliseconds
+
 
 	private Map<String,HttpPage> pages;
 	private HttpPage defaultPage;
-	private Map<String,Map<String,Object>> sessions;
+	private Map<Integer,Map<String,Object>> sessions;
 	private int nextSessionId;
 
 	/**
@@ -77,12 +80,12 @@ public class HttpServer extends ThreadedTCPNetworkServer{
 	public HttpServer(int port, File keyStore, String keyStorePass){
 		super( port, keyStore, keyStorePass );
 
-		pages = new ConcurrentHashMap<String,HttpPage>();
-		sessions = new ConcurrentHashMap<String,Map<String,Object>>();
+		pages = new ConcurrentHashMap<>();
+		sessions = new ConcurrentHashMap<>();
 		nextSessionId = 0;
 
 		Timer timer = new Timer();
-		timer.schedule(new GarbageCollector(), 10000, SESSION_TTL / 2);
+		timer.schedule(new SessionGarbageCollector(), 10000, SESSION_TTL / 2);
 
 		logger.info("HTTP"+(keyStore==null?"":"S")+" Server ready!");
 	}
@@ -93,14 +96,14 @@ public class HttpServer extends ThreadedTCPNetworkServer{
 	 * 
 	 * @author Ziver
 	 */
-	private class GarbageCollector extends TimerTask {
+	private class SessionGarbageCollector extends TimerTask {
 		public void run(){
 			Object[] keys = sessions.keySet().toArray();
 			for(Object key : keys){
-				Map<String,Object> client_session = sessions.get(key);
+				Map<String,Object> session = sessions.get(key);
 
 				// Check if session is still valid
-				if((Long)client_session.get("ttl") < System.currentTimeMillis()){
+				if((Long)session.get(SESSION_TTL_KEY) < System.currentTimeMillis()){
 					sessions.remove(key);
 					logger.fine("Removing Session: "+key);
 				}
@@ -158,92 +161,87 @@ public class HttpServer extends ThreadedTCPNetworkServer{
 
 		public void run(){
 			String tmp = null;
-
-			HashMap<String,String> cookie = new HashMap<String,String>();
-			HashMap<String,String> request = new HashMap<String,String>();
+			HttpHeaderParser headerParser = new HttpHeaderParser(in);
 
 			//****************************  REQUEST *********************************
 			try {
 				long time = System.currentTimeMillis();
-				HttpHeaderParser parser = new HttpHeaderParser(in);
-				request = parser.getURLAttributes();
-				cookie = parser.getCookies();
-
+				HttpHeader header = headerParser.read();
+                if(header == null){
+                    logger.finer("No header received");
+                    return;
+                }
 
 				//******* Read in the post data if available
-				if( parser.getHeader("Content-Length")!=null ){
+				if( header.getHeader("Content-Length") != null ){
 					// Reads the post data size
-					tmp = parser.getHeader("Content-Length");
+					tmp = header.getHeader("Content-Length");
 					int post_data_length = Integer.parseInt( tmp );
 					// read the data
-					StringBuffer tmpb = new StringBuffer();
+					StringBuilder tmpBuff = new StringBuilder();
 					// read the data
 					for(int i=0; i<post_data_length ;i++){
-						tmpb.append((char)in.read());
+						tmpBuff.append((char)in.read());
 					}
 
-					tmp = parser.getHeader("Content-Type");
+					tmp = header.getHeader("Content-Type");
 					if( tmp.contains("application/x-www-form-urlencoded") ){
 						// get the variables
-						HttpHeaderParser.parseURLParameters( tmpb.toString(), request );
+						HttpHeaderParser.parseURLParameters(header, tmpBuff.toString());
 					}
-					else if( tmp.contains("application/soap+xml" ) || 
-							tmp.contains("text/xml") || 
+					else if( tmp.contains("application/soap+xml" ) ||
+							tmp.contains("text/xml") ||
 							tmp.contains("text/plain") ){
 						// save the variables
-						request.put( "" , tmpb.toString() );
+						header.putURLAttribute("" , tmpBuff.toString());
 					}
 					else if( tmp.contains("multipart/form-data") ){
-						// TODO: File upload					
-						throw new Exception( "\"multipart-form-data\" Not implemented." );
-					}						
+						// TODO: File upload
+						throw new UnsupportedOperationException("HTTP Content-Type 'multipart-form-data' not supported." );
+					}
 				}
 
 				//****************************  HANDLE REQUEST *********************************
 				// Get the client session or create one
-				Map<String, Object> client_session;
-				long ttl_time = System.currentTimeMillis()+SESSION_TTL;
-				if( cookie.containsKey("session_id") && sessions.containsKey(cookie.get("session_id")) ){
-					client_session = sessions.get( cookie.get("session_id") );
-					// Check if session is still valid
-					if( (Long)client_session.get("ttl") < System.currentTimeMillis() ){
-						int session_id = (Integer)client_session.get("session_id");
-						client_session = Collections.synchronizedMap(new HashMap<String, Object>());
-						client_session.put( "session_id", session_id);
-						sessions.put( ""+session_id, client_session);
-					}
+				Map<String, Object> session;
+				long ttlTime = System.currentTimeMillis() + SESSION_TTL;
+                String sessionCookie = header.getCookie(SESSION_ID_KEY);
+				if( sessionCookie != null && sessions.containsKey(sessionCookie) &&
+                        (Long)sessions.get(sessionCookie).get(SESSION_TTL_KEY) < System.currentTimeMillis()){ // Check if session is still valid
+
+                    session = sessions.get(sessionCookie);
 					// renew the session TTL
-					client_session.put("ttl", ttl_time);
+					session.put(SESSION_TTL_KEY, ttlTime);
 				}
 				else{
-					client_session = Collections.synchronizedMap(new HashMap<String, Object>());
-					client_session.put( "session_id", nextSessionId );
-					client_session.put( "ttl", ttl_time );
-					sessions.put( ""+nextSessionId, client_session );
+					session = Collections.synchronizedMap(new HashMap<String, Object>());
+					session.put(SESSION_ID_KEY, nextSessionId );
+					session.put(SESSION_TTL_KEY, ttlTime );
+					sessions.put(nextSessionId, session );
 					++nextSessionId;
 				}
 
 				//****************************  RESPONSE  ************************************
 				out.setStatusCode(200);
-				out.setHeader( "Server", SERVER_VERSION );
-				out.setHeader( "Content-Type", "text/html" );
-				out.setCookie( "session_id", ""+client_session.get("session_id") );
+				out.setHeader("Server", SERVER_VERSION);
+				out.setHeader("Content-Type", "text/html");
+				out.setCookie(SESSION_ID_KEY, ""+session.get(SESSION_ID_KEY));
 
-				if( parser.getRequestURL() != null && pages.containsKey(parser.getRequestURL()) ){
-					HttpPage page = pages.get(parser.getRequestURL());
-                    page.respond(out, parser, client_session, cookie, request);
+				if( header.getRequestURL() != null && pages.containsKey(header.getRequestURL())){
+					HttpPage page = pages.get(header.getRequestURL());
+                    page.respond(out, header, session, header.getCookieMap(), header.getUrlAttributeMap());
 					if(LogUtil.isLoggable(page.getClass(), Level.FINER))
-                        logRequest(parser, client_session, cookie, request, time);
+                        logRequest(header, session, time);
 				}
-				else if( parser.getRequestURL() != null && defaultPage != null ){
-					defaultPage.respond(out, parser, client_session, cookie, request);
+				else if( header.getRequestURL() != null && defaultPage != null ){
+					defaultPage.respond(out, header, session, header.getCookieMap(), header.getUrlAttributeMap());
                     if(LogUtil.isLoggable(defaultPage.getClass(), Level.FINER))
-					    logRequest(parser, client_session, cookie, request, time);
+					    logRequest(header, session, time);
 				}
 				else{
-					out.setStatusCode( 404 );
-					out.println( "404 Page Not Found: "+parser.getRequestURL() );
-					logger.warning("Page not defined: " + parser.getRequestURL());
+					out.setStatusCode(404);
+					out.println("404 Page Not Found: "+header.getRequestURL());
+					logger.warning("Page not defined: " + header.getRequestURL());
 				}
 
 				//********************************************************************************
@@ -263,33 +261,37 @@ public class HttpServer extends ThreadedTCPNetworkServer{
 					logger.log(Level.SEVERE, null, ioe);
 				}
 			}
-
-			try{
-				out.close();
-				in.close();
-				socket.close();
-			} catch( Exception e ) {
-				logger.log(Level.WARNING, "Could not close connection", e);
-			}
+            finally {
+                try{
+                    out.close();
+                    in.close();
+                    socket.close();
+                } catch( Exception e ) {
+                    logger.log(Level.WARNING, "Could not close connection", e);
+                }
+            }
 		}
 	}
 
-    protected static void logRequest(HttpHeaderParser parser,
-                                   Map<String,Object> client_session,
-                                   Map<String,String> cookie,
-                                   Map<String,String> request,
+
+    protected static void logRequest(HttpHeader header,
+                                   Map<String,Object> session,
                                    long time){
         // Debug
         if(logger.isLoggable(Level.FINEST) ){
-            logger.finer(
-                    "Received request: " + parser.getRequestURL()
-                            + " (client_session: " + client_session
-                            + ", cookie: " + cookie
-                            + ", request: " + request + ")"
-                            + ", time: "+ StringUtil.formatTimeToString(System.currentTimeMillis() - time));
+            StringBuilder buff = new StringBuilder();
+            buff.append("Received request: ").append(header.getRequestURL());
+            buff.append(", (");
+            buff.append("request: ").append(header.toStringAttributes());
+            buff.append(", cookies: ").append(header.toStringCookies());
+            buff.append(", session: ").append(session);
+            buff.append(")");
+            buff.append(", time: "+ StringUtil.formatTimeToString(System.currentTimeMillis() - time));
+
+            logger.finer(buff.toString());
         } else if(logger.isLoggable(Level.FINER)){
             logger.finer(
-                    "Received request: " + parser.getRequestURL()
+                    "Received request: " + header.getRequestURL()
                             + ", time: "+ StringUtil.formatTimeToString(System.currentTimeMillis() - time));
         }
     }

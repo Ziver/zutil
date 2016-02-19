@@ -25,7 +25,6 @@
 package zutil.db;
 
 import zutil.StringUtil;
-import zutil.db.handler.ListSQLResult;
 import zutil.db.handler.SimpleSQLResult;
 import zutil.log.LogUtil;
 
@@ -37,7 +36,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**

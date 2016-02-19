@@ -28,7 +28,8 @@ import org.junit.Test;
 import zutil.parser.binary.BinaryStruct;
 import zutil.parser.binary.BinaryStructParser;
 
-import static junit.framework.TestCase.*;
+import static junit.framework.TestCase.assertEquals;
+import static junit.framework.TestCase.assertFalse;
 
 /**
  * Created by Ziver on 2016-01-28.

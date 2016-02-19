@@ -29,7 +29,6 @@ import zutil.ClassUtil;
 import zutil.parser.Base64Encoder;
 import zutil.parser.DataNode;
 import zutil.parser.DataNode.DataType;
-import static zutil.parser.json.JSONObjectInputStream.*;
 
 import javax.activation.UnsupportedDataTypeException;
 import java.io.*;
@@ -39,6 +38,9 @@ import java.lang.reflect.Modifier;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static zutil.parser.json.JSONObjectInputStream.MD_CLASS;
+import static zutil.parser.json.JSONObjectInputStream.MD_OBJECT_ID;
 
 public class JSONObjectOutputStream extends OutputStream implements ObjectOutput, Closeable{
     /** If the generated JSON should contain class def meta-data **/

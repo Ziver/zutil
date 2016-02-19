@@ -24,7 +24,7 @@
 
 package zutil.net.upnp;
 
-import zutil.net.http.HttpHeaderParser;
+import zutil.net.http.HttpHeader;
 import zutil.net.http.HttpPrintStream;
 
 import java.io.IOException;
@@ -47,9 +47,11 @@ public class UPnPMediaServer extends UPnPRootDevice{
 		url = location;
 	}
 
-	public void respond(HttpPrintStream out, HttpHeaderParser clientInfo,
-			Map<String, Object> session, Map<String, String> cookie,
-			Map<String, String> request) throws IOException {
+	public void respond(HttpPrintStream out,
+                        HttpHeader headers,
+                        Map<String, Object> session,
+                        Map<String, String> cookie,
+                        Map<String, String> request) throws IOException {
 
 		out.enableBuffering(true);
 		out.setHeader("Content-Type", "text/xml");

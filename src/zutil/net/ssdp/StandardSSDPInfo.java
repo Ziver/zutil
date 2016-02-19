@@ -24,13 +24,14 @@
 
 package zutil.net.ssdp;
 
-import zutil.net.http.HttpHeaderParser;
+import zutil.net.http.HttpHeader;
 import zutil.net.http.HttpPrintStream;
 
 import java.io.IOException;
 import java.net.InetAddress;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.UUID;
 
 /**
@@ -145,10 +146,12 @@ public class StandardSSDPInfo implements SSDPServiceInfo, SSDPCustomInfo{
 		}
 	}
     @Override
-    public void readHeaders(HttpHeaderParser http) {
-        HashMap<String,String> httpHeaders = http.getHeaders();
-        for (String key : httpHeaders.keySet())
-            headers.put(key, httpHeaders.get(key));
+    public void readHeaders(HttpHeader header) {
+        Iterator<String> it = header.getHeaderKeys();
+        while (it.hasNext()) {
+			String key = it.next();
+			headers.put(key, header.getHeader(key));
+		}
     }
 
 	public InetAddress getInetAddress(){
