@@ -68,6 +68,10 @@
             <classpath refid="classpath.build" />
 			<include name="**/*.java" />
 		</javac>
+        <copy todir="${buildDir}">
+            <fileset dir="${srcDir}"
+                     excludes="**/*.java" />
+        </copy>
 	</target>
 
     <target name="build-test" depends="build">
@@ -77,6 +81,10 @@
             <classpath refid="classpath.test" />
             <include name="**/*.java" />
         </javac>
+        <copy todir="${buildTestDir}">
+            <fileset dir="${testDir}"
+                     excludes="**/*.java" />
+        </copy>
     </target>
 		
 </project>
