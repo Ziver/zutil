@@ -24,7 +24,6 @@
 
 package zutil.parser.json;
 
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 import zutil.ClassUtil;
 import zutil.parser.Base64Encoder;
 import zutil.parser.DataNode;
@@ -211,7 +210,7 @@ public class JSONObjectOutputStream extends OutputStream implements ObjectOutput
         out.write(new DataNode(v));
     }
     @Override public void writeByte(int v) throws IOException {
-        throw new NotImplementedException();
+        throw new UnsupportedOperationException ();
     }
     @Override public void writeShort(int v) throws IOException {
         out.write(new DataNode(v));
@@ -232,7 +231,7 @@ public class JSONObjectOutputStream extends OutputStream implements ObjectOutput
         out.write(new DataNode(v));
     }
     @Override public void writeBytes(String s) throws IOException {
-        throw new NotImplementedException();
+        throw new UnsupportedOperationException ();
     }
     @Override public void writeChars(String s) throws IOException {
         out.write(new DataNode(s));

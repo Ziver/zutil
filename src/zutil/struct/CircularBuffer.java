@@ -24,7 +24,6 @@
 
 package zutil.struct;
 
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import java.util.Iterator;
 import java.util.NoSuchElementException;
@@ -104,7 +103,7 @@ public class CircularBuffer<T> implements Iterable<T>{
 
         @Override
         public void remove() {
-            throw new NotImplementedException();
+            throw new UnsupportedOperationException ();
         }
     }
 }
