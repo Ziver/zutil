@@ -67,7 +67,6 @@
 		<javac srcdir="${srcDir}" destdir="${buildDir}" debug="yes" debugLevel="lines,vars,source">
             <classpath refid="classpath.build" />
 			<include name="**/*.java" />
-            <exclude name="zutil/log/net/*" />
 		</javac>
         <copy todir="${buildDir}">
             <fileset dir="${srcDir}"
@@ -78,7 +77,6 @@
     <target name="build-test" depends="build">
         <mkdir dir="${buildTestDir}" />
         <javac srcdir="${testDir}" destdir="${buildTestDir}" debug="yes" debugLevel="lines,vars,source">
-            <classpath refid="classpath.build" />
             <classpath refid="classpath.test" />
             <include name="**/*.java" />
         </javac>
