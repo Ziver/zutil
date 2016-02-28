@@ -23,14 +23,13 @@
 	
 	<!--classpath included when building-->
 	<path id="classpath.build">
-        <fileset dir="${libDir}">
-            <include name="**/*.jar"/>
-        </fileset>
+        <pathelement location="${libDir}/*" />
         <pathelement location="${buildDir}" />
 	</path>
 
     <path id="classpath.test">
         <pathelement location="${buildTestDir}" />
+        <!--include libraries used for building-->
         <path refid="classpath.build"/>
     </path>
 	
@@ -38,8 +37,9 @@
 
     <target name="test" depends="build-test">
         <mkdir dir="${reportsDir}" />
-        <junit printsummary="yes" haltonfailure="false">
+        <junit printsummary="yes" haltonfailure="false" fork="true">
             <classpath refid="classpath.test" />
+            <formatter type="plain" usefile="false" /> <!-- to screen -->
             <formatter type="xml" /> <!-- to file -->
 
             <batchtest todir="${reportsDir}">
