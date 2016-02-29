@@ -193,7 +193,7 @@ public class JSONObjectOutputStream extends OutputStream implements ObjectOutput
 
     /**
      * Defines if null fields in objects should be included
-     * in the JSON output.
+     * in the JSON output. Default value is true
      */
     public void ignoreNullFields(boolean enable) {
         ignoreNullFields = enable;

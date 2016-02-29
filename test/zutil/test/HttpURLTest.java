@@ -27,6 +27,10 @@ package zutil.test;
 import org.junit.Test;
 import zutil.net.http.HttpURL;
 
+import static org.hamcrest.CoreMatchers.allOf;
+import static org.hamcrest.CoreMatchers.both;
+import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
 
 public class HttpURLTest {
@@ -63,7 +67,7 @@ public class HttpURLTest {
 		assertEquals( "key1=value1", url.getParameterString() );
 		
 		url.setParameter("key2", "value2");
-		assertEquals( "key2=value2&key1=value1", url.getParameterString() );
+		assertThat(url.getParameterString(), allOf(containsString("key2=value2"), containsString("key1=value1")));
 
 	}
 

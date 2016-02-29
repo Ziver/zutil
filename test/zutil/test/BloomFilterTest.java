@@ -76,10 +76,10 @@ public class BloomFilterTest extends TestCase {
 					+ " false positives out of " + addCount + " added items, rate = "
 					+ df.format(actualFP) + ", expected = "
 					+ df.format(expectedFP));
-			double ratio = expectedFP/actualFP;
+			double ratio = actualFP/expectedFP;
 			assertTrue(
-					"Assert that the actual false positive rate doesn't deviate by more than 10% from what was predicted",
-					ratio > 0.9 && ratio < 1.1);
+					"Assert that the actual false positive rate doesn't deviate by more than 10% from what was predicted, ratio: "+ratio,
+					ratio < 1.1);
 		}
 	}
 

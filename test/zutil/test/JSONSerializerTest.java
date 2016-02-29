@@ -141,6 +141,7 @@ public class JSONSerializerTest{
         sourceObj.map.put("key1", null);
 
         TestClassMap targetObj = sendReceiveObject(sourceObj);
+        sourceObj.map.remove("key1"); // key1 should not be set in destination
         TestClassMap.assertEquals(sourceObj, targetObj);
     }
 
@@ -180,7 +181,7 @@ public class JSONSerializerTest{
 		StringOutputStream bout = new StringOutputStream();
 		JSONObjectOutputStream out = new JSONObjectOutputStream(bout);
 		out.enableMetaData(metadata);
-		
+
 		out.writeObject(sourceObj);
 		out.flush();
 		out.close();
