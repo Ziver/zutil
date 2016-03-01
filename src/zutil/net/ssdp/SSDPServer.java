@@ -88,7 +88,7 @@ public class SSDPServer extends ThreadedUDPNetwork implements ThreadedUDPNetwork
 
 		services = new HashMap<String, SSDPServiceInfo>();
 
-		setChacheTime( DEFAULT_CACHE_TIME );
+		setCacheTime( DEFAULT_CACHE_TIME );
 		enableNotify( true );
 	}
 
@@ -118,7 +118,7 @@ public class SSDPServer extends ThreadedUDPNetwork implements ThreadedUDPNetwork
 	 * 
 	 * @param time is the time in seconds
 	 */
-	public void setChacheTime(int time){
+	public void setCacheTime(int time){
 		cache_time = time;
 		if( isNotifyEnabled() ){
 			enableNotify(false);
