@@ -70,8 +70,8 @@ public class JSONSerializerTest{
         String data = writeObjectToJson(sourceObj);
         data = data.replace("\"", "'");
 
-        assertThat(data, containsString("'@class': 'zutil.test.JSONSerializerTest$TestClassObjClone'"));
-        assertThat(data, containsString("'obj1': {'@class': 'zutil.test.JSONSerializerTest$TestObj', '@object_id': 2, 'value': 42}"));
+        assertThat(data, containsString("'@class': 'zutil.parser.json.JSONSerializerTest$TestClassObjClone'"));
+        assertThat(data, containsString("'obj1': {'@class': 'zutil.parser.json.JSONSerializerTest$TestObj', '@object_id': 2, 'value': 42}"));
         assertThat(data, containsString("'obj2': {'@object_id': 2}"));
     }
 	
@@ -92,7 +92,7 @@ public class JSONSerializerTest{
         data = data.replace("\"", "'");
 
         assertEquals(
-                "{'@class': 'zutil.test.JSONSerializerTest$TestClassArray', 'array': [1, 2, 3, 4], '@object_id': 1}\n",
+                "{'@class': 'zutil.parser.json.JSONSerializerTest$TestClassArray', 'array': [1, 2, 3, 4], '@object_id': 1}\n",
                 data);
     }
 
