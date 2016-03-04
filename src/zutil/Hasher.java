@@ -24,7 +24,7 @@
 
 package zutil;
 
-import zutil.converters.Converter;
+import zutil.converter.Converter;
 
 import javax.crypto.Mac;
 import javax.crypto.SecretKeyFactory;

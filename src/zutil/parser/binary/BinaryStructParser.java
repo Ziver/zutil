@@ -25,7 +25,7 @@
 package zutil.parser.binary;
 
 import zutil.ByteUtil;
-import zutil.converters.Converter;
+import zutil.converter.Converter;
 import zutil.parser.binary.BinaryStruct.BinaryField;
 
 import java.lang.reflect.Field;

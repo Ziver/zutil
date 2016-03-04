@@ -24,7 +24,7 @@
 
 package zutil.db;
 
-import zutil.converters.Converter;
+import zutil.converter.Converter;
 import zutil.io.MultiPrintStream;
 
 import java.sql.PreparedStatement;

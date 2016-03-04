@@ -24,7 +24,7 @@
 
 package zutil.parser;
 
-import zutil.converters.Converter;
+import zutil.converter.Converter;
 import zutil.io.DynamicByteArrayStream;
 
 public class Base64Decoder {

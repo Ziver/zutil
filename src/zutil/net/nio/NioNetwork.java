@@ -25,7 +25,7 @@
 package zutil.net.nio;
 
 import zutil.Encrypter;
-import zutil.converters.Converter;
+import zutil.converter.Converter;
 import zutil.io.DynamicByteArrayStream;
 import zutil.io.MultiPrintStream;
 import zutil.log.LogUtil;

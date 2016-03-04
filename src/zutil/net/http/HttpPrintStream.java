@@ -24,7 +24,7 @@
 
 package zutil.net.http;
 
-import zutil.converters.Converter;
+import zutil.converter.Converter;
 
 import java.io.IOException;
 import java.io.OutputStream;

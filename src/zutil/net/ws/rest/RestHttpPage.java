@@ -24,7 +24,7 @@
 
 package zutil.net.ws.rest;
 
-import zutil.converters.Converter;
+import zutil.converter.Converter;
 import zutil.io.StringOutputStream;
 import zutil.net.http.HttpHeader;
 import zutil.net.http.HttpPage;
