@@ -31,9 +31,9 @@ import static junit.framework.TestCase.assertFalse;
 
 
 /**
- * Created by Ziver on 2016-01-28.
+ * Created by Ziver
  */
-public class BinaryStructTest {
+public class BinaryStructInputStreamTest {
     interface BinaryTestStruct extends BinaryStruct{
         void assertObj();
     }
@@ -52,7 +52,7 @@ public class BinaryStructTest {
             }
         };
 
-        BinaryStructParser.parse(struct, new byte[]{0,0,0,1, 0,0,0,2});
+        BinaryStructInputStream.parse(struct, new byte[]{0,0,0,1, 0,0,0,2});
         struct.assertObj();
     }
 
@@ -70,7 +70,7 @@ public class BinaryStructTest {
             }
         };
 
-        BinaryStructParser.parse(struct, new byte[]{0b0100_000});
+        BinaryStructInputStream.parse(struct, new byte[]{0b0100_000});
         struct.assertObj();
     }
 
@@ -81,11 +81,11 @@ public class BinaryStructTest {
             public String s1;
 
             public void assertObj(){
-                assertEquals(s1, "hello world!");
+                assertEquals("hello world!", s1);
             }
         };
 
-        BinaryStructParser.parse(struct, "hello world!".getBytes());
+        BinaryStructInputStream.parse(struct, "hello world!".getBytes());
         struct.assertObj();
     }
 
@@ -103,7 +103,7 @@ public class BinaryStructTest {
             }
         };
 
-        BinaryStructParser.parse(struct, new byte[]{0b0000_0000,0b0001_1000,0b0000_0000});
+        BinaryStructInputStream.parse(struct, new byte[]{0b0000_0000,0b0001_1000,0b0000_0000});
         struct.assertObj();
     }
 
@@ -122,7 +122,7 @@ public class BinaryStructTest {
             }
         };
 
-        BinaryStructParser.parse(struct, new byte[]{0b0000_0001,0b0001_1000,0b0000_0000});
+        BinaryStructInputStream.parse(struct, new byte[]{0b0000_0001,0b0001_1000,0b0000_0000});
         struct.assertObj();
     }
 }
