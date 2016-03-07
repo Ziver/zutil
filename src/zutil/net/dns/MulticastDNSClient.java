@@ -26,9 +26,10 @@ package zutil.net.dns;
 
 import zutil.net.threaded.ThreadedUDPNetwork;
 import zutil.net.threaded.ThreadedUDPNetworkThread;
-import zutil.parser.binary.BinaryStructParser;
-import zutil.parser.binary.BinaryStructWriter;
+import zutil.parser.binary.BinaryStructInputStream;
+import zutil.parser.binary.BinaryStructOutputStream;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
@@ -50,7 +51,8 @@ public class MulticastDNSClient extends ThreadedUDPNetwork implements ThreadedUD
 
     public void sendProbe() {
         try {
-            BinaryStructWriter out = new BinaryStructWriter();
+            ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+            BinaryStructOutputStream out = new BinaryStructOutputStream(buffer);
 
             DNSPacket header = new DNSPacket();
             out.write(header);
@@ -58,7 +60,7 @@ public class MulticastDNSClient extends ThreadedUDPNetwork implements ThreadedUD
             DatagramPacket packet = null;
 
             packet = new DatagramPacket(
-                    out.getByteArray(), out.getLength(),
+                    buffer.toByteArray(), buffer.size(),
                     InetAddress.getByName( MDNS_MULTICAST_ADDR ),
                     MDNS_MULTICAST_PORT );
             send(packet);
@@ -70,6 +72,6 @@ public class MulticastDNSClient extends ThreadedUDPNetwork implements ThreadedUD
     @Override
     public void receivedPacket(DatagramPacket packet, ThreadedUDPNetwork network) {
         DNSPacket header = new DNSPacket();
-        int length = BinaryStructParser.parse(header, packet.getData());
+        int length = BinaryStructInputStream.parse(header, packet.getData());
     }
 }
