@@ -24,6 +24,9 @@
 
 package zutil.parser.binary;
 
+import zutil.ByteUtil;
+
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.List;
@@ -39,14 +42,14 @@ public class BinaryStructOutputStream {
 
     private OutputStream out;
     private byte rest;
-    private int restLength;
+    private int restBitLength; // length from Most Significant Bit
 
 
     public BinaryStructOutputStream(OutputStream out){
         this.out = out;
 
         rest = 0;
-        restLength = 0;
+        restBitLength = 0;
     }
 
 
@@ -54,9 +57,13 @@ public class BinaryStructOutputStream {
      * Generate a binary byte array from the provided struct.
      * The byte array will be left
      */
-/*    public byte[] serialize(BinaryStruct struct) {
-
-    }*/
+    public static byte[] serialize(BinaryStruct struct) throws IOException {
+        ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+        BinaryStructOutputStream out = new BinaryStructOutputStream(buffer);
+        out.write(struct);
+        out.flush();
+        return buffer.toByteArray();
+    }
 
     /**
      * Generate a binary stream from the provided struct and
@@ -68,8 +75,19 @@ public class BinaryStructOutputStream {
         for (BinaryFieldData field : structDataList){
             byte[] data = field.getValue(struct);
 
-            for (int i=data.length-1; i>=0; --i) {
-                out.write(data[i]);
+            int fieldBitLength = field.getBitLength();
+            for (int i=data.length-1; fieldBitLength>0; fieldBitLength-=8, --i) {
+                byte b = data[i];
+                if (restBitLength == 0 && fieldBitLength >= 8)
+                    out.write(0xFF & b);
+                else {
+                    b <<= 8-restBitLength-fieldBitLength;
+                    b &= ByteUtil.getBitMask(7-restBitLength, fieldBitLength);
+                    rest |= b;
+                    restBitLength += fieldBitLength;
+                    if (restBitLength >= 8)
+                        localFlush();
+                }
             }
         }
     }
@@ -79,12 +97,15 @@ public class BinaryStructOutputStream {
      * Writes any outstanding data to the stream
      */
     public void flush() throws IOException {
-        if(restLength > 0){
+        localFlush();
+        out.flush();
+    }
+    private void localFlush() throws IOException {
+        if(restBitLength > 0){
             out.write(0xFF & rest);
             rest = 0;
-            restLength = 0;
+            restBitLength = 0;
         }
-        out.flush();
     }
 
     /**

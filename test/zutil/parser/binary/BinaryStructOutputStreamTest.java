@@ -47,23 +47,23 @@ public class BinaryStructOutputStreamTest {
             public int i2 = 2;
         };
 
-        byte[] data = serialize(struct);
+        byte[] data = BinaryStructOutputStream.serialize(struct);
         assertArrayEquals(new byte[]{0,0,0,1, 0,0,0,2}, data);
     }
-/*
+
     @Test
     public void basicBooleanTest() throws IOException {
         BinaryStruct struct = new BinaryStruct() {
             @BinaryField(index=1, length=1)
-            public boolean b1 = true;
+            public boolean b1 = false;
             @BinaryField(index=2, length=1)
-            public boolean b2 = false;
+            public boolean b2 = true;
         };
 
-        byte[] data = serialize(struct);
-        assertArrayEquals(new byte[]{(byte)0b1000_0000}, data);
+        byte[] data = BinaryStructOutputStream.serialize(struct);
+        assertArrayEquals(new byte[]{(byte)0b0100_0000}, data);
     }
-
+/*
     @Test
     public void basicStringTest(){
         BinaryTestStruct struct = new BinaryTestStruct() {
@@ -79,11 +79,4 @@ public class BinaryStructOutputStreamTest {
         struct.assertObj();
     }
     */
-
-    private byte[] serialize(BinaryStruct struct) throws IOException {
-        ByteArrayOutputStream buffer = new ByteArrayOutputStream();
-        BinaryStructOutputStream out = new BinaryStructOutputStream(buffer);
-        out.write(struct);
-        return buffer.toByteArray();
-    }
 }
