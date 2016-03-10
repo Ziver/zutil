@@ -28,6 +28,10 @@ import zutil.ByteUtil;
 import zutil.converter.Converter;
 import zutil.parser.binary.BinaryStruct.BinaryField;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -42,31 +46,59 @@ import java.util.List;
  */
 public class BinaryStructInputStream {
 
-    public static int parse(BinaryStruct struct, byte[] data) {
-        List<BinaryFieldData> structDataList = BinaryFieldData.getStructFieldList(struct.getClass());
-        int bitOffset = 0;
-        for (BinaryFieldData field : structDataList){
+    private InputStream in;
+    private byte data;
+    private int dataBitIndex = -1;
 
-            int byteIndex = bitOffset / 8;
-            int bitIndex = 7 - bitOffset % 8;
-            int bitLength = Math.min(bitIndex+1, field.getBitLength());
-
-            int readLength = 0;
-            byte[] valueData = new byte[(int) Math.ceil(field.getBitLength() / 8.0)];
-            for (int index = 0; index < valueData.length; ++index) {
-                valueData[index] = ByteUtil.getShiftedBits(data[byteIndex], bitIndex, bitLength);
-                readLength += bitLength;
-                byteIndex++;
-                bitIndex = 7;
-                bitLength = Math.min(bitIndex+1, field.getBitLength() - readLength);
-            }
-            field.setValue(struct, valueData);
-            bitOffset += field.getBitLength();
-        }
-        return bitOffset;
+    public BinaryStructInputStream(InputStream in){
+        this.in = in;
     }
 
 
+    /**
+     * Parses a byte array and assigns all fields in the struct
+     */
+    public static int read(BinaryStruct struct, byte[] data) {
+        int read = 0;
+        try {
+            ByteArrayInputStream buffer = new ByteArrayInputStream(data);
+            BinaryStructInputStream in = new BinaryStructInputStream(buffer);
+            read = in.read(struct);
+        } catch (Exception e){
+            e.printStackTrace();
+        }
+        return read;
+    }
+
+    /**
+     * Reads the given struct from the input stream
+     */
+    public int read(BinaryStruct struct) throws IOException {
+        List<BinaryFieldData> structDataList = BinaryFieldData.getStructFieldList(struct.getClass());
+
+        int totalReadLength = 0;
+        for (BinaryFieldData field : structDataList){
+            byte[] valueData = new byte[(int) Math.ceil(field.getBitLength() / 8.0)];
+            int fieldReadLength = 0;
+
+            // Parse value
+            for (int valueDataIndex = 0; valueDataIndex < valueData.length; ++valueDataIndex) {
+                if(dataBitIndex < 0) { // Read new data?
+                    data = (byte) in.read();
+                    dataBitIndex = 7;
+                }
+                int bitLength = Math.min(dataBitIndex+1, field.getBitLength() - fieldReadLength);
+                valueData[valueDataIndex] = ByteUtil.getShiftedBits(data, dataBitIndex, bitLength);
+                fieldReadLength += bitLength;
+                dataBitIndex -= bitLength;
+            }
+            // Set value
+            field.setValue(struct, valueData);
+            totalReadLength += fieldReadLength;
+        }
+
+        return totalReadLength;
+    }
 
 
 }

@@ -72,6 +72,6 @@ public class MulticastDNSClient extends ThreadedUDPNetwork implements ThreadedUD
     @Override
     public void receivedPacket(DatagramPacket packet, ThreadedUDPNetwork network) {
         DNSPacket header = new DNSPacket();
-        int length = BinaryStructInputStream.parse(header, packet.getData());
+        BinaryStructInputStream.read(header, packet.getData());
     }
 }

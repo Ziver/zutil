@@ -52,7 +52,7 @@ public class BinaryStructInputStreamTest {
             }
         };
 
-        BinaryStructInputStream.parse(struct, new byte[]{0,0,0,1, 0,0,0,2});
+        BinaryStructInputStream.read(struct, new byte[]{0,0,0,1, 0,0,0,2});
         struct.assertObj();
     }
 
@@ -66,11 +66,11 @@ public class BinaryStructInputStreamTest {
 
             public void assertObj(){
                 assertFalse(b1);
-                assertFalse(b2);
+                assert(b2);
             }
         };
 
-        BinaryStructInputStream.parse(struct, new byte[]{0b0100_000});
+        BinaryStructInputStream.read(struct, new byte[]{0b0100_0000});
         struct.assertObj();
     }
 
@@ -85,7 +85,7 @@ public class BinaryStructInputStreamTest {
             }
         };
 
-        BinaryStructInputStream.parse(struct, "hello world!".getBytes());
+        BinaryStructInputStream.read(struct, "hello world!".getBytes());
         struct.assertObj();
     }
 
@@ -103,7 +103,7 @@ public class BinaryStructInputStreamTest {
             }
         };
 
-        BinaryStructInputStream.parse(struct, new byte[]{0b0000_0000,0b0001_1000,0b0000_0000});
+        BinaryStructInputStream.read(struct, new byte[]{0b0000_0000,0b0001_1000,0b0000_0000});
         struct.assertObj();
     }
 
@@ -122,7 +122,7 @@ public class BinaryStructInputStreamTest {
             }
         };
 
-        BinaryStructInputStream.parse(struct, new byte[]{0b0000_0001,0b0001_1000,0b0000_0000});
+        BinaryStructInputStream.read(struct, new byte[]{0b0000_0001,0b0001_1000,0b0000_0000});
         struct.assertObj();
     }
 }

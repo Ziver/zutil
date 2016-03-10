@@ -43,8 +43,8 @@ public class CSVParser extends Parser{
     public CSVParser(Reader in){
         this(in, false, ',');
     }
-    public CSVParser(Reader in, boolean inclusedHeader){
-        this(in, inclusedHeader, ',');
+    public CSVParser(Reader in, boolean includedHeader){
+        this(in, includedHeader, ',');
     }
     public CSVParser(Reader in, boolean includesHeader, char delimiter){
         this.in = in;
