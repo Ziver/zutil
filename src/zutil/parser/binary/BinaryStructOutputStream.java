@@ -76,7 +76,7 @@ public class BinaryStructOutputStream {
             byte[] data = field.getValue(struct);
 
             int fieldBitLength = field.getBitLength();
-            for (int i=data.length-1; fieldBitLength>0; fieldBitLength-=8, --i) {
+            for (int i=(int)Math.ceil(fieldBitLength/8.0)-1; fieldBitLength>0; fieldBitLength-=8, --i) {
                 byte b = data[i];
                 if (restBitLength == 0 && fieldBitLength >= 8)
                     out.write(0xFF & b);

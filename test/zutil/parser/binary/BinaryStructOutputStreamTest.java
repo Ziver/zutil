@@ -42,7 +42,7 @@ public class BinaryStructOutputStreamTest {
     public void basicIntTest() throws IOException {
         BinaryStruct struct = new BinaryStruct() {
             @BinaryField(index=1, length=32)
-            public int i1 = 1;
+            int i1 = 1;
             @BinaryField(index=2, length=32)
             public int i2 = 2;
         };
@@ -50,6 +50,20 @@ public class BinaryStructOutputStreamTest {
         byte[] data = BinaryStructOutputStream.serialize(struct);
         assertArrayEquals(new byte[]{0,0,0,1, 0,0,0,2}, data);
     }
+
+    @Test
+    public void shortIntTest() throws IOException {
+        BinaryStruct struct = new BinaryStruct() {
+            @BinaryField(index=1, length=16)
+            int i1 = 1;
+            @BinaryField(index=2, length=16)
+            int i2 = 2;
+        };
+
+        byte[] data = BinaryStructOutputStream.serialize(struct);
+        assertArrayEquals(new byte[]{0,1, 0,2}, data);
+    }
+
 
     @Test
     public void basicBooleanTest() throws IOException {

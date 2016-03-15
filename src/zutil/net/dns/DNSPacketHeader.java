@@ -30,7 +30,7 @@ import zutil.parser.binary.BinaryStruct;
  * Created by Ziver on 2016-02-09.
  * Reference: http://tools.ietf.org/html/rfc1035
  */
-public class DNSPacket implements BinaryStruct {
+public class DNSPacketHeader implements BinaryStruct {
     public static final int OPCODE_QUERY = 0;
     public static final int OPCODE_IQUERY = 1;
     public static final int OPCODE_STATUS = 2;
@@ -42,9 +42,33 @@ public class DNSPacket implements BinaryStruct {
     public static final int RCODE_NOT_IMPLEMENTED = 4;
     public static final int RCODE_REFUSED = 5;
 
+    /*
+    Header section format
+
+    The header contains the following fields:
+
+                                        1  1  1  1  1  1
+          0  1  2  3  4  5  6  7  8  9  0  1  2  3  4  5
+        +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
+        |                      ID                       |
+        +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
+        |QR|   Opcode  |AA|TC|RD|RA|   Z    |   RCODE   |
+        +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
+        |                    QDCOUNT                    |
+        +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
+        |                    ANCOUNT                    |
+        +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
+        |                    NSCOUNT                    |
+        +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
+        |                    ARCOUNT                    |
+        +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
+
+    where:
+     */
+
 
     @BinaryField(index=0, length=16)
-    int id;
+    public int id;
 
     //////////////// FLAGS
     //@BinaryField(index=10, length=16)
@@ -54,7 +78,7 @@ public class DNSPacket implements BinaryStruct {
      * query (0), or a response (1).
      */
     @BinaryField(index=10, length=1)
-    boolean flagQueryResponse;
+    public boolean flagQueryResponse;
     /**
      * A four bit field that specifies kind of query in this message.
      * <pre>
@@ -64,21 +88,21 @@ public class DNSPacket implements BinaryStruct {
      * </pre>
      */
     @BinaryField(index=11, length=4)
-    int flagOperationCode;
+    public int flagOperationCode;
     /**
      * This bit is valid in responses,
      * and specifies that the responding name server is an
      * authority for the domain name in question section.
      */
     @BinaryField(index=12, length=1)
-    boolean flagAuthoritativeAnswer;
+    public boolean flagAuthoritativeAnswer;
     /**
      * specifies that this message was truncated
      * due to length greater than that permitted on the
      * transmission channel.
      */
     @BinaryField(index=13, length=1)
-    boolean flagTruncation;
+    public boolean flagTruncation;
     /**
      * this bit may be set in a query and
      * is copied into the response.  If RD is set, it directs
@@ -86,20 +110,20 @@ public class DNSPacket implements BinaryStruct {
      * Recursive query support is optional.
      */
     @BinaryField(index=14, length=1)
-    boolean flagRecursionDesired;
+    public boolean flagRecursionDesired;
     /**
      * this be is set or cleared in a
      * response, and denotes whether recursive query support is
      * available in the name server.
      */
     @BinaryField(index=15, length=1)
-    boolean flagRecursionAvailable;
+    public boolean flagRecursionAvailable;
     /**
      * Reserved for future use.  Must be zero in all queries
      * and responses.
      */
     @BinaryField(index=16, length=3)
-    private int z;
+    protected int z;
     /**
      * this field is set as part of responses.
      * The values have the following interpretation:
@@ -123,7 +147,7 @@ public class DNSPacket implements BinaryStruct {
      *</pre>
      */
     @BinaryField(index=17, length=4)
-    int flagResponseCode;
+    public int flagResponseCode;
 
 
     //////////////// COUNTS
@@ -132,115 +156,57 @@ public class DNSPacket implements BinaryStruct {
      * Specifying the number of entries in the question section.
      */
     @BinaryField(index=20, length=16)
-    int countQuestion;
+    public int countQuestion;
     /**
      * Answer Record Count.
      * specifying the number of resource records in
      * the answer section.
      */
     @BinaryField(index=21, length=16)
-    int countAnswerRecord;
+    public int countAnswerRecord;
     /**
      * Name Server (Authority Record) Count.
      * Specifying the number of name server resource records
      * in the authority records section.
      */
     @BinaryField(index=22, length=16)
-    int countNameServer;
+    public int countNameServer;
     /**
      * Additional Record Count.
      * Specifying the number of resource records in the
      * additional records section
      */
     @BinaryField(index=23, length=16)
-    int countAdditionalRecord;
+    public int countAdditionalRecord;
 
 
 
-    /*
-    Question section format
-                                        1  1  1  1  1  1
-          0  1  2  3  4  5  6  7  8  9  0  1  2  3  4  5
-        +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
-        |                                               |
-        /                     QNAME                     /
-        /                                               /
-        +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
-        |                     QTYPE                     |
-        +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
-        |                     QCLASS                    |
-        +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
 
-    where:
 
-    QNAME           a domain name represented as a sequence of labels, where
-                    each label consists of a length octet followed by that
-                    number of octets.  The domain name terminates with the
-                    zero length octet for the null label of the root.  Note
-                    that this field may be an odd number of octets; no
-                    padding is used.
 
-    QTYPE           a two octet code which specifies the type of the query.
-                    The values for this field include all codes valid for a
-                    TYPE field, together with some more general codes which
-                    can match more than one type of RR.
+    public void setDefaultQueryData() {
+        // Set all flags to zero
+        flagQueryResponse = false;
+        flagOperationCode = 0;
+        flagAuthoritativeAnswer = false;
+        flagTruncation = false;
+        flagRecursionDesired = false;
+        flagRecursionAvailable = false;
+        z = 0;
+        flagResponseCode = 0;
+    }
 
-    QCLASS          a two octet code that specifies the class of the query.
-                    For example, the QCLASS field is IN for the Internet.
-    */
+    public void setDefaultResponseData() {
+        flagQueryResponse = true;
+        flagAuthoritativeAnswer = true;
 
-    /*
-    Resource record format
-
-    The answer, authority, and additional sections all share the same
-    format: a variable number of resource records, where the number of
-    records is specified in the corresponding count field in the header.
-    Each resource record has the following format:
-                                        1  1  1  1  1  1
-          0  1  2  3  4  5  6  7  8  9  0  1  2  3  4  5
-        +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
-        |                                               |
-        /                                               /
-        /                      NAME                     /
-        |                                               |
-        +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
-        |                      TYPE                     |
-        +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
-        |                     CLASS                     |
-        +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
-        |                      TTL                      |
-        |                                               |
-        +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
-        |                   RDLENGTH                    |
-        +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--|
-        /                     RDATA                     /
-        /                                               /
-        +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
-
-    where:
-
-    NAME            a domain name to which this resource record pertains.
-
-    TYPE            two octets containing one of the RR type codes.  This
-                    field specifies the meaning of the data in the RDATA
-                    field.
-
-    CLASS           two octets which specify the class of the data in the
-                    RDATA field.
-
-    TTL             a 32 bit unsigned integer that specifies the time
-                    interval (in seconds) that the resource record may be
-                    cached before it should be discarded.  Zero values are
-                    interpreted to mean that the RR can only be used for the
-                    transaction in progress, and should not be cached.
-
-    RDLENGTH        an unsigned 16 bit integer that specifies the length in
-                    octets of the RDATA field.
-
-    RDATA           a variable length string of octets that describes the
-                    resource.  The format of this information varies
-                    according to the TYPE and CLASS of the resource record.
-                    For example, the if the TYPE is A and the CLASS is IN,
-                    the RDATA field is a 4 octet ARPA Internet address.
-     */
+        // Set the rest to zero
+        // TODO: all flags should not be zeroed
+        flagOperationCode = 0;
+        flagTruncation = false;
+        flagRecursionDesired = false;
+        flagRecursionAvailable = false;
+        z = 0;
+        flagResponseCode = 0;
+    }
 }

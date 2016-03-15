@@ -24,49 +24,43 @@
 
 package zutil.net.dns;
 
-import zutil.net.threaded.ThreadedUDPNetwork;
-import zutil.net.threaded.ThreadedUDPNetworkThread;
-import zutil.parser.binary.BinaryStructInputStream;
+import org.junit.Test;
 import zutil.parser.binary.BinaryStructOutputStream;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.net.DatagramPacket;
-import java.net.InetAddress;
+
+import static org.junit.Assert.assertEquals;
 
 /**
  * Created by Ziver
  */
-public class MulticastDNSClient extends ThreadedUDPNetwork implements ThreadedUDPNetworkThread{
-    private static final String MDNS_MULTICAST_ADDR = "224.0.0.251";
-    private static final int    MDNS_MULTICAST_PORT = 5353;
+public class DNSPacketTest {
 
+    @Test
+    public void headerQueryTest() throws IOException {
+        DNSPacketHeader header = new DNSPacketHeader();
+        header.setDefaultQueryData();
+        header.countQuestion = 1;
 
-    public MulticastDNSClient() throws IOException {
-        super(null, MDNS_MULTICAST_ADDR, MDNS_MULTICAST_PORT);
-        setThread( this );
+        byte[] data = BinaryStructOutputStream.serialize(header);
+        assertEquals("header length", 12, data.length);
+        assertEquals("Flag byte1", 0x00, data[2]);
+        assertEquals("Flag byte2", 0x00, data[3]);
+        assertEquals("Question count byte1", 0x00, data[4]);
+        assertEquals("Question count byte2", 0x01, data[5]);
     }
 
-
-    public void sendProbe() throws IOException {
-        ByteArrayOutputStream buffer = new ByteArrayOutputStream();
-        BinaryStructOutputStream out = new BinaryStructOutputStream(buffer);
-
+    @Test
+    public void headerResponseTest() throws IOException {
         DNSPacketHeader header = new DNSPacketHeader();
-        out.write(header);
+        header.setDefaultResponseData();
+        header.countAnswerRecord = 1;
 
-        DatagramPacket packet = null;
-
-        packet = new DatagramPacket(
-                buffer.toByteArray(), buffer.size(),
-                InetAddress.getByName( MDNS_MULTICAST_ADDR ),
-                MDNS_MULTICAST_PORT );
-        send(packet);
-    }
-
-    @Override
-    public void receivedPacket(DatagramPacket packet, ThreadedUDPNetwork network) {
-        DNSPacketHeader header = new DNSPacketHeader();
-        BinaryStructInputStream.read(header, packet.getData());
+        byte[] data = BinaryStructOutputStream.serialize(header);
+        assertEquals("header length", 12, data.length);
+        assertEquals("Flag byte1", (byte)0x84, data[2]);
+        assertEquals("Flag byte2", (byte)0x00, data[3]);
+        assertEquals("Answer count byte1", 0x00, data[6]);
+        assertEquals("Answer count byte2", 0x01, data[7]);
     }
 }
