@@ -43,6 +43,7 @@ public class NutUPSClient {
 
 
     public NutUPSClient(String host, int port){
+        this.upsDevices = new ArrayList<>();
         this.host = host;
         this.port = port;
         this.pollTimer = new Timer(POLL_INTERVAL);
