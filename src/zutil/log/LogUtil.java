@@ -118,7 +118,7 @@ public class LogUtil {
 		if( newLogger.getHandlers().length > 0 ){
 			// Set the level on the handlers if its level is higher
 			for (Handler handler : newLogger.getHandlers()) {
-				if(handler.getLevel().intValue() < level.intValue())
+				if(handler.getLevel().intValue() > level.intValue())
                     handler.setLevel(level);
 			}
 		}
