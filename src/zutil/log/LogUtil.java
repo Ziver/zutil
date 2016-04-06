@@ -93,7 +93,7 @@ public class LogUtil {
 	}
 
 	/**
-	 * Addsd a Handler to the root namespace
+	 * Adds a Handler to the root namespace
 	 */
 	public static void addGlobalHandler(Handler handler){
 		Logger root = Logger.getLogger("");
