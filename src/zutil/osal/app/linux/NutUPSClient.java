@@ -47,7 +47,6 @@ public class NutUPSClient {
         this.host = host;
         this.port = port;
         this.pollTimer = new Timer(POLL_INTERVAL);
-        update();
     }
 
 
