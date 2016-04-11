@@ -30,7 +30,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Created by ezivkoc on 2016-01-28.
+ * Created by Ziver on 2016-01-28.
  */
 public interface BinaryStruct {
 
@@ -39,5 +39,12 @@ public interface BinaryStruct {
     @interface BinaryField{
         int index();
         int length();
+    }
+
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target(ElementType.FIELD)
+    @interface CustomBinaryField{
+        int index();
+        Class serializer();
     }
 }

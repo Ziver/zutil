@@ -24,7 +24,13 @@
 
 package zutil.net.dns;
 
+import zutil.parser.binary.BinaryFieldData;
+import zutil.parser.binary.BinaryFieldSerializer;
 import zutil.parser.binary.BinaryStruct;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 
 /**
  * Created by Ziver on 2016-02-09.
@@ -64,6 +70,40 @@ public class DNSPacketQuestion implements BinaryStruct {
                     For example, the QCLASS field is IN for the Internet.
     */
 
+    @CustomBinaryField(index=10, serializer=QNameSerializer.class)
+    private String qName;
+    @BinaryField(index=10, length=1)
+    private int qType;
+    @BinaryField(index=20, length=1)
+    private int qClass;
 
 
+
+
+    private static class QNameSerializer implements BinaryFieldSerializer<String> {
+
+        public String read(InputStream in, BinaryFieldData field) throws IOException {
+            StringBuilder str = new StringBuilder();
+            int c = in.read();
+            while (c > 0){
+                for (int i=0; i<c; ++i){
+                    str.append((char)in.read());
+                }
+                c = in.read();
+                if (c > 0)
+                    str.append('.');
+            }
+            return toString();
+        }
+
+        public void write(OutputStream out, String domain, BinaryFieldData field) throws IOException {
+            String[] labels = domain.split(".");
+            for (String label : labels){
+                out.write(label.length());
+                out.write(label.getBytes());
+            }
+            out.write(0);
+        }
+
+    }
 }

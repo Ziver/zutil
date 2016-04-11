@@ -53,11 +53,10 @@ public class MulticastDNSClient extends ThreadedUDPNetwork implements ThreadedUD
         BinaryStructOutputStream out = new BinaryStructOutputStream(buffer);
 
         DNSPacketHeader header = new DNSPacketHeader();
+        header.setDefaultQueryData();
         out.write(header);
 
-        DatagramPacket packet = null;
-
-        packet = new DatagramPacket(
+        DatagramPacket packet = new DatagramPacket(
                 buffer.toByteArray(), buffer.size(),
                 InetAddress.getByName( MDNS_MULTICAST_ADDR ),
                 MDNS_MULTICAST_PORT );

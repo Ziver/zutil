@@ -26,6 +26,10 @@ package zutil.net.dns;
 
 import zutil.parser.binary.BinaryStruct;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+
 /**
  * Created by Ziver on 2016-02-09.
  * Reference: http://tools.ietf.org/html/rfc1035
@@ -84,5 +88,14 @@ public class DNSPacketResource implements BinaryStruct {
                     For example, the if the TYPE is A and the CLASS is IN,
                     the RDATA field is a 4 octet ARPA Internet address.
      */
+
+
+    public static DNSPacketResource read(InputStream in){
+        return null;
+    }
+
+    public void write(OutputStream out) throws IOException {
+
+    }
 
 }

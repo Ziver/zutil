@@ -1,48 +1,62 @@
 package zutil.parser.binary;
 
 
-import java.io.InvalidClassException;
-import java.io.InvalidObjectException;
 import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
-import zutil.ByteUtil;
 import zutil.converter.Converter;
-import zutil.parser.binary.BinaryStruct.BinaryField;
+import zutil.parser.binary.BinaryStruct.*;
 
 /**
  * A class representing each field in a BinaryStruct.
  */
-public class BinaryFieldData implements Comparable<BinaryFieldData> {
+public class BinaryFieldData {
     private static final HashMap<Class, List<BinaryFieldData>> cache = new HashMap<>();
 
     private int index;
     private int length;
+    private BinaryFieldSerializer serializer;
     private Field field;
 
 
     protected static List<BinaryFieldData> getStructFieldList(Class<? extends BinaryStruct> clazz){
         if (!cache.containsKey(clazz)) {
-            ArrayList<BinaryFieldData> list = new ArrayList<>();
-            for (Field field : clazz.getDeclaredFields()) {
-                if (field.isAnnotationPresent(BinaryField.class))
-                    list.add(new BinaryFieldData(field));
+            try {
+                ArrayList<BinaryFieldData> list = new ArrayList<>();
+                for (Field field : clazz.getDeclaredFields()) {
+                    if (field.isAnnotationPresent(BinaryField.class) ||
+                            field.isAnnotationPresent(CustomBinaryField.class))
+
+                        list.add(new BinaryFieldData(field));
+
+                }
+                Collections.sort(list, new Comparator<BinaryFieldData>(){
+                    @Override
+                    public int compare(BinaryFieldData o1, BinaryFieldData o2) {
+                        return o1.index - o2.index;
+                    }
+                });
+                cache.put(clazz, list);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
             }
-            Collections.sort(list);
-            cache.put(clazz, list);
         }
         return cache.get(clazz);
     }
 
 
-    private BinaryFieldData(Field f){
+    private BinaryFieldData(Field f) throws IllegalAccessException, InstantiationException {
         field = f;
-        BinaryField fieldData = field.getAnnotation(BinaryField.class);
-        index = fieldData.index();
-        length = fieldData.length();
+        if (field.isAnnotationPresent(CustomBinaryField.class)){
+            CustomBinaryField fieldData = field.getAnnotation(CustomBinaryField.class);
+            index = fieldData.index();
+            serializer = (BinaryFieldSerializer) fieldData.serializer().newInstance();
+        }
+        else {
+            BinaryField fieldData = field.getAnnotation(BinaryField.class);
+            index = fieldData.index();
+            length = fieldData.length();
+        }
     }
 
     protected void setValue(Object obj, byte[] data){
@@ -54,6 +68,8 @@ public class BinaryFieldData implements Comparable<BinaryFieldData> {
                 field.set(obj, Converter.toInt(data));
             else if (field.getType() == String.class)
                 field.set(obj, new String(data));
+            else
+                throw new UnsupportedOperationException("Unsupported BinaryStruct field class: "+ field.getClass());
         } catch (IllegalAccessException e){
             e.printStackTrace();
         }
@@ -81,8 +97,4 @@ public class BinaryFieldData implements Comparable<BinaryFieldData> {
         return length;
     }
 
-    @Override
-    public int compareTo(BinaryFieldData o) {
-        return this.index - o.index;
-    }
 }
