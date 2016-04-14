@@ -26,9 +26,6 @@ package zutil.net.dns;
 
 import zutil.parser.binary.BinaryStruct;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 
 /**
  * Created by Ziver on 2016-02-09.
@@ -63,39 +60,55 @@ public class DNSPacketResource implements BinaryStruct {
         +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
 
     where:
+    */
 
-    NAME            a domain name to which this resource record pertains.
-
-    TYPE            two octets containing one of the RR type codes.  This
-                    field specifies the meaning of the data in the RDATA
-                    field.
-
-    CLASS           two octets which specify the class of the data in the
-                    RDATA field.
-
-    TTL             a 32 bit unsigned integer that specifies the time
-                    interval (in seconds) that the resource record may be
-                    cached before it should be discarded.  Zero values are
-                    interpreted to mean that the RR can only be used for the
-                    transaction in progress, and should not be cached.
-
-    RDLENGTH        an unsigned 16 bit integer that specifies the length in
-                    octets of the RDATA field.
-
-    RDATA           a variable length string of octets that describes the
-                    resource.  The format of this information varies
-                    according to the TYPE and CLASS of the resource record.
-                    For example, the if the TYPE is A and the CLASS is IN,
-                    the RDATA field is a 4 octet ARPA Internet address.
+    /**
+     * a domain name to which this resource record pertains.
      */
+    @CustomBinaryField(index=10, serializer=DNSPacketQuestion.DomainStringSerializer.class)
+    private String name;
 
+    /**
+     * two octets containing one of the RR type codes.  This
+     * field specifies the meaning of the data in the RDATA
+     * field.
+     */
+    @BinaryField(index=20, length=16)
+    private int type;
 
-    public static DNSPacketResource read(InputStream in){
-        return null;
-    }
+    /**
+     * two octets which specify the class of the data in the
+     * RDATA field.
+     */
+    @BinaryField(index=30, length=16)
+    private int clazz;
 
-    public void write(OutputStream out) throws IOException {
+    /**
+     * a 32 bit unsigned integer that specifies the time
+     * interval (in seconds) that the resource record may be
+     * cached before it should be discarded.  Zero values are
+     * interpreted to mean that the RR can only be used for the
+     * transaction in progress, and should not be cached.
+     */
+    @BinaryField(index=40, length=32)
+    private int ttl;
 
-    }
+    /**
+     * an unsigned 16 bit integer that specifies the length in
+     * octets of the RDATA field.
+     */
+    @BinaryField(index=50, length=16)
+    private int length;
+
+    /**
+     * a variable length string of octets that describes the
+     * resource.  The format of this information varies
+     * according to the TYPE and CLASS of the resource record.
+     * For example, if the TYPE is A and the CLASS is IN,
+     * the RDATA field is a 4 octet ARPA Internet address.
+     */
+    @VariableLengthBinaryField(index=60, lengthField="length")
+    private String data;
+
 
 }
