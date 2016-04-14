@@ -25,17 +25,10 @@
 package zutil.parser.binary;
 
 import zutil.ByteUtil;
-import zutil.converter.Converter;
-import zutil.parser.binary.BinaryStruct.BinaryField;
 
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -78,23 +71,29 @@ public class BinaryStructInputStream {
 
         int totalReadLength = 0;
         for (BinaryFieldData field : structDataList){
-            byte[] valueData = new byte[(int) Math.ceil(field.getBitLength() / 8.0)];
-            int fieldReadLength = 0;
-
-            // Parse value
-            for (int valueDataIndex = 0; valueDataIndex < valueData.length; ++valueDataIndex) {
-                if(dataBitIndex < 0) { // Read new data?
-                    data = (byte) in.read();
-                    dataBitIndex = 7;
-                }
-                int bitLength = Math.min(dataBitIndex+1, field.getBitLength() - fieldReadLength);
-                valueData[valueDataIndex] = ByteUtil.getShiftedBits(data, dataBitIndex, bitLength);
-                fieldReadLength += bitLength;
-                dataBitIndex -= bitLength;
+            if (field.getSerializer() != null){
+                Object value = field.getSerializer().read(in, field);
+                field.setValue(struct, value);
             }
-            // Set value
-            field.setValue(struct, valueData);
-            totalReadLength += fieldReadLength;
+            else {
+                byte[] valueData = new byte[(int) Math.ceil(field.getBitLength() / 8.0)];
+                int fieldReadLength = 0;
+
+                // Parse value
+                for (int valueDataIndex = 0; valueDataIndex < valueData.length; ++valueDataIndex) {
+                    if (dataBitIndex < 0) { // Read new data?
+                        data = (byte) in.read();
+                        dataBitIndex = 7;
+                    }
+                    int bitLength = Math.min(dataBitIndex + 1, field.getBitLength() - fieldReadLength);
+                    valueData[valueDataIndex] = ByteUtil.getShiftedBits(data, dataBitIndex, bitLength);
+                    fieldReadLength += bitLength;
+                    dataBitIndex -= bitLength;
+                }
+                // Set value
+                field.setByteValue(struct, valueData);
+                totalReadLength += fieldReadLength;
+            }
         }
 
         return totalReadLength;

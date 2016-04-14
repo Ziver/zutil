@@ -26,6 +26,10 @@ package zutil.parser.binary;
 
 import org.junit.Test;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+
 import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertFalse;
 
@@ -124,5 +128,30 @@ public class BinaryStructInputStreamTest {
 
         BinaryStructInputStream.read(struct, new byte[]{0b0000_0001,0b0001_1000,0b0000_0000});
         struct.assertObj();
+    }
+
+
+    @Test
+    public void customBinaryField(){
+        BinaryTestStruct struct = new BinaryTestStruct() {
+            @CustomBinaryField(index=1, serializer=ByteStringSerializer.class)
+            public String s1;
+
+            public void assertObj(){
+                assertEquals("1234", s1);
+            }
+        };
+
+        BinaryStructInputStream.read(struct, new byte[]{0b0000_0001,0b0000_0010,0b0000_0011,0b0000_0100});
+        struct.assertObj();
+    }
+    public static class ByteStringSerializer implements BinaryFieldSerializer<String>{
+        public String read(InputStream in, BinaryFieldData field) throws IOException {
+            String ret = "";
+            for (int c; (c=in.read()) > 0; )
+                ret += c;
+            return ret;
+        }
+        public void write(OutputStream out, String obj, BinaryFieldData field) throws IOException {}
     }
 }

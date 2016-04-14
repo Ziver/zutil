@@ -73,20 +73,26 @@ public class BinaryStructOutputStream {
         List<BinaryFieldData> structDataList = BinaryFieldData.getStructFieldList(struct.getClass());
 
         for (BinaryFieldData field : structDataList){
-            byte[] data = field.getValue(struct);
+            if (field.getSerializer() != null){
+                localFlush();
+                field.getSerializer().write(out, field.getValue(struct), field);
+            }
+            else{
+                byte[] data = field.getByteValue(struct);
 
-            int fieldBitLength = field.getBitLength();
-            for (int i=(int)Math.ceil(fieldBitLength/8.0)-1; fieldBitLength>0; fieldBitLength-=8, --i) {
-                byte b = data[i];
-                if (restBitLength == 0 && fieldBitLength >= 8)
-                    out.write(0xFF & b);
-                else {
-                    b <<= 8-restBitLength-fieldBitLength;
-                    b &= ByteUtil.getBitMask(7-restBitLength, fieldBitLength);
-                    rest |= b;
-                    restBitLength += fieldBitLength;
-                    if (restBitLength >= 8)
-                        localFlush();
+                int fieldBitLength = field.getBitLength();
+                for (int i = (int) Math.ceil(fieldBitLength / 8.0) - 1; fieldBitLength > 0; fieldBitLength -= 8, --i) {
+                    byte b = data[i];
+                    if (restBitLength == 0 && fieldBitLength >= 8)
+                        out.write(0xFF & b);
+                    else {
+                        b <<= 8 - restBitLength - fieldBitLength;
+                        b &= ByteUtil.getBitMask(7 - restBitLength, fieldBitLength);
+                        rest |= b;
+                        restBitLength += fieldBitLength;
+                        if (restBitLength >= 8)
+                            localFlush();
+                    }
                 }
             }
         }

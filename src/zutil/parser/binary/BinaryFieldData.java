@@ -59,7 +59,7 @@ public class BinaryFieldData {
         }
     }
 
-    protected void setValue(Object obj, byte[] data){
+    protected void setByteValue(Object obj, byte[] data){
         try {
             field.setAccessible(true);
             if (field.getType() == Boolean.class || field.getType() == boolean.class)
@@ -74,8 +74,16 @@ public class BinaryFieldData {
             e.printStackTrace();
         }
     }
+    protected void setValue(Object obj, Object value){
+        try {
+            field.setAccessible(true);
+            field.set(obj, value);
+        } catch (IllegalAccessException e){
+            e.printStackTrace();
+        }
+    }
 
-    protected byte[] getValue(Object obj){
+    protected byte[] getByteValue(Object obj){
         try {
             field.setAccessible(true);
             if (field.getType() == Boolean.class || field.getType() == boolean.class)
@@ -91,10 +99,22 @@ public class BinaryFieldData {
         }
         return null;
     }
+    protected Object getValue(Object obj){
+        try {
+            field.setAccessible(true);
+            return field.get(obj);
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
 
 
     public int getBitLength(){
         return length;
     }
 
+    public BinaryFieldSerializer getSerializer(){
+        return serializer;
+    }
 }

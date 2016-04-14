@@ -26,10 +26,10 @@ package zutil.parser.binary;
 
 import org.junit.Test;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 
-import static junit.framework.TestCase.assertEquals;
 import static org.junit.Assert.assertArrayEquals;
 
 
@@ -77,20 +77,25 @@ public class BinaryStructOutputStreamTest {
         byte[] data = BinaryStructOutputStream.serialize(struct);
         assertArrayEquals(new byte[]{(byte)0b0100_0000}, data);
     }
-/*
-    @Test
-    public void basicStringTest(){
-        BinaryTestStruct struct = new BinaryTestStruct() {
-            @BinaryField(index=1, length=8*12)
-            public String s1;
 
-            public void assertObj(Object... expected){
-                assertEquals(s1, "hello world!");
-            }
+
+    @Test
+    public void customBinaryField() throws IOException {
+        BinaryStruct struct = new BinaryStruct() {
+            @BinaryStruct.CustomBinaryField(index=1, serializer=ByteStringSerializer.class)
+            public String s1 = "1234";
         };
 
-        BinaryStructParser.parse(struct, "hello world!".getBytes());
-        struct.assertObj();
+        byte[] data = BinaryStructOutputStream.serialize(struct);
+        assertArrayEquals(new byte[]{0b0000_0001,0b0000_0010,0b0000_0011,0b0000_0100}, data);
     }
-    */
+    public static class ByteStringSerializer implements BinaryFieldSerializer<String>{
+        public String read(InputStream in, BinaryFieldData field) throws IOException {
+            return null;
+        }
+        public void write(OutputStream out, String obj, BinaryFieldData field) throws IOException {
+            for (char c : obj.toCharArray())
+                out.write(Integer.parseInt(""+c));
+        }
+    }
 }
