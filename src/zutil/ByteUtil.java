@@ -73,13 +73,13 @@ public class ByteUtil {
      * Returns a byte bitmask
      *
      * @param   index   start index of the mask, valid values 0-7
-     * @param   length  length of mask from index, valid values 1-8
+     * @param   length  length of mask from index, valid values 1-8 depending on index
      */
     public static byte getBitMask(int index, int length) {
         --length;
         if(0 > index || index > 7)
             throw new IllegalArgumentException("Invalid index argument, allowed value is 0-7");
-        if(length < 0 && index-length < 0)
+        if(length < 0 || 7-index-length < 0)
             throw new IllegalArgumentException("Invalid length argument: "+length+", allowed values 1-8 depending on index");
         return (byte) BYTE_MASK[index][length];
     }

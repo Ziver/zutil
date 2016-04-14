@@ -34,17 +34,42 @@ import java.lang.annotation.Target;
  */
 public interface BinaryStruct {
 
+    /**
+     * Basic BinaryField with a constant length.
+     */
     @Retention(RetentionPolicy.RUNTIME)
     @Target(ElementType.FIELD)
     @interface BinaryField{
+        /** Will be used to order the fields are read. Lowest index number field will be read first. */
         int index();
+        /** Defines the bit length of the data */
         int length();
     }
 
+    /**
+     * Can be used for fields that are of variable length.
+     */
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target(ElementType.FIELD)
+    @interface VariableLengthBinaryField{
+        /** Will be used to order the fields are read. Lowest index number field will be read first. */
+        int index();
+        /** The name of the field that will contain the length of the data to read. */
+        String lengthField();
+        /** Defines the multiplier used on the lengthField to convert to length in bits which is used internally.
+         * Default value is 8. */
+        int multiplier() default 8;
+    }
+
+    /**
+     * Can be used with fields that need a custom serializer.
+     */
     @Retention(RetentionPolicy.RUNTIME)
     @Target(ElementType.FIELD)
     @interface CustomBinaryField{
+        /** Will be used to order the fields are read. Lowest index number field will be read first. */
         int index();
-        Class serializer();
+        /** Defines the serializer class that will be used. Class needs to be publicly visible. */
+        Class<? extends BinaryFieldSerializer> serializer();
     }
 }

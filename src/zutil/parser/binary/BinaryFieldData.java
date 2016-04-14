@@ -4,6 +4,7 @@ package zutil.parser.binary;
 import java.lang.reflect.Field;
 import java.util.*;
 
+import zutil.ClassUtil;
 import zutil.converter.Converter;
 import zutil.parser.binary.BinaryStruct.*;
 
@@ -15,8 +16,12 @@ public class BinaryFieldData {
 
     private int index;
     private int length;
-    private BinaryFieldSerializer serializer;
     private Field field;
+    /* @VariableLengthBinaryField */
+    private BinaryFieldData lengthField;
+    private int lengthMultiplier;
+    /* @CustomBinaryField */
+    private BinaryFieldSerializer serializer;
 
 
     protected static List<BinaryFieldData> getStructFieldList(Class<? extends BinaryStruct> clazz){
@@ -25,10 +30,10 @@ public class BinaryFieldData {
                 ArrayList<BinaryFieldData> list = new ArrayList<>();
                 for (Field field : clazz.getDeclaredFields()) {
                     if (field.isAnnotationPresent(BinaryField.class) ||
-                            field.isAnnotationPresent(CustomBinaryField.class))
+                            field.isAnnotationPresent(CustomBinaryField.class) ||
+                            field.isAnnotationPresent(VariableLengthBinaryField.class))
 
                         list.add(new BinaryFieldData(field));
-
                 }
                 Collections.sort(list, new Comparator<BinaryFieldData>(){
                     @Override
@@ -45,21 +50,42 @@ public class BinaryFieldData {
     }
 
 
-    private BinaryFieldData(Field f) throws IllegalAccessException, InstantiationException {
+    private BinaryFieldData(Field f) throws IllegalAccessException, InstantiationException, NoSuchFieldException {
         field = f;
+        this.length = -1;
+        this.lengthField = null;
+        this.lengthMultiplier = 1;
+        this.serializer = null;
         if (field.isAnnotationPresent(CustomBinaryField.class)){
             CustomBinaryField fieldData = field.getAnnotation(CustomBinaryField.class);
-            index = fieldData.index();
-            serializer = (BinaryFieldSerializer) fieldData.serializer().newInstance();
+            this.index = fieldData.index();
+            this.serializer = fieldData.serializer().newInstance();
+        }
+        else if (field.isAnnotationPresent(VariableLengthBinaryField.class)) {
+            VariableLengthBinaryField fieldData = field.getAnnotation(VariableLengthBinaryField.class);
+            this.index = fieldData.index();
+            this.lengthMultiplier = fieldData.multiplier();
+            this.lengthField = new BinaryFieldData(
+                    field.getDeclaringClass().getDeclaredField(fieldData.lengthField()));
+            if ( !ClassUtil.isNumber(lengthField.getType()))
+                throw new IllegalArgumentException("Length variable for VariableLengthBinaryStruct needs to be of a number type.");
         }
         else {
             BinaryField fieldData = field.getAnnotation(BinaryField.class);
-            index = fieldData.index();
-            length = fieldData.length();
+            this.index = fieldData.index();
+            this.length = fieldData.length();
         }
     }
 
-    protected void setByteValue(Object obj, byte[] data){
+
+    public String getName(){
+        return field.getName();
+    }
+    public Class<?> getType(){
+        return field.getType();
+    }
+
+    public void setByteValue(Object obj, byte[] data){
         try {
             field.setAccessible(true);
             if (field.getType() == Boolean.class || field.getType() == boolean.class)
@@ -74,7 +100,7 @@ public class BinaryFieldData {
             e.printStackTrace();
         }
     }
-    protected void setValue(Object obj, Object value){
+    public void setValue(Object obj, Object value){
         try {
             field.setAccessible(true);
             field.set(obj, value);
@@ -83,7 +109,7 @@ public class BinaryFieldData {
         }
     }
 
-    protected byte[] getByteValue(Object obj){
+    public byte[] getByteValue(Object obj){
         try {
             field.setAccessible(true);
             if (field.getType() == Boolean.class || field.getType() == boolean.class)
@@ -93,13 +119,13 @@ public class BinaryFieldData {
             else if (field.getType() == String.class)
                 return ((String)(field.get(obj))).getBytes();
             else
-                throw new UnsupportedOperationException("Unsupported BinaryStruct field class: "+ field.getClass());
+                throw new UnsupportedOperationException("Unsupported BinaryStruct field type: "+ getType());
         } catch (IllegalAccessException e){
             e.printStackTrace();
         }
         return null;
     }
-    protected Object getValue(Object obj){
+    public Object getValue(Object obj){
         try {
             field.setAccessible(true);
             return field.get(obj);
@@ -110,7 +136,9 @@ public class BinaryFieldData {
     }
 
 
-    public int getBitLength(){
+    public int getBitLength(Object obj){
+        if(lengthField != null)
+            return (int) lengthField.getValue(obj) * lengthMultiplier;
         return length;
     }
 

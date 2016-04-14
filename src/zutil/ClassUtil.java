@@ -81,6 +81,34 @@ public class ClassUtil {
         return primitives.contains( type );
     }
 
+    /**
+     * @return true if the given class is a type representing a number without any decimals.
+     * E.g. long, int, short, char, byte and corresponding wrapper.
+     */
+    public static boolean isNumber(Class<?> type){
+        return Long.class.isAssignableFrom(type) ||
+                long.class.isAssignableFrom(type) ||
+                Integer.class.isAssignableFrom(type) ||
+                int.class.isAssignableFrom(type) ||
+                Short.class.isAssignableFrom(type) ||
+                short.class.isAssignableFrom(type) ||
+                Character.class.isAssignableFrom(type) ||
+                char.class.isAssignableFrom(type) ||
+                Byte.class.isAssignableFrom(type) ||
+                byte.class.isAssignableFrom(type);
+    }
+
+    /**
+     * @return true if the given class is a type representing a number with decimals.
+     * E.g. double, float and corresponding wrapper.
+     */
+    public static boolean isDecimal(Class<?> type){
+        return Double.class.isAssignableFrom(type) ||
+                double.class.isAssignableFrom(type) ||
+                Float.class.isAssignableFrom(type) ||
+                float.class.isAssignableFrom(type);
+    }
+
 
     /**
      * @param   field       is the field to return the generics from

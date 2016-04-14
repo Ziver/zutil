@@ -80,7 +80,7 @@ public class BinaryStructOutputStreamTest {
 
 
     @Test
-    public void customBinaryField() throws IOException {
+    public void customBinaryFieldTest() throws IOException {
         BinaryStruct struct = new BinaryStruct() {
             @BinaryStruct.CustomBinaryField(index=1, serializer=ByteStringSerializer.class)
             public String s1 = "1234";
@@ -97,5 +97,21 @@ public class BinaryStructOutputStreamTest {
             for (char c : obj.toCharArray())
                 out.write(Integer.parseInt(""+c));
         }
+    }
+
+
+    @Test
+    public void variableLengthFieldTest() throws IOException {
+        BinaryStruct struct = new BinaryStruct() {
+            @BinaryField(index=1, length=1)
+            private int s1 = 2;
+            @VariableLengthBinaryField(index=2, lengthField="s1")
+            private String s2 = "12345";
+        };
+
+        byte[] data = BinaryStructOutputStream.serialize(struct);
+        byte[] expected = "012".getBytes();
+        expected[0] = 2;
+        assertArrayEquals(expected, data);
     }
 }

@@ -76,7 +76,7 @@ public class BinaryStructInputStream {
                 field.setValue(struct, value);
             }
             else {
-                byte[] valueData = new byte[(int) Math.ceil(field.getBitLength() / 8.0)];
+                byte[] valueData = new byte[(int) Math.ceil(field.getBitLength(struct) / 8.0)];
                 int fieldReadLength = 0;
 
                 // Parse value
@@ -85,7 +85,7 @@ public class BinaryStructInputStream {
                         data = (byte) in.read();
                         dataBitIndex = 7;
                     }
-                    int bitLength = Math.min(dataBitIndex + 1, field.getBitLength() - fieldReadLength);
+                    int bitLength = Math.min(dataBitIndex + 1, field.getBitLength(struct) - fieldReadLength);
                     valueData[valueDataIndex] = ByteUtil.getShiftedBits(data, dataBitIndex, bitLength);
                     fieldReadLength += bitLength;
                     dataBitIndex -= bitLength;

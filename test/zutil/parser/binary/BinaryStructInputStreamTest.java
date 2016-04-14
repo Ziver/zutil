@@ -154,4 +154,25 @@ public class BinaryStructInputStreamTest {
         }
         public void write(OutputStream out, String obj, BinaryFieldData field) throws IOException {}
     }
+
+
+    @Test
+    public void variableLengthField(){
+        BinaryTestStruct struct = new BinaryTestStruct() {
+            @BinaryField(index=1, length=8)
+            public int i1;
+            @VariableLengthBinaryField(index=2, lengthField="i1")
+            public String s2;
+
+            public void assertObj(){
+                assertEquals(3, i1);
+                assertEquals("123", s2);
+            }
+        };
+
+        byte[] data = "0123456".getBytes();
+        data[0] = 3;
+        BinaryStructInputStream.read(struct, data);
+        struct.assertObj();
+    }
 }
