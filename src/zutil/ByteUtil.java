@@ -57,7 +57,18 @@ public class ByteUtil {
     }
 
     /**
-     * Creates a new sub byte from index and with a length
+     * Creates a new sub byte from index and with the given length length
+     *
+     * @param   data    is the byte data
+     * @param   length  is the length of bits to return, valid values 1-8
+     * @return a new byte containing a sub byte defined by the index and length
+     */
+    public static byte getBits(byte data, int length){
+        return getBits(data, 0, length);
+    }
+
+    /**
+     * Creates a new sub byte from index and with the given length length
      *
      * @param   data    is the byte data
      * @param   index   is the bit index, valid values 0-7
@@ -67,6 +78,21 @@ public class ByteUtil {
     public static byte getBits(byte data, int index, int length){
         byte ret = (byte) (data & getBitMask(index, length));
         return  ret;
+    }
+
+    /**
+     * Creates a new sub byte array with only the given length of bits from the data array.
+     *
+     * @param   data    is the byte data array
+     * @param   length  is the length of bits to return
+     * @return a new byte array of te given length containing the given data.
+     */
+    public static byte[] getBits(byte[] data, int length){
+        byte[] dest = new byte[(int) Math.ceil(length/8.0)];
+        System.arraycopy(data, 0, dest, 0, Math.min(data.length, dest.length));
+        if(length % 8 != 0)
+            dest[dest.length-1] = getBits(dest[dest.length-1], length % 8);
+        return dest;
     }
 
     /**

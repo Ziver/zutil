@@ -26,6 +26,7 @@ package zutil;
 
 import org.junit.Test;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
 
@@ -44,5 +45,17 @@ public class ByteUtilTest {
         assertEquals(3, ByteUtil.getShiftedBits((byte)0b0110_0000, 6, 2));
 
         assertEquals((byte)0xFF, ByteUtil.getShiftedBits((byte)0b1111_1111, 7, 8));
+    }
+
+
+    @Test
+    public void getBitsArray(){
+        assertArrayEquals(new byte[]{}, ByteUtil.getBits(new byte[]{0x00}, 0));
+        assertArrayEquals(new byte[]{0x00}, ByteUtil.getBits(new byte[]{}, 1));
+        assertArrayEquals(new byte[]{0x00,0x00,0x00,0x00}, ByteUtil.getBits(new byte[]{0x00}, 32));
+        assertArrayEquals(new byte[]{0x00}, ByteUtil.getBits(new byte[]{0x00,0x10}, 1));
+        assertArrayEquals(new byte[]{0x00}, ByteUtil.getBits(new byte[]{0x00,0x10}, 8));
+        assertArrayEquals(new byte[]{0x00,0x01}, ByteUtil.getBits(new byte[]{0x00,0x01}, 9));
+        assertArrayEquals(new byte[]{0x00,0x01}, ByteUtil.getBits(new byte[]{0x00,0x11}, 9));
     }
 }
