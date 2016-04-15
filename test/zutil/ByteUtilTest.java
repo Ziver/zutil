@@ -58,4 +58,12 @@ public class ByteUtilTest {
         assertArrayEquals(new byte[]{0x00,0x01}, ByteUtil.getBits(new byte[]{0x00,0x01}, 9));
         assertArrayEquals(new byte[]{0x00,0x01}, ByteUtil.getBits(new byte[]{0x00,0x11}, 9));
     }
+
+    @Test
+    public void getReverseByteOrder(){
+        assertArrayEquals(new byte[]{}, ByteUtil.getReverseByteOrder(new byte[]{}));
+        assertArrayEquals(new byte[]{0x11}, ByteUtil.getReverseByteOrder(new byte[]{0x11}));
+        assertArrayEquals(new byte[]{0x22,0x11}, ByteUtil.getReverseByteOrder(new byte[]{0x11,0x22}));
+        assertArrayEquals(new byte[]{0x44,0x33,0x22,0x11}, ByteUtil.getReverseByteOrder(new byte[]{0x11,0x22,0x33,0x44}));
+    }
 }

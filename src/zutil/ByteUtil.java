@@ -96,6 +96,21 @@ public class ByteUtil {
     }
 
     /**
+     * Creates a new byte array with reversed byte ordering
+     * (LittleEndian -> BigEndian, BigEndian -> LittleEndian)
+     *
+     * @param   data    is the byte array that will be reversed.
+     * @return a new byte array that will have the same data but in reverse byte order
+     */
+    public static byte[] getReverseByteOrder(byte[] data){
+        byte[] dest = new byte[data.length];
+        if (data.length > 0)
+            for (int i=0; i<data.length; ++i)
+                dest[dest.length-1-i] = data[i];
+        return dest;
+    }
+
+    /**
      * Returns a byte bitmask
      *
      * @param   index   start index of the mask, valid values 0-7
