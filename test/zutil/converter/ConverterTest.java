@@ -94,10 +94,10 @@ public class ConverterTest {
 	@Test
 	public void intToByteArray(){
 		assertArrayEquals(new byte[]{0x00,0x00,0x00,0x00}, Converter.toBytes(0));
-		assertArrayEquals(new byte[]{0x00,0x00,0x00,0x01}, Converter.toBytes(1));
-		assertArrayEquals(new byte[]{0x00,0x00,0x01,0x00}, Converter.toBytes(256));
+		assertArrayEquals(new byte[]{0x01,0x00,0x00,0x00}, Converter.toBytes(1));
+		assertArrayEquals(new byte[]{0x00,0x01,0x00,0x00}, Converter.toBytes(256));
 		assertArrayEquals(new byte[]{(byte)0xFF,(byte)0xFF,(byte)0xFF,(byte)0xFF}, Converter.toBytes(-1));
-		assertArrayEquals(new byte[]{(byte)0x7F,(byte)0xFF,(byte)0xFF,(byte)0xFF}, Converter.toBytes(Integer.MAX_VALUE));
-		assertArrayEquals(new byte[]{(byte)0x80,(byte)0x00,(byte)0x00,(byte)0x00}, Converter.toBytes(Integer.MIN_VALUE));
+		assertArrayEquals(new byte[]{(byte)0xFF,(byte)0xFF,(byte)0xFF,(byte)0x7F}, Converter.toBytes(Integer.MAX_VALUE));
+		assertArrayEquals(new byte[]{(byte)0x00,(byte)0x00,(byte)0x00,(byte)0x80}, Converter.toBytes(Integer.MIN_VALUE));
 	}
 }

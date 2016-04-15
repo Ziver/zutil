@@ -60,10 +60,10 @@ public class Converter {
 	 */
 	public static byte[] toBytes(int num){
 		return new byte[]{
-				(byte)((num >> 24)& 0xff),
-		        (byte)((num >> 16)& 0xff),
+				(byte)(num & 0xff),
 				(byte)((num >> 8)& 0xff),
-				(byte)(num & 0xff)};
+				(byte)((num >> 16)& 0xff),
+				(byte)((num >> 24)& 0xff)};
 	}
 	
 	/**
