@@ -59,11 +59,11 @@ public class Converter {
 	 * @return a byte array of four bytes
 	 */
 	public static byte[] toBytes(int num){
-		return new byte[]{ 
-				(byte)(num & 0xff), 
-				(byte)((num >> 8)& 0xff), 
-				(byte)((num >> 16)& 0xff), 
-				(byte)((num >> 24)& 0xff)};
+		return new byte[]{
+				(byte)((num >> 24)& 0xff),
+		        (byte)((num >> 16)& 0xff),
+				(byte)((num >> 8)& 0xff),
+				(byte)(num & 0xff)};
 	}
 	
 	/**
