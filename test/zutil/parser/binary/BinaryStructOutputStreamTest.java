@@ -78,6 +78,21 @@ public class BinaryStructOutputStreamTest {
         assertArrayEquals(new byte[]{(byte)0b0100_0000}, data);
     }
 
+    @Test
+    public void basicStringTest() throws IOException {
+        BinaryStruct struct = new BinaryStruct() {
+            @BinaryField(index=1, length=8)
+            int i1 = Integer.MAX_VALUE;
+            @BinaryField(index=2, length=12*8)
+            public String s2 = "hello world!";
+        };
+
+        byte[] expected = "0hello world!".getBytes();
+        expected[0] = (byte)0xFF;
+        byte[] data = BinaryStructOutputStream.serialize(struct);
+        assertArrayEquals(expected, data);
+    }
+
 
     @Test
     public void customBinaryFieldTest() throws IOException {
@@ -103,15 +118,15 @@ public class BinaryStructOutputStreamTest {
     @Test
     public void variableLengthFieldTest() throws IOException {
         BinaryStruct struct = new BinaryStruct() {
-            @BinaryField(index=1, length=1)
+            @BinaryField(index=1, length=8)
             private int s1 = 2;
             @VariableLengthBinaryField(index=2, lengthField="s1")
             private String s2 = "12345";
         };
 
-        byte[] data = BinaryStructOutputStream.serialize(struct);
         byte[] expected = "012".getBytes();
         expected[0] = 2;
+        byte[] data = BinaryStructOutputStream.serialize(struct);
         assertArrayEquals(expected, data);
     }
 }

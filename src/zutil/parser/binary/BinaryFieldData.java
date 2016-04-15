@@ -4,6 +4,7 @@ package zutil.parser.binary;
 import java.lang.reflect.Field;
 import java.util.*;
 
+import zutil.ByteUtil;
 import zutil.ClassUtil;
 import zutil.converter.Converter;
 import zutil.parser.binary.BinaryStruct.*;
@@ -113,11 +114,18 @@ public class BinaryFieldData {
         try {
             field.setAccessible(true);
             if (field.getType() == Boolean.class || field.getType() == boolean.class)
-                return new byte[]{ (byte)(field.getBoolean(obj) ? 0x01 : 0x00) };
+                return ByteUtil.getBits(
+                        new byte[]{ (byte)(field.getBoolean(obj) ? 0x01 : 0x00)},
+                        getBitLength(obj));
             else if (field.getType() == Integer.class || field.getType() == int.class)
-                return Converter.toBytes(field.getInt(obj));
+                return ByteUtil.getBits(
+                        Converter.toBytes(field.getInt(obj)),
+                        getBitLength(obj));
             else if (field.getType() == String.class)
-                return ((String)(field.get(obj))).getBytes();
+                return ByteUtil.getReverseByteOrder(
+                        ByteUtil.getBits(
+                                ((String)(field.get(obj))).getBytes(),
+                                getBitLength(obj)));
             else
                 throw new UnsupportedOperationException("Unsupported BinaryStruct field type: "+ getType());
         } catch (IllegalAccessException e){
