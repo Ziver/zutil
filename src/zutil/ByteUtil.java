@@ -64,7 +64,7 @@ public class ByteUtil {
      * @return a new byte containing a sub byte defined by the index and length
      */
     public static byte getBits(byte data, int length){
-        return getBits(data, 0, length);
+        return getBits(data, length-1, length);
     }
 
     /**
@@ -119,9 +119,9 @@ public class ByteUtil {
     public static byte getBitMask(int index, int length) {
         --length;
         if(0 > index || index > 7)
-            throw new IllegalArgumentException("Invalid index argument, allowed value is 0-7");
-        if(length < 0 || 7-index-length < 0)
-            throw new IllegalArgumentException("Invalid length argument: "+length+", allowed values 1-8 depending on index");
+            throw new IllegalArgumentException("Invalid index argument, allowed values: 0-7");
+        if(length < 0 || index-length < 0)
+            throw new IllegalArgumentException("Invalid length argument: "+length+", allowed values: 1 to "+(index+1)+" for index "+index);
         return (byte) BYTE_MASK[index][length];
     }
 }

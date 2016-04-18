@@ -49,6 +49,14 @@ public class ByteUtilTest {
 
 
     @Test
+    public void getBits(){
+        assertEquals(0x01, ByteUtil.getBits((byte)0xFF, 1));
+        assertEquals(0x0F, ByteUtil.getBits((byte)0xFF, 4));
+        assertEquals((byte)0xFF, ByteUtil.getBits((byte)0xFF, 8));
+
+    }
+
+    @Test
     public void getBitsArray(){
         assertArrayEquals(new byte[]{}, ByteUtil.getBits(new byte[]{0x00}, 0));
         assertArrayEquals(new byte[]{0x00}, ByteUtil.getBits(new byte[]{}, 1));
