@@ -33,6 +33,51 @@ import zutil.parser.binary.BinaryStruct;
  */
 public class DNSPacketResource implements BinaryStruct {
 
+    /** a host address */
+    public static final int TYPE_A     = 1;
+    /** an authoritative name server */
+    public static final int TYPE_NS    = 2;
+    /** a mail destination (Obsolete - use MX) */
+    public static final int TYPE_MD    = 3;
+    /** a mail forwarder (Obsolete - use MX) */
+    public static final int TYPE_MF    = 4;
+    /** the canonical name for an alias */
+    public static final int TYPE_CNAME = 5;
+    /** marks the start of a zone of authority */
+    public static final int TYPE_SOA   = 6;
+    /** a mailbox domain name (EXPERIMENTAL) */
+    public static final int TYPE_MB    = 7;
+    /** a mail group member (EXPERIMENTAL) */
+    public static final int TYPE_MG    = 8;
+    /** a mail rename domain name (EXPERIMENTAL) */
+    public static final int TYPE_MR    = 9;
+    /** a null RR (EXPERIMENTAL) */
+    public static final int TYPE_NULL  = 10;
+    /** a well known service description */
+    public static final int TYPE_WKS   = 11;
+    /** a domain name pointer */
+    public static final int TYPE_PTR   = 12;
+    /** host information */
+    public static final int TYPE_HINFO = 13;
+    /**  mailbox or mail list information */
+    public static final int TYPE_MINFO = 14;
+    /** mail exchange */
+    public static final int TYPE_MX    = 15;
+    /** text strings */
+    public static final int TYPE_TXT   = 16;
+
+    /**  the Internet */
+    public static final int CLASS_IN   = 1;
+    /**  the CSNET class (Obsolete - used only for examples in some obsolete RFCs) */
+    public static final int CLASS_CS   = 2;
+    /**  the CHAOS class */
+    public static final int CLASS_CH   = 3;
+    /**  Hesiod [Dyer 87] */
+    public static final int CLASS_HS   = 4;
+
+
+
+
     /*
     The answer, authority, and additional sections all share the same
     format: a variable number of resource records, where the number of

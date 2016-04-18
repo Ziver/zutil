@@ -26,9 +26,12 @@ package zutil.net.dns;
 
 import org.junit.Test;
 import zutil.parser.binary.BinaryStructOutputStream;
+import static zutil.net.dns.DNSPacketQuestion.*;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
 /**
@@ -37,7 +40,7 @@ import static org.junit.Assert.assertEquals;
 public class DNSPacketTest {
 
     @Test
-    public void headerQueryTest() throws IOException {
+    public void writeHeaderTest() throws IOException {
         DNSPacketHeader header = new DNSPacketHeader();
         header.setDefaultQueryData();
         header.countQuestion = 1;
@@ -51,16 +54,60 @@ public class DNSPacketTest {
     }
 
     @Test
-    public void headerResponseTest() throws IOException {
+    public void readHheaderTest() throws IOException {
         DNSPacketHeader header = new DNSPacketHeader();
         header.setDefaultResponseData();
         header.countAnswerRecord = 1;
 
         byte[] data = BinaryStructOutputStream.serialize(header);
         assertEquals("header length", 12, data.length);
-        assertEquals("Flag byte1", (byte)0x84, data[2]);
-        assertEquals("Flag byte2", (byte)0x00, data[3]);
+        assertEquals("Flag byte1", (byte) 0x84, data[2]);
+        assertEquals("Flag byte2", (byte) 0x00, data[3]);
         assertEquals("Answer count byte1", 0x00, data[6]);
         assertEquals("Answer count byte2", 0x01, data[7]);
+    }
+
+    @Test
+    public void writeDnsPacketHeaderTest() throws IOException {
+        DNSPacket packet = new DNSPacket();
+        packet.getHeader().setDefaultQueryData();
+
+        ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+        packet.write(buffer);
+        byte[] data = buffer.toByteArray();
+
+        byte[] expected = {
+                0x00, 0x00, 0x00, 0x00,
+                0x00, 0x00, // QDCOUNT
+                0x00, 0x00, // ANCOUNT
+                0x00, 0x00, // NSCOUNT
+                0x00, 0x00, // ARCOUNT
+        };
+        assertArrayEquals(expected, data);
+    }
+
+    @Test
+    public void writeDnsPacketTest() throws IOException {
+        DNSPacket packet = new DNSPacket();
+        packet.getHeader().setDefaultQueryData();
+        packet.addQuestion(new DNSPacketQuestion("appletv.local", QTYPE_A, QCLASS_IN));
+
+        ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+        packet.write(buffer);
+        byte[] data = buffer.toByteArray();
+
+        byte[] expected = {
+                0x00, 0x00, 0x00, 0x00,
+                0x00, 0x01, // QDCOUNT
+                0x00, 0x00, // ANCOUNT
+                0x00, 0x00, // NSCOUNT
+                0x00, 0x00, // ARCOUNT
+                0x07, 0x61, 0x70, 0x70, 0x6c, 0x65, 0x74, 0x76, // "apple"
+                0x05, 0x6c, 0x6f, 0x63, 0x61, 0x6c, // "local"
+                0x00, // NULL
+                0x00, 0x01, // QTYPE
+                0x00, 0x01 // QCLASS
+        };
+        assertArrayEquals(expected, data);
     }
 }

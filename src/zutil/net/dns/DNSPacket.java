@@ -1,17 +1,19 @@
 package zutil.net.dns;
 
+import zutil.parser.binary.BinaryStructInputStream;
 import zutil.parser.binary.BinaryStructOutputStream;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * This class is a general wrapper for a whole DNS packet.
  *
- * Created by ezivkoc on 2016-04-11.
+ * Created by Ziver on 2016-04-11.
  */
 public class DNSPacket {
     private DNSPacketHeader header;
@@ -30,23 +32,77 @@ public class DNSPacket {
     }
 
 
-    public static DNSPacket read(InputStream in){
-        return null;
+    public DNSPacketHeader getHeader(){
+        return header;
+    }
+    public List<DNSPacketQuestion> getQuestions(){
+        return Collections.unmodifiableList(questions);
+    }
+    public List<DNSPacketResource> getAnswerRecords(){
+        return Collections.unmodifiableList(answerRecords);
+    }
+    public List<DNSPacketResource> getNameServers(){
+        return Collections.unmodifiableList(nameServers);
+    }
+    public List<DNSPacketResource> getAdditionalRecords(){
+        return Collections.unmodifiableList(additionalRecords);
+    }
+
+
+    public void addQuestion(DNSPacketQuestion question){
+        questions.add(question);
+        header.countQuestion = questions.size();
+    }
+    public void addAnswerRecord(DNSPacketResource resource){
+        answerRecords.add(resource);
+        header.countAnswerRecord = answerRecords.size();
+    }
+    public void addNameServer(DNSPacketResource resource){
+        nameServers.add(resource);
+        header.countNameServer = nameServers.size();
+    }
+    public void addAdditionalRecord(DNSPacketResource resource){
+        additionalRecords.add(resource);
+        header.countAdditionalRecord = additionalRecords.size();
+    }
+
+
+    public static DNSPacket read(InputStream in) throws IOException {
+        BinaryStructInputStream structIn = new BinaryStructInputStream(in);
+        DNSPacket packet = new DNSPacket();
+        structIn.read(packet.header);
+
+        for (int i=0; i<packet.header.countQuestion; ++i) {
+            DNSPacketQuestion question = new DNSPacketQuestion();
+            structIn.read(question);
+            packet.questions.add(question);
+        }
+        readResource(structIn, packet.header.countAnswerRecord, packet.answerRecords);
+        readResource(structIn, packet.header.countNameServer, packet.nameServers);
+        readResource(structIn, packet.header.countAdditionalRecord, packet.additionalRecords);
+        return packet;
+    }
+    private static void readResource(BinaryStructInputStream structIn, int count, ArrayList<DNSPacketResource> list) throws IOException {
+        for (int i=0; i<count; ++i){
+            DNSPacketResource resource = new DNSPacketResource();
+            structIn.read(resource);
+            list.add(resource);
+        }
     }
 
     public void write(OutputStream out) throws IOException {
         BinaryStructOutputStream structOut = new BinaryStructOutputStream(out);
         structOut.write(header);
-        out.flush();
 
-        /*for (DNSPacketQuestion question : questions)
-            question.write(out);
+        for (DNSPacketQuestion question : questions)
+            structOut.write(question);
         for (DNSPacketResource answerRecord : answerRecords)
-            answerRecord.write(out);
+            structOut.write(answerRecord);
         for (DNSPacketResource nameServer : nameServers)
-            nameServer.write(out);
+            structOut.write(nameServer);
         for (DNSPacketResource additionalRecord : additionalRecords)
-            additionalRecord.write(out);*/
+            structOut.write(additionalRecord);
+
     }
 
 }
