@@ -110,8 +110,8 @@ public class DNSPacketResource implements BinaryStruct {
     /**
      * a domain name to which this resource record pertains.
      */
-    @CustomBinaryField(index=10, serializer=DNSPacketQuestion.DomainStringSerializer.class)
-    private String name;
+    @CustomBinaryField(index=10, serializer=DNSPacketQuestion.FQDNStringSerializer.class)
+    public String name;
 
     /**
      * two octets containing one of the RR type codes.  This
@@ -119,14 +119,14 @@ public class DNSPacketResource implements BinaryStruct {
      * field.
      */
     @BinaryField(index=20, length=16)
-    private int type;
+    public int type;
 
     /**
      * two octets which specify the class of the data in the
      * RDATA field.
      */
     @BinaryField(index=30, length=16)
-    private int clazz;
+    public int clazz;
 
     /**
      * a 32 bit unsigned integer that specifies the time
@@ -136,14 +136,14 @@ public class DNSPacketResource implements BinaryStruct {
      * transaction in progress, and should not be cached.
      */
     @BinaryField(index=40, length=32)
-    private int ttl;
+    public int ttl;
 
     /**
      * an unsigned 16 bit integer that specifies the length in
      * octets of the RDATA field.
      */
     @BinaryField(index=50, length=16)
-    private int length;
+    public int length;
 
     /**
      * a variable length string of octets that describes the
@@ -153,7 +153,7 @@ public class DNSPacketResource implements BinaryStruct {
      * the RDATA field is a 4 octet ARPA Internet address.
      */
     @VariableLengthBinaryField(index=60, lengthField="length")
-    private String data;
+    public String data;
 
 
 }

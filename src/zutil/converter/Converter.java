@@ -65,6 +65,17 @@ public class Converter {
 				(byte)((num >> 16)& 0xff),
 				(byte)((num >> 24)& 0xff)};
 	}
+
+    /**
+     * Converts a char array to a byte array.
+     *
+     * @return a byte array with the same binary value as the char.
+     */
+	public static byte[] toBytes(char[] arr){
+        byte[] ret = new byte[arr.length];
+        System.arraycopy(arr, 0, ret, 0, arr.length);
+        return ret;
+    }
 	
 	/**
 	 * Converts a Integer to a byte

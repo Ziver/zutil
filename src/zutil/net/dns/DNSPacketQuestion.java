@@ -114,8 +114,8 @@ public class DNSPacketQuestion implements BinaryStruct {
      * that this field may be an odd number of octets; no
      * padding is used.
      */
-    @CustomBinaryField(index=10, serializer=DomainStringSerializer.class)
-    private String qName;
+    @CustomBinaryField(index=10, serializer=FQDNStringSerializer.class)
+    public String qName;
 
     /**
      * a two octet code which specifies the type of the query.
@@ -124,14 +124,14 @@ public class DNSPacketQuestion implements BinaryStruct {
      * can match more than one type of RR.
      */
     @BinaryField(index=10, length=16)
-    private int qType;
+    public int qType;
 
     /**
      * a two octet code that specifies the class of the query.
      * For example, the QCLASS field is IN for the Internet.
      */
     @BinaryField(index=20, length=16)
-    private int qClass;
+    public int qClass;
 
 
 
@@ -146,7 +146,7 @@ public class DNSPacketQuestion implements BinaryStruct {
 
 
 
-    public static class DomainStringSerializer implements BinaryFieldSerializer<String> {
+    public static class FQDNStringSerializer implements BinaryFieldSerializer<String> {
 
         public String read(InputStream in, BinaryFieldData field) throws IOException {
             StringBuilder str = new StringBuilder();
