@@ -2,6 +2,7 @@ package zutil.parser.binary;
 
 
 import java.lang.reflect.Field;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 import zutil.ByteUtil;
@@ -94,7 +95,7 @@ public class BinaryFieldData {
             else if (field.getType() == Integer.class || field.getType() == int.class)
                 field.set(obj, Converter.toInt(data));
             else if (field.getType() == String.class)
-                field.set(obj, new String(data));
+                field.set(obj, new String(data, StandardCharsets.ISO_8859_1));
             else
                 throw new UnsupportedOperationException("Unsupported BinaryStruct field class: "+ field.getClass());
         } catch (IllegalAccessException e){
@@ -124,7 +125,7 @@ public class BinaryFieldData {
             else if (field.getType() == String.class)
                 return ByteUtil.getReverseByteOrder(
                         ByteUtil.getBits(
-                                ((String)(field.get(obj))).getBytes(),
+                                ((String)(field.get(obj))).getBytes(StandardCharsets.ISO_8859_1),
                                 getBitLength(obj)));
             else
                 throw new UnsupportedOperationException("Unsupported BinaryStruct field type: "+ getType());

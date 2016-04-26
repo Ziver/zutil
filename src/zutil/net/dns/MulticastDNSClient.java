@@ -24,20 +24,32 @@
 
 package zutil.net.dns;
 
+import zutil.ByteUtil;
+import zutil.converter.Converter;
+import zutil.io.MultiPrintStream;
+import zutil.log.LogUtil;
 import zutil.net.threaded.ThreadedUDPNetwork;
 import zutil.net.threaded.ThreadedUDPNetworkThread;
 import zutil.parser.binary.BinaryStructInputStream;
 import zutil.parser.binary.BinaryStructOutputStream;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
+ * This class implements a MDNS Client. MDNS is a version
+ * of the DNS protocol but used a Zeroconf application.
+ *
  * Created by Ziver
  */
 public class MulticastDNSClient extends ThreadedUDPNetwork implements ThreadedUDPNetworkThread{
+    private static final Logger logger = LogUtil.getLogger();
+
     private static final String MDNS_MULTICAST_ADDR = "224.0.0.251";
     private static final int    MDNS_MULTICAST_PORT = 5353;
 
@@ -48,24 +60,42 @@ public class MulticastDNSClient extends ThreadedUDPNetwork implements ThreadedUD
     }
 
 
-    public void sendProbe() throws IOException {
+    public void sendProbe(String service) throws IOException {
         ByteArrayOutputStream buffer = new ByteArrayOutputStream();
         BinaryStructOutputStream out = new BinaryStructOutputStream(buffer);
 
-        DNSPacketHeader header = new DNSPacketHeader();
-        header.setDefaultQueryData();
-        out.write(header);
+        DNSPacket dnsPacket = new DNSPacket();
+        dnsPacket.getHeader().setDefaultQueryData();
+        dnsPacket.addQuestion(new DNSPacketQuestion(
+                service,
+                DNSPacketQuestion.QTYPE_A,
+                DNSPacketQuestion.QCLASS_IN));
+        dnsPacket.write(out);
 
-        DatagramPacket packet = new DatagramPacket(
+        DatagramPacket udpPacket = new DatagramPacket(
                 buffer.toByteArray(), buffer.size(),
                 InetAddress.getByName( MDNS_MULTICAST_ADDR ),
                 MDNS_MULTICAST_PORT );
-        send(packet);
+
+        System.out.println("#### Sending Request");
+        System.out.println(ByteUtil.toFormattedString(udpPacket.getData()));
+        MultiPrintStream.out.dump(dnsPacket,3);
+
+        //send(udpPacket);
     }
 
     @Override
     public void receivedPacket(DatagramPacket packet, ThreadedUDPNetwork network) {
-        DNSPacketHeader header = new DNSPacketHeader();
-        BinaryStructInputStream.read(header, packet.getData());
+        try {
+            ByteArrayInputStream buffer = new ByteArrayInputStream(packet.getData(),
+                    packet.getOffset(), packet.getLength());
+            BinaryStructInputStream in = new BinaryStructInputStream(buffer);
+            DNSPacket dnsPacket = DNSPacket.read(in);
+            System.out.println("#### Received response from "+packet.getAddress());
+            System.out.println(ByteUtil.toFormattedString(packet.getData()));
+            MultiPrintStream.out.dump(dnsPacket,3);
+        } catch (IOException e){
+            logger.log(Level.WARNING, null, e);
+        }
     }
 }

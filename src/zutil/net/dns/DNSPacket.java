@@ -67,8 +67,7 @@ public class DNSPacket {
     }
 
 
-    public static DNSPacket read(InputStream in) throws IOException {
-        BinaryStructInputStream structIn = new BinaryStructInputStream(in);
+    public static DNSPacket read(BinaryStructInputStream structIn) throws IOException {
         DNSPacket packet = new DNSPacket();
         structIn.read(packet.header);
 
@@ -90,8 +89,7 @@ public class DNSPacket {
         }
     }
 
-    public void write(OutputStream out) throws IOException {
-        BinaryStructOutputStream structOut = new BinaryStructOutputStream(out);
+    public void write(BinaryStructOutputStream structOut) throws IOException {
         structOut.write(header);
 
         for (DNSPacketQuestion question : questions)

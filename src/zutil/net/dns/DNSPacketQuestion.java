@@ -159,7 +159,7 @@ public class DNSPacketQuestion implements BinaryStruct {
                 if (c > 0)
                     str.append('.');
             }
-            return toString();
+            return str.toString();
         }
 
         public void write(OutputStream out, String domain, BinaryFieldData field) throws IOException {

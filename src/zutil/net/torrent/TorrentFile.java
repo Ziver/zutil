@@ -24,14 +24,12 @@
 
 package zutil.net.torrent;
 
-import zutil.Dumpable;
-
 /**
  * This class represents a File for download
  * 
  * @author Ziver
  */
-public class TorrentFile implements Dumpable{
+public class TorrentFile{
 	private String filename;
 	private long length;
 	

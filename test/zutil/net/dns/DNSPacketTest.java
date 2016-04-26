@@ -26,6 +26,7 @@ package zutil.net.dns;
 
 import org.junit.Test;
 import zutil.converter.Converter;
+import zutil.parser.binary.BinaryStructInputStream;
 import zutil.parser.binary.BinaryStructOutputStream;
 
 import static org.junit.Assert.assertTrue;
@@ -78,7 +79,8 @@ public class DNSPacketTest {
         packet.getHeader().setDefaultQueryData();
 
         ByteArrayOutputStream buffer = new ByteArrayOutputStream();
-        packet.write(buffer);
+        BinaryStructOutputStream out = new BinaryStructOutputStream(buffer);
+        packet.write(out);
         byte[] data = buffer.toByteArray();
 
         byte[] expected = {
@@ -98,7 +100,8 @@ public class DNSPacketTest {
         packet.addQuestion(new DNSPacketQuestion("appletv.local", QTYPE_A, QCLASS_IN));
 
         ByteArrayOutputStream buffer = new ByteArrayOutputStream();
-        packet.write(buffer);
+        BinaryStructOutputStream out = new BinaryStructOutputStream(buffer);
+        packet.write(out);
         byte[] data = buffer.toByteArray();
 
         byte[] expected = {
@@ -110,7 +113,7 @@ public class DNSPacketTest {
                 0x00, 0x00, // NSCOUNT
                 0x00, 0x00, // ARCOUNT
                 // QUESTION
-                0x07, 0x61, 0x70, 0x70, 0x6c, 0x65, 0x74, 0x76, // "apple"
+                0x07, 0x61, 0x70, 0x70, 0x6c, 0x65, 0x74, 0x76, // "appletv"
                 0x05, 0x6c, 0x6f, 0x63, 0x61, 0x6c, // "local"
                 0x00, // NULL
                 0x00, 0x01, // QTYPE
@@ -119,7 +122,8 @@ public class DNSPacketTest {
         assertArrayEquals(expected, data);
     }
 
-    public void readRespnseDnsPacketTest() throws IOException {
+    @Test
+    public void readResponseDnsPacketTest() throws IOException {
         char[] input = {
                 // HEADER
                 0x00, 0x00, // ID
@@ -129,11 +133,11 @@ public class DNSPacketTest {
                 0x00, 0x00, // NSCOUNT
                 0x00, 0x02, // ARCOUNT
                 // ANSWER RECORD
-                0x07, 0x61, 0x70, 0x70, 0x6c, 0x65, 0x74, 0x76, // FQDN: "apple"
+                0x07, 0x61, 0x70, 0x70, 0x6c, 0x65, 0x74, 0x76, // FQDN: "appletv"
                 0x05, 0x6c, 0x6f, 0x63, 0x61, 0x6c, // FQDN: "local"
                 0x00, // FQDN: NULL
                 0x00, 0x01, // TYPE: A/IPv4
-                0x80, 0x01, // CLASS: IPv4
+                0x00, 0x01, // CLASS: IPv4
                 0x00, 0x00, 0x78, 0x00, // TTL: 30720 seconds
                 0x00, 0x04, // IPv4 length
                 0x99, 0x6d, 0x07, 0x5a, // IPv4:  153.109.7.90
@@ -154,7 +158,8 @@ public class DNSPacketTest {
                 0xc0, 0x0c, 0x00, 0x04, 0x40, 0x00, 0x00, 0x08 // NSEC
         };
         ByteArrayInputStream buffer = new ByteArrayInputStream(Converter.toBytes(input));
-        DNSPacket packet = DNSPacket.read(buffer);
+        BinaryStructInputStream in = new BinaryStructInputStream(buffer);
+        DNSPacket packet = DNSPacket.read(in);
 
         // Assert Header
         assertTrue("flagQueryResponse", packet.getHeader().flagQueryResponse);
@@ -164,10 +169,11 @@ public class DNSPacketTest {
         // Assert Answer
         assertEquals("No Of Answer records", 1, packet.getAnswerRecords().size());
         DNSPacketResource answer = packet.getAnswerRecords().get(0);
+        assertEquals("NAME", "appletv.local", answer.name);
         assertEquals("TYPE", TYPE_A, answer.type);
         assertEquals("CLASS", CLASS_IN, answer.clazz);
         assertEquals("TTL", 30720, answer.ttl);
-        assertEquals("IPv4", new char[]{0x99, 0x6d, 0x07, 0x5a}, answer.data);
+        assertEquals("IPv4", new String(new char[]{0x99, 0x6d, 0x07, 0x5a}), answer.data);
     }
 
 }
