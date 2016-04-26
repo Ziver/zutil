@@ -25,7 +25,6 @@
 package zutil;
 
 import org.junit.Test;
-import zutil.StringUtil;
 
 import java.util.Arrays;
 
@@ -70,30 +69,6 @@ public class StringUtilTest {
 		assertEquals( "aa\"", 	StringUtil.trimQuotes("aa\"") );
 		assertEquals( "aa", 	StringUtil.trimQuotes("\"aa\"") );
 	}
-
-    @Test
-    public void formatBytesToStringTest(){
-        byte[] data = new byte[1];
-        assertEquals("000  00                       '.       '",
-                StringUtil.formatBytesToString(data));
-
-        data[0] = 65;
-        assertEquals("000  41                       'A       '",
-                StringUtil.formatBytesToString(data));
-
-        byte[] data2 = new byte[8];
-        data2[4] = 65;
-        assertEquals("000  00 00 00 00 41 00 00 00  '....A...'",
-                StringUtil.formatBytesToString(data2));
-
-        byte[] data3 = new byte[32];
-        data3[4] = 65;
-        assertEquals("000  00 00 00 00 41 00 00 00  '....A...'\n"+
-                     "008  00 00 00 00 00 00 00 00  '........'\n"+
-                     "016  00 00 00 00 00 00 00 00  '........'\n"+
-                     "024  00 00 00 00 00 00 00 00  '........'",
-                StringUtil.formatBytesToString(data3));
-    }
 
 	@Test
 	public void joinTest(){

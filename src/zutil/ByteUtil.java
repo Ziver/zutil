@@ -24,6 +24,8 @@
 
 package zutil;
 
+import zutil.converter.Converter;
+
 /**
  * Utility functions for byte primitive type
  *
@@ -123,5 +125,55 @@ public class ByteUtil {
         if(length < 0 || index-length < 0)
             throw new IllegalArgumentException("Invalid length argument: "+length+", allowed values: 1 to "+(index+1)+" for index "+index);
         return (byte) BYTE_MASK[index][length];
+    }
+
+    /**
+     * Presents a binary array in HEX and ASCII
+     *
+     * @param       data     The source binary data to format
+     * @return A multiline String with human readable HEX and ASCII
+     */
+    public static String toFormattedString(byte[] data){
+        StringBuffer output = new StringBuffer();
+
+        //000  XX XX XX XX XX XX XX XX  '........'
+        int maxOffset = (""+data.length).length();
+        for(int offset=0; offset<data.length; offset+=8){
+            if(offset != 0)
+                output.append('\n');
+
+            // Offset
+            String offsetStr = ""+offset;
+            for(int i=offsetStr.length(); i<3 || i<maxOffset; ++i){
+                output.append('0');
+            }
+            output.append(offsetStr);
+            output.append("  ");
+
+            // HEX
+            for(int i=0; i<8; ++i){
+                if(offset+i < data.length)
+                    output.append(Converter.toHexString(data[offset+i]));
+                else
+                    output.append("  ");
+                output.append(' ');
+            }
+            output.append(' ');
+
+            // ACII
+            output.append('\'');
+            for(int i=0; i<8; ++i){
+                if(offset+i < data.length)
+                    if( 32 <= data[offset+i] && data[offset+i] <= 126 )
+                        output.append((char)data[offset+i]);
+                    else
+                        output.append('.');
+                else
+                    output.append(' ');
+            }
+            output.append('\'');
+        }
+
+        return output.toString();
     }
 }

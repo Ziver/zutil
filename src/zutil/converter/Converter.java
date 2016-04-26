@@ -73,7 +73,9 @@ public class Converter {
      */
 	public static byte[] toBytes(char[] arr){
         byte[] ret = new byte[arr.length];
-        System.arraycopy(arr, 0, ret, 0, arr.length);
+		for (int i=0; i<arr.length; ++i)
+			ret[i] = (byte) (arr[i] & 0xFF);
+        //System.arraycopy(arr, 0, ret, 0, arr.length); // does not work if char value is largen than 128
         return ret;
     }
 	

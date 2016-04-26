@@ -74,4 +74,29 @@ public class ByteUtilTest {
         assertArrayEquals(new byte[]{0x22,0x11}, ByteUtil.getReverseByteOrder(new byte[]{0x11,0x22}));
         assertArrayEquals(new byte[]{0x44,0x33,0x22,0x11}, ByteUtil.getReverseByteOrder(new byte[]{0x11,0x22,0x33,0x44}));
     }
+
+
+    @Test
+    public void toFormattedStringTest(){
+        byte[] data = new byte[1];
+        assertEquals("000  00                       '.       '",
+                ByteUtil.toFormattedString(data));
+
+        data[0] = 65;
+        assertEquals("000  41                       'A       '",
+                ByteUtil.toFormattedString(data));
+
+        byte[] data2 = new byte[8];
+        data2[4] = 65;
+        assertEquals("000  00 00 00 00 41 00 00 00  '....A...'",
+                ByteUtil.toFormattedString(data2));
+
+        byte[] data3 = new byte[32];
+        data3[4] = 65;
+        assertEquals("000  00 00 00 00 41 00 00 00  '....A...'\n"+
+                        "008  00 00 00 00 00 00 00 00  '........'\n"+
+                        "016  00 00 00 00 00 00 00 00  '........'\n"+
+                        "024  00 00 00 00 00 00 00 00  '........'",
+                ByteUtil.toFormattedString(data3));
+    }
 }
