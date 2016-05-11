@@ -361,24 +361,10 @@ public class Converter {
 		int i = 0;
 		switch (b.length){
 			default:
-			case 4:
-				i |= 0xFF000000 & (b[0] << 24);
-				i |= 0x00FF0000 & (b[1] << 16);
-				i |= 0x0000FF00 & (b[2] << 8);
-				i |= 0x000000FF & b[3];
-				break;
-			case 3:
-                i |= 0x00FF0000 & (b[0] << 16);
-				i |= 0x0000FF00 & (b[1] << 8);
-				i |= 0x000000FF & b[2];
-				break;
-			case 2:
-                i |= 0x0000FF00 & (b[0] << 8);
-				i |= 0x000000FF & b[1];
-				break;
-			case 1:
-				i |= 0x000000FF & b[0];
-				break;
+			case 4:	i |= 0xFF000000 & (b[3] << 24);
+			case 3: i |= 0x00FF0000 & (b[2] << 16);
+			case 2: i |= 0x0000FF00 & (b[1] << 8);
+			case 1:	i |= 0x000000FF &  b[0];
 			case 0: break;
 		}
 		return i;

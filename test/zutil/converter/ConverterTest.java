@@ -84,11 +84,11 @@ public class ConverterTest {
 	public void byteArrayToInt(){
 		assertEquals(0, Converter.toInt(new byte[]{}));
 		assertEquals(1, Converter.toInt(new byte[]{0b0000_0001}));
-		assertEquals(1, Converter.toInt(new byte[]{0x00,0x01}));
+		assertEquals(1, Converter.toInt(new byte[]{0x01,0x00}));
 		assertEquals(256, Converter.toInt(new byte[]{0x00,0x01,0x00}));
 		assertEquals(-1, Converter.toInt(new byte[]{(byte)0xFF,(byte)0xFF,(byte)0xFF,(byte)0xFF}));
-		assertEquals(Integer.MAX_VALUE, Converter.toInt(new byte[]{(byte)0x7F,(byte)0xFF,(byte)0xFF,(byte)0xFF}));
-		assertEquals(Integer.MAX_VALUE, Converter.toInt(new byte[]{(byte)0x7F,(byte)0xFF,(byte)0xFF,(byte)0xFF,(byte)0xFF,(byte)0xFF}));
+		assertEquals(Integer.MAX_VALUE, Converter.toInt(new byte[]{(byte)0xFF,(byte)0xFF,(byte)0xFF,(byte)0x7F}));
+		assertEquals(Integer.MAX_VALUE, Converter.toInt(new byte[]{(byte)0xFF,(byte)0xFF,(byte)0xFF,(byte)0x7F, (byte)0xFF,(byte)0xFF}));
 	}
 
 	@Test

@@ -45,21 +45,7 @@ public class ByteUtil {
     };
 
     /**
-     * Creates a new sub byte from index and with a length and shifts the data to the left
-     *
-     * @param   data    is the byte data
-     * @param   index   is the bit index, valid values 0-7
-     * @param   length  is the length of bits to return, valid values 1-8
-     * @return a new byte containing a sub byte defined by the index and length
-     */
-    public static byte getShiftedBits(byte data, int index, int length){
-        int ret = 0xFF & getBits(data, index, length);
-        ret = ret >>> index+1-length;
-        return (byte) ret;
-    }
-
-    /**
-     * Creates a new sub byte from index and with the given length length
+     * Creates a new sub byte from MSB to the given length
      *
      * @param   data    is the byte data
      * @param   length  is the length of bits to return, valid values 1-8
@@ -83,7 +69,21 @@ public class ByteUtil {
     }
 
     /**
-     * Creates a new sub byte array with only the given length of bits from the data array.
+     * Creates a new sub byte from index and with a length and shifts the data to the left
+     *
+     * @param   data    is the byte data
+     * @param   index   is the bit index, valid values 0-7
+     * @param   length  is the length of bits to return, valid values 1-8
+     * @return a new byte containing a sub byte defined by the index and length
+     */
+    public static byte getShiftedBits(byte data, int index, int length){
+        int ret = 0xFF & getBits(data, index, length);
+        ret = ret >>> index+1-length;
+        return (byte) ret;
+    }
+
+    /**
+     * Creates a new sub byte array with only the given length of bits from the LSB.
      *
      * @param   data    is the byte data array
      * @param   length  is the length of bits to return
@@ -126,6 +126,32 @@ public class ByteUtil {
             throw new IllegalArgumentException("Invalid length argument: "+length+", allowed values: 1 to "+(index+1)+" for index "+index);
         return (byte) BYTE_MASK[index][length];
     }
+
+
+    /**
+     * Shifts a whole byte array to the left by the specified amount.
+     *
+     * @param   data        the array to be shifted
+     * @param   shiftBy     the amount to shift. Currently only supports maximum value of 8
+     * @return same data reference as the data input
+     */
+    public static byte[] shiftLeft(byte[] data, int shiftBy) {
+        if(0 > shiftBy || shiftBy > 8)
+            throw new IllegalArgumentException("Invalid shiftBy argument, allowed values: 0-8");
+        if (shiftBy == 0)
+            return data;
+
+        byte rest = 0;
+        for (int i=0; i<data.length; ++i){
+            rest = (byte)(getBits(data[i], shiftBy-1, shiftBy) << 8 - shiftBy);
+            data[i] >>>= shiftBy;
+            if(i != 0)
+                data[i-1] |= rest;
+        }
+
+        return data;
+    }
+
 
     /**
      * Presents a binary array in HEX and ASCII

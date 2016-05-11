@@ -77,20 +77,23 @@ public class BinaryStructInputStream {
             }
             else {
                 byte[] valueData = new byte[(int) Math.ceil(field.getBitLength(struct) / 8.0)];
-                int fieldReadLength = 0;
+                int fieldReadLength = 0; // How much we have read so far
+                int shiftBy = (dataBitIndex+1 + field.getBitLength(struct)) % 8;
+
 
                 // Parse value
-                for (int valueDataIndex = 0; valueDataIndex < valueData.length; ++valueDataIndex) {
+                for (int valueDataIndex=valueData.length-1; valueDataIndex >= 0 ; --valueDataIndex) {
                     if (dataBitIndex < 0) { // Read new data?
                         data = (byte) in.read();
                         dataBitIndex = 7;
                     }
-                    int bitLength = Math.min(dataBitIndex + 1, field.getBitLength(struct) - fieldReadLength);
-                    valueData[valueDataIndex] = ByteUtil.getShiftedBits(data, dataBitIndex, bitLength);
-                    fieldReadLength += bitLength;
-                    dataBitIndex -= bitLength;
+                    int subBitLength = Math.min(dataBitIndex + 1, field.getBitLength(struct) - fieldReadLength);
+                    valueData[valueDataIndex] = ByteUtil.getBits(data, dataBitIndex, subBitLength);
+                    fieldReadLength += subBitLength;
+                    dataBitIndex -= subBitLength;
                 }
                 // Set value
+                ByteUtil.shiftLeft(valueData, shiftBy); // shift data so that LSB is at the beginning
                 field.setByteValue(struct, valueData);
                 totalReadLength += fieldReadLength;
             }

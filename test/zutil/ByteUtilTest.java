@@ -99,4 +99,21 @@ public class ByteUtilTest {
                         "024  00 00 00 00 00 00 00 00  '........'",
                 ByteUtil.toFormattedString(data3));
     }
+
+
+    @Test
+    public void shiftLeft(){
+        assertArrayEquals(         new byte[]{},
+                ByteUtil.shiftLeft(new byte[]{}, 4));
+        assertArrayEquals(         new byte[]{0b0000_0001},
+                ByteUtil.shiftLeft(new byte[]{0b0000_0001}, 0));
+        assertArrayEquals(         new byte[]{0b0000_0001},
+                ByteUtil.shiftLeft(new byte[]{0b0001_0000}, 4));
+        assertArrayEquals(         new byte[]{0b0001_0001, 0b0000_0000},
+                ByteUtil.shiftLeft(new byte[]{0b0001_0000, 0b0000_0001}, 4));
+        assertArrayEquals(         new byte[]{0b0100_1001, 0b0000_0001},
+                ByteUtil.shiftLeft(new byte[]{0b0111_1111, 0b0101_0010}, 6));
+        assertArrayEquals(         new byte[]{0b0000_0001,0b0000_0001,0b0000_0001,0b0000_0001},
+                ByteUtil.shiftLeft(new byte[]{0b0001_0000,0b0001_0000,0b0001_0000,0b0001_0000}, 4));
+    }
 }

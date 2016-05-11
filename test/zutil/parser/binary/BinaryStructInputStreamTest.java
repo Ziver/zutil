@@ -112,7 +112,7 @@ public class BinaryStructInputStreamTest {
     }
 
     // TODO: add full non lined length support
-    // @Test
+    @Test
     public void nonLinedLength2(){
         BinaryTestStruct struct = new BinaryTestStruct() {
             @BinaryField(index=1, length=12)
