@@ -111,7 +111,6 @@ public class BinaryStructInputStreamTest {
         struct.assertObj();
     }
 
-    // TODO: add full non lined length support
     @Test
     public void nonLinedLength2(){
         BinaryTestStruct struct = new BinaryTestStruct() {
@@ -127,6 +126,33 @@ public class BinaryStructInputStreamTest {
         };
 
         BinaryStructInputStream.read(struct, new byte[]{0b0000_0001,0b0001_1000,0b0000_0000});
+        struct.assertObj();
+    }
+
+    @Test
+    public void mixedType(){
+        BinaryTestStruct struct = new BinaryTestStruct() {
+            @BinaryField(index=1, length=4)
+            public int i1;
+            @BinaryField(index=2, length=1)
+            public boolean b2;
+            @BinaryField(index=3, length=1)
+            public boolean b3;
+            @BinaryField(index=4, length=1)
+            public boolean b4;
+            @BinaryField(index=5, length=1)
+            public boolean b5;
+
+            public void assertObj(){
+                assertEquals("i1", 6, i1);
+                assertEquals("b2", true, b2);
+                assertEquals("b3", true, b3);
+                assertEquals("b4", false, b4);
+                assertEquals("b5", true, b5);
+            }
+        };
+
+        BinaryStructInputStream.read(struct, new byte[]{0b0110_1101});
         struct.assertObj();
     }
 
@@ -174,5 +200,52 @@ public class BinaryStructInputStreamTest {
         data[0] = 3;
         BinaryStructInputStream.read(struct, data);
         struct.assertObj();
+    }
+
+
+    @Test
+    public void shiftBy(){
+        assertEquals(0, BinaryStructInputStream.shiftBy(0, 1));
+        assertEquals(1, BinaryStructInputStream.shiftBy(1, 1));
+        assertEquals(3, BinaryStructInputStream.shiftBy(3, 1));
+        assertEquals(4, BinaryStructInputStream.shiftBy(4, 1));
+        assertEquals(5, BinaryStructInputStream.shiftBy(5, 1));
+        assertEquals(6, BinaryStructInputStream.shiftBy(6, 1));
+        assertEquals(7, BinaryStructInputStream.shiftBy(7, 1));
+
+        assertEquals(0, BinaryStructInputStream.shiftBy(1, 2));
+        assertEquals(2, BinaryStructInputStream.shiftBy(3, 2));
+        assertEquals(6, BinaryStructInputStream.shiftBy(7, 2));
+
+        assertEquals(0, BinaryStructInputStream.shiftBy(7, 8));
+        assertEquals(2, BinaryStructInputStream.shiftBy(7, 6));
+        assertEquals(3, BinaryStructInputStream.shiftBy(7, 5));
+        assertEquals(6, BinaryStructInputStream.shiftBy(7, 2));
+
+        // Cross 1 byte border
+        assertEquals(7, BinaryStructInputStream.shiftBy(0, 2));
+        assertEquals(6, BinaryStructInputStream.shiftBy(1, 4));
+        assertEquals(4, BinaryStructInputStream.shiftBy(3, 8));
+        assertEquals(0, BinaryStructInputStream.shiftBy(3, 12));
+        assertEquals(0, BinaryStructInputStream.shiftBy(7, 16));
+
+        // Cross 2 byte borders
+        assertEquals(0, BinaryStructInputStream.shiftBy(7, 32));
+        assertEquals(7, BinaryStructInputStream.shiftBy(7, 33));
+        assertEquals(6, BinaryStructInputStream.shiftBy(7, 34));
+        assertEquals(5, BinaryStructInputStream.shiftBy(7, 35));
+        assertEquals(4, BinaryStructInputStream.shiftBy(7, 36));
+        assertEquals(3, BinaryStructInputStream.shiftBy(7, 37));
+        assertEquals(2, BinaryStructInputStream.shiftBy(7, 38));
+        assertEquals(1, BinaryStructInputStream.shiftBy(7, 39));
+        assertEquals(0, BinaryStructInputStream.shiftBy(7, 40));
+        assertEquals(7, BinaryStructInputStream.shiftBy(7, 41));
+        assertEquals(6, BinaryStructInputStream.shiftBy(6, 41));
+        assertEquals(5, BinaryStructInputStream.shiftBy(5, 41));
+        assertEquals(4, BinaryStructInputStream.shiftBy(4, 41));
+        assertEquals(3, BinaryStructInputStream.shiftBy(3, 41));
+        assertEquals(2, BinaryStructInputStream.shiftBy(2, 41));
+        assertEquals(1, BinaryStructInputStream.shiftBy(1, 41));
+        assertEquals(0, BinaryStructInputStream.shiftBy(7, 64));
     }
 }

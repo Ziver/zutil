@@ -137,7 +137,7 @@ public class ByteUtil {
      */
     public static byte[] shiftLeft(byte[] data, int shiftBy) {
         if(0 > shiftBy || shiftBy > 8)
-            throw new IllegalArgumentException("Invalid shiftBy argument, allowed values: 0-8");
+            throw new IllegalArgumentException("Invalid shiftBy("+shiftBy+") argument, allowed values: 0-8");
         if (shiftBy == 0)
             return data;
 
