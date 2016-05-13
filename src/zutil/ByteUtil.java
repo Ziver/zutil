@@ -144,7 +144,7 @@ public class ByteUtil {
         byte rest = 0;
         for (int i=0; i<data.length; ++i){
             rest = (byte)(getBits(data[i], shiftBy-1, shiftBy) << 8 - shiftBy);
-            data[i] >>>= shiftBy;
+            data[i] = (byte)((int)(data[i]&0xFF) >> shiftBy);
             if(i != 0)
                 data[i-1] |= rest;
         }

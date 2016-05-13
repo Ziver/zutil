@@ -109,6 +109,8 @@ public class ByteUtilTest {
                 ByteUtil.shiftLeft(new byte[]{0b0000_0001}, 0));
         assertArrayEquals(         new byte[]{0b0000_0001},
                 ByteUtil.shiftLeft(new byte[]{0b0001_0000}, 4));
+        assertArrayEquals(         new byte[]{0b0000_1000},
+                ByteUtil.shiftLeft(new byte[]{(byte)0b1000_0000}, 4));
         assertArrayEquals(         new byte[]{0b0001_0001, 0b0000_0000},
                 ByteUtil.shiftLeft(new byte[]{0b0001_0000, 0b0000_0001}, 4));
         assertArrayEquals(         new byte[]{0b0100_1001, 0b0000_0001},

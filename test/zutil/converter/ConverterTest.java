@@ -57,9 +57,9 @@ public class ConverterTest {
         assertArrayEquals( new byte[]{}, Converter.hexToByte("") );
         assertArrayEquals( new byte[]{0x00}, Converter.hexToByte("0x00") );
         assertArrayEquals( new byte[]{0x00}, Converter.hexToByte("00") );
-        assertArrayEquals(new byte[]{0x07,0x06,0x05,0x04,0x03,0x02,0x01},
+        assertArrayEquals(new byte[]{0x01,0x02,0x03,0x04,0x05,0x06,0x07},
                 Converter.hexToByte("01020304050607") );
-        assertArrayEquals( new byte[]{0x11,0x0F}, Converter.hexToByte("F11") );
+        assertArrayEquals( new byte[]{(byte)0xF1,0x10}, Converter.hexToByte("F11") );
     }
 
 	@Test
