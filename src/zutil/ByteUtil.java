@@ -44,16 +44,6 @@ public class ByteUtil {
             {0b1000_0000, 0b1100_0000, 0b1110_0000, 0b1111_0000, 0b1111_1000, 0b1111_1100, 0b1111_1110, 0b1111_1111}
     };
 
-    /**
-     * Creates a new sub byte from MSB to the given length
-     *
-     * @param   data    is the byte data
-     * @param   length  is the length of bits to return, valid values 1-8
-     * @return a new byte containing a sub byte defined by the index and length
-     */
-    public static byte getBits(byte data, int length){
-        return getBits(data, length-1, length);
-    }
 
     /**
      * Creates a new sub byte from index and with the given length length
@@ -83,6 +73,17 @@ public class ByteUtil {
     }
 
     /**
+     * Creates a new sub byte from LSB to the given length
+     *
+     * @param   data    is the byte data
+     * @param   length  is the length of bits to return, valid values 1-8
+     * @return a new byte containing a sub byte defined by the index and length
+     */
+    public static byte getBits(byte data, int length){
+        return getBits(data, length-1, length);
+    }
+
+    /**
      * Creates a new sub byte array with only the given length of bits from the LSB.
      *
      * @param   data    is the byte data array
@@ -95,6 +96,17 @@ public class ByteUtil {
         if(length % 8 != 0)
             dest[dest.length-1] = getBits(dest[dest.length-1], length % 8);
         return dest;
+    }
+
+    /**
+     * Creates a new sub byte from MSB to the given length
+     *
+     * @param   data    is the byte data
+     * @param   length  is the length of bits to return, valid values 1-8
+     * @return a new byte containing a sub byte defined by the index and length
+     */
+    public static byte getBitsMSB(byte data, int length){
+        return getShiftedBits(data, 7, length);
     }
 
     /**
@@ -144,9 +156,34 @@ public class ByteUtil {
         byte rest = 0;
         for (int i=0; i<data.length; ++i){
             rest = (byte)(getBits(data[i], shiftBy-1, shiftBy) << 8 - shiftBy);
-            data[i] = (byte)((int)(data[i]&0xFF) >> shiftBy);
+            data[i] = (byte)((data[i]&0xFF) >>> shiftBy);
             if(i != 0)
                 data[i-1] |= rest;
+        }
+
+        return data;
+    }
+
+    /**
+     * Shifts a whole byte array to the right by the specified amount.
+     *
+     * @param   data        the array to be shifted
+     * @param   shiftBy     the amount to shift. Currently only supports maximum value of 8
+     * @return same data reference as the data input
+     */
+    public static byte[] shiftRight(byte[] data, int shiftBy) {
+        if(0 > shiftBy || shiftBy > 8)
+            throw new IllegalArgumentException("Invalid shiftBy("+shiftBy+") argument, allowed values: 0-8");
+        if (shiftBy == 0)
+            return data;
+
+        byte rest = 0;
+        for (int i=0; i<data.length; ++i){
+            byte preRest = getBitsMSB(data[i], shiftBy);
+            data[i] = (byte)(data[i] << shiftBy);
+            if(i != 0)
+                data[i] |= rest;
+            rest = preRest;
         }
 
         return data;

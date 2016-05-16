@@ -50,10 +50,18 @@ public class ByteUtilTest {
 
     @Test
     public void getBits(){
-        assertEquals(0x01, ByteUtil.getBits((byte)0xFF, 1));
-        assertEquals(0x0F, ByteUtil.getBits((byte)0xFF, 4));
-        assertEquals((byte)0xFF, ByteUtil.getBits((byte)0xFF, 8));
+        assertEquals(0x01, ByteUtil.getBits((byte)0x11, 1));
+        assertEquals(0x03, ByteUtil.getBits((byte)0x13, 4));
+        assertEquals((byte)0x55, ByteUtil.getBits((byte)0x55, 8));
+    }
 
+    @Test
+    public void getBitsMSB(){
+        assertEquals(0x01, ByteUtil.getBitsMSB((byte)0x80, 1));
+        assertEquals(0x05, ByteUtil.getBitsMSB((byte)0x52, 4));
+        assertEquals((byte)0x55, ByteUtil.getBitsMSB((byte)0x55, 8));
+        assertEquals((byte)0x03, ByteUtil.getBitsMSB((byte)0xFF, 2));
+        assertEquals((byte)0x0F, ByteUtil.getBitsMSB((byte)0xFF, 4));
     }
 
     @Test
@@ -77,7 +85,7 @@ public class ByteUtilTest {
 
 
     @Test
-    public void toFormattedStringTest(){
+    public void toFormattedString(){
         byte[] data = new byte[1];
         assertEquals("000  00                       '.       '",
                 ByteUtil.toFormattedString(data));
@@ -117,5 +125,25 @@ public class ByteUtilTest {
                 ByteUtil.shiftLeft(new byte[]{0b0111_1111, 0b0101_0010}, 6));
         assertArrayEquals(         new byte[]{0b0000_0001,0b0000_0001,0b0000_0001,0b0000_0001},
                 ByteUtil.shiftLeft(new byte[]{0b0001_0000,0b0001_0000,0b0001_0000,0b0001_0000}, 4));
+    }
+
+    @Test
+    public void shiftRight(){
+        assertArrayEquals(         new byte[]{},
+                ByteUtil.shiftRight(new byte[]{}, 4));
+        assertArrayEquals(         new byte[]{0b0000_0001},
+                ByteUtil.shiftRight(new byte[]{0b0000_0001}, 0));
+        assertArrayEquals(         new byte[]{(byte)0b0001_0000},
+                ByteUtil.shiftRight(new byte[]{0b0000_0001}, 4));
+        assertArrayEquals(         new byte[]{(byte)0b1000_0000},
+                ByteUtil.shiftRight(new byte[]{0b0000_1000}, 4));
+        assertArrayEquals(         new byte[]{0b0000_0000},
+                ByteUtil.shiftRight(new byte[]{(byte)0b0001_0000}, 4));
+        assertArrayEquals(         new byte[]{0b0001_0000, 0b0001_0000},
+                ByteUtil.shiftRight(new byte[]{0b0000_0001, 0b0000_0001}, 4));
+        assertArrayEquals(         new byte[]{(byte)0b1100_0000, (byte)0b1001_1111},
+                ByteUtil.shiftRight(new byte[]{0b0111_1111, 0b0101_0010}, 6));
+        assertArrayEquals(         new byte[]{0b0000_0000,0b0000_0001,0b0000_0001,0b0000_0001},
+                ByteUtil.shiftRight(new byte[]{0b0001_0000,0b0001_0000,0b0001_0000,0b0001_0000}, 4));
     }
 }

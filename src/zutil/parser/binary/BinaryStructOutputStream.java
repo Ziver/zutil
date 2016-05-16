@@ -78,15 +78,16 @@ public class BinaryStructOutputStream {
                 field.getSerializer().write(out, field.getValue(struct), field);
             }
             else{
-                byte[] data = field.getByteValue(struct);
-
                 int fieldBitLength = field.getBitLength(struct);
+                byte[] data = field.getByteValue(struct);
+                data = ByteUtil.shiftRight(data, ((8 - fieldBitLength % 8) % 8));
+
                 for (int i=(int)Math.ceil(fieldBitLength/8.0)-1; fieldBitLength>0; fieldBitLength-=8, --i) {
                     byte b = data[i];
                     if (restBitLength == 0 && fieldBitLength >= 8)
                         out.write(0xFF & b);
                     else {
-                        b <<= 8 - restBitLength - fieldBitLength;
+                        b = (byte)((b&0xFF) >> restBitLength);
                         b &= ByteUtil.getBitMask(7 - restBitLength, fieldBitLength);
                         rest |= b;
                         restBitLength += fieldBitLength;

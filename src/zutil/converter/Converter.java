@@ -24,6 +24,7 @@
 
 package zutil.converter;
 
+import zutil.ByteUtil;
 import zutil.io.DynamicByteArrayStream;
 import zutil.parser.Base64Decoder;
 
@@ -185,6 +186,21 @@ public class Converter {
 		return object;
 	}
 
+
+    /**
+     * Converts a byte to a Bit String (e.g 01100100)
+     *
+     * @param   raw     the byte array to convert
+     * @return a bit String
+     */
+	public static String toBitString(byte raw){
+		StringBuilder str = new StringBuilder(8);
+		for (int i=0; i<8; ++i) {
+			str.append(raw & 0x01);
+			raw >>>= 1;
+		}
+		return str.reverse().toString();
+	}
 
 	/** array needed for byteToHex */
 	private static char[] HEX_CHARS = {'0','1','2','3','4','5','6','7','8','9','a','b','c','d','e','f'};

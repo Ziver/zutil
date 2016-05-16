@@ -78,7 +78,7 @@ public class BinaryStructInputStream {
             else {
                 byte[] valueData = new byte[(int) Math.ceil(field.getBitLength(struct) / 8.0)];
                 int fieldReadLength = 0; // How much we have read so far
-                int shiftBy = shiftBy(dataBitIndex, field.getBitLength(struct));
+                int shiftBy = shiftLeftBy(dataBitIndex, field.getBitLength(struct));
 
                 // Parse value
                 for (int valueDataIndex=valueData.length-1; valueDataIndex >= 0 ; --valueDataIndex) {
@@ -101,7 +101,7 @@ public class BinaryStructInputStream {
         return totalReadLength;
     }
 
-    protected static int shiftBy(int bitIndex, int bitLength){
+    protected static int shiftLeftBy(int bitIndex, int bitLength){
         int shiftBy = (8 - ((7-bitIndex) + bitLength) % 8) % 8;
         return shiftBy;
     }

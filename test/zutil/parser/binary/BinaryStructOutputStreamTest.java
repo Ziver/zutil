@@ -25,11 +25,14 @@
 package zutil.parser.binary;
 
 import org.junit.Test;
+import zutil.converter.Converter;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 
+import static junit.framework.TestCase.assertEquals;
 import static org.junit.Assert.assertArrayEquals;
 
 
@@ -93,6 +96,27 @@ public class BinaryStructOutputStreamTest {
         assertArrayEquals(expected, data);
     }
 
+    @Test
+    public void mixedTypeTest() throws IOException {
+        BinaryStruct struct = new BinaryStruct() {
+            @BinaryField(index=1, length=26)
+            private int house = 11_772_006;
+            @BinaryField(index=2, length=1)
+            private boolean group = false;
+            @BinaryField(index=3, length=1)
+            private boolean enable = true;
+            @BinaryField(index=4, length=4)
+            private int unit = 0;
+        };
+
+        byte[] expected = new byte[]{
+                (byte) 0b0010_1100,
+                (byte) 0b1110_1000,
+                (byte) 0b0001_1001,
+                (byte) 0b10_0_1_0000};
+        byte[] actual = BinaryStructOutputStream.serialize(struct);
+        assertArrayEquals(expected, actual);
+    }
 
     @Test
     public void customBinaryFieldTest() throws IOException {
@@ -129,4 +153,5 @@ public class BinaryStructOutputStreamTest {
         byte[] data = BinaryStructOutputStream.serialize(struct);
         assertArrayEquals(expected, data);
     }
+
 }
