@@ -54,9 +54,13 @@ public class NutUPSClient {
 
     public UPSDevice getUPS(String id){
         update();
-        int i = upsDevices.indexOf(id);
-        if (i >= 0)
-            return upsDevices.get(i);
+        return __getUPS(id);
+    }
+    private UPSDevice __getUPS(String id){
+        for (UPSDevice ups : upsDevices){
+            if (ups.equals(id))
+                return ups;
+        }
         return null;
     }
 
@@ -77,7 +81,7 @@ public class NutUPSClient {
                 HashMap<String,String> tmp = new HashMap<>();
                 sendListCommand(out, in, "UPS", tmp);
                 for (String upsId : tmp.keySet()){
-                    if(!upsDevices.contains(upsId)) {
+                    if(__getUPS(upsId) == null) {
                         logger.fine("Registering new UPS device: "+upsId);
                         upsDevices.add(new UPSDevice(upsId));
                     }
@@ -118,15 +122,6 @@ public class NutUPSClient {
                     m.group(1),
                     m.group(2));
         }
-
-        /*while ((line=in.readLine()) != null){
-            if (line.startsWith("END"))
-                break;
-            String[] strArr = line.split("\\W+", 3);
-            parameters.put(
-                    strArr[1],
-                    StringUtil.trim(strArr[2], '\"'));
-        }*/
     }
 
 
