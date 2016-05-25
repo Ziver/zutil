@@ -1,5 +1,6 @@
 package zutil.osal.app.linux;
 
+import zutil.StringUtil;
 import zutil.Timer;
 import zutil.log.LogUtil;
 
@@ -77,7 +78,7 @@ public class NutUPSClient {
                 sendListCommand(out, in, "UPS", tmp);
                 for (String upsId : tmp.keySet()){
                     if(!upsDevices.contains(upsId)) {
-                        logger.fine("Registering new UPS device");
+                        logger.fine("Registering new UPS device: "+upsId);
                         upsDevices.add(new UPSDevice(upsId));
                     }
                 }
@@ -87,12 +88,11 @@ public class NutUPSClient {
                     ups.update(out, in);
                 }
 
-            } catch (IOException e){
+            } catch (Exception e){
                 logger.log(Level.WARNING, null, e);
             }
             // reset timer
             pollTimer.start();
-            logger.fine("Refresh done");
         }
     }
 
@@ -102,20 +102,31 @@ public class NutUPSClient {
     private void sendListCommand(Writer out, BufferedReader in, String cmd, HashMap<String,String> parameters) throws IOException {
         String request = "LIST " + cmd;
         out.write(request + "\n");
+        out.flush();
 
         String line = in.readLine();
         if ( ! line.startsWith("BEGIN LIST"))
             throw new IOException("Unexpected response from upsd: Request: '"+request+"' Response: '"+line+"'");
 
-        Pattern listKeyValuePatter = Pattern.compile("\\w* (\\w*) (.*) \"(.*)\"");
+        Pattern listKeyValuePatter = Pattern.compile("\\w* (?:\\w* )?([\\w.]+) \"(.*)\"");
         while ((line=in.readLine()) != null){
             if (line.startsWith("END"))
                 break;
             Matcher m = listKeyValuePatter.matcher(line);
+            m.matches();
             parameters.put(
-                    m.group(3),
-                    m.group(4));
+                    m.group(1),
+                    m.group(2));
         }
+
+        /*while ((line=in.readLine()) != null){
+            if (line.startsWith("END"))
+                break;
+            String[] strArr = line.split("\\W+", 3);
+            parameters.put(
+                    strArr[1],
+                    StringUtil.trim(strArr[2], '\"'));
+        }*/
     }
 
 
@@ -132,6 +143,7 @@ public class NutUPSClient {
         protected synchronized void update(Writer out, BufferedReader in) throws IOException {
             if(pollTimer == null || pollTimer.hasTimedOut()){
                 parameters.clear();
+                logger.fine("Updating UPS parameters for: "+id);
                 sendListCommand(out, in, "VAR "+id, parameters);
             }
         }
