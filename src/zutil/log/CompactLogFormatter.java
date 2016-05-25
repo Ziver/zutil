@@ -153,10 +153,13 @@ public class CompactLogFormatter extends Formatter{
 	 */
 	private String paddClassName(String source){
 		String cStr = padd_cache.get(source);
-		if(cStr == null || cStr.length() != max_class_name) {
+		if (cStr == null || cStr.length() != max_class_name) {
 			cStr = source.substring(source.lastIndexOf('.') + 1); // Remove packages
-			if(cStr.lastIndexOf('$') >= 0) // extract subclass name
-				cStr = cStr.substring(cStr.lastIndexOf('$')+1);
+			if (cStr.lastIndexOf('$') >= 0) { // extract subclass name
+				String subClass = cStr.substring(cStr.lastIndexOf('$') + 1);
+                if (!Pattern.matches("\\d+", subClass)) // Don'n substring for anonymous classes
+                    cStr = subClass;
+			}
 
 			if (cStr.length() > max_class_name)
 				max_class_name = cStr.length();

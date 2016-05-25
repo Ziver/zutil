@@ -26,8 +26,11 @@ package zutil.log;
 
 import zutil.io.file.FileUtil;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.util.logging.*;
+
+import static java.lang.System.in;
 
 /**
  * Utility functions for the standard Java Logger
@@ -130,11 +133,16 @@ public class LogUtil {
 
     public static void readConfiguration(String file){
         try{
-            FileInputStream in = new FileInputStream(FileUtil.find(file));
-            LogManager.getLogManager().readConfiguration(in);
-            in.close();
+			File confFile = FileUtil.find(file);
+			if (confFile != null) {
+				FileInputStream in = new FileInputStream(confFile);
+				LogManager.getLogManager().readConfiguration(in);
+				in.close();
+			}
+			else
+				logger.warning("Unable to find logging configuration file: "+file);
         } catch (Exception e){
-            logger.log(Level.SEVERE, null, e);
+            logger.log(Level.SEVERE, "Unable to load logging configuration: "+file, e);
         }
     }
 }

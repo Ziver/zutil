@@ -33,6 +33,7 @@ public class NutUPSClient {
     private static final String PARAMETER_POWER_LOAD = "ups.load"; //ups.power
     private static final String PARAMETER_POWER_USAGE = "ups.realpower"; //ups.power
     private static final String PARAMETER_BATTERY_CHARGE = "battery.charge";
+    private static final String PARAMETER_BATTERY_VOLTAGE = "battery.voltage";
     private static final String PARAMETER_POLL_INTERVAL = "driver.parameter.pollinterval";
 
 
@@ -66,7 +67,7 @@ public class NutUPSClient {
 
     protected synchronized void update(){
         if(pollTimer.hasTimedOut()){
-            logger.fine("Starting UPS data refresh");
+            logger.fine("Starting UPS data refresh ("+host+":"+port+")");
             try(Socket s = new Socket(host, port)) {
                 Writer out = new OutputStreamWriter(s.getOutputStream());
                 BufferedReader in = new BufferedReader(new InputStreamReader(s.getInputStream()));
@@ -161,6 +162,9 @@ public class NutUPSClient {
         }
         public int getBatteryCharge(){
             return Integer.parseInt(parameters.get(PARAMETER_BATTERY_CHARGE));
+        }
+        public double getBatteryVoltage(){
+            return Double.parseDouble(parameters.get(PARAMETER_BATTERY_VOLTAGE));
         }
 
     }
