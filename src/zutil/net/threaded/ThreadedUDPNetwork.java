@@ -49,49 +49,43 @@ public class ThreadedUDPNetwork extends Thread{
 
 	/**
 	 * Creates a new unicast Client instance of the class
-	 * 
-	 * @param thread is the class that will handle incoming packets
+	 *
 	 * @throws SocketException
 	 */
-	public ThreadedUDPNetwork(ThreadedUDPNetworkThread thread) throws SocketException{
+	public ThreadedUDPNetwork() throws SocketException{
 		this.type = UDPType.UNICAST;
 		this.port = -1;
-		setThread( thread );
 		
 		socket = new DatagramSocket();
 	}
 
 	/**
 	 * Creates a new unicast Server instance of the class
-	 * 
-	 * @param thread is the class that will handle incoming packets
-	 * @param port is the port that the server should listen to
+	 *
+	 * @param	port	is the port that the server should listen to
 	 * @throws SocketException
 	 */
-	public ThreadedUDPNetwork(ThreadedUDPNetworkThread thread, int port) throws SocketException{
+	public ThreadedUDPNetwork(int port) throws SocketException{
 		this.type = UDPType.UNICAST;
 		this.port = port;
-		setThread( thread );
 		
 		socket = new DatagramSocket( port );
 	}
 	
 	/**
 	 * Creates a new multicast Server instance of the class
-	 * 
-	 * @param thread is the class that will handle incoming packets
-	 * @param port is the port that the server should listen to
-	 * @param multicast_addr is the multicast address that the server will listen on
+	 *
+	 * @param	port			is the port that the server should listen to
+	 * @param	multicastAddr	is the multicast address that the server will listen on
 	 * @throws IOException 
 	 */
-	public ThreadedUDPNetwork(ThreadedUDPNetworkThread thread, String multicast_addr, int port ) throws IOException{
+	public ThreadedUDPNetwork(String multicastAddr, int port ) throws IOException{
 		this.type = UDPType.MULTICAST;
 		this.port = port;
-		setThread( thread );
 		
 		// init udp socket
 		MulticastSocket msocket = new MulticastSocket( port );
-		InetAddress group = InetAddress.getByName( multicast_addr );
+		InetAddress group = InetAddress.getByName( multicastAddr );
 		msocket.joinGroup( group );	
 
 		socket = msocket;
@@ -115,7 +109,7 @@ public class ThreadedUDPNetwork extends Thread{
 	/**
 	 * Sends the given packet
 	 * 
-	 * @param packet is the packet to send
+	 * @param	packet	is the packet to send
 	 * @throws IOException
 	 */
 	public synchronized void send( DatagramPacket packet ) throws IOException{
@@ -125,7 +119,7 @@ public class ThreadedUDPNetwork extends Thread{
 	/**
 	 * Sets the thread that will handle the incoming packets
 	 * 
-	 * @param thread is the thread
+	 * @param	thread	is the thread
 	 */
 	public void setThread(ThreadedUDPNetworkThread thread){
 		this.thread = thread;

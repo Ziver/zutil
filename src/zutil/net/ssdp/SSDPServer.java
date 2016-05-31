@@ -83,7 +83,7 @@ public class SSDPServer extends ThreadedUDPNetwork implements ThreadedUDPNetwork
 
 
 	public SSDPServer() throws IOException{
-		super( null, SSDP_MULTICAST_ADDR, SSDP_PORT );
+		super( SSDP_MULTICAST_ADDR, SSDP_PORT );
 		super.setThread( this );
 
 		services = new HashMap<String, SSDPServiceInfo>();

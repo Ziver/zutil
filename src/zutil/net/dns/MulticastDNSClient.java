@@ -55,7 +55,7 @@ public class MulticastDNSClient extends ThreadedUDPNetwork implements ThreadedUD
 
 
     public MulticastDNSClient() throws IOException {
-        super(null, MDNS_MULTICAST_ADDR, MDNS_MULTICAST_PORT);
+        super(MDNS_MULTICAST_ADDR, MDNS_MULTICAST_PORT);
         setThread( this );
     }
 
