@@ -31,6 +31,7 @@ import java.util.Iterator;
 
 public class HttpHeader {
 	// HTTP info
+	private boolean request;
 	private String type;
 	private String url;
 	private HashMap<String, String> urlAttributes;
@@ -49,6 +50,18 @@ public class HttpHeader {
     }
 
 
+	/**
+	 * @return true if this header represents a server response
+	 */
+	public boolean isResponse(){
+		return !request;
+	}
+	/**
+	 * @return true if this header represents a client request
+     */
+	public boolean isRequest(){
+		return request;
+	}
 	/**
 	 * @return 		the HTTP message type( ex. GET,POST...)
 	 */
@@ -117,13 +130,7 @@ public class HttpHeader {
 	}
 
 
-    protected HashMap<String,String> getCookieMap(){
-        return cookies;
-    }
-    protected HashMap<String,String> getUrlAttributeMap(){
-        return urlAttributes;
-    }
-
+	protected void setIsRequest(boolean request) { this.request = request; }
     protected void setRequestType(String type){
         this.type = type.trim();
     }
@@ -145,6 +152,13 @@ public class HttpHeader {
 	protected void putHeader(String key, String value){
         headers.put(key.trim(), value.trim());
     }
+
+	protected HashMap<String,String> getCookieMap(){
+		return cookies;
+	}
+	protected HashMap<String,String> getUrlAttributeMap(){
+		return urlAttributes;
+	}
 
 
 

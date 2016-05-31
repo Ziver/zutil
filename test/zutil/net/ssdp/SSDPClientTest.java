@@ -41,12 +41,23 @@ public class SSDPClientTest {
         LogUtil.setGlobalLevel(Level.FINEST);
         SSDPClient ssdp = new SSDPClient();
         ssdp.requestService("upnp:rootdevice");
+        ssdp.requestService("urn:schemas-wifialliance-org:device:WFADevice:1");
+        ssdp.requestService("urn:dial-multiscreen-org:service:dial:1"); // Chromecast
+        ssdp.requestService("urn:schemas-upnp-org:device:InternetGatewayDevice:1"); // Routers
         ssdp.start();
 
-        for(int i=0; true ;++i){
-            while( i==ssdp.getServicesCount("upnp:rootdevice") ){ try{Thread.sleep(100);}catch(Exception e){} }
-            System.out.println("************************" );
-            System.out.println("" + ssdp.getServices("upnp:rootdevice").get(i));
-        }
+        ssdp.setListener(new SSDPClient.SSDPServiceListener() {
+            @Override
+            public void serviceDiscovered(StandardSSDPInfo service) {
+                System.out.println("*********** DISCOVERY *************" );
+                System.out.println("" + service);
+            }
+
+            @Override
+            public void serviceLost(StandardSSDPInfo service) {
+                System.out.println("*********** LOST *************" );
+                System.out.println("" + service);
+            }
+        });
     }
 }

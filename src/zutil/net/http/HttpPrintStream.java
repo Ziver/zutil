@@ -208,9 +208,9 @@ public class HttpPrintStream extends OutputStream{
 		else{
 			if(res_status_code != null){
 				if( message_type==HttpMessageType.REQUEST ) 
-					out.print(req_type + " " + req_url + " HTTP/1.0");
+					out.print(req_type + " " + req_url + " HTTP/1.1");
 				else
-					out.print("HTTP/1.0 " + res_status_code + " " + getStatusString(res_status_code));
+					out.print("HTTP/1.1 " + res_status_code + " " + getStatusString(res_status_code));
 				out.println();
 				res_status_code = null;
 				req_type = null;

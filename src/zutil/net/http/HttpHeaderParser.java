@@ -87,11 +87,13 @@ public class HttpHeaderParser {
 	protected static void parseStatusLine(HttpHeader header, String line){
 		// Server Response
 		if( line.startsWith("HTTP/") ){
+			header.setIsRequest(false);
 			header.setHTTPVersion( Float.parseFloat( line.substring( 5 , 8)));
 			header.setHTTPCode( Integer.parseInt( line.substring( 9, 12 )));
 		}
 		// Client Request
 		else if(line.contains("HTTP/")){
+			header.setIsRequest(true);
 			header.setRequestType( line.substring(0, line.indexOf(" ")));
 			header.setHTTPVersion( Float.parseFloat( line.substring(line.lastIndexOf("HTTP/")+5 , line.length()).trim()));
 			line = (line.substring(header.getRequestType().length()+1, line.lastIndexOf("HTTP/")));

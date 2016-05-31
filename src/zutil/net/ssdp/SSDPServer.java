@@ -33,6 +33,7 @@ import zutil.net.http.HttpPrintStream;
 import zutil.net.threaded.ThreadedUDPNetwork;
 import zutil.net.threaded.ThreadedUDPNetworkThread;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
@@ -68,9 +69,8 @@ import java.util.logging.Logger;
  */
 public class SSDPServer extends ThreadedUDPNetwork implements ThreadedUDPNetworkThread{
 	private static final Logger logger = LogUtil.getLogger();
-	public static final String SERVER_INFO = "Zutil SSDP Java Server";
+	public static final String SERVER_INFO = "Zutil SSDP Server";
 	public static final int DEFAULT_CACHE_TIME = 60*30; // 30 min
-	public static final int BUFFER_SIZE = 512;
 	public static final String SSDP_MULTICAST_ADDR = "239.255.255.250";
 	public static final int SSDP_PORT = 1900;
 
@@ -186,8 +186,8 @@ public class SSDPServer extends ThreadedUDPNetwork implements ThreadedUDPNetwork
 						logger.log(Level.FINEST, "Received Multicast(from: "+packet.getAddress()+"): "+ header);
 
 						// Generate the SSDP response
-						StringOutputStream response = new StringOutputStream();
-						HttpPrintStream http = new HttpPrintStream( response );
+						ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+						HttpPrintStream http = new HttpPrintStream( buffer );
 						http.setStatusCode(200);
 						http.setHeader("Location", services.get(st).getLocation() );
 						http.setHeader("USN", services.get(st).getUSN() );
@@ -200,8 +200,7 @@ public class SSDPServer extends ThreadedUDPNetwork implements ThreadedUDPNetwork
                         logger.log(Level.FINEST, "Sending Response: "+ http);
                         http.flush();
 
-						String strData = response.toString();
-						byte[] data = strData.getBytes();
+						byte[] data = buffer.toByteArray();
 						packet = new DatagramPacket( 
 								data, data.length, 
 								packet.getAddress(), 
@@ -255,8 +254,8 @@ public class SSDPServer extends ThreadedUDPNetwork implements ThreadedUDPNetwork
 		try {
             SSDPServiceInfo service = services.get(searchTarget);
 			// Generate the SSDP response
-			StringOutputStream msg = new StringOutputStream();
-			HttpPrintStream http = new HttpPrintStream( msg, HttpPrintStream.HttpMessageType.REQUEST );
+			ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+			HttpPrintStream http = new HttpPrintStream( buffer, HttpPrintStream.HttpMessageType.REQUEST );
 			http.setRequestType("NOTIFY");
 			http.setRequestURL("*");
 			http.setHeader("Server", SERVER_INFO );
@@ -271,7 +270,7 @@ public class SSDPServer extends ThreadedUDPNetwork implements ThreadedUDPNetwork
             logger.log(Level.FINEST, "Sending Notification: " + http);
             http.flush();
 
-			byte[] data = msg.toString().getBytes();
+			byte[] data = buffer.toByteArray();
 			DatagramPacket packet = new DatagramPacket( 
 					data, data.length, 
 					InetAddress.getByName( SSDP_MULTICAST_ADDR ), 
@@ -309,8 +308,8 @@ public class SSDPServer extends ThreadedUDPNetwork implements ThreadedUDPNetwork
 	public void sendByeBye(String searchTarget){
 		try {
 			// Generate the SSDP response
-			StringOutputStream msg = new StringOutputStream();
-			HttpPrintStream http = new HttpPrintStream( msg, HttpPrintStream.HttpMessageType.REQUEST );
+			ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+			HttpPrintStream http = new HttpPrintStream( buffer, HttpPrintStream.HttpMessageType.REQUEST );
 			http.setRequestType("NOTIFY");
 			http.setRequestURL("*");
 			http.setHeader("Server", SERVER_INFO );
@@ -321,7 +320,7 @@ public class SSDPServer extends ThreadedUDPNetwork implements ThreadedUDPNetwork
             logger.log(Level.FINEST, "Sending ByeBye: " + http);
             http.flush();
 
-			byte[] data = msg.toString().getBytes();
+			byte[] data = buffer.toByteArray();
 			DatagramPacket packet = new DatagramPacket( 
 					data, data.length, 
 					InetAddress.getByName( SSDP_MULTICAST_ADDR ), 

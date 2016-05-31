@@ -24,7 +24,6 @@
 
 package zutil.net.ssdp;
 
-import zutil.io.StringOutputStream;
 import zutil.log.LogUtil;
 import zutil.net.http.HttpHeader;
 import zutil.net.http.HttpHeaderParser;
@@ -32,6 +31,7 @@ import zutil.net.http.HttpPrintStream;
 import zutil.net.threaded.ThreadedUDPNetwork;
 import zutil.net.threaded.ThreadedUDPNetworkThread;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
@@ -39,6 +39,9 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import static zutil.net.ssdp.SSDPServer.SSDP_MULTICAST_ADDR;
+import static zutil.net.ssdp.SSDPServer.SSDP_PORT;
 
 /**
  * An SSDP client class that will request
@@ -48,6 +51,7 @@ import java.util.logging.Logger;
  */
 public class SSDPClient extends ThreadedUDPNetwork implements ThreadedUDPNetworkThread{
 	private static final Logger logger = LogUtil.getLogger();
+    public static final String USER_AGENT = "Zutil SSDP Client";
 	/** Mapping of search targets and list of associated services **/
 	private HashMap<String, LinkedList<StandardSSDPInfo>> services_st;
     /** Map of all unique services received **/
@@ -63,6 +67,7 @@ public class SSDPClient extends ThreadedUDPNetwork implements ThreadedUDPNetwork
 	 * @throws IOException
 	 */
 	public SSDPClient() throws IOException{
+        super( SSDP_MULTICAST_ADDR, SSDP_PORT );
 		super.setThread(this);
 		
 		services_st = new HashMap<>();
@@ -88,14 +93,15 @@ public class SSDPClient extends ThreadedUDPNetwork implements ThreadedUDPNetwork
 	public void requestService(String searchTarget, HashMap<String,String> headers){
 		try {
 			// Generate an SSDP discover message
-			StringOutputStream msg = new StringOutputStream();
-			HttpPrintStream http = new HttpPrintStream( msg, HttpPrintStream.HttpMessageType.REQUEST );
+			ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+			HttpPrintStream http = new HttpPrintStream( buffer, HttpPrintStream.HttpMessageType.REQUEST );
 			http.setRequestType("M-SEARCH");
 			http.setRequestURL("*");
-			http.setHeader("Host", SSDPServer.SSDP_MULTICAST_ADDR +":"+ SSDPServer.SSDP_PORT );
+			http.setHeader("Host", SSDP_MULTICAST_ADDR +":"+ SSDP_PORT );
 			http.setHeader("ST", searchTarget );
 			http.setHeader("Man", "\"ssdp:discover\"" );
 			http.setHeader("MX", "3" );
+			http.setHeader("USER-AGENT", USER_AGENT );
 			if(headers != null) {
 				for (String key : headers.keySet()) {
 					http.setHeader(key, headers.get(key));
@@ -104,11 +110,12 @@ public class SSDPClient extends ThreadedUDPNetwork implements ThreadedUDPNetwork
 			logger.log(Level.FINEST, "Sending Multicast: "+ http);
 			http.flush();
 
-			byte[] data = msg.toString().getBytes();
+			byte[] data = buffer.toByteArray();
+            //System.out.println(new String(data)+"****************");
 			DatagramPacket packet = new DatagramPacket( 
 					data, data.length, 
-					InetAddress.getByName( SSDPServer.SSDP_MULTICAST_ADDR ), 
-					SSDPServer.SSDP_PORT );
+					InetAddress.getByName( SSDP_MULTICAST_ADDR ),
+					SSDP_PORT );
 			super.send( packet );
 			http.close();
 		} catch (Exception e) {
@@ -193,38 +200,57 @@ public class SSDPClient extends ThreadedUDPNetwork implements ThreadedUDPNetwork
             String msg = new String(packet.getData(), packet.getOffset(), packet.getLength());
             HttpHeaderParser headerParser = new HttpHeaderParser(msg);
             HttpHeader header = headerParser.read();
-            logger.log(Level.FINEST, "Received(from: " + packet.getAddress() + "): " + header);
 
             String usn = header.getHeader("USN");
             String st = header.getHeader("ST");
-            boolean newService = false;
-            StandardSSDPInfo service;
+            StandardSSDPInfo service = null;
             // Get existing service
             if (services_usn.containsKey(usn)) {
                 service = services_usn.get(usn);
             }
-            // Add new service
+
+            // Remove service
+            if ("NOTIFY".equals(header.getRequestType()) && "ssdp:byebye".equalsIgnoreCase(header.getHeader("NTS"))){
+                logger.log(Level.FINER, "Received NOTIFY:byebye (from: " + packet.getAddress() + "): " + header);
+                if (service != null) {
+                    services_usn.remove(usn);
+                    if (services_st.containsKey(st))
+                        services_st.get(st).remove(service);
+                    if (listener != null)
+                        listener.serviceLost(service);
+                }
+            }
+            // Existing or new service update
+			else if (header.isResponse() || "NOTIFY".equals(header.getRequestType())) {
+                logger.log(Level.FINER, "Received service update (from: " + packet.getAddress() + "): " + header);
+                boolean newService = false;
+
+                // Add new service
+                if (service == null){
+                    newService = true;
+                    service = new StandardSSDPInfo();
+                    services_usn.put(usn, service);
+                    if (!services_st.containsKey(st))
+                        services_st.put(st, new LinkedList<StandardSSDPInfo>());
+                    services_st.get(header.getHeader("ST")).add(service);
+                }
+
+                service.setLocation(header.getHeader("LOCATION"));
+                service.setST(st);
+                service.setUSN(usn);
+                service.setInetAddress(packet.getAddress());
+                if (header.getHeader("Cache-Control") != null) {
+                    service.setExpirationTime(
+                            System.currentTimeMillis() + 1000 * getCacheTime(header.getHeader("Cache-Control")));
+                }
+                service.readHeaders(header);
+
+                if (listener != null && newService)
+                    listener.serviceDiscovered(service);
+            }
             else {
-                newService = true;
-                service = new StandardSSDPInfo();
-                services_usn.put(usn, service);
-                if (!services_st.containsKey(st))
-                    services_st.put(st, new LinkedList<StandardSSDPInfo>());
-                services_st.get(header.getHeader("ST")).add(service);
+                logger.log(Level.FINEST, "Ignored (from: " + packet.getAddress() + "): " + header);
             }
-
-            service.setLocation(header.getHeader("LOCATION"));
-            service.setST(st);
-            service.setUSN(usn);
-            service.setInetAddress(packet.getAddress());
-            if (header.getHeader("Cache-Control") != null) {
-                service.setExpirationTime(
-                        System.currentTimeMillis() + 1000 * getCacheTime(header.getHeader("Cache-Control")));
-            }
-            service.readHeaders(header);
-
-            if (listener != null && newService)
-                listener.newService(service);
         } catch (IOException e){
             logger.log(Level.SEVERE, null, e);
         }
@@ -243,6 +269,14 @@ public class SSDPClient extends ThreadedUDPNetwork implements ThreadedUDPNetwork
 	}
 
 	public interface SSDPServiceListener{
-		public void newService(StandardSSDPInfo service);
-	}
+        /**
+         * Is called when a new service is discovered. Will only be called once per service.
+         */
+		void serviceDiscovered(StandardSSDPInfo service);
+
+        /**
+         * Is called when a service goes down and is not available anymore.
+         */
+        void serviceLost(StandardSSDPInfo service);
+    }
 }

@@ -95,7 +95,8 @@ public class SOAPHttpPage implements HttpPage{
 	/**
 	 * Enables session support, if enabled then a new instance 
 	 * of the SOAPInterface will be created, if disabled then 
-	 * only the given object will be used as an static interface
+	 * only the given object will be used as an static interface.
+	 * Default is false.
 	 * 
 	 * @param enabled is if session should be enabled
 	 */
