@@ -24,6 +24,8 @@
 
 package zutil.net.http.page;
 
+import zutil.Hasher;
+import zutil.StringUtil;
 import zutil.io.IOUtil;
 import zutil.io.file.FileUtil;
 import zutil.log.LogUtil;
@@ -32,6 +34,8 @@ import zutil.net.http.HttpPage;
 import zutil.net.http.HttpPrintStream;
 
 import java.io.*;
+import java.security.NoSuchAlgorithmException;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -43,10 +47,17 @@ import java.util.logging.Logger;
  */
 public class HttpFilePage implements HttpPage{
     private static final Logger log = LogUtil.getLogger();
+    private static final int MAX_CACHE_AGE_SECONDS = 120;
 
     private File resource_root;
     private boolean showFolders;
     private boolean redirectToIndex;
+
+    private HashMap<File,FileCache> cache;
+    private static class FileCache{
+        public long lastModified;
+        public String hash;
+    }
 
     /**
      * @param    file       a reference to a root directory or a file.
@@ -55,6 +66,7 @@ public class HttpFilePage implements HttpPage{
         this.resource_root = file;
         this.showFolders = true;
         this.redirectToIndex = true;
+        this.cache = new HashMap<>();
     }
 
 
@@ -68,12 +80,13 @@ public class HttpFilePage implements HttpPage{
         try {
             // Is the root only one file or a folder
             if (resource_root.isFile()) {
-                deliverFile(resource_root, out);
+                deliverFileWithCache(headers, resource_root, out);
             }
             else { // Resource root is a folder
                 File file = new File(resource_root,
                         headers.getRequestURL());
                 if(file.getCanonicalPath().startsWith(resource_root.getCanonicalPath())){
+                    // Web Gui
                     if(file.isDirectory() && showFolders){
                         File indexFile = new File(file, "index.html");
                         // Redirect to index.html
@@ -96,8 +109,9 @@ public class HttpFilePage implements HttpPage{
                             throw new SecurityException("User not allowed to view folder: root=" + resource_root.getAbsolutePath());
                         }
                     }
+                    // Deliver the requested file
                     else {
-                        deliverFile(file, out);
+                        deliverFileWithCache(headers, file, out);
                     }
                 }
                 else {
@@ -123,14 +137,43 @@ public class HttpFilePage implements HttpPage{
         }
     }
 
+    private void deliverFileWithCache(HttpHeader headers, File file, HttpPrintStream out) throws IOException {
+        String eTag = getFileHash(file);
+        out.setHeader("Cache-Control", "max-age=" + MAX_CACHE_AGE_SECONDS);
+        out.setHeader("ETag", "\"" + eTag + "\"");
+
+        if (headers.getHeader("If-None-Match") != null &&
+                eTag.equals(StringUtil.trimQuotes(headers.getHeader("If-None-Match")))){ // File has not changed
+            out.setStatusCode(304);
+        } else {
+            deliverFile(file, out);
+        }
+    }
     private void deliverFile(File file, HttpPrintStream out) throws IOException {
         out.setHeader("Content-Type", getMIMEType(file));
+        out.setHeader("Content-Length", "" + file.length());
         out.flush();
 
-        //InputStream in = new BufferedInputStream(new FileInputStream(file));
         InputStream in = new FileInputStream(file);
         IOUtil.copyStream(in, out);
         in.close();
+    }
+
+
+    private String getFileHash(File file) throws IOException {
+        try {
+            FileCache fileCache = cache.get(file);
+            if (fileCache == null)
+                cache.put(file, fileCache = new FileCache());
+            if (fileCache.lastModified != file.lastModified()) {
+                fileCache.hash = Hasher.hash(file, "SHA-1");
+                fileCache.lastModified = file.lastModified();
+            }
+            return fileCache.hash;
+        } catch (NoSuchAlgorithmException e){
+            log.log(Level.WARNING, "Unable to generate hash", e);
+        }
+        return "";
     }
 
     private String getMIMEType(File file){
