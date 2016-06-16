@@ -31,10 +31,9 @@ import java.util.*;
  */
 public class Navigation implements Iterable{
     private static final String NAVIGATION_URL_KEY = "i";
-    private static int nextId = 0;
-    private static HashMap<Integer, Navigation> navMap = new HashMap<Integer, Navigation>();
+    private static HashMap<String, Navigation> navMap = new HashMap<>();
 
-    private final Integer id;
+    private final String id;
     private String name;
     private int weight;
     private Object resource;
@@ -44,8 +43,9 @@ public class Navigation implements Iterable{
 
 
 
-    private Navigation(String name) {
-        this.id = nextId++;
+
+    private Navigation(String id, String name) {
+        this.id = id;
         this.navMap.put(this.id, this);
         this.name = name;
         this.subNav = new ArrayList<>();
@@ -58,12 +58,12 @@ public class Navigation implements Iterable{
     /**
      * Will create a new sub-nav if it does not already exist or return a existing one.
      */
-    public Navigation createSubNav(String name) {
+    public Navigation createSubNav(String id, String name) {
         Navigation nav = getSubNav(name);
         if(nav != null)
             return nav;
 
-        nav = new Navigation(name);
+        nav = new Navigation(id, name);
         nav.setParentNav(this);
         subNav.add(nav);
         sortSubNavs();
@@ -103,9 +103,6 @@ public class Navigation implements Iterable{
     public String getName(){
         return name;
     }
-    public String getUrl(){
-        return "?"+NAVIGATION_URL_KEY+"="+this.id;
-    }
     public Object getResource(){
         return resource;
     }
@@ -144,24 +141,35 @@ public class Navigation implements Iterable{
     /**
      * Will create a clone of the navigation tree with some request instance specific information
      */
-    public NavInstance createNavInstance(Map<String, String> request){
-        return createNavInstance(getBreadcrumb(request));
+    public NavInstance createParameterizedNavInstance(Map<String, String> request){
+        return createParameterizedNavInstance(getBreadcrumb(getNavigation(request)));
     }
-    private NavInstance createNavInstance(List<Navigation> activeList){
-        NavInstance instance = new NavInstance(this);
+    private NavInstance createParameterizedNavInstance(List<Navigation> activeList){
+        NavInstance instance = new ParameterizedNavInstance(this);
         instance.setActive(activeList.contains(this));
         for (Navigation nav : subNav)
-            instance.addSubNav(nav.createNavInstance(activeList));
+            instance.addSubNav(nav.createParameterizedNavInstance(activeList));
+        return instance;
+    }
+
+    public NavInstance createPagedNavInstance(Map<String, String> request){
+        return createPagedNavInstance(getBreadcrumb(getNavigation(request)));
+    }
+    private NavInstance createPagedNavInstance(List<Navigation> activeList){
+        NavInstance instance = new PagedNavInstance(this);
+        instance.setActive(activeList.contains(this));
+        for (Navigation nav : subNav)
+            instance.addSubNav(nav.createPagedNavInstance(activeList));
         return instance;
     }
 
 
 
     public static Navigation createRootNav(){
-        return new Navigation(null);
+        return new Navigation(null, null);
     }
     public static Navigation getRootNav(Map<String, String> request) {
-        List<Navigation> breadcrumb = getBreadcrumb(request);
+        List<Navigation> breadcrumb = getBreadcrumb(getNavigation(request));
         if (!breadcrumb.isEmpty())
             return breadcrumb.get(0);
         return null;
@@ -177,17 +185,19 @@ public class Navigation implements Iterable{
     }
 
     /**
-     * @param   request     A map of all url parameters sent from client
+     * @param   pageId     the ID of the requested page
      * @return a List of Navigation objects depicting the navigation hierarchy for the
      *          requested page from the client. First entry will be the root navigation object.
      */
-    public static List<Navigation> getBreadcrumb(Map<String, String> request) {
+    public static List<Navigation> getBreadcrumb(String pageId) {
+        return getBreadcrumb(navMap.get(pageId));
+    }
+    private static List<Navigation> getBreadcrumb(Navigation nav) {
         LinkedList list = new LinkedList();
-        Navigation current = getNavigation(request);
-        if (current != null){
-            while(current != null){
-                list.addFirst(current);
-                current = current.parentNav;
+        if (nav != null){
+            while(nav != null){
+                list.addFirst(nav);
+                nav = nav.parentNav;
             }
         }
         return list;
@@ -196,10 +206,10 @@ public class Navigation implements Iterable{
 
 
 
-    public static class NavInstance{
-        private Navigation nav;
-        private boolean active;
-        private ArrayList<NavInstance> subNavs;
+    public abstract static class NavInstance{
+        protected Navigation nav;
+        protected boolean active;
+        protected ArrayList<NavInstance> subNavs;
 
         protected NavInstance(Navigation nav){
             this.nav = nav;
@@ -220,8 +230,9 @@ public class Navigation implements Iterable{
 
         // Mirror getters from Navigation
         public String getName(){                 return nav.getName(); }
-        public String getUrl(){                  return nav.getUrl(); }
         public Object getResource(){             return nav.getResource(); }
+
+        public abstract String getUrl();
 
 
         public boolean equals(Object o){
@@ -230,6 +241,22 @@ public class Navigation implements Iterable{
             else if (o instanceof NavInstance)
                 return nav.equals(((NavInstance) o).nav);
             return false;
+        }
+    }
+
+    public static class ParameterizedNavInstance extends NavInstance{
+        protected ParameterizedNavInstance(Navigation nav) { super(nav); }
+
+        public String getUrl(){
+            return "?"+NAVIGATION_URL_KEY+"="+nav.id;
+        }
+    }
+
+    public static class PagedNavInstance extends NavInstance{
+        protected PagedNavInstance(Navigation nav) { super(nav); }
+
+        public String getUrl(){
+            return nav.id;
         }
     }
 }
