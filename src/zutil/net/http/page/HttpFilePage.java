@@ -142,7 +142,7 @@ public class HttpFilePage implements HttpPage{
         out.setHeader("Cache-Control", "max-age=" + MAX_CACHE_AGE_SECONDS);
         out.setHeader("ETag", "\"" + eTag + "\"");
 
-        if (headers.getHeader("If-None-Match") != null &&
+        if (eTag != null && headers.getHeader("If-None-Match") != null &&
                 eTag.equals(StringUtil.trimQuotes(headers.getHeader("If-None-Match")))){ // File has not changed
             out.setStatusCode(304);
         } else {

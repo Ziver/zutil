@@ -86,6 +86,22 @@ public class HttpHeader {
 	public String getRequestURL(){
 		return url;
 	}
+	/**
+	 * @return parses out the page name from the request url and returns it.
+     */
+	public String getRequestPage() {
+		if (url != null){
+            int start = 0;
+            if (url.charAt(0) == '/')
+                start = 1;
+			int end = url.indexOf('?');
+			if (end < 0)
+                end = url.length();
+
+            return url.substring(start, end);
+		}
+		return null;
+	}
     /**
      * @return a Iterator with all defined url keys
      */
@@ -187,4 +203,5 @@ public class HttpHeader {
 	public String toStringAttributes(){
 		return Converter.toString(urlAttributes);
 	}
+
 }
