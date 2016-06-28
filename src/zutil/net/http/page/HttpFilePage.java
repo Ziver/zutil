@@ -178,14 +178,36 @@ public class HttpFilePage implements HttpPage{
 
     private String getMIMEType(File file){
         switch(FileUtil.getFileExtension(file)){
-            case "css":  return "text/css";
-            case "cvs":  return "text/csv";
+            case "avi":  return "video/avi";
+            case "mpeg": return "video/mpeg";
+
+            case "mp3":  return "audio/mpeg";
+            case "ogg":  return "audio/vorbis";
+            case "wav":  return "audio/wav";
+
+            case "bmp":  return "image/bmp";
+            case "gif":  return "image/gif";
             case "jpg":  return "image/jpeg";
-            case "js":   return "application/javascript";
             case "png":  return "image/png";
+            case "svg":  return "image/svg+xml";
+            case "tiff": return "image/tiff";
+
+            case "cvs":  return "text/csv";
             case "htm":
             case "html": return "text/html";
             case "xml":  return "text/xml";
+            case "js":   return "application/javascript";
+            case "css":  return "text/css";
+
+            case "bz2":  return "application/x-bzip2";
+            case "gz":   return "application/x-gzip";
+            case "tgz":  return "application/x-tar";
+            case "zip":  return "application/zip";
+
+            case "exe":  return "application/octet-stream";
+            case "jar":  return "application/java-archive";
+            case "pdf":  return "application/pdf";
+
             default:     return "text/plain";
         }
     }
