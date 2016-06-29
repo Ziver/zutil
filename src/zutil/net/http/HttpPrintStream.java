@@ -45,23 +45,25 @@ public class HttpPrintStream extends OutputStream{
 		RESPONSE
 	}
 
-	// The actual output stream
+	/** The actual output stream */
 	private PrintStream out;
-	// This defines the type of message that will be generated
+	/** This defines the supported http version */
+	private String httpVersion;
+	/** This defines the type of message that will be generated */
 	private HttpMessageType message_type;
-	// The status code of the message, ONLY for response
+	/** The status code of the message, ONLY for response */
 	private Integer res_status_code;
-	// The request type of the message ONLY for request
+	/** The request type of the message ONLY for request */
 	private String req_type;
-	// The requesting url ONLY for request
+	/** The requesting url ONLY for request */
 	private String req_url;
-	// An Map of all the header values
+	/** An Map of all the header values */
 	private HashMap<String, String> headers;
-	// An Map of all the cookies
+	/** An Map of all the cookies */
 	private HashMap<String, String> cookies;
-	// The buffered header
+	/** The buffered header */
 	private StringBuffer buffer;
-	// If the header buffering is enabled
+	/** If the header buffering is enabled */
 	private boolean buffer_enabled;	
 
 	/**
@@ -82,6 +84,7 @@ public class HttpPrintStream extends OutputStream{
 	 */
 	public HttpPrintStream(OutputStream out, HttpMessageType type) {
 		this.out = new PrintStream(out);
+        this.httpVersion = "1.1";
 		this.message_type = type;
 		this.res_status_code = 0;
 		this.headers = new HashMap<String, String>();
@@ -103,6 +106,13 @@ public class HttpPrintStream extends OutputStream{
 		buffer_enabled = b;
 		if(!buffer_enabled) flush();
 	}
+
+    /**
+     * Set the http version that will be used in the http header
+     */
+    public void setHttpVersion(String version){
+        this.httpVersion = version;
+    }
 
 	/**
 	 * Adds a cookie that will be sent to the client
@@ -208,9 +218,9 @@ public class HttpPrintStream extends OutputStream{
 		else{
 			if(res_status_code != null){
 				if( message_type==HttpMessageType.REQUEST ) 
-					out.print(req_type + " " + req_url + " HTTP/1.1");
+					out.print(req_type + " " + req_url + " HTTP/"+httpVersion);
 				else
-					out.print("HTTP/1.1 " + res_status_code + " " + getStatusString(res_status_code));
+					out.print("HTTP/"+httpVersion+" " + res_status_code + " " + getStatusString(res_status_code));
 				out.println();
 				res_status_code = null;
 				req_type = null;
@@ -306,6 +316,7 @@ public class HttpPrintStream extends OutputStream{
 		case 100: return "Continue";
 		case 200: return "OK";
 		case 301: return "Moved Permanently";
+		case 304: return "Not Modified";
 		case 307: return "Temporary Redirect";
 		case 400: return "Bad Request";
 		case 401: return "Unauthorized";

@@ -51,7 +51,7 @@ public class HttpServer extends ThreadedTCPNetworkServer{
 
 	public static final String SESSION_ID_KEY = "session_id";
 	public static final String SESSION_TTL_KEY = "session_ttl";
-	public static final String SERVER_VERSION = "Ziver HttpServer 1.1";
+	public static final String SERVER_VERSION = "Zutil HttpServer";
 	public static final int SESSION_TTL = 10*60*1000; // in milliseconds
 
 
@@ -142,6 +142,7 @@ public class HttpServer extends ThreadedTCPNetworkServer{
 		return null;
 	}
 
+    private static int noOfConnections = 0;
 	/**
 	 * Internal class that handles all the requests
 	 * 
@@ -160,90 +161,87 @@ public class HttpServer extends ThreadedTCPNetworkServer{
 		}
 
 		public void run(){
-			String tmp = null;
-			HttpHeaderParser headerParser = new HttpHeaderParser(in);
+			//logger.finest("New Connection: "+socket.getInetAddress()+" (Ongoing connections: "+(++noOfConnections)+")");
 
-			//****************************  REQUEST *********************************
 			try {
-				long time = System.currentTimeMillis();
-				HttpHeader header = headerParser.read();
-                if(header == null){
+                //**************************** PARSE REQUEST *********************************
+                long time = System.currentTimeMillis();
+                HttpHeaderParser headerParser = new HttpHeaderParser(in);
+                HttpHeader header = headerParser.read();
+                if (header == null) {
                     logger.finer("No header received");
                     return;
                 }
+                String tmp = null;
 
-				//******* Read in the post data if available
-				if( header.getHeader("Content-Length") != null ){
-					// Reads the post data size
-					tmp = header.getHeader("Content-Length");
-					int post_data_length = Integer.parseInt( tmp );
-					// read the data
-					StringBuilder tmpBuff = new StringBuilder();
-					// read the data
-					for(int i=0; i<post_data_length ;i++){
-						tmpBuff.append((char)in.read());
-					}
+                //******* Read in the post data if available
+                if (header.getHeader("Content-Length") != null) {
+                    // Reads the post data size
+                    tmp = header.getHeader("Content-Length");
+                    int post_data_length = Integer.parseInt(tmp);
+                    // read the data
+                    StringBuilder tmpBuff = new StringBuilder();
+                    // read the data
+                    for (int i = 0; i < post_data_length; i++) {
+                        tmpBuff.append((char) in.read());
+                    }
 
-					tmp = header.getHeader("Content-Type");
-					if( tmp.contains("application/x-www-form-urlencoded") ){
-						// get the variables
-						HttpHeaderParser.parseURLParameters(header, tmpBuff.toString());
-					}
-					else if( tmp.contains("application/soap+xml" ) ||
-							tmp.contains("text/xml") ||
-							tmp.contains("text/plain") ){
-						// save the variables
-						header.putURLAttribute("" , tmpBuff.toString());
-					}
-					else if( tmp.contains("multipart/form-data") ){
-						// TODO: File upload
-						throw new UnsupportedOperationException("HTTP Content-Type 'multipart-form-data' not supported." );
-					}
-				}
+                    tmp = header.getHeader("Content-Type");
+                    if (tmp.contains("application/x-www-form-urlencoded")) {
+                        // get the variables
+                        HttpHeaderParser.parseURLParameters(header, tmpBuff.toString());
+                    } else if (tmp.contains("application/soap+xml") ||
+                            tmp.contains("text/xml") ||
+                            tmp.contains("text/plain")) {
+                        // save the variables
+                        header.putURLAttribute("", tmpBuff.toString());
+                    } else if (tmp.contains("multipart/form-data")) {
+                        // TODO: File upload
+                        throw new UnsupportedOperationException("HTTP Content-Type 'multipart-form-data' not supported.");
+                    }
+                }
 
-				//****************************  HANDLE REQUEST *********************************
-				// Get the client session or create one
-				Map<String, Object> session;
-				long ttlTime = System.currentTimeMillis() + SESSION_TTL;
+                //****************************  HANDLE REQUEST *********************************
+                // Get the client session or create one
+                Map<String, Object> session;
+                long ttlTime = System.currentTimeMillis() + SESSION_TTL;
                 String sessionCookie = header.getCookie(SESSION_ID_KEY);
-				if( sessionCookie != null && sessions.containsKey(sessionCookie) &&
-                        (Long)sessions.get(sessionCookie).get(SESSION_TTL_KEY) < System.currentTimeMillis()){ // Check if session is still valid
+                if (sessionCookie != null && sessions.containsKey(sessionCookie) &&
+                        (Long) sessions.get(sessionCookie).get(SESSION_TTL_KEY) < System.currentTimeMillis()) { // Check if session is still valid
 
                     session = sessions.get(sessionCookie);
-					// renew the session TTL
-					session.put(SESSION_TTL_KEY, ttlTime);
-				}
-				else{
-					session = Collections.synchronizedMap(new HashMap<String, Object>());
-					session.put(SESSION_ID_KEY, nextSessionId );
-					session.put(SESSION_TTL_KEY, ttlTime );
-					sessions.put(nextSessionId, session );
-					++nextSessionId;
-				}
+                    // renew the session TTL
+                    session.put(SESSION_TTL_KEY, ttlTime);
+                } else {
+                    session = Collections.synchronizedMap(new HashMap<String, Object>());
+                    session.put(SESSION_ID_KEY, nextSessionId);
+                    session.put(SESSION_TTL_KEY, ttlTime);
+                    sessions.put(nextSessionId, session);
+                    ++nextSessionId;
+                }
 
-				//****************************  RESPONSE  ************************************
-				out.setStatusCode(200);
-				out.setHeader("Server", SERVER_VERSION);
-				out.setHeader("Content-Type", "text/html");
-				out.setCookie(SESSION_ID_KEY, ""+session.get(SESSION_ID_KEY));
+                //****************************  RESPONSE  ************************************
+                out.setHttpVersion("1.0");
+                out.setStatusCode(200);
+                out.setHeader("Server", SERVER_VERSION);
+                out.setHeader("Content-Type", "text/html");
+                //out.setHeader("Connection", "keep-alive");
+                out.setCookie(SESSION_ID_KEY, "" + session.get(SESSION_ID_KEY));
 
-				if( header.getRequestURL() != null && pages.containsKey(header.getRequestURL())){
-					HttpPage page = pages.get(header.getRequestURL());
+                if (header.getRequestURL() != null && pages.containsKey(header.getRequestURL())) {
+                    HttpPage page = pages.get(header.getRequestURL());
                     page.respond(out, header, session, header.getCookieMap(), header.getUrlAttributeMap());
-					if(LogUtil.isLoggable(page.getClass(), Level.FINER))
+                    if (LogUtil.isLoggable(page.getClass(), Level.FINER))
                         logRequest(header, session, time);
-				}
-				else if( header.getRequestURL() != null && defaultPage != null ){
-					defaultPage.respond(out, header, session, header.getCookieMap(), header.getUrlAttributeMap());
-                    if(LogUtil.isLoggable(defaultPage.getClass(), Level.FINER))
-					    logRequest(header, session, time);
-				}
-				else{
-					out.setStatusCode(404);
-					out.println("404 Page Not Found: "+header.getRequestURL());
-					logger.warning("Page not defined: " + header.getRequestURL());
-				}
-
+                } else if (header.getRequestURL() != null && defaultPage != null) {
+                    defaultPage.respond(out, header, session, header.getCookieMap(), header.getUrlAttributeMap());
+                    if (LogUtil.isLoggable(defaultPage.getClass(), Level.FINER))
+                        logRequest(header, session, time);
+                } else {
+                    out.setStatusCode(404);
+                    out.println("404 Page Not Found: " + header.getRequestURL());
+                    logger.warning("Page not defined: " + header.getRequestURL());
+                    }
 				//********************************************************************************
 			} catch (Exception e) {
 				logger.log(Level.SEVERE, "500 Internal Server Error", e);
@@ -266,6 +264,7 @@ public class HttpServer extends ThreadedTCPNetworkServer{
                     out.close();
                     in.close();
                     socket.close();
+                    //logger.finest("Connection Closed: "+socket.getInetAddress()+" (Ongoing connections: "+(--noOfConnections)+")");
                 } catch( Exception e ) {
                     logger.log(Level.WARNING, "Could not close connection", e);
                 }
