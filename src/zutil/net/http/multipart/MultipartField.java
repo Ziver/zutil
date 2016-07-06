@@ -25,46 +25,22 @@
 package zutil.net.http.multipart;
 
 
+import java.io.InputStream;
+
 /**
- * A class for handling multipart field
+ * A interface representing a single field in a multipart message.
  * 
  * @author Ziver
  */
-public class MultipartField{
-	protected long received;
-	protected long length;
-	protected String contentType;
-	
-	protected String fieldname;
-	protected String value;
-	
-	
-	protected MultipartField(){
-		
-	}
+public interface MultipartField{
+	/**
+	 * @return the amount of data received for this field. Might only be available when all data has been processed
+	 */
+	public long getLength();
 	
 	/**
-	 * @return the amount of data received for this field
+	 * @return the name of the field.
 	 */
-	public long getReceivedBytes(){
-		return received;
-	}
-	
-	/**
-	 * @return the fieldname
-	 */
-	public String getFieldname(){
-		return fieldname;
-	}
-	
-	/**
-	 * @return the value of the field
-	 */
-	public String getValue(){
-		return value;
-	}
-	
-	protected void parse(){
-		
-	}
+	public String getName();
+
 }

@@ -25,14 +25,18 @@
 package zutil.net.http.multipart;
 
 import zutil.ProgressListener;
+import zutil.log.LogUtil;
 import zutil.net.http.HttpHeader;
+import zutil.net.http.HttpHeaderParser;
 
 import javax.servlet.http.HttpServletRequest;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Parses a multipart/form-data http request, 
@@ -43,103 +47,140 @@ import java.util.List;
  * @author Ziver
  *
  */
-public class MultipartParser {
-	/** This is the temporary directory for the received files	 */
-	private File tempDir;
+public class MultipartParser implements Iterable<MultipartField>{
+    private static final Logger logger = LogUtil.getLogger();
+    private static final String HEADER_CONTENT_DISPOSITION = "Content-Disposition";
+    private static final String HEADER_CONTENT_TYPE        = "Content-Type";
+
 	/** This is the delimiter that will separate the fields */
 	private String delimiter;
 	/** The length of the HTTP Body */
 	private long contentLength;
 	/** This is the input stream */
 	private BufferedReader in;
-	
-	/** This is the listener that will listen on the progress */
-	private ProgressListener<MultipartParser,MultipartField> listener;
-	
-	
-	
+
+    private MultiPartIterator iterator;
+
+
+    public MultipartParser(BufferedReader in, String delimiter, long length){
+        this.in = in;
+        this.delimiter = delimiter;
+        this.contentLength = length;
+    }
 	public MultipartParser(BufferedReader in, HttpHeader header){
-		this.in = in;
-		
-		String cotype = header.getHeader("Content-type");
-		cotype = cotype.split(" *; *")[1];
-		delimiter = cotype.split(" *= *")[1];
-		
-		contentLength = Long.parseLong( header.getHeader("Content-Length") );
+		this(in,
+                parseDelimiter(header.getHeader("Content-type")),
+                Long.parseLong( header.getHeader("Content-Length")));
 	}
-	
-	public MultipartParser(BufferedReader in, HttpServletRequest req){
-		this.in = in;
-		
-		String cotype = req.getHeader("Content-type");
-		cotype = cotype.split(" *; *")[1];
-		delimiter = cotype.split(" *= *")[1];
-		
-		contentLength = req.getContentLength();
-	}
-	
-	public MultipartParser(BufferedReader in, String delimiter, long length){
-		this.in = in;
-		this.delimiter = delimiter;		
-		this.contentLength = length;
-	}
-	
-	
-	/**
-	 * @param listener is the listener that will be called for progress
-	 */
-	public void setListener(ProgressListener<MultipartParser,MultipartField> listener){
-		this.listener = listener;
-	}
-	
-	/**
-	 * Parses the HTTP Body and returns a list of fields
-	 *  
-	 * @return A list of FormField
-	 */
-	public List<MultipartField> parse() throws IOException{
-		ArrayList<MultipartField> list = new ArrayList<MultipartField>();
-		parse(list, delimiter);
-		return list;
+	public MultipartParser(HttpServletRequest req) throws IOException {
+		this(req.getReader(),
+                parseDelimiter(req.getHeader("Content-type")),
+                req.getContentLength());
 	}
 
+    private static String parseDelimiter(String contentTypeHeader){
+        String delimiter = contentTypeHeader.split(" *; *")[1];
+        delimiter = delimiter.split(" *= *")[1];
+        return delimiter;
+    }
 
-	private void parse(List<MultipartField> list, String delimiter) throws IOException{
-		// TODO: 
-	}
+	
 
-	
-	/**
-	 * Creates a temporary file in either the system 
-	 * temporary folder or by the setTempDir() function
-	 * 
-	 * @return the temporary file
-	 */
-	protected File createTempFile() throws IOException{
-		if(tempDir != null) 
-			return File.createTempFile("upload", ".part", tempDir.getAbsoluteFile());
-		else
-			return File.createTempFile("upload", ".part");
-	}
-	
-	/**
-	 * Sets the initial delimiter
-	 * 
-	 * @param delimiter is the new delimiter
-	 */
-	public void setDelimiter(String delimiter){
-		this.delimiter = delimiter;
-	}
-	
-	public void setTempDir(File dir){
-		if(!dir.isDirectory())
-			throw new RuntimeException("\""+dir.getAbsolutePath()+"\" is not a directory!");
-		if(!dir.canWrite())
-			throw new RuntimeException("\""+dir.getAbsolutePath()+"\" is not writable!");
-		tempDir = dir;
-	}
-	
 	public long getContentLength(){
 		return contentLength;
 	}
+
+
+
+	@Override
+	public Iterator<MultipartField> iterator() {
+        if (iterator == null)
+            iterator = new MultiPartIterator();
+		return iterator;
+	}
+
+
+    protected class MultiPartIterator implements Iterator<MultipartField>{
+        private String currentLine;
+        private boolean endOfStream;
+        private HttpHeaderParser parser;
+
+
+        protected MultiPartIterator(){
+            this.endOfStream = false;
+            this.parser = new HttpHeaderParser(in);
+            this.parser.setReadStatusLine(false);
+        }
+
+
+        @Override
+        public boolean hasNext() {
+            try{
+                findDelimiter();
+            if (endOfStream)
+                return false;
+            return true;
+            } catch (IOException e){
+                logger.log(Level.SEVERE, null, e);
+                endOfStream = true;
+            }
+            return false;
+        }
+        private void findDelimiter() throws IOException {
+            if (endOfStream || matchesDelimiter(currentLine))
+                return;
+            while ((currentLine=in.readLine()) != null) {
+                if (matchesDelimiter(currentLine))
+                    break;
+            }
+        }
+        private boolean matchesDelimiter(String match){
+            if (match == null)
+                return false;
+            else if (match.equals("--" + delimiter + "--")) {
+                endOfStream = true;
+                return true;
+            }
+            else if (match.equals("--" + delimiter))
+                return true;
+            return false;
+        }
+
+        @Override
+        public MultipartField next() {
+            if (!hasNext())
+                return null;
+            try {
+                HttpHeader header = parser.read();
+                String disposition = header.getHeader(HEADER_CONTENT_DISPOSITION);
+                if (disposition != null){
+                    HashMap<String,String> map = new HashMap<>();
+                    HttpHeaderParser.parseHeaderValue(map, disposition);
+                    if (map.containsKey("form-data")){
+                        if (map.containsKey("filename")){
+                            MultipartFileField field = new MultipartFileField();
+                            return field;
+                        }
+                        else{
+                            MultipartStringField field = new MultipartStringField();
+                            return field;
+                        }
+                    }
+                    else {
+                        logger.warning("Only form-data is supported");
+                        return this.next(); // find next field
+                    }
+                }
+            } catch (IOException e) {
+                logger.log(Level.SEVERE, null, e);
+            }
+            return null;
+        }
+
+
+        @Override
+        public void remove() {
+            throw new UnsupportedOperationException("Remove not supported in read only stream.");
+        }
+    }
 }
