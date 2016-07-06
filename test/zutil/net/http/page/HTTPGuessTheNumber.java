@@ -22,13 +22,18 @@
  * THE SOFTWARE.
  */
 
-package zutil.net.http;
+package zutil.net.http.page;
+
+import zutil.net.http.HttpHeader;
+import zutil.net.http.HttpPage;
+import zutil.net.http.HttpPrintStream;
+import zutil.net.http.HttpServer;
 
 import java.io.IOException;
 import java.util.Map;
 
 
-public class HTTPGuessTheNumber implements HttpPage{
+public class HTTPGuessTheNumber implements HttpPage {
 
 	public static void main(String[] args) throws IOException{
 		//HttpServer server = new HttpServer("localhost", 443, FileFinder.find("keySSL"), "rootroot");//SSL

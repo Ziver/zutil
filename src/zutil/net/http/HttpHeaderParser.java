@@ -29,6 +29,7 @@ import zutil.parser.URLDecoder;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.StringReader;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 public class HttpHeaderParser {
@@ -41,6 +42,7 @@ public class HttpHeaderParser {
 
 
     private BufferedReader in;
+    private boolean readStatusLine;
 
 
 	/**
@@ -50,6 +52,7 @@ public class HttpHeaderParser {
 	 */
 	public HttpHeaderParser(BufferedReader in){
         this.in = in;
+        this.readStatusLine = true;
 	}
 
 	/**
@@ -58,81 +61,98 @@ public class HttpHeaderParser {
 	 * @param   in 		is the String
 	 */
 	public HttpHeaderParser(String in){
-        this.in = new BufferedReader(new StringReader(in));
+        this(new BufferedReader(new StringReader(in)));
 	}
 
 
     public HttpHeader read() throws IOException {
-        HttpHeader header = null;
+        HttpHeader header = new HttpHeader();
         String line = null;
-        if( (line=in.readLine()) != null && !line.isEmpty() ){
-            header = new HttpHeader();
-            parseStatusLine(header, line);
-            while( (line=in.readLine()) != null && !line.isEmpty() ){
-                parseLine(header, line);
-            }
-            parseCookies(header);
+
+        // First line
+        if (readStatusLine) {
+            if( (line=in.readLine()) != null && !line.isEmpty() )
+                parseStatusLine(header, line);
+            else
+                return null;
         }
+        // Read header body
+        while( (line=in.readLine()) != null && !line.isEmpty() ){
+            parseHeaderLine(header, line);
+        }
+        // Post processing
+        parseHeaderValue(header.getCookieMap(), header.getHeader(HEADER_COOKIE));
+
         return header;
     }
 
+    /**
+     * @param   readStatusLine      indicates if the stream contains http status lines. (default: true)
+     */
+    public void setReadStatusLine(boolean readStatusLine){
+        this.readStatusLine = readStatusLine;
+    }
 
 	/**
-	 * Parses the first header line and ads the values to 
-	 * the map and returns the file name and path
-	 * 
-	 * @param 	line 		The header String
-	 * @return 				The path and file name as a String
+	 * Parses the first line of a http request/response and stores the values in a HttpHeader object
+	 *
+     * @param   header          the header object where the cookies will be stored.
+	 * @param 	statusLine 		the status line String
 	 */
-	protected static void parseStatusLine(HttpHeader header, String line){
+	public static void parseStatusLine(HttpHeader header, String statusLine){
 		// Server Response
-		if( line.startsWith("HTTP/") ){
+		if( statusLine.startsWith("HTTP/") ){
 			header.setIsRequest(false);
-			header.setHTTPVersion( Float.parseFloat( line.substring( 5 , 8)));
-			header.setHTTPCode( Integer.parseInt( line.substring( 9, 12 )));
+			header.setHTTPVersion( Float.parseFloat( statusLine.substring( 5 , 8)));
+			header.setHTTPCode( Integer.parseInt( statusLine.substring( 9, 12 )));
 		}
 		// Client Request
-		else if(line.contains("HTTP/")){
+		else if(statusLine.contains("HTTP/")){
 			header.setIsRequest(true);
-			header.setRequestType( line.substring(0, line.indexOf(" ")));
-			header.setHTTPVersion( Float.parseFloat( line.substring(line.lastIndexOf("HTTP/")+5 , line.length()).trim()));
-			line = (line.substring(header.getRequestType().length()+1, line.lastIndexOf("HTTP/")));
+			header.setRequestType( statusLine.substring(0, statusLine.indexOf(" ")).trim() );
+			header.setHTTPVersion( Float.parseFloat( statusLine.substring(statusLine.lastIndexOf("HTTP/")+5 , statusLine.length()).trim()));
+			statusLine = (statusLine.substring(header.getRequestType().length()+1, statusLine.lastIndexOf("HTTP/")));
 
 			// parse URL and attributes
-			int index = line.indexOf('?');
+			int index = statusLine.indexOf('?');
 			if(index > -1){
-				header.setRequestURL( line.substring(0, index));
-				line = line.substring( index+1, line.length());
-				parseURLParameters(header, line);
+				header.setRequestURL( statusLine.substring(0, index));
+				statusLine = statusLine.substring( index+1, statusLine.length());
+				parseURLParameters(header, statusLine);
 			}
 			else{
-				header.setRequestURL(line);
+				header.setRequestURL(statusLine);
 			}
 		}
 	}
 
     /**
-     * Parses the rest of the header
+     * Parses a http key value paired header line
      *
+     * @param   header          the header object where the cookies will be stored.
      * @param 	line 	is the next line in the header
      */
-    protected void parseLine(HttpHeader header, String line){
+    public static void parseHeaderLine(HttpHeader header, String line){
         String[] data = PATTERN_COLON.split( line, 2 );
-        header.putHeader(
+        header.getHeaderMap().put(
                 data[0].trim().toUpperCase(), 					// Key
                 (data.length>1 ? data[1] : "").trim()); 		//Value
     }
 
     /**
-     * Parses the header "Cookie" and stores all cookies in the HttpHeader object
+     * Parses a header value string that contains key and value paired data and
+     * stores them in a HashMap. If a pair only contain a key the the value
+     * will be set as a empty string.
+	 *
+	 * @param   map             the Map where the cookies will be stored.
+     * @param   cookieHeader    the raw cookie header String that will be parsed
      */
-    protected void parseCookies(HttpHeader header){
-        String cookieHeader = header.getHeader(HEADER_COOKIE);
+    public static void parseHeaderValue(Map<String,String> map, String cookieHeader){
         if(cookieHeader != null && !cookieHeader.isEmpty()){
             String[] tmp = PATTERN_SEMICOLON.split(cookieHeader);
             for(String cookie : tmp){
                 String[] tmp2 = PATTERN_EQUAL.split(cookie, 2);
-                header.putCookie(
+                map.put(
                         tmp2[0].trim(), 							// Key
                         (tmp2.length>1 ? tmp2[1] : "").trim()); 	//Value
             }
@@ -140,19 +160,19 @@ public class HttpHeaderParser {
     }
 
 	/**
-	 * Parses a String with variables from a get or post
-	 * that was sent from a client
-	 * 
-	 * @param 	attributes 		is the String containing all the attributes
+	 * Parses a string with variables from a get or post request that was sent from a client
+	 *
+     * @param   header              the header object where the cookies will be stored.
+	 * @param 	urlAttributes 		is the String containing all the attributes
 	 */
-	protected static void parseURLParameters(HttpHeader header, String attributes){
+	public static void parseURLParameters(HttpHeader header, String urlAttributes){
 		String[] tmp;
-		attributes = URLDecoder.decode(attributes);
+		urlAttributes = URLDecoder.decode(urlAttributes);
 		// get the variables
-		String[] data = PATTERN_AND.split( attributes );
+		String[] data = PATTERN_AND.split( urlAttributes );
 		for(String element : data){
 			tmp = PATTERN_EQUAL.split(element, 2);
-			header.putURLAttribute(
+			header.getUrlAttributeMap().put(
 					tmp[0].trim(), 								// Key
 					(tmp.length>1 ? tmp[1] : "").trim()); 		//Value
 		}

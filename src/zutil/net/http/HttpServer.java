@@ -194,7 +194,7 @@ public class HttpServer extends ThreadedTCPNetworkServer{
                             tmp.contains("text/xml") ||
                             tmp.contains("text/plain")) {
                         // save the variables
-                        header.putURLAttribute("", tmpBuff.toString());
+                        header.getUrlAttributeMap().put("", tmpBuff.toString());
                     } else if (tmp.contains("multipart/form-data")) {
                         // TODO: File upload
                         throw new UnsupportedOperationException("HTTP Content-Type 'multipart-form-data' not supported.");

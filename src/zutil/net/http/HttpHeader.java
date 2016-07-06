@@ -148,7 +148,7 @@ public class HttpHeader {
 
 	protected void setIsRequest(boolean request) { this.request = request; }
     protected void setRequestType(String type){
-        this.type = type.trim();
+        this.type = type;
     }
     protected void setHTTPVersion(float version){
         this.version = version;
@@ -159,16 +159,10 @@ public class HttpHeader {
     protected void setRequestURL(String url){
         this.url = url.trim().replaceAll("//", "/");
     }
-	protected void putCookie(String key, String value){
-		cookies.put(key.trim(), value.trim());
-	}
-	protected void putURLAttribute(String key, String value){
-        urlAttributes.put(key.trim(), value.trim());
-    }
-	protected void putHeader(String key, String value){
-        headers.put(key.trim(), value.trim());
-    }
 
+	protected HashMap<String,String> getHeaderMap(){
+		return headers;
+	}
 	protected HashMap<String,String> getCookieMap(){
 		return cookies;
 	}
