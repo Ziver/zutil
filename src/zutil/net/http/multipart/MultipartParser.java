@@ -162,7 +162,7 @@ public class MultipartParser implements Iterable<MultipartField>{
                             return field;
                         }
                         else{
-                            MultipartStringField field = new MultipartStringField();
+                            MultipartStringField field = new MultipartStringField(map.get("name"));
                             return field;
                         }
                     }

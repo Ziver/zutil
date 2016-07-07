@@ -24,6 +24,7 @@
 
 package zutil.net.http;
 
+import zutil.StringUtil;
 import zutil.parser.URLDecoder;
 
 import java.io.BufferedReader;
@@ -154,7 +155,7 @@ public class HttpHeaderParser {
                 String[] tmp2 = PATTERN_EQUAL.split(cookie, 2);
                 map.put(
                         tmp2[0].trim(), 							// Key
-                        (tmp2.length>1 ? tmp2[1] : "").trim()); 	//Value
+                        StringUtil.trim((tmp2.length>1 ? tmp2[1] : "").trim(), '\"')); 	//Value
             }
         }
     }
