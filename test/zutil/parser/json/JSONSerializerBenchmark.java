@@ -57,7 +57,7 @@ public class JSONSerializerBenchmark {
             TestClass targetObj = (TestClass) in.readObject();
             in.close();
 
-            assertEquals( sourceObj, targetObj );
+            TestClass.assertEquals( sourceObj, targetObj );
         }
     }
 
@@ -68,7 +68,7 @@ public class JSONSerializerBenchmark {
 
             TestClass targetObj = JSONSerializerTest.sendReceiveObject(sourceObj);
 
-            assertEquals( sourceObj, targetObj );
+            TestClass.assertEquals( sourceObj, targetObj );
         }
     }
 

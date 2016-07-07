@@ -186,8 +186,6 @@ public class JSONSerializerTest{
 		out.close();
 		
 		String data = bout.toString();
-        System.out.println(data);
-        
         return data;
 	}
 	
