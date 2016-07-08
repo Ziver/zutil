@@ -31,6 +31,7 @@ import java.util.NoSuchElementException;
 /**
  * This class is a first in first out circular buffer with a fixed size.
  * If the size is exceed then the oldest item will be removed.
+ *
  * Created by Ziver on 2015-09-22.
  */
 public class CircularBuffer<T> implements Iterable<T>{

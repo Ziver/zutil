@@ -89,11 +89,23 @@ public class IOUtil {
     }
 
     /**
-     * Copies all data from the input stream to the output stream.
-     * The input stream will not be closed after method has returned.
+     * Copies all data from one InputStream to another OutputStream.
+     * The streams will not be closed after method has returned.
      */
     public static void copyStream(InputStream in, OutputStream out) throws IOException {
-        byte[] buff = new byte[256];
+        byte[] buff = new byte[8192]; // This is the default BufferedInputStream buffer size
+        int len;
+        while((len = in.read(buff)) > 0){
+            out.write(buff, 0, len);
+        }
+    }
+
+    /**
+     * Copies all data from one Reader to another Writer.
+     * The streams will not be closed after method has returned.
+     */
+    public static void copyStream(Reader in, Writer out) throws IOException {
+        char[] buff = new char[8192]; // This is the default BufferedReader buffer size
         int len;
         while((len = in.read(buff)) > 0){
             out.write(buff, 0, len);

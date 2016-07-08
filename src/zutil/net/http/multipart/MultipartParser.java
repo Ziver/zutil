@@ -24,17 +24,17 @@
 
 package zutil.net.http.multipart;
 
-import zutil.ProgressListener;
+import zutil.io.BufferedBoundaryInputStream;
+import zutil.io.IOUtil;
+import zutil.io.NullWriter;
 import zutil.log.LogUtil;
 import zutil.net.http.HttpHeader;
 import zutil.net.http.HttpHeaderParser;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.*;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -57,23 +57,23 @@ public class MultipartParser implements Iterable<MultipartField>{
 	/** The length of the HTTP Body */
 	private long contentLength;
 	/** This is the input stream */
-	private BufferedReader in;
+	private InputStream in;
 
     private MultiPartIterator iterator;
 
 
-    public MultipartParser(BufferedReader in, String delimiter, long length){
+    public MultipartParser(InputStream in, String delimiter, long length){
         this.in = in;
         this.delimiter = delimiter;
         this.contentLength = length;
     }
-	public MultipartParser(BufferedReader in, HttpHeader header){
+	public MultipartParser(InputStream in, HttpHeader header){
 		this(in,
                 parseDelimiter(header.getHeader("Content-type")),
                 Long.parseLong( header.getHeader("Content-Length")));
 	}
 	public MultipartParser(HttpServletRequest req) throws IOException {
-		this(req.getReader(),
+		this(req.getInputStream(),
                 parseDelimiter(req.getHeader("Content-type")),
                 req.getContentLength());
 	}
@@ -101,56 +101,39 @@ public class MultipartParser implements Iterable<MultipartField>{
 
 
     protected class MultiPartIterator implements Iterator<MultipartField>{
-        private String currentLine;
-        private boolean endOfStream;
+        private BufferedBoundaryInputStream boundaryIn;
+        private BufferedReader buffIn;
         private HttpHeaderParser parser;
 
 
         protected MultiPartIterator(){
-            this.endOfStream = false;
-            this.parser = new HttpHeaderParser(in);
+            this.boundaryIn = new BufferedBoundaryInputStream(in);
+            this.buffIn = new BufferedReader(new InputStreamReader(boundaryIn));
+            this.parser = new HttpHeaderParser(buffIn);
             this.parser.setReadStatusLine(false);
+
+            this.boundaryIn.setBoundary("--"+delimiter);
         }
 
 
         @Override
         public boolean hasNext() {
-            try{
-                findDelimiter();
-            if (endOfStream)
-                return false;
-            return true;
+            try {
+                IOUtil.copyStream(buffIn, new NullWriter());
+                return boundaryIn.hasNext();
             } catch (IOException e){
                 logger.log(Level.SEVERE, null, e);
-                endOfStream = true;
             }
             return false;
         }
-        private void findDelimiter() throws IOException {
-            if (endOfStream || matchesDelimiter(currentLine))
-                return;
-            while ((currentLine=in.readLine()) != null) {
-                if (matchesDelimiter(currentLine))
-                    break;
-            }
-        }
-        private boolean matchesDelimiter(String match){
-            if (match == null)
-                return false;
-            else if (match.equals("--" + delimiter + "--")) {
-                endOfStream = true;
-                return true;
-            }
-            else if (match.equals("--" + delimiter))
-                return true;
-            return false;
-        }
+
 
         @Override
         public MultipartField next() {
             if (!hasNext())
                 return null;
             try {
+                boundaryIn.next(); // Skip current boundary
                 HttpHeader header = parser.read();
                 String disposition = header.getHeader(HEADER_CONTENT_DISPOSITION);
                 if (disposition != null){
@@ -158,16 +141,16 @@ public class MultipartParser implements Iterable<MultipartField>{
                     HttpHeaderParser.parseHeaderValue(map, disposition);
                     if (map.containsKey("form-data")){
                         if (map.containsKey("filename")){
-                            MultipartFileField field = new MultipartFileField();
+                            MultipartFileField field = new MultipartFileField(map, buffIn);
                             return field;
                         }
                         else{
-                            MultipartStringField field = new MultipartStringField(map.get("name"));
+                            MultipartStringField field = new MultipartStringField(map, buffIn);
                             return field;
                         }
                     }
                     else {
-                        logger.warning("Only form-data is supported");
+                        logger.warning("Only multipart form-data is supported");
                         return this.next(); // find next field
                     }
                 }

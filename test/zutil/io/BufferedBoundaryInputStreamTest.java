@@ -29,13 +29,14 @@ import org.junit.Test;
 import java.io.IOException;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 
 @SuppressWarnings("resource")
 public class BufferedBoundaryInputStreamTest {
 
 	@Test
-	public void testReadB1() throws IOException {
+	public void normal() throws IOException {
 		StringInputStream inin = new StringInputStream("aaa#aaaaaaaaaaaaaaaa#aaaaaaaaaaaaaaa#");
 		BufferedBoundaryInputStream in = new BufferedBoundaryInputStream(inin);
 		
@@ -61,7 +62,16 @@ public class BufferedBoundaryInputStreamTest {
 	}
 
 	@Test
-	public void testOnlyBoundaries() throws IOException {
+	public void startWithBound() throws IOException {
+		StringInputStream inin = new StringInputStream("#aaa");
+		BufferedBoundaryInputStream in = new BufferedBoundaryInputStream(inin);
+		in.setBoundary("#");
+
+		assertEquals(-1, in.read());
+	}
+
+	@Test
+	public void onlyBoundaries() throws IOException {
 		StringInputStream inin = new StringInputStream("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
 		BufferedBoundaryInputStream in = new BufferedBoundaryInputStream(inin);
 
@@ -72,14 +82,14 @@ public class BufferedBoundaryInputStreamTest {
 			assertEquals(-1, in.read());
 			assertEquals(-1, in.read());
 			in.next();
-			if(!in.isBoundary())
+			if(!in.hasNext())
 				break;
 		}
 		assertEquals(35, n);
 	}
 	
 	@Test
-	public void testNoBounds() throws IOException {
+	public void noBounds() throws IOException {
 		String data = "1234567891011121314151617181920";
 		StringInputStream inin = new StringInputStream(data);
 		BufferedBoundaryInputStream in = new BufferedBoundaryInputStream(inin);

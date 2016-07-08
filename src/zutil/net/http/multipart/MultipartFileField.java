@@ -24,8 +24,11 @@
 
 package zutil.net.http.multipart;
 
-import java.io.File;
-import java.io.IOException;
+import zutil.io.IOUtil;
+
+import java.io.*;
+import java.util.HashMap;
+import java.util.Map;
 
 
 /**
@@ -34,14 +37,14 @@ import java.io.IOException;
  * @author Ziver
  */
 public class MultipartFileField implements MultipartField{
-	/** This is the temporary directory for the received files	 */
-	private File tempDir;
-	protected String filename;
-	protected File file;
-	
+	private String fieldname;
+	private String filename;
+    private InputStream in;
 
-	protected MultipartFileField() throws IOException {
-		this.file = createTempFile();
+
+	protected MultipartFileField(Map<String,String> header, BufferedReader in) throws IOException {
+		this.fieldname = header.get("fieldname");
+		this.filename = header.get("filename");
 	}
 	
 	/**
@@ -52,51 +55,28 @@ public class MultipartFileField implements MultipartField{
 	}
 
     /**
-     * @return the specific file name for this field.
+     * @return the field name
      */
     public String getName(){
-        return filename;
+        return fieldname;
+    }
+
+	public String getFilename(){
+		return filename;
+	}
+
+    public InputStream getInputStream(){
+        return in;
     }
 
 	/**
-	 * @return the File class that points to the received file
-	 */
-	public File getFile(){
-		return file;
-	}
-	
-	/**
-	 * Moves the received file.
+	 * Reads in all data and save it into the specified file
 	 * 
-	 * @param   newFile    is the new location to move the file to
-	 * @return if the move was successful 
+	 * @param   file    is the new file where the data will be stored
 	 */
-	public boolean moveFile(File newFile){
-		boolean success = file.renameTo(newFile);
-		if(success)
-			file = newFile;
-		return success;
-	}
-
-	/**
-	 * Creates a temporary file in either the system
-	 * temporary folder or by the setTempDir() function
-	 *
-	 * @return the temporary file
-	 */
-	protected File createTempFile() throws IOException {
-		if(tempDir != null)
-			return File.createTempFile("upload", ".part", tempDir.getAbsoluteFile());
-		else
-			return File.createTempFile("upload", ".part");
-	}
-
-
-	public void setTempDir(File dir){
-		if(!dir.isDirectory())
-			throw new RuntimeException("\""+dir.getAbsolutePath()+"\" is not a directory!");
-		if(!dir.canWrite())
-			throw new RuntimeException("\""+dir.getAbsolutePath()+"\" is not writable!");
-		tempDir = dir;
+	public void saveToFile(File file) throws IOException {
+        BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(file));
+        IOUtil.copyStream(in, out);
+        out.close();
 	}
 }

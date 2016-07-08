@@ -83,19 +83,16 @@ public class CircularBufferTest {
         } catch (IndexOutOfBoundsException e) {}
     }
 
-    @Test
+    @Test(expected = NoSuchElementException.class)
     public void iteratorEmpty() {
         CircularBuffer<Integer> buff = new CircularBuffer<Integer>(10);
         Iterator<Integer> it = buff.iterator();
 
         assert (!it.hasNext());
-        try {
-            it.next();
-            fail("NoSuchElementException was not thrown");
-        } catch (NoSuchElementException e) {}
+        it.next(); // Exception
     }
 
-    @Test
+    @Test(expected = NoSuchElementException.class)
     public void iteratorThreeElements() {
         CircularBuffer<Integer> buff = new CircularBuffer<Integer>(10);
         buff.add(10);
@@ -111,9 +108,6 @@ public class CircularBufferTest {
         assertEquals((Integer) 10, it.next());
         assert (!it.hasNext());
 
-        try {
-            it.next();
-            fail("NoSuchElementException was not thrown");
-        } catch (NoSuchElementException e) {}
+        it.next(); // Exception
     }
 }

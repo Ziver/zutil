@@ -216,9 +216,9 @@ public class BufferedBoundaryInputStream extends FilterInputStream{
 	}
 
 	/**
-	 * @return if current position in the buffer is a boundary
+	 * @return if there is more data to read
 	 */
-	public boolean isBoundary(){
+	public boolean hasNext(){
 		return bound_pos == buf_pos;
 	}
 	
