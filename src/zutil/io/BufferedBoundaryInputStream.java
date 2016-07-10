@@ -36,7 +36,7 @@ import java.io.InputStream;
  */
 public class BufferedBoundaryInputStream extends FilterInputStream{
 	/** The size of the buffer in bytes */
-	public static final int DEFAULT_BUF_SIZE = 64*1024;
+	public static final int DEFAULT_BUF_SIZE = 8192;
 
 	/** The raw buffer */
 	protected byte buffer[];
@@ -133,16 +133,15 @@ public class BufferedBoundaryInputStream extends FilterInputStream{
 	 * @return 			the amount of bytes read or -1 if EOF
 	 */
 	public int read(byte b[], int off, int len) throws IOException {
-		if(bound_pos == buf_pos)
-			return -1; // boundary
-			
 		if(buf_pos >= buf_end-boundary.length) {
 			if(fillBuffer() <= 0)
 				return -1; // EOF
 		}
-		int leftover = buf_end - buf_pos;
+		if(bound_pos == buf_pos)
+			return -1; // boundary
 
 		// The request is larger then the buffer size
+		int leftover = buf_end - buf_pos;
 		if(len > leftover){
 			len = leftover;
 		}
@@ -159,11 +158,13 @@ public class BufferedBoundaryInputStream extends FilterInputStream{
 	/**
 	 * Skips over the boundary at the current position in the buffer
 	 */
-	public void next(){
+	public boolean next(){
 		if(bound_pos == buf_pos){
 			buf_pos += boundary.length;
 			searchNextBoundary();
+            return buf_end >= buf_pos;
 		}
+        return true;
 	}
 	
 	/**
@@ -218,7 +219,7 @@ public class BufferedBoundaryInputStream extends FilterInputStream{
 	/**
 	 * @return if there is more data to read
 	 */
-	public boolean hasNext(){
+	public boolean isOnBoundary(){
 		return bound_pos == buf_pos;
 	}
 	

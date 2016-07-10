@@ -43,7 +43,7 @@ public class IOUtil {
 	 */
 	public static byte[] getContent(InputStream stream) throws IOException{
         DynamicByteArrayStream dyn_buff = new DynamicByteArrayStream();
-        byte[] buff = new byte[256];
+        byte[] buff = new byte[8192];
         int len = 0;
 		while((len = stream.read(buff)) != -1){
 			dyn_buff.append(buff, 0, len);

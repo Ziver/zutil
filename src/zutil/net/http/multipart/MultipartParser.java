@@ -120,7 +120,7 @@ public class MultipartParser implements Iterable<MultipartField>{
         public boolean hasNext() {
             try {
                 IOUtil.copyStream(buffIn, new NullWriter());
-                return boundaryIn.hasNext();
+                return boundaryIn.next();
             } catch (IOException e){
                 logger.log(Level.SEVERE, null, e);
             }
@@ -133,8 +133,11 @@ public class MultipartParser implements Iterable<MultipartField>{
             if (!hasNext())
                 return null;
             try {
-                boundaryIn.next(); // Skip current boundary
                 HttpHeader header = parser.read();
+                String tmp = buffIn.readLine(); // read the new line after the delimiter
+                if (tmp == null && tmp.equals("--"))
+                    return null;
+
                 String disposition = header.getHeader(HEADER_CONTENT_DISPOSITION);
                 if (disposition != null){
                     HashMap<String,String> map = new HashMap<>();

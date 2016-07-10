@@ -68,6 +68,12 @@ public class BufferedBoundaryInputStreamTest {
 		in.setBoundary("#");
 
 		assertEquals(-1, in.read());
+
+        inin = new StringInputStream("#aaa");
+        in = new BufferedBoundaryInputStream(inin);
+        in.setBoundary("#");
+
+        assertEquals(-1, in.read(new byte[10], 0, 10));
 	}
 
 	@Test
@@ -82,7 +88,7 @@ public class BufferedBoundaryInputStreamTest {
 			assertEquals(-1, in.read());
 			assertEquals(-1, in.read());
 			in.next();
-			if(!in.hasNext())
+			if(!in.isOnBoundary())
 				break;
 		}
 		assertEquals(35, n);
@@ -103,4 +109,17 @@ public class BufferedBoundaryInputStreamTest {
 		assertEquals(data, output.toString());
 	}
 
+    @Test
+    public void next() throws IOException {
+        StringInputStream inin = new StringInputStream("a#a#");
+        BufferedBoundaryInputStream in = new BufferedBoundaryInputStream(inin);
+        in.setBoundary("#");
+
+        assertEquals('a', in.read());
+        assertEquals(-1, in.read());
+        assertEquals(true, in.next());
+        assertEquals('a', in.read());
+        assertEquals(-1, in.read());
+        assertEquals(false, in.next());
+    }
 }
