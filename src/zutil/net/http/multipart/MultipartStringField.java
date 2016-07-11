@@ -17,7 +17,7 @@ public class MultipartStringField implements MultipartField {
 
     protected MultipartStringField(Map<String,String> header, BufferedReader in) throws IOException {
         this.name = header.get("name");
-        value = IOUtil.getContentAsString(in);
+        value = in.readLine();
     }
 
     @Override

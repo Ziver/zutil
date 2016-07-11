@@ -75,7 +75,7 @@ public class IOUtil {
         StringBuilder str = new StringBuilder();
         BufferedReader in = null;
         if(reader instanceof BufferedReader)
-            reader = (BufferedReader) reader;
+            in = (BufferedReader) reader;
         else
             in = new BufferedReader(reader);
 
