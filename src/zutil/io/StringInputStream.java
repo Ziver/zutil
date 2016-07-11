@@ -63,12 +63,12 @@ public class StringInputStream extends InputStream{
      * Reads the next byte of data from the input stream.
      */
     public int read(){
-        if(buffer.length() > 0){
-            int ret = Character.getNumericValue( buffer.charAt( 0 ));
-            buffer.deleteCharAt( 0 );
-            return ret;
-        }
-        return -1;
+        if(buffer.length() == 0)
+			return -1;
+
+		int ret = Character.getNumericValue( buffer.charAt( 0 ));
+		buffer.deleteCharAt( 0 );
+		return ret;
     }
 	
     /**
@@ -84,12 +84,13 @@ public class StringInputStream extends InputStream{
      * into an array of bytes.
      */
     public int read(byte[] b, int off, int len){
+		if(buffer.length() == 0)
+			return -1;
+
     	if( buffer.length() < len ){
     		len = buffer.length();
     	}
-    	char[] ctmp = new char[len];
-    	buffer.getChars(0, len, ctmp, 0);
-    	byte[] btmp = new String( ctmp ).getBytes();
+    	byte[] btmp = buffer.substring(0, len).getBytes();
     	System.arraycopy(btmp, 0, b, off, len);
     	buffer.delete(0, len);
 		return len;

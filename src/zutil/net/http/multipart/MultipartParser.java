@@ -119,9 +119,8 @@ public class MultipartParser implements Iterable<MultipartField>{
         @Override
         public boolean hasNext() {
             try {
-                IOUtil.copyStream(buffIn, new NullWriter());
-                return boundaryIn.isOnBoundary();
-            } catch (IOException e){
+                return boundaryIn.hasNext();
+            } catch (IOException e) {
                 logger.log(Level.SEVERE, null, e);
             }
             return false;
