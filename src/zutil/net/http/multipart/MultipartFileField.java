@@ -39,12 +39,14 @@ import java.util.Map;
 public class MultipartFileField implements MultipartField{
 	private String fieldname;
 	private String filename;
+    private String contentType;
     private InputStream in;
 
 
-	protected MultipartFileField(Map<String,String> header, BufferedReader in) throws IOException {
-		this.fieldname = header.get("fieldname");
-		this.filename = header.get("filename");
+	protected MultipartFileField(String name, String filename, String contentType, BufferedReader in) throws IOException {
+		this.fieldname = name;
+		this.filename = filename;
+		this.contentType = contentType;
 	}
 	
 	/**
@@ -65,6 +67,10 @@ public class MultipartFileField implements MultipartField{
 		return filename;
 	}
 
+	public String getContentType() {
+		return contentType;
+	}
+
     public InputStream getInputStream(){
         return in;
     }
@@ -79,4 +85,5 @@ public class MultipartFileField implements MultipartField{
         IOUtil.copyStream(in, out);
         out.close();
 	}
+
 }

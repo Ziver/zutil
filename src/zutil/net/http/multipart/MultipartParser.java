@@ -104,6 +104,7 @@ public class MultipartParser implements Iterable<MultipartField>{
         private BufferedBoundaryInputStream boundaryIn;
         private BufferedReader buffIn;
         private HttpHeaderParser parser;
+        private boolean firstIteration;
 
 
         protected MultiPartIterator(){
@@ -113,6 +114,7 @@ public class MultipartParser implements Iterable<MultipartField>{
             this.parser.setReadStatusLine(false);
 
             this.boundaryIn.setBoundary("--"+delimiter);
+            firstIteration = true;
         }
 
 
@@ -131,22 +133,35 @@ public class MultipartParser implements Iterable<MultipartField>{
         public MultipartField next() {
             try {
                 boundaryIn.next();
+                if (firstIteration){
+                    this.boundaryIn.setBoundary("\n--"+delimiter); // Add new-line to boundary after the first iteration
+                    firstIteration = false;
+                }
                 String tmp = buffIn.readLine(); // read the new line after the delimiter
                 if (tmp == null || tmp.equals("--"))
                     return null;
 
                 HttpHeader header = parser.read();
                 String disposition = header.getHeader(HEADER_CONTENT_DISPOSITION);
+                String contentType = header.getHeader("Content-Type");
+                if (contentType != null && !contentType.equalsIgnoreCase("application/octet-stream"))
+                    logger.warning("Unsupported ontent-Type: "+contentType);
                 if (disposition != null){
                     HashMap<String,String> map = new HashMap<>();
                     HttpHeaderParser.parseHeaderValue(map, disposition);
                     if (map.containsKey("form-data")){
                         if (map.containsKey("filename")){
-                            MultipartFileField field = new MultipartFileField(map, buffIn);
+                            MultipartFileField field = new MultipartFileField(
+                                    map.get("name"),
+                                    map.get("filename"),
+                                    contentType,
+                                    buffIn);
                             return field;
                         }
                         else{
-                            MultipartStringField field = new MultipartStringField(map, buffIn);
+                            MultipartStringField field = new MultipartStringField(
+                                    map.get("name"),
+                                    buffIn);
                             return field;
                         }
                     }

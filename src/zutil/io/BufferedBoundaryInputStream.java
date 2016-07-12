@@ -79,7 +79,7 @@ public class BufferedBoundaryInputStream extends FilterInputStream{
 
 	
 	/**
-	 * @return 			the next byte in the buffer
+     * @return 			the next byte from the stream or -1 if EOF or stream is on a boundary
 	 */
 	public final int read() throws IOException{
         if (fillBuffer() < 0)
@@ -94,7 +94,7 @@ public class BufferedBoundaryInputStream extends FilterInputStream{
 	 * Fills the given array with data from the buffer
 	 * 
 	 * @param 	b 		is the array that will be filled
-	 * @return 			the amount of bytes read or -1 if EOF
+	 * @return 			the amount of bytes read or -1 if EOF or stream is on a boundary
 	 */	
 	public int read(byte b[]) throws IOException {
 		return read(b, 0, b.length);
@@ -106,23 +106,22 @@ public class BufferedBoundaryInputStream extends FilterInputStream{
 	 * @param 	b 		is the array that will be filled
 	 * @param 	off 	is the offset in the array
 	 * @param 	len 	is the amount to read
-	 * @return 			the amount of bytes read or -1 if EOF
+     * @return 			the amount of bytes read or -1 if EOF or stream is on a boundary
 	 */
 	public int read(byte b[], int off, int len) throws IOException {
         if (fillBuffer() < 0)
             return -1; // EOF
-        if(isOnBoundary())
+        if (isOnBoundary())
 			return -1; // boundary
 
 		// The request is larger then the buffer size
 		int leftover = available();
-		if(len > leftover){
+		if (len > leftover)
 			len = leftover;
-		}
+
 		// the boundary is in the read range
-		if(buf_pos < buf_bound_pos && buf_bound_pos < buf_pos+len){
+		if (buf_pos < buf_bound_pos && buf_bound_pos < buf_pos+len)
 			len = buf_bound_pos - buf_pos;
-		}
 		
 		System.arraycopy(buffer, buf_pos, b, off, len);
 		buf_pos += len;
@@ -163,8 +162,8 @@ public class BufferedBoundaryInputStream extends FilterInputStream{
 			searchNextBoundary();
 		}
         else { // read data until we find the next boundary or get to the end of the stream
-            buf_pos = buf_end;
-            while (buf_bound_pos >= 0 || fillBuffer() < 0);
+            while (buf_bound_pos >= 0 || fillBuffer() >= 0)
+				buf_pos = buf_end;
         }
 	}
 	
@@ -191,6 +190,7 @@ public class BufferedBoundaryInputStream extends FilterInputStream{
 	 */
 	public void setBoundary(String b){
 		this.boundary = b.getBytes();
+        searchNextBoundary(); // redo the search with the new boundary
 	}
 	
 	/**
@@ -199,6 +199,7 @@ public class BufferedBoundaryInputStream extends FilterInputStream{
 	public void setBoundary(byte[] b){
 		boundary = new byte[b.length];
 		System.arraycopy(b, 0, boundary, 0, b.length);
+        searchNextBoundary(); // redo the search with the new boundary
 	}
 
 	/**
@@ -227,10 +228,11 @@ public class BufferedBoundaryInputStream extends FilterInputStream{
      * buffer and then fills the buffer with data from
      * the source stream
      *
-     * @return 			the number of new bytes read from the source stream
+     * @return 			the number of new bytes read from the source stream,
+     *                  or -1 if the buffer is empty and it is the end of the stream
      */
     private int fillBuffer() throws IOException {
-        int leftover = available();
+        int leftover = this.available();
         // Do we need to fill the buffer
         if(buf_pos < buf_end-boundary.length)
             return 0;
@@ -239,17 +241,18 @@ public class BufferedBoundaryInputStream extends FilterInputStream{
             return -1; // EOF
 
         // Move the end of the buffer to the start to not miss any split boundary
-        if (leftover > 0)
+        if (leftover > 0 && buf_pos != 0)
             System.arraycopy(buffer, buf_pos, buffer, 0, leftover);
+        buf_pos = 0;
+        buf_end = leftover;
+
         // Copy in new data from the stream
-        int n = super.read(buffer, leftover, buffer.length-leftover );
-        // Reset positions
-        if(n+leftover >= 0) {
-            buf_end = leftover + n;
-            buf_pos = 0;
-        }
+        int n = super.read(buffer, buf_end, buffer.length-buf_end);
+        if (n >= 0)
+            buf_end = buf_end + n;
+
         searchNextBoundary();
-        return n;
+        return ((n < 0 && this.available() > 0) ? 0 : n);
     }
 
     /**

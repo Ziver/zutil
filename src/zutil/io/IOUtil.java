@@ -89,6 +89,25 @@ public class IOUtil {
     }
 
     /**
+     * Reads on line terminated by a new line or carriage return from a stream.
+     *
+     * @param   in      the stream to read from
+     * @return          a String that contains one line excluding line terminating
+     *                  characters, null if it is the end of the stream
+     */
+    public static String readLine(InputStream in) throws IOException {
+        StringBuilder str = new StringBuilder(80);
+        int c = 0;
+        while ((c=in.read()) >= 0 && (c != '\n') && (c != '\r'))
+            str.append((char)c);
+        if (c == '\r')
+            in.read(); // if the last char is carriage return we assume the next char in the stream will be new line so skip it
+        if (c == -1 && str.length() == 0)
+            return null; // End of the stream
+        return str.toString();
+    }
+
+    /**
      * Copies all data from one InputStream to another OutputStream.
      * The streams will not be closed after method has returned.
      */

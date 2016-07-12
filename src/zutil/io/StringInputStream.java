@@ -66,7 +66,7 @@ public class StringInputStream extends InputStream{
         if(buffer.length() == 0)
 			return -1;
 
-		int ret = Character.getNumericValue( buffer.charAt( 0 ));
+		int ret = buffer.charAt( 0 );
 		buffer.deleteCharAt( 0 );
 		return ret;
     }

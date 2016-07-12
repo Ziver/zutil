@@ -36,11 +36,16 @@ import static org.junit.Assert.assertTrue;
 @SuppressWarnings("resource")
 public class BufferedBoundaryInputStreamTest {
 
+    private static BufferedBoundaryInputStream getBufferedBoundaryInputStream(String data, String b) {
+        StringInputStream inin = new StringInputStream(data);
+        BufferedBoundaryInputStream in = new BufferedBoundaryInputStream(inin);
+        in.setBoundary(b);
+        return in;
+    }
+
 	@Test
 	public void read_normal() throws IOException {
-		StringInputStream inin = new StringInputStream("aaa#a##aaaaaaa#");
-		BufferedBoundaryInputStream in = new BufferedBoundaryInputStream(inin);
-		in.setBoundary("#");
+        BufferedBoundaryInputStream in = getBufferedBoundaryInputStream("aaa#a##aaaaaaa#", "#");
 
 		assertTrue(in.hasNext());
         assertEquals('a', in.read());
@@ -73,11 +78,9 @@ public class BufferedBoundaryInputStreamTest {
 		assertEquals(-1, in.read());
         assertFalse(in.hasNext());
 	}
-	@Test
+    @Test
 	public void readArr_normal() throws IOException {
-		StringInputStream inin = new StringInputStream("aaa#aaaaaaaaaaaaaaaa#aaaaaaaaaaaaaaa#");
-		BufferedBoundaryInputStream in = new BufferedBoundaryInputStream(inin);
-		in.setBoundary("#");
+        BufferedBoundaryInputStream in = getBufferedBoundaryInputStream("aaa#aaaaaaaaaaaaaaaa#aaaaaaaaaaaaaaa#", "#");
 
 		byte[] buff = new byte[100];
 		int n = in.read(buff);
@@ -101,9 +104,7 @@ public class BufferedBoundaryInputStreamTest {
 
     @Test
     public void read_multiCharBoundary() throws IOException {
-        StringInputStream inin = new StringInputStream("aaa1234");
-        BufferedBoundaryInputStream in = new BufferedBoundaryInputStream(inin);
-        in.setBoundary("1234");
+        BufferedBoundaryInputStream in = getBufferedBoundaryInputStream("aaa1234", "1234");
 
         byte[] buff = new byte[100];
         assertEquals(3, in.read(buff));
@@ -116,9 +117,7 @@ public class BufferedBoundaryInputStreamTest {
     }
     @Test
     public void readArr_multiCharBoundary() throws IOException {
-        StringInputStream inin = new StringInputStream("aaa1234");
-        BufferedBoundaryInputStream in = new BufferedBoundaryInputStream(inin);
-        in.setBoundary("1234");
+        BufferedBoundaryInputStream in = getBufferedBoundaryInputStream("aaa1234", "1234");
 
         assertEquals('a', in.read());
         assertEquals('a', in.read());
@@ -133,26 +132,20 @@ public class BufferedBoundaryInputStreamTest {
 
 	@Test
 	public void read_startWithBound() throws IOException {
-		StringInputStream inin = new StringInputStream("#aaa");
-		BufferedBoundaryInputStream in = new BufferedBoundaryInputStream(inin);
-		in.setBoundary("#");
+        BufferedBoundaryInputStream in = getBufferedBoundaryInputStream("#aaa", "#");
 
 		assertEquals(-1, in.read());
 	}
 	@Test
 	public void readArr_startWithBound() throws IOException {
-		StringInputStream inin = new StringInputStream("#aaa");
-		BufferedBoundaryInputStream in = new BufferedBoundaryInputStream(inin);
-		in.setBoundary("#");
+        BufferedBoundaryInputStream in = getBufferedBoundaryInputStream("#aaa", "#");
 
         assertEquals(-1, in.read(new byte[10], 0, 10));
 	}
 
 	@Test
 	public void read_onlyBoundaries() throws IOException {
-		StringInputStream inin = new StringInputStream("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
-		BufferedBoundaryInputStream in = new BufferedBoundaryInputStream(inin);
-		in.setBoundary("a");
+        BufferedBoundaryInputStream in = getBufferedBoundaryInputStream("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "a");
 		
 		int n;
 		for(n=1; in.hasNext(); n++){
@@ -164,9 +157,7 @@ public class BufferedBoundaryInputStreamTest {
 	}
 	@Test
 	public void readArr_onlyBoundaries() throws IOException {
-		StringInputStream inin = new StringInputStream("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
-		BufferedBoundaryInputStream in = new BufferedBoundaryInputStream(inin);
-		in.setBoundary("a");
+        BufferedBoundaryInputStream in = getBufferedBoundaryInputStream("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "a");
 
         byte[] buff = new byte[100];
 		int n;
@@ -181,9 +172,7 @@ public class BufferedBoundaryInputStreamTest {
 	@Test
 	public void read_noBounds() throws IOException {
 		String data = "1234567891011121314151617181920";
-		StringInputStream inin = new StringInputStream(data);
-		BufferedBoundaryInputStream in = new BufferedBoundaryInputStream(inin);
-		in.setBoundary("#");
+        BufferedBoundaryInputStream in = getBufferedBoundaryInputStream(data, "#");
 		
 		int out;
 		StringBuilder output = new StringBuilder();
@@ -195,9 +184,7 @@ public class BufferedBoundaryInputStreamTest {
     @Test
     public void readArr_noBounds() throws IOException {
         String data = "1234567891011121314151617181920";
-        StringInputStream inin = new StringInputStream(data);
-        BufferedBoundaryInputStream in = new BufferedBoundaryInputStream(inin);
-        in.setBoundary("#");
+        BufferedBoundaryInputStream in = getBufferedBoundaryInputStream(data, "#");
 
         byte[] buff = new byte[100];
         assertEquals(data.length(), in.read(buff));
@@ -237,10 +224,11 @@ public class BufferedBoundaryInputStreamTest {
         in.setBoundary("#");
 
         byte[] buff = new byte[100];
+        int n = 0;
         assertTrue(in.hasNext());
-        assertEquals(10, in.read(buff));
-        assertEquals(2, in.read(buff));
-        assertEquals(-1, in.read());
+        n = in.read(buff) + in.read(buff);
+        assertEquals(12, n);
+        assertEquals(-1, in.read(buff));
 
         assertTrue(in.hasNext());
         in.next();
@@ -248,8 +236,8 @@ public class BufferedBoundaryInputStreamTest {
 
         assertTrue(in.hasNext());
         in.next();
-        assertEquals(10, in.read(buff));
-        assertEquals(5, in.read(buff));
+        n = in.read(buff) + in.read(buff) + in.read(buff);
+        assertEquals(15, n);
         assertEquals(-1, in.read());
         assertFalse(in.hasNext());
     }
