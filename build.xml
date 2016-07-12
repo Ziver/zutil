@@ -39,13 +39,13 @@
 
     <target name="test" depends="build-test">
         <mkdir dir="${reportsDir}" />
-        <junit printsummary="yes" haltonfailure="false" fork="true">
+        <junit printsummary="yes" haltonfailure="false" fork="true" timeout="3000000">
             <classpath refid="classpath.test" />
             <formatter type="plain" usefile="false" /> <!-- to screen -->
             <formatter type="xml" /> <!-- to file -->
 
             <batchtest todir="${reportsDir}" skipNonTests="true">
-                <fileset dir="${buildTestDir}" includes="**/*Test*.class" />
+                <fileset dir="${buildTestDir}" includes="**/*.class" />
             </batchtest>
         </junit>
     </target>
@@ -70,7 +70,7 @@
             <classpath refid="classpath.build" />
 			<include name="**/*.java" />
 		</javac>
-        <copy todir="${buildDir}">
+        <copy todir="${buildDir}"> <!-- Copy resource files -->
             <fileset dir="${srcDir}"
                      excludes="**/*.java" />
         </copy>
