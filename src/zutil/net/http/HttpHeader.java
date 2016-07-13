@@ -26,6 +26,8 @@ package zutil.net.http;
 
 import zutil.converter.Converter;
 
+import java.io.BufferedReader;
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Iterator;
 
@@ -37,6 +39,7 @@ public class HttpHeader {
 	private HashMap<String, String> urlAttributes;
 	private float version;
 	private int httpCode;
+	private InputStream in;
 
 	// Parameters
 	private HashMap<String, String> headers;
@@ -51,13 +54,13 @@ public class HttpHeader {
 
 
 	/**
-	 * @return true if this header represents a server response
+	 * @return      true if this header represents a server response
 	 */
 	public boolean isResponse(){
 		return !request;
 	}
 	/**
-	 * @return true if this header represents a client request
+	 * @return      true if this header represents a client request
      */
 	public boolean isRequest(){
 		return request;
@@ -103,47 +106,47 @@ public class HttpHeader {
 		return null;
 	}
     /**
-     * @return a Iterator with all defined url keys
+     * @return      a Iterator with all defined url keys
      */
     public Iterator<String> getURLAttributeKeys(){
         return urlAttributes.keySet().iterator();
     }
     /**
-	 * Returns the URL attribute value of the given name.
-	 * 
-	 * returns 		null if there is no such attribute
+	 * @return     the URL attribute value of the given name. null if there is no such attribute
 	 */
 	public String getURLAttribute(String name){
 		return urlAttributes.get( name );
 	}
     /**
-     * @return a Iterator with all defined headers
+     * @return      a Iterator with all defined headers
      */
     public Iterator<String> getHeaderKeys(){
         return headers.keySet().iterator();
     }
 	/**
-	 * Returns the HTTP attribute value of the given name.
-	 * 
-	 * returns 		null if there is no such attribute
+	 * @return     the HTTP attribute value of the given name. null if there is no such attribute
 	 */
 	public String getHeader(String name){
 		return headers.get( name.toUpperCase() );
 	}
     /**
-     * @return a Iterator with all defined cookies
+     * @return      a Iterator with all defined cookies
      */
     public Iterator<String> getCookieKeys(){
         return cookies.keySet().iterator();
     }
 	/**
-	 * Returns the cookie value of the given name.
-	 * 
-	 * returns 		null if there is no such attribute
+	 * @return     the cookie value of the given name. null if there is no such attribute.
 	 */
 	public String getCookie(String name){
 		return cookies.get( name );
 	}
+    /**
+     * @return     a Reader that contains the body of the http request.
+     */
+    public InputStream getInputStream(){
+        return in;
+    }
 
 
 	protected void setIsRequest(boolean request) { this.request = request; }
@@ -158,6 +161,9 @@ public class HttpHeader {
     }
     protected void setRequestURL(String url){
         this.url = url.trim().replaceAll("//", "/");
+    }
+    protected void setInputStream(InputStream in){
+        this.in = in;
     }
 
 	protected HashMap<String,String> getHeaderMap(){

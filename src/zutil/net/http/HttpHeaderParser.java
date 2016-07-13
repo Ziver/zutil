@@ -24,17 +24,18 @@
 
 package zutil.net.http;
 
+import com.mysql.jdbc.Buffer;
 import zutil.StringUtil;
+import zutil.io.IOUtil;
+import zutil.io.StringInputStream;
 import zutil.parser.URLDecoder;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.StringReader;
+import java.io.*;
 import java.util.Map;
 import java.util.regex.Pattern;
 
 public class HttpHeaderParser {
-    public static final String HEADER_COOKIE = "COOKIE";
+    private static final String HEADER_COOKIE = "COOKIE";
 
 	private static final Pattern PATTERN_COLON = Pattern.compile(":");
 	private static final Pattern PATTERN_EQUAL = Pattern.compile("=");
@@ -42,7 +43,7 @@ public class HttpHeaderParser {
 	private static final Pattern PATTERN_SEMICOLON = Pattern.compile(";");
 
 
-    private BufferedReader in;
+    private InputStream in;
     private boolean readStatusLine;
 
 
@@ -51,8 +52,8 @@ public class HttpHeaderParser {
 	 * 
 	 * @param 	in 				is the stream
 	 */
-	public HttpHeaderParser(BufferedReader in){
-        this.in = in;
+	public HttpHeaderParser(InputStream in){
+	    this.in = in;
         this.readStatusLine = true;
 	}
 
@@ -62,28 +63,29 @@ public class HttpHeaderParser {
 	 * @param   in 		is the String
 	 */
 	public HttpHeaderParser(String in){
-        this(new BufferedReader(new StringReader(in)));
+        this(new StringInputStream(in));
 	}
 
 
     public HttpHeader read() throws IOException {
         HttpHeader header = new HttpHeader();
-        String line = null;
+        String line;
 
         // First line
         if (readStatusLine) {
-            if( (line=in.readLine()) != null && !line.isEmpty() )
+            if( (line= IOUtil.readLine(in)) != null && !line.isEmpty() )
                 parseStatusLine(header, line);
             else
                 return null;
         }
         // Read header body
-        while( (line=in.readLine()) != null && !line.isEmpty() ){
-            parseHeaderLine(header, line);
+        while( (line=IOUtil.readLine(in)) != null && !line.isEmpty() ){
+            parseHeaderLine(header.getHeaderMap(), line);
         }
+
         // Post processing
         parseHeaderValue(header.getCookieMap(), header.getHeader(HEADER_COOKIE));
-
+        header.setInputStream(in);
         return header;
     }
 
@@ -119,7 +121,7 @@ public class HttpHeaderParser {
 			if(index > -1){
 				header.setRequestURL( statusLine.substring(0, index));
 				statusLine = statusLine.substring( index+1, statusLine.length());
-				parseURLParameters(header, statusLine);
+				parseURLParameters(header.getUrlAttributeMap(), statusLine);
 			}
 			else{
 				header.setRequestURL(statusLine);
@@ -128,14 +130,16 @@ public class HttpHeaderParser {
 	}
 
     /**
-     * Parses a http key value paired header line
+     * Parses a http key value paired header line.
+     * Note that all header keys will be stored with
+     * uppercase notation to make them case insensitive.
      *
-     * @param   header          the header object where the cookies will be stored.
+     * @param   map     a map where the header key(Uppercase) and value will be stored.
      * @param 	line 	is the next line in the header
      */
-    public static void parseHeaderLine(HttpHeader header, String line){
+    public static void parseHeaderLine(Map<String,String> map, String line){
         String[] data = PATTERN_COLON.split( line, 2 );
-        header.getHeaderMap().put(
+        map.put(
                 data[0].trim().toUpperCase(), 					// Key
                 (data.length>1 ? data[1] : "").trim()); 		//Value
     }
@@ -160,20 +164,30 @@ public class HttpHeaderParser {
         }
     }
 
+
 	/**
 	 * Parses a string with variables from a get or post request that was sent from a client
 	 *
-     * @param   header              the header object where the cookies will be stored.
+	 * @param   header              the header object where the url attributes key and value will be stored.
 	 * @param 	urlAttributes 		is the String containing all the attributes
 	 */
 	public static void parseURLParameters(HttpHeader header, String urlAttributes){
+		parseURLParameters(header.getUrlAttributeMap(), urlAttributes);
+	}
+	/**
+	 * Parses a string with variables from a get or post request that was sent from a client
+	 *
+     * @param   map                 a map where the url attributes key and value will be stored.
+	 * @param 	urlAttributes 		is the String containing all the attributes
+	 */
+	public static void parseURLParameters(Map<String,String> map, String urlAttributes){
 		String[] tmp;
 		urlAttributes = URLDecoder.decode(urlAttributes);
 		// get the variables
 		String[] data = PATTERN_AND.split( urlAttributes );
 		for(String element : data){
 			tmp = PATTERN_EQUAL.split(element, 2);
-			header.getUrlAttributeMap().put(
+			map.put(
 					tmp[0].trim(), 								// Key
 					(tmp.length>1 ? tmp[1] : "").trim()); 		//Value
 		}

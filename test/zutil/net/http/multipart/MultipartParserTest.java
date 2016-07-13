@@ -38,6 +38,8 @@ public class MultipartParserTest {
         assertEquals("foo", stringField.getName());
         assertEquals("bar", stringField.getValue());
         //assertFalse(it.hasNext()); //TODO: does not work, how to solve this?
+        assertEquals(null, it.next());
+        assertEquals(null, it.next());
     }
 
     @Test

@@ -175,7 +175,7 @@ public class FTPClient extends Thread{
 		BufferedInputStream data_in = getDataInputStream();
 		sendCommand("NLST "+path);
 
-        String data = new String(IOUtil.getContent(data_in));
+        String data = new String(IOUtil.readContent(data_in));
 		
 		data_in.close();
 		readCommand();
@@ -194,7 +194,7 @@ public class FTPClient extends Thread{
 		BufferedInputStream data_in = getDataInputStream();
 		sendCommand("LIST "+path);
 
-        String data = new String(IOUtil.getContent(data_in));
+        String data = new String(IOUtil.readContent(data_in));
 
 		data_in.close();
 		readCommand();

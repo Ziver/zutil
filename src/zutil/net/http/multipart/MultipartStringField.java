@@ -2,9 +2,11 @@ package zutil.net.http.multipart;
 
 
 import zutil.io.IOUtil;
+import zutil.io.InputStreamCloser;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Map;
 
 
@@ -15,9 +17,9 @@ public class MultipartStringField implements MultipartField {
     private String name;
     private String value;
 
-    protected MultipartStringField(String name, BufferedReader in) throws IOException {
-        this.name = name;
-        value = in.readLine();
+    protected MultipartStringField(Map<String,String> headers, InputStream in) throws IOException {
+        this.name = headers.get("name");
+        value = IOUtil.readLine(in);
     }
 
     @Override

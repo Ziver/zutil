@@ -78,7 +78,7 @@ public class SOAPClientInvocationHandler implements InvocationHandler {
         request.setURL(url);
         request.setData(reqXml);
         HttpHeaderParser response = request.send();
-        String rspXml = IOUtil.getContentAsString( request.getResponseReader());
+        String rspXml = IOUtil.readContentAsString( request.getResponseReader());
 
         // DEBUG
         if( logger.isLoggable(Level.FINEST) ){

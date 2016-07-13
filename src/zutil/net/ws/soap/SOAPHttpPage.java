@@ -39,6 +39,8 @@ import zutil.net.http.HttpPrintStream;
 import zutil.net.ws.*;
 import zutil.net.ws.WSReturnObject.WSValueName;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.util.Iterator;
@@ -120,6 +122,22 @@ public class SOAPHttpPage implements HttpPage{
 			Map<String, String> request) {
 
 		try {
+			// Read http body
+            StringBuilder data = null;
+			String contentType = headers.getHeader("Content-Type");
+			if (contentType != null &&
+                    (contentType.contains("application/soap+xml") ||
+					contentType.contains("text/xml") ||
+					contentType.contains("text/plain"))) {
+				int post_data_length = Integer.parseInt(headers.getHeader("Content-Length"));
+                BufferedReader in = new BufferedReader(new InputStreamReader(headers.getInputStream()));
+				data = new StringBuilder(post_data_length);
+				for (int i = 0; i < post_data_length; i++) {
+					data.append((char) in.read());
+				}
+			}
+
+			// Response
 			out.setHeader("Content-Type", "text/xml");
 			out.flush();
 
@@ -138,7 +156,7 @@ public class SOAPHttpPage implements HttpPage{
                 obj = ws;
             }
 
-            Document document = genSOAPResponse( request.get(""), obj);
+            Document document = genSOAPResponse( (data!=null ? data.toString() : ""), obj);
 
 			OutputFormat format = OutputFormat.createPrettyPrint();
             XMLWriter writer = new XMLWriter( out, format );

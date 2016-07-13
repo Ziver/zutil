@@ -41,7 +41,7 @@ public class IOUtil {
 	 * @param 		stream
 	 * @return the stream contents
 	 */
-	public static byte[] getContent(InputStream stream) throws IOException{
+	public static byte[] readContent(InputStream stream) throws IOException{
         DynamicByteArrayStream dyn_buff = new DynamicByteArrayStream();
         byte[] buff = new byte[8192];
         int len = 0;
@@ -60,8 +60,8 @@ public class IOUtil {
      * @param 		stream
      * @return a String with the content of the stream
      */
-    public static String getContentAsString(InputStream stream) throws IOException{
-        return getContentAsString(new InputStreamReader(stream));
+    public static String readContentAsString(InputStream stream) throws IOException{
+        return readContentAsString(new InputStreamReader(stream));
     }
 
     /**
@@ -71,7 +71,7 @@ public class IOUtil {
      * @param 		reader
      * @return a String with the content of the stream
      */
-    public static String getContentAsString(Reader reader) throws IOException{
+    public static String readContentAsString(Reader reader) throws IOException{
         StringBuilder str = new StringBuilder();
         BufferedReader in = null;
         if(reader instanceof BufferedReader)
@@ -89,7 +89,8 @@ public class IOUtil {
     }
 
     /**
-     * Reads on line terminated by a new line or carriage return from a stream.
+     * Reads one line terminated by a new line or carriage return from a stream.
+     * Will only read ASCII based char streams.
      *
      * @param   in      the stream to read from
      * @return          a String that contains one line excluding line terminating
@@ -106,6 +107,26 @@ public class IOUtil {
             return null; // End of the stream
         return str.toString();
     }
+    /**
+     * Reads one line terminated by a new line or carriage return from a Reader.
+     * Will only read ASCII based char streams.
+     *
+     * @param   in      the Reader to read from
+     * @return          a String that contains one line excluding line terminating
+     *                  characters, null if it is the end of the stream
+     */
+    public static String readLine(Reader in) throws IOException {
+        StringBuilder str = new StringBuilder(80);
+        int c = 0;
+        while ((c=in.read()) >= 0 && (c != '\n') && (c != '\r'))
+            str.append((char)c);
+        if (c == '\r')
+            in.read(); // if the last char is carriage return we assume the next char in the stream will be new line so skip it
+        if (c == -1 && str.length() == 0)
+            return null; // End of the stream
+        return str.toString();
+    }
+
 
     /**
      * Copies all data from one InputStream to another OutputStream.

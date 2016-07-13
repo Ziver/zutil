@@ -29,10 +29,7 @@ import zutil.log.LogUtil;
 import zutil.net.threaded.ThreadedTCPNetworkServer;
 import zutil.net.threaded.ThreadedTCPNetworkServerThread;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.net.Socket;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -151,12 +148,12 @@ public class HttpServer extends ThreadedTCPNetworkServer{
 	 */
 	protected class HttpServerThread implements ThreadedTCPNetworkServerThread{
 		private HttpPrintStream out;
-		private BufferedReader in;
+		private BufferedInputStream in;
 		private Socket socket;
 
 		public HttpServerThread(Socket socket) throws IOException{
 			out = new HttpPrintStream(socket.getOutputStream());
-			in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+			in = new BufferedInputStream(socket.getInputStream());
 			this.socket = socket;
 		}
 
@@ -175,30 +172,19 @@ public class HttpServer extends ThreadedTCPNetworkServer{
                 String tmp = null;
 
                 //******* Read in the post data if available
-                if (header.getHeader("Content-Length") != null) {
+                if (header.getHeader("Content-Length") != null &&
+						header.getHeader("Content-Type") != null &&
+						header.getHeader("Content-Type").contains("application/x-www-form-urlencoded")) {
                     // Reads the post data size
-                    tmp = header.getHeader("Content-Length");
-                    int post_data_length = Integer.parseInt(tmp);
+                    int post_data_length = Integer.parseInt(header.getHeader("Content-Length"));
                     // read the data
                     StringBuilder tmpBuff = new StringBuilder();
                     // read the data
                     for (int i = 0; i < post_data_length; i++) {
                         tmpBuff.append((char) in.read());
                     }
-
-                    tmp = header.getHeader("Content-Type");
-                    if (tmp.contains("application/x-www-form-urlencoded")) {
-                        // get the variables
-                        HttpHeaderParser.parseURLParameters(header, tmpBuff.toString());
-                    } else if (tmp.contains("application/soap+xml") ||
-                            tmp.contains("text/xml") ||
-                            tmp.contains("text/plain")) {
-                        // save the variables
-                        header.getUrlAttributeMap().put("", tmpBuff.toString());
-                    } else if (tmp.contains("multipart/form-data")) {
-                        // TODO: File upload
-                        throw new UnsupportedOperationException("HTTP Content-Type 'multipart-form-data' not supported.");
-                    }
+					// get the variables
+					HttpHeaderParser.parseURLParameters(header, tmpBuff.toString());
                 }
 
                 //****************************  HANDLE REQUEST *********************************

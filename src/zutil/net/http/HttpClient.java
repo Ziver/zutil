@@ -26,6 +26,7 @@ package zutil.net.http;
 
 import zutil.net.http.HttpPrintStream.HttpMessageType;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -52,8 +53,8 @@ public class HttpClient implements AutoCloseable{
     private String data;
 
 	// Response variables
-    private HttpHeaderParser rspHeader;
-    private BufferedReader   rspReader;
+    private HttpHeaderParser    rspHeader;
+    private BufferedInputStream rspReader;
 
 	
 	
@@ -128,7 +129,7 @@ public class HttpClient implements AutoCloseable{
 		// Response
         if(rspHeader != null || rspReader != null) // Close previous request
             this.close();
-		rspReader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+		rspReader = new BufferedInputStream(conn.getInputStream());
 		rspHeader = new HttpHeaderParser( rspReader );
 
 		return rspHeader;
@@ -137,7 +138,7 @@ public class HttpClient implements AutoCloseable{
     public HttpHeaderParser getResponseHeader(){
         return rspHeader;
     }
-    public BufferedReader getResponseReader(){
+    public BufferedInputStream getResponseReader(){
         return rspReader;
     }
 

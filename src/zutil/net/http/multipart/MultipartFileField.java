@@ -25,10 +25,13 @@
 package zutil.net.http.multipart;
 
 import zutil.io.IOUtil;
+import zutil.log.LogUtil;
 
 import java.io.*;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Logger;
+
+import static zutil.net.http.multipart.MultipartParser.HEADER_CONTENT_TYPE;
 
 
 /**
@@ -37,16 +40,23 @@ import java.util.Map;
  * @author Ziver
  */
 public class MultipartFileField implements MultipartField{
+    private static final Logger logger = LogUtil.getLogger();
+
 	private String fieldname;
 	private String filename;
     private String contentType;
+    private byte[] content;
     private InputStream in;
 
 
-	protected MultipartFileField(String name, String filename, String contentType, BufferedReader in) throws IOException {
-		this.fieldname = name;
-		this.filename = filename;
-		this.contentType = contentType;
+	protected MultipartFileField(Map<String,String> headers, InputStream in) throws IOException {
+		this.fieldname = headers.get("name");
+		this.filename = headers.get("filename");
+		this.contentType = headers.get(HEADER_CONTENT_TYPE);
+        this.in = in;
+
+        if (contentType != null && !contentType.equalsIgnoreCase("application/octet-stream"))
+            logger.warning("Unsupported Content-Type: "+contentType);
 	}
 	
 	/**
@@ -71,19 +81,42 @@ public class MultipartFileField implements MultipartField{
 		return contentType;
 	}
 
-    public InputStream getInputStream(){
-        return in;
+
+
+    /**
+     * First time this method is called the contents of the
+     * file will be read into a byte array and returned.
+     * Subsequent calls will just return the array without
+     * reading any more data from the stream.
+     *
+     * Note: Only one of the methods {@link #getContent()} or
+     * {@link #saveToFile(File)} can be used as they will consume the data in the stream.
+     *
+     * @return a byte array containing the file data. null if the Stream has already been consumed
+     */
+    public byte[] getContent() throws IOException {
+        if (in != null) {
+            content = IOUtil.readContent(in);
+            in = null; // reset InputStream
+        }
+        return content;
     }
 
-	/**
-	 * Reads in all data and save it into the specified file
-	 * 
+    /**
+	 * Reads in all data and save it into the specified file.
+     *
+     * Note: Only one of the methods {@link #getContent()} or
+     * {@link #saveToFile(File)} can be used as they will consume the data in the stream.
+	 *
 	 * @param   file    is the new file where the data will be stored
 	 */
 	public void saveToFile(File file) throws IOException {
+	    if (in == null)
+	        throw new IOException("Stream already consumed.");
         BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(file));
         IOUtil.copyStream(in, out);
         out.close();
+        in = null; // reset InputStream
 	}
 
 }

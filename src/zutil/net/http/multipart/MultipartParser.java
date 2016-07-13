@@ -49,8 +49,8 @@ import java.util.logging.Logger;
  */
 public class MultipartParser implements Iterable<MultipartField>{
     private static final Logger logger = LogUtil.getLogger();
-    private static final String HEADER_CONTENT_DISPOSITION = "Content-Disposition";
-    private static final String HEADER_CONTENT_TYPE        = "Content-Type";
+    protected static final String HEADER_CONTENT_DISPOSITION = "Content-Disposition".toUpperCase();
+    protected static final String HEADER_CONTENT_TYPE        = "Content-Type".toUpperCase();
 
 	/** This is the delimiter that will separate the fields */
 	private String delimiter;
@@ -67,17 +67,17 @@ public class MultipartParser implements Iterable<MultipartField>{
         this.delimiter = delimiter;
         this.contentLength = length;
     }
-	public MultipartParser(InputStream in, HttpHeader header){
-		this(in,
+	public MultipartParser(HttpHeader header){
+		this(header.getInputStream(),
                 parseDelimiter(header.getHeader("Content-type")),
-                Long.parseLong( header.getHeader("Content-Length")));
+                Long.parseLong(header.getHeader("Content-Length")));
 	}
-	public MultipartParser(HttpServletRequest req) throws IOException {
+/*	public MultipartParser(HttpServletRequest req) throws IOException {
 		this(req.getInputStream(),
                 parseDelimiter(req.getHeader("Content-type")),
                 req.getContentLength());
 	}
-
+*/
     private static String parseDelimiter(String contentTypeHeader){
         String delimiter = contentTypeHeader.split(" *; *")[1];
         delimiter = delimiter.split(" *= *")[1];
@@ -102,22 +102,20 @@ public class MultipartParser implements Iterable<MultipartField>{
 
     protected class MultiPartIterator implements Iterator<MultipartField>{
         private BufferedBoundaryInputStream boundaryIn;
-        private BufferedReader buffIn;
-        private HttpHeaderParser parser;
         private boolean firstIteration;
 
 
         protected MultiPartIterator(){
             this.boundaryIn = new BufferedBoundaryInputStream(in);
-            this.buffIn = new BufferedReader(new InputStreamReader(boundaryIn));
-            this.parser = new HttpHeaderParser(buffIn);
-            this.parser.setReadStatusLine(false);
 
             this.boundaryIn.setBoundary("--"+delimiter);
             firstIteration = true;
         }
 
 
+        /**
+         * TODO: there is a bug where this returns true after the last MultiPart as it cannot read ahead. So use next() != null instead
+         */
         @Override
         public boolean hasNext() {
             try {
@@ -137,31 +135,26 @@ public class MultipartParser implements Iterable<MultipartField>{
                     this.boundaryIn.setBoundary("\n--"+delimiter); // Add new-line to boundary after the first iteration
                     firstIteration = false;
                 }
-                String tmp = buffIn.readLine(); // read the new line after the delimiter
+                String tmp = IOUtil.readLine(boundaryIn); // read the new line after the delimiter
                 if (tmp == null || tmp.equals("--"))
                     return null;
 
-                HttpHeader header = parser.read();
-                String disposition = header.getHeader(HEADER_CONTENT_DISPOSITION);
-                String contentType = header.getHeader("Content-Type");
-                if (contentType != null && !contentType.equalsIgnoreCase("application/octet-stream"))
-                    logger.warning("Unsupported ontent-Type: "+contentType);
+                // Read Headers
+                HashMap<String,String> headers = new HashMap<>();
+                while ((tmp=IOUtil.readLine(boundaryIn)) != null && !tmp.isEmpty())
+                    HttpHeaderParser.parseHeaderLine(headers, tmp);
+
+                // Parse
+                String disposition = headers.get(HEADER_CONTENT_DISPOSITION);
                 if (disposition != null){
-                    HashMap<String,String> map = new HashMap<>();
-                    HttpHeaderParser.parseHeaderValue(map, disposition);
-                    if (map.containsKey("form-data")){
-                        if (map.containsKey("filename")){
-                            MultipartFileField field = new MultipartFileField(
-                                    map.get("name"),
-                                    map.get("filename"),
-                                    contentType,
-                                    buffIn);
+                    HttpHeaderParser.parseHeaderValue(headers, disposition);
+                    if (headers.containsKey("form-data")){
+                        if (headers.containsKey("filename")){
+                            MultipartFileField field = new MultipartFileField(headers, boundaryIn);
                             return field;
                         }
                         else{
-                            MultipartStringField field = new MultipartStringField(
-                                    map.get("name"),
-                                    buffIn);
+                            MultipartStringField field = new MultipartStringField(headers, boundaryIn);
                             return field;
                         }
                     }
