@@ -1,8 +1,10 @@
 package zutil.net.http.multipart;
 
 import org.junit.Test;
+import zutil.io.IOUtil;
 import zutil.io.StringInputStream;
 
+import java.io.IOException;
 import java.util.Iterator;
 
 import static junit.framework.TestCase.assertFalse;
@@ -43,24 +45,25 @@ public class MultipartParserTest {
     }
 
     @Test
-    public void singleFileUpload() {
-        String input =
+    public void singleFileUpload() throws IOException {
+        String input_start =
                 "------------------------------83ff53821b7c\n" +
                 "Content-Disposition: form-data; name=\"img\"; filename=\"a.png\"\n" +
                 "Content-Type: application/octet-stream\n" +
-                "\n" +
+                "\n";
+        String input_data =
                 "?PNG\n" +
                 "\n" +
-                "IHD?wS??iCCPICC Profilex?T?kA?6n??Zk?x?\"IY?hE?6?bk\n" +
-                "Y?<ߡ)??????9Nyx?+=?Y\"|@5-?\u007FM?S?%?@?H8??qR>?\u05CB??inf???O?????b??N?????~N??>?!?\n" +
-                "??V?J?p?8?da?sZHO?Ln?}&???wVQ?y?g????E??0\n" +
-                " ??\n" +
-                "   IDAc????????-IEND?B`?\n" +
-                "------------------------------83ff53821b7c--";
+                "lkuytrewacvbnmloiuytrewrtyuiol,mnbvdc xswertyuioplm cdsertyuioölkjgf\n" +
+                "kgkfdgfhgfhgkhgvytvjgxslkyöiyfödgjdjhföjhdlgdgjfhföjhföiyföudlögföudöfö\n" +
+                "ögdljgdjhöfjhfdfsgdfg  ryrt dtrd ytfc  uhöiugljfkdkhdjgd\n" +
+                " xx\n" +
+                "     kuykutfytdh ytrd trutrd trxxx";
+        String input_end = "\n------------------------------83ff53821b7c--";
         MultipartParser parser = new MultipartParser(
-                new StringInputStream(input),
+                new StringInputStream(input_start+input_data+input_end),
                 "----------------------------83ff53821b7c",
-                input.length());
+                0);
 
         // Assertions
         Iterator<MultipartField> it = parser.iterator();
@@ -71,6 +74,7 @@ public class MultipartParserTest {
         assertEquals("img", fileField.getName());
         assertEquals("a.png", fileField.getFilename());
         assertEquals("application/octet-stream", fileField.getContentType());
+        assertEquals(input_data, new String(fileField.getContent()));
         //assertFalse(it.hasNext()); //TODO: does not work, how to solve this?
     }
 

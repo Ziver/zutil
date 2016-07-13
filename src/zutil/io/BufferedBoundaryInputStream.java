@@ -162,7 +162,7 @@ public class BufferedBoundaryInputStream extends FilterInputStream{
 			searchNextBoundary();
 		}
         else { // read data until we find the next boundary or get to the end of the stream
-            while (buf_bound_pos >= 0 || fillBuffer() >= 0)
+            while (buf_bound_pos < 0 && fillBuffer() >= 0)
 				buf_pos = buf_end;
         }
 	}
@@ -207,7 +207,7 @@ public class BufferedBoundaryInputStream extends FilterInputStream{
 	 *             over) from this buffered input stream without blocking.
 	 * @exception  IOException  if an I/O error occurs.
 	 */
-	public int available() throws IOException {
+	public int available() {
 		return buf_end - buf_pos;
 	}
 
@@ -259,16 +259,19 @@ public class BufferedBoundaryInputStream extends FilterInputStream{
      * Searches for the nearest boundary from the current buffer position
      */
     private void searchNextBoundary(){
-        for(int i=buf_pos; i<buf_end; i++){
-            for(int b=0; b < boundary.length; b++){
-                if(buffer[i+b] != boundary[b])
-                    break;
-                else if(b == boundary.length-1){
-                    buf_bound_pos = i;
-                    return;
-                }
-            }
-        }
+        // No need to check for boundary if buffer is smaller than the boundary length
+    	if (this.available() >= boundary.length) {
+			for (int i = buf_pos; i < buf_end; i++) {
+				for (int b = 0; b < boundary.length; b++) {
+					if (buffer[i + b] != boundary[b])
+						break;
+					else if (b == boundary.length - 1) {
+						buf_bound_pos = i;
+						return;
+					}
+				}
+			}
+		}
         buf_bound_pos = -1;
     }
 }

@@ -117,11 +117,17 @@ public class BufferedBoundaryInputStreamTest {
     }
     @Test
     public void readArr_multiCharBoundary() throws IOException {
-        BufferedBoundaryInputStream in = getBufferedBoundaryInputStream("aaa1234", "1234");
+        BufferedBoundaryInputStream in = getBufferedBoundaryInputStream(
+                "------------------------------83ff53821b7chello------------------------------83ff53821b7c--",
+                "------------------------------83ff53821b7c");
 
-        assertEquals('a', in.read());
-        assertEquals('a', in.read());
-        assertEquals('a', in.read());
+        assertEquals(-1, in.read());
+        assertTrue(in.hasNext()); in.next();
+        assertEquals("hello", IOUtil.readContentAsString(in));
+        assertEquals(-1, in.read());
+        assertTrue(in.hasNext()); in.next();
+        assertEquals('-', in.read());
+        assertEquals('-', in.read());
         assertEquals(-1, in.read());
 
         assertFalse(in.hasNext());
@@ -194,12 +200,14 @@ public class BufferedBoundaryInputStreamTest {
 
     @Test
     public void read_largeData() throws IOException {
-        String data = "aaaaaaaaaaaa#aa#aaaaaaaaaaaaaaa#";
+        String data = "#aaaaaaaaaaaa#aa#aaaaaaaaaaaaaaa#";
         StringInputStream inin = new StringInputStream(data);
         BufferedBoundaryInputStream in = new BufferedBoundaryInputStream(inin, 10);
         in.setBoundary("#");
 
+        assertEquals(-1, in.read());
         assertTrue(in.hasNext());
+        in.next();
         for (int i=0; i<12; ++i)
             assertEquals('a', in.read());
         assertEquals(-1, in.read());

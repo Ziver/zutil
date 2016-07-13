@@ -83,6 +83,7 @@ public class IOUtil {
         while((line = in.readLine()) != null){
             str.append(line).append("\n");
         }
+        str.delete(str.length()-1, str.length()); // remove last new line
         in.close();
 
         return str.toString();
