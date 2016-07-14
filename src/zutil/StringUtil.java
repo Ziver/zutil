@@ -28,6 +28,7 @@ import zutil.converter.Converter;
 
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 /**
  * This is a class whit utility methods.
@@ -214,4 +215,29 @@ public class StringUtil {
 		}
 		return SPACES.get(i);
 	}
+
+
+    /**
+     * A simple split method that uses {@link String#substring(int, int)}
+     * to split a string between a single character delimiter.
+     * This method should be used for performance reasons as it is faster than
+     * the {@link String#split(String)}.
+     *
+     * @param   str         is the string to be split
+     * @param   delimiter   a single character delimiter
+     * @return              a List with all data between the delimiter
+     */
+	public static List<String> split(String str, char delimiter){
+        ArrayList<String> splitList = new ArrayList<>();
+        int from = 0, to = 0;
+        while (to >= 0) {
+            to = str.indexOf(delimiter, from + 1);
+            if (to < 0)
+                splitList.add(str.substring(from));
+            else
+                splitList.add(str.substring(from, to));
+            from = to;
+        }
+        return splitList;
+    }
 }

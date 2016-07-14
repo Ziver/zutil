@@ -4,8 +4,10 @@ import com.carrotsearch.junitbenchmarks.BenchmarkOptions;
 import com.carrotsearch.junitbenchmarks.BenchmarkRule;
 import org.junit.Rule;
 import org.junit.Test;
+import zutil.StringUtil;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.regex.Pattern;
 
 import static org.junit.Assert.assertEquals;
@@ -39,16 +41,7 @@ public class StringSplitBenchmark {
     @Test
     public void substring(){
         for(int i=0; i<TEST_EXECUTIONS; i++) {
-            ArrayList<String> splitList = new ArrayList<>();
-            int from = 0, to = 0;
-            while (to >= 0) {
-                to = str.indexOf(delimiter, from + 1);
-                if (to < 0)
-                    splitList.add(str.substring(from));
-                else
-                    splitList.add(str.substring(from, to));
-                from = to;
-            }
+            List<String> splitList = StringUtil.split(str, delimiter.charAt(0));
             assertSplit(splitList.toArray(new String[splitList.size()]));
         }
     }
