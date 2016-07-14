@@ -26,10 +26,7 @@ package zutil.net.http;
 
 import zutil.net.http.HttpPrintStream.HttpMessageType;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.net.Socket;
 import java.net.URL;
 import java.util.HashMap;
@@ -54,7 +51,7 @@ public class HttpClient implements AutoCloseable{
 
 	// Response variables
     private HttpHeaderParser    rspHeader;
-    private BufferedInputStream rspReader;
+    private InputStream rspStream;
 
 	
 	
@@ -127,10 +124,10 @@ public class HttpClient implements AutoCloseable{
 		request.close();
 		
 		// Response
-        if(rspHeader != null || rspReader != null) // Close previous request
+        if(rspHeader != null || rspStream != null) // Close previous request
             this.close();
-		rspReader = new BufferedInputStream(conn.getInputStream());
-		rspHeader = new HttpHeaderParser( rspReader );
+		rspStream = new BufferedInputStream(conn.getInputStream());
+		rspHeader = new HttpHeaderParser(rspStream);
 
 		return rspHeader;
 	}
@@ -138,15 +135,15 @@ public class HttpClient implements AutoCloseable{
     public HttpHeaderParser getResponseHeader(){
         return rspHeader;
     }
-    public BufferedInputStream getResponseReader(){
-        return rspReader;
+    public InputStream getResponseInputStream(){
+        return rspStream;
     }
 
     @Override
     public void close() throws IOException {
-        if(rspReader != null)
-            rspReader.close();
-        rspReader = null;
+        if(rspStream != null)
+            rspStream.close();
+        rspStream = null;
         rspHeader = null;
     }
 }

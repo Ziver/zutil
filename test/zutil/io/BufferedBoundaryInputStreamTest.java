@@ -225,6 +225,27 @@ public class BufferedBoundaryInputStreamTest {
         assertFalse(in.hasNext());
     }
     @Test
+    public void read_largeDataOnlyNext() throws IOException {
+        String data = "#aaaaaaaaaaaa#aa#aaaaaaaaaaaaaaa#";
+        StringInputStream inin = new StringInputStream(data);
+        BufferedBoundaryInputStream in = new BufferedBoundaryInputStream(inin, 10);
+        in.setBoundary("#");
+
+        in.next();
+        for (int i=0; i<12; ++i)
+            assertEquals('a', in.read());
+        assertEquals(-1, in.read());
+
+        in.next();
+        assertEquals('a', in.read());
+        assertEquals('a', in.read());
+
+        in.next();
+        for (int i=0; i<15; ++i)
+            assertEquals('a', in.read());
+        assertEquals(-1, in.read());
+    }
+    @Test
     public void readArr_largeData() throws IOException {
         String data = "aaaaaaaaaaaa#aa#aaaaaaaaaaaaaaa#";
         StringInputStream inin = new StringInputStream(data);

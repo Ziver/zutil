@@ -73,7 +73,7 @@ public class HttpHeaderParser {
 
         // First line
         if (readStatusLine) {
-            if( (line= IOUtil.readLine(in)) != null && !line.isEmpty() )
+            if( (line=IOUtil.readLine(in)) != null && !line.isEmpty() )
                 parseStatusLine(header, line);
             else
                 return null;
@@ -102,7 +102,7 @@ public class HttpHeaderParser {
      * @param   header          the header object where the cookies will be stored.
 	 * @param 	statusLine 		the status line String
 	 */
-	public static void parseStatusLine(HttpHeader header, String statusLine){
+	private static void parseStatusLine(HttpHeader header, String statusLine){
 		// Server Response
 		if( statusLine.startsWith("HTTP/") ){
 			header.setIsRequest(false);

@@ -176,11 +176,11 @@ public class HttpServer extends ThreadedTCPNetworkServer{
 						header.getHeader("Content-Type") != null &&
 						header.getHeader("Content-Type").contains("application/x-www-form-urlencoded")) {
                     // Reads the post data size
-                    int post_data_length = Integer.parseInt(header.getHeader("Content-Length"));
+                    int postDataLength = Integer.parseInt(header.getHeader("Content-Length"));
                     // read the data
                     StringBuilder tmpBuff = new StringBuilder();
                     // read the data
-                    for (int i = 0; i < post_data_length; i++) {
+                    for (int i = 0; i < postDataLength; i++) {
                         tmpBuff.append((char) in.read());
                     }
 					// get the variables

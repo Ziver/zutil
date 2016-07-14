@@ -72,19 +72,12 @@ public class MultipartParser implements Iterable<MultipartField>{
                 parseDelimiter(header.getHeader("Content-type")),
                 Long.parseLong(header.getHeader("Content-Length")));
 	}
-/*	public MultipartParser(HttpServletRequest req) throws IOException {
-		this(req.getInputStream(),
-                parseDelimiter(req.getHeader("Content-type")),
-                req.getContentLength());
-	}
-*/
+
     private static String parseDelimiter(String contentTypeHeader){
         String delimiter = contentTypeHeader.split(" *; *")[1];
         delimiter = delimiter.split(" *= *")[1];
         return delimiter;
     }
-
-	
 
 	public long getContentLength(){
 		return contentLength;

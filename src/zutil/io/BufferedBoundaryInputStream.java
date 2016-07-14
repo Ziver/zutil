@@ -157,14 +157,16 @@ public class BufferedBoundaryInputStream extends FilterInputStream{
      * Skips over the closest boundary
      */
 	public void next() throws IOException {
+		// read data until we find the next boundary or get to the end of the stream
+		if (buf_bound_pos < 0) {
+            while (fillBuffer() >= 0 && buf_bound_pos < 0)
+                buf_pos = buf_end;
+        }
+
 		if (buf_bound_pos >= 0){ // is boundary in buffer?
 			buf_pos += boundary.length;
 			searchNextBoundary();
 		}
-        else { // read data until we find the next boundary or get to the end of the stream
-            while (buf_bound_pos < 0 && fillBuffer() >= 0)
-				buf_pos = buf_end;
-        }
 	}
 	
 
@@ -236,9 +238,6 @@ public class BufferedBoundaryInputStream extends FilterInputStream{
         // Do we need to fill the buffer
         if(buf_pos < buf_end-boundary.length)
             return 0;
-        // is there any data available
-        if(leftover <= 0 && super.available() <= 0)
-            return -1; // EOF
 
         // Move the end of the buffer to the start to not miss any split boundary
         if (leftover > 0 && buf_pos != 0)
@@ -247,12 +246,16 @@ public class BufferedBoundaryInputStream extends FilterInputStream{
         buf_end = leftover;
 
         // Copy in new data from the stream
-        int n = super.read(buffer, buf_end, buffer.length-buf_end);
-        if (n >= 0)
-            buf_end = buf_end + n;
+        int n = -1;
+        if (super.available() > 0) { // is there any data available
+            n = super.read(buffer, buf_end, buffer.length - buf_end);
+            if (n >= 0)
+                buf_end = leftover = buf_end + n;
+        }
 
+        // Update boundary position
         searchNextBoundary();
-        return ((n < 0 && this.available() > 0) ? 0 : n);
+        return ((leftover > 0 && n < 0) ? 0 : n);
     }
 
     /**
@@ -260,18 +263,16 @@ public class BufferedBoundaryInputStream extends FilterInputStream{
      */
     private void searchNextBoundary(){
         // No need to check for boundary if buffer is smaller than the boundary length
-    	if (this.available() >= boundary.length) {
-			for (int i = buf_pos; i < buf_end; i++) {
-				for (int b = 0; b < boundary.length; b++) {
-					if (buffer[i + b] != boundary[b])
-						break;
-					else if (b == boundary.length - 1) {
-						buf_bound_pos = i;
-						return;
-					}
-				}
-			}
-		}
+        for (int i = buf_pos; i <= buf_end-boundary.length; i++) {
+            for (int b = 0; b < boundary.length; b++) {
+                if (buffer[i + b] != boundary[b])
+                    break;
+                else if (b == boundary.length - 1) {
+                    buf_bound_pos = i;
+                    return;
+                }
+            }
+        }
         buf_bound_pos = -1;
     }
 }

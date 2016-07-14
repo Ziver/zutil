@@ -54,9 +54,6 @@ public class MultipartFileField implements MultipartField{
 		this.filename = headers.get("filename");
 		this.contentType = headers.get(HEADER_CONTENT_TYPE);
         this.in = in;
-
-        if (contentType != null && !contentType.equalsIgnoreCase("application/octet-stream"))
-            logger.warning("Unsupported Content-Type: "+contentType);
 	}
 	
 	/**
