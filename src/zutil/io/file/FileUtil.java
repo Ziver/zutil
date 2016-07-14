@@ -162,10 +162,7 @@ public class FileUtil {
         return new String(getByteContent(file));
     }
     public static byte[] getByteContent(File file) throws IOException {
-        InputStream in = new FileInputStream(file);
-        byte[] data = IOUtil.readContent(in);
-        in.close();
-        return data;
+        return IOUtil.readContent(new FileInputStream(file), true);
     }
 
     /**
@@ -175,9 +172,7 @@ public class FileUtil {
      * @return the file content
      */
     public static String getContent(URL url) throws IOException{
-        InputStream in = url.openStream();
-        String data = new String(IOUtil.readContent(in));
-        in.close();
+        String data = new String(IOUtil.readContent(url.openStream(), true));
         return data;
     }
 

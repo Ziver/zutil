@@ -34,44 +34,75 @@ import java.io.*;
  */
 public class IOUtil {
 
+    /**
+     * Reads and returns all the content of a stream.
+     * The InputStream will not be closed
+     *
+     * @param 		stream
+     * @return a byte array with the stream contents
+     */
+    public static byte[] readContent(InputStream stream) throws IOException{
+        return readContent(stream, false);
+    }
+
 	/**
 	 * Reads and returns all the content of a stream.
-     * This function will close the inout stream at the end.
-	 * 
+	 *
 	 * @param 		stream
-	 * @return the stream contents
+     * @param       close       true if the stream should be closed at the end
+	 * @return a byte array with the stream contents
 	 */
-	public static byte[] readContent(InputStream stream) throws IOException{
+	public static byte[] readContent(InputStream stream, boolean close) throws IOException{
         DynamicByteArrayStream dyn_buff = new DynamicByteArrayStream();
         byte[] buff = new byte[8192];
         int len = 0;
 		while((len = stream.read(buff)) != -1){
 			dyn_buff.append(buff, 0, len);
 		}
-        stream.close();
 
+		if (close) stream.close();
 		return dyn_buff.getBytes();
 	}
 
     /**
      * Reads and returns all the content of a stream as a String.
-     * This function will close the input stream at the end.
+     * The InputStream will not be closed
      *
      * @param 		stream
      * @return a String with the content of the stream
      */
     public static String readContentAsString(InputStream stream) throws IOException{
-        return readContentAsString(new InputStreamReader(stream));
+        return readContentAsString(stream, false);
+    }
+    /**
+     * Reads and returns all the content of a stream as a String.
+     *
+     * @param 		stream
+     * @param       close       true if the stream should be closed at the end
+     * @return a String with the content of the stream
+     */
+    public static String readContentAsString(InputStream stream, boolean close) throws IOException{
+        return readContentAsString(new InputStreamReader(stream), close);
     }
 
     /**
      * Reads and returns all the content of a stream as a String.
-     * This function will close the input stream at the end.
+     * The Reader will not be closed
      *
      * @param 		reader
      * @return a String with the content of the stream
      */
     public static String readContentAsString(Reader reader) throws IOException{
+        return readContentAsString(reader, false);
+    }
+    /**
+     * Reads and returns all the content of a stream as a String.
+     *
+     * @param 		reader
+     * @param       close       true if the stream should be closed at the end
+     * @return a String with the content of the stream
+     */
+    public static String readContentAsString(Reader reader, boolean close) throws IOException{
         StringBuilder str = new StringBuilder();
         BufferedReader in = null;
         if(reader instanceof BufferedReader)
@@ -84,8 +115,8 @@ public class IOUtil {
             str.append(line).append("\n");
         }
         str.delete(str.length()-1, str.length()); // remove last new line
-        in.close();
 
+        if (close) reader.close();
         return str.toString();
     }
 

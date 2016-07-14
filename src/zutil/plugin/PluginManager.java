@@ -70,7 +70,7 @@ public class PluginManager<T> implements Iterable<PluginData>{
 		log.fine("Searching for plugins...");
 		for(FileSearcher.FileSearchItem file : search){
 			try {
-				DataNode node = JSONParser.read(IOUtil.readContentAsString(file.getInputStream()));
+				DataNode node = JSONParser.read(IOUtil.readContentAsString(file.getInputStream(), true));
 				log.fine("Found plugin: "+file.getPath());
 				PluginData plugin = new PluginData(node);
 
