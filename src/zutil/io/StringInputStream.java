@@ -25,6 +25,7 @@
 package zutil.io;
 
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 
 /**
  * This class saves all the input data in to an StringBuffer
@@ -90,7 +91,7 @@ public class StringInputStream extends InputStream{
     	if( buffer.length() < len ){
     		len = buffer.length();
     	}
-    	byte[] btmp = buffer.substring(0, len).getBytes();
+    	byte[] btmp = buffer.substring(0, len).getBytes(StandardCharsets.ISO_8859_1);
     	System.arraycopy(btmp, 0, b, off, len);
     	buffer.delete(0, len);
 		return len;

@@ -48,9 +48,13 @@ public class BufferedBoundaryInputStream extends FilterInputStream{
 	/** The end position of the buffer */
     private int buf_end = 0;
     /** Boundary position, 0< means no boundary found */
-    private int buf_bound_pos;
+    private int buf_bound_pos = -1;
 	/** The boundary (the delimiter)  */
     private byte[] boundary;
+    /** The position in the buffer where user has marked, -1 if no mark is set **/
+    private int buf_mark = -1;
+    /** The read limit of the mark, after this limit the mark will be invalidated **/
+    private int buf_mark_limit = 0;
 
 
 	/**
@@ -70,18 +74,15 @@ public class BufferedBoundaryInputStream extends FilterInputStream{
 	 */
 	public BufferedBoundaryInputStream(InputStream in, int buf_size){
 		super(in);
-        buf_pos = 0;
-		buf_end = 0;
-        buf_bound_pos = -1;
 		buffer = new byte[buf_size];
 	}
 
 
-	
+
 	/**
-     * @return 			the next byte from the stream or -1 if EOF or stream is on a boundary
+     * @return 			the next byte from the stream or -1 if EOF or stream has encountered a boundary
 	 */
-	public final int read() throws IOException{
+	public int read() throws IOException{
         if (fillBuffer() < 0)
             return -1;
 
@@ -132,7 +133,7 @@ public class BufferedBoundaryInputStream extends FilterInputStream{
     /**
      * @return if the current position in the buffer is a boundary
      */
-    private boolean isOnBoundary(){
+    public boolean isOnBoundary(){
         return buf_bound_pos == buf_pos;
     }
 
@@ -165,17 +166,19 @@ public class BufferedBoundaryInputStream extends FilterInputStream{
 
 		if (buf_bound_pos >= 0){ // is boundary in buffer?
 			buf_pos += boundary.length;
-			searchNextBoundary();
+			findNextBoundary();
 		}
 	}
 	
 
 	/**
 	 * Skips a specific amounts of bytes in the buffer.
-	 * Note that his method does not check for boundaries.
+	 * Note that his method does not check for boundaries
+     * and it will only skip in the local buffer.
 	 * 
      * @param	n 	the number of bytes to be skipped.
-     * @return		the actual number of bytes skipped.
+     * @return		the actual number of bytes skipped,
+     *              0 if it has reach the end of the buffer but does not mean end of stream.
 	 */
 	public long skip(long n) throws IOException {
 		int leftover = available();
@@ -192,7 +195,7 @@ public class BufferedBoundaryInputStream extends FilterInputStream{
 	 */
 	public void setBoundary(String b){
 		this.boundary = b.getBytes();
-        searchNextBoundary(); // redo the search with the new boundary
+        findNextBoundary(); // redo the search with the new boundary
 	}
 	
 	/**
@@ -201,48 +204,96 @@ public class BufferedBoundaryInputStream extends FilterInputStream{
 	public void setBoundary(byte[] b){
 		boundary = new byte[b.length];
 		System.arraycopy(b, 0, boundary, 0, b.length);
-        searchNextBoundary(); // redo the search with the new boundary
+        findNextBoundary(); // redo the search with the new boundary
 	}
 
 	/**
 	 * @return     an estimate of the number of bytes that can be read (or skipped
 	 *             over) from this buffered input stream without blocking.
-	 * @exception  IOException  if an I/O error occurs.
 	 */
-	public int available() {
-		return buf_end - buf_pos;
+	public int available() throws IOException {
+	    if (super.available() <= 0)
+	        return buf_end - buf_pos; // return the whole stream as there are no more boundaries
+        else if (buf_end < boundary.length)
+	        return 0; // we need a safety block in case boundary is split
+		return buf_end - boundary.length - buf_pos;
 	}
 
-	/**
-     * Tests if this input stream supports the mark and 
-     * reset methods.
+
+
+    /**
+     * @return true for BufferedBoundaryInputStream
      */
 	public boolean markSupported(){
-		return false;
+		return true;
 	}
 
+    /**
+     * See {@link InputStream#mark(int)} for details
+     *
+     * @param   readlimit   the amount of data that can be read before
+     *                      the mark is invalidated. Note that if the
+     *                      readlimit is larger than the buffer size,
+     *                      then the buffer size will be used instead.
+     */
+    public void mark(int readlimit) {
+        buf_mark_limit = readlimit;
+        buf_mark = buf_pos;
+    }
+
+    /**
+     * See {@link InputStream#reset()} for details
+     *
+     * @exception  IOException if the mark is or has been invalidated
+     */
+    public void reset() throws IOException {
+        if (buf_mark < 0)
+            throw new IOException("Resetting to invalid mark");
+        buf_mark_limit = 0;
+        buf_pos = buf_mark;
+        buf_mark = -1;
+        findNextBoundary();
+    }
 
 
 
     /**
      * Checks if the buffer needs to be appended with data.
      * If so it moves the remaining data to the beginning of the
-     * buffer and then fills the buffer with data from
-     * the source stream
+     * buffer and then fills the buffer with data from the source
+     * stream.
      *
      * @return 			the number of new bytes read from the source stream,
      *                  or -1 if the buffer is empty and it is the end of the stream
      */
     private int fillBuffer() throws IOException {
-        int leftover = this.available();
         // Do we need to fill the buffer
         if(buf_pos < buf_end-boundary.length)
             return 0;
 
+        int leftover = buf_end - buf_pos;
+        int tmp_pos = buf_pos;
+        // Mark handling
+        if (buf_mark > 0) {
+            // Mark enabled and it has not already been moved to the beginning of the buffer
+            leftover = buf_end - buf_mark;
+            buf_pos  = buf_mark;
+        } else if (buf_pos >= buf_mark_limit ||
+                buf_mark_limit >= buffer.length) {
+            // we have passed the read limit or read limit is bigger than the buffer, so reset mark
+            buf_mark = -1;
+            buf_mark_limit = 0;
+        }
+
         // Move the end of the buffer to the start to not miss any split boundary
         if (leftover > 0 && buf_pos != 0)
             System.arraycopy(buffer, buf_pos, buffer, 0, leftover);
-        buf_pos = 0;
+        // Set new positions
+        if (buf_mark >= 0){
+            buf_pos = tmp_pos - buf_mark;
+            buf_mark = 0;
+        } else
+            buf_pos = 0;
         buf_end = leftover;
 
         // Copy in new data from the stream
@@ -254,14 +305,14 @@ public class BufferedBoundaryInputStream extends FilterInputStream{
         }
 
         // Update boundary position
-        searchNextBoundary();
+        findNextBoundary();
         return ((leftover > 0 && n < 0) ? 0 : n);
     }
 
     /**
      * Searches for the nearest boundary from the current buffer position
      */
-    private void searchNextBoundary(){
+    private void findNextBoundary(){
         // No need to check for boundary if buffer is smaller than the boundary length
         for (int i = buf_pos; i <= buf_end-boundary.length; i++) {
             for (int b = 0; b < boundary.length; b++) {

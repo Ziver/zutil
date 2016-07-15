@@ -27,21 +27,36 @@ package zutil.io;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.io.InputStream;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 
 @SuppressWarnings("resource")
 public class BufferedBoundaryInputStreamTest {
 
-    private static BufferedBoundaryInputStream getBufferedBoundaryInputStream(String data, String b) {
+    private void readAndAssertArray(byte[] expected, InputStream in, int readcount) throws IOException {
+        byte[] buff = new byte[readcount];
+        int n = in.read(buff, 0, readcount);
+        if (n < readcount)
+            n += in.read(buff, n, readcount-n);
+        assertEquals(readcount, n);
+        assertArrayEquals(expected, buff);
+    }
+
+    private static BufferedBoundaryInputStream getBufferedBoundaryInputStream(String data, String boundary) {
+        return getBufferedBoundaryInputStream(data, boundary, -1);
+    }
+    private static BufferedBoundaryInputStream getBufferedBoundaryInputStream(String data, String boundary, int buffLimit) {
         StringInputStream inin = new StringInputStream(data);
-        BufferedBoundaryInputStream in = new BufferedBoundaryInputStream(inin);
-        in.setBoundary(b);
+        BufferedBoundaryInputStream in = buffLimit >= 0 ?
+                new BufferedBoundaryInputStream(inin, buffLimit) :
+                new BufferedBoundaryInputStream(inin);
+        in.setBoundary(boundary);
         return in;
     }
+
+
 
 	@Test
 	public void read_normal() throws IOException {
@@ -200,10 +215,8 @@ public class BufferedBoundaryInputStreamTest {
 
     @Test
     public void read_largeData() throws IOException {
-        String data = "#aaaaaaaaaaaa#aa#aaaaaaaaaaaaaaa#";
-        StringInputStream inin = new StringInputStream(data);
-        BufferedBoundaryInputStream in = new BufferedBoundaryInputStream(inin, 10);
-        in.setBoundary("#");
+        BufferedBoundaryInputStream in = getBufferedBoundaryInputStream(
+                "#aaaaaaaaaaaa#aa#aaaaaaaaaaaaaaa#", "#", 10);
 
         assertEquals(-1, in.read());
         assertTrue(in.hasNext());
@@ -226,10 +239,8 @@ public class BufferedBoundaryInputStreamTest {
     }
     @Test
     public void read_largeDataOnlyNext() throws IOException {
-        String data = "#aaaaaaaaaaaa#aa#aaaaaaaaaaaaaaa#";
-        StringInputStream inin = new StringInputStream(data);
-        BufferedBoundaryInputStream in = new BufferedBoundaryInputStream(inin, 10);
-        in.setBoundary("#");
+        BufferedBoundaryInputStream in = getBufferedBoundaryInputStream(
+                "#aaaaaaaaaaaa#aa#aaaaaaaaaaaaaaa#", "#", 10);
 
         in.next();
         for (int i=0; i<12; ++i)
@@ -247,10 +258,8 @@ public class BufferedBoundaryInputStreamTest {
     }
     @Test
     public void readArr_largeData() throws IOException {
-        String data = "aaaaaaaaaaaa#aa#aaaaaaaaaaaaaaa#";
-        StringInputStream inin = new StringInputStream(data);
-        BufferedBoundaryInputStream in = new BufferedBoundaryInputStream(inin, 10);
-        in.setBoundary("#");
+        BufferedBoundaryInputStream in = getBufferedBoundaryInputStream(
+                "aaaaaaaaaaaa#aa#aaaaaaaaaaaaaaa#", "#", 10);
 
         byte[] buff = new byte[100];
         int n = 0;
@@ -269,5 +278,83 @@ public class BufferedBoundaryInputStreamTest {
         assertEquals(15, n);
         assertEquals(-1, in.read());
         assertFalse(in.hasNext());
+    }
+
+    @Test
+    public void readArr_splitBoundary() throws IOException {
+        BufferedBoundaryInputStream in = getBufferedBoundaryInputStream(
+                "aaaaaaaa####aaaaaaaa", "####", 10);
+
+        byte[] buff = new byte[10];
+        assertEquals(4, in.read(buff, 0 , 4));
+        int n = 0;
+        n += in.read(buff, 0 , 10);
+        n += in.read(buff, 0 , 10);
+        assertEquals(4, n);
+        assertEquals(-1, in.read(buff, 0 , 6));
+        in.next();
+        assertEquals(6, in.read(buff, 0 , 6));
+    }
+
+
+    @Test
+    public void read_mark() throws IOException {
+        BufferedBoundaryInputStream in = getBufferedBoundaryInputStream(
+                "0123456789#abcdefghijklmn#opqrstuvwxyz", "#");
+
+        in.read();in.read();in.read();
+        assertEquals('3', in.read());
+        in.mark(10); // mark '4'
+        assertEquals('4', in.read());
+        in.read();in.read();in.read();
+        assertEquals('8', in.read());
+        in.reset(); // go back to '4'
+        assertEquals('4', in.read());
+    }
+    @Test
+    public void readArr_mark() throws IOException {
+        BufferedBoundaryInputStream in = getBufferedBoundaryInputStream(
+                "0123456789#abcdefghijklmn#opqrstuvwxyz", "#");
+
+        readAndAssertArray(new byte[]{'0','1','2','3'}, in, 4);
+        in.mark(10); // mark '4'
+        readAndAssertArray(new byte[]{'4','5','6','7'}, in, 4);
+        readAndAssertArray(new byte[]{'8','9'}, in, 2);
+        in.reset(); // go back to '4'
+        readAndAssertArray(new byte[]{'4','5','6','7'}, in, 4);
+    }
+
+    @Test
+    public void readArr_markBoundary() throws IOException {
+        BufferedBoundaryInputStream in = getBufferedBoundaryInputStream(
+                "0123456789#abcdefghijklmn#opqrstuvwxyz", "#");
+
+        readAndAssertArray(new byte[]{'0','1','2','3'}, in, 4);
+        in.mark(30); // mark '4'
+        readAndAssertArray(new byte[]{'4','5','6','7','8','9'}, in, 6);
+        assertEquals(-1, in.read()); // boundary
+        in.next();
+        readAndAssertArray(new byte[]{'a','b'}, in, 2);
+        in.reset(); // go back to '4'
+        readAndAssertArray(new byte[]{'4','5','6','7','8','9'}, in, 6);
+        assertEquals(-1, in.read()); // is boundary still there
+    }
+
+    @Test
+    public void readArr_markLargeData() throws IOException {
+        BufferedBoundaryInputStream in = getBufferedBoundaryInputStream(
+                "0123456789#abcdefghijklmn#opqrstuvwxyz", "#", 10);
+
+        readAndAssertArray(new byte[]{'0','1','2','3'}, in, 4);
+        in.mark(30); // mark '4'
+        readAndAssertArray(new byte[]{'4','5','6','7','8','9'}, in, 6);
+        assertEquals(-1, in.read()); // boundary
+        in.next();
+        readAndAssertArray(new byte[]{'a','b','c','d','e','f'}, in, 6);
+        try{
+            in.reset(); // Exception we have passed buffer limit
+            fail();
+        } catch (IOException e){}
+        readAndAssertArray(new byte[]{'g','h'}, in, 2);
     }
 }

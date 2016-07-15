@@ -107,11 +107,24 @@ public class MultipartParser implements Iterable<MultipartField>{
 
 
         /**
-         * TODO: there is a bug where this returns true after the last MultiPart as it cannot read ahead. So use next() != null instead
+         * @return if there is more data after the closest boundary.
+         *          Note that if all data until the next boundary has
+         *          not been read then this method can only estimate
+         *          if there is a next element as the next boundary or
+         *          end of stream might be out of reach.
          */
         @Override
         public boolean hasNext() {
             try {
+                // check is the last characters are "--"
+                if (boundaryIn.hasNext() && boundaryIn.isOnBoundary()) {
+                    boundaryIn.mark(delimiter.length() + 10);
+                    boundaryIn.next();
+                    boolean ret = ! ('-' == boundaryIn.read() && '-' == boundaryIn.read());
+                    boundaryIn.reset();
+                    return ret;
+                }
+                // Or just guess
                 return boundaryIn.hasNext();
             } catch (IOException e) {
                 logger.log(Level.SEVERE, null, e);

@@ -33,13 +33,15 @@ public class MultipartParserTest {
 
         // Assertions
         Iterator<MultipartField> it = parser.iterator();
+
         assertTrue(it.hasNext());
         MultipartField field = it.next();
         assertTrue(field instanceof MultipartStringField);
         MultipartStringField stringField = (MultipartStringField) field;
         assertEquals("foo", stringField.getName());
         assertEquals("bar", stringField.getValue());
-        //assertFalse(it.hasNext()); //TODO: does not work, how to solve this?
+
+        assertFalse(it.hasNext());
         assertEquals(null, it.next());
         assertEquals(null, it.next());
     }
@@ -54,19 +56,21 @@ public class MultipartParserTest {
         String input_data =
                 "?PNG\n" +
                 "\n" +
-                "lkuytrewacvbnmloiuytrewrtyuiol,mnbvdc xswertyuioplm cdsertyuioölkjgf\n" +
-                "kgkfdgfhgfhgkhgvytvjgxslkyöiyfödgjdjhföjhdlgdgjfhföjhföiyföudlögföudöfö\n" +
-                "ögdljgdjhöfjhfdfsgdfg  ryrt dtrd ytfc  uhöiugljfkdkhdjgd\n" +
+                "lkuytrewacvbnmloiuytrewrtyuiol,mnbvdc xswertyuioplm cdsertyuiojlkjgf\n" +
+                "kgkfdgfhgfhgkhgvytvjgxslkysiyfedgjdjhfkjhdlgdgjfhfcjhfqiyfyudlmgfeudcfa\n" +
+                "bgdljgdjhffjhfdfsgdfg  ryrt dtrd ytfc  uhhiugljfkdkhdjgd\n" +
                 " xx\n" +
                 "     kuykutfytdh ytrd trutrd trxxx";
         String input_end = "\n------------------------------83ff53821b7c--";
+        String input = input_start+input_data+input_end;
         MultipartParser parser = new MultipartParser(
-                new StringInputStream(input_start+input_data+input_end),
+                new StringInputStream(input),
                 "----------------------------83ff53821b7c",
                 0);
 
         // Assertions
         Iterator<MultipartField> it = parser.iterator();
+
         assertTrue(it.hasNext());
         MultipartField field = it.next();
         assertTrue(field instanceof MultipartFileField);
@@ -75,7 +79,8 @@ public class MultipartParserTest {
         assertEquals("a.png", fileField.getFilename());
         assertEquals("application/octet-stream", fileField.getContentType());
         assertEquals(input_data, new String(fileField.getContent()));
-        //assertFalse(it.hasNext()); //TODO: does not work, how to solve this?
+
+        assertFalse(it.hasNext());
     }
 
     //Test
