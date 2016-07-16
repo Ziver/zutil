@@ -1,14 +1,16 @@
 package zutil.parser.binary;
 
 
-import java.lang.reflect.Field;
-import java.nio.charset.StandardCharsets;
-import java.util.*;
-
 import zutil.ByteUtil;
 import zutil.ClassUtil;
 import zutil.converter.Converter;
-import zutil.parser.binary.BinaryStruct.*;
+import zutil.parser.binary.BinaryStruct.BinaryField;
+import zutil.parser.binary.BinaryStruct.CustomBinaryField;
+import zutil.parser.binary.BinaryStruct.VariableLengthBinaryField;
+
+import java.lang.reflect.Field;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
 
 /**
  * A class representing each field in a BinaryStruct.

@@ -25,8 +25,6 @@
 package zutil.net.http.multipart;
 
 
-import java.io.InputStream;
-
 /**
  * A interface representing a single field in a multipart message.
  * 

@@ -1,12 +1,10 @@
 package zutil.benchmark;
 
-import com.carrotsearch.junitbenchmarks.BenchmarkOptions;
 import com.carrotsearch.junitbenchmarks.BenchmarkRule;
 import org.junit.Rule;
 import org.junit.Test;
 import zutil.StringUtil;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
 

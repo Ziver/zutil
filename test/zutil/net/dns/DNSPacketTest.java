@@ -29,16 +29,15 @@ import zutil.converter.Converter;
 import zutil.parser.binary.BinaryStructInputStream;
 import zutil.parser.binary.BinaryStructOutputStream;
 
-import static org.junit.Assert.assertTrue;
-import static zutil.net.dns.DNSPacketQuestion.*;
-import static zutil.net.dns.DNSPacketResource.*;
-
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
+import static zutil.net.dns.DNSPacketQuestion.QCLASS_IN;
+import static zutil.net.dns.DNSPacketQuestion.QTYPE_A;
+import static zutil.net.dns.DNSPacketResource.CLASS_IN;
+import static zutil.net.dns.DNSPacketResource.TYPE_A;
 
 /**
  * Created by Ziver

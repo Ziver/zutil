@@ -25,7 +25,6 @@
 package zutil.net.ssdp;
 
 import zutil.StringUtil;
-import zutil.io.StringOutputStream;
 import zutil.log.LogUtil;
 import zutil.net.http.HttpHeader;
 import zutil.net.http.HttpHeaderParser;

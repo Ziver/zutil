@@ -24,8 +24,6 @@
 
 package zutil.net;
 
-import zutil.net.ServerFindClient;
-
 import java.io.IOException;
 
 

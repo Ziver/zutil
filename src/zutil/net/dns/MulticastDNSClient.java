@@ -25,7 +25,6 @@
 package zutil.net.dns;
 
 import zutil.ByteUtil;
-import zutil.converter.Converter;
 import zutil.io.MultiPrintStream;
 import zutil.log.LogUtil;
 import zutil.net.threaded.ThreadedUDPNetwork;

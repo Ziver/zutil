@@ -3,7 +3,6 @@ package zutil.benchmark;
 import com.carrotsearch.junitbenchmarks.BenchmarkRule;
 import org.junit.Rule;
 import org.junit.Test;
-import zutil.StringUtil;
 
 public class LoopBenchmark {
     public static final int TEST_EXECUTIONS = 500;

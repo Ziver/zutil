@@ -25,14 +25,11 @@
 package zutil.parser.binary;
 
 import org.junit.Test;
-import zutil.converter.Converter;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.nio.charset.StandardCharsets;
 
-import static junit.framework.TestCase.assertEquals;
 import static org.junit.Assert.assertArrayEquals;
 
 

@@ -26,13 +26,12 @@ package zutil.net.http.multipart;
 
 import zutil.io.BufferedBoundaryInputStream;
 import zutil.io.IOUtil;
-import zutil.io.NullWriter;
 import zutil.log.LogUtil;
 import zutil.net.http.HttpHeader;
 import zutil.net.http.HttpHeaderParser;
 
-import javax.servlet.http.HttpServletRequest;
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.logging.Level;

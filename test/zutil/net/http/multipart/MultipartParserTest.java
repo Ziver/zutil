@@ -1,7 +1,6 @@
 package zutil.net.http.multipart;
 
 import org.junit.Test;
-import zutil.io.IOUtil;
 import zutil.io.StringInputStream;
 
 import java.io.IOException;

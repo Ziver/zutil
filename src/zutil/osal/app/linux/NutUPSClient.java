@@ -1,6 +1,5 @@
 package zutil.osal.app.linux;
 
-import zutil.StringUtil;
 import zutil.Timer;
 import zutil.log.LogUtil;
 
@@ -8,7 +7,6 @@ import java.io.*;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;

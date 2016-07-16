@@ -24,7 +24,6 @@
 
 package zutil.algo.sort;
 
-import zutil.algo.sort.MergeSort;
 import zutil.algo.sort.sortable.SortableIntArray;
 
 // TODO: Convert to JUnit

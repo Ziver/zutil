@@ -2,9 +2,7 @@ package zutil.net.http.multipart;
 
 
 import zutil.io.IOUtil;
-import zutil.io.InputStreamCloser;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Map;

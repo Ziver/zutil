@@ -31,8 +31,6 @@ import zutil.parser.json.JSONSerializerTest.TestClass;
 
 import java.io.*;
 
-import static org.junit.Assert.assertEquals;
-
 
 public class JSONSerializerBenchmark {
     private static final int TEST_EXECUTIONS = 2000;

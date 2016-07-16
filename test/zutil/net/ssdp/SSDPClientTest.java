@@ -25,7 +25,6 @@
 package zutil.net.ssdp;
 
 import zutil.log.LogUtil;
-import zutil.net.ssdp.SSDPClient;
 
 import java.io.IOException;
 import java.util.logging.Level;

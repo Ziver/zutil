@@ -30,8 +30,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.util.logging.*;
 
-import static java.lang.System.in;
-
 /**
  * Utility functions for the standard Java Logger
  * 

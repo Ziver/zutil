@@ -24,13 +24,13 @@
 
 package zutil.net.http;
 
-import com.mysql.jdbc.Buffer;
 import zutil.StringUtil;
 import zutil.io.IOUtil;
 import zutil.io.StringInputStream;
 import zutil.parser.URLDecoder;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Map;
 import java.util.regex.Pattern;
 

@@ -26,7 +26,6 @@ package zutil.net.http;
 
 import zutil.converter.Converter;
 
-import java.io.BufferedReader;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Iterator;
