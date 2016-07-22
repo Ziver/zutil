@@ -153,6 +153,21 @@ public class Navigation implements Iterable{
                 (o != null && this.id == (((Navigation)o).id));
     }
 
+
+
+
+    public static Navigation createRootNav(){
+        return new Navigation(null, null);
+    }
+    public static Navigation getRootNav(Map<String, String> request) {
+        List<Navigation> breadcrumb = getBreadcrumb(getParameterizedNavigation(request));
+        if (!breadcrumb.isEmpty())
+            return breadcrumb.get(0);
+        return null;
+    }
+
+
+
     /**
      * Will create a clone of the navigation tree with some request instance specific information
      */
@@ -176,6 +191,7 @@ public class Navigation implements Iterable{
     }
     
 
+
     public NavInstance createPagedNavInstance(HttpHeader header){
         Navigation nav = getPagedNavigation(header);
         if (nav != null)
@@ -197,16 +213,6 @@ public class Navigation implements Iterable{
     }
 
 
-
-    public static Navigation createRootNav(){
-        return new Navigation(null, null);
-    }
-    public static Navigation getRootNav(Map<String, String> request) {
-        List<Navigation> breadcrumb = getBreadcrumb(getParameterizedNavigation(request));
-        if (!breadcrumb.isEmpty())
-            return breadcrumb.get(0);
-        return null;
-    }
     
 
     /**

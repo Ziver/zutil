@@ -51,7 +51,7 @@ public class Configurator<T> {
      */
     @Retention(RetentionPolicy.RUNTIME) // Make this annotation accessible at runtime via reflection.
     @Target({ElementType.FIELD})        // This annotation can only be applied to class fields.
-    public static @interface Configurable{
+    public @interface Configurable{
         /** Nice name of this parameter **/
         String value();
         /** Defines the order the parameters, in ascending order **/
@@ -59,7 +59,7 @@ public class Configurator<T> {
     }
 
 
-    public static enum ConfigType{
+    public enum ConfigType{
         STRING, INT, BOOLEAN
     }
 
@@ -71,10 +71,12 @@ public class Configurator<T> {
     private PreConfigurationActionListener<T> preListener;
     private PostConfigurationActionListener<T> postListener;
 
+
     public Configurator(T obj){
         this.obj = obj;
         this.params = getConfiguration(obj.getClass(), obj);
     }
+
 
     public T getObject(){
         return obj;
@@ -111,6 +113,8 @@ public class Configurator<T> {
 
     /**
      * Uses a Map to assign all parameters of the Object
+     *
+     * @return a reference to itself so that metodcalls can be chained.
      */
     public Configurator<T> setValues(Map<String,String> parameters){
         for(ConfigurationParam param : this.params){
@@ -123,6 +127,8 @@ public class Configurator<T> {
     /**
      * Uses a Map to assign all parameters of the Object.
      * NOTE: the DataNode must be of type Map
+     *
+     * @return a reference to itself so that metodcalls can be chained.
      */
     public Configurator<T> setValues(DataNode node){
         if(!node.isMap())
@@ -165,8 +171,10 @@ public class Configurator<T> {
      * been configured if it implements the PreConfigurationActionListener interface.
      * The postConfigurationAction() method will be called after the target object is
      * configured if it implements the PostConfigurationActionListener interface.
+     *
+     * @return a reference to itself so that metodcalls can be chained.
      */
-    public void applyConfiguration(){
+    public Configurator<T> applyConfiguration(){
         if(preListener != null)
             preListener.preConfigurationAction(this, obj);
         if(obj instanceof PreConfigurationActionListener)
@@ -195,6 +203,8 @@ public class Configurator<T> {
             ((PostConfigurationActionListener<T>) obj).postConfigurationAction(this, obj);
         if(postListener != null)
             postListener.postConfigurationAction(this, obj);
+
+        return this;
     }
 
 
