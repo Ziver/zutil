@@ -172,7 +172,10 @@ public class Navigation implements Iterable{
      * Will create a clone of the navigation tree with some request instance specific information
      */
     public NavInstance createParameterizedNavInstance(Map<String, String> request){
-        return createParameterizedNavInstance(getBreadcrumb(getParameterizedNavigation(request)));
+        Navigation nav = getParameterizedNavigation(request);
+        if (nav != null)
+            return createParameterizedNavInstance(getBreadcrumb(nav));
+        return createParameterizedNavInstance(Collections.EMPTY_LIST);
     }
     private NavInstance createParameterizedNavInstance(List<Navigation> activeList){
         NavInstance instance = new ParameterizedNavInstance(this);
@@ -196,7 +199,7 @@ public class Navigation implements Iterable{
         Navigation nav = getPagedNavigation(header);
         if (nav != null)
             return createPagedNavInstance(getBreadcrumb(nav));
-        return null;
+        return createPagedNavInstance(Collections.EMPTY_LIST);
     }
     private NavInstance createPagedNavInstance(List<Navigation> activeList){
         NavInstance instance = new PagedNavInstance(this);
