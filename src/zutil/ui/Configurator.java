@@ -171,10 +171,8 @@ public class Configurator<T> {
      * been configured if it implements the PreConfigurationActionListener interface.
      * The postConfigurationAction() method will be called after the target object is
      * configured if it implements the PostConfigurationActionListener interface.
-     *
-     * @return a reference to itself so that metodcalls can be chained.
      */
-    public Configurator<T> applyConfiguration(){
+    public void applyConfiguration(){
         if(preListener != null)
             preListener.preConfigurationAction(this, obj);
         if(obj instanceof PreConfigurationActionListener)
@@ -203,8 +201,6 @@ public class Configurator<T> {
             ((PostConfigurationActionListener<T>) obj).postConfigurationAction(this, obj);
         if(postListener != null)
             postListener.postConfigurationAction(this, obj);
-
-        return this;
     }
 
 
