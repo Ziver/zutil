@@ -24,14 +24,18 @@
 
 package zutil.struct;
 
+import zutil.Timer;
+
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 
 /**
  * This is a timed HashSet. Each entry has a limited time to live.
  */
 public class TimedHashSet<T> {
 
-    private HashMap<T, Long> map;
+    private HashMap<T, Timer> map;
     private long ttl;
 
     /**
@@ -47,12 +51,12 @@ public class TimedHashSet<T> {
      * @return true if the object already existed in the set which will reset the TTL.
      */
     public boolean add(T o){
-        return map.put(o, System.currentTimeMillis()) != null;
+        return map.put(o, new Timer(ttl).start()) != null;
     }
 
     public boolean contains(Object o){
         if(map.containsKey(o)){
-            if(map.get(o) + ttl < System.currentTimeMillis()) // entry to old
+            if(map.get(o).hasTimedOut()) // entry to old
                 map.remove(o);
             else
                 return true;
@@ -62,12 +66,28 @@ public class TimedHashSet<T> {
 
 
     /**
-     * Iterates through the Set and removes all entries that has passed the TTL
+     * This method will return the number of stored entries(valid and timed out entries) in the Set.
      */
-    public void garbageCollect(){
-        for(T o : map.keySet()){
-            if(map.get(o) + ttl < System.currentTimeMillis()) // entry to old
-                map.remove(o);
-        }
+    public int size() {
+        return map.size();
     }
+
+
+    /**
+     * Iterates through the Set and removes all entries that has passed its TTL.
+     *
+     * @return the number of objects removed from the Set
+     */
+    public int garbageCollect(){
+        int count = 0;
+        for(Iterator<Map.Entry<T, Timer>> it = map.entrySet().iterator(); it.hasNext(); ) {
+            Map.Entry<T, Timer> entry = it.next();
+            if (entry.getValue().hasTimedOut()) { // entry to old
+                it.remove();
+                ++count;
+            }
+        }
+        return count;
+    }
+
 }

@@ -156,18 +156,17 @@ public class DBBeanSQLResultHandler<T> implements SQLResultHandler<T>{
 			}
 			
 			int removed = 0;
-			long time = System.currentTimeMillis();
 			for(Object classKey : cache.keySet()){
 				if( classKey == null ) continue;
 					
 				Map<Long,DBBeanCache> class_cache = cache.get(classKey);
-				for(Object objKey : class_cache.keySet()){
-					if( objKey == null ) continue;
-					
-					DBBeanCache beanCache = class_cache.get(objKey);
+				for(Iterator<Map.Entry<Long, DBBeanCache>> it = class_cache.entrySet().iterator(); it.hasNext(); ) {
+					Map.Entry<Long, DBBeanCache> entry = it.next();
+					if( entry.getKey() == null ) continue;
+
 					// Check if session is still valid
-					if( beanCache.bean.get() == null ){
-						class_cache.remove(objKey);
+					if( entry.getValue().bean.get() == null ){
+						it.remove();
 						removed++;
 					}
 				}

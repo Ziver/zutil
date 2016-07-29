@@ -34,45 +34,72 @@ import static org.junit.Assert.assertFalse;
 /**
  * Created by Ziver on 2015-11-20.
  */
-public class TimedHashSetTest {
-    public static final String ENTRY = "key";
-    public static final String ENTRY2 = "key2";
+public class ObjectCacheTest {
+    public static final String KEY = "key";
+    public static final String OBJECT = "object";
+    public static final String KEY2 = "key2";
+    public static final String OBJECT2 = "object2";
+
+
+    @Test
+    public void emptyCache() throws InterruptedException {
+        ObjectCache cache = new ObjectCache(10);
+        assertFalse(cache.containsKey(KEY));
+        assertEquals(0, cache.size());
+    }
 
     @Test
     public void zeroTTL() throws InterruptedException {
-        TimedHashSet set = new TimedHashSet(0);
-        set.add(ENTRY);
+        ObjectCache cache = new ObjectCache(0);
+        cache.put(KEY, OBJECT);
+        assertEquals(1, cache.size());
         Thread.sleep(1);
-        assertFalse(set.contains(ENTRY));
+        assertFalse(cache.containsKey(KEY));
     }
 
     @Test
     public void tenMsTTL() throws InterruptedException {
-        TimedHashSet set = new TimedHashSet(10);
-        set.add(ENTRY);
+        ObjectCache cache = new ObjectCache(10);
+        cache.put(KEY, OBJECT);
+        assertEquals(OBJECT, cache.get(KEY));
         Thread.sleep(1);
-        assertTrue(set.contains(ENTRY));
+        assertTrue(cache.containsKey(KEY));
         Thread.sleep(10);
-        assertFalse(set.contains(ENTRY));
+        assertFalse(cache.containsKey(KEY));
+        assertEquals(0, cache.size());
     }
 
     @Test
     public void oneSecTTL() throws InterruptedException {
-        TimedHashSet set = new TimedHashSet(1000);
-        set.add(ENTRY);
+        ObjectCache cache = new ObjectCache(1000);
+        cache.put(KEY, OBJECT);
         Thread.sleep(1);
-        assertTrue(set.contains(ENTRY));
+        assertTrue(cache.containsKey(KEY));
+    }
+
+    //@Test
+    // This TC does not work
+    public void javaGRC() throws InterruptedException {
+        ObjectCache cache = new ObjectCache(10000);
+        {
+            String tmp = new String("temporary obj");
+            cache.put(KEY, tmp);
+            assertEquals(1, cache.size());
+        }
+        System.gc(); // will probably not do anything
+        Thread.sleep(10);
+        assertEquals(1, cache.garbageCollect());
     }
 
     @Test
     public void grc() throws InterruptedException {
-        TimedHashSet set = new TimedHashSet(10);
-        set.add(ENTRY);
-        set.add(ENTRY2);
-        assertEquals(2, set.size());
+        ObjectCache cache = new ObjectCache(10);
+        cache.put(KEY, OBJECT);
+        cache.put(KEY2, OBJECT2);
+        assertEquals(2, cache.size());
         Thread.sleep(12);
-        assertEquals(2, set.size());
-        assertEquals(2, set.garbageCollect());
-        assertEquals(0, set.size());
+        assertEquals(2, cache.size());
+        assertEquals(2, cache.garbageCollect());
+        assertEquals(0, cache.size());
     }
 }

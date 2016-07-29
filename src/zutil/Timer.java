@@ -44,9 +44,12 @@ public class Timer {
 
     /**
      * Will start or restart the timer if it is already running
+     *
+     * @return a reference of itself
      */
-    public void start(){
+    public Timer start(){
         timestamp = System.currentTimeMillis();
+        return this;
     }
 
     /**
