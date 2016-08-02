@@ -94,14 +94,15 @@ public class Configurator<T> {
     protected static ConfigurationParam[] getConfiguration(Class c, Object obj){
         ArrayList<ConfigurationParam> conf = new ArrayList<ConfigurationParam>();
 
-        Field[] all = c.getDeclaredFields();
-        for(Field f : all){
-            if(f.isAnnotationPresent(Configurable.class) &&
-                    !Modifier.isStatic(f.getModifiers()) && !Modifier.isTransient(f.getModifiers())) {
-                try {
-                    conf.add(new ConfigurationParam(f, obj));
-                } catch (IllegalAccessException e) {
-                    logger.log(Level.SEVERE, null, e);
+        for(Class<?> cc = c; cc != Object.class ;cc = cc.getSuperclass()) { // iterate through all super classes
+            for (Field f : cc.getDeclaredFields()) {
+                if (f.isAnnotationPresent(Configurable.class) &&
+                        !Modifier.isStatic(f.getModifiers()) && !Modifier.isTransient(f.getModifiers())) {
+                    try {
+                        conf.add(new ConfigurationParam(f, obj));
+                    } catch (IllegalAccessException e) {
+                        logger.log(Level.SEVERE, null, e);
+                    }
                 }
             }
         }
