@@ -197,11 +197,21 @@ public class ByteUtil {
      * @return A multiline String with human readable HEX and ASCII
      */
     public static String toFormattedString(byte[] data){
+        return toFormattedString(data, 0, data.length);
+    }
+
+    /**
+     * Presents a binary array in HEX and ASCII
+     *
+     * @param       data     The source binary data to format
+     * @return A multiline String with human readable HEX and ASCII
+     */
+    public static String toFormattedString(byte[] data, int offset, int length){
         StringBuffer output = new StringBuffer();
 
         //000  XX XX XX XX XX XX XX XX  '........'
-        int maxOffset = (""+data.length).length();
-        for(int offset=0; offset<data.length; offset+=8){
+        int maxOffset = (""+length).length();
+        for(; offset<length; offset+=8){
             if(offset != 0)
                 output.append('\n');
 
@@ -215,7 +225,7 @@ public class ByteUtil {
 
             // HEX
             for(int i=0; i<8; ++i){
-                if(offset+i < data.length)
+                if(offset+i < length)
                     output.append(Converter.toHexString(data[offset+i]));
                 else
                     output.append("  ");
@@ -226,7 +236,7 @@ public class ByteUtil {
             // ACII
             output.append('\'');
             for(int i=0; i<8; ++i){
-                if(offset+i < data.length)
+                if(offset+i < length)
                     if( 32 <= data[offset+i] && data[offset+i] <= 126 )
                         output.append((char)data[offset+i]);
                     else

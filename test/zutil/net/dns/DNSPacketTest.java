@@ -34,10 +34,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
 import static org.junit.Assert.*;
-import static zutil.net.dns.DNSPacketQuestion.QCLASS_IN;
-import static zutil.net.dns.DNSPacketQuestion.QTYPE_A;
-import static zutil.net.dns.DNSPacketResource.CLASS_IN;
-import static zutil.net.dns.DNSPacketResource.TYPE_A;
+import static zutil.net.dns.DNSPacketQuestion.*;
+import static zutil.net.dns.DNSPacketResource.*;
 
 /**
  * Created by Ziver
