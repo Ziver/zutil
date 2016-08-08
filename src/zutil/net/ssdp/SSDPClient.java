@@ -258,13 +258,10 @@ public class SSDPClient extends ThreadedUDPNetwork implements ThreadedUDPNetwork
 	
 	private long getCacheTime(String cache_control){
 		long ret = 0;
-		String[] tmp = cache_control.split(",");
-		for( String element : tmp ){
-			element = element.replaceAll("\\s", "").toLowerCase();
-			if( element.startsWith("max-age=") ){
-				ret = Long.parseLong( element.substring( "max-age=".length() ) );
-			}
-		}
+		HashMap<String,String> tmpMap = new HashMap<>();
+		HttpHeaderParser.parseHeaderValues(tmpMap, cache_control, ",");
+        if(tmpMap.containsKey("max-age"))
+            ret = Long.parseLong( tmpMap.get("max-age") );
 		return ret;
 	}
 

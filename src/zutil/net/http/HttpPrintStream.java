@@ -244,11 +244,11 @@ public class HttpPrintStream extends OutputStream{
 					else{
 						for(String key : cookies.keySet()){
 							out.print("Set-Cookie: " + key + "=" + cookies.get(key) + ";");
-							out.print(System.lineSeparator());
+							out.println();
 						}
 					}
 				}
-				out.print(System.lineSeparator());
+				out.println();
 				cookies = null;
 			}
 			out.print(s);
@@ -305,10 +305,6 @@ public class HttpPrintStream extends OutputStream{
 	public void write(byte[] buf, int off, int len) throws IOException {
 		flushBuffer();
 		out.write(buf, off, len);
-	}
-
-	private void rawWrite(String s) throws IOException {
-		out.write(s.getBytes());
 	}
 
 	private String getStatusString(int type){

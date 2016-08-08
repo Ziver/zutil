@@ -12,6 +12,7 @@ public class MulticastDNSClientTest {
     public static void main(String[]  args) throws IOException {
         MulticastDNSClient mdns = new MulticastDNSClient();
         mdns.start();
-        mdns.sendProbe("apple.local");
+        //mdns.sendProbe("appletv.local");
+        mdns.sendProbe("_services._dns-sd._udp.local");
     }
 }

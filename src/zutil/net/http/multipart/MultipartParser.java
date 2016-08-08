@@ -152,7 +152,7 @@ public class MultipartParser implements Iterable<MultipartField>{
                 // Parse
                 String disposition = headers.get(HEADER_CONTENT_DISPOSITION);
                 if (disposition != null){
-                    HttpHeaderParser.parseHeaderValue(headers, disposition);
+                    HttpHeaderParser.parseCookieValues(headers, disposition);
                     if (headers.containsKey("form-data")){
                         if (headers.containsKey("filename")){
                             MultipartFileField field = new MultipartFileField(headers, boundaryIn);

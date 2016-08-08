@@ -40,7 +40,6 @@ public class HttpHeaderParser {
 	private static final Pattern PATTERN_COLON = Pattern.compile(":");
 	private static final Pattern PATTERN_EQUAL = Pattern.compile("=");
 	private static final Pattern PATTERN_AND = Pattern.compile("&");
-	private static final Pattern PATTERN_SEMICOLON = Pattern.compile(";");
 
 
     private InputStream in;
@@ -84,7 +83,7 @@ public class HttpHeaderParser {
         }
 
         // Post processing
-        parseHeaderValue(header.getCookieMap(), header.getHeader(HEADER_COOKIE));
+		parseCookieValues(header.getCookieMap(), header.getHeader(HEADER_COOKIE));
         header.setInputStream(in);
         return header;
     }
@@ -144,17 +143,27 @@ public class HttpHeaderParser {
                 (data.length>1 ? data[1] : "").trim()); 		//Value
     }
 
+	/**
+	 * Parses a raw cookie header into key and value pairs
+	 *
+	 * @param   map             the Map where the cookies will be stored.
+	 * @param   cookieValue		the raw cookie header value String that will be parsed
+	 */
+	public static void parseCookieValues(Map<String,String> map, String cookieValue){
+		parseHeaderValues(map, cookieValue, ";");
+	}
     /**
      * Parses a header value string that contains key and value paired data and
      * stores them in a HashMap. If a pair only contain a key the the value
      * will be set as a empty string.
 	 *
-	 * @param   map             the Map where the cookies will be stored.
-     * @param   cookieHeader    the raw cookie header String that will be parsed
+	 * @param   map             the Map where key and values will be stored.
+     * @param   headerValue		the raw header value String that will be parsed.
+	 * @param 	delimiter		the delimiter that separates key and value pairs (e.g. ';' for Cookies or ',' for Cache-Control)
      */
-    public static void parseHeaderValue(Map<String,String> map, String cookieHeader){
-        if(cookieHeader != null && !cookieHeader.isEmpty()){
-            String[] tmp = PATTERN_SEMICOLON.split(cookieHeader);
+    public static void parseHeaderValues(Map<String,String> map, String headerValue, String delimiter){
+        if(headerValue != null && !headerValue.isEmpty()){
+            String[] tmp = headerValue.split(delimiter);
             for(String cookie : tmp){
                 String[] tmp2 = PATTERN_EQUAL.split(cookie, 2);
                 map.put(
