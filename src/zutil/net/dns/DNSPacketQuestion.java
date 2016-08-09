@@ -151,13 +151,22 @@ public class DNSPacketQuestion implements BinaryStruct {
         public String read(InputStream in, BinaryFieldData field) throws IOException {
             StringBuilder str = new StringBuilder();
             int c = in.read();
-            while (c > 0){
-                for (int i=0; i<c; ++i){
-                    str.append((char)in.read());
+            // Is this a pointer
+            if ((c & 0b1100_0000) == 0b1100_0000 ){
+                int offset = (c & 0b0011_1111) << 8;
+                offset |= in.read() & 0b1111_1111;
+                str.append(offset);
+            }
+            // Normal Domain String
+            else {
+                while (c > 0) {
+                    for (int i = 0; i < c; ++i) {
+                        str.append((char) in.read());
+                    }
+                    c = in.read();
+                    if (c > 0)
+                        str.append('.');
                 }
-                c = in.read();
-                if (c > 0)
-                    str.append('.');
             }
             return str.toString();
         }

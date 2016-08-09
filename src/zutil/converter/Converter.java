@@ -128,8 +128,9 @@ public class Converter {
 	 * 
 	 * @param 	hex     is the hex value
 	 * @return a byte that corresponds to the hex
+	 * @throws IllegalArgumentException if hex is not a valid hex character
 	 */
-	public static byte hexToByte( char hex ){
+	public static byte hexToByte( char hex ) throws IllegalArgumentException{
 		switch( Character.toLowerCase(hex) ){
 		case '0': return 0x00;
 		case '1': return 0x01;
@@ -147,8 +148,9 @@ public class Converter {
 		case 'd': return 0x0d;
 		case 'e': return 0x0e;
 		case 'f': return 0x0f;
+		default:
+			throw new IllegalArgumentException("'"+hex+"' is an illegal hex character only 0-9 and a-f characters allowed");
 		}
-		return (byte)0;
 	}
 
 	/** 

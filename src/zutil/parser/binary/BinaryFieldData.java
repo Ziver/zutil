@@ -156,4 +156,18 @@ public class BinaryFieldData {
     public BinaryFieldSerializer getSerializer(){
         return serializer;
     }
+
+
+    @Override
+    public String toString(){
+        return field.getDeclaringClass().getSimpleName() + "::" + field.getName() +
+                " (" +
+                (lengthField != null ?
+                    "LengthField: " + lengthField +", LengthMultiplier: "+lengthMultiplier :
+                    length+" bits") +
+                (serializer != null ?
+                    ", Serializer: " + serializer.getClass().getName() : "") +
+                ")";
+
+    }
 }

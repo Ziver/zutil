@@ -11,7 +11,8 @@ import java.util.List;
 /**
  * This class is a general wrapper for a whole DNS packet.
  *
- * Created by Ziver on 2016-04-11.
+ * @see <a href="https://tools.ietf.org/html/rfc1035">rfc1035</a>
+ * @author Ziver on 2016-04-11.
  */
 public class DNSPacket {
     private DNSPacketHeader header;
