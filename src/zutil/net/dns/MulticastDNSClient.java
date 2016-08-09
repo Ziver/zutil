@@ -64,6 +64,7 @@ public class MulticastDNSClient extends ThreadedUDPNetwork implements ThreadedUD
         BinaryStructOutputStream out = new BinaryStructOutputStream(buffer);
 
         DNSPacket dnsPacket = new DNSPacket();
+        dnsPacket.getHeader().id = (int)(Math.random() * 0xFFFF);
         dnsPacket.getHeader().setDefaultQueryData();
         dnsPacket.addQuestion(new DNSPacketQuestion(
                 service,

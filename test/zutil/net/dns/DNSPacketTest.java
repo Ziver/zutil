@@ -205,7 +205,27 @@ Domain Name System (query)
             Type: A (Host address)
             Class: IN (0x0001)
  */
-// TODO
+        DNSPacket packet = new DNSPacket();
+        DNSPacketHeader header = packet.getHeader();
+        header.id = 0x241a;
+        header.flagRecursionDesired = true;
+        header.countQuestion = 1;
+
+        DNSPacketQuestion question = new DNSPacketQuestion();
+        question.qName = "www.google.com";
+        question.qType = QTYPE_A;
+        question.qClass = QCLASS_IN;
+        packet.addQuestion(question);
+
+        ByteArrayOutputStream buff = new ByteArrayOutputStream();
+        BinaryStructOutputStream out = new BinaryStructOutputStream(buff);
+        packet.write(out);
+        byte[] data = buff.toByteArray();
+        assertEquals((
+                "241a 01 00 00 01 00 00 00 00 00 00 " +
+                "03 77  77 77 06 67 6f 6f 67 6c 65 03 63 6f 6d 00  0001  0001"
+            ).replace(" ",""),
+                Converter.toHexString(data));
     }
 
     @Test

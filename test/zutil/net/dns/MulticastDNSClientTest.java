@@ -13,6 +13,7 @@ public class MulticastDNSClientTest {
         MulticastDNSClient mdns = new MulticastDNSClient();
         mdns.start();
         //mdns.sendProbe("appletv.local");
-        mdns.sendProbe("_services._dns-sd._udp.local");
+        //mdns.sendProbe("_services._dns-sd._udp.local");
+        mdns.sendProbe("_googlecast._tcp.local");
     }
 }
