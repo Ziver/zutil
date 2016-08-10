@@ -81,7 +81,7 @@ public class MulticastDNSClient extends ThreadedUDPNetwork implements ThreadedUD
         System.out.println(ByteUtil.toFormattedString(udpPacket.getData(), udpPacket.getOffset(), udpPacket.getLength()));
         MultiPrintStream.out.dump(dnsPacket,3);
 
-        //send(udpPacket);
+        send(udpPacket);
     }
 
     @Override
@@ -91,6 +91,7 @@ public class MulticastDNSClient extends ThreadedUDPNetwork implements ThreadedUD
                     packet.getOffset(), packet.getLength());
             BinaryStructInputStream in = new BinaryStructInputStream(buffer);
             DNSPacket dnsPacket = DNSPacket.read(in);
+
             System.out.println("#### Received response from "+packet.getAddress());
             System.out.println(ByteUtil.toFormattedString(packet.getData(), packet.getOffset(), packet.getLength()));
             MultiPrintStream.out.dump(dnsPacket,3);
