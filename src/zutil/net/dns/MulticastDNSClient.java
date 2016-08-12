@@ -37,9 +37,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.util.HashSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -56,7 +54,7 @@ public class MulticastDNSClient extends ThreadedUDPNetwork implements ThreadedUD
     private static final int    MDNS_MULTICAST_PORT = 5353;
 
 
-    private HashMap<String,List<String>> activeProbes;
+    private HashSet<Integer> activeProbes;
     private DNSResolutionListener listener;
 
 
@@ -64,7 +62,7 @@ public class MulticastDNSClient extends ThreadedUDPNetwork implements ThreadedUD
         super(MDNS_MULTICAST_ADDR, MDNS_MULTICAST_PORT);
         setThread( this );
 
-        this.activeProbes = new HashMap<>();
+        this.activeProbes = new HashSet<>();
     }
 
     public void setListener(DNSResolutionListener listener){
@@ -73,12 +71,13 @@ public class MulticastDNSClient extends ThreadedUDPNetwork implements ThreadedUD
 
 
     public void sendProbe(String domain) throws IOException {
-        activeProbes.put(domain, new ArrayList<String>());
+        int id = (int)(Math.random() * 0xFFFF);
+        activeProbes.add(id);
         ByteArrayOutputStream buffer = new ByteArrayOutputStream();
         BinaryStructOutputStream out = new BinaryStructOutputStream(buffer);
 
         DNSPacket dnsPacket = new DNSPacket();
-        dnsPacket.getHeader().id = (int)(Math.random() * 0xFFFF);
+        dnsPacket.getHeader().id = id;
         dnsPacket.getHeader().setDefaultQueryData();
         dnsPacket.addQuestion(new DNSPacketQuestion(
                 domain,
@@ -91,9 +90,9 @@ public class MulticastDNSClient extends ThreadedUDPNetwork implements ThreadedUD
                 InetAddress.getByName( MDNS_MULTICAST_ADDR ),
                 MDNS_MULTICAST_PORT );
 
-        logger.fine("Sending MDSN probe for domain: " + domain);
-        System.out.println(ByteUtil.toFormattedString(udpPacket.getData(), udpPacket.getOffset(), udpPacket.getLength()));
-        MultiPrintStream.out.dump(dnsPacket,3);
+        logger.fine("Sending MDSN probe id: "+id+", for domain: " + domain);
+        //System.out.println("Sending:\n"+ByteUtil.toFormattedString(udpPacket.getData(), udpPacket.getOffset(), udpPacket.getLength()));
+        //MultiPrintStream.out.dump(dnsPacket,3);
 
         send(udpPacket);
     }
@@ -106,19 +105,14 @@ public class MulticastDNSClient extends ThreadedUDPNetwork implements ThreadedUD
             BinaryStructInputStream in = new BinaryStructInputStream(buffer);
             DNSPacket dnsPacket = DNSPacket.read(in);
 
-            System.out.println(ByteUtil.toFormattedString(packet.getData(), packet.getOffset(), packet.getLength()));
-            MultiPrintStream.out.dump(dnsPacket,3);
+            //System.out.println("Received:\n"+ByteUtil.toFormattedString(packet.getData(), packet.getOffset(), packet.getLength()));
+            //MultiPrintStream.out.dump(dnsPacket,3);
 
-            if (dnsPacket.getHeader().flagQueryResponse && dnsPacket.getHeader().countAnswerRecord > 0) {
-                String domain = null;
-                if (domain != null && activeProbes.containsKey(domain)){
-                    List<String> list = activeProbes.get(domain);
-                    if (!list.contains(domain)){
-                        logger.fine("Received MDSN response from: "+packet.getAddress()+", domain: " + domain);
-                        list.add(domain);
-                        if (listener != null)
-                            listener.receivedResponse(dnsPacket);
-                    }
+            if (dnsPacket.getHeader().flagQueryResponse) {
+                if (activeProbes.contains(dnsPacket.getHeader().id)){
+                    logger.fine("Received MDSN response from: "+packet.getAddress()+", msg id: " + dnsPacket.getHeader().id);
+                    if (listener != null)
+                        listener.receivedResponse(dnsPacket);
                 }
             }
         } catch (IOException e){
