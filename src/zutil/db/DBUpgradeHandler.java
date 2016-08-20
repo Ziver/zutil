@@ -69,9 +69,9 @@ public class DBUpgradeHandler {
      * Will create a rename mapping where an existing table will be renamed.
      *
      * @param   oldTableName    current name of the table
-     * @param   newTableName    new name that ol table will be renamed to.
+     * @param   newTableName    new name that old table will be renamed to.
      */
-    public void setTableRenameMap(String oldTableName, String newTableName){
+    public void addTableRenameMapping(String oldTableName, String newTableName){
         this.tableRenameMap.put(oldTableName, newTableName);
     }
 
@@ -215,7 +215,7 @@ public class DBUpgradeHandler {
                     logger.fine(String.format("Forced Upgrade: Dropping backup table: '%s'", backupTable));
                     target.exec("DROP TABLE " + backupTable);
                 }
-                // Do a
+                // Do a soft upgrade, add missing columns
                 else{
                     // Add new columns
                     for(DBColumn column : refStruct) {
