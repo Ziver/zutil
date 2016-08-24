@@ -32,7 +32,6 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -41,6 +40,17 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
+ * This class is a helper class that lets can configure fields inside of a object.
+ * The target class should implement the {@link Configurable} annotation on all the
+ * fields that should be configurable. And then the gui can use the {@link Configurator#getConfiguration()}
+ * to display all the correct fields. To later save the user input back to the target
+ * object the {@link Configurator#setValues(DataNode)} or {@link Configurator#setValues(Map)}
+ * can be used to set the individual fields and finaly call {@link Configurator#applyConfiguration()}
+ * to configure the target object.
+ *
+ * <br>
+ * Supported field types: String, int, boolean, enum
+ * <br>
  * Created by Ziver
  */
 public class Configurator<T> {
@@ -60,7 +70,7 @@ public class Configurator<T> {
 
 
     public enum ConfigType{
-        STRING, INT, BOOLEAN
+        STRING, INT, BOOLEAN, ENUM
     }
 
 
@@ -96,8 +106,7 @@ public class Configurator<T> {
 
         for(Class<?> cc = c; cc != Object.class ;cc = cc.getSuperclass()) { // iterate through all super classes
             for (Field f : cc.getDeclaredFields()) {
-                if (f.isAnnotationPresent(Configurable.class) &&
-                        !Modifier.isStatic(f.getModifiers()) && !Modifier.isTransient(f.getModifiers())) {
+                if (f.isAnnotationPresent(Configurable.class)) {
                     try {
                         conf.add(new ConfigurationParam(f, obj));
                     } catch (IllegalAccessException e) {
@@ -115,7 +124,7 @@ public class Configurator<T> {
     /**
      * Uses a Map to assign all parameters of the Object
      *
-     * @return a reference to itself so that metodcalls can be chained.
+     * @return a reference to itself so that method calls can be chained.
      */
     public Configurator<T> setValues(Map<String,String> parameters){
         for(ConfigurationParam param : this.params){
@@ -129,7 +138,7 @@ public class Configurator<T> {
      * Uses a Map to assign all parameters of the Object.
      * NOTE: the DataNode must be of type Map
      *
-     * @return a reference to itself so that metodcalls can be chained.
+     * @return a reference to itself so that method calls can be chained.
      */
     public Configurator<T> setValues(DataNode node){
         if(!node.isMap())
@@ -237,9 +246,12 @@ public class Configurator<T> {
                 order = Integer.MAX_VALUE;
             }
 
-            if     (f.getType() == String.class) type = ConfigType.STRING;
-            else if(f.getType() == int.class)    type = ConfigType.INT;
-            else if(f.getType() == boolean.class)type = ConfigType.BOOLEAN;
+            if     (f.getType() == String.class)    type = ConfigType.STRING;
+            else if(f.getType() == int.class)       type = ConfigType.INT;
+            else if(f.getType() == boolean.class)   type = ConfigType.BOOLEAN;
+            else if(f.getType().isEnum())           type = ConfigType.ENUM;
+            else
+                throw new IllegalArgumentException(f.getType()+" is not a supported configurable type");
 
         }
 
@@ -249,6 +261,7 @@ public class Configurator<T> {
         public boolean isTypeString(){ return type == ConfigType.STRING;}
         public boolean isTypeInt(){    return type == ConfigType.INT;}
         public boolean isTypeBoolean(){return type == ConfigType.BOOLEAN;}
+        public boolean isTypeEnum(){   return type == ConfigType.ENUM;}
 
         public String getString(){
             if(value == null)
@@ -259,6 +272,20 @@ public class Configurator<T> {
             if(value == null || type != ConfigType.BOOLEAN)
                 return false;
             return (boolean)value;
+        }
+
+        /**
+         * @return a String array with all enum possibilities or empty array if the type is not an enum
+         */
+        public String[] getPossibleValues(){
+            if (type == ConfigType.ENUM) {
+                Object[] constants = field.getType().getEnumConstants();
+                String[] values = new String[constants.length];
+                for (int i = 0; i < constants.length; ++i)
+                    values[i] = ((Enum<?>)constants[i]).name();
+                return values;
+            }
+            return new String[0];
         }
 
         /**
@@ -274,6 +301,8 @@ public class Configurator<T> {
                     value = Integer.parseInt(v); break;
                 case BOOLEAN:
                     value = Boolean.parseBoolean(v); break;
+                case ENUM:
+                    value = Enum.valueOf((Class<? extends Enum>)field.getType(), v); break;
             }
         }
 
