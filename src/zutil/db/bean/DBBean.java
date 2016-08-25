@@ -446,7 +446,7 @@ public abstract class DBBean {
     /**
 	 * @return the object id or null if the bean has not bean saved yet
 	 */
-	public Long getId(){
+	public final Long getId(){
 		return id;
 	}
 	
