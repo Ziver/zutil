@@ -32,12 +32,14 @@ public class BinaryFieldData {
         if (!cache.containsKey(clazz)) {
             try {
                 ArrayList<BinaryFieldData> list = new ArrayList<>();
-                for (Field field : clazz.getDeclaredFields()) {
-                    if (field.isAnnotationPresent(BinaryField.class) ||
-                            field.isAnnotationPresent(CustomBinaryField.class) ||
-                            field.isAnnotationPresent(VariableLengthBinaryField.class))
+                for(Class<?> cc = clazz; cc != Object.class ;cc = cc.getSuperclass()) { // iterate through all super classes
+                    for (Field field : cc.getDeclaredFields()) {
+                        if (field.isAnnotationPresent(BinaryField.class) ||
+                                field.isAnnotationPresent(CustomBinaryField.class) ||
+                                field.isAnnotationPresent(VariableLengthBinaryField.class))
 
-                        list.add(new BinaryFieldData(field));
+                            list.add(new BinaryFieldData(field));
+                    }
                 }
                 Collections.sort(list, new Comparator<BinaryFieldData>(){
                     @Override

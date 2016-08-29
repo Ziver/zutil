@@ -137,8 +137,8 @@ public class JSONObjectOutputStream extends OutputStream implements ObjectOutput
             }
             // Add all the fields to the DataNode
             for(Field field : obj.getClass().getDeclaredFields()){
-                if((field.getModifiers() & Modifier.STATIC) == 0 &&
-                        (field.getModifiers() & Modifier.TRANSIENT) == 0){
+                if( ! Modifier.isStatic(field.getModifiers()) &&
+                        ! Modifier.isTransient(field.getModifiers())){
                     field.setAccessible(true);
                     Object fieldObj = field.get(obj);
 
