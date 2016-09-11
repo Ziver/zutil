@@ -34,8 +34,8 @@ import java.util.ArrayList;
  * User: Ziver
  */
 public abstract class OSAbstractionLayer {
-    public static enum OSType{
-        Windows, Linux, MacOS, Unix
+    public enum OSType{
+        Windows, Linux, MacOS, Unix, Unknown
     }
 
     // Variables
@@ -51,7 +51,8 @@ public abstract class OSAbstractionLayer {
         String os = System.getProperty("os.name");
         if     (os.contains("Linux"))   return new OsalLinuxImpl();
         else if(os.contains("Windows")) return new OsalWindowsImpl();
-        else                            return null;
+        else if(os.contains("Mac"))     return new OsalMacOSImpl();
+        else                            return new OsalDummyImpl();
     }
 
     /**
@@ -60,8 +61,8 @@ public abstract class OSAbstractionLayer {
      * @param   cmd             the command to run
      * @return first line of the command
      */
-    protected static String getFirstLineFromCommand(String cmd) {
-        String[] tmp = runCommand(cmd);
+    protected static String getFirstLineFromExec(String cmd) {
+        String[] tmp = exec(cmd);
         if(tmp.length > 1)
             return tmp[0];
         return null;
@@ -73,23 +74,19 @@ public abstract class OSAbstractionLayer {
      * @param   cmd             the command to run
      * @return a String list of the output of the command
      */
-    public static String[] runCommand(String cmd) {
+    public static String[] exec(String cmd) {
         ArrayList<String> ret = new ArrayList<String>();
         try {
-            Runtime runtime = Runtime.getRuntime();
-            Process proc = runtime.exec(cmd);
+            Process proc = Runtime.getRuntime().exec(cmd);
             proc.waitFor();
             BufferedReader output = new BufferedReader(new InputStreamReader(proc.getInputStream()));
-
 
             String line;
             while ((line = output.readLine()) != null) {
                 ret.add(line);
             }
             output.close();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
@@ -100,11 +97,6 @@ public abstract class OSAbstractionLayer {
      * @return the generic type of the OS
      */
     public abstract OSType getOSType();
-
-    /**
-     * @return a more specific OS or distribution name e.g "ubuntu", "suse", "windows"
-     */
-    public abstract String getOSName();
 
     /**
      * @return the OS version e.g windows: "vista", "7"; ubuntu: "10.4", "12.10"

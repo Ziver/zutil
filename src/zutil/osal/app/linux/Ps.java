@@ -33,7 +33,7 @@ public class Ps {
     private static OSAbstractionLayer os = OSAbstractionLayer.getInstance();
 
     public static boolean isRunning(int pid){
-        String[] output = os.runCommand("ps -p "+pid);
+        String[] output = os.exec("ps -p "+pid);
         return output.length > 1;
     }
 }

@@ -27,7 +27,7 @@ package zutil.osal;
 import java.io.File;
 
 /**
- * User: Ziver
+ * Linux platform specific implementation
  */
 public class OsalLinuxImpl extends OSAbstractionLayer {
     private static HalLinuxImpl hal;
@@ -37,20 +37,16 @@ public class OsalLinuxImpl extends OSAbstractionLayer {
         return OSType.Linux;
     }
 
-    @Override
-    public String getOSName() {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
-    }
 
     @Override
     public String getOSVersion() {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public String getKernelVersion() {
         try{
-            return super.getFirstLineFromCommand("uname -r");
+            return super.getFirstLineFromExec("uname -r");
         } catch(Exception e){
             e.printStackTrace();
         }
@@ -60,7 +56,7 @@ public class OsalLinuxImpl extends OSAbstractionLayer {
     @Override
     public String getUsername() {
         try{
-            return super.getFirstLineFromCommand("whoami");
+            return super.getFirstLineFromExec("whoami");
         } catch(Exception e){
             e.printStackTrace();
         }

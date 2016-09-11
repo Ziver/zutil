@@ -43,13 +43,13 @@ public class AptGet {
 
     public static void install(String pkg) {
         update();
-        OSAbstractionLayer.runCommand("apt-get -y install " + pkg);
+        OSAbstractionLayer.exec("apt-get -y install " + pkg);
         packageTimer.reset();
     }
 
     public static void upgrade(){
         update();
-        OSAbstractionLayer.runCommand("apt-get -y " +
+        OSAbstractionLayer.exec("apt-get -y " +
                 // Dont display configuration conflicts
                 "-o Dpkg::Options::=\"--force-confdef\" -o Dpkg::Options::=\"--force-confold\" " +
                 "upgrade");
@@ -59,13 +59,13 @@ public class AptGet {
     public static void update(){
         // Only run every 5 min
         if(updateTimer.hasTimedOut()){
-            OSAbstractionLayer.runCommand("apt-get update");
+            OSAbstractionLayer.exec("apt-get update");
             updateTimer.start();
         }
     }
 
     public static void purge(String pkg) {
-        OSAbstractionLayer.runCommand("apt-get --purge remove " + pkg);
+        OSAbstractionLayer.exec("apt-get --purge remove " + pkg);
         packageTimer.reset();
     }
 
@@ -77,7 +77,7 @@ public class AptGet {
     public static synchronized void updatePackages(){
         // Only run every 5 min
         if(packageTimer.hasTimedOut()){
-            String[] output = OSAbstractionLayer.runCommand("dpkg --list");
+            String[] output = OSAbstractionLayer.exec("dpkg --list");
             for(int i=5; i<output.length; ++i) {
                 packages.put(output[i], new Package(output[5]));
             }

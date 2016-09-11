@@ -27,28 +27,24 @@ package zutil.osal;
 import java.io.File;
 
 /**
- * User: ezivkoc
+ * Windows platform specific implementation
  */
 public class OsalWindowsImpl extends OSAbstractionLayer {
-    @Override
-    public OSType getOSType() {
-        return null;
-    }
 
     @Override
-    public String getOSName() {
-        return null;
+    public OSType getOSType() {
+        return OSType.Windows;
     }
 
     @Override
     public String getOSVersion() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public String getKernelVersion() {
         try {
-            return getFirstLineFromCommand("ver");
+            return getFirstLineFromExec("ver");
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -57,21 +53,21 @@ public class OsalWindowsImpl extends OSAbstractionLayer {
 
     @Override
     public String getUsername() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public File getUserConfigPath() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public File getGlobalConfigPath() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public HardwareAbstractionLayer getHAL() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 }
