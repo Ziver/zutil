@@ -4,69 +4,86 @@ import zutil.osal.MultiCommandExecutor;
 import zutil.osal.OSAbstractionLayer;
 
 import java.io.*;
+import java.net.Inet4Address;
+import java.net.InetAddress;
 
 /**
- * Created by Ziver on 2016-09-11.
+ * This class is a IPv4 scanner, it will scan a
+ * range of IPs to check if they are available.
+ * Note that this class uses the platform specific
+ * ping executable to check for availability.
  */
 public class InetScanner {
     private static final int TIMEOUT_MS = 50;
 
+    private InetScanListener listener;
+    private boolean canceled;
 
-    public static void main(String[] args){
-        //scan();
-        scan2();
+
+    public void setListener(InetScanListener listener){
+        this.listener = listener;
     }
 
 
-    public static void scan(){
-        for (int i = 1; i < 255; i++) {
-            String ip = "192.168.1."+i;
-            System.out.println(ip+": "+isReachableByPing(ip));
-        }
-    }
-    public static boolean isReachableByPing(String host) {
+    /**
+     * Starts scanning a /24 ip range. This method will block until the scan is finished
+     *
+     * @param   ip      the network ip address
+     */
+    public synchronized void scan(InetAddress ip){
+        canceled = false;
+        MultiCommandExecutor exec = new MultiCommandExecutor();
+        String netAddr = ip.getHostAddress().substring(0, ip.getHostAddress().lastIndexOf('.')+1);
+
         try{
-            String[] output = OSAbstractionLayer.exec(getPlatformPingCmd(host));
-            if (output[2].contains("TTL=") || output[2].contains("ttl="))
-                return true;
-
-        } catch( Exception e ) {
-            e.printStackTrace();
-        }
-        return false;
-    }
-
-
-    public static void scan2(){
-        try{
-            MultiCommandExecutor exec = new MultiCommandExecutor();
-            // execute the desired command (here: ls) n times
-            for (int i = 1; i < 255; i++) {
+            for (int i = 1; i < 255 && !canceled; i++) {
                 try {
-                    String ip = "192.168.1."+i;
-                    exec.exec(getPlatformPingCmd(ip));
+                    String targetIp = netAddr+i;
+                    exec.exec(platformPingCmd(targetIp));
 
-                    System.out.print(ip+": ");
                     boolean online = false;
                     for (String line; (line=exec.readLine()) != null;) {
-                        if (line.contains("TTL=") || line.contains("ttl="))
+                        if (platformPingCheck(line))
                             online = true;
                     }
-                    System.out.println(online);
-                }
-                catch (IOException e) {
-                    System.out.println(e);
+                    if (online && listener != null)
+                        listener.foundInetAddress(InetAddress.getByName(targetIp));
+                } catch (IOException e) {
+                    e.printStackTrace();
                 }
             }
-
-            exec.close();
         }
         catch (Exception e) {
             e.printStackTrace();
+        } finally {
+            exec.close();
         }
     }
 
-    private static String getPlatformPingCmd(String ip){
+    /**
+     * Cancels the ongoing ip scan
+     */
+    public void cancel(){
+        canceled = true;
+    }
+
+
+    /**
+     * Will check if the given IP is reachable (Pingable)
+     */
+    public static boolean isReachable(InetAddress ip){
+        String[] output = OSAbstractionLayer.exec(platformPingCmd(ip.getHostAddress()));
+
+        boolean online = false;
+        for (String line : output) {
+            if (platformPingCheck(line))
+                online = true;
+        }
+        return online;
+    }
+
+
+    private static String platformPingCmd(String ip){
         switch (OSAbstractionLayer.getInstance().getOSType()){
             case Windows:
                 return "ping -n 1 -w "+ TIMEOUT_MS +" " + ip;
@@ -76,5 +93,14 @@ public class InetScanner {
             default:
                 return null;
         }
+    }
+    private static boolean platformPingCheck(String line){
+        return line.contains("TTL=") || line.contains("ttl=");
+    }
+
+
+
+    public interface InetScanListener {
+        void foundInetAddress(InetAddress ip);
     }
 }
