@@ -106,13 +106,15 @@ public class MulticastDNSClient extends ThreadedUDPNetwork implements ThreadedUD
             DNSPacket dnsPacket = DNSPacket.read(in);
 
             //System.out.println("Received:\n"+ByteUtil.toFormattedString(packet.getData(), packet.getOffset(), packet.getLength()));
-            //MultiPrintStream.out.dump(dnsPacket,3);
+            MultiPrintStream.out.dump(dnsPacket,3);
 
             if (dnsPacket.getHeader().flagQueryResponse) {
                 if (activeProbes.contains(dnsPacket.getHeader().id)){
                     logger.fine("Received MDSN response from: "+packet.getAddress()+", msg id: " + dnsPacket.getHeader().id);
                     if (listener != null)
                         listener.receivedResponse(dnsPacket);
+                } else {
+                    logger.fine("Received MDSN packet: "+packet.getAddress()+", msg id: " + dnsPacket.getHeader().id);
                 }
             }
         } catch (IOException e){
