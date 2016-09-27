@@ -153,7 +153,7 @@ public class UPnPContentDirectory implements UPnPService, HttpPage, WSInterface 
 	}
 	
 
-	@WSDisabled
+	@WSIgnore
 	public void respond(HttpPrintStream out, HttpHeader headers,
                         Map<String, Object> session,
                         Map<String, String> cookie,

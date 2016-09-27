@@ -200,8 +200,14 @@ public class JSONObjectOutputStream extends OutputStream implements ObjectOutput
     }
 
     public void flush() throws IOException {
-        super.flush();
         out.flush();
+    }
+
+    public void close() throws IOException {
+        if (out != null) {
+            out.flush();
+            out.close();
+        }
     }
 
 

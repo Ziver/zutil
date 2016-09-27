@@ -31,24 +31,18 @@ package zutil.net.torrent;
  */
 public class TorrentFile{
 	private String filename;
-	private long length;
+	private long size;
 	
-	public TorrentFile(String filename, long length){
+	public TorrentFile(String filename, long size){
 		this.filename = filename;
-		this.length = length;
+		this.size = size;
 	}
 	
 
 	public String getFilename() {
 		return filename;
 	}
-	public void setFilename(String filename) {
-		this.filename = filename;
-	}
-	public long getLength() {
-		return length;
-	}
-	public void setLength(long length) {
-		this.length = length;
+	public long getSize() {
+		return size;
 	}
 }

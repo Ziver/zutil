@@ -27,6 +27,9 @@ package zutil.parser;
 import zutil.parser.DataNode.DataType;
 import zutil.struct.MutableInt;
 
+import java.nio.charset.MalformedInputException;
+import java.text.ParseException;
+
 /**
  * http://wiki.theory.org/BitTorrentSpecification
  * @author Ziver
@@ -40,7 +43,7 @@ public class BEncodedParser {
 	 * @param	data	is the data to be decoded
 	 * @return
 	 */
-	public static DataNode read(String data){
+	public static DataNode read(String data) throws ParseException {
 		return decode_BEncoded(new MutableInt(), new StringBuilder(data));
 	}
 
@@ -51,9 +54,10 @@ public class BEncodedParser {
 	 * @param	index	is the index in data to start from
 	 * @return
 	 */
-	private static DataNode decode_BEncoded(MutableInt index, StringBuilder data){
+	private static DataNode decode_BEncoded(MutableInt index, StringBuilder data) throws ParseException {
 		String tmp;
 		char c = ' ';
+        int end;
 
 		switch (data.charAt(index.i)) {
 		/**
@@ -63,7 +67,10 @@ public class BEncodedParser {
 		 */
 		case 'i':
 			index.i++;
-			tmp = data.substring(index.i, data.indexOf("e"));
+            end = data.indexOf("e", index.i);
+            if (end < 0)
+                throw new ParseException("Corrupt bEncoding", index.i);
+			tmp = data.substring(index.i, end);
 			index.i += tmp.length() + 1;
 			return new DataNode( new Long(tmp));
 		/**
@@ -97,6 +104,8 @@ public class BEncodedParser {
 			while(c != 'e'){
 				DataNode tmp2 = decode_BEncoded(index, data);
 				map.set(tmp2.getString(), decode_BEncoded(index, data));
+                if (index.i >= data.length())
+                    throw new ParseException("Incorrect bEncoding ending of element", index.i);
 				c = data.charAt(index.i);
 			}
 			index.i++;
@@ -107,10 +116,13 @@ public class BEncodedParser {
 		 * would bEncode to 11:BitTorrents.
 		 */
 		default:
-			tmp = data.substring(index.i, data.indexOf(":"));
+			end = data.indexOf(":", index.i);
+			if (end < 0)
+				throw new ParseException("Corrupt bEncoding", index.i);
+			tmp = data.substring(index.i, end);
 			int length = Integer.parseInt(tmp);
 			index.i += tmp.length() + 1;
-			String ret = data.substring(index.i, length);
+			String ret = data.substring(index.i, index.i+length);
 			index.i += length;
 			return new DataNode( ret );
 		}

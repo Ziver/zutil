@@ -32,10 +32,13 @@ import zutil.parser.DataNode;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Iterator;
 
 public class TorrentMetainfo {
+    /** Name **/
+    private String name;
 	/** Comment (optional) **/
 	private String comment;
 	/** Signature of the software which created the torrent (optional) **/
@@ -63,16 +66,16 @@ public class TorrentMetainfo {
 
 
 
-	public TorrentMetainfo(File torrent) throws IOException{
+	public TorrentMetainfo(File torrent) throws IOException, ParseException {
 		this(FileUtil.getContent(torrent));
 	}
 
-	public TorrentMetainfo(String data){
+	public TorrentMetainfo(String data) throws ParseException {
 		decode(data);
 	}
 
 
-	private void decode(String data){
+	private void decode(String data) throws ParseException {
 		DataNode metainfo = BEncodedParser.read(data);
 		
 		// Main values
@@ -91,66 +94,70 @@ public class TorrentMetainfo {
 
 		// info data
 		DataNode info 	= metainfo.get("info");
-		String name 	= info.getString("name");
+		name        	= info.getString("name");
 		piece_length 	= info.getLong("piece length");
 		if( info.get("private") != null )
 			is_private = (info.getInt("private") != 0);
 		// Split the hashes
 		String hashes = info.getString("pieces");
 		piece_hashes = new ArrayList<String>();
-		for(int i=0; i<hashes.length() ;i++){
-			String hash = "";
-			for(; i%20!=0 ;i++)
-				hash += hashes.charAt(i);
-			piece_hashes.add(hash);
+		for(int i=0; i<hashes.length(); ){
+			StringBuilder hash = new StringBuilder(20);
+			for(int k=0; k<20; ++i, ++k)
+				hash.append(hashes.charAt(i));
+			piece_hashes.add(hash.toString());
 		}
 
 		// File data
 		file_list = new ArrayList<TorrentFile>();
 		// Single-file torrent
 		if( info.get("files") == null ){
-			Long length = info.getLong("length");
-			file_list.add( new TorrentFile(name, length) );
+			Long fileSize = size = info.getLong("length");
+			file_list.add( new TorrentFile(name, fileSize) );
 		}
 		// Multi-file torrent
 		else{
 			DataNode files = info.get("files");
 			for( DataNode file : files ){
-				String filename = "";
+				StringBuilder filename = new StringBuilder();
 				DataNode tmp = file.get("path");
 				// File in subdir
 				if( tmp.isList() ){
 					Iterator<DataNode> it = tmp.iterator();
 					while( it.hasNext() ){
-						filename += it.next().getString();
-						if(it.hasNext()) filename += File.separator;
+						filename.append(it.next().getString());
+						if(it.hasNext())
+							filename.append(File.separator);
 					}
 				}
 				// File in root dir
 				else
-					filename = tmp.getString();
-				Long length = file.getLong("length");
-				filename = name + File.separator + filename;
-				file_list.add( new TorrentFile(filename, length) );
+					filename.append(tmp.getString());
+				Long fileSize = file.getLong("length");
+                size += fileSize;
+				file_list.add( new TorrentFile(filename.toString(), fileSize) );
 			}
 		}
 	}
 
 
 
+	public String getName() {
+		return name;
+	}
 	public String getComment() {
 		return comment;
 	}
-	public String getCreated_by() {
+	public String getCreatedBy() {
 		return created_by;
 	}
-	public long getCreation_date() {
+	public long getCreationDate() {
 		return creation_date;
 	}
 	public String getAnnounce() {
 		return announce;
 	}
-	public ArrayList<String> getAnnounce_list() {
+	public ArrayList<String> getAnnounceList() {
 		return announce_list;
 	}
 	public String getEncoding() {
@@ -159,31 +166,17 @@ public class TorrentMetainfo {
 	public long getSize() {
 		return size;
 	}
-	public long getPiece_length() {
+	public long getPieceLength() {
 		return piece_length;
 	}
-	public ArrayList<String> getPiece_hashes() {
+	public ArrayList<String> getPieceHashes() {
 		return piece_hashes;
 	}
-	public boolean isIs_private() {
+	public boolean isPrivate() {
 		return is_private;
 	}
-	public ArrayList<TorrentFile> getFile_list() {
+	public ArrayList<TorrentFile> getFileList() {
 		return file_list;
 	}
 
-	/**
-	 * Example use
-	 */
-	public static void main(String[] args){
-		try {
-			TorrentMetainfo tmp = new TorrentMetainfo(FileUtil.find("test.torrent"));
-			MultiPrintStream.out.dump(tmp);
-
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
 }

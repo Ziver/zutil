@@ -228,16 +228,8 @@ public class WSMethodDef {
 	 * @param		obj 		the object the method will called on
 	 * @param 		params 		a vector with arguments
 	 */
-	public Object invoke(Object obj, Object[] params) throws Throwable{
-		try {
-			return this.method.invoke(obj, params );
-		} catch (IllegalArgumentException e) {
-			throw e;
-		} catch (IllegalAccessException e) {
-			throw e;
-		} catch (InvocationTargetException e) {
-			throw e.getCause();
-		}
+	public Object invoke(Object obj, Object[] params) throws Exception {
+		return this.method.invoke(obj, params );
 	}
 	
 	

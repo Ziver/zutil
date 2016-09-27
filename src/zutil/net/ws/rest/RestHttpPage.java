@@ -70,7 +70,7 @@ public class RestHttpPage implements HttpPage {
     }
 
 
-    private String execute(String targetMethod, Map<String, String> input) throws Throwable {
+    protected String execute(String targetMethod, Map<String, String> input) throws Exception {
         if( wsDef.hasMethod(targetMethod) ){
             // Parse request
             WSMethodDef m = wsDef.getMethod(targetMethod);
@@ -82,6 +82,7 @@ public class RestHttpPage implements HttpPage {
             // Generate Response
             StringOutputStream dummyOut = new StringOutputStream();
             JSONObjectOutputStream out = new JSONObjectOutputStream(dummyOut);
+            out.enableMetaData(false);
             out.writeObject(ret);
             out.close();
             return dummyOut.toString();
@@ -102,9 +103,5 @@ public class RestHttpPage implements HttpPage {
             }
         }
         return inputParams;
-    }
-
-    private void generateResponse(){
-
     }
 }

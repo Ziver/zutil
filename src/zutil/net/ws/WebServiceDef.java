@@ -57,7 +57,7 @@ public class WebServiceDef {
 		for(Method m : intf.getDeclaredMethods()){
 			// check for public methods
 			if((m.getModifiers() & Modifier.PUBLIC) > 0 && 
-					!m.isAnnotationPresent(WSInterface.WSDisabled.class)){
+					!m.isAnnotationPresent(WSInterface.WSIgnore.class)){
 				WSMethodDef method = new WSMethodDef(this, m);
 				methods.put(method.getName(), method);
 			}

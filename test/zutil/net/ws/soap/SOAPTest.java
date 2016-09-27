@@ -38,10 +38,6 @@ import zutil.parser.wsdl.WSDLWriter;
 public class SOAPTest {
     /************************* TEST CASES ************************/
 	public static void main(String[] args){
-		new SOAPTest();
-	}
-	
-	public SOAPTest(){
 		WebServiceDef wsDef = new WebServiceDef( MainSOAPClass.class );
 		SOAPHttpPage soap = new SOAPHttpPage( wsDef );
 
@@ -84,7 +80,7 @@ public class SOAPTest {
 	public static class SpecialReturnClass extends WSReturnObject{
 		@WSValueName(value="otherValue1")
 		public String param1 = "otherValue1";
-		@WSValueName("otherValue2")
+		@WSValueName("otherName2")
 		public String param2 = "otherValue2";
 		public byte[] b = new byte[]{0x12, 0x23};
 		public InnerClass inner = new InnerClass();
@@ -147,7 +143,7 @@ public class SOAPTest {
 		@WSParamDocumentation("void method documentation")
 		public void voidMethod (){ }
 		
-		@WSDisabled()
+		@WSIgnore()
 		public void disabledMethod(){ }
 		protected void protectedMethod(){ }	
 

@@ -40,19 +40,6 @@ import java.util.logging.Logger;
 public class SOAPClientFactory {
     private static Logger logger = LogUtil.getLogger();
 
-    /**
-     * Generates a Client Object for the web service.
-     *
-     * @param 	<T> 	is the class of the web service definition
-     * @param 	url 	is the target service url
-     * @param 	intf 	is the class of the web service definition
-     * @return a client Object
-     */
-    @SuppressWarnings("unchecked")
-    public static <T> T createClient(URL url, Class<T> intf){
-        return createClient(url, intf,
-                new WebServiceDef((Class<? extends WSInterface>)intf) );
-    }
 
     /**
      * Generates a Client Object for the web service.
@@ -60,12 +47,11 @@ public class SOAPClientFactory {
      * @param 	<T> 	is the class of the web service definition
      * @param 	url 	is the target service url
      * @param 	intf 	is the class of the web service definition
-     * @param 	wsDef 	is the web service definition of the intf parameter
      * @return a client Object
      */
-    public static <T> T createClient(URL url, Class<T> intf, WebServiceDef wsDef){
+    public static <T extends WSInterface> T createClient(URL url, Class<T> intf){
         T obj = WSClientFactory.createClient( intf,
-                new SOAPClientInvocationHandler(url, wsDef));
+                new SOAPClientInvocationHandler(url, new WebServiceDef(intf)));
         return obj;
     }
 

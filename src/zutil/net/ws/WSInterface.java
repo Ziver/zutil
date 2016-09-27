@@ -30,14 +30,16 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 /**
  * 
- * Specifies web service parameter names and other things. 
+ * Specifies web service definitions. Which methods that will
+ * be published and other related metadata.
+ *
  * Example:
  * <pre>
  *	private static class Test implements WSInterface{
  *		public Test(){}
  *	
  *		@WSDocumentation("blabla")
- *		@WSDLParamDocumentation("olle = an variable?")
+ *		@WSDLParamDocumentation("olle = a variable?")
  *		public void pubZ( 
  *				@WSParamName("olle") int lol) 
  *				throws Exception{ 
@@ -51,7 +53,7 @@ import java.lang.annotation.Target;
  *			....
  *		}
  *	
- *		@WSDisabled()
+ *		@WSIgnore()
  *		public void privaZ(....){ 
  *			...
  *		}		
@@ -87,13 +89,13 @@ public interface WSInterface {
 	}
 	
 	/**
-	 * Disables publication of the given method
+	 * Skipp publication of the given method
 	 * 
 	 * @author Ziver
 	 */
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target(ElementType.METHOD)
-	public @interface WSDisabled { }
+	public @interface WSIgnore { }
 	
 	/**
 	 * Method or Parameter comments for the WSDL. 
