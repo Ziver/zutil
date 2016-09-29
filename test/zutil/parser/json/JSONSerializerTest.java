@@ -28,9 +28,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import zutil.io.StringOutputStream;
 
-import java.io.IOException;
-import java.io.Serializable;
-import java.io.StringReader;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -62,7 +60,7 @@ public class JSONSerializerTest{
 
         TestClass.assertEquals(sourceObj, targetObj);
 	}
-	
+
     @Test
     public void testOutputSerializerWithClones() throws InterruptedException, IOException, ClassNotFoundException{
     	TestClassObjClone sourceObj = new TestClassObjClone().init();
@@ -92,7 +90,7 @@ public class JSONSerializerTest{
         data = data.replace("\"", "'");
 
         assertEquals(
-                "{'@class': 'zutil.parser.json.JSONSerializerTest$TestClassArray', 'array': [1, 2, 3, 4], '@object_id': 1}\n",
+                "{'@class': 'zutil.parser.json.JSONSerializerTest$TestClassArray', 'array': [1, 2, 3, 4], '@object_id': 1}",
                 data);
     }
 
@@ -119,7 +117,7 @@ public class JSONSerializerTest{
 		String data = writeObjectToJson(sourceObj, false);
 		data = data.replace("\"", "'");
 		assertEquals(
-				"{'decimal': 0.0}\n",
+				"{'decimal': 0.0}",
 				data);
 
         TestClass targetObj = sendReceiveObject(sourceObj);
@@ -154,6 +152,25 @@ public class JSONSerializerTest{
 
         TestClassList targetObj = sendReceiveObject(sourceObj);
         TestClassList.assertEquals(sourceObj, targetObj);
+    }
+
+    @Test
+    public void testSerializerWithMultipleObj() throws InterruptedException, IOException, ClassNotFoundException{
+        TestClass sourceObj1 = new TestClass().init();
+        TestClass sourceObj2 = new TestClass().init();
+
+        ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+        JSONObjectOutputStream out = new JSONObjectOutputStream(buffer);
+        out.enableMetaData(false);
+        out.writeObject(sourceObj1);
+        out.writeObject(sourceObj2);
+        out.flush();
+
+        JSONObjectInputStream in = new JSONObjectInputStream(new ByteArrayInputStream(buffer.toByteArray()));
+        TestClass targetObj1 = in.readObject(TestClass.class);
+        TestClass.assertEquals(sourceObj1, targetObj1);
+        TestClass targetObj2 = in.readObject(TestClass.class);
+        TestClass.assertEquals(sourceObj2, targetObj2);
     }
 
 	/******************* Utility Functions ************************************/

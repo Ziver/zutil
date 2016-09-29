@@ -143,7 +143,6 @@ public class JSONWriter{
     }
 
     public void flush(){
-        out.print("\n");
         out.flush();
     }
 }
