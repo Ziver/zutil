@@ -1,4 +1,4 @@
-# Hal
+# Zutil
 
 This project is a collection of utility classes and methods that I use in most 
 of my projects. Some of the code is incomplete and might never be completed 

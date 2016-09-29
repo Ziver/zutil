@@ -39,7 +39,7 @@
 
     <target name="test" depends="build-test">
         <mkdir dir="${reportsDir}" />
-        <junit printsummary="yes" haltonfailure="false" fork="true" timeout="3000000">
+        <junit printsummary="yes" fork="true" haltonfailure="false" failureproperty="test.failed" timeout="3000000">
             <classpath refid="classpath.test" />
             <formatter type="plain" usefile="false" /> <!-- to screen -->
             <formatter type="xml" /> <!-- to file -->
@@ -48,6 +48,7 @@
                 <fileset dir="${buildTestDir}" includes="**/*.class" />
             </batchtest>
         </junit>
+        <fail message="Test failure detected, check test results." if="test.failed" /> <!-- Need this to fail build -->
     </target>
 
     <!-- ________________________ BUILD TARGETS ________________________ -->
