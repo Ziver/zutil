@@ -24,7 +24,7 @@ public class RestHttpPageTest {
 
         HashMap<String,String> input = new HashMap<>();
         String output = rest.execute("hello", input);
-        assertEquals("\"hello world\"\n", output);
+        assertEquals("\"hello world\"", output);
     }
 
 
@@ -43,7 +43,7 @@ public class RestHttpPageTest {
         HashMap<String,String> input = new HashMap<>();
         input.put("input", "test input");
         String output = rest.execute("echo", input);
-        assertEquals("\"echo: test input\"\n", output);
+        assertEquals("\"echo: test input\"", output);
     }
 
 }
