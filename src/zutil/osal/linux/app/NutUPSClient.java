@@ -1,4 +1,4 @@
-package zutil.osal.app.linux;
+package zutil.osal.linux.app;
 
 import zutil.Timer;
 import zutil.log.LogUtil;

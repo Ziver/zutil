@@ -22,50 +22,14 @@
  * THE SOFTWARE.
  */
 
-package zutil.osal;
+package zutil.osal.linux;
 
-import com.mysql.jdbc.NotImplemented;
-
-import java.io.File;
+import zutil.osal.HardwareAbstractionLayer;
 
 /**
- * MacOS platform specific implementation
+ * Created by Ziver on 2015-04-07.
  */
-public class OsalMacOSImpl extends OSAbstractionLayer {
+public class HalLinuxImpl implements HardwareAbstractionLayer {
 
-    @Override
-    public OSType getOSType() {
-        return OSType.MacOS;
-    }
-
-
-    @Override
-    public String getOSVersion() {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public String getKernelVersion() {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public String getUsername() {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public File getUserConfigPath() {
-        return new File("/home/"+getUsername());
-    }
-
-    @Override
-    public File getGlobalConfigPath() {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public HardwareAbstractionLayer getHAL() {
-        throw new UnsupportedOperationException();
-    }
+    protected HalLinuxImpl(){}
 }
