@@ -39,13 +39,7 @@ public class InetScanner {
             for (int i = 1; i < 255 && !canceled; i++) {
                 try {
                     String targetIp = netAddr+i;
-                    exec.exec(platformPingCmd(targetIp));
-
-                    boolean online = false;
-                    for (String line; (line=exec.readLine()) != null;) {
-                        if (platformPingCheck(line))
-                            online = true;
-                    }
+                    boolean online = isReachable(InetAddress.getByName(targetIp));
                     if (online && listener != null)
                         listener.foundInetAddress(InetAddress.getByName(targetIp));
                 } catch (IOException e) {
@@ -74,12 +68,24 @@ public class InetScanner {
     public static boolean isReachable(InetAddress ip){
         String[] output = OSAbstractionLayer.exec(platformPingCmd(ip.getHostAddress()));
 
-        boolean online = false;
         for (String line : output) {
             if (platformPingCheck(line))
-                online = true;
+                return true;
         }
-        return online;
+        return false;
+    }
+    /**
+     * Will check if the given IP is reachable (Pingable).
+     * This method is faster if multiple pings are needed as a MultiCommandExecutor can be provided.
+     */
+    public static boolean isReachable(InetAddress ip, MultiCommandExecutor exec) throws IOException {
+        exec.exec(platformPingCmd(ip.getHostAddress()));
+
+        for (String line; (line=exec.readLine()) != null;) {
+            if (platformPingCheck(line))
+                return true;
+        }
+        return false;
     }
 
 
