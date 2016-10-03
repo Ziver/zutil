@@ -4,7 +4,6 @@ import zutil.osal.MultiCommandExecutor;
 import zutil.osal.OSAbstractionLayer;
 
 import java.io.*;
-import java.net.Inet4Address;
 import java.net.InetAddress;
 
 /**
@@ -14,7 +13,7 @@ import java.net.InetAddress;
  * ping executable to check for availability.
  */
 public class InetScanner {
-    private static final int TIMEOUT_MS = 50;
+    private static final int TIMEOUT_SEC = 1; // 1 second
 
     private InetScanListener listener;
     private boolean canceled;
@@ -39,7 +38,7 @@ public class InetScanner {
             for (int i = 1; i < 255 && !canceled; i++) {
                 try {
                     String targetIp = netAddr+i;
-                    boolean online = isReachable(InetAddress.getByName(targetIp));
+                    boolean online = isReachable(targetIp, exec);
                     if (online && listener != null)
                         listener.foundInetAddress(InetAddress.getByName(targetIp));
                 } catch (IOException e) {
@@ -65,8 +64,8 @@ public class InetScanner {
     /**
      * Will check if the given IP is reachable (Pingable)
      */
-    public static boolean isReachable(InetAddress ip){
-        String[] output = OSAbstractionLayer.exec(platformPingCmd(ip.getHostAddress()));
+    public static boolean isReachable(String host){
+        String[] output = OSAbstractionLayer.exec(platformPingCmd(host));
 
         for (String line : output) {
             if (platformPingCheck(line))
@@ -78,8 +77,8 @@ public class InetScanner {
      * Will check if the given IP is reachable (Pingable).
      * This method is faster if multiple pings are needed as a MultiCommandExecutor can be provided.
      */
-    public static boolean isReachable(InetAddress ip, MultiCommandExecutor exec) throws IOException {
-        exec.exec(platformPingCmd(ip.getHostAddress()));
+    public static boolean isReachable(String host, MultiCommandExecutor exec) throws IOException {
+        exec.exec(platformPingCmd(host));
 
         for (String line; (line=exec.readLine()) != null;) {
             if (platformPingCheck(line))
@@ -92,10 +91,10 @@ public class InetScanner {
     private static String platformPingCmd(String ip){
         switch (OSAbstractionLayer.getInstance().getOSType()){
             case Windows:
-                return "ping -n 1 -w "+ TIMEOUT_MS +" " + ip;
+                return "ping -n 1 -w "+ TIMEOUT_SEC*1000 +" " + ip;
             case Linux:
             case MacOS:
-                return "ping -c 1 -W "+ TIMEOUT_MS +" " + ip;
+                return "ping -c 1 -W "+ TIMEOUT_SEC +" " + ip;
             default:
                 return null;
         }
