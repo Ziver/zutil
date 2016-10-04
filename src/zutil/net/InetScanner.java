@@ -110,27 +110,6 @@ public class InetScanner {
         return line.contains("TTL=") || line.contains("ttl=");
     }
 
-    /**
-     * @return a list of IPv4 addresses for the all local network cards
-     */
-    public static List<InetAddress> getLocalInet4Address(){
-        ArrayList<InetAddress> ips = new ArrayList<>();
-        try {
-            Enumeration<NetworkInterface> netIntf = NetworkInterface.getNetworkInterfaces();
-            while(netIntf.hasMoreElements()){
-                Enumeration<InetAddress> addresses = netIntf.nextElement().getInetAddresses();
-                while (addresses.hasMoreElements()){
-                    InetAddress ip = addresses.nextElement();
-                    if (ip instanceof Inet4Address && ip.isSiteLocalAddress())
-                        ips.add(ip);
-                }
-            }
-        } catch (SocketException e) {
-            e.printStackTrace();
-        }
-        return ips;
-    }
-
 
     public interface InetScanListener {
         void foundInetAddress(InetAddress ip);
