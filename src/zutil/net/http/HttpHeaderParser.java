@@ -31,6 +31,7 @@ import zutil.parser.URLDecoder;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
@@ -106,7 +107,7 @@ public class HttpHeaderParser {
 		if( statusLine.startsWith("HTTP/") ){
 			header.setIsRequest(false);
 			header.setHTTPVersion( Float.parseFloat( statusLine.substring( 5 , 8)));
-			header.setHTTPCode( Integer.parseInt( statusLine.substring( 9, 12 )));
+			header.setHTTPCode( Integer.parseInt( statusLine.substring( 9, statusLine.indexOf(' ', 9) )));
 		}
 		// Client Request
 		else if(statusLine.contains("HTTP/")){
@@ -163,12 +164,12 @@ public class HttpHeaderParser {
      */
     public static void parseHeaderValues(Map<String,String> map, String headerValue, String delimiter){
         if(headerValue != null && !headerValue.isEmpty()){
-            String[] tmp = headerValue.split(delimiter);
-            for(String cookie : tmp){
-                String[] tmp2 = PATTERN_EQUAL.split(cookie, 2);
+            String[] tmpArr = headerValue.split(delimiter);
+            for(String cookie : tmpArr){
+                String[] tmpStr = PATTERN_EQUAL.split(cookie, 2);
                 map.put(
-                        tmp2[0].trim(), 							// Key
-                        StringUtil.trim((tmp2.length>1 ? tmp2[1] : "").trim(), '\"')); 	//Value
+                        tmpStr[0].trim(), 							// Key
+                        StringUtil.trim((tmpStr.length>1 ? tmpStr[1] : "").trim(), '\"')); 	//Value
             }
         }
     }

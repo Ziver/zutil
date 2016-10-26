@@ -45,7 +45,7 @@ public class HttpHeader {
 	private HashMap<String, String> cookies;
 
 
-    protected HttpHeader(){
+    public HttpHeader(){
         urlAttributes = new HashMap<String, String>();
         headers = new HashMap<String, String>();
         cookies = new HashMap<String, String>();

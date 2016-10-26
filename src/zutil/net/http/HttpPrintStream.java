@@ -86,7 +86,7 @@ public class HttpPrintStream extends OutputStream{
 		this.out = new PrintStream(out);
         this.httpVersion = "1.1";
 		this.message_type = type;
-		this.res_status_code = 0;
+		this.res_status_code = 200;
 		this.headers = new HashMap<String, String>();
 		this.cookies = new HashMap<String, String>();
 		this.buffer = new StringBuffer();
