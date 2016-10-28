@@ -195,7 +195,7 @@ public class StringUtil {
 	}
 
 
-	private static ArrayList<String> SPACES = new ArrayList<String>();
+	private static ArrayList<String> SPACES = new ArrayList<>();
 	/**
 	 * @return A string containing a specific amount of spaces
 	 */

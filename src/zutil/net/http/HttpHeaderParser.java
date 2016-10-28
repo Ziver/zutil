@@ -158,6 +158,7 @@ public class HttpHeaderParser {
      * stores them in a HashMap. If a pair only contain a key the the value
      * will be set as a empty string.
 	 *
+	 * TODO: method is not quote aware
 	 * @param   map             the Map where key and values will be stored.
      * @param   headerValue		the raw header value String that will be parsed.
 	 * @param 	delimiter		the delimiter that separates key and value pairs (e.g. ';' for Cookies or ',' for Cache-Control)
@@ -168,8 +169,8 @@ public class HttpHeaderParser {
             for(String cookie : tmpArr){
                 String[] tmpStr = PATTERN_EQUAL.split(cookie, 2);
                 map.put(
-                        tmpStr[0].trim(), 							// Key
-                        StringUtil.trim((tmpStr.length>1 ? tmpStr[1] : "").trim(), '\"')); 	//Value
+                        tmpStr[0].trim(), // Key
+                        StringUtil.trim((tmpStr.length>1 ? tmpStr[1] : "").trim(), '\"')); //Value
             }
         }
     }

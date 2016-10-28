@@ -1,6 +1,7 @@
 package zutil.net.http.page;
 
 import org.junit.Test;
+import zutil.Hasher;
 import zutil.io.StringOutputStream;
 import zutil.net.http.HttpHeader;
 import zutil.net.http.HttpHeaderParser;
@@ -20,18 +21,40 @@ public class HttpDigestAuthPageTest {
 
     @Test
     public void cleanRequest() throws IOException {
-        HttpHeader header = new HttpHeader();
-        HttpHeader output = makeRequest(header);
+        HttpHeader rspHeader = makeRequest(new HttpHeader());
 
-        assertEquals(401, output.getHTTPCode());
-        assertTrue(output.getHeader("WWW-Authenticate") != null);
-        assertEquals("Digest", parseAuthType(output));
-        Map<String,String> authHeader = parseAuthHeader(output);
+        assertEquals(401, rspHeader.getHTTPCode());
+        assertTrue(rspHeader.getHeader("WWW-Authenticate") != null);
+        assertEquals("Digest", parseAuthType(rspHeader));
+        Map<String,String> authHeader = parseAuthHeader(rspHeader);
         assertTrue(authHeader.containsKey("realm"));
-        assertTrue(authHeader.containsKey("qop"));
         assertTrue(authHeader.containsKey("nonce"));
-        assertTrue(authHeader.containsKey("opaque"));
     }
+
+
+    @Test
+    public void authenticate() throws IOException {
+        HttpHeader reqHeader = new HttpHeader();
+        HttpHeader rspHeader = makeRequest(reqHeader);
+        Map<String,String> authHeader = parseAuthHeader(rspHeader);
+        reqHeader = new HttpHeader();
+
+        String realm = authHeader.get("realm");
+        String nonce = authHeader.get("nonce");
+        String uri = "/login";
+
+        String ha1 = Hasher.MD5("username:password");
+        String ha2 = Hasher.MD5("MD5:/" +uri);
+        String response = Hasher.MD5(ha1 +":"+ nonce +":"+ ha2);
+        reqHeader.setHeader("Authorization", "Digest username=\"username\", " +
+                "realm=\""+realm+"\", " +
+                "nonce=\""+nonce+"\", " +
+                "uri=\""+uri+"\", " +
+                "response=\""+response+"\"");
+        rspHeader = makeRequest(reqHeader);
+        assertEquals(200, rspHeader.getHTTPCode());
+    }
+
 
 
 

@@ -148,19 +148,22 @@ public class HttpHeader {
     }
 
 
-	protected void setIsRequest(boolean request) { this.request = request; }
-    protected void setRequestType(String type){
+	public void setIsRequest(boolean request) { this.request = request; }
+	public void setRequestType(String type){
         this.type = type;
     }
-    protected void setHTTPVersion(float version){
+	public void setHTTPVersion(float version){
         this.version = version;
     }
-    protected void setHTTPCode(int code){
+	public void setHTTPCode(int code){
         this.httpCode = code;
     }
-    protected void setRequestURL(String url){
+	public void setRequestURL(String url){
         this.url = url.trim().replaceAll("//", "/");
     }
+    public void setHeader(String key, String value){
+    	this.headers.put(key.toUpperCase(), value);
+	}
     protected void setInputStream(InputStream in){
         this.in = in;
     }
