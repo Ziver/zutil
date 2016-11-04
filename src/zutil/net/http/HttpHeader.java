@@ -32,12 +32,12 @@ import java.util.Iterator;
 
 public class HttpHeader {
 	// HTTP info
-	private boolean request;
-	private String type;
-	private String url;
+	private boolean request = true;
+	private String type     = "GET";
+	private String url      = "/";
 	private HashMap<String, String> urlAttributes;
-	private float version;
-	private int httpCode;
+	private float version   = 1.0f;
+	private int httpCode    = 200;
 	private InputStream in;
 
 	// Parameters

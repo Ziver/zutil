@@ -84,7 +84,7 @@ public class HttpPrintStream extends OutputStream{
 	 */
 	public HttpPrintStream(OutputStream out, HttpMessageType type) {
 		this.out = new PrintStream(out);
-        this.httpVersion = "1.1";
+        this.httpVersion = "1.0";
 		this.message_type = type;
 		this.res_status_code = 200;
 		this.headers = new HashMap<String, String>();

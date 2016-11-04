@@ -98,15 +98,18 @@ public class HttpServer extends ThreadedTCPNetworkServer{
 	private class SessionGarbageCollector extends TimerTask {
 		public void run(){
 			Object[] keys = sessions.keySet().toArray();
+			int count = 0;
 			for(Object key : keys){
 				Map<String,Object> session = sessions.get(key);
 
 				// Check if session is still valid
 				if((Long)session.get(SESSION_TTL_KEY) < System.currentTimeMillis()){
 					sessions.remove(key);
-					logger.fine("Removing Session: "+key);
+					++count;
 				}
 			}
+			if (count > 0)
+				logger.fine("Removed "+count+" old sessions");
 		}
 	}
 
@@ -141,7 +144,6 @@ public class HttpServer extends ThreadedTCPNetworkServer{
 		return null;
 	}
 
-    private static int noOfConnections = 0;
 	/**
 	 * Internal class that handles all the requests
 	 * 
@@ -160,8 +162,6 @@ public class HttpServer extends ThreadedTCPNetworkServer{
 		}
 
 		public void run(){
-			//logger.finest("New Connection: "+socket.getInetAddress()+" (Ongoing connections: "+(++noOfConnections)+")");
-
 			try {
                 //**************************** PARSE REQUEST *********************************
                 long time = System.currentTimeMillis();
@@ -171,7 +171,6 @@ public class HttpServer extends ThreadedTCPNetworkServer{
                     logger.finer("No header received");
                     return;
                 }
-                String tmp = null;
 
                 //******* Read in the post data if available
                 if (header.getHeader("Content-Length") != null &&
@@ -213,7 +212,6 @@ public class HttpServer extends ThreadedTCPNetworkServer{
                 out.setStatusCode(200);
                 out.setHeader("Server", SERVER_VERSION);
                 out.setHeader("Content-Type", "text/html");
-                //out.setHeader("Connection", "keep-alive");
                 out.setCookie(SESSION_ID_KEY, "" + session.get(SESSION_ID_KEY));
 
                 if (header.getRequestURL() != null && pages.containsKey(header.getRequestURL())) {
@@ -252,7 +250,6 @@ public class HttpServer extends ThreadedTCPNetworkServer{
                     out.close();
                     in.close();
                     socket.close();
-                    //logger.finest("Connection Closed: "+socket.getInetAddress()+" (Ongoing connections: "+(--noOfConnections)+")");
                 } catch( Exception e ) {
                     logger.log(Level.WARNING, "Could not close connection", e);
                 }

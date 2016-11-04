@@ -114,7 +114,8 @@ public class IOUtil {
         while((line = in.readLine()) != null){
             str.append(line).append("\n");
         }
-        str.delete(str.length()-1, str.length()); // remove last new line
+        if (str.length() > 0)
+            str.delete(str.length()-1, str.length()); // remove last new line
 
         if (close) reader.close();
         return str.toString();

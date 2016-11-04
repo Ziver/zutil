@@ -31,7 +31,7 @@ import zutil.parser.URLDecoder;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.List;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Pattern;
 
@@ -44,7 +44,7 @@ public class HttpHeaderParser {
 
 
     private InputStream in;
-    private boolean readStatusLine;
+    private boolean skipStatusLine;
 
 
 	/**
@@ -54,7 +54,7 @@ public class HttpHeaderParser {
 	 */
 	public HttpHeaderParser(InputStream in){
 	    this.in = in;
-        this.readStatusLine = true;
+        this.skipStatusLine = false;
 	}
 
 	/**
@@ -72,7 +72,7 @@ public class HttpHeaderParser {
         String line;
 
         // First line
-        if (readStatusLine) {
+        if (!skipStatusLine) {
             if( (line=IOUtil.readLine(in)) != null && !line.isEmpty() )
                 parseStatusLine(header, line);
             else
@@ -90,10 +90,10 @@ public class HttpHeaderParser {
     }
 
     /**
-     * @param   readStatusLine      indicates if the stream contains http status lines. (default: true)
+     * @param   skipStatusLine      indicates if the parser should expect a  http status lines. (default: true)
      */
-    public void setReadStatusLine(boolean readStatusLine){
-        this.readStatusLine = readStatusLine;
+    public void skipStatusLine(boolean skipStatusLine){
+        this.skipStatusLine = skipStatusLine;
     }
 
 	/**
@@ -153,9 +153,25 @@ public class HttpHeaderParser {
 	public static void parseCookieValues(Map<String,String> map, String cookieValue){
 		parseHeaderValues(map, cookieValue, ";");
 	}
+
+
     /**
      * Parses a header value string that contains key and value paired data and
-     * stores them in a HashMap. If a pair only contain a key the the value
+     * stores them in a HashMap. If a pair only contain a key then the value
+     * will be set as a empty string.
+     *
+     * TODO: method is not quote aware
+     * @param   headerValue         the raw header value String that will be parsed.
+     * @param   delimiter           the delimiter that separates key and value pairs (e.g. ';' for Cookies or ',' for Cache-Control)
+     */
+    public static HashMap<String, String> parseHeaderValues(String headerValue, String delimiter){
+        HashMap<String, String> map = new HashMap<>();
+        parseHeaderValues(map, headerValue, delimiter);
+        return map;
+    }
+    /**
+     * Parses a header value string that contains key and value paired data and
+     * stores them in a HashMap. If a pair only contain a key then the value
      * will be set as a empty string.
 	 *
 	 * TODO: method is not quote aware

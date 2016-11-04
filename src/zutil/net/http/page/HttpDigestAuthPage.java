@@ -1,14 +1,18 @@
 package zutil.net.http.page;
 
-import zutil.Encrypter;
+import sun.net.www.HeaderParser;
 import zutil.Hasher;
+import zutil.log.LogUtil;
 import zutil.net.http.HttpHeader;
+import zutil.net.http.HttpHeaderParser;
 import zutil.net.http.HttpPage;
 import zutil.net.http.HttpPrintStream;
 
 import java.io.IOException;
 import java.security.SecureRandom;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Logger;
 
 /**
  * A abstract page that requires HTTP Digest authentication
@@ -18,7 +22,9 @@ import java.util.Map;
  * @author Ziver
  */
 public abstract class HttpDigestAuthPage implements HttpPage{
-    private static final String DEAFULT_REALM = "Login";
+    private static final Logger logger = LogUtil.getLogger();
+
+    private static final String DEFAULT_REALM = "Login";
     private static final String HTTP_AUTH_HEADER = "WWW-Authenticate";
     private static final String HTTP_CLIENT_HEADER = "Authorization";
     private static final String AUTH_TYPE = "Digest";
@@ -29,9 +35,11 @@ public abstract class HttpDigestAuthPage implements HttpPage{
     private static final String AUTH_USERNAME = "username";
     private static final String AUTH_URI = "uri";
     private static final String AUTH_RESPONSE = "response";
+    private static final String AUTH_DELIMITER = ",";
 
 
-    private String realm = DEAFULT_REALM;
+    private String realm = DEFAULT_REALM;
+    private HashMap<String,String> userMap = new HashMap<>();
     private SecureRandom secRandom = new SecureRandom();
 
 
@@ -40,6 +48,12 @@ public abstract class HttpDigestAuthPage implements HttpPage{
         this.realm = realm;
     }
 
+    public void addUser(String username, char[] password) {
+        userMap.put(username, new String(password)); // TODO: should use char[] for passwords
+    }
+    public void removeUser(String username) {
+        userMap.remove(username);
+    }
 
 
     @Override
@@ -49,16 +63,50 @@ public abstract class HttpDigestAuthPage implements HttpPage{
                         Map<String, String> cookie,
                         Map<String, String> request) throws IOException {
 
-        if (headers.getHeader(HTTP_CLIENT_HEADER) == null) {
+        if (headers.getHeader(HTTP_CLIENT_HEADER) == null || !session.containsKey(AUTH_NONCE)) {
             session.put(AUTH_NONCE, generateNonce());
             out.setStatusCode(401);
             out.setHeader(HTTP_AUTH_HEADER, generateAuthHeader((String) session.get(AUTH_NONCE)));
+            out.println("401 Unauthorized");
+        }
+        else if ( ! headers.getHeader(HTTP_CLIENT_HEADER).startsWith(AUTH_TYPE)){
+            out.setStatusCode(501);
+            out.println("501 Not Implemented");
         }
         else{
-            authRespond(out, headers, session, cookie, request);
+            HashMap<String,String> authMap = HttpHeaderParser.parseHeaderValues(
+                    headers.getHeader(HTTP_CLIENT_HEADER).substring(AUTH_TYPE.length()+1), // Skip auth type
+                    AUTH_DELIMITER);
+            if (authenticate(
+                    authMap.get(AUTH_USERNAME),
+                    headers.getRequestURL(),
+                    (String)session.get(AUTH_NONCE),
+                    authMap.get(AUTH_RESPONSE))) {
+                // Safe area, user authenticated
+                logger.fine("User '"+authMap.get(AUTH_USERNAME)+"' has been authenticated for realm '"+realm+"'");
+                authRespond(out, headers, session, cookie, request);
+            }
+            else{
+                out.setStatusCode(403);
+                out.println("403 Forbidden");
+            }
         }
     }
 
+
+    private boolean authenticate(String username, String uri, String nonce, String clientResponse){
+        if (!userMap.containsKey(username)) // do user exist?
+            return false;
+
+        String generatedResponse = generateResponseHash(
+                generateH1(username, userMap.get(username), realm),
+                generateH2(uri),
+                nonce);
+        if (generatedResponse.equals(clientResponse)){
+            return true;
+        }
+        return false;
+    }
 
     private String generateAuthHeader(String nonce){
         StringBuilder str = new StringBuilder();
@@ -76,7 +124,7 @@ public abstract class HttpDigestAuthPage implements HttpPage{
     }
 
     private static String generateH1(String username, String password, String realm) {
-        String ha1 = null;
+        String ha1;
         // If the algorithm directive's value is "MD5" or unspecified, then HA1 is
         //    HA1=MD5(username:realm:password)
         ha1 = Hasher.MD5(username +":"+ realm +":"+ password);
@@ -111,4 +159,5 @@ public abstract class HttpDigestAuthPage implements HttpPage{
                               Map<String, Object> session,
                               Map<String, String> cookie,
                               Map<String, String> request) throws IOException;
+
 }
