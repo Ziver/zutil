@@ -108,13 +108,12 @@ public class HttpURL {
 	public String getParameterString(){
 		StringBuilder param = new StringBuilder();
 		for(String key : parameters.keySet()){
+			if (param.length() > 0)
+				param.append('&');
 			param.append(key);
 			param.append('=');
 			param.append( parameters.get(key) );
-			param.append('&');
 		}
-		if( param.length() > 0 )
-			param.deleteCharAt( param.length()-1 );
 		return param.toString();
 	}
 
