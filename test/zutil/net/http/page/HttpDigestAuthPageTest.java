@@ -7,10 +7,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import zutil.Hasher;
 import zutil.io.IOUtil;
-import zutil.net.http.HttpHeader;
-import zutil.net.http.HttpHeaderParser;
-import zutil.net.http.HttpPrintStream;
-import zutil.net.http.HttpTestUtil;
+import zutil.net.http.*;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -26,11 +23,11 @@ public class HttpDigestAuthPageTest {
     private static final String PAGE_USERNAME = "username";
     private static final String PAGE_PASSWORD = "password";
 
-    private HttpDigestTestPage page;
+    private HttpDigestAuthPage page;
 
     @Before
     public void init(){
-        page = new HttpDigestTestPage();
+        page = new HttpDigestAuthPage(new TestPage());
         page.addUser(PAGE_USERNAME, PAGE_PASSWORD.toCharArray());
     }
 
@@ -113,9 +110,9 @@ public class HttpDigestAuthPageTest {
         return authHeaders;
     }
 
-    private static class HttpDigestTestPage extends HttpDigestAuthPage{
+    private static class TestPage implements HttpPage {
         @Override
-        public void authRespond(HttpPrintStream out,
+        public void respond(HttpPrintStream out,
                                 HttpHeader headers,
                                 Map<String, Object> session,
                                 Map<String, String> cookie,

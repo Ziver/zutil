@@ -15,13 +15,12 @@ import java.util.Map;
 import java.util.logging.Logger;
 
 /**
- * A abstract page that requires HTTP Digest authentication
- * to access the subclass HttpPage.
+ * A class that encapsulates a HttpPage around a HTTP Digest authentication requirement.
  *
  * @see <a href="https://tools.ietf.org/html/rfc2069">rfc2069</a>
  * @author Ziver
  */
-public abstract class HttpDigestAuthPage implements HttpPage{
+public class HttpDigestAuthPage implements HttpPage{
     private static final Logger logger = LogUtil.getLogger();
 
     private static final String DEFAULT_REALM = "Login";
@@ -41,7 +40,16 @@ public abstract class HttpDigestAuthPage implements HttpPage{
     private String realm = DEFAULT_REALM;
     private HashMap<String,String> userMap = new HashMap<>();
     private SecureRandom secRandom = new SecureRandom();
+    private HttpPage targetPage;
 
+
+    /**
+     *
+     * @param page
+     */
+    public HttpDigestAuthPage(HttpPage page){
+        targetPage = page;
+    }
 
 
     public void setRealm(String realm){
@@ -84,7 +92,7 @@ public abstract class HttpDigestAuthPage implements HttpPage{
                     authMap.get(AUTH_RESPONSE))) {
                 // Safe area, user authenticated
                 logger.fine("User '"+authMap.get(AUTH_USERNAME)+"' has been authenticated for realm '"+realm+"'");
-                authRespond(out, headers, session, cookie, request);
+                targetPage.respond(out, headers, session, cookie, request);
             }
             else{
                 out.setStatusCode(403);
@@ -153,11 +161,5 @@ public abstract class HttpDigestAuthPage implements HttpPage{
         return response;
     }
 
-
-    public abstract void authRespond(HttpPrintStream out,
-                              HttpHeader headers,
-                              Map<String, Object> session,
-                              Map<String, String> cookie,
-                              Map<String, String> request) throws IOException;
 
 }
