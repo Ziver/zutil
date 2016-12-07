@@ -32,8 +32,7 @@ package zutil.net.nio.worker.grid;
  */
 public abstract class GridThread implements Runnable{
 	/**
-	 * The initial static and final data will be sent to this 
-	 * method.
+	 * The initial static and final data will be sent to this method.
 	 * 
 	 * @param data is the static and or final data
 	 */
@@ -55,8 +54,7 @@ public abstract class GridThread implements Runnable{
 	}
 	
 	/**
-	 * Compute the given data and return 
-	 * @param data
+	 * Compute the given data and return
 	 */
 	public abstract void compute(GridJob data) throws Exception;
 }

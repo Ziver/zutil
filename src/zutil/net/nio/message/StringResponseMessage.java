@@ -22,30 +22,33 @@
  * THE SOFTWARE.
  */
 
-package zutil.net.nio;
-
-import zutil.log.CompactLogFormatter;
-import zutil.log.LogUtil;
-
-import java.io.IOException;
-import java.security.NoSuchAlgorithmException;
-import java.util.logging.Level;
+package zutil.net.nio.message;
 
 
-@SuppressWarnings("unused")
-public class NetworkServerTest {
-	public static void main(String[] args) throws NoSuchAlgorithmException, InterruptedException {
-		try {
-			LogUtil.setGlobalLevel(Level.ALL);
-			LogUtil.setGlobalFormatter(new CompactLogFormatter());
+public class StringResponseMessage extends EchoMessage implements RequestResponseMessage {
+	private static final long serialVersionUID = 1L;
 
-			NioServer server = new NioServer(6056);
+	private long responseId;
+	private String msg;
+	
+	public StringResponseMessage(String msg){
+		this.msg = msg;
+		responseId = (long)(Math.random()*Long.MAX_VALUE);
+	}
+	
+	public String getString(){
+		return msg;
+	}
+	
+	public void setString(String msg){
+		this.msg = msg;
+	}
+	
+	public String toString(){
+		return getString();
+	}
 
-			while(true){
-			    Thread.sleep(1000);
-            }
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+	public long getResponseId() {
+		return responseId;
 	}
 }

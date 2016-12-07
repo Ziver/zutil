@@ -34,11 +34,12 @@ import java.nio.channels.spi.SelectorProvider;
 import java.util.Iterator;
 
 public class NioServer extends NioNetwork{
+
 	
 	/**
 	 * Creates a NioServer object which listens on localhost
 	 * 
-	 * @param port The port to listen to
+	 * @param	port	the port to listen to
 	 */
 	public NioServer(int port) throws IOException {
 		this(null, port);
@@ -47,12 +48,11 @@ public class NioServer extends NioNetwork{
 	/**
 	 * Creates a NioServer object which listens to a specific address
 	 * 
-	 * @param address The address to listen to
-	 * @param port The port to listen to
+	 * @param	address	the address to listen to
+	 * @param	port	the port to listen to
 	 */
 	public NioServer(InetAddress address, int port) throws IOException {
-		super(address, port, NetworkType.SERVER);
-		new Thread(this).start();
+		super(new InetSocketAddress(address, port));
 	}
 
 	protected Selector initSelector() throws IOException {
@@ -65,8 +65,7 @@ public class NioServer extends NioNetwork{
 		serverChannel.configureBlocking(false);
 
 		// Bind the server socket to the specified address and port
-		InetSocketAddress isa = new InetSocketAddress(address, port);
-		serverChannel.socket().bind(isa);
+		serverChannel.socket().bind(localAddress);
 
 		// Register the server socket channel, indicating an interest in 
 		// accepting new connections
@@ -74,17 +73,16 @@ public class NioServer extends NioNetwork{
 
 		return socketSelector;
 	}
-	
+
 	/**
 	 * Broadcasts the message to all the connected clients
 	 * 
-	 * @param data The data to broadcast
+	 * @param	data	the data to broadcast
 	 */
 	public void broadcast(byte[] data){
 		synchronized(clients){
-			Iterator<InetSocketAddress> it = clients.keySet().iterator();
-			while(it.hasNext()){
-				send(it.next(), data);
+			for(InetSocketAddress target : clients.keySet()){
+				send(target, data);
 			}
 		}
 	}

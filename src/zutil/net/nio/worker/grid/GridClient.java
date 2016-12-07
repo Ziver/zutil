@@ -28,7 +28,7 @@ import zutil.io.MultiPrintStream;
 import zutil.net.nio.NioClient;
 import zutil.net.nio.message.GridMessage;
 import zutil.net.nio.worker.ThreadedEventWorker;
-import zutil.net.nio.worker.WorkerDataEvent;
+import zutil.net.nio.worker.WorkerEventData;
 
 import java.io.IOException;
 import java.util.LinkedList;
@@ -51,8 +51,8 @@ public class GridClient extends ThreadedEventWorker {
 	 * Creates a new GridClient object and registers itself at the server
 	 * and sets itself as a worker in NioClient
 	 * 
-	 * @param thread the Thread interface to run for the jobs
-	 * @param network the NioClient to use to communicate to the server
+	 * @param	thread	the Thread interface to run for the jobs
+	 * @param	network	the NioClient to use to communicate to the server
 	 */
 	public GridClient(GridThread thread, NioClient network){
 		jobQueue = new LinkedList<GridJob>();
@@ -64,7 +64,6 @@ public class GridClient extends ThreadedEventWorker {
 	/**
 	 * Starts up the client and a couple of GridThreads.
 	 * And registers itself as a worker in NioClient
-	 * @throws IOException 
 	 */
 	public void initiate() throws IOException{
 		network.setDefaultWorker(this);
@@ -77,7 +76,7 @@ public class GridClient extends ThreadedEventWorker {
 	}
 
 	@Override
-	public void messageEvent(WorkerDataEvent e) {
+	public void messageEvent(WorkerEventData e) {
 		// ignores other messages than GridMessage
 		if(e.data instanceof GridMessage){
 			GridMessage msg = (GridMessage)e.data;
@@ -96,10 +95,9 @@ public class GridClient extends ThreadedEventWorker {
 	/**
 	 * Register whit the server that the job is done
 	 * 
-	 * @param jobID is the job id
-	 * @param correct if the answer was right
-	 * @param result the result of the computation
-	 * @throws IOException
+	 * @param	jobID 	is the job id
+	 * @param	correct if the answer was right
+	 * @param	result	the result of the computation
 	 */
 	public static void jobDone(int jobID, boolean correct, Object result) throws IOException{
 		if(correct)
@@ -112,17 +110,16 @@ public class GridClient extends ThreadedEventWorker {
 	 * Registers with the server that there was an 
 	 * error when computing this job
 	 * 
-	 * @param jobID is the job id
+	 * @param	jobId	is the job id
 	 */
-	public static void jobError(int jobID){
+	public static void jobError(int jobId){
 		try{
-			network.send(new GridMessage(GridMessage.COMP_SUCCESSFUL, jobID));
+			network.send(new GridMessage(GridMessage.COMP_SUCCESSFUL, jobId));
 		}catch(Exception e){e.printStackTrace();}
 	}
 
 	/**
 	 * @return a new job to compute
-	 * @throws IOException
 	 */
 	public static synchronized GridJob getNextJob() throws IOException{
 		if(jobQueue.isEmpty()){

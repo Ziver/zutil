@@ -25,32 +25,28 @@
 package zutil.net.nio;
 
 import zutil.net.nio.message.Message;
-import zutil.net.nio.message.type.ResponseRequestMessage;
+import zutil.net.nio.message.RequestResponseMessage;
 import zutil.net.nio.response.ResponseEvent;
 
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.nio.channels.Selector;
-import java.nio.channels.SocketChannel;
 import java.nio.channels.spi.SelectorProvider;
 
 
 public class NioClient extends NioNetwork{
-	private SocketChannel serverSocket;
+	private InetSocketAddress remoteAddress;
 	
 	/**
 	 * Creates a NioClient that connects to a server
 	 * 
-	 * @param hostAddress The server address
-	 * @param port The port to listen on
+	 * @param	remoteAddress   the server address
+	 * @param	remotePort      the port to listen on
 	 */
-	public NioClient(InetAddress serverAddress, int port) throws IOException {
-		super(InetAddress.getLocalHost(), port, NetworkType.CLIENT);
-		serverSocket = initiateConnection(new InetSocketAddress(serverAddress, port));
-		Thread thread = new Thread(this);
-		thread.setDaemon(false);
-		thread.start();
+	public NioClient(InetAddress remoteAddress, int remotePort) throws IOException {
+		this.remoteAddress = new InetSocketAddress(remoteAddress, remotePort);
+		connect(this.remoteAddress);
 	}
 
 	protected Selector initSelector() throws IOException {
@@ -61,21 +57,19 @@ public class NioClient extends NioNetwork{
 	/**
 	 * Sends a Message to the default server
 	 * 
-	 * @param data The data to be sent
-	 * @throws IOException Something got wrong
+	 * @param   data    the data to be sent
 	 */
 	public void send(Message data) throws IOException {
-		send(serverSocket, data);
+		send(remoteAddress, data);
 	}
 	
 	/**
 	 * This method is for the Client to send a message to the server
 	 * 
-	 * @param handler The response handler
-	 * @param data The data to send
-	 * @throws IOException
+	 * @param   handler the response handler
+	 * @param   data    the data to send
 	 */
-	public void send(ResponseEvent handler, ResponseRequestMessage data) throws IOException {
-		send(serverSocket, handler, data);
+	public void send(ResponseEvent handler, RequestResponseMessage data) throws IOException {
+		send(remoteAddress, handler, data);
 	}
 }

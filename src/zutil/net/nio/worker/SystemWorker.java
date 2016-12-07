@@ -26,15 +26,10 @@ package zutil.net.nio.worker;
 
 import zutil.log.LogUtil;
 import zutil.net.nio.NioNetwork;
-import zutil.net.nio.message.ChatMessage;
 import zutil.net.nio.message.Message;
-import zutil.net.nio.message.SyncMessage;
-import zutil.net.nio.message.type.EchoMessage;
-import zutil.net.nio.message.type.ResponseRequestMessage;
+import zutil.net.nio.message.EchoMessage;
+import zutil.net.nio.message.RequestResponseMessage;
 import zutil.net.nio.response.ResponseEvent;
-import zutil.net.nio.service.NetworkService;
-import zutil.net.nio.service.chat.ChatService;
-import zutil.net.nio.service.sync.SyncService;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -43,41 +38,49 @@ import java.util.logging.Logger;
 
 public class SystemWorker extends ThreadedEventWorker {
 	private static Logger logger = LogUtil.getLogger();
+
 	private NioNetwork nio;
-	// Maps a SocketChannel to a RspHandler
-	private Map<Double, ResponseEvent> rspEvents = new HashMap<Double, ResponseEvent>();	
-	// Difren services listening on specific messages
-	private Map<Class<?>, NetworkService> services = new HashMap<Class<?>, NetworkService>();
+	// Maps a responseId to a RspHandler
+	private Map<Long, ResponseEvent> rspEvents = new HashMap<>();
+	// Different services listening on specific messages
+	private Map<Class<?>, ThreadedEventWorker> services = new HashMap<>();
+
+
+
 	/**
 	 * Creates a new SystemWorker
-	 * @param nio The Network
 	 */
 	public SystemWorker(NioNetwork nio){
 		this.nio = nio;
 	}
 
+
+
 	@Override
-	public void messageEvent(WorkerDataEvent event) {
+	public void messageEvent(WorkerEventData event) {
 		try {
 			logger.finer("System Message: "+event.data.getClass().getName());
 			if(event.data instanceof Message){
 				if(event.data instanceof EchoMessage && ((EchoMessage)event.data).echo()){
-					// Echos back the recived message
-					((EchoMessage)event.data).recived();
+					// Echos back the received message
+					((EchoMessage)event.data).received();
 					logger.finer("Echoing Message: "+event.data);
-					nio.send(event.socket, event.data);
+					nio.send(event.remoteAddress, event.data);
 				}
-				else if(event.data instanceof ResponseRequestMessage && 
-						rspEvents.get(((ResponseRequestMessage)event.data).getResponseId()) != null){
-					// Handle the response
-					handleResponse(((ResponseRequestMessage)event.data).getResponseId(), event.data);
+				else if(event.data instanceof RequestResponseMessage &&
+						rspEvents.get(((RequestResponseMessage)event.data).getResponseId()) != null){
+                    long responseId = ((RequestResponseMessage)event.data).getResponseId();
+                    // Look up the handler for this channel
+                    ResponseEvent handler = rspEvents.get(responseId);
+                    // And pass the response to it
+                    handler.handleResponse(event.data);
+                    rspEvents.remove(responseId);
 					logger.finer("Response Request Message: "+event.data);
 				}
 				else{
-					//Services
-					if(services.containsKey(event.data.getClass()) ||
-							!services.containsKey(event.data.getClass()) && defaultServices(event.data)){
-						services.get(event.data.getClass()).handleMessage((Message)event.data, event.socket);
+					// Check mapped workers
+					if(services.containsKey(event.data.getClass())){
+						services.get(event.data.getClass()).messageEvent(event);
 					}
 				}
 			}
@@ -87,67 +90,29 @@ public class SystemWorker extends ThreadedEventWorker {
 	}
 
 	/**
-	 * Registers a Service to a specific message
+	 * Maps a Worker to a specific message
 	 * 
-	 * @param c The Message class
-	 * @param ns The service
+	 * @param   messageClass    the received message class
+	 * @param   worker          the worker that should handle the specified message type
 	 */
-	public void registerService(Class<?> c, NetworkService ns){
-		services.put(c, ns);
+	public void registerWorker(Class<?> messageClass, ThreadedEventWorker worker){
+		services.put(messageClass, worker);
 	}
 
 	/**
-	 * Unregisters a service
-	 * 
-	 * @param c The class
+	 * Un-maps a message class to a worker
+	 *
+     * @param   messageClass    the received message class
 	 */
-	public void unregisterService(Class<?> c){
-		services.remove(c);
+	public void unregisterWorker(Class<?> messageClass){
+		services.remove(messageClass);
 	}
 
 	/**
-	 * Connects a ResponseHandler to a specific message 
-	 * @param handler The Handler
-	 * @param data The Message
+	 * Connects a ResponseHandler to a specific message object
 	 */
-	public void addResponseHandler(ResponseEvent handler, ResponseRequestMessage data){
+	public void addResponseHandler(ResponseEvent handler, RequestResponseMessage data){
 		rspEvents.put(data.getResponseId(), handler);
-	}
-
-	/**
-	 * Client And Server ResponseEvent
-	 */
-	private void handleResponse(double responseId, Object rspData){	
-		// Look up the handler for this channel
-		ResponseEvent handler = rspEvents.get(responseId);		
-		// And pass the response to it
-		handler.handleResponse(rspData);
-
-		rspEvents.remove(responseId);
-	}
-
-	/**
-	 * Registers the default services in the engin e
-	 * if the message needs one of them
-	 * 
-	 * @param o The message
-	 */
-	private boolean defaultServices(Object o){
-		if(o instanceof SyncMessage){
-			if(SyncService.getInstance() == null)
-				registerService(o.getClass(), new SyncService(nio));
-			else
-				registerService(o.getClass(), SyncService.getInstance());
-			return true;
-		}
-		else if(o instanceof ChatMessage){
-			if(ChatService.getInstance() == null)
-				registerService(o.getClass(), new ChatService(nio));
-			else
-				registerService(o.getClass(), ChatService.getInstance());
-			return true;
-		}
-		return false;
 	}
 
 }

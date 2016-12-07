@@ -22,30 +22,13 @@
  * THE SOFTWARE.
  */
 
-package zutil.net.nio;
+package zutil.net.nio.worker.chat;
 
-import zutil.log.CompactLogFormatter;
-import zutil.log.LogUtil;
-
-import java.io.IOException;
-import java.security.NoSuchAlgorithmException;
-import java.util.logging.Level;
-
-
-@SuppressWarnings("unused")
-public class NetworkServerTest {
-	public static void main(String[] args) throws NoSuchAlgorithmException, InterruptedException {
-		try {
-			LogUtil.setGlobalLevel(Level.ALL);
-			LogUtil.setGlobalFormatter(new CompactLogFormatter());
-
-			NioServer server = new NioServer(6056);
-
-			while(true){
-			    Thread.sleep(1000);
-            }
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
+/**
+ * Tis is a listener class for new chat messages
+ * @author Ziver
+ *
+ */
+public interface ChatListener {
+	public void messageAction(String msg, String room);
 }

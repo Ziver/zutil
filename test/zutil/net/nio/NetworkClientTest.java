@@ -24,27 +24,33 @@
 
 package zutil.net.nio;
 
-import zutil.net.nio.message.StringMessage;
+import zutil.log.CompactLogFormatter;
+import zutil.log.LogUtil;
+import zutil.net.nio.message.StringResponseMessage;
 import zutil.net.nio.response.PrintRsp;
 
 import java.io.IOException;
 import java.net.InetAddress;
 import java.security.NoSuchAlgorithmException;
+import java.util.logging.Level;
 
 
 @SuppressWarnings("unused")
 public class NetworkClientTest {
-	public static void main(String[] args) throws NoSuchAlgorithmException {
+	public static void main(String[] args) throws NoSuchAlgorithmException, InterruptedException {
 		try {
-			int count = 0;
+            LogUtil.setGlobalLevel(Level.ALL);
+            LogUtil.setGlobalFormatter(new CompactLogFormatter());
+
+            int count = 0;
 			long time = System.currentTimeMillis()+1000*60;
 			NioClient client = new NioClient(InetAddress.getByName("localhost"), 6056);
-			//client.setEncrypter(new Encrypter("lol", Encrypter.PASSPHRASE_DES_ALGO));
+            Thread.sleep(1000);
 			while(time > System.currentTimeMillis()){
 				PrintRsp handler = new PrintRsp();			
-				client.send(handler, new StringMessage("StringMessage: "+count));
+				client.send(handler, new StringResponseMessage("StringResponseMessage: "+count));
 				handler.waitForResponse();
-				//try {Thread.sleep(100);} catch (InterruptedException e) {}
+				//Thread.sleep(100);
 				//System.out.println("sending..");
 				count++;
 			}

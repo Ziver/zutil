@@ -24,18 +24,16 @@
 
 package zutil.net.nio.worker;
 
-import zutil.io.MultiPrintStream;
-
 import java.io.IOException;
+
 
 public class EchoWorker extends ThreadedEventWorker {
 
 	@Override
-	public void messageEvent(WorkerDataEvent dataEvent) {
+	public void messageEvent(WorkerEventData dataEvent) {
 		try {
 			// Return to sender
-			MultiPrintStream.out.println("Recived Msg: "+dataEvent.data);
-			dataEvent.network.send(dataEvent.socket, dataEvent.data);
+			dataEvent.network.send(dataEvent.remoteAddress, dataEvent.data);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

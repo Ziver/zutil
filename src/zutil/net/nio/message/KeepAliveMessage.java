@@ -24,8 +24,6 @@
 
 package zutil.net.nio.message;
 
-import zutil.net.nio.message.type.SystemMessage;
-
 /**
  * Tells the destination that the 
  * source is still online

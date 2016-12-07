@@ -26,7 +26,7 @@ package zutil.net.nio.worker.grid;
 
 import zutil.net.nio.message.GridMessage;
 import zutil.net.nio.worker.ThreadedEventWorker;
-import zutil.net.nio.worker.WorkerDataEvent;
+import zutil.net.nio.worker.WorkerEventData;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -41,41 +41,42 @@ import java.util.Queue;
 @SuppressWarnings({ "unchecked", "rawtypes" })
 public class GridServerWorker extends ThreadedEventWorker{
 	// Job timeout after 30 min
-	public static int JOB_TIMEOUT = 1000*60*30;
-
+	public int jobTimeout = 1000*60*30;
 	private HashMap<Integer, GridJob> jobs; // contains all the ongoing jobs
-	private Queue<GridJob> reSendjobQueue; // Contains all the jobs that will be recalculated
+	private Queue<GridJob> resendJobQueue; // Contains all the jobs that will be recalculated
 	private GridJobGenerator jobGenerator; // The job generator
 	private GridResultHandler resHandler;
 	private int nextJobID;
+
 
 	public GridServerWorker(GridResultHandler resHandler, GridJobGenerator jobGenerator){
 		this.resHandler = resHandler;
 		this.jobGenerator = jobGenerator;
 		nextJobID = 0;
 
-		jobs = new HashMap<Integer, GridJob>();
-		reSendjobQueue = new LinkedList<GridJob>();
+		jobs = new HashMap<>();
+		resendJobQueue = new LinkedList<>();
 		GridMaintainer maintainer = new GridMaintainer();
 		maintainer.start();
 	}
 
+
 	@Override
-	public void messageEvent(WorkerDataEvent e) {
+	public void messageEvent(WorkerEventData e) {
 		try {
 			// ignores other messages than GridMessage
 			if(e.data instanceof GridMessage){
 				GridMessage msg = (GridMessage)e.data;
-				GridJob job = null;
+				GridJob job;
 
 				switch(msg.messageType()){
 				case GridMessage.REGISTER:
-					e.network.send(e.socket, new GridMessage(GridMessage.INIT_DATA, 0, jobGenerator.initValues()));
+					e.network.send(e.remoteAddress, new GridMessage(GridMessage.INIT_DATA, 0, jobGenerator.initValues()));
 					break;
 				// Sending new data to compute to the client
 				case GridMessage.NEW_DATA:
-					if(!reSendjobQueue.isEmpty()){ // checks first if there is a job for recalculation
-						job = reSendjobQueue.poll();
+					if(!resendJobQueue.isEmpty()){ // checks first if there is a job for recalculation
+						job = resendJobQueue.poll();
 						job.renewTimeStamp();
 					}
 					else{ // generates new job
@@ -85,7 +86,7 @@ public class GridServerWorker extends ThreadedEventWorker{
 						nextJobID++;
 					}
 					GridMessage newMsg = new GridMessage(GridMessage.COMP_DATA, job.jobID, job.job);
-					e.network.send(e.socket, newMsg);				
+					e.network.send(e.remoteAddress, newMsg);
 					break;
 
 					// Received computation results
@@ -97,7 +98,7 @@ public class GridServerWorker extends ThreadedEventWorker{
 					break;
 				case GridMessage.COMP_ERROR: // marks the job for recalculation
 					job = jobs.get(msg.getJobQueueID());
-					reSendjobQueue.add(job);
+					resendJobQueue.add(job);
 					break;
 				}
 			}
@@ -108,23 +109,24 @@ public class GridServerWorker extends ThreadedEventWorker{
 
 	/**
 	 * Changes the job timeout value
-	 * @param min is the timeout in minutes
+	 *
+	 * @param	timeout		is the timeout in minutes
 	 */
-	public static void setJobTimeOut(int min){
-		JOB_TIMEOUT = 1000*60*min;
+	public void setJobTimeout(int timeout){
+		jobTimeout = 1000*60*timeout;
 	}
 
 	class GridMaintainer extends Thread{
 		/**
 		 * Runs some behind the scenes stuff
-		 * like job timeout.
+		 * like job garbage collection.
 		 */
 		public void run(){
 			while(true){
 				long time = System.currentTimeMillis();
 				for(int jobID : jobs.keySet()){
-					if(time-jobs.get(jobID).timestamp > JOB_TIMEOUT){
-						reSendjobQueue.add(jobs.get(jobID));
+					if(time-jobs.get(jobID).timestamp > jobTimeout){
+						resendJobQueue.add(jobs.get(jobID));
 					}
 				}
 				try{Thread.sleep(1000*60*1);}catch(Exception e){};

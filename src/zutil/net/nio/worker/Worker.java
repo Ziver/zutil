@@ -26,30 +26,24 @@ package zutil.net.nio.worker;
 
 import zutil.net.nio.NioNetwork;
 
-import java.nio.channels.SocketChannel;
+import java.net.SocketAddress;
 import java.util.LinkedList;
 import java.util.List;
 
 
-public abstract class Worker implements Runnable {
-	private LinkedList<WorkerDataEvent> queue = new LinkedList<WorkerDataEvent>();
+public abstract class Worker {
+	private LinkedList<WorkerEventData> queue = new LinkedList<WorkerEventData>();
 	
-	public void processData(NioNetwork server, SocketChannel socket, Object data) {
+	public void processData(NioNetwork server, SocketAddress remote, Object data) {
 		synchronized(queue) {
-			queue.add(new WorkerDataEvent(server, socket, data));
+			queue.add(new WorkerEventData(server, remote, data));
 			queue.notify();
 		}
 	}
 	
+
 	/**
-	 * @return The event queue
-	 */
-	protected List<WorkerDataEvent> getEventQueue(){
-		return queue;
-	}
-	
-	/**
-	 * @return If there is a event in the queue
+	 * @return true if there is a event in the queue
 	 */
 	protected boolean hasEvent(){
 		return !queue.isEmpty();
@@ -57,20 +51,17 @@ public abstract class Worker implements Runnable {
 	
 	/**
 	 * Polls a event from the list or waits until there is a event
-	 * @return The next event
+     *
+	 * @return the next event
 	 */
-	protected WorkerDataEvent pollEvent(){
-		while(queue.isEmpty()) {
-			try {
-				this.wait();
-			} catch (InterruptedException e) {}
+	protected WorkerEventData pollEvent(){
+		synchronized(queue) {
+			while (queue.isEmpty()) {
+				try {
+					queue.wait();
+				} catch (InterruptedException e) {}
+			}
 		}
 		return queue.poll();
 	}
-	
-	public void run(){
-		update();
-	}
-	
-	public abstract void update();
 }

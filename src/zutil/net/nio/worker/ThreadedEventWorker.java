@@ -24,7 +24,7 @@
 
 package zutil.net.nio.worker;
 
-public abstract class ThreadedEventWorker extends Worker{
+public abstract class ThreadedEventWorker extends Worker implements Runnable{
 	private Thread thread;
 
 	public ThreadedEventWorker(){
@@ -32,27 +32,17 @@ public abstract class ThreadedEventWorker extends Worker{
 		thread.start();
 	}
 
-	public void update() {
-		WorkerDataEvent dataEvent;
-
+	public void run() {
 		while(true) {
 			try{
 				// Wait for data to become available
-				synchronized(getEventQueue()) {
-					while(getEventQueue().isEmpty()) {
-						try {
-							getEventQueue().wait();
-						} catch (InterruptedException e) {}
-					}
-					dataEvent = (WorkerDataEvent) getEventQueue().remove(0);
-				}
-				messageEvent(dataEvent);
+				messageEvent(pollEvent());
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
 		}
 	}
 
-	public abstract void messageEvent(WorkerDataEvent e);
 
+	public abstract void messageEvent(WorkerEventData e);
 }

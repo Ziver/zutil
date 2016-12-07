@@ -22,30 +22,15 @@
  * THE SOFTWARE.
  */
 
-package zutil.net.nio;
+package zutil.net.nio.message;
 
-import zutil.log.CompactLogFormatter;
-import zutil.log.LogUtil;
+/**
+ * A message that implements this will be 
+ * handeld internaly by the network engine
+ * 
+ * @author Ziver
+ *
+ */
+public interface SystemMessage {
 
-import java.io.IOException;
-import java.security.NoSuchAlgorithmException;
-import java.util.logging.Level;
-
-
-@SuppressWarnings("unused")
-public class NetworkServerTest {
-	public static void main(String[] args) throws NoSuchAlgorithmException, InterruptedException {
-		try {
-			LogUtil.setGlobalLevel(Level.ALL);
-			LogUtil.setGlobalFormatter(new CompactLogFormatter());
-
-			NioServer server = new NioServer(6056);
-
-			while(true){
-			    Thread.sleep(1000);
-            }
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
 }

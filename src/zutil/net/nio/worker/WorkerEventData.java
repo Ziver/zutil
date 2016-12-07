@@ -22,30 +22,22 @@
  * THE SOFTWARE.
  */
 
-package zutil.net.nio;
+package zutil.net.nio.worker;
 
-import zutil.log.CompactLogFormatter;
-import zutil.log.LogUtil;
+import zutil.net.nio.NioNetwork;
 
-import java.io.IOException;
-import java.security.NoSuchAlgorithmException;
-import java.util.logging.Level;
+import java.net.SocketAddress;
+import java.nio.channels.SocketChannel;
 
 
-@SuppressWarnings("unused")
-public class NetworkServerTest {
-	public static void main(String[] args) throws NoSuchAlgorithmException, InterruptedException {
-		try {
-			LogUtil.setGlobalLevel(Level.ALL);
-			LogUtil.setGlobalFormatter(new CompactLogFormatter());
-
-			NioServer server = new NioServer(6056);
-
-			while(true){
-			    Thread.sleep(1000);
-            }
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+public class WorkerEventData {
+	public NioNetwork network;
+	public SocketAddress remoteAddress;
+	public Object data;
+	
+	public WorkerEventData(NioNetwork server, SocketAddress remoteAddress, Object data) {
+		this.network = server;
+		this.remoteAddress = remoteAddress;
+		this.data = data;
 	}
 }

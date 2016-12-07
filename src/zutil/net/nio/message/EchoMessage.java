@@ -22,30 +22,30 @@
  * THE SOFTWARE.
  */
 
-package zutil.net.nio;
+package zutil.net.nio.message;
 
-import zutil.log.CompactLogFormatter;
-import zutil.log.LogUtil;
+/**
+ * The reciver will echo out this message to the sender
+ * 
+ * @author Ziver
+ */
+public abstract class EchoMessage extends Message implements SystemMessage{
+	private static final long serialVersionUID = 1L;
+	
+	private boolean echo = false;
 
-import java.io.IOException;
-import java.security.NoSuchAlgorithmException;
-import java.util.logging.Level;
 
-
-@SuppressWarnings("unused")
-public class NetworkServerTest {
-	public static void main(String[] args) throws NoSuchAlgorithmException, InterruptedException {
-		try {
-			LogUtil.setGlobalLevel(Level.ALL);
-			LogUtil.setGlobalFormatter(new CompactLogFormatter());
-
-			NioServer server = new NioServer(6056);
-
-			while(true){
-			    Thread.sleep(1000);
-            }
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+	/**
+	 * @return true if this message is an echo of an original message
+	 */
+	public boolean echo() {
+		return echo;
+	}
+	
+	/**
+	 * Called by the receiver to mark this message as an echo copy
+	 */
+	public void received() {
+		echo = true;
 	}
 }

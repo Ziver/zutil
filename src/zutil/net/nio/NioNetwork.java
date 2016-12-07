@@ -24,13 +24,10 @@
 
 package zutil.net.nio;
 
-import zutil.Encrypter;
 import zutil.converter.Converter;
-import zutil.io.DynamicByteArrayStream;
-import zutil.io.MultiPrintStream;
 import zutil.log.LogUtil;
-import zutil.net.nio.message.type.ResponseRequestMessage;
-import zutil.net.nio.message.type.SystemMessage;
+import zutil.net.nio.message.RequestResponseMessage;
+import zutil.net.nio.message.SystemMessage;
 import zutil.net.nio.response.ResponseEvent;
 import zutil.net.nio.server.ChangeRequest;
 import zutil.net.nio.server.ClientData;
@@ -38,8 +35,8 @@ import zutil.net.nio.worker.SystemWorker;
 import zutil.net.nio.worker.Worker;
 
 import java.io.IOException;
-import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
@@ -51,136 +48,130 @@ import java.util.logging.Logger;
 
 public abstract class NioNetwork implements Runnable {
 	private static Logger logger = LogUtil.getLogger();
-	public static enum NetworkType {SERVER, CLIENT};
 
-	private NetworkType type;
-
-	// The host:port combination to listen on
-	protected InetAddress address;
-	protected int port;
-
+	protected SocketAddress localAddress;
 	// The channel on which we'll accept connections
 	protected ServerSocketChannel serverChannel;
-	// The selector we'll be monitoring
+	// The selector we will be monitoring
 	private Selector selector;
 	// The buffer into which we'll read data when it's available
 	private ByteBuffer readBuffer = ByteBuffer.allocate(8192);
 	protected Worker worker;
 	protected SystemWorker systemWorker;
 
-	// This map contains all the clients that are conncted
+	// This map contains all the clients that are connected
 	protected Map<InetSocketAddress, ClientData> clients = new HashMap<InetSocketAddress, ClientData>();
 
 	// A list of PendingChange instances
 	private List<ChangeRequest> pendingChanges = new LinkedList<ChangeRequest>();
 	// Maps a SocketChannel to a list of ByteBuffer instances
 	private Map<SocketChannel, List<ByteBuffer>> pendingWriteData = new HashMap<SocketChannel, List<ByteBuffer>>();
-	private Map<SocketChannel, DynamicByteArrayStream> pendingReadData = new HashMap<SocketChannel, DynamicByteArrayStream>();
-	// The encrypter
-	private Encrypter encrypter;
+
+
 
 	/**
-	 * Create a nio network class
-	 * 
-	 * @param hostAddress The host address
-	 * @param port The port 
-	 * @param type The type of network host
-	 * @throws IOException
+	 * Create a client based Network object
 	 */
-	public NioNetwork(InetAddress address, int port, NetworkType type) throws IOException {
-		this.port = port;
-		this.address = address;
-		this.type = type;
-		this.selector = initSelector();
-		this.systemWorker = new SystemWorker(this);
+	public NioNetwork() throws IOException {
+		this(null);
 	}
+
+    /**
+     * Create a server based Network object
+     *
+     * @param   localAddress    the address the server will listen on
+     */
+    public NioNetwork(SocketAddress localAddress) throws IOException {
+	    this.localAddress = localAddress;
+	    // init selector
+        this.selector = initSelector();
+        this.systemWorker = new SystemWorker(this);
+        // init traffic thread
+        new Thread(this).start();
+    }
 
 	protected abstract Selector initSelector() throws IOException;
 
+
+
 	/**
-	 * Sets the Worker for the network messages
+	 * Sets the default worker for non System messages.
 	 * 
-	 * @param worker The worker that handles the incoming messages
+	 * @param   worker  the worker that should handle incoming messages
 	 */
 	public void setDefaultWorker(Worker worker){
 		this.worker = worker;
 	}
 
-	/**
-	 * Sets the encrypter to use in the network
-	 * 
-	 * @param enc The encrypter to use or null fo no encryption
-	 */
-	public void setEncrypter(Encrypter enc){
-		encrypter = enc;
-		MultiPrintStream.out.println("Network Encryption "+
-				(encrypter != null ? "Enabled("+encrypter.getAlgorithm()+")" : "Disabled")+"!!");
-	}
 
-	public void send(SocketChannel socket, Object data) throws IOException{
-		send(socket, Converter.toBytes(data));
-	}
+    /**
+     * Connect to a remote Server.
+     */
+    protected void connect(SocketAddress address) throws IOException {
+        logger.fine("Connecting to: "+address);
+        // Create a non-blocking socket channel
+        SocketChannel socketChannel = SocketChannel.open();
+        socketChannel.socket().setReuseAddress(true);
+        socketChannel.configureBlocking(false);
+        // Establish the Connection
+        socketChannel.connect(address);
 
-	public void send(InetSocketAddress address, Object data) throws IOException{
+        // Queue a channel registration
+        synchronized(this.pendingChanges) {
+            pendingChanges.add(new ChangeRequest(socketChannel, ChangeRequest.REGISTER, SelectionKey.OP_CONNECT));
+        }
+        selector.wakeup();
+    }
+
+
+	public void send(SocketAddress address, Object data) throws IOException{
 		send(address, Converter.toBytes(data));
 	}
 
-	public void send(InetSocketAddress address, byte[] data){
-		send(getSocketChannel(address), data);
-	}
+    public void send(SocketAddress address, ResponseEvent handler, RequestResponseMessage data) throws IOException {
+        // Register the response handler
+        systemWorker.addResponseHandler(handler, data);
 
-	public void send(SocketChannel socket, ResponseEvent handler, ResponseRequestMessage data) throws IOException {
-		// Register the response handler
-		systemWorker.addResponseHandler(handler, data);
+        send(address, Converter.toBytes(data));
+    }
 
-		queueSend(socket,Converter.toBytes(data));
-	}
+    /**
+     * Queues a message to be sent
+     *
+     * @param   address the target address where the message should be sent
+     * @param   data    the data to send
+     */
+	public void send(SocketAddress address, byte[] data){
+        logger.finest("Sending Queue...");
+	    SocketChannel socket = getSocketChannel(address);
 
-	/**
-	 * This method sends data true the given socket
-	 * 
-	 * @param socket The socket
-	 * @param data The data to send
-	 */
-	public void send(SocketChannel socket, byte[] data) {
-		queueSend(socket,data);
-	}
-
-	/**
-	 * Queues the message to be sent and wakeups the selector
-	 * 
-	 * @param socket The socet to send the message thrue
-	 * @param data The data to send
-	 */
-	protected void queueSend(SocketChannel socket, byte[] data){
-		logger.finest("Sending Queue...");
 		// And queue the data we want written
 		synchronized (pendingWriteData) {
 			List<ByteBuffer> queue = pendingWriteData.get(socket);
 			if (queue == null) {
-				queue = new ArrayList<ByteBuffer>();
+				queue = new ArrayList<>();
 				pendingWriteData.put(socket, queue);
 			}
-			//encrypts
-			if(encrypter != null) 
-				queue.add(ByteBuffer.wrap(encrypter.encrypt(data)));
-			else queue.add(ByteBuffer.wrap(data));		
+			queue.add(ByteBuffer.wrap(data));
 		}
 		// Changing the key state to write 
 		synchronized (pendingChanges) {
 			// Indicate we want the interest ops set changed
 			pendingChanges.add(new ChangeRequest(socket, ChangeRequest.CHANGEOPS, SelectionKey.OP_WRITE));
 		}
-		logger.finest("selector.wakeup();");
 		// Finally, wake up our selecting thread so it can make the required changes
 		selector.wakeup();
 	}
 
+
+
+
+
 	public void run() {
-		logger.fine("NioNetwork Started!!!");
+		logger.fine("NioNetwork Started.");
 		while (true) {
 			try {
-				// Process any pending changes
+				// Handle any pending changes
 				synchronized (pendingChanges) {
 					Iterator<ChangeRequest> changes = pendingChanges.iterator();
 					while (changes.hasNext()) {
@@ -200,16 +191,16 @@ public abstract class NioNetwork implements Runnable {
 					pendingChanges.clear();
 				}
 
-				// Wait for an event one of the registered channels
+				// Wait for an event from one of the channels
 				selector.select();
 				logger.finest("selector is awake");
 
 				// Iterate over the set of keys for which events are available
-				Iterator<SelectionKey> selectedKeys = selector.selectedKeys().iterator();
-				while (selectedKeys.hasNext()) {
-					SelectionKey key = (SelectionKey) selectedKeys.next();
-					selectedKeys.remove();
-					logger.finest("KeyOP: "+key.interestOps()+"	isAcceptable: "+SelectionKey.OP_ACCEPT+" isConnectable: "+SelectionKey.OP_CONNECT+" isWritable: "+SelectionKey.OP_WRITE+" isReadable: "+SelectionKey.OP_READ);
+                Iterator<SelectionKey> selectedKeys = selector.selectedKeys().iterator();
+                while (selectedKeys.hasNext()) {
+                    SelectionKey key = selectedKeys.next();
+                    selectedKeys.remove();
+					logger.finest("KeyOP: "+key.interestOps()+"	isAcceptable: "+SelectionKey.OP_ACCEPT+" isConnectible: "+SelectionKey.OP_CONNECT+" isWritable: "+SelectionKey.OP_WRITE+" isReadable: "+SelectionKey.OP_READ);
 
 					if (key.isValid()) {
 						// Check what event is available and deal with it
@@ -218,8 +209,8 @@ public abstract class NioNetwork implements Runnable {
 							accept(key);
 						}
 						else if (key.isConnectable()) {
-							logger.finest("Finnishing Connection!!");
-							finishConnection(key);
+							logger.finest("Establishing Connection!!");
+							establishConnection(key);
 						}
 						else if (key.isWritable()) {
 							logger.finest("Writing");
@@ -238,7 +229,7 @@ public abstract class NioNetwork implements Runnable {
 	}
 
 	/**
-	 * Server
+	 * Handle an accept event from a remote host. Channel can only be a server socket.
 	 */
 	private void accept(SelectionKey key) throws IOException {
 		// For an accept to be pending the channel must be a server socket channel.
@@ -254,15 +245,67 @@ public abstract class NioNetwork implements Runnable {
 		socketChannel.register(selector, SelectionKey.OP_READ);
 
 		// adds the client to the clients list
-		InetSocketAddress remoteAdr = (InetSocketAddress) socketChannel.socket().getRemoteSocketAddress();
-		if(!clients.containsValue(remoteAdr)){
-			clients.put(remoteAdr, new ClientData(socketChannel));
-			logger.fine("New Connection("+remoteAdr+")!!! Count: "+clients.size());
-		}
+        registerSocketChannel(socketChannel);
+        logger.fine("New Connection("+socketChannel.getRemoteAddress()+")!!! Count: "+clients.size());
 	}
 
+    /**
+     * Finnish an ongoing remote connection establishment procedure
+     */
+    private void establishConnection(SelectionKey key){
+        SocketChannel socketChannel = (SocketChannel) key.channel();
+
+        try {
+            // Finalize/Finish the connection.
+            socketChannel.finishConnect();
+
+            // Register an interest in writing on this channel
+            key.interestOps(SelectionKey.OP_WRITE);
+
+            registerSocketChannel(socketChannel);
+            logger.fine("Connection established("+socketChannel.getRemoteAddress()+")");
+        } catch (IOException e) {
+            // Cancel the channel's registration with our selector
+            e.printStackTrace();
+            key.cancel();
+        }
+    }
+
+
+    /**
+     * Writes data pending message into a specific socket defined by the key
+     */
+    private void write(SelectionKey key) throws IOException {
+        SocketChannel socketChannel = (SocketChannel) key.channel();
+
+        synchronized (pendingWriteData) {
+            List<ByteBuffer> queue = pendingWriteData.get(socketChannel);
+            if(queue == null){
+                queue = new ArrayList<>();
+                pendingWriteData.put(socketChannel, queue);
+            }
+
+            // Write until there's no more data ...
+            while (!queue.isEmpty()) {
+                ByteBuffer buf = queue.get(0);
+                socketChannel.write(buf);
+                if (buf.remaining() > 0) {
+                    logger.finest("Write Buffer Full!");
+                    break;
+                }
+                queue.remove(0);
+            }
+
+            if (queue.isEmpty()) {
+                // All data written, change selector interest
+                logger.finest("No more Data to write!");
+                key.interestOps(SelectionKey.OP_READ);
+            }
+        }
+    }
+
 	/**
-	 * Client and Server
+	 * Handle a read event from a socket specified by the key.
 	 */
 	private void read(SelectionKey key) throws IOException {
 		SocketChannel socketChannel = (SocketChannel) key.channel();
@@ -281,12 +324,9 @@ public abstract class NioNetwork implements Runnable {
 			key.cancel();
 			socketChannel.close();
 			clients.remove(remoteAdr);
-			pendingReadData.remove(socketChannel);
 			pendingWriteData.remove(socketChannel);
-			logger.fine("Connection Forced Close("+remoteAdr+")!!! Connection Count: "+clients.size());
-			if(type == NetworkType.CLIENT) 
-				throw new IOException("Server Closed The Connection!!!");
-			return;
+			logger.fine("Connection forcibly closed("+remoteAdr+")! Remaining connections: "+clients.size());
+			throw new IOException("Remote forcibly closed the connection");
 		}
 
 		if (numRead == -1) {
@@ -295,169 +335,80 @@ public abstract class NioNetwork implements Runnable {
 			key.channel().close();
 			key.cancel();
 			clients.remove(remoteAdr);
-			pendingReadData.remove(socketChannel);
 			pendingWriteData.remove(socketChannel);
-			logger.fine("Connection Close("+remoteAdr+")!!! Connection Count: "+clients.size());
-			if(type == NetworkType.CLIENT) 
-				throw new IOException("Server Closed The Connection!!!");
-			return;
+			logger.fine("Connection Closed("+remoteAdr+")! Remaining connections: "+clients.size());
+            throw new IOException("Remote closed the connection");
 		}
 
-		// Make a correctly sized copy of the data before handing it
-		// to the client
+		// Make a correctly sized copy of the data before handing it to the client
 		byte[] rspByteData = new byte[numRead];
 		System.arraycopy(readBuffer.array(), 0, rspByteData, 0, numRead);
-		if(encrypter != null)// Encryption
-			rspByteData = encrypter.decrypt(rspByteData);
-		
-		// Message Count 1m: 36750
-		// Message Count 1s: 612
-		if(!pendingReadData.containsKey(socketChannel)){
-			pendingReadData.put(socketChannel, new DynamicByteArrayStream());
-		}
-		DynamicByteArrayStream dynBuf = pendingReadData.get(socketChannel);
-		dynBuf.append(rspByteData);
-		 
-		
-		Object rspData = null;		
+
 		try{
-			//rspData = Converter.toObject(rspByteData);
-			rspData = Converter.toObject(dynBuf);
-			handleRecivedMessage(socketChannel, rspData);
-			dynBuf.clear();
+            Object rspData = Converter.toObject(rspByteData);
+			handleReceivedMessage(socketChannel, rspData);
 		}catch(Exception e){
 			e.printStackTrace();
-			dynBuf.reset();
 		}
 	}
 
-	/**
-	 * Client and Server
-	 */
-	private void write(SelectionKey key) throws IOException {
-		SocketChannel socketChannel = (SocketChannel) key.channel();
 
-		synchronized (pendingWriteData) {
-			List<ByteBuffer> queue = pendingWriteData.get(socketChannel);
-			if(queue == null){
-				queue = new ArrayList<ByteBuffer>();
-				pendingWriteData.put(socketChannel, queue);
-			}
+	private void handleReceivedMessage(SocketChannel socketChannel, Object rspData){
+		logger.finer("Handling incoming message...");
 
-			// Write until there's not more data ...
-			while (!queue.isEmpty()) {
-				ByteBuffer buf = queue.get(0);
-				socketChannel.write(buf);
-				if (buf.remaining() > 0) {
-					// ... or the socket's buffer fills up
-					logger.finest("Write Buffer Full!!");
-					break;
-				}
-				queue.remove(0);
-			}
-
-			if (queue.isEmpty()) {
-				// We wrote away all data, so we're no longer interested
-				// in writing on this socket. Switch back to waiting for
-				// data.
-				logger.finest("No more Data to write!!");
-				key.interestOps(SelectionKey.OP_READ);
-			}
-		}
-	}
-
-	private void handleRecivedMessage(SocketChannel socketChannel, Object rspData){
-		logger.finer("Handling incomming message...");
-		
-		if(rspData instanceof SystemMessage){
-			if(systemWorker != null){
-				logger.finest("System Message!!!");
-				systemWorker.processData(this, socketChannel, rspData);
-			}
-			else{
-				logger.finer("Unhandled System Message!!!");
-			}
-		}
-		else{
-			// Hand the data off to our worker thread
-			if(worker != null){
-				logger.finest("Worker Message!!!");
-				worker.processData(this, socketChannel, rspData);
-			}
-			else{
-				logger.fine("Unhandled Worker Message!!!");
-			}
-		}
-	}
-
-	/**
-	 * Initializes a socket to a server
-	 */
-	protected SocketChannel initiateConnection(InetSocketAddress address) throws IOException {
-		// Create a non-blocking socket channel
-		SocketChannel socketChannel = SocketChannel.open();
-		socketChannel.socket().setReuseAddress(true);
-		socketChannel.configureBlocking(false);
-		logger.fine("Connecting to: "+address);
-
-		// Kick off connection establishment
-		socketChannel.connect(address);
-
-		// Queue a channel registration since the caller is not the 
-		// selecting thread. As part of the registration we'll register
-		// an interest in connection events. These are raised when a channel
-		// is ready to complete connection establishment.
-		synchronized(this.pendingChanges) {
-			pendingChanges.add(new ChangeRequest(socketChannel, ChangeRequest.REGISTER, SelectionKey.OP_CONNECT));
-		}
-
-		return socketChannel;
-	}
-
-	protected SocketChannel getSocketChannel(InetSocketAddress address){
-		return clients.get(address).getSocketChannel();
-	}
-
-	/**
-	 * Client
-	 */
-	private void finishConnection(SelectionKey key){
-		SocketChannel socketChannel = (SocketChannel) key.channel();
-
-		// Finish the connection. If the connection operation failed
-		// this will raise an IOException.
 		try {
-			socketChannel.finishConnect();
-		} catch (IOException e) {
-			// Cancel the channel's registration with our selector
-			e.printStackTrace();
-			key.cancel();
-			return;
-		}
-
-		// Register an interest in writing on this channel
-		key.interestOps(SelectionKey.OP_WRITE);
+            if (rspData instanceof SystemMessage) {
+                if (systemWorker != null) {
+                    logger.finest("Handling system message");
+                    systemWorker.processData(this, socketChannel.getRemoteAddress(), rspData);
+                } else {
+                    logger.finer("Unhandled system message!");
+                }
+            } else {
+                // Hand the data off to our worker thread
+                if (worker != null) {
+                    logger.finest("Handling generic worker message");
+                    worker.processData(this, socketChannel.getRemoteAddress(), rspData);
+                } else {
+                    logger.fine("Unhandled message!");
+                }
+            }
+        }catch (IOException e){
+		    e.printStackTrace();
+        }
 	}
 
-	/**
-	 * Client
-	 * @throws IOException 
-	 */
-	protected void closeConnection(SocketChannel socketChannel) throws IOException{		
+
+    private ClientData registerSocketChannel(SocketChannel socket){
+        InetSocketAddress remoteAdr = (InetSocketAddress) socket.socket().getRemoteSocketAddress();
+        if (!clients.containsKey(remoteAdr)) {
+            ClientData clientData = new ClientData(socket);
+            clients.put(remoteAdr, clientData);
+        }
+        return clients.get(remoteAdr);
+    }
+    private SocketChannel getSocketChannel(SocketAddress address){
+        return clients.get(address).getSocketChannel();
+    }
+
+
+
+
+    /**
+     * Close a ongoing connection
+     */
+    protected void closeConnection(InetSocketAddress address) throws IOException{
+        closeConnection(getSocketChannel(address));
+    }
+
+	private void closeConnection(SocketChannel socketChannel) throws IOException{
 		socketChannel.close();
 		socketChannel.keyFor(selector).cancel();
 	}
 
-	/**
-	 * Client
-	 * @throws IOException 
-	 */
-	protected void closeConnection(InetSocketAddress address) throws IOException{		
-		closeConnection(getSocketChannel(address));
-	}
 
-	/*
-	public void close() throws IOException{
+
+	/*public void close() throws IOException{
 		if(serverChannel != null){
 			serverChannel.close();
 			serverChannel.keyFor(selector).cancel();
@@ -465,7 +416,4 @@ public abstract class NioNetwork implements Runnable {
 		selector.close();
 	}*/
 
-	public NetworkType getType(){
-		return type;
-	}
 }

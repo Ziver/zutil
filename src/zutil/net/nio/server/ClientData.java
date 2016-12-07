@@ -30,11 +30,13 @@ import java.nio.channels.SocketChannel;
 public class ClientData {
 	private SocketChannel socketChannel;
 	private long lastMessageReceived;
-	
+
+
 	public ClientData(SocketChannel socketChannel){
 		this.socketChannel = socketChannel;
 	}
-	
+
+
 	public SocketChannel getSocketChannel(){
 		return socketChannel;
 	}
