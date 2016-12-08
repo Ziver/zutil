@@ -25,12 +25,11 @@
 package zutil.net.nio;
 
 import zutil.net.nio.message.Message;
-import zutil.net.nio.message.RequestResponseMessage;
-import zutil.net.nio.response.ResponseEvent;
 
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.net.SocketAddress;
 import java.nio.channels.Selector;
 import java.nio.channels.spi.SelectorProvider;
 
@@ -55,21 +54,24 @@ public class NioClient extends NioNetwork{
 	}
 	
 	/**
-	 * Sends a Message to the default server
+	 * Sends a Message to the connected server
 	 * 
 	 * @param   data    the data to be sent
 	 */
 	public void send(Message data) throws IOException {
 		send(remoteAddress, data);
 	}
-	
+
 	/**
-	 * This method is for the Client to send a message to the server
-	 * 
-	 * @param   handler the response handler
-	 * @param   data    the data to send
+	 * Sends a Message to the connected server
+	 *
+	 * @param   data    the data to be sent
 	 */
-	public void send(ResponseEvent handler, RequestResponseMessage data) throws IOException {
-		send(remoteAddress, handler, data);
+	public void send(byte[] data) throws IOException {
+		send(remoteAddress, data);
 	}
+
+	public SocketAddress getRemoteAddress(){
+	    return remoteAddress;
+    }
 }

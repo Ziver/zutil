@@ -26,6 +26,7 @@ package zutil.net.nio;
 
 import zutil.log.CompactLogFormatter;
 import zutil.log.LogUtil;
+import zutil.net.nio.worker.StandardWorker;
 
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
@@ -36,10 +37,11 @@ import java.util.logging.Level;
 public class NetworkServerTest {
 	public static void main(String[] args) throws NoSuchAlgorithmException, InterruptedException {
 		try {
-			LogUtil.setGlobalLevel(Level.ALL);
+			//LogUtil.setGlobalLevel(Level.ALL);
 			LogUtil.setGlobalFormatter(new CompactLogFormatter());
 
 			NioServer server = new NioServer(6056);
+			server.setDefaultWorker(new StandardWorker(server));
 
 			while(true){
 			    Thread.sleep(1000);

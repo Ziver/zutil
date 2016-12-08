@@ -26,7 +26,7 @@ package zutil.log.net;
 
 import zutil.net.nio.message.Message;
 
-public class NetLogStatusMessage extends Message{
+public class NetLogStatusMessage implements Message{
 	private static final long serialVersionUID = 1L;
 	
 	public long totalMemory;

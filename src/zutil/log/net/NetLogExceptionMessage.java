@@ -28,7 +28,7 @@ import zutil.net.nio.message.Message;
 
 import java.util.logging.LogRecord;
 
-public class NetLogExceptionMessage extends Message {
+public class NetLogExceptionMessage implements Message {
 	private static final long serialVersionUID = 1L;
 	
 	private int    count;

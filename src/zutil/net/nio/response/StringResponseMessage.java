@@ -22,23 +22,33 @@
  * THE SOFTWARE.
  */
 
-package zutil.net.nio.worker;
-
-import zutil.net.nio.NioNetwork;
-
-import java.net.SocketAddress;
-import java.nio.channels.SocketChannel;
+package zutil.net.nio.response;
 
 
-public class WorkerEventData {
-	public NioNetwork network;
-	public SocketAddress remoteAddress;
-	public Object data;
+import zutil.net.nio.message.EchoMessage;
+
+public class StringResponseMessage extends EchoMessage implements RequestResponseMessage {
+	private static final long serialVersionUID = 1L;
+
+	private long responseId;
+	private String msg;
 
 
-	public WorkerEventData(NioNetwork server, SocketAddress remoteAddress, Object data) {
-		this.network = server;
-		this.remoteAddress = remoteAddress;
-		this.data = data;
+	public StringResponseMessage(String msg){
+		this.msg = msg;
+		responseId = (long)(Math.random()*Long.MAX_VALUE);
+	}
+
+
+    public long getResponseId() {
+        return responseId;
+    }
+
+	public void setString(String msg){
+		this.msg = msg;
+	}
+	
+	public String toString(){
+		return msg;
 	}
 }

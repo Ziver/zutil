@@ -25,18 +25,18 @@
 package zutil.net.nio.message;
 
 /**
- * The reciver will echo out this message to the sender
+ * The receiver will echo out this message to the sender
  * 
  * @author Ziver
  */
-public abstract class EchoMessage extends Message implements SystemMessage{
+public abstract class EchoMessage implements Message{
 	private static final long serialVersionUID = 1L;
 	
 	private boolean echo = false;
 
 
 	/**
-	 * @return true if this message is an echo of an original message
+	 * @return true if this message is an echo/copy of an original message
 	 */
 	public boolean echo() {
 		return echo;

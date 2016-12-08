@@ -26,7 +26,6 @@ package zutil.net.nio.worker.grid;
 
 import zutil.io.MultiPrintStream;
 import zutil.net.nio.NioClient;
-import zutil.net.nio.message.GridMessage;
 import zutil.net.nio.worker.ThreadedEventWorker;
 import zutil.net.nio.worker.WorkerEventData;
 

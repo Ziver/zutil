@@ -25,13 +25,9 @@
 package zutil.net.nio.worker.sync;
 
 import zutil.log.LogUtil;
-import zutil.net.nio.NioNetwork;
-import zutil.net.nio.message.Message;
-import zutil.net.nio.message.SyncMessage;
 import zutil.net.nio.worker.ThreadedEventWorker;
 import zutil.net.nio.worker.WorkerEventData;
 
-import java.nio.channels.SocketChannel;
 import java.util.HashMap;
 import java.util.logging.Logger;
 

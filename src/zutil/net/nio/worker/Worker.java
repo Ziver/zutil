@@ -32,8 +32,9 @@ import java.util.List;
 
 
 public abstract class Worker {
-	private LinkedList<WorkerEventData> queue = new LinkedList<WorkerEventData>();
-	
+	private LinkedList<WorkerEventData> queue = new LinkedList<>();
+
+
 	public void processData(NioNetwork server, SocketAddress remote, Object data) {
 		synchronized(queue) {
 			queue.add(new WorkerEventData(server, remote, data));
@@ -50,7 +51,7 @@ public abstract class Worker {
 	}
 	
 	/**
-	 * Polls a event from the list or waits until there is a event
+	 * Polls a event from the list or blocks until there is a event available
      *
 	 * @return the next event
 	 */

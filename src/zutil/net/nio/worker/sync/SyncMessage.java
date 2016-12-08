@@ -22,23 +22,21 @@
  * THE SOFTWARE.
  */
 
-package zutil.net.nio.worker;
+package zutil.net.nio.worker.sync;
 
-import zutil.net.nio.NioNetwork;
+import zutil.net.nio.message.Message;
 
-import java.net.SocketAddress;
-import java.nio.channels.SocketChannel;
-
-
-public class WorkerEventData {
-	public NioNetwork network;
-	public SocketAddress remoteAddress;
-	public Object data;
-
-
-	public WorkerEventData(NioNetwork server, SocketAddress remoteAddress, Object data) {
-		this.network = server;
-		this.remoteAddress = remoteAddress;
-		this.data = data;
+public class SyncMessage implements Message {
+	private static final long serialVersionUID = 1L;
+	public enum MessageType {
+		REQUEST_ID,
+		NEW,
+		REMOVE,
+		SYNC
 	}
+	
+	// type of message
+	public MessageType type;
+	// id of the Object
+	public String id;
 }

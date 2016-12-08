@@ -30,7 +30,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.logging.LogRecord;
 
-public class NetLogMessage extends Message {
+public class NetLogMessage implements Message {
 	private static final long serialVersionUID = 1L;
     private static final SimpleDateFormat dataFormat =
             new SimpleDateFormat("yyyy--MM-dd HH:mm:ss");
@@ -41,7 +41,8 @@ public class NetLogMessage extends Message {
 	private String className;
 	private String methodName;
 	private String log;
-	
+
+
 	public NetLogMessage(String level, long timestamp, String log){
 		this.level = level;
 		this.timestamp = timestamp;

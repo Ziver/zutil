@@ -22,33 +22,20 @@
  * THE SOFTWARE.
  */
 
-package zutil.net.nio.message;
+package zutil.net.nio.response;
 
+/**
+ * This interface defines a request response flow where a request
+ * message is sent to a server and a registered handler will handle the message.
+ * 
+ * @author Ziver
+ *
+ */
+public interface RequestResponseMessage {
 
-public class StringResponseMessage extends EchoMessage implements RequestResponseMessage {
-	private static final long serialVersionUID = 1L;
-
-	private long responseId;
-	private String msg;
+	/**
+	 * @return a unique id for this message
+	 */
+	long getResponseId();
 	
-	public StringResponseMessage(String msg){
-		this.msg = msg;
-		responseId = (long)(Math.random()*Long.MAX_VALUE);
-	}
-	
-	public String getString(){
-		return msg;
-	}
-	
-	public void setString(String msg){
-		this.msg = msg;
-	}
-	
-	public String toString(){
-		return getString();
-	}
-
-	public long getResponseId() {
-		return responseId;
-	}
 }

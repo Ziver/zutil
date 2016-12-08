@@ -161,30 +161,24 @@ public class Converter {
 	 * @return the associated object.
 	 */
 	public static Object toObject(byte[] bytes) throws Exception{
-		Object object = null;
-
+		Object object;
 		ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(bytes));
 		object = ois.readObject();
 		ois.close();
 
 		return object;
 	}
-	
+
 	/** 
-	 * Converts an array of bytes back to its constituent object. The 
-	 * input array is assumed to have been created from the original object.
+	 * Reads the first Java Serialized object from a stream.
 	 * 
-	 * @param   bytes   the byte array to convert.
-	 * @return the associated object.
+	 * @param   input   the stream to read from
+	 * @return an parsed object.
 	 */
-	public static Object toObject(DynamicByteArrayStream bytes) throws Exception{
-		Object object = null;
-
-		ObjectInputStream ois = new ObjectInputStream(bytes);
-		object = ois.readObject();
-		ois.close();
-
-		return object;
+	public static Object toObject(InputStream input) throws Exception{
+		ObjectInputStream ois = new ObjectInputStream(input);
+		// Don't close the stream as it will close the underlying stream.
+		return ois.readObject();
 	}
 
 

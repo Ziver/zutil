@@ -24,42 +24,35 @@
 
 package zutil.net.nio.response;
 
-import java.util.LinkedList;
-import java.util.List;
+// TODO: this class has a strange structure, should be refactored
+public abstract class ResponseHandler {
+	private Object rsp = null;
 
-
-public abstract class ResponseHandler implements Runnable{
-	private List<ResponseEvent> queue = new LinkedList<ResponseEvent>();
-	
-	public ResponseHandler(){
-		
-	}
-
-	public synchronized void addResponseEvent(ResponseEvent re){
-		queue.add(re);
+	public synchronized void handleResponse(Object rsp) {
+		this.rsp = rsp;
+        responseEvent(rsp);
 		notify();
 	}
-	
-	public synchronized void removeResponseEvent(ResponseEvent re){
-		queue.remove(re);
-	}
-	
-	public void run() {
-		while(true) {
+
+	/**
+	 * Blocks the calling thread until there is a response
+	 */
+	public void waitForResponse() {
+		while(!gotResponse()) {
 			try {
-				this.wait();
+			    synchronized (this) {
+                    this.wait();
+                }
 			} catch (InterruptedException e) {}
-			
-			update();
 		}
 	}
 
-	public synchronized void update(){
-		while(!queue.isEmpty()){
-			queue.get(0).handleResponse();
-			if(queue.get(0).gotResponse()){
-				queue.remove(0);
-			}
-		}
+	/**
+	 * @return true if a response has been received
+	 */
+	public boolean gotResponse(){
+		return (rsp != null);
 	}
+
+	protected abstract void responseEvent(Object rsp);
 }

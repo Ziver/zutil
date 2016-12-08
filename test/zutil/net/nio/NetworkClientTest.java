@@ -26,8 +26,9 @@ package zutil.net.nio;
 
 import zutil.log.CompactLogFormatter;
 import zutil.log.LogUtil;
-import zutil.net.nio.message.StringResponseMessage;
-import zutil.net.nio.response.PrintRsp;
+import zutil.net.nio.response.StringResponseMessage;
+import zutil.net.nio.response.PrintResponseHandler;
+import zutil.net.nio.worker.StandardWorker;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -39,21 +40,27 @@ import java.util.logging.Level;
 public class NetworkClientTest {
 	public static void main(String[] args) throws NoSuchAlgorithmException, InterruptedException {
 		try {
-            LogUtil.setGlobalLevel(Level.ALL);
+            //LogUtil.setGlobalLevel(Level.ALL);
             LogUtil.setGlobalFormatter(new CompactLogFormatter());
 
             int count = 0;
 			long time = System.currentTimeMillis()+1000*60;
 			NioClient client = new NioClient(InetAddress.getByName("localhost"), 6056);
+			StandardWorker worker = new StandardWorker(client);
+			client.setDefaultWorker(worker);
+
             Thread.sleep(1000);
 			while(time > System.currentTimeMillis()){
-				PrintRsp handler = new PrintRsp();			
-				client.send(handler, new StringResponseMessage("StringResponseMessage: "+count));
+				PrintResponseHandler handler = new PrintResponseHandler();
+				worker.send(client.getRemoteAddress(),
+                        new StringResponseMessage("StringResponseMessage: "+count),
+                        handler);
 				handler.waitForResponse();
 				//Thread.sleep(100);
 				//System.out.println("sending..");
 				count++;
 			}
+			client.close();
 			
 			System.out.println("Message Count 1m: "+count);
 			System.out.println("Message Count 1s: "+count/60);

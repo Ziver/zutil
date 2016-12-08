@@ -26,12 +26,8 @@ package zutil.net.nio;
 
 import zutil.converter.Converter;
 import zutil.log.LogUtil;
-import zutil.net.nio.message.RequestResponseMessage;
-import zutil.net.nio.message.SystemMessage;
-import zutil.net.nio.response.ResponseEvent;
 import zutil.net.nio.server.ChangeRequest;
 import zutil.net.nio.server.ClientData;
-import zutil.net.nio.worker.SystemWorker;
 import zutil.net.nio.worker.Worker;
 
 import java.io.IOException;
@@ -57,7 +53,6 @@ public abstract class NioNetwork implements Runnable {
 	// The buffer into which we'll read data when it's available
 	private ByteBuffer readBuffer = ByteBuffer.allocate(8192);
 	protected Worker worker;
-	protected SystemWorker systemWorker;
 
 	// This map contains all the clients that are connected
 	protected Map<InetSocketAddress, ClientData> clients = new HashMap<InetSocketAddress, ClientData>();
@@ -85,7 +80,6 @@ public abstract class NioNetwork implements Runnable {
 	    this.localAddress = localAddress;
 	    // init selector
         this.selector = initSelector();
-        this.systemWorker = new SystemWorker(this);
         // init traffic thread
         new Thread(this).start();
     }
@@ -128,13 +122,6 @@ public abstract class NioNetwork implements Runnable {
 		send(address, Converter.toBytes(data));
 	}
 
-    public void send(SocketAddress address, ResponseEvent handler, RequestResponseMessage data) throws IOException {
-        // Register the response handler
-        systemWorker.addResponseHandler(handler, data);
-
-        send(address, Converter.toBytes(data));
-    }
-
     /**
      * Queues a message to be sent
      *
@@ -168,8 +155,8 @@ public abstract class NioNetwork implements Runnable {
 
 
 	public void run() {
-		logger.fine("NioNetwork Started.");
-		while (true) {
+		logger.info("NioNetwork Started.");
+		while (selector.isOpen()) {
 			try {
 				// Handle any pending changes
 				synchronized (pendingChanges) {
@@ -196,36 +183,36 @@ public abstract class NioNetwork implements Runnable {
 				logger.finest("selector is awake");
 
 				// Iterate over the set of keys for which events are available
-                Iterator<SelectionKey> selectedKeys = selector.selectedKeys().iterator();
-                while (selectedKeys.hasNext()) {
-                    SelectionKey key = selectedKeys.next();
-                    selectedKeys.remove();
-					logger.finest("KeyOP: "+key.interestOps()+"	isAcceptable: "+SelectionKey.OP_ACCEPT+" isConnectible: "+SelectionKey.OP_CONNECT+" isWritable: "+SelectionKey.OP_WRITE+" isReadable: "+SelectionKey.OP_READ);
+                if (selector.isOpen()) {
+                    Iterator<SelectionKey> selectedKeys = selector.selectedKeys().iterator();
+                    while (selectedKeys.hasNext()) {
+                        SelectionKey key = selectedKeys.next();
+                        selectedKeys.remove();
+                        logger.finest("KeyOP: " + key.interestOps() + "	isAcceptable: " + SelectionKey.OP_ACCEPT + " isConnectible: " + SelectionKey.OP_CONNECT + " isWritable: " + SelectionKey.OP_WRITE + " isReadable: " + SelectionKey.OP_READ);
 
-					if (key.isValid()) {
-						// Check what event is available and deal with it
-						if (key.isAcceptable()) {
-							logger.finest("Accepting Connection!!");
-							accept(key);
-						}
-						else if (key.isConnectable()) {
-							logger.finest("Establishing Connection!!");
-							establishConnection(key);
-						}
-						else if (key.isWritable()) {
-							logger.finest("Writing");
-							write(key);
-						}
-						else if (key.isReadable()) {
-							logger.finest("Reading");
-							read(key);
-						} 
-					}
-				}
+                        if (key.isValid()) {
+                            // Check what event is available and deal with it
+                            if (key.isAcceptable()) {
+                                logger.finest("Accepting Connection!!");
+                                accept(key);
+                            } else if (key.isConnectable()) {
+                                logger.finest("Establishing Connection!!");
+                                establishConnection(key);
+                            } else if (key.isWritable()) {
+                                logger.finest("Writing");
+                                write(key);
+                            } else if (key.isReadable()) {
+                                logger.finest("Reading");
+                                read(key);
+                            }
+                        }
+                    }
+                }
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
 		}
+		logger.info("Shutting down NioNetwork");
 	}
 
 	/**
@@ -309,7 +296,7 @@ public abstract class NioNetwork implements Runnable {
 	 */
 	private void read(SelectionKey key) throws IOException {
 		SocketChannel socketChannel = (SocketChannel) key.channel();
-		InetSocketAddress remoteAdr = (InetSocketAddress) socketChannel.socket().getRemoteSocketAddress();
+		SocketAddress remoteAdr = socketChannel.socket().getRemoteSocketAddress();
 
 		// Clear out our read buffer so it's ready for new data
 		readBuffer.clear();
@@ -341,42 +328,24 @@ public abstract class NioNetwork implements Runnable {
 		}
 
 		// Make a correctly sized copy of the data before handing it to the client
-		byte[] rspByteData = new byte[numRead];
-		System.arraycopy(readBuffer.array(), 0, rspByteData, 0, numRead);
+		//byte[] rspByteData = new byte[numRead];
+		//System.arraycopy(readBuffer.array(), 0, rspByteData, 0, numRead);
 
 		try{
-            Object rspData = Converter.toObject(rspByteData);
-			handleReceivedMessage(socketChannel, rspData);
+            Object rspData = Converter.toObject(readBuffer.array());
+
+            // Hand the data off to our worker thread
+            if (worker != null) {
+                logger.finer("Handling incoming message...");
+                worker.processData(this, socketChannel.getRemoteAddress(), rspData);
+            } else {
+                logger.fine("No worker set, message unhandled!");
+            }
 		}catch(Exception e){
 			e.printStackTrace();
 		}
 	}
 
-
-	private void handleReceivedMessage(SocketChannel socketChannel, Object rspData){
-		logger.finer("Handling incoming message...");
-
-		try {
-            if (rspData instanceof SystemMessage) {
-                if (systemWorker != null) {
-                    logger.finest("Handling system message");
-                    systemWorker.processData(this, socketChannel.getRemoteAddress(), rspData);
-                } else {
-                    logger.finer("Unhandled system message!");
-                }
-            } else {
-                // Hand the data off to our worker thread
-                if (worker != null) {
-                    logger.finest("Handling generic worker message");
-                    worker.processData(this, socketChannel.getRemoteAddress(), rspData);
-                } else {
-                    logger.fine("Unhandled message!");
-                }
-            }
-        }catch (IOException e){
-		    e.printStackTrace();
-        }
-	}
 
 
     private ClientData registerSocketChannel(SocketChannel socket){
@@ -395,7 +364,7 @@ public abstract class NioNetwork implements Runnable {
 
 
     /**
-     * Close a ongoing connection
+     * Close a specific ongoing connection
      */
     protected void closeConnection(InetSocketAddress address) throws IOException{
         closeConnection(getSocketChannel(address));
@@ -406,14 +375,17 @@ public abstract class NioNetwork implements Runnable {
 		socketChannel.keyFor(selector).cancel();
 	}
 
-
-
-	/*public void close() throws IOException{
+    /**
+     * Close all connections
+     */
+	public void close() throws IOException{
 		if(serverChannel != null){
 			serverChannel.close();
 			serverChannel.keyFor(selector).cancel();
 		}
-		selector.close();
-	}*/
-
+        clients.clear();
+        pendingChanges.clear();
+        pendingWriteData.clear();
+        selector.close();
+	}
 }

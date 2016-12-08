@@ -24,8 +24,6 @@
 
 package zutil.net.nio.worker.sync;
 
-import zutil.net.nio.message.SyncMessage;
-
 public abstract class ObjectSync {
 	public String id;
 
