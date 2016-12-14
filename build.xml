@@ -8,11 +8,11 @@
 	<property name="srcDir" value="${gitRoot}/src" />
 	<property name="testDir" value="${gitRoot}/test" />
 	<property name="libDir" value="${gitRoot}/lib" />
-    <property name="buildRoot" value="${gitRoot}/build" />
-	<property name="buildDir" value="${buildRoot}/production" />
-    <property name="buildTestDir" value="${buildRoot}/test" />
-    <property name="releaseDir" value="${buildRoot}/release" />
-    <property name="reportsDir" value="${buildRoot}/reports" />
+    <property name="outputRoot" value="${gitRoot}/build" />
+	<property name="buildDir" value="${outputRoot}/production" />
+    <property name="buildTestDir" value="${outputRoot}/test" />
+    <property name="releaseDir" value="${outputRoot}/release" />
+    <property name="reportsDir" value="${outputRoot}/reports" />
 
 	<!--define standard arduments for javac-->
 	<presetdef name="javac">
@@ -56,15 +56,11 @@
 	<!--clean all build paths-->
 	<target name="clean">
 		<delete includeemptydirs="true" failonerror="false">
-			<fileset dir="${buildRoot}" includes="**/*"/>
+			<fileset dir="${outputRoot}" includes="**/*"/>
 		</delete>
 	</target>
 
 	<!--build product code-->
-    <target name="release" depends="build">
-        <jar destfile="${releaseDir}/Zutil.jar" basedir="${buildDir}" />
-    </target>
-
 	<target name="build">
 		<mkdir dir="${buildDir}" />
 		<javac target="1.7" srcdir="${srcDir}" destdir="${buildDir}" debug="yes" debugLevel="lines,vars,source">
@@ -87,6 +83,10 @@
             <fileset dir="${testDir}"
                      excludes="**/*.java" />
         </copy>
+    </target>
+
+    <target name="package" depends="build">
+        <jar destfile="${releaseDir}/Zutil.jar" basedir="${buildDir}" />
     </target>
 		
 </project>
