@@ -1,6 +1,5 @@
 package zutil.net.http.page;
 
-import sun.net.www.HeaderParser;
 import zutil.Hasher;
 import zutil.log.LogUtil;
 import zutil.net.http.HttpHeader;

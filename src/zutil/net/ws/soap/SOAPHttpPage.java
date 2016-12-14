@@ -38,6 +38,7 @@ import zutil.net.http.HttpPage;
 import zutil.net.http.HttpPrintStream;
 import zutil.net.ws.*;
 import zutil.net.ws.WSReturnObject.WSValueName;
+import zutil.parser.Base64Encoder;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -325,7 +326,7 @@ public class SOAPHttpPage implements HttpPage{
 		if(byte[].class.isAssignableFrom(obj.getClass())){
 			Element valueE = root.addElement( elementName );
 			valueE.addAttribute("type", "xsd:"+ getSOAPClassName(obj.getClass()));
-			String tmp = new sun.misc.BASE64Encoder().encode((byte[])obj);
+			String tmp = Base64Encoder.encode((byte[])obj);
 			tmp = tmp.replaceAll("\\s", "");
 			valueE.setText(tmp);
 		}

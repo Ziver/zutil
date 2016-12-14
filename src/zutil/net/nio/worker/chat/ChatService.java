@@ -126,7 +126,7 @@ public class ChatService extends ThreadedEventWorker{
 	private void addRoom(String room){
 		if(!rooms.containsKey(room)){
 			logger.fine("New Chat Room: "+room);
-			rooms.put(room, new LinkedList<>());
+			rooms.put(room, new LinkedList<SocketAddress>());
 		}
 	}
 	
