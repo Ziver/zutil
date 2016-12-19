@@ -22,8 +22,15 @@ node {
 
 
     stage('Package') {
-         sh 'ant package'
-         archiveArtifacts artifacts: 'build/release/Zutil.jar', fingerprint: true
+        sh 'ant package'
+        archiveArtifacts artifacts: 'build/release/Zutil.jar', fingerprint: true
+
+        // Tag artifact
+        withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'f8e5f6c6-4adb-4ab2-bb5d-1c8535dff491',
+                                      usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
+            sh "git tag BUILD-" + env.BUILD_ID
+            sh "git push 'https://${USERNAME}:${PASSWORD}@repo.koc.se/hal.git' --tags"
+        }
     }
 
 
