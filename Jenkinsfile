@@ -1,6 +1,11 @@
 // Jenkinsfile (Pipeline Script)
 node {
+    // Select JDK8
+    env.JAVA_HOME = tool name: 'JDK8'
+    echo "JDK installation path is: ${env.JAVA_HOME}"
+
     checkout scm
+
 
     stage('Build') {
         sh 'ant clean'
