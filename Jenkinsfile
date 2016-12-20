@@ -33,13 +33,11 @@ node {
             sh "git push 'https://${USERNAME}:${PASSWORD}@${env.REPO_URL}' ${env.BUILD_NAME}"
         }
     }
-
-
-    //stage('Deploy') {
-    //    if (currentBuild.result == 'SUCCESS') {
-    //        input 'Deploy?', submitter 'Administrator'
-    //        sh 'ant deploy'
-    //    }
-    //}
 }
 
+//stage('Deploy') {
+//    input message: 'Deploy?', submitter: 'ziver'
+//    node {
+//        sh 'ant deploy'
+//    }
+//}
