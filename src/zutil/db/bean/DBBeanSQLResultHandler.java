@@ -172,7 +172,8 @@ public class DBBeanSQLResultHandler<T> implements SQLResultHandler<T>{
 				}
 			}
 
-            logger.info("DBBean GarbageCollector has cleared "+removed+" beans from cache.");
+			if (removed > 0)
+            	logger.info("DBBean GarbageCollector has cleared "+removed+" beans from cache.");
 		}
 	}
 	
