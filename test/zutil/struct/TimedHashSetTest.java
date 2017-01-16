@@ -50,7 +50,6 @@ public class TimedHashSetTest {
     public void tenMsTTL() throws InterruptedException {
         TimedHashSet set = new TimedHashSet(10);
         set.add(ENTRY);
-        Thread.sleep(1);
         assertTrue(set.contains(ENTRY));
         Thread.sleep(10);
         assertFalse(set.contains(ENTRY));
@@ -70,7 +69,7 @@ public class TimedHashSetTest {
         set.add(ENTRY);
         set.add(ENTRY2);
         assertEquals(2, set.size());
-        Thread.sleep(12);
+        Thread.sleep(20);
         assertEquals(2, set.size());
         assertEquals(2, set.garbageCollect());
         assertEquals(0, set.size());

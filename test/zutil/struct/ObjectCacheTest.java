@@ -97,7 +97,7 @@ public class ObjectCacheTest {
         cache.put(KEY, OBJECT);
         cache.put(KEY2, OBJECT2);
         assertEquals(2, cache.size());
-        Thread.sleep(12);
+        Thread.sleep(20);
         assertEquals(2, cache.size());
         assertEquals(2, cache.garbageCollect());
         assertEquals(0, cache.size());
