@@ -25,6 +25,7 @@
 package zutil.parser.json;
 
 import zutil.ClassUtil;
+import zutil.io.StringOutputStream;
 import zutil.parser.Base64Encoder;
 import zutil.parser.DataNode;
 import zutil.parser.DataNode.DataType;
@@ -52,7 +53,7 @@ public class JSONObjectOutputStream extends OutputStream implements ObjectOutput
     private JSONWriter out;
 
     private JSONObjectOutputStream() {
-        this.objectCache = new HashMap<Object, Integer>();
+        this.objectCache = new HashMap<>();
     }
     public JSONObjectOutputStream(OutputStream out) {
         this();
@@ -64,6 +65,21 @@ public class JSONObjectOutputStream extends OutputStream implements ObjectOutput
     }
 
 
+    /**
+     * @return a String containing the JSON representation of the Object
+     */
+    public static String toString(Object obj){
+        try {
+            StringOutputStream out = new StringOutputStream();
+            JSONObjectOutputStream writer = new JSONObjectOutputStream(out);
+            writer.writeObject(obj);
+            writer.close();
+            return out.toString();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
 
     public synchronized void writeObject(Object obj) throws IOException{
         try{

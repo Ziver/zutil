@@ -45,7 +45,7 @@ public class DBBeanSQLResultHandler<T> implements SQLResultHandler<T>{
 	public static final long CACHE_DATA_TTL = 1000*60*5; // 5 min in ms
 	/** A cache for detecting recursion **/
 	protected static Map<Class<?>, Map<Long,DBBeanCache>> cache =
-		new ConcurrentHashMap<Class<?>, Map<Long,DBBeanCache>>();
+		new ConcurrentHashMap<>();
 	private static Timer timer;
 
     static {
@@ -283,7 +283,7 @@ public class DBBeanSQLResultHandler<T> implements SQLResultHandler<T>{
 		} finally{
 			obj.processing_update = false;
 		}
-		
+
 		obj.postUpdateAction();
 	}
 
