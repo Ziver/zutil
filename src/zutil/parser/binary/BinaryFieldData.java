@@ -101,7 +101,7 @@ public class BinaryFieldData {
             else if (field.getType() == String.class)
                 field.set(obj, new String(ByteUtil.getReverseByteOrder(data), StandardCharsets.ISO_8859_1));
             else
-                throw new UnsupportedOperationException("Unsupported BinaryStruct field class: "+ field.getClass());
+                throw new UnsupportedOperationException("Unsupported BinaryStruct field class: "+ field.getType());
         } catch (IllegalAccessException e){
             e.printStackTrace();
         }

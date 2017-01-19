@@ -30,6 +30,9 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
+ * A interface that indicate that the implementing class can
+ * be serialized into a linear binary stream.
+ *
  * Created by Ziver on 2016-01-28.
  */
 public interface BinaryStruct {
@@ -47,7 +50,9 @@ public interface BinaryStruct {
     }
 
     /**
-     * Can be used for fields that are of variable length.
+     * Can be used for fields that are of variable length. This interface
+     * is only applicable for reading from a stream.
+     * TODO: Length must be manually set when writing.
      */
     @Retention(RetentionPolicy.RUNTIME)
     @Target(ElementType.FIELD)
@@ -56,8 +61,8 @@ public interface BinaryStruct {
         int index();
         /** The name of the field that will contain the length of the data to read. */
         String lengthField();
-        /** Defines the multiplier used on the lengthField to convert to length in bits which is used internally.
-         * Default value is 8. */
+        /** Defines the multiplier used on the lengthField parameter to convert the length in bits to
+         *  a user defined value. Default value is 8 (which converts length to nr of bytes). */
         int multiplier() default 8;
     }
 
