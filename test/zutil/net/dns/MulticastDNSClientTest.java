@@ -8,24 +8,24 @@ import java.io.IOException;
 import java.util.logging.Level;
 
 /**
- * Test class for MulticastDNSClient.
+ * Test class for MulticastDnsClient.
  *
  * Created by Ziver on 2016-04-26.
  */
-public class MulticastDNSClientTest {
+public class MulticastDnsClientTest {
 
     public static void main(String[]  args) throws IOException {
         LogUtil.setGlobalLevel(Level.ALL);
         LogUtil.setGlobalFormatter(new CompactLogFormatter());
 
-        MulticastDNSClient mdns = new MulticastDNSClient();
+        MulticastDnsClient mdns = new MulticastDnsClient();
         mdns.start();
         //mdns.sendProbe("appletv.local");
         //mdns.sendProbe("_services._dns-sd._udp.local");
         mdns.sendProbe("_googlecast._tcp.local");
-        mdns.setListener(new DNSResolutionListener() {
+        mdns.setListener(new DnsResolutionListener() {
             @Override
-            public void receivedResponse(DNSPacket packet) {
+            public void receivedResponse(DnsPacket packet) {
                 System.out.println("####### Received:");
                 MultiPrintStream.out.dump(packet,3);
             }

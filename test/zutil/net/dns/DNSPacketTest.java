@@ -34,17 +34,17 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
 import static org.junit.Assert.*;
-import static zutil.net.dns.DNSPacketQuestion.*;
-import static zutil.net.dns.DNSPacketResource.*;
+import static zutil.net.dns.DnsPacketQuestion.*;
+import static zutil.net.dns.DnsPacketResource.*;
 
 /**
  * Created by Ziver
  */
-public class DNSPacketTest {
+public class DnsPacketTest {
 
     @Test
     public void writeRequestHeaderTest() throws IOException {
-        DNSPacketHeader header = new DNSPacketHeader();
+        DnsPacketHeader header = new DnsPacketHeader();
         header.setDefaultQueryData();
         header.countQuestion = 1;
 
@@ -58,7 +58,7 @@ public class DNSPacketTest {
 
     @Test
     public void readResponseHeaderTest() throws IOException {
-        DNSPacketHeader header = new DNSPacketHeader();
+        DnsPacketHeader header = new DnsPacketHeader();
         header.setDefaultResponseData();
         header.countAnswerRecord = 1;
 
@@ -72,7 +72,7 @@ public class DNSPacketTest {
 
     @Test
     public void writeRequestDnsPacketHeaderTest() throws IOException {
-        DNSPacket packet = new DNSPacket();
+        DnsPacket packet = new DnsPacket();
         packet.getHeader().setDefaultQueryData();
 
         ByteArrayOutputStream buffer = new ByteArrayOutputStream();
@@ -92,9 +92,9 @@ public class DNSPacketTest {
 
     @Test
     public void writeRequestDnsPacketTest() throws IOException {
-        DNSPacket packet = new DNSPacket();
+        DnsPacket packet = new DnsPacket();
         packet.getHeader().setDefaultQueryData();
-        packet.addQuestion(new DNSPacketQuestion("appletv.local", QTYPE_A, QCLASS_IN));
+        packet.addQuestion(new DnsPacketQuestion("appletv.local", QTYPE_A, QCLASS_IN));
 
         ByteArrayOutputStream buffer = new ByteArrayOutputStream();
         BinaryStructOutputStream out = new BinaryStructOutputStream(buffer);
@@ -156,7 +156,7 @@ public class DNSPacketTest {
         };
         ByteArrayInputStream buffer = new ByteArrayInputStream(Converter.toBytes(input));
         BinaryStructInputStream in = new BinaryStructInputStream(buffer);
-        DNSPacket packet = DNSPacket.read(in);
+        DnsPacket packet = DnsPacket.read(in);
 
         // Assert Header
         assertTrue("flagQueryResponse", packet.getHeader().flagQueryResponse);
@@ -165,7 +165,7 @@ public class DNSPacketTest {
         assertEquals("ARCOUNT", 2, packet.getHeader().countAdditionalRecord);
         // Assert Answer
         assertEquals("No Of Answer records", 1, packet.getAnswerRecords().size());
-        DNSPacketResource answer = packet.getAnswerRecords().get(0);
+        DnsPacketResource answer = packet.getAnswerRecords().get(0);
         assertEquals("NAME", "appletv.local", answer.name);
         assertEquals("TYPE", TYPE_A, answer.type);
         assertEquals("CLASS", CLASS_IN, answer.clazz);
@@ -205,13 +205,13 @@ Domain Name System (query)
             Type: A (Host address)
             Class: IN (0x0001)
  */
-        DNSPacket packet = new DNSPacket();
-        DNSPacketHeader header = packet.getHeader();
+        DnsPacket packet = new DnsPacket();
+        DnsPacketHeader header = packet.getHeader();
         header.id = 0x241a;
         header.flagRecursionDesired = true;
         header.countQuestion = 1;
 
-        DNSPacketQuestion question = new DNSPacketQuestion();
+        DnsPacketQuestion question = new DnsPacketQuestion();
         question.qName = "www.google.com";
         question.qType = QTYPE_A;
         question.qClass = QCLASS_IN;
@@ -298,7 +298,7 @@ Domain Name System (response)
                 ).replace(" ", ""));
         ByteArrayInputStream buffer = new ByteArrayInputStream(input);
         BinaryStructInputStream in = new BinaryStructInputStream(buffer);
-        DNSPacket packet = DNSPacket.read(in);
+        DnsPacket packet = DnsPacket.read(in);
 
         assertEquals("id", 0x241a, packet.getHeader().id);
         assertTrue("flagQueryResponse", packet.getHeader().flagQueryResponse);
@@ -308,13 +308,13 @@ Domain Name System (response)
         assertEquals("No Of Additional records", 0, packet.getHeader().countAdditionalRecord);
 
         // Query
-        DNSPacketQuestion question = packet.getQuestions().get(0);
+        DnsPacketQuestion question = packet.getQuestions().get(0);
         assertEquals("qNAME", "www.google.com", question.qName);
-        assertEquals("qType", DNSPacketQuestion.QTYPE_A, question.qType);
-        assertEquals("qClass", DNSPacketQuestion.QCLASS_IN, question.qClass);
+        assertEquals("qType", DnsPacketQuestion.QTYPE_A, question.qType);
+        assertEquals("qClass", DnsPacketQuestion.QCLASS_IN, question.qClass);
 
         // Answer
-        DNSPacketResource answer = packet.getAnswerRecords().get(0);
+        DnsPacketResource answer = packet.getAnswerRecords().get(0);
         assertEquals("NAME", "12", answer.name);
         assertEquals("TYPE", TYPE_CNAME, answer.type);
         assertEquals("CLASS", CLASS_IN, answer.clazz);

@@ -31,7 +31,7 @@ import zutil.parser.binary.BinaryStruct;
  * Created by Ziver on 2016-02-09.
  * Reference: http://tools.ietf.org/html/rfc1035
  */
-public class DNSPacketResource implements BinaryStruct {
+public class DnsPacketResource implements BinaryStruct {
 
     /** a host address */
     public static final int TYPE_A     = 1;
@@ -110,7 +110,7 @@ public class DNSPacketResource implements BinaryStruct {
     /**
      * a domain name to which this resource record pertains.
      */
-    @CustomBinaryField(index=10, serializer=DNSPacketQuestion.FQDNStringSerializer.class)
+    @CustomBinaryField(index=10, serializer=DnsPacketQuestion.FQDNStringSerializer.class)
     public String name;
 
     /**

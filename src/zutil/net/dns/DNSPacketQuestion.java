@@ -36,7 +36,7 @@ import java.io.OutputStream;
  * Created by Ziver on 2016-02-09.
  * Reference: http://tools.ietf.org/html/rfc1035
  */
-public class DNSPacketQuestion implements BinaryStruct {
+public class DnsPacketQuestion implements BinaryStruct {
     /** a host address */
     public static final int QTYPE_A     = 1;
     /** an authoritative name server */
@@ -135,8 +135,8 @@ public class DNSPacketQuestion implements BinaryStruct {
 
 
 
-    public DNSPacketQuestion() {}
-    public DNSPacketQuestion(String qName, int qType, int qClass) {
+    public DnsPacketQuestion() {}
+    public DnsPacketQuestion(String qName, int qType, int qClass) {
         this.qName = qName;
         this.qType = qType;
         this.qClass = qClass;

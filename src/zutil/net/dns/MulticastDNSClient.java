@@ -24,7 +24,6 @@
 
 package zutil.net.dns;
 
-import zutil.ByteUtil;
 import zutil.io.MultiPrintStream;
 import zutil.log.LogUtil;
 import zutil.net.threaded.ThreadedUDPNetwork;
@@ -47,7 +46,7 @@ import java.util.logging.Logger;
  *
  * Created by Ziver
  */
-public class MulticastDNSClient extends ThreadedUDPNetwork implements ThreadedUDPNetworkThread{
+public class MulticastDnsClient extends ThreadedUDPNetwork implements ThreadedUDPNetworkThread{
     private static final Logger logger = LogUtil.getLogger();
 
     private static final String MDNS_MULTICAST_ADDR = "224.0.0.251";
@@ -55,17 +54,17 @@ public class MulticastDNSClient extends ThreadedUDPNetwork implements ThreadedUD
 
 
     private HashSet<Integer> activeProbes;
-    private DNSResolutionListener listener;
+    private DnsResolutionListener listener;
 
 
-    public MulticastDNSClient() throws IOException {
+    public MulticastDnsClient() throws IOException {
         super(MDNS_MULTICAST_ADDR, MDNS_MULTICAST_PORT);
         setThread( this );
 
         this.activeProbes = new HashSet<>();
     }
 
-    public void setListener(DNSResolutionListener listener){
+    public void setListener(DnsResolutionListener listener){
         this.listener = listener;
     }
 
@@ -76,13 +75,13 @@ public class MulticastDNSClient extends ThreadedUDPNetwork implements ThreadedUD
         ByteArrayOutputStream buffer = new ByteArrayOutputStream();
         BinaryStructOutputStream out = new BinaryStructOutputStream(buffer);
 
-        DNSPacket dnsPacket = new DNSPacket();
+        DnsPacket dnsPacket = new DnsPacket();
         dnsPacket.getHeader().id = id;
         dnsPacket.getHeader().setDefaultQueryData();
-        dnsPacket.addQuestion(new DNSPacketQuestion(
+        dnsPacket.addQuestion(new DnsPacketQuestion(
                 domain,
-                DNSPacketQuestion.QTYPE_A,
-                DNSPacketQuestion.QCLASS_IN));
+                DnsPacketQuestion.QTYPE_A,
+                DnsPacketQuestion.QCLASS_IN));
         dnsPacket.write(out);
 
         DatagramPacket udpPacket = new DatagramPacket(
@@ -103,18 +102,18 @@ public class MulticastDNSClient extends ThreadedUDPNetwork implements ThreadedUD
             ByteArrayInputStream buffer = new ByteArrayInputStream(packet.getData(),
                     packet.getOffset(), packet.getLength());
             BinaryStructInputStream in = new BinaryStructInputStream(buffer);
-            DNSPacket dnsPacket = DNSPacket.read(in);
+            DnsPacket dnsPacket = DnsPacket.read(in);
 
             //System.out.println("Received:\n"+ByteUtil.toFormattedString(packet.getData(), packet.getOffset(), packet.getLength()));
             MultiPrintStream.out.dump(dnsPacket,3);
 
             if (dnsPacket.getHeader().flagQueryResponse) {
                 if (activeProbes.contains(dnsPacket.getHeader().id)){
-                    logger.fine("Received MDSN response from: "+packet.getAddress()+", msg id: " + dnsPacket.getHeader().id);
+                    logger.fine("Received MDNS response from: "+packet.getAddress()+", msg id: " + dnsPacket.getHeader().id);
                     if (listener != null)
                         listener.receivedResponse(dnsPacket);
                 } else {
-                    logger.fine("Received MDSN packet: "+packet.getAddress()+", msg id: " + dnsPacket.getHeader().id);
+                    logger.fine("Received MDNS packet: "+packet.getAddress()+", msg id: " + dnsPacket.getHeader().id);
                 }
             }
         } catch (IOException e){

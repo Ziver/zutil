@@ -14,16 +14,16 @@ import java.util.List;
  * @see <a href="https://tools.ietf.org/html/rfc1035">rfc1035</a>
  * @author Ziver on 2016-04-11.
  */
-public class DNSPacket {
-    private DNSPacketHeader header;
-    private ArrayList<DNSPacketQuestion> questions;
-    private ArrayList<DNSPacketResource> answerRecords;
-    private ArrayList<DNSPacketResource> nameServers;
-    private ArrayList<DNSPacketResource> additionalRecords;
+public class DnsPacket {
+    private DnsPacketHeader header;
+    private ArrayList<DnsPacketQuestion> questions;
+    private ArrayList<DnsPacketResource> answerRecords;
+    private ArrayList<DnsPacketResource> nameServers;
+    private ArrayList<DnsPacketResource> additionalRecords;
 
 
-    public DNSPacket(){
-        header = new DNSPacketHeader();
+    public DnsPacket(){
+        header = new DnsPacketHeader();
         questions = new ArrayList<>();
         answerRecords = new ArrayList<>();
         nameServers = new ArrayList<>();
@@ -31,47 +31,47 @@ public class DNSPacket {
     }
 
 
-    public DNSPacketHeader getHeader(){
+    public DnsPacketHeader getHeader(){
         return header;
     }
-    public List<DNSPacketQuestion> getQuestions(){
+    public List<DnsPacketQuestion> getQuestions(){
         return Collections.unmodifiableList(questions);
     }
-    public List<DNSPacketResource> getAnswerRecords(){
+    public List<DnsPacketResource> getAnswerRecords(){
         return Collections.unmodifiableList(answerRecords);
     }
-    public List<DNSPacketResource> getNameServers(){
+    public List<DnsPacketResource> getNameServers(){
         return Collections.unmodifiableList(nameServers);
     }
-    public List<DNSPacketResource> getAdditionalRecords(){
+    public List<DnsPacketResource> getAdditionalRecords(){
         return Collections.unmodifiableList(additionalRecords);
     }
 
 
-    public void addQuestion(DNSPacketQuestion question){
+    public void addQuestion(DnsPacketQuestion question){
         questions.add(question);
         header.countQuestion = questions.size();
     }
-    public void addAnswerRecord(DNSPacketResource resource){
+    public void addAnswerRecord(DnsPacketResource resource){
         answerRecords.add(resource);
         header.countAnswerRecord = answerRecords.size();
     }
-    public void addNameServer(DNSPacketResource resource){
+    public void addNameServer(DnsPacketResource resource){
         nameServers.add(resource);
         header.countNameServer = nameServers.size();
     }
-    public void addAdditionalRecord(DNSPacketResource resource){
+    public void addAdditionalRecord(DnsPacketResource resource){
         additionalRecords.add(resource);
         header.countAdditionalRecord = additionalRecords.size();
     }
 
 
-    public static DNSPacket read(BinaryStructInputStream structIn) throws IOException {
-        DNSPacket packet = new DNSPacket();
+    public static DnsPacket read(BinaryStructInputStream structIn) throws IOException {
+        DnsPacket packet = new DnsPacket();
         structIn.read(packet.header);
 
         for (int i=0; i<packet.header.countQuestion; ++i) {
-            DNSPacketQuestion question = new DNSPacketQuestion();
+            DnsPacketQuestion question = new DnsPacketQuestion();
             structIn.read(question);
             packet.questions.add(question);
         }
@@ -80,9 +80,9 @@ public class DNSPacket {
         readResource(structIn, packet.header.countAdditionalRecord, packet.additionalRecords);
         return packet;
     }
-    private static void readResource(BinaryStructInputStream structIn, int count, ArrayList<DNSPacketResource> list) throws IOException {
+    private static void readResource(BinaryStructInputStream structIn, int count, ArrayList<DnsPacketResource> list) throws IOException {
         for (int i=0; i<count; ++i){
-            DNSPacketResource resource = new DNSPacketResource();
+            DnsPacketResource resource = new DnsPacketResource();
             structIn.read(resource);
             list.add(resource);
         }
@@ -91,13 +91,13 @@ public class DNSPacket {
     public void write(BinaryStructOutputStream structOut) throws IOException {
         structOut.write(header);
 
-        for (DNSPacketQuestion question : questions)
+        for (DnsPacketQuestion question : questions)
             structOut.write(question);
-        for (DNSPacketResource answerRecord : answerRecords)
+        for (DnsPacketResource answerRecord : answerRecords)
             structOut.write(answerRecord);
-        for (DNSPacketResource nameServer : nameServers)
+        for (DnsPacketResource nameServer : nameServers)
             structOut.write(nameServer);
-        for (DNSPacketResource additionalRecord : additionalRecords)
+        for (DnsPacketResource additionalRecord : additionalRecords)
             structOut.write(additionalRecord);
 
     }

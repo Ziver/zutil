@@ -30,7 +30,7 @@ import zutil.parser.binary.BinaryStruct;
  * Created by Ziver on 2016-02-09.
  * Reference: http://tools.ietf.org/html/rfc1035
  */
-public class DNSPacketHeader implements BinaryStruct {
+public class DnsPacketHeader implements BinaryStruct {
     public static final int OPCODE_QUERY = 0;
     public static final int OPCODE_IQUERY = 1;
     public static final int OPCODE_STATUS = 2;

@@ -33,12 +33,12 @@ import java.io.IOException;
 import java.util.Map;
 
 
-public class HTTPGuessTheNumber implements HttpPage {
+public class HttpGuessTheNumber implements HttpPage {
 
 	public static void main(String[] args) throws IOException{
 		//HttpServer server = new HttpServer("localhost", 443, FileFinder.find("keySSL"), "rootroot");//SSL
 		HttpServer server = new HttpServer(8080);
-		server.setDefaultPage(new HTTPGuessTheNumber());
+		server.setDefaultPage(new HttpGuessTheNumber());
 		server.run();
 	}
 
