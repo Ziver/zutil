@@ -26,10 +26,7 @@ package zutil.net.smtp;
 
 import zutil.log.LogUtil;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintStream;
+import java.io.*;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.util.logging.Level;
@@ -46,7 +43,7 @@ import java.util.logging.Logger;
 public class SMTPClient {
 	private static final Logger logger = LogUtil.getLogger();
 
-	private static final String NEWLINE   = "\r\n";
+	protected static final String NEWLINE   = "\r\n";
 	private static final String CMD_HELO  = "HELO";
 	private static final String CMD_FROM  = "MAIL FROM";
 	private static final String CMD_TO    = "RCPT TO";
@@ -59,7 +56,7 @@ public class SMTPClient {
 
     private Socket socket;
 	private BufferedReader in;
-	private PrintStream out;
+	private Writer out;
 
 
     /**
@@ -77,7 +74,7 @@ public class SMTPClient {
 	public SMTPClient(String host, int port) throws IOException {
         socket = new Socket(host, port);
         in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-        out = new PrintStream(socket.getOutputStream());
+        out = new OutputStreamWriter(socket.getOutputStream());
 
         readCommand();
         sendCommand(CMD_HELO + " " + InetAddress.getLocalHost().getHostName());
@@ -92,26 +89,12 @@ public class SMTPClient {
 	 * @param   msg     the email body message
 	 */
 	public synchronized void send(String from, String to, String subj, String msg) throws IOException{
-        if(from == null)
-            throw new IllegalArgumentException("From value cannot be null!");
-        if(to == null)
-            throw new IllegalArgumentException("To value cannot be null!");
-		try{
-			// Pre metadata
-			sendCommand(CMD_FROM + ":" + from);
-			sendCommand(CMD_TO + ":" + to);
-			sendCommand(CMD_DATA);
-			// Message headers and body
-			out.println("From: "+from);
-            out.println("To: "+to);
-            out.println("Subject: "+subj);
-            out.println("");
-            out.println(msg);
-			sendCommand(CMD_DATA_END);
-			reset();
-		}catch(IOException e){
-			logger.log(Level.SEVERE, null, e);
-		}
+        Email email = new Email();
+        email.setFrom(from);
+        email.setTo(to);
+        email.setSubject(subj);
+        email.setMessage(msg);
+        send(email);
 	}
 
     /**
@@ -122,15 +105,16 @@ public class SMTPClient {
     public synchronized void send(Email email) throws IOException{
         if(email.getFromAddress() == null)
             throw new IllegalArgumentException("From value cannot be null!");
-        if(email.getTo() == null)
+        if(email.getToAddress() == null)
             throw new IllegalArgumentException("To value cannot be null!");
         try{
             // Pre metadata
             sendCommand(CMD_FROM + ":" + email.getFromAddress());
-            sendCommand(CMD_TO + ":" + email.getTo());
+            sendCommand(CMD_TO + ":" + email.getToAddress());
             sendCommand(CMD_DATA);
             // Message headers and body
             email.write(out);
+            out.write(NEWLINE);
             sendCommand(CMD_DATA_END);
             reset();
         }catch(IOException e){
@@ -148,7 +132,7 @@ public class SMTPClient {
 	 */
 	public synchronized int sendCommand(String cmd) throws IOException{
 		logger.finest(">> "+cmd);
-	    out.print(cmd + NEWLINE);
+	    out.write(cmd + NEWLINE);
 		String reply = readCommand();
 		return parseReturnCode(reply);
 	}
