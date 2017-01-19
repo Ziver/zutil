@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.Writer;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Locale;
 import java.util.regex.Pattern;
 
 import static zutil.net.smtp.SMTPClient.NEWLINE;
@@ -20,7 +21,7 @@ public class Email {
 		PLAIN, HTML
 	}
 	private static final SimpleDateFormat dateFormatter = 
-		new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss Z");
+		new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss Z", Locale.ENGLISH);
     private static final Pattern PATTERN_NEWLINE = Pattern.compile("(\\r\\n|\\n)");
 
 	private String fromAddress;

@@ -86,7 +86,7 @@ public class EmailTest {
         assertEquals(
                 "From: test@example.com" + NEWLINE +
                         "To: to@example.com" + NEWLINE +
-                        "Date: on, 22 nov 2000 15:20:55 +0100" + NEWLINE +
+                        "Date: Wed, 22 Nov 2000 15:20:55 +0100" + NEWLINE +
                         "Content-Type: text/plain;" + NEWLINE +
                         "Subject: " + NEWLINE +
                         NEWLINE +
@@ -109,7 +109,7 @@ public class EmailTest {
                 "From: Test Tester <test@example.com>" + NEWLINE +
                         "Reply-To: <mokey@example.org>" + NEWLINE +
                         "To: To Totter <to@example.com>" + NEWLINE +
-                        "Date: on, 22 nov 2000 15:20:55 +0100" + NEWLINE +
+                        "Date: Wed, 22 Nov 2000 15:20:55 +0100" + NEWLINE +
                         "Content-Type: text/html;" + NEWLINE +
                         "Subject: Title" + NEWLINE +
                         NEWLINE +
