@@ -9,7 +9,7 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 
 import static org.junit.Assert.*;
-import static zutil.net.smtp.SMTPClient.NEWLINE;
+import static zutil.net.smtp.SmtpClient.NEWLINE;
 
 /**
  * Created by Ziver on 2017-01-19.

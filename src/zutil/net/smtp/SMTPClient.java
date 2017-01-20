@@ -40,7 +40,7 @@ import java.util.logging.Logger;
  * @author Ziver
  *
  */
-public class SMTPClient {
+public class SmtpClient {
 	private static final Logger logger = LogUtil.getLogger();
 
 	protected static final String NEWLINE   = "\r\n";
@@ -62,16 +62,16 @@ public class SMTPClient {
     /**
      * Will look for a SMTP server on localhost on port 25
      */
-    public SMTPClient() throws IOException {
+    public SmtpClient() throws IOException {
         this("localhost", 25);
     }
     /**
      * Will look for a SMTP server on specified host on port 25
      */
-	public SMTPClient(String host) throws IOException {
+	public SmtpClient(String host) throws IOException {
 		this(host, 25);
 	}
-	public SMTPClient(String host, int port) throws IOException {
+	public SmtpClient(String host, int port) throws IOException {
         socket = new Socket(host, port);
         in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
         out = new OutputStreamWriter(socket.getOutputStream());
@@ -79,6 +79,8 @@ public class SMTPClient {
         readCommand();
         sendCommand(CMD_HELO + " " + InetAddress.getLocalHost().getHostName());
 	}
+
+
 
 	/**
 	 * Sends a basic email to the smtp server
@@ -133,6 +135,7 @@ public class SMTPClient {
 	public synchronized int sendCommand(String cmd) throws IOException{
 		logger.finest(">> "+cmd);
 	    out.write(cmd + NEWLINE);
+	    out.flush();
 		String reply = readCommand();
 		return parseReturnCode(reply);
 	}
