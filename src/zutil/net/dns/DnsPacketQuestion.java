@@ -63,13 +63,15 @@ public class DnsPacketQuestion implements BinaryStruct {
     public static final int QTYPE_PTR   = 12;
     /** host information */
     public static final int QTYPE_HINFO = 13;
-    /**  mailbox or mail list information */
+    /** mailbox or mail list information */
     public static final int QTYPE_MINFO = 14;
     /** mail exchange */
     public static final int QTYPE_MX    = 15;
     /** text strings */
     public static final int QTYPE_TXT   = 16;
-    /**  A request for a transfer of an entire zone */
+    /** service location record */
+    public static final int QTYPE_SRV   = 33;
+    /** A request for a transfer of an entire zone */
     public static final int QTYPE_AXFR  = 252;
     /** A request for mailbox-related records (MB, MG or MR) */
     public static final int QTYPE_MAILB = 253;

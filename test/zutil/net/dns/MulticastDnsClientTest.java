@@ -22,7 +22,7 @@ public class MulticastDnsClientTest {
         mdns.start();
         //mdns.sendProbe("appletv.local");
         //mdns.sendProbe("_services._dns-sd._udp.local");
-        mdns.sendProbe("_googlecast._tcp.local");
+        mdns.sendProbe("ziver-VirtualBox._afpovertcp._tcp.local");
         mdns.setListener(new DnsResolutionListener() {
             @Override
             public void receivedResponse(DnsPacket packet) {

@@ -70,7 +70,7 @@ public class MulticastDnsClient extends ThreadedUDPNetwork implements ThreadedUD
 
 
     public void sendProbe(String domain) throws IOException {
-        int id = (int)(Math.random() * 0xFFFF);
+        int id = 0;//(int)(Math.random() * 0xFFFF);
         activeProbes.add(id);
         ByteArrayOutputStream buffer = new ByteArrayOutputStream();
         BinaryStructOutputStream out = new BinaryStructOutputStream(buffer);
@@ -80,7 +80,7 @@ public class MulticastDnsClient extends ThreadedUDPNetwork implements ThreadedUD
         dnsPacket.getHeader().setDefaultQueryData();
         dnsPacket.addQuestion(new DnsPacketQuestion(
                 domain,
-                DnsPacketQuestion.QTYPE_A,
+                DnsPacketQuestion.QTYPE_SRV,
                 DnsPacketQuestion.QCLASS_IN));
         dnsPacket.write(out);
 
