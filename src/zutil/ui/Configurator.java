@@ -45,7 +45,7 @@ import java.util.logging.Logger;
  * fields that should be configurable. And then the gui can use the {@link Configurator#getConfiguration()}
  * to display all the correct fields. To later save the user input back to the target
  * object the {@link Configurator#setValues(DataNode)} or {@link Configurator#setValues(Map)}
- * can be used to set the individual fields and finaly call {@link Configurator#applyConfiguration()}
+ * can be used to set the individual fields and finally call {@link Configurator#applyConfiguration()}
  * to configure the target object.
  *
  * <br>

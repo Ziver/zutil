@@ -12,12 +12,18 @@ import java.util.Map;
  */
 public class HttpRedirectPage implements HttpPage{
 
+    private boolean permanent;
     private String redirectUrl;
 
 
     public HttpRedirectPage(String redirectUrl){
         this.redirectUrl = redirectUrl;
     }
+
+    public void setPermanentRedirect(boolean permanent){
+        this.permanent = permanent;
+    }
+
 
     @Override
     public void respond(HttpPrintStream out,
@@ -26,7 +32,7 @@ public class HttpRedirectPage implements HttpPage{
                         Map<String, String> cookie,
                         Map<String, String> request) throws IOException {
 
-        out.setStatusCode(301);
+        out.setStatusCode((permanent ? 301 : 307));
         out.setHeader("Location", redirectUrl);
         out.print(
                 "<!DOCTYPE HTML>\n" +

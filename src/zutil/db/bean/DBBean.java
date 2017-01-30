@@ -58,9 +58,9 @@ import java.util.logging.Logger;
  * 	*Double
  * 	*String
  * 	*Character
- * 	*DBBean
- * 	*java.sql.Timestamp
- * 	*List<DBBean> 
+ *  *java.sql.Timestamp
+ * 	*DBBean (A Integer reference to another Bean in another table)
+ * 	*List<DBBean> (A reference table is used to associate Beans into the list)
  * </XMP>
  * @author Ziver
  */
