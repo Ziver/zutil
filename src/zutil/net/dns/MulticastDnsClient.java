@@ -44,7 +44,9 @@ import java.util.logging.Logger;
  * This class implements a MDNS Client. MDNS is a version
  * of the DNS protocol but used a Zeroconf application.
  *
- * Created by Ziver
+ * @see <a href="http://tools.ietf.org/html/rfc1035">DNS Spec (rfc1035)</a>
+ * @see <a href="https://tools.ietf.org/html/rfc6763">DNS-SD Spec (rfc6763)</a>
+ * @author Ziver
  */
 public class MulticastDnsClient extends ThreadedUDPNetwork implements ThreadedUDPNetworkThread{
     private static final Logger logger = LogUtil.getLogger();
@@ -70,7 +72,7 @@ public class MulticastDnsClient extends ThreadedUDPNetwork implements ThreadedUD
 
 
     public void sendProbe(String domain) throws IOException {
-        int id = 0;//(int)(Math.random() * 0xFFFF);
+        int id = 0; // Needs to be zero when doing multicast
         activeProbes.add(id);
         ByteArrayOutputStream buffer = new ByteArrayOutputStream();
         BinaryStructOutputStream out = new BinaryStructOutputStream(buffer);
@@ -80,8 +82,8 @@ public class MulticastDnsClient extends ThreadedUDPNetwork implements ThreadedUD
         dnsPacket.getHeader().setDefaultQueryData();
         dnsPacket.addQuestion(new DnsPacketQuestion(
                 domain,
-                DnsPacketQuestion.QTYPE_SRV,
-                DnsPacketQuestion.QCLASS_IN));
+                DnsConstants.TYPE.SRV,
+                DnsConstants.CLASS.IN));
         dnsPacket.write(out);
 
         DatagramPacket udpPacket = new DatagramPacket(

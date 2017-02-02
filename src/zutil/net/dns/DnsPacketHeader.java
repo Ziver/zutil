@@ -27,20 +27,10 @@ package zutil.net.dns;
 import zutil.parser.binary.BinaryStruct;
 
 /**
- * Created by Ziver on 2016-02-09.
- * Reference: http://tools.ietf.org/html/rfc1035
+ * @see <a href="http://tools.ietf.org/html/rfc1035">DNS Spec (rfc1035)</a>
+ * @author Ziver
  */
 public class DnsPacketHeader implements BinaryStruct {
-    public static final int OPCODE_QUERY = 0;
-    public static final int OPCODE_IQUERY = 1;
-    public static final int OPCODE_STATUS = 2;
-
-    public static final int RCODE_NO_ERROR = 0;
-    public static final int RCODE_FORMAT_ERROR = 1;
-    public static final int RCODE_SERVER_FAILURE = 2;
-    public static final int RCODE_NAME_ERROR = 3;
-    public static final int RCODE_NOT_IMPLEMENTED = 4;
-    public static final int RCODE_REFUSED = 5;
 
     /*
     Header section format
@@ -81,11 +71,8 @@ public class DnsPacketHeader implements BinaryStruct {
     public boolean flagQueryResponse;
     /**
      * A four bit field that specifies kind of query in this message.
-     * <pre>
-     * 0    a standard query (QUERY)
-     * 1    an inverse query (IQUERY)
-     * 2    a server status request (STATUS)
-     * </pre>
+     *
+     * @see DnsConstants.OPCODE
      */
     @BinaryField(index=11, length=4)
     public int flagOperationCode;
@@ -127,24 +114,8 @@ public class DnsPacketHeader implements BinaryStruct {
     /**
      * this field is set as part of responses.
      * The values have the following interpretation:
-     * <pre>
-     * 0    No error condition
-     * 1    Format error - The name server was
-     *      unable to interpret the query.
-     * 2    Server failure - The name server was
-     *      unable to process this query due to a
-     *      problem with the name server.
-     * 3    Name Error - Meaningful only for
-     *      responses from an authoritative name
-     *      server, this code signifies that the
-     *      domain name referenced in the query does
-     *      not exist.
-     * 4    Not Implemented - The name server does
-     *      not support the requested kind of query.
-     * 5    Refused - The name server refuses to
-     *      perform the specified operation for
-     *      policy reasons.
-     *</pre>
+     *
+     * @see DnsConstants.RCODE
      */
     @BinaryField(index=17, length=4)
     public int flagResponseCode;

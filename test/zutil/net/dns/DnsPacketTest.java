@@ -34,8 +34,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
 import static org.junit.Assert.*;
-import static zutil.net.dns.DnsPacketQuestion.*;
-import static zutil.net.dns.DnsPacketResource.*;
 
 /**
  * Created by Ziver
@@ -94,7 +92,8 @@ public class DnsPacketTest {
     public void writeRequestDnsPacketTest() throws IOException {
         DnsPacket packet = new DnsPacket();
         packet.getHeader().setDefaultQueryData();
-        packet.addQuestion(new DnsPacketQuestion("appletv.local", QTYPE_A, QCLASS_IN));
+        packet.addQuestion(new DnsPacketQuestion(
+                "appletv.local", DnsConstants.TYPE.A, DnsConstants.CLASS.IN));
 
         ByteArrayOutputStream buffer = new ByteArrayOutputStream();
         BinaryStructOutputStream out = new BinaryStructOutputStream(buffer);
@@ -167,8 +166,8 @@ public class DnsPacketTest {
         assertEquals("No Of Answer records", 1, packet.getAnswerRecords().size());
         DnsPacketResource answer = packet.getAnswerRecords().get(0);
         assertEquals("NAME", "appletv.local", answer.name);
-        assertEquals("TYPE", TYPE_A, answer.type);
-        assertEquals("CLASS", CLASS_IN, answer.clazz);
+        assertEquals("TYPE", DnsConstants.TYPE.A, answer.type);
+        assertEquals("CLASS", DnsConstants.CLASS.IN, answer.clazz);
         assertEquals("TTL", 30720, answer.ttl);
         assertEquals("IPv4", new String(new char[]{0x99, 0x6d, 0x07, 0x5a}), answer.data);
     }
@@ -212,9 +211,9 @@ Domain Name System (query)
         header.countQuestion = 1;
 
         DnsPacketQuestion question = new DnsPacketQuestion();
-        question.qName = "www.google.com";
-        question.qType = QTYPE_A;
-        question.qClass = QCLASS_IN;
+        question.name = "www.google.com";
+        question.type = DnsConstants.TYPE.A;
+        question.clazz = DnsConstants.CLASS.IN;
         packet.addQuestion(question);
 
         ByteArrayOutputStream buff = new ByteArrayOutputStream();
@@ -309,27 +308,27 @@ Domain Name System (response)
 
         // Query
         DnsPacketQuestion question = packet.getQuestions().get(0);
-        assertEquals("qNAME", "www.google.com", question.qName);
-        assertEquals("qType", DnsPacketQuestion.QTYPE_A, question.qType);
-        assertEquals("qClass", DnsPacketQuestion.QCLASS_IN, question.qClass);
+        assertEquals("qNAME", "www.google.com", question.name);
+        assertEquals("type", DnsConstants.TYPE.A, question.type);
+        assertEquals("clazz", DnsConstants.CLASS.IN, question.clazz);
 
         // Answer
         DnsPacketResource answer = packet.getAnswerRecords().get(0);
         assertEquals("NAME", "12", answer.name);
-        assertEquals("TYPE", TYPE_CNAME, answer.type);
-        assertEquals("CLASS", CLASS_IN, answer.clazz);
+        assertEquals("TYPE", DnsConstants.TYPE.CNAME, answer.type);
+        assertEquals("CLASS", DnsConstants.CLASS.IN, answer.clazz);
         assertEquals("TTL", 337977, answer.ttl);
 
         answer = packet.getAnswerRecords().get(1);
         assertEquals("NAME", "44", answer.name);
-        assertEquals("TYPE", TYPE_A, answer.type);
-        assertEquals("CLASS", CLASS_IN, answer.clazz);
+        assertEquals("TYPE", DnsConstants.TYPE.A, answer.type);
+        assertEquals("CLASS", DnsConstants.CLASS.IN, answer.clazz);
         assertEquals("TTL", 227, answer.ttl);
 
         answer = packet.getAnswerRecords().get(2);
         assertEquals("NAME", "44", answer.name);
-        assertEquals("TYPE", TYPE_A, answer.type);
-        assertEquals("CLASS", CLASS_IN, answer.clazz);
+        assertEquals("TYPE", DnsConstants.TYPE.A, answer.type);
+        assertEquals("CLASS", DnsConstants.CLASS.IN, answer.clazz);
         assertEquals("TTL", 227, answer.ttl);
     }
 }

@@ -33,63 +33,10 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 /**
- * Created by Ziver on 2016-02-09.
- * Reference: http://tools.ietf.org/html/rfc1035
+ * @see <a href="http://tools.ietf.org/html/rfc1035">DNS Spec (rfc1035)</a>
+ * @author Ziver
  */
 public class DnsPacketQuestion implements BinaryStruct {
-    /** a host address */
-    public static final int QTYPE_A     = 1;
-    /** an authoritative name server */
-    public static final int QTYPE_NS    = 2;
-    /** a mail destination (Obsolete - use MX) */
-    public static final int QTYPE_MD    = 3;
-    /** a mail forwarder (Obsolete - use MX) */
-    public static final int QTYPE_MF    = 4;
-    /** the canonical name for an alias */
-    public static final int QTYPE_CNAME = 5;
-    /** marks the start of a zone of authority */
-    public static final int QTYPE_SOA   = 6;
-    /** a mailbox domain name (EXPERIMENTAL) */
-    public static final int QTYPE_MB    = 7;
-    /** a mail group member (EXPERIMENTAL) */
-    public static final int QTYPE_MG    = 8;
-    /** a mail rename domain name (EXPERIMENTAL) */
-    public static final int QTYPE_MR    = 9;
-    /** a null RR (EXPERIMENTAL) */
-    public static final int QTYPE_NULL  = 10;
-    /** a well known service description */
-    public static final int QTYPE_WKS   = 11;
-    /** a domain name pointer */
-    public static final int QTYPE_PTR   = 12;
-    /** host information */
-    public static final int QTYPE_HINFO = 13;
-    /** mailbox or mail list information */
-    public static final int QTYPE_MINFO = 14;
-    /** mail exchange */
-    public static final int QTYPE_MX    = 15;
-    /** text strings */
-    public static final int QTYPE_TXT   = 16;
-    /** service location record */
-    public static final int QTYPE_SRV   = 33;
-    /** A request for a transfer of an entire zone */
-    public static final int QTYPE_AXFR  = 252;
-    /** A request for mailbox-related records (MB, MG or MR) */
-    public static final int QTYPE_MAILB = 253;
-    /** A request for mail agent RRs (Obsolete - see MX) */
-    public static final int QTYPE_MAILA = 254;
-    /** A request for all records */
-    public static final int QTYPE_ANY   = 255;
-
-    /**  the Internet */
-    public static final int QCLASS_IN   = 1;
-    /**  the CSNET class (Obsolete - used only for examples in some obsolete RFCs) */
-    public static final int QCLASS_CS   = 2;
-    /**  the CHAOS class */
-    public static final int QCLASS_CH   = 3;
-    /**  Hesiod [Dyer 87] */
-    public static final int QCLASS_HS   = 4;
-    /** any class */
-    public static final int QCLASS_ANY  = 255;
 
     /*
     Question section format
@@ -117,31 +64,35 @@ public class DnsPacketQuestion implements BinaryStruct {
      * padding is used.
      */
     @CustomBinaryField(index=10, serializer=FQDNStringSerializer.class)
-    public String qName;
+    public String name;
 
     /**
      * a two octet code which specifies the type of the query.
      * The values for this field include all codes valid for a
      * TYPE field, together with some more general codes which
      * can match more than one type of RR.
+     *
+     * @see DnsConstants.TYPE
      */
     @BinaryField(index=10, length=16)
-    public int qType;
+    public int type;
 
     /**
      * a two octet code that specifies the class of the query.
      * For example, the QCLASS field is IN for the Internet.
+     *
+     * @see DnsConstants.CLASS
      */
     @BinaryField(index=20, length=16)
-    public int qClass;
+    public int clazz;
 
 
 
     public DnsPacketQuestion() {}
-    public DnsPacketQuestion(String qName, int qType, int qClass) {
-        this.qName = qName;
-        this.qType = qType;
-        this.qClass = qClass;
+    public DnsPacketQuestion(String name, int type, int clazz) {
+        this.name = name;
+        this.type = type;
+        this.clazz = clazz;
     }
 
 
