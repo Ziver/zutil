@@ -3,6 +3,7 @@ package zutil.net.dns;
 import zutil.io.MultiPrintStream;
 import zutil.log.CompactLogFormatter;
 import zutil.log.LogUtil;
+import zutil.net.dns.packet.DnsPacket;
 
 import java.io.IOException;
 import java.util.logging.Level;

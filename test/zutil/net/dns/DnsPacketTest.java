@@ -26,6 +26,7 @@ package zutil.net.dns;
 
 import org.junit.Test;
 import zutil.converter.Converter;
+import zutil.net.dns.packet.*;
 import zutil.parser.binary.BinaryStructInputStream;
 import zutil.parser.binary.BinaryStructOutputStream;
 

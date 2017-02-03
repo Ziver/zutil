@@ -26,6 +26,9 @@ package zutil.net.dns;
 
 import zutil.io.MultiPrintStream;
 import zutil.log.LogUtil;
+import zutil.net.dns.packet.DnsConstants;
+import zutil.net.dns.packet.DnsPacket;
+import zutil.net.dns.packet.DnsPacketQuestion;
 import zutil.net.threaded.ThreadedUDPNetwork;
 import zutil.net.threaded.ThreadedUDPNetworkThread;
 import zutil.parser.binary.BinaryStructInputStream;
@@ -40,9 +43,12 @@ import java.util.HashSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import static zutil.net.dns.MulticastDnsServer.MDNS_MULTICAST_ADDR;
+import static zutil.net.dns.MulticastDnsServer.MDNS_MULTICAST_PORT;
+
 /**
  * This class implements a MDNS Client. MDNS is a version
- * of the DNS protocol but used a Zeroconf application.
+ * of the DNS protocol but supports Zeroconf.
  *
  * @see <a href="http://tools.ietf.org/html/rfc1035">DNS Spec (rfc1035)</a>
  * @see <a href="https://tools.ietf.org/html/rfc6763">DNS-SD Spec (rfc6763)</a>
@@ -50,9 +56,6 @@ import java.util.logging.Logger;
  */
 public class MulticastDnsClient extends ThreadedUDPNetwork implements ThreadedUDPNetworkThread{
     private static final Logger logger = LogUtil.getLogger();
-
-    private static final String MDNS_MULTICAST_ADDR = "224.0.0.251";
-    private static final int    MDNS_MULTICAST_PORT = 5353;
 
 
     private HashSet<Integer> activeProbes;

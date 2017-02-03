@@ -24,6 +24,8 @@
 package zutil.net.dns;
 
 
+import zutil.net.dns.packet.DnsPacket;
+
 public interface DnsResolutionListener {
         void receivedResponse(DnsPacket packet);
     }

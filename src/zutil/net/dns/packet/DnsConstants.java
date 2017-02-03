@@ -1,4 +1,4 @@
-package zutil.net.dns;
+package zutil.net.dns.packet;
 
 /**
  *

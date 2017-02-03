@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  */
 
-package zutil.net.dns;
+package zutil.net.dns.packet;
 
 import zutil.parser.binary.BinaryStruct;
 
@@ -65,7 +65,7 @@ public class DnsPacketResource implements BinaryStruct {
     /**
      * a domain name to which this resource record pertains.
      */
-    @CustomBinaryField(index=10, serializer=DnsPacketQuestion.FQDNStringSerializer.class)
+    @CustomBinaryField(index=10, serializer=FQDNStringSerializer.class)
     public String name;
 
     /**

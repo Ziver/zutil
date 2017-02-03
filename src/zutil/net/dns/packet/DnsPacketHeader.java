@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  */
 
-package zutil.net.dns;
+package zutil.net.dns.packet;
 
 import zutil.parser.binary.BinaryStruct;
 
