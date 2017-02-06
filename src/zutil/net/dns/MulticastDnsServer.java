@@ -25,6 +25,7 @@
 package zutil.net.dns;
 
 import zutil.log.LogUtil;
+import zutil.net.dns.packet.DnsConstants;
 import zutil.net.dns.packet.DnsPacket;
 import zutil.net.dns.packet.DnsPacketQuestion;
 import zutil.net.dns.packet.DnsPacketResource;
@@ -35,6 +36,7 @@ import zutil.parser.binary.BinaryStructInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.DatagramPacket;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.logging.Level;
@@ -55,7 +57,7 @@ public class MulticastDnsServer extends ThreadedUDPNetwork implements ThreadedUD
     protected static final int    MDNS_MULTICAST_PORT = 5353;
 
 
-    private HashMap<String,ArrayList> entries = new HashMap<>();
+    private HashMap<String,ArrayList<DnsPacketResource>> entries = new HashMap<>();
 
 
 
@@ -74,21 +76,21 @@ public class MulticastDnsServer extends ThreadedUDPNetwork implements ThreadedUD
      * @param   clazz   {@link zutil.net.dns.packet.DnsConstants.CLASS}
      * @param   data
      */
-    public void addEntry(String name, int type, int clazz, String data){
+    public void addEntry(String name, int type, int clazz, byte[] data){
         DnsPacketResource resource = new DnsPacketResource();
         resource.name = name;
         resource.type = type;
         resource.clazz = clazz;
         //resource.ttl = 10; ???
-        resource.length = data.length();
-        resource.data = data;
+        resource.length = data.length;
+        resource.data = new String(data, StandardCharsets.ISO_8859_1);
 
         addEntry(resource);
     }
 
     private void addEntry(DnsPacketResource resource) {
         if ( ! entries.containsKey(resource.name))
-            entries.put(resource.name, new ArrayList());
+            entries.put(resource.name, new ArrayList<>());
         entries.get(resource.name).add(resource);
     }
 
@@ -105,10 +107,19 @@ public class MulticastDnsServer extends ThreadedUDPNetwork implements ThreadedUD
             // Just handle queries and no responses
             if ( ! dnsPacket.getHeader().flagQueryResponse){
                 for (DnsPacketQuestion question : dnsPacket.getQuestions()){
-                    if (entries.containsKey(question.name)){
-                        // Respond with entries
-
-                    }
+                	if (question.name == null) continue;
+                	
+                	switch(question.type){
+                	case DnsConstants.TYPE.PTR:
+                		if (question.name.startsWith("_service")){
+                			
+                		}
+                		else if (entries.containsKey(question.name)){
+		                    // Respond with entries
+		
+		                }
+		                break;
+                	}
                 }
             }
         } catch (IOException e){
