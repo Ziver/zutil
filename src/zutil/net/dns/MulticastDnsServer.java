@@ -32,10 +32,13 @@ import zutil.net.dns.packet.DnsPacketResource;
 import zutil.net.threaded.ThreadedUDPNetwork;
 import zutil.net.threaded.ThreadedUDPNetworkThread;
 import zutil.parser.binary.BinaryStructInputStream;
+import zutil.parser.binary.BinaryStructOutputStream;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.DatagramPacket;
+import java.net.InetAddress;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -64,10 +67,18 @@ public class MulticastDnsServer extends ThreadedUDPNetwork implements ThreadedUD
     public MulticastDnsServer() throws IOException {
         super(MDNS_MULTICAST_ADDR, MDNS_MULTICAST_PORT);
         setThread( this );
-
     }
 
 
+    /**
+     * Add a domain name specific data that will be returned to a requesting client
+     *
+     * @param   name    is the domain name to add the entry under
+     * @param   ip      the IPv4 address to respond with
+     */
+    public void addEntry(String name, InetAddress ip){
+        addEntry(name, DnsConstants.TYPE.A, DnsConstants.CLASS.IN, ip.getAddress());
+    }
     /**
      * Add a domain name specific data that will be returned to a requesting client
      *
@@ -90,7 +101,7 @@ public class MulticastDnsServer extends ThreadedUDPNetwork implements ThreadedUD
 
     private void addEntry(DnsPacketResource resource) {
         if ( ! entries.containsKey(resource.name))
-            entries.put(resource.name, new ArrayList<>());
+            entries.put(resource.name, new ArrayList<DnsPacketResource>());
         entries.get(resource.name).add(resource);
     }
 
@@ -106,20 +117,18 @@ public class MulticastDnsServer extends ThreadedUDPNetwork implements ThreadedUD
 
             // Just handle queries and no responses
             if ( ! dnsPacket.getHeader().flagQueryResponse){
-                for (DnsPacketQuestion question : dnsPacket.getQuestions()){
-                	if (question.name == null) continue;
-                	
-                	switch(question.type){
-                	case DnsConstants.TYPE.PTR:
-                		if (question.name.startsWith("_service")){
-                			
-                		}
-                		else if (entries.containsKey(question.name)){
-		                    // Respond with entries
-		
-		                }
-		                break;
-                	}
+                DnsPacket response = handleReceivedPacket(dnsPacket);
+                if (response != null){
+                    ByteArrayOutputStream outBuffer = new ByteArrayOutputStream();
+                    BinaryStructOutputStream out = new BinaryStructOutputStream(outBuffer);
+                    response.write(out);
+                    out.close();
+
+                    DatagramPacket outPacket = new DatagramPacket(
+                            outBuffer.toByteArray(), outBuffer.size(),
+                            InetAddress.getByName( MDNS_MULTICAST_ADDR ),
+                            MDNS_MULTICAST_PORT );
+                    send(outPacket);
                 }
             }
         } catch (IOException e){
@@ -127,4 +136,38 @@ public class MulticastDnsServer extends ThreadedUDPNetwork implements ThreadedUD
         }
     }
 
+    protected DnsPacket handleReceivedPacket(DnsPacket request){
+        DnsPacket response = new DnsPacket();
+        response.getHeader().setDefaultResponseData();
+        for (DnsPacketQuestion question : request.getQuestions()){
+            if (question.name == null) continue;
+            switch (question.type){
+
+                // Normal Domain Name Resolution
+                case DnsConstants.TYPE.A:
+                    if (entries.containsKey(question.name)){
+                        response.addAnswerRecord(entries.get(question.name));
+                    }
+                    break;
+
+                // Service Name Resolution
+                case DnsConstants.TYPE.PTR:
+                    if (question.name.startsWith("_service.")){
+                        String postFix = question.name.substring(9);
+                        for (String domain : entries.keySet()){
+                            if (domain.endsWith(postFix))
+                                response.addAnswerRecord(entries.get(domain));
+                        }
+                    } else if (entries.containsKey(question.name)){
+                        response.addAnswerRecord(entries.get(question.name));
+                    }
+                    break;
+            }
+        }
+        if (response.getAnswerRecords().isEmpty() &&
+                response.getNameServers().isEmpty() &&
+                response.getAdditionalRecords().isEmpty())
+            return null;
+        return response;
+    }
 }

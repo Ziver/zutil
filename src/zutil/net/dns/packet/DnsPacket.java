@@ -56,6 +56,10 @@ public class DnsPacket {
         answerRecords.add(resource);
         header.countAnswerRecord = answerRecords.size();
     }
+    public void addAnswerRecord(List<DnsPacketResource> resources){
+        answerRecords.addAll(resources);
+        header.countAnswerRecord = answerRecords.size();
+    }
     public void addNameServer(DnsPacketResource resource){
         nameServers.add(resource);
         header.countNameServer = nameServers.size();

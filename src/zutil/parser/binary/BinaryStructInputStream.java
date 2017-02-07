@@ -52,9 +52,15 @@ public class BinaryStructInputStream {
      * Parses a byte array and assigns all fields in the struct
      */
     public static int read(BinaryStruct struct, byte[] data) {
+        return read(struct, data, 0, data.length);
+    }
+    /**
+     * Parses a byte array and assigns all fields in the struct
+     */
+    public static int read(BinaryStruct struct, byte[] data, int offset, int length) {
         int read = 0;
         try {
-            ByteArrayInputStream buffer = new ByteArrayInputStream(data);
+            ByteArrayInputStream buffer = new ByteArrayInputStream(data, offset, length);
             BinaryStructInputStream in = new BinaryStructInputStream(buffer);
             read = in.read(struct);
         } catch (Exception e){
