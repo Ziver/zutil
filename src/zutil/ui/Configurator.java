@@ -47,6 +47,11 @@ import java.util.logging.Logger;
  * object the {@link Configurator#setValues(DataNode)} or {@link Configurator#setValues(Map)}
  * can be used to set the individual fields and finally call {@link Configurator#applyConfiguration()}
  * to configure the target object.
+ * <br />
+ * External listener can be registered to be called before or after configuration changes
+ * by implementing {@link PreConfigurationActionListener} or {@link PostConfigurationActionListener}.
+ * The configured object will autmatically be registered as a listener if it also implements
+ * these interfaces.
  *
  * <br>
  * Supported field types: String, int, boolean, enum
@@ -248,6 +253,7 @@ public class Configurator<T> {
 
             if     (f.getType() == String.class)    type = ConfigType.STRING;
             else if(f.getType() == int.class)       type = ConfigType.INT;
+            else if(f.getType() == double.class)    type = ConfigType.INT;
             else if(f.getType() == boolean.class)   type = ConfigType.BOOLEAN;
             else if(f.getType().isEnum())           type = ConfigType.ENUM;
             else
@@ -298,7 +304,11 @@ public class Configurator<T> {
                 case STRING:
                     value = v; break;
                 case INT:
-                    value = Integer.parseInt(v); break;
+                    if (field.getType() == double.class)
+                        value = Double.parseDouble(v);
+                    else
+                        value = Integer.parseInt(v);
+                    break;
                 case BOOLEAN:
                     value = Boolean.parseBoolean(v); break;
                 case ENUM:

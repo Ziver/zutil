@@ -48,7 +48,7 @@ public abstract class DBBeanObjectDSO<T> extends DBBean{
             }
 
             if (config != null && !config.isEmpty()) {
-                Configurator<T> configurator = new Configurator<>(cachedObj);
+                Configurator<T> configurator = getObjectConfigurator();
                 configurator.setValues(JSONParser.read(config));
                 configurator.applyConfiguration();
             }
@@ -60,7 +60,7 @@ public abstract class DBBeanObjectDSO<T> extends DBBean{
         if (cachedObj == null)
             this.config = null;
         else {
-            Configurator<T> configurator = new Configurator<>(cachedObj);
+            Configurator<T> configurator = getObjectConfigurator();
             this.config = JSONWriter.toString(configurator.getValuesAsNode());
         }
         super.save(db);
@@ -95,12 +95,16 @@ public abstract class DBBeanObjectDSO<T> extends DBBean{
         setObjectClass(clazz.getName());
     }
 
-    protected void setObjectClass(String clazz){
+    public void setObjectClass(String clazz){
         if (this.type == null || !this.type.equals(type)) {
+            // TODO: check if clazz is subclass of T
             setObject(null);
             this.type = clazz;
+            postUpdateAction(); // instantiate cached object
         }
     }
 
-
+    public Configurator<T> getObjectConfigurator(){
+        return new Configurator<>(cachedObj);
+    }
 }

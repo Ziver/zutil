@@ -27,6 +27,8 @@ package zutil;
 /**
  * This class is a timer, it will track time and
  * timeout after a specific amount of time.
+ * <br>
+ * Note that the {@link #start()} method needs to be called for the timer to start.
  *
  * Created by Ziver on 2015-07-15.
  */
@@ -37,6 +39,9 @@ public class Timer {
     private long timestamp;
 
 
+    /**
+     * Creates a new timer that in reset state.
+     */
     public Timer(long milisec){
         this.period = milisec;
         reset();
