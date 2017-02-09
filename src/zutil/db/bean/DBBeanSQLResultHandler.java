@@ -254,6 +254,8 @@ public class DBBeanSQLResultHandler<T> implements SQLResultHandler<T>{
 							subobj = DBBean.load(db, (Class<? extends DBBean>)field.getType(), subid);
 						obj.setFieldValue(field, subobj);
 					}
+					else
+						logger.warning("No DB available to read sub beans");
 				}
 				// A list of DBBeans
 				else if( List.class.isAssignableFrom( field.getType() ) && 
@@ -266,8 +268,7 @@ public class DBBeanSQLResultHandler<T> implements SQLResultHandler<T>{
 						String idcol = (linkTable.idColumn().isEmpty() ? bean_config.tableName : linkTable.idColumn() );
 
 						// Load list from link table
-						//String subsql = "SELECT * FROM "+linkTableName+" NATURAL JOIN "+subConfig.tableName+" WHERE "+idcol+"=?";
-						String subsql = "SELECT obj.* FROM "+linkTableName+" as link, "+subTable+" as obj WHERE obj."+idcol+"=? AND obj."+bean_config.idColumn+"=link.id";
+						String subsql = "SELECT subObjTable.* FROM "+linkTableName+" as linkTable, "+subTable+" as subObjTable WHERE linkTable."+idcol+"=? AND linkTable."+subConfig.idColumn+"=subObjTable."+subConfig.idColumn;
 						logger.finest("List Load Query: "+subsql);
 						PreparedStatement subStmt = db.getPreparedStatement( subsql );
 						subStmt.setObject(1, obj.getId() );
@@ -275,6 +276,8 @@ public class DBBeanSQLResultHandler<T> implements SQLResultHandler<T>{
 								DBBeanSQLResultHandler.createList(linkTable.beanClass(), db));
 						obj.setFieldValue(field, list);
 					}
+					else
+						logger.warning("No DB available to read sub beans");
 				}
 				// Normal field
 				else				
