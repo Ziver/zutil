@@ -67,7 +67,7 @@ class DBBeanConfig{
      * Caches the fields
      */
     private static void initBeanConfig(Class<? extends DBBean> c){
-        logger.fine("Initiating new BeanConfig( "+c.getName()+" )");
+        //logger.fine("Initiating new BeanConfig( "+c.getName()+" )");
         DBBeanConfig config = new DBBeanConfig();
         // Find the table name
         DBBean.DBTable tableAnn = c.getAnnotation(DBBean.DBTable.class);

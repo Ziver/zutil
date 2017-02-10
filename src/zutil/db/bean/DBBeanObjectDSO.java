@@ -107,4 +107,12 @@ public abstract class DBBeanObjectDSO<T> extends DBBean{
     public Configurator<T> getObjectConfigurator(){
         return new Configurator<>(cachedObj);
     }
+
+
+    public String toString(){
+        Object obj = getObject();
+        if (obj != null)
+            return obj.toString();
+        return "null (DSO: "+ super.toString() +")";
+    }
 }
