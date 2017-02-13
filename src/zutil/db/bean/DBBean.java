@@ -238,12 +238,12 @@ public abstract class DBBean {
 
 					List<DBBean> list = (List<DBBean>)getFieldValue(field);
 					if( list != null ){
-						DBLinkTable linkTable = field.getAnnotation( DBLinkTable.class );
-						String subTable = linkTable.table();
-						String idCol = (linkTable.idColumn().isEmpty() ? config.tableName : linkTable.idColumn() );
+						DBLinkTable linkTableAnnotation = field.getAnnotation( DBLinkTable.class );
+						String linkTable = linkTableAnnotation.table();
+						String idCol = (linkTableAnnotation.idColumn().isEmpty() ? config.tableName : linkTableAnnotation.idColumn() );
 						String subIdCol = "id";
 
-						DBBeanConfig subConfig = null;
+						DBBeanConfig subObjConfig = null;
 						for(DBBean subObj : list){
 							// Save the sub bean
 							if( recursive || subObj.getId() == null )
@@ -253,17 +253,17 @@ public abstract class DBBean {
 								continue;
 							}
 							// Get the Sub object configuration
-							if(subConfig == null){
-								subConfig = DBBeanConfig.getBeanConfig( subObj.getClass() );
-								subIdCol = subConfig.idColumn;
+							if(subObjConfig == null){
+								subObjConfig = DBBeanConfig.getBeanConfig( subObj.getClass() );
+								subIdCol = subObjConfig.idColumn;
 							}
 							// Save links in link table
 							String sql;
-							if( subTable.equals(subConfig.tableName) )
-								sql = "UPDATE "+subTable+" SET "+idCol+"=? WHERE "+subIdCol+"=?";
-							else
-								sql = "REPLACE INTO "+subTable+" SET "+idCol+"=?, "+subIdCol+"=?";
-							logger.finest("Save Bean("+c.getName()+", id: "+subObj.getId()+") query: "+sql);
+							if(linkTable.equals(subObjConfig.tableName))
+								sql = "UPDATE "+linkTable+" SET "+idCol+"=? WHERE "+subIdCol+"=?";
+							else // TODO: REPLACE will probably not work here
+								sql = "REPLACE INTO "+linkTable+" ("+idCol+", "+subIdCol+") VALUES(?, ?)";
+							logger.finest("Save sub Bean("+c.getName()+", id: "+subObj.getId()+") query: "+sql);
 							PreparedStatement subStmt = db.getPreparedStatement( sql );
 							subStmt.setLong(1, this.id );
 							subStmt.setLong(2, subObj.getId() );

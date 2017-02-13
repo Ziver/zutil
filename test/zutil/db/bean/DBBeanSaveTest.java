@@ -180,7 +180,7 @@ public class DBBeanSaveTest {
                 "parent_id INTEGER, " +
                 "intField INTEGER);");
 
-        ParentTestClass obj = new ParentTestClass();
+        ParentLinkTestClass obj = new ParentLinkTestClass();
         SubObjectTestClass subObj = new SubObjectTestClass();
         subObj.intField = 1337;
         obj.subobjs.add(subObj);
