@@ -25,6 +25,7 @@
 package zutil;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
@@ -128,12 +129,21 @@ public class StringUtil {
         return str.reverse().toString();
     }
 
+
+	/**
+	 * @param   delimiter   a String delimiter that will be added between every entry in the list
+	 * @param   array       a array of object that toString() will be called on
+	 * @return a String containing all entries in the list with the specified delimiter in between entries
+	 */
+	public static <T> String join(String delimiter, T... array){
+		return join(delimiter, Arrays.asList(array));
+	}
     /**
-     * @param   list        a list of object that toString() will be called on
      * @param   delimiter   a String delimiter that will be added between every entry in the list
+	 * @param   list        a list of object that toString() will be called on
      * @return a String containing all entries in the list with the specified delimiter in between entries
      */
-	public static String join(Iterable<?> list, String delimiter){
+	public static String join(String delimiter, Iterable<?> list){
         StringBuilder str = new StringBuilder();
         Iterator<?> it = list.iterator();
         if(it.hasNext()) {

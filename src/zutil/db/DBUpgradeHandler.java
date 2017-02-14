@@ -206,7 +206,7 @@ public class DBUpgradeHandler {
 
                     // Restoring data
                     logger.fine(String.format("Forced Upgrade: Restoring data for table: '%s'", table));
-                    String cols = StringUtil.join(refStruct, ",");
+                    String cols = StringUtil.join(",", refStruct);
                     target.exec(String.format(
                             "INSERT INTO %s (%s) SELECT %s FROM %s",
                             table, cols, cols, backupTable));

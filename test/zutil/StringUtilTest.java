@@ -72,9 +72,11 @@ public class StringUtilTest {
 
 	@Test
 	public void joinTest(){
-		assertEquals("", StringUtil.join(Arrays.asList(), ","));
-		assertEquals("1,2,3,4,5", StringUtil.join(Arrays.asList(1,2,3,4,5), ","));
-        assertEquals("animal,monkey,dog", StringUtil.join(Arrays.asList("animal", "monkey", "dog"), ","));
-        assertEquals("12345", StringUtil.join(Arrays.asList(1,2,3,4,5), ""));
+		assertEquals("", StringUtil.join(",", Arrays.asList()));
+		assertEquals("1,2,3,4,5", StringUtil.join(",", 1,2,3,4,5));
+		assertEquals("1,2,3,4,5", StringUtil.join(",", Arrays.asList(1,2,3,4,5)));
+        assertEquals("animal,monkey,dog", StringUtil.join(",", "animal", "monkey", "dog"));
+        assertEquals("animal,monkey,dog", StringUtil.join(",", Arrays.asList("animal", "monkey", "dog")));
+        assertEquals("12345", StringUtil.join("", 1,2,3,4,5));
 	}
 }
