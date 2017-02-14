@@ -3,16 +3,15 @@ package zutil.db.bean;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import zutil.db.DBConnection;
-import zutil.db.handler.SimpleSQLResult;
+import zutil.db.bean.DBBeanTestBase.*;
 import zutil.log.CompactLogFormatter;
 import zutil.log.LogUtil;
 
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.logging.Level;
 
 import static org.junit.Assert.*;
+import static zutil.db.bean.DBBeanTestBase.*;
 
 /**
  *
@@ -31,21 +30,9 @@ public class DBBeanSaveTest {
     ////////////////////////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////
 
-    private static class SimpleTestClass extends DBBean{
-        int intField;
-        String strField;
-    }
-
     @Test
     public void simpleClassCreate() throws SQLException {
-        db.exec("CREATE TABLE SimpleTestClass (" +
-                "id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, " +
-                "intField INTEGER, " +
-                "strField TEXT);");
-
-        SimpleTestClass obj = new SimpleTestClass();
-        obj.intField = 1234;
-        obj.strField = "helloworld";
+        SimpleTestClass obj = simpleClassInit(db);
         obj.save(db);
 
         assertEquals(1234,
@@ -56,14 +43,7 @@ public class DBBeanSaveTest {
 
     @Test
     public void simpleClassUpdate() throws SQLException {
-        db.exec("CREATE TABLE SimpleTestClass (" +
-                "id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, " +
-                "intField INTEGER, " +
-                "strField TEXT);");
-
-        SimpleTestClass obj = new SimpleTestClass();
-        obj.intField = 1234;
-        obj.strField = "helloworld";
+        SimpleTestClass obj = simpleClassInit(db);
         obj.save(db);
         obj.intField = 1337;
         obj.strField = "monkey";
@@ -78,24 +58,9 @@ public class DBBeanSaveTest {
     ////////////////////////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////
 
-    @DBBean.DBTable("aliasTable")
-    private static class AliasFieldsTestClass extends DBBean{
-        @DBColumn("aliasIntField")
-        int intField;
-        @DBColumn("aliasStrField")
-        String strField;
-    }
-
     @Test
     public void aliasFieldsCreate() throws SQLException {
-        db.exec("CREATE TABLE aliasTable (" +
-                "id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, " +
-                "aliasIntField INTEGER, " +
-                "aliasStrField TEXT);");
-
-        AliasFieldsTestClass obj = new AliasFieldsTestClass();
-        obj.intField = 1234;
-        obj.strField = "helloworld";
+        AliasFieldsTestClass obj = aliasFieldsInit(db);
         obj.save(db);
 
         assertEquals(1234,
@@ -106,14 +71,7 @@ public class DBBeanSaveTest {
 
     @Test
     public void aliasFieldsUpdate() throws SQLException {
-        db.exec("CREATE TABLE aliasTable (" +
-                "id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, " +
-                "aliasIntField INTEGER, " +
-                "aliasStrField TEXT);");
-
-        AliasFieldsTestClass obj = new AliasFieldsTestClass();
-        obj.intField = 1234;
-        obj.strField = "helloworld";
+        AliasFieldsTestClass obj = aliasFieldsInit(db);
         obj.save(db);
         obj.intField = 1337;
         obj.strField = "monkey";
@@ -128,31 +86,25 @@ public class DBBeanSaveTest {
     ////////////////////////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////
 
-    @DBBean.DBTable("parent")
-    private static class ParentTestClass extends DBBean{
-        @DBLinkTable(table = "subobject", idColumn = "parent_id",beanClass = SubObjectTestClass.class)
-        List<SubObjectTestClass> subobjs = new ArrayList<>();
-    }
-    @DBBean.DBTable("subobject")
-    private static class SubObjectTestClass extends DBBean{
-        int intField;
+    @Test
+    public void subObjectCreate() throws SQLException {
+        ParentTestClass obj = subObjectInit(db);
+        obj.save(db);
+
+        assertEquals(1234,
+                getColumnValue(db, "subobject", "intField"));
+        assertEquals(1,
+                getColumnValue(db, "subobject", "parent_id"));
     }
 
     @Test
-    public void subObjectCreate() throws SQLException {
-        db.exec("CREATE TABLE parent (" +
-                "id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT);");
-        db.exec("CREATE TABLE subobject (" +
-                "id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, " +
-                "parent_id INTEGER, " +
-                "intField INTEGER);");
-
-        ParentTestClass obj = new ParentTestClass();
-        SubObjectTestClass subObj = new SubObjectTestClass();
-        subObj.intField = 1337;
-        obj.subobjs.add(subObj);
+    public void subObjectUpdate() throws SQLException {
+        ParentTestClass obj = subObjectInit(db);
+        obj.save(db);
+        obj.subobjs.get(0).intField = 1337;
         obj.save(db);
 
+        assertEquals("Check for duplicates",1, getRowCount(db, "subobject"));
         assertEquals(1337,
                 getColumnValue(db, "subobject", "intField"));
         assertEquals(1,
@@ -162,30 +114,28 @@ public class DBBeanSaveTest {
     ////////////////////////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////
 
-    @DBBean.DBTable("parent")
-    private static class ParentLinkTestClass extends DBBean{
-        @DBLinkTable(table = "link", idColumn = "parent_id",beanClass = SubObjectTestClass.class)
-        List<SubObjectTestClass> subobjs = new ArrayList<>();
+    @Test
+    public void subLinkObjectCreate() throws SQLException {
+        ParentLinkTestClass obj = subLinkObjectInit(db);
+        obj.save(db);
+
+        assertEquals(1,
+                getColumnValue(db, "link", "parent_id"));
+        assertEquals(1,
+                getColumnValue(db, "link", "id"));
+        assertEquals(1234,
+                getColumnValue(db, "subobject", "intField"));
     }
 
     @Test
-    public void subLinkObjectCreate() throws SQLException {
-        db.exec("CREATE TABLE parent (" +
-                "id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT);");
-        db.exec("CREATE TABLE link (" +
-                "parent_id INTEGER, " +
-                "id INTEGER);");
-        db.exec("CREATE TABLE subobject (" +
-                "id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, " +
-                "parent_id INTEGER, " +
-                "intField INTEGER);");
-
-        ParentLinkTestClass obj = new ParentLinkTestClass();
-        SubObjectTestClass subObj = new SubObjectTestClass();
-        subObj.intField = 1337;
-        obj.subobjs.add(subObj);
+    public void subLinkObjectUpdate() throws SQLException {
+        ParentLinkTestClass obj = subLinkObjectInit(db);
+        obj.save(db);
+        obj.subobjs.get(0).intField = 1337;
         obj.save(db);
 
+        assertEquals("Check for duplicates",1, getRowCount(db, "subobject"));
+        assertEquals("Check for duplicate links",1, getRowCount(db, "link"));
         assertEquals(1,
                 getColumnValue(db, "link", "parent_id"));
         assertEquals(1,
@@ -194,10 +144,4 @@ public class DBBeanSaveTest {
                 getColumnValue(db, "subobject", "intField"));
     }
 
-    ////////////////////////////////////////////////////////////////////////////////////////////
-    ////////////////////////////////////////////////////////////////////////////////////////////
-
-    public static Object getColumnValue(DBConnection db, String table, String column) throws SQLException {
-        return db.exec("SELECT "+column+" FROM "+table, new SimpleSQLResult<>());
-    }
 }

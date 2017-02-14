@@ -29,41 +29,24 @@ import zutil.db.SQLResultHandler;
 import zutil.db.bean.DBBean.DBLinkTable;
 import zutil.log.LogUtil;
 
-import java.lang.ref.WeakReference;
 import java.lang.reflect.Field;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
+
 
 public class DBBeanSQLResultHandler<T> implements SQLResultHandler<T>{
 	private static final Logger logger = LogUtil.getLogger();
-	/** This is the time to live for the cached items **/
-	public static final long CACHE_DATA_TTL = 1000*60*5; // 5 min in ms
-	/** A cache for detecting recursion **/
-	protected static Map<Class<?>, Map<Long,DBBeanCache>> cache =
-		new ConcurrentHashMap<>();
-	private static Timer timer;
-
-    static {
-        enableBeanGBC(true); // Initiate DBBeanGarbageCollector
-    }
-
-	/**
-	 * A cache container that contains a object and last read time
-	 */
-	private static class DBBeanCache{
-		public long updateTimestamp;
-		public WeakReference<DBBean> bean;
-	}
 	
-	private Class<? extends DBBean> bean_class;
-	private DBBeanConfig bean_config;
+	private Class<? extends DBBean> beanClass;
+	private DBBeanConfig beanConfig;
 	private DBConnection db;
 	private boolean list;
+
+
 
 	/**
 	 * Creates a new instance of this class that returns only one bean
@@ -83,7 +66,7 @@ public class DBBeanSQLResultHandler<T> implements SQLResultHandler<T>{
 	 * @return			a new instance of this class
 	 */
 	public static <C extends DBBean> DBBeanSQLResultHandler<C> create(Class<C> cl, DBConnection db){		
-		return new DBBeanSQLResultHandler<C>(cl, db, false);
+		return new DBBeanSQLResultHandler<>(cl, db, false);
 	}
 
 	/**
@@ -93,7 +76,7 @@ public class DBBeanSQLResultHandler<T> implements SQLResultHandler<T>{
 	 * @return			a new instance of this class
 	 */
 	public static <C extends DBBean> DBBeanSQLResultHandler<List<C>> createList(Class<C> cl){
-		return new DBBeanSQLResultHandler<List<C>>(cl, null, true);
+		return new DBBeanSQLResultHandler<>(cl, null, true);
 	}
 
 	/**
@@ -104,8 +87,9 @@ public class DBBeanSQLResultHandler<T> implements SQLResultHandler<T>{
 	 * @return			a new instance of this class
 	 */
 	public static <C extends DBBean> DBBeanSQLResultHandler<List<C>> createList(Class<C> cl, DBConnection db){
-		return new DBBeanSQLResultHandler<List<C>>(cl, db, true);
+		return new DBBeanSQLResultHandler<>(cl, db, true);
 	}
+
 
 	/**
 	 * Creates a new instance of this class
@@ -115,68 +99,13 @@ public class DBBeanSQLResultHandler<T> implements SQLResultHandler<T>{
 	 * @param	list	is if the handler should return a list of beans instead of one
 	 */
 	protected DBBeanSQLResultHandler(Class<? extends DBBean> cl, DBConnection db, boolean list) {
-		this.bean_class = cl;
+		this.beanClass = cl;
 		this.list = list;
 		this.db = db;
-		this.bean_config = DBBeanConfig.getBeanConfig( cl );
+		this.beanConfig = DBBeanConfig.getBeanConfig( cl );
 	}
 
-	/**
-	 * This function cancels the internal cache garbage collector in DBBean.
-     * GBC is enabled by default
-	 */
-	private static void enableBeanGBC(boolean enable){
-        if(enable){
-            if( timer == null ){
-                timer = new Timer( true ); // Run as daemon
-                timer.schedule( new DBBeanGarbageCollector(), CACHE_DATA_TTL, CACHE_DATA_TTL *2 );
-				logger.fine("Bean garbage collection daemon enabled");
-            }
-        }
-        else {
-            if (timer != null) {
-                timer.cancel();
-                timer = null;
-				logger.fine("Bean garbage collection daemon disabled");
-            }
-        }
-	}
 
-	/**
-	 * This class acts as an garbage collector that removes old DBBeans
-	 * 
-	 * @author Ziver
-	 */
-	private static class DBBeanGarbageCollector extends TimerTask {
-		public void run(){
-			if( cache == null ){
-				logger.severe("DBBeanSQLResultHandler not initialized, stopping DBBeanGarbageCollector timer.");
-				this.cancel();
-				return;
-			}
-			
-			int removed = 0;
-			for(Object classKey : cache.keySet()){
-				if( classKey == null ) continue;
-					
-				Map<Long,DBBeanCache> class_cache = cache.get(classKey);
-				for(Iterator<Map.Entry<Long, DBBeanCache>> it = class_cache.entrySet().iterator(); it.hasNext(); ) {
-					Map.Entry<Long, DBBeanCache> entry = it.next();
-					if( entry.getKey() == null ) continue;
-
-					// Check if session is still valid
-					if( entry.getValue().bean.get() == null ){
-						it.remove();
-						removed++;
-					}
-				}
-			}
-
-			if (removed > 0)
-            	logger.info("DBBean GarbageCollector has cleared "+removed+" beans from cache.");
-		}
-	}
-	
 	/**
 	 *  Is called to handle a result from a query.
 	 * 
@@ -212,13 +141,15 @@ public class DBBeanSQLResultHandler<T> implements SQLResultHandler<T>{
 	protected DBBean createBean(ResultSet result) throws SQLException{
 		try {
 			Long id = result.getLong( "id" );
-			DBBean obj = getCachedDBBean(bean_class, id, result);
-			if( obj != null )
-				return obj;
-			logger.fine("Creating new Bean("+bean_class.getName()+") with id: "+id);
-			obj = bean_class.newInstance();
-            obj.id = id; // Set id field
-			cacheDBBean(obj);
+			// Check cache first
+			DBBean obj = DBBeanCache.get(beanClass, id, result);
+			if ( obj == null ) {
+                // Cache miss create a new object
+                logger.fine("Creating new Bean(" + beanClass.getName() + ") with id: " + id);
+                obj = beanClass.newInstance();
+                obj.setId(id);
+                DBBeanCache.add(obj);
+            }
 			
 			// Update fields
 			updateBean( result, obj );
@@ -238,125 +169,60 @@ public class DBBeanSQLResultHandler<T> implements SQLResultHandler<T>{
 	 */
 	@SuppressWarnings("unchecked")
 	protected void updateBean(ResultSet result, DBBean obj) throws SQLException{
-		try {
-			logger.fine("Updating Bean("+bean_class.getName()+") with id: "+obj.id);
-			obj.processing_update = true;
-			// Get the rest
-			for( Field field : bean_config.fields ){
-				String name = DBBeanConfig.getFieldName(field);
+		if (obj.readLock.tryLock()) {
+            try {
+                logger.fine("Updating Bean(" + beanClass.getName() + ") with id: " + obj.getId());
+                // Get the rest
+                for (Field field : beanConfig.fields) {
+                    String name = DBBeanConfig.getFieldName(field);
 
-				// Another DBBean class
-				if( DBBean.class.isAssignableFrom( field.getType() )){
-					if(db != null){
-						Long subid = result.getLong( name );
-						DBBean subobj = getCachedDBBean( field.getType(), subid );
-						if( subobj == null )
-							subobj = DBBean.load(db, (Class<? extends DBBean>)field.getType(), subid);
-						obj.setFieldValue(field, subobj);
-					}
-					else
-						logger.warning("No DB available to read sub beans");
-				}
-				// A list of DBBeans
-				else if( List.class.isAssignableFrom( field.getType() ) && 
-						field.getAnnotation( DBLinkTable.class ) != null){
-					if(db != null){
-						DBLinkTable linkTable = field.getAnnotation( DBLinkTable.class );
-						DBBeanConfig subConfig = DBBeanConfig.getBeanConfig( linkTable.beanClass() );
-						String linkTableName = linkTable.table();
-						String subTable = subConfig.tableName;
-						String idcol = (linkTable.idColumn().isEmpty() ? bean_config.tableName : linkTable.idColumn() );
-
-						// Load list from link table
-						String subsql = "SELECT subObjTable.* FROM "+linkTableName+" as linkTable, "+subTable+" as subObjTable WHERE linkTable."+idcol+"=? AND linkTable."+subConfig.idColumn+"=subObjTable."+subConfig.idColumn;
-						logger.finest("List Load Query: "+subsql);
-						PreparedStatement subStmt = db.getPreparedStatement( subsql );
-						subStmt.setObject(1, obj.getId() );
-						List<? extends DBBean> list = DBConnection.exec(subStmt, 
-								DBBeanSQLResultHandler.createList(linkTable.beanClass(), db));
-						obj.setFieldValue(field, list);
-					}
-					else
-						logger.warning("No DB available to read sub beans");
-				}
-				// Normal field
-				else				
-					obj.setFieldValue(field, result.getObject(name));
-			}
-		} finally{
-			obj.processing_update = false;
-		}
-
-		obj.postUpdateAction();
-	}
-
-	/**
-	 * Will check the cache if the given object exists
-	 * 
-	 * @param 		c			is the class of the bean
-	 * @param 		id			is the id of the bean
-	 * @return					a cached DBBean object, or null if there is no cached object or if the cache is to old
-	 */
-	protected DBBean getCachedDBBean(Class<?> c, Long id){
-		try{
-			return getCachedDBBean( c, id, null );
-		}catch(SQLException e){
-			throw new RuntimeException("This exception should not be thrown, Something ent ready wrong!", e);
-		}
-	}
-	
-	/**
-	 * Will check the cache if the given object exists and will update it if its old
-	 * 
-	 * @param 		c			is the class of the bean
-	 * @param 		id			is the id of the bean
-	 * @param		result		is the ResultSet for this object, the object will be updated from this ResultSet if the object is to old, there will be no update if this parameter is null
-	 * @return					a cached DBBean object, might update the cached object if its old but only if the ResultSet parameter is set
-	 */
-	protected DBBean getCachedDBBean(Class<?> c, Long id, ResultSet result) throws SQLException{
-		if( cache.containsKey(c) ){
-			DBBeanCache cacheItem = cache.get(c).get(id);
-			// Check if the cache is valid
-			if( cacheItem != null){
-                DBBean bean = cacheItem.bean.get();
-                if( bean != null) {
-                    // The cache is old, update and return it
-                    if (cacheItem.updateTimestamp + CACHE_DATA_TTL < System.currentTimeMillis()) {
-                        // There is no ResultSet to update from
-                        if (result == null)
-                            return null;
-                        // Only update object if there is no update running now
-                        if (!bean.processing_update) {
-                            logger.finer("Bean(" + c.getName() + ") cache to old for id: " + id);
-                            updateBean(result, bean);
-                        }
+                    // Another DBBean class
+                    if (DBBean.class.isAssignableFrom(field.getType())) {
+                        if (db != null) {
+                            Long subid = result.getLong(name);
+                            DBBean subobj = DBBeanCache.get(field.getType(), subid);
+                            if (subobj == null)
+                                subobj = DBBean.load(db, (Class<? extends DBBean>) field.getType(), subid);
+                            obj.setFieldValue(field, subobj);
+                        } else
+                            logger.warning("No DB available to read sub beans");
                     }
-                    return bean;
+                    // A list of DBBeans
+                    else if (List.class.isAssignableFrom(field.getType()) &&
+                            field.getAnnotation(DBLinkTable.class) != null) {
+                        if (db != null) {
+                            DBLinkTable linkTable = field.getAnnotation(DBLinkTable.class);
+                            DBBeanConfig subConfig = DBBeanConfig.getBeanConfig(linkTable.beanClass());
+                            String linkTableName = linkTable.table();
+                            String subTable = subConfig.tableName;
+                            String idcol = (linkTable.idColumn().isEmpty() ? beanConfig.tableName : linkTable.idColumn());
+
+                            // Load list from link table
+                            String subsql = "SELECT subObjTable.* FROM " + linkTableName + " as linkTable, " + subTable + " as subObjTable WHERE linkTable." + idcol + "=? AND linkTable." + subConfig.idColumn + "=subObjTable." + subConfig.idColumn;
+                            logger.finest("List Load Query: " + subsql);
+                            PreparedStatement subStmt = db.getPreparedStatement(subsql);
+                            subStmt.setObject(1, obj.getId());
+                            List<? extends DBBean> list = DBConnection.exec(subStmt,
+                                    DBBeanSQLResultHandler.createList(linkTable.beanClass(), db));
+                            obj.setFieldValue(field, list);
+                        } else
+                            logger.warning("No DB available to read sub beans");
+                    }
+                    // Normal field
+                    else {
+                        obj.setFieldValue(field, result.getObject(name));
+                    }
                 }
-			}
-			// The cache is null
-			cache.get(c).remove(id);
-		}
-		logger.finer("Bean("+c.getName()+") cache miss for id: "+id);
-		return null;
+
+                obj.postUpdateAction();
+            } finally {
+                obj.readLock.unlock();
+            }
+        } else {
+            obj.readLock.lock();
+            obj.readLock.unlock();
+        }
 	}
-	
-	/**
-	 * Adds the given object to the cache
-	 * 
-	 * @param 		obj		is the object to cache
-	 */
-	protected static synchronized void cacheDBBean(DBBean obj) {
-		DBBeanCache cacheItem = new DBBeanCache();
-		cacheItem.updateTimestamp = System.currentTimeMillis();
-		cacheItem.bean = new WeakReference<DBBean>(obj);
-		if( cache.containsKey(obj.getClass()) )
-			cache.get(obj.getClass()).put(obj.getId(), cacheItem);
-		else{
-			Map<Long, DBBeanCache> map = new ConcurrentHashMap<Long, DBBeanCache>();
-			map.put(obj.getId(), cacheItem);
-			cache.put(obj.getClass(), map);
-		}
-	}
+
 	
 }
