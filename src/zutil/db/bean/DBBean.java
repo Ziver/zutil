@@ -267,7 +267,7 @@ public abstract class DBBean {
                                     sql = "UPDATE " + linkTable + " SET " + idCol + "=? WHERE " + subIdCol + "=?";
                                 else
                                     sql = "INSERT INTO " + linkTable + " (" + idCol + ", " + subIdCol + ") SELECT ?,? " +
-                                            "WHERE NOT EXISTS(SELECT 1 FROM " + linkTable + " WHERE " + idCol + "=? AND " + idCol + "=?);";
+                                            "WHERE NOT EXISTS(SELECT 1 FROM " + linkTable + " WHERE " + idCol + "=? AND " + subIdCol + "=?);";
                                 logger.finest("Save sub Bean(" + c.getName() + ", id: " + subObj.getId() + ") query: " + sql);
                                 PreparedStatement subStmt = db.getPreparedStatement(sql);
                                 subStmt.setLong(1, this.id);

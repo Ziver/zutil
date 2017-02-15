@@ -2,17 +2,20 @@ package zutil.db.bean;
 
 import zutil.StringUtil;
 import zutil.db.DBConnection;
+import zutil.db.SQLResultHandler;
 import zutil.db.handler.SimpleSQLResult;
+import zutil.log.LogUtil;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
+import java.util.logging.Logger;
 
 /**
  *
  */
 public class DBBeanTestBase {
+    private static final Logger logger = LogUtil.getLogger();
 
 
     public static class SimpleTestClass extends DBBean{
@@ -21,7 +24,7 @@ public class DBBeanTestBase {
     }
 
     public static SimpleTestClass simpleClassInit(DBConnection db) throws SQLException {
-        db.exec("CREATE TABLE SimpleTestClass (" +
+        execSql(db,"CREATE TABLE SimpleTestClass (" +
                 "id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, " +
                 "intField INTEGER, " +
                 "strField TEXT);");
@@ -44,7 +47,7 @@ public class DBBeanTestBase {
     }
 
     public static AliasFieldsTestClass aliasFieldsInit(DBConnection db) throws SQLException {
-        db.exec("CREATE TABLE aliasTable (" +
+        execSql(db,"CREATE TABLE aliasTable (" +
                 "id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, " +
                 "aliasIntField INTEGER, " +
                 "aliasStrField TEXT);");
@@ -69,9 +72,9 @@ public class DBBeanTestBase {
     }
 
     public static ParentTestClass subObjectInit(DBConnection db) throws SQLException {
-        db.exec("CREATE TABLE parent (" +
+        execSql(db,"CREATE TABLE parent (" +
                 "id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT);");
-        db.exec("CREATE TABLE subobject (" +
+        execSql(db,"CREATE TABLE subobject (" +
                 "id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, " +
                 "parent_id INTEGER, " +
                 "intField INTEGER);");
@@ -93,14 +96,13 @@ public class DBBeanTestBase {
     }
 
     public static ParentLinkTestClass subLinkObjectInit(DBConnection db) throws SQLException {
-        db.exec("CREATE TABLE parent (" +
+        execSql(db,"CREATE TABLE parent (" +
                 "id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT);");
-        db.exec("CREATE TABLE link (" +
+        execSql(db,"CREATE TABLE link (" +
                 "parent_id INTEGER, " +
                 "id INTEGER);");
-        db.exec("CREATE TABLE subobject (" +
+        execSql(db,"CREATE TABLE subobject (" +
                 "id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, " +
-                "parent_id INTEGER, " +
                 "intField INTEGER);");
 
         ParentLinkTestClass obj = new ParentLinkTestClass();
@@ -114,15 +116,27 @@ public class DBBeanTestBase {
     ////////////////////////////////////////////////////////////////////////////////////////////
 
     public static Object getColumnValue(DBConnection db, String table, String column) throws SQLException {
-        return db.exec("SELECT "+column+" FROM "+table, new SimpleSQLResult<>());
+        return execSql(db, "SELECT "+column+" FROM "+table, new SimpleSQLResult<>());
+    }
+    public static Object getColumnValue(DBConnection db, String table, String id, String column) throws SQLException {
+        return execSql(db, "SELECT "+column+" FROM "+table+" WHERE id="+id, new SimpleSQLResult<>());
     }
 
     public static Object getRowCount(DBConnection db, String table) throws SQLException {
-        return db.exec("SELECT count(*) FROM "+table, new SimpleSQLResult<>());
+        return execSql(db, "SELECT count(*) FROM "+table, new SimpleSQLResult<>());
     }
 
     public static void insert(DBConnection db, String table, String... values) throws SQLException {
-        db.exec("INSERT INTO "+table+" VALUES("+
-                StringUtil.join(",", values)+");");
+        execSql(db, "INSERT INTO "+table+" VALUES("+StringUtil.join(",", values)+");");
+    }
+
+    private static void execSql(DBConnection db, String sql) throws SQLException {
+        logger.info("SQL: "+sql);
+        db.exec(sql);
+    }
+
+    private static Object execSql(DBConnection db, String sql, SQLResultHandler handler) throws SQLException {
+        logger.info("SQL RET: "+sql);
+        return db.exec(sql, handler);
     }
 }

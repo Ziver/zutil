@@ -87,6 +87,21 @@ public class DBBeanSaveTest {
     ////////////////////////////////////////////////////////////////////////////////////////////
 
     @Test
+    public void emptySubObjectCreate() throws SQLException {
+        subObjectInit(db);
+        ParentTestClass obj = new ParentTestClass();
+        obj.subobjs = null;
+        obj.save(db);
+
+        assertEquals(0, getRowCount(db, "subobject"));
+
+        obj = new ParentTestClass();
+        obj.save(db);
+
+        assertEquals(0, getRowCount(db, "subobject"));
+    }
+
+    @Test
     public void subObjectCreate() throws SQLException {
         ParentTestClass obj = subObjectInit(db);
         obj.save(db);
@@ -109,6 +124,45 @@ public class DBBeanSaveTest {
                 getColumnValue(db, "subobject", "intField"));
         assertEquals(1,
                 getColumnValue(db, "subobject", "parent_id"));
+    }
+
+    @Test
+    public void multiSubObjectCreate() throws SQLException {
+        ParentTestClass obj = subObjectInit(db);
+        obj.subobjs.add(new SubObjectTestClass());
+        obj.subobjs.add(new SubObjectTestClass());
+        obj.subobjs.get(0).intField = 1001;
+        obj.subobjs.get(1).intField = 1002;
+        obj.subobjs.get(2).intField = 1003;
+        obj.save(db);
+
+        assertEquals(3, getRowCount(db, "subobject"));
+        assertEquals(1, getColumnValue(db, "subobject", "1", "parent_id"));
+        assertEquals(1001, getColumnValue(db, "subobject", "1", "intField"));
+        assertEquals(1, getColumnValue(db, "subobject", "2", "parent_id"));
+        assertEquals(1002, getColumnValue(db, "subobject", "2", "intField"));
+        assertEquals(1, getColumnValue(db, "subobject", "3", "parent_id"));
+        assertEquals(1003, getColumnValue(db, "subobject", "3", "intField"));
+    }
+
+    @Test
+    public void multiSubObjectUpdate() throws SQLException {
+        ParentTestClass obj = subObjectInit(db);
+        obj.subobjs.add(new SubObjectTestClass());
+        obj.subobjs.add(new SubObjectTestClass());
+        obj.save(db);
+        obj.subobjs.get(0).intField = 1001;
+        obj.subobjs.get(1).intField = 1002;
+        obj.subobjs.get(2).intField = 1003;
+        obj.save(db);
+
+        assertEquals(3, getRowCount(db, "subobject"));
+        assertEquals(1, getColumnValue(db, "subobject", "1", "parent_id"));
+        assertEquals(1001, getColumnValue(db, "subobject", "1", "intField"));
+        assertEquals(1, getColumnValue(db, "subobject", "2", "parent_id"));
+        assertEquals(1002, getColumnValue(db, "subobject", "2", "intField"));
+        assertEquals(1, getColumnValue(db, "subobject", "3", "parent_id"));
+        assertEquals(1003, getColumnValue(db, "subobject", "3", "intField"));
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////
@@ -144,4 +198,44 @@ public class DBBeanSaveTest {
                 getColumnValue(db, "subobject", "intField"));
     }
 
+    @Test
+    public void multiSubLinkObjectCreate() throws SQLException {
+        ParentLinkTestClass obj = subLinkObjectInit(db);
+        obj.subobjs.add(new SubObjectTestClass());
+        obj.subobjs.add(new SubObjectTestClass());
+        obj.subobjs.get(0).intField = 1001;
+        obj.subobjs.get(1).intField = 1002;
+        obj.subobjs.get(2).intField = 1003;
+        obj.save(db);
+
+        assertEquals(3, getRowCount(db, "link"));
+        assertEquals(1, getColumnValue(db, "link", "1", "parent_id"));
+        assertEquals(1, getColumnValue(db, "link", "2", "parent_id"));
+        assertEquals(1, getColumnValue(db, "link", "3", "parent_id"));
+        assertEquals(3, getRowCount(db, "subobject"));
+        assertEquals(1001, getColumnValue(db, "subobject", "1", "intField"));
+        assertEquals(1002, getColumnValue(db, "subobject", "2", "intField"));
+        assertEquals(1003, getColumnValue(db, "subobject", "3", "intField"));
+    }
+
+    @Test
+    public void multiSubLinkObjectUpdate() throws SQLException {
+        ParentLinkTestClass obj = subLinkObjectInit(db);
+        obj.subobjs.add(new SubObjectTestClass());
+        obj.subobjs.add(new SubObjectTestClass());
+        obj.save(db);
+        obj.subobjs.get(0).intField = 1001;
+        obj.subobjs.get(1).intField = 1002;
+        obj.subobjs.get(2).intField = 1003;
+        obj.save(db);
+
+        assertEquals(3, getRowCount(db, "link"));
+        assertEquals(1, getColumnValue(db, "link", "1", "parent_id"));
+        assertEquals(1, getColumnValue(db, "link", "2", "parent_id"));
+        assertEquals(1, getColumnValue(db, "link", "3", "parent_id"));
+        assertEquals(3, getRowCount(db, "subobject"));
+        assertEquals(1001, getColumnValue(db, "subobject", "1", "intField"));
+        assertEquals(1002, getColumnValue(db, "subobject", "2", "intField"));
+        assertEquals(1003, getColumnValue(db, "subobject", "3", "intField"));
+    }
 }
