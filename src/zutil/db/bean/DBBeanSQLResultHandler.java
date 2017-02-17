@@ -26,10 +26,10 @@ package zutil.db.bean;
 
 import zutil.db.DBConnection;
 import zutil.db.SQLResultHandler;
-import zutil.db.bean.DBBean.DBLinkTable;
+import zutil.db.bean.DBBeanConfig.DBBeanFieldConfig;
+import zutil.db.bean.DBBeanConfig.DBBeanSubBeanConfig;
 import zutil.log.LogUtil;
 
-import java.lang.reflect.Field;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -55,7 +55,7 @@ public class DBBeanSQLResultHandler<T> implements SQLResultHandler<T>{
 	 * @return			a new instance of this class
 	 */
 	public static <C extends DBBean> DBBeanSQLResultHandler<C> create(Class<C> cl){		
-		return new DBBeanSQLResultHandler<C>(cl, null, false);
+		return new DBBeanSQLResultHandler<>(cl, null, false);
 	}
 
 	/**
@@ -115,7 +115,7 @@ public class DBBeanSQLResultHandler<T> implements SQLResultHandler<T>{
 	@SuppressWarnings("unchecked")
 	public T handleQueryResult(Statement stmt, ResultSet result) throws SQLException{
 		if( list ){
-			LinkedList<DBBean> bean_list = new LinkedList<DBBean>();
+			List<DBBean> bean_list = new LinkedList<>();
 			while( result.next() ){
 				DBBean obj = createBean(result);
 				bean_list.add( obj );
@@ -138,21 +138,23 @@ public class DBBeanSQLResultHandler<T> implements SQLResultHandler<T>{
 	 * @param 		result		is where the field values for the bean will bee read from, the cursor should be in front of the data
 	 * @return					a new instance of the bean
 	 */
-	protected DBBean createBean(ResultSet result) throws SQLException{
+	private DBBean createBean(ResultSet result) throws SQLException{
 		try {
 			Long id = result.getLong( "id" );
 			// Check cache first
-			DBBean obj = DBBeanCache.get(beanClass, id, result);
+			DBBean obj = DBBeanCache.get(beanClass, id);
 			if ( obj == null ) {
-                // Cache miss create a new object
+                // Cache miss create a new bean
                 logger.fine("Creating new Bean(" + beanClass.getName() + ") with id: " + id);
                 obj = beanClass.newInstance();
                 obj.setId(id);
-                DBBeanCache.add(obj);
+                updateBean( result, obj );
             }
-			
-			// Update fields
-			updateBean( result, obj );
+            else if (DBBeanCache.isOutDated(obj)){
+                // Update fields
+                logger.finer("Bean(" + beanClass.getName() + ") cache to old for id: " + id);
+                updateBean(result, obj);
+            }
 			return obj;
 		} catch (SQLException e) {
 			throw e;
@@ -164,17 +166,17 @@ public class DBBeanSQLResultHandler<T> implements SQLResultHandler<T>{
 	/**
 	 * Updates an existing bean and assigns field values from the ResultSet
 	 * 
-	 * @param 		result		is where the field values for the bean will bee read from, the cursor should be in front of the data
-	 * @param		obj			is the object that will be updated
+	 * @param 		result		is where the field values for the bean will be read from, the cursor should be in front of the data
+	 * @param		obj			is the bean that will be updated
 	 */
 	@SuppressWarnings("unchecked")
-	protected void updateBean(ResultSet result, DBBean obj) throws SQLException{
+	private void updateBean(ResultSet result, DBBean obj) throws SQLException{
 		if (obj.readLock.tryLock()) {
             try {
                 logger.fine("Updating Bean("+ beanClass.getName() +") with id: "+ obj.getId());
                 // Read fields
-                for (Field field : beanConfig.fields) {
-                    String name = DBBeanConfig.getFieldName(field);
+                for (DBBeanFieldConfig field : beanConfig.getFields()) {
+                    String name = field.getName();
 
                     // Inline DBBean class
                     if (DBBean.class.isAssignableFrom(field.getType())) {
@@ -183,32 +185,35 @@ public class DBBeanSQLResultHandler<T> implements SQLResultHandler<T>{
                             DBBean subObj = DBBeanCache.get(field.getType(), subId);
                             if (subObj == null)
                                 subObj = DBBean.load(db, (Class<? extends DBBean>) field.getType(), subId);
-                            obj.setFieldValue(field, subObj);
+                            field.setValue(obj, subObj);
                         } else
                             logger.warning("No DB available to read sub beans");
                     }
                     // Normal field
                     else {
-                        obj.setFieldValue(field, result.getObject(name));
+                        field.setValue(obj, result.getObject(name));
                     }
                 }
+                // Update cache
+                DBBeanCache.add(obj);
+
                 // Read sub beans
 				if (db != null) {
-					for (Field field : beanConfig.subBeanFields) {
-						DBLinkTable linkTable = field.getAnnotation(DBLinkTable.class);
-						DBBeanConfig subConfig = DBBeanConfig.getBeanConfig(linkTable.beanClass());
-						String linkTableName = linkTable.table();
-						String subTable = subConfig.tableName;
-						String idCol = (linkTable.idColumn().isEmpty() ? beanConfig.tableName : linkTable.idColumn());
+					for (DBBeanSubBeanConfig subBeanField : beanConfig.getSubBeans()) {
+						DBBeanConfig subBeanConfig = subBeanField.getSubBeanConfig();
 
-						// Load list from link table
-						String subSql = "SELECT subObjTable.* FROM "+ linkTableName +" as linkTable, "+ subTable +" as subObjTable WHERE linkTable."+idCol+"=? AND linkTable."+subConfig.idColumn+"=subObjTable."+subConfig.idColumn;
+						// Load List from link table
+						String subSql = "SELECT subBeanTable.* FROM "+
+                                subBeanField.getLinkTableName() +" as linkTable, "+
+                                subBeanConfig.getTableName() +" as subBeanTable " +
+                                "WHERE linkTable."+subBeanField.getParentIdColumnName()+"=? AND " +
+                                "linkTable."+subBeanConfig.getIdColumnName()+"=subBeanTable."+subBeanConfig.getIdColumnName();
 						logger.finest("List Load Query: " + subSql);
 						PreparedStatement subStmt = db.getPreparedStatement(subSql);
 						subStmt.setObject(1, obj.getId());
 						List<? extends DBBean> list = DBConnection.exec(subStmt,
-								DBBeanSQLResultHandler.createList(linkTable.beanClass(), db));
-						obj.setFieldValue(field, list);
+								DBBeanSQLResultHandler.createList(subBeanField.getSubBeanClass(), db));
+                        subBeanField.setValue(obj, list);
 					}
 				} else
 					logger.warning("No DB available to read sub beans");

@@ -30,7 +30,7 @@ class DBBeanCache {
     }
 
     /**
-     * A cache container that contains a object and last read time
+     * A cache container that contains a bean and its last filed update time
      */
     private static class CacheItem{
         public long updateTimestamp;
@@ -113,41 +113,16 @@ class DBBeanCache {
     }
 
     /**
-     * Will check the cache if the given object exists
+     * Will check the cache if the given bean exists
      *
      * @param 		c			is the class of the bean
      * @param 		id			is the id of the bean
-     * @return					a cached DBBean object, or null if there is no cached object or if the cache is to old
+     * @return					a cached DBBean object, null if there is a cache miss
      */
-    public static DBBean get(Class<?> c, Long id){
-        try{
-            return get( c, id, null );
-        }catch(SQLException e){
-            throw new RuntimeException("This exception should not be thrown, Something went really wrong!", e);
-        }
-    }
-
-    /**
-     * Will check the cache if the given object exists and will update it if its old
-     *
-     * @param 		c			is the class of the bean
-     * @param 		id			is the id of the bean
-     * @param		result		is the ResultSet for this object, the object will be updated from this ResultSet if the object is to old, there will be no update if this parameter is null
-     * @return					a cached DBBean object, might update the cached object if its old but only if the ResultSet parameter is set
-     */
-    public static DBBean get(Class<?> c, Long id, ResultSet result) throws SQLException{
+    public static DBBean get(Class<?> c, Long id) {
         if(contains(c, id)){
             CacheItem cacheItem = cache.get(c).get(id);
             DBBean bean = cacheItem.bean.get();
-            // The cache is old, update and return it
-            if (cacheItem.updateTimestamp + CACHE_DATA_TTL < System.currentTimeMillis()) {
-                // There is no ResultSet to update from
-                if (result == null)
-                    return null;
-                // Only update object if there is no update running now
-                logger.finer("Bean(" + c.getName() + ") cache to old for id: " + id);
-                // TODO:updateBean(result, bean);
-            }
             return bean;
         }
         logger.finer("Bean("+c.getName()+") cache miss for id: "+id);
@@ -155,14 +130,25 @@ class DBBeanCache {
     }
 
     /**
-     * Will check if the object with the id already exists in the cahce,
-     * if not then it will add the given object to the cache.
-     *
-     * @param 		obj		is the object to cache
+     * @return true if the bean data is outdated, false if the data is current or if the bean was not found in the cache
+     */
+    public static boolean isOutDated(DBBean obj){
+        if(contains(obj)) {
+            CacheItem cacheItem = cache.get(obj.getClass()).get(obj.getId());
+            return cacheItem.updateTimestamp + CACHE_DATA_TTL < System.currentTimeMillis();
+        }
+        return false;
+    }
+
+    /**
+     * Will add a bean to the cache. If the bean already is in
+     * the cache then its TTL timer will be reset
      */
     public synchronized static void add(DBBean obj) {
-        if (contains(obj))
+        if (contains(obj)) {
+            cache.get(obj.getClass()).get(obj.getId()).updateTimestamp = System.currentTimeMillis();
             return;
+        }
         CacheItem cacheItem = new CacheItem();
         cacheItem.updateTimestamp = System.currentTimeMillis();
         cacheItem.bean = new WeakReference<>(obj);
@@ -173,5 +159,11 @@ class DBBeanCache {
             map.put(obj.getId(), cacheItem);
             cache.put(obj.getClass(), map);
         }
+    }
+
+    public static void remove(DBBean obj){
+        if (obj != null)
+            if( cache.containsKey(obj.getClass()) )
+                cache.get(obj.getClass()).remove(obj.getId());
     }
 }
