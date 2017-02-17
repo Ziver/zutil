@@ -28,6 +28,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 /**
  * A Class that contains information about a bean
@@ -38,23 +39,23 @@ class DBBeanConfig{
 
 
 	/** The name of the table in the DB **/
-    protected String tableName;
+    public String tableName;
     /** The name of the id column **/
-    protected String idColumn;
-    /** All the fields in the bean **/
-    protected ArrayList<Field> fields;
+    public String idColumn;
+    /** All normal fields in the bean **/
+    public ArrayList<Field> fields = new ArrayList<>();
+    /** All sub bean fields in the bean **/
+    public ArrayList<Field> subBeanFields = new ArrayList<>();
 
 
-    private DBBeanConfig(){
-        fields = new ArrayList<>();
-    }
+    private DBBeanConfig(){ }
 
 
 
     /**
      * @return the configuration object for the specified class
      */
-    protected static DBBeanConfig getBeanConfig(Class<? extends DBBean> c){
+    public static DBBeanConfig getBeanConfig(Class<? extends DBBean> c){
         if( !beanConfigs.containsKey( c.getName() ) )
             initBeanConfig( c );
         return beanConfigs.get( c.getName() );
@@ -81,13 +82,14 @@ class DBBeanConfig{
             for( Field field : fields ){
                 int mod = field.getModifiers();
                 if( !Modifier.isTransient( mod ) &&
-                        !Modifier.isAbstract( mod ) &&
                         !Modifier.isFinal( mod ) &&
                         !Modifier.isStatic( mod ) &&
-                        !Modifier.isInterface( mod ) &&
-                        !Modifier.isNative( mod ) &&
                         !config.fields.contains( field )){
-                    config.fields.add( field );
+                    if (List.class.isAssignableFrom(field.getType()) &&
+                            field.getAnnotation(DBBean.DBLinkTable.class) != null)
+                        config.subBeanFields.add( field );
+                    else
+                        config.fields.add( field );
                 }
             }
             if( tableAnn == null || !tableAnn.superBean() )
@@ -97,10 +99,11 @@ class DBBeanConfig{
         beanConfigs.put(c.getName(), config);
     }
 
-    protected static String getFieldName(Field field){
+    public static String getFieldName(Field field){
         DBBean.DBColumn colAnnotation = field.getAnnotation(DBBean.DBColumn.class);
         if(colAnnotation != null)
             return colAnnotation.value();
         return field.getName();
     }
+
 }

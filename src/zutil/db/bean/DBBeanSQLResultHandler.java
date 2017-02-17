@@ -171,40 +171,19 @@ public class DBBeanSQLResultHandler<T> implements SQLResultHandler<T>{
 	protected void updateBean(ResultSet result, DBBean obj) throws SQLException{
 		if (obj.readLock.tryLock()) {
             try {
-                logger.fine("Updating Bean(" + beanClass.getName() + ") with id: " + obj.getId());
-                // Get the rest
+                logger.fine("Updating Bean("+ beanClass.getName() +") with id: "+ obj.getId());
+                // Read fields
                 for (Field field : beanConfig.fields) {
                     String name = DBBeanConfig.getFieldName(field);
 
-                    // Another DBBean class
+                    // Inline DBBean class
                     if (DBBean.class.isAssignableFrom(field.getType())) {
                         if (db != null) {
-                            Long subid = result.getLong(name);
-                            DBBean subobj = DBBeanCache.get(field.getType(), subid);
-                            if (subobj == null)
-                                subobj = DBBean.load(db, (Class<? extends DBBean>) field.getType(), subid);
-                            obj.setFieldValue(field, subobj);
-                        } else
-                            logger.warning("No DB available to read sub beans");
-                    }
-                    // A list of DBBeans
-                    else if (List.class.isAssignableFrom(field.getType()) &&
-                            field.getAnnotation(DBLinkTable.class) != null) {
-                        if (db != null) {
-                            DBLinkTable linkTable = field.getAnnotation(DBLinkTable.class);
-                            DBBeanConfig subConfig = DBBeanConfig.getBeanConfig(linkTable.beanClass());
-                            String linkTableName = linkTable.table();
-                            String subTable = subConfig.tableName;
-                            String idcol = (linkTable.idColumn().isEmpty() ? beanConfig.tableName : linkTable.idColumn());
-
-                            // Load list from link table
-                            String subsql = "SELECT subObjTable.* FROM " + linkTableName + " as linkTable, " + subTable + " as subObjTable WHERE linkTable." + idcol + "=? AND linkTable." + subConfig.idColumn + "=subObjTable." + subConfig.idColumn;
-                            logger.finest("List Load Query: " + subsql);
-                            PreparedStatement subStmt = db.getPreparedStatement(subsql);
-                            subStmt.setObject(1, obj.getId());
-                            List<? extends DBBean> list = DBConnection.exec(subStmt,
-                                    DBBeanSQLResultHandler.createList(linkTable.beanClass(), db));
-                            obj.setFieldValue(field, list);
+                            Long subId = result.getLong(name);
+                            DBBean subObj = DBBeanCache.get(field.getType(), subId);
+                            if (subObj == null)
+                                subObj = DBBean.load(db, (Class<? extends DBBean>) field.getType(), subId);
+                            obj.setFieldValue(field, subObj);
                         } else
                             logger.warning("No DB available to read sub beans");
                     }
@@ -213,7 +192,28 @@ public class DBBeanSQLResultHandler<T> implements SQLResultHandler<T>{
                         obj.setFieldValue(field, result.getObject(name));
                     }
                 }
+                // Read sub beans
+				if (db != null) {
+					for (Field field : beanConfig.subBeanFields) {
+						DBLinkTable linkTable = field.getAnnotation(DBLinkTable.class);
+						DBBeanConfig subConfig = DBBeanConfig.getBeanConfig(linkTable.beanClass());
+						String linkTableName = linkTable.table();
+						String subTable = subConfig.tableName;
+						String idCol = (linkTable.idColumn().isEmpty() ? beanConfig.tableName : linkTable.idColumn());
 
+						// Load list from link table
+						String subSql = "SELECT subObjTable.* FROM "+ linkTableName +" as linkTable, "+ subTable +" as subObjTable WHERE linkTable."+idCol+"=? AND linkTable."+subConfig.idColumn+"=subObjTable."+subConfig.idColumn;
+						logger.finest("List Load Query: " + subSql);
+						PreparedStatement subStmt = db.getPreparedStatement(subSql);
+						subStmt.setObject(1, obj.getId());
+						List<? extends DBBean> list = DBConnection.exec(subStmt,
+								DBBeanSQLResultHandler.createList(linkTable.beanClass(), db));
+						obj.setFieldValue(field, list);
+					}
+				} else
+					logger.warning("No DB available to read sub beans");
+
+                // Call post listener
                 obj.postUpdateAction();
             } finally {
                 obj.readLock.unlock();
