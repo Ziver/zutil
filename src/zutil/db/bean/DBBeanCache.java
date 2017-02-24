@@ -3,8 +3,6 @@ package zutil.db.bean;
 import zutil.log.LogUtil;
 
 import java.lang.ref.WeakReference;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Timer;
