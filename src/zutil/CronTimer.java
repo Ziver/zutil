@@ -158,6 +158,9 @@ public class CronTimer implements Iterator<Long>, Iterable<Long>{
      */
     public Long next(long fromTimestamp) {
         Calendar cal = getCalendar(fromTimestamp);
+        cal.set(Calendar.MILLISECOND, 0);
+        cal.set(Calendar.SECOND, 0);
+        cal.add(Calendar.MINUTE, 1); // skipp current time
 
         while (true) {
             int index;
@@ -169,6 +172,10 @@ public class CronTimer implements Iterator<Long>, Iterable<Long>{
                     return -1L; // We have reach the limit no more years left
                 else
                     cal.set(Calendar.YEAR, years[Math.abs(index + 1)]);
+                cal.set(Calendar.MONTH, months[0] - 1);
+                cal.set(Calendar.DAY_OF_MONTH, dayOfMonths[0]);
+                cal.set(Calendar.HOUR_OF_DAY, hours[0]);
+                cal.set(Calendar.MINUTE, minutes[0]);
                 continue;
             }
 
@@ -180,6 +187,9 @@ public class CronTimer implements Iterator<Long>, Iterable<Long>{
                     cal.add(Calendar.YEAR, 1);
                 } else
                     cal.set(Calendar.MONTH, months[Math.abs(index + 1)] - 1);
+                cal.set(Calendar.DAY_OF_MONTH, dayOfMonths[0]);
+                cal.set(Calendar.HOUR_OF_DAY, hours[0]);
+                cal.set(Calendar.MINUTE, minutes[0]);
                 continue;
             }
 
@@ -193,6 +203,8 @@ public class CronTimer implements Iterator<Long>, Iterable<Long>{
                     cal.add(Calendar.MONTH, 1);
                 } else
                     cal.set(Calendar.DAY_OF_MONTH, dayOfMonths[Math.abs(index + 1)]);
+                cal.set(Calendar.HOUR_OF_DAY, hours[0]);
+                cal.set(Calendar.MINUTE, minutes[0]);
                 continue;
             }
 
@@ -205,6 +217,8 @@ public class CronTimer implements Iterator<Long>, Iterable<Long>{
                     cal.add(Calendar.WEEK_OF_YEAR, 1);
                 } else
                     cal.set(Calendar.DAY_OF_WEEK, getDayOfWeekEnum(dayOfWeeks[Math.abs(index + 1)]));
+                cal.set(Calendar.HOUR_OF_DAY, hours[0]);
+                cal.set(Calendar.MINUTE, minutes[0]);
                 continue;
             }
 
@@ -216,6 +230,7 @@ public class CronTimer implements Iterator<Long>, Iterable<Long>{
                     cal.add(Calendar.DAY_OF_MONTH, 1);
                 } else
                     cal.set(Calendar.HOUR_OF_DAY, hours[Math.abs(index + 1)]);
+                cal.set(Calendar.MINUTE, minutes[0]);
                 continue;
             }
 
