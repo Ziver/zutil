@@ -4,6 +4,7 @@ import org.junit.Test;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.TimeZone;
 
 import static org.junit.Assert.*;
 
@@ -56,7 +57,7 @@ public class CronTimerTest {
 
     @Test
     public void specificTime() {
-        CronTimer cron = new CronTimer("59 23 31 12 3 2003");
+        CronTimer cron = getCronTimer("59 23 31 12 3 2003");
         assertEquals(-1, (long) cron.next());
         assertEquals(-1, (long) cron.next(1072915140000L));
         assertEquals(1072915140000L, (long) cron.next(978307140000L));
@@ -64,14 +65,14 @@ public class CronTimerTest {
 
     @Test
     public void minuteWildcard(){
-        CronTimer cron = new CronTimer("0 * * * * *");
+        CronTimer cron = getCronTimer("0 * * * * *");
         assertEquals(1041382800000L, (long)cron.next(1041379200000L));
         assertEquals(1041382800000L, (long)cron.next(1041379260000L));
     }
 
     @Test
     public void hourWildcard(){
-        CronTimer cron = new CronTimer("* 0 * * * *");
+        CronTimer cron = getCronTimer("* 0 * * * *");
         assertEquals(1041379260000L, (long)cron.next(1041379200000L));
         assertEquals(1041379320000L, (long)cron.next(1041379260000L)); // minute change
         assertEquals(1041465600000L, (long)cron.next(1041382790000L)); // minute border
@@ -80,7 +81,7 @@ public class CronTimerTest {
 
     @Test
     public void dayWildcard(){
-        CronTimer cron = new CronTimer("* * 1 * * *");
+        CronTimer cron = getCronTimer("* * 1 * * *");
         assertEquals(1041379260000L, (long)cron.next(1041379200000L));
         assertEquals(1041379320000L, (long)cron.next(1041379260000L)); // minute change
         assertEquals(1044057600000L, (long)cron.next(1041465600000L)); // day change
@@ -88,7 +89,7 @@ public class CronTimerTest {
 
     @Test
     public void monthWildcard(){
-        CronTimer cron = new CronTimer("* * * 1 * *");
+        CronTimer cron = getCronTimer("* * * 1 * *");
         assertEquals(1041379260000L, (long)cron.next(1041379200000L));
         assertEquals(1041382860000L, (long)cron.next(1041382800000L)); // hour change
         assertEquals(1041469260000L, (long)cron.next(1041469200000L)); // day change
@@ -97,14 +98,14 @@ public class CronTimerTest {
 
     @Test
     public void weekDayWildcard(){
-        CronTimer cron = new CronTimer("* * * * 3 *");
+        CronTimer cron = getCronTimer("* * * * 3 *");
         assertEquals(1041379260000L, (long)cron.next(1041379200000L));
         assertEquals(1041984000000L, (long)cron.next(1041465600000L)); // day change
     }
 
     @Test
     public void yearWildcard(){
-        CronTimer cron = new CronTimer("* * * * * 2003");
+        CronTimer cron = getCronTimer("* * * * * 2003");
         assertEquals(1041379260000L, (long)cron.next(1041379200000L));
         assertEquals(1041379320000L, (long)cron.next(1041379260000L)); // min change
         assertEquals(1041382980000L, (long)cron.next(1041382920000L)); // hour change
@@ -113,4 +114,11 @@ public class CronTimerTest {
         assertEquals(-1, (long)cron.next(1075683660000L)); // year change
     }
 
+
+
+    private static CronTimer getCronTimer(String cron) {
+        CronTimer timer = new CronTimer(cron);
+        timer.setTimeZone(TimeZone.getTimeZone("UTC"));
+        return timer;
+    }
 }

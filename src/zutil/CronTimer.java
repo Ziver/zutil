@@ -41,6 +41,8 @@ import java.util.*;
  */
 public class CronTimer implements Iterator<Long>, Iterable<Long>{
 
+    private TimeZone timeZone;
+
     private int[] minutes;
     private int[] hours;
     private int[] dayOfMonths;
@@ -128,6 +130,13 @@ public class CronTimer implements Iterator<Long>, Iterable<Long>{
         return list;
     }
 
+
+    /**
+     * Set the TimeZone that should be used by the cron algorithm
+     */
+    public void setTimeZone(TimeZone timeZone){
+        this.timeZone = timeZone;
+    }
 
 
     @Override
@@ -252,9 +261,9 @@ public class CronTimer implements Iterator<Long>, Iterable<Long>{
     }
 
     protected Calendar getCalendar(long timestamp){
-        Calendar cal = Calendar.getInstance(
-                TimeZone.getTimeZone("UTC"),
-                new Locale("sv","SE"));
+        Calendar cal = Calendar.getInstance();
+        if (timeZone != null)
+            cal.setTimeZone(timeZone);
         cal.setTimeInMillis(timestamp);
         return cal;
     }
