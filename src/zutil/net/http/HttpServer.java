@@ -146,9 +146,6 @@ public class HttpServer extends ThreadedTCPNetworkServer{
 
 	/**
 	 * Internal class that handles all the requests
-	 * 
-	 * @author Ziver
-	 *
 	 */
 	protected class HttpServerThread implements ThreadedTCPNetworkServerThread{
 		private HttpPrintStream out;
@@ -162,11 +159,14 @@ public class HttpServer extends ThreadedTCPNetworkServer{
 		}
 
 		public void run(){
+            long time = System.currentTimeMillis();
+            HttpHeaderParser headerParser;
+            HttpHeader header = null;
+            Map<String, Object> session = null;
 			try {
                 //**************************** PARSE REQUEST *********************************
-                long time = System.currentTimeMillis();
-                HttpHeaderParser headerParser = new HttpHeaderParser(in);
-                HttpHeader header = headerParser.read();
+                headerParser = new HttpHeaderParser(in);
+                header = headerParser.read();
                 if (header == null) {
                     logger.finer("No header received");
                     return;
@@ -190,7 +190,6 @@ public class HttpServer extends ThreadedTCPNetworkServer{
 
                 //****************************  HANDLE REQUEST *********************************
                 // Get the client session or create one
-                Map<String, Object> session;
                 long ttlTime = System.currentTimeMillis() + SESSION_TTL;
                 String sessionCookie = header.getCookie(SESSION_ID_KEY);
                 if (sessionCookie != null && sessions.containsKey(sessionCookie) &&
@@ -227,9 +226,10 @@ public class HttpServer extends ThreadedTCPNetworkServer{
                     out.setStatusCode(404);
                     out.println("404 Page Not Found: " + header.getRequestURL());
                     logger.warning("Page not defined: " + header.getRequestURL());
-                    }
+				}
 				//********************************************************************************
 			} catch (Exception e) {
+				logRequest(header, session, time);
 				logger.log(Level.SEVERE, "500 Internal Server Error", e);
 				try {
 					if (!out.isHeaderSent())
@@ -264,10 +264,10 @@ public class HttpServer extends ThreadedTCPNetworkServer{
         // Debug
         if(logger.isLoggable(Level.FINEST) ){
             StringBuilder buff = new StringBuilder();
-            buff.append("Received request: ").append(header.getRequestURL());
+            buff.append("Received request: ").append(header==null ? null : header.getRequestURL());
             buff.append(", (");
-            buff.append("request: ").append(header.toStringAttributes());
-            buff.append(", cookies: ").append(header.toStringCookies());
+            buff.append("request: ").append(header==null ? null : header.toStringAttributes());
+            buff.append(", cookies: ").append(header==null ? null : header.toStringCookies());
             buff.append(", session: ").append(session);
             buff.append(")");
             buff.append(", time: "+ StringUtil.formatTimeToString(System.currentTimeMillis() - time));
@@ -275,7 +275,7 @@ public class HttpServer extends ThreadedTCPNetworkServer{
             logger.finer(buff.toString());
         } else if(logger.isLoggable(Level.FINER)){
             logger.finer(
-                    "Received request: " + header.getRequestURL()
+                    "Received request: " + (header==null ? null : header.getRequestURL())
                             + ", time: "+ StringUtil.formatTimeToString(System.currentTimeMillis() - time));
         }
     }
