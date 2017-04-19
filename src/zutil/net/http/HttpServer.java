@@ -25,6 +25,7 @@
 package zutil.net.http;
 
 import zutil.StringUtil;
+import zutil.Timer;
 import zutil.log.LogUtil;
 import zutil.net.threaded.ThreadedTCPNetworkServer;
 import zutil.net.threaded.ThreadedTCPNetworkServerThread;
@@ -33,8 +34,11 @@ import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.net.Socket;
-import java.util.*;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -48,15 +52,15 @@ import java.util.logging.Logger;
 public class HttpServer extends ThreadedTCPNetworkServer{
 	private static final Logger logger = LogUtil.getLogger();
 
-	public static final String SESSION_ID_KEY = "session_id";
-	public static final String SESSION_TTL_KEY = "session_ttl";
-	public static final String SERVER_VERSION = "Zutil HttpServer";
+	public static final String SESSION_KEY_ID  = "session_id";
+	public static final String SESSION_KEY_TTL = "session_ttl";
+	public static final String SERVER_NAME     = "Zutil HttpServer";
 	public static final int SESSION_TTL = 10*60*1000; // in milliseconds
 
 
 	private Map<String,HttpPage> pages;
 	private HttpPage defaultPage;
-	private Map<Integer,Map<String,Object>> sessions;
+	private Map<String,Map<String,Object>> sessions;
 	private int nextSessionId;
 
 	/**
@@ -83,8 +87,8 @@ public class HttpServer extends ThreadedTCPNetworkServer{
 		sessions = new ConcurrentHashMap<>();
 		nextSessionId = 0;
 
-		Timer timer = new Timer();
-		timer.schedule(new SessionGarbageCollector(), 10000, SESSION_TTL / 2);
+        ScheduledExecutorService exec = Executors.newSingleThreadScheduledExecutor();
+		exec.scheduleWithFixedDelay(new SessionGarbageCollector(), 10000, SESSION_TTL / 2, TimeUnit.MILLISECONDS);
 
 		logger.info("HTTP"+(keyStore==null?"":"S")+" Server ready!");
 	}
@@ -92,10 +96,8 @@ public class HttpServer extends ThreadedTCPNetworkServer{
 	/**
 	 * This class acts as an garbage collector that 
 	 * removes old sessions from the session HashMap
-	 * 
-	 * @author Ziver
 	 */
-	private class SessionGarbageCollector extends TimerTask {
+	private class SessionGarbageCollector implements Runnable {
 		public void run(){
 			Object[] keys = sessions.keySet().toArray();
 			int count = 0;
@@ -103,7 +105,7 @@ public class HttpServer extends ThreadedTCPNetworkServer{
 				Map<String,Object> session = sessions.get(key);
 
 				// Check if session is still valid
-				if((Long)session.get(SESSION_TTL_KEY) < System.currentTimeMillis()){
+				if(((Timer) session.get(SESSION_KEY_TTL)).hasTimedOut()){
 					sessions.remove(key);
 					++count;
 				}
@@ -190,28 +192,28 @@ public class HttpServer extends ThreadedTCPNetworkServer{
 
                 //****************************  HANDLE REQUEST *********************************
                 // Get the client session or create one
-                long ttlTime = System.currentTimeMillis() + SESSION_TTL;
-                String sessionCookie = header.getCookie(SESSION_ID_KEY);
+                String sessionCookie = header.getCookie(SESSION_KEY_ID);
                 if (sessionCookie != null && sessions.containsKey(sessionCookie) &&
-                        (Long) sessions.get(sessionCookie).get(SESSION_TTL_KEY) < System.currentTimeMillis()) { // Check if session is still valid
+                        !((Timer) sessions.get(sessionCookie).get(SESSION_KEY_TTL)).hasTimedOut()) { // Check if session is still valid
 
                     session = sessions.get(sessionCookie);
-                    // renew the session TTL
-                    session.put(SESSION_TTL_KEY, ttlTime);
+                    ((Timer) sessions.get(sessionCookie).get(SESSION_KEY_TTL)).start(); // renew the session TTL
                 } else {
-                    session = Collections.synchronizedMap(new HashMap<String, Object>());
-                    session.put(SESSION_ID_KEY, nextSessionId);
-                    session.put(SESSION_TTL_KEY, ttlTime);
-                    sessions.put(nextSessionId, session);
-                    ++nextSessionId;
+                    synchronized (sessions) {
+                        session = new ConcurrentHashMap<>();
+                        session.put(SESSION_KEY_ID, ""+nextSessionId);
+                        session.put(SESSION_KEY_TTL, new Timer(SESSION_TTL).start());
+                        sessions.put(""+nextSessionId, session);
+                        out.setCookie(SESSION_KEY_ID, ""+nextSessionId);
+                        ++nextSessionId;
+                    }
                 }
 
                 //****************************  RESPONSE  ************************************
                 out.setHttpVersion("1.0");
                 out.setStatusCode(200);
-                out.setHeader("Server", SERVER_VERSION);
+                out.setHeader("Server", SERVER_NAME);
                 out.setHeader("Content-Type", "text/html");
-                out.setCookie(SESSION_ID_KEY, "" + session.get(SESSION_ID_KEY));
 
                 if (header.getRequestURL() != null && pages.containsKey(header.getRequestURL())) {
                     HttpPage page = pages.get(header.getRequestURL());

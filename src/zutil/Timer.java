@@ -70,4 +70,11 @@ public class Timer {
     public boolean hasTimedOut(){
         return timestamp + period < System.currentTimeMillis();
     }
+
+    public String toString(){
+        if (hasTimedOut())
+            return "Timed out";
+        else
+            return "Timeout in "+StringUtil.formatTimeToString((timestamp+period)-System.currentTimeMillis());
+    }
 }
