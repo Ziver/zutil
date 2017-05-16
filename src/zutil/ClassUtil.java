@@ -109,6 +109,17 @@ public class ClassUtil {
                 float.class.isAssignableFrom(type);
     }
 
+    /**
+     * @return a bool value depending on if the given class is available in the classpath
+     */
+    public boolean isAvailable(String clazz){
+        try{
+            Class.forName(clazz);
+            return true;
+        } catch (ClassNotFoundException e) {
+            return false;
+        }
+    }
 
     /**
      * @param   field       is the field to return the generics from
