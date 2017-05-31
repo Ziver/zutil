@@ -8,7 +8,7 @@ import zutil.parser.binary.BinaryStruct;
  *
  * @see <a href="http://docs.oasis-open.org/mqtt/mqtt/v3.1.1/mqtt-v3.1.1.html">MQTT v3.1.1 Spec</a>
  */
-public class MqttPacketConnectAck implements BinaryStruct{
+public class MqttPacketConnectAck extends MqttPacketHeader{
     public static final int RETCODE_OK                 = 0;
     public static final int RETCODE_PROT_VER_ERROR     = 1;
     public static final int RETCODE_IDENTIFIER_REJECT  = 2;

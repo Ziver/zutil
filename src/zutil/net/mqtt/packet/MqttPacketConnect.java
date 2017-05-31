@@ -9,7 +9,7 @@ import zutil.parser.binary.BinaryStruct;
  *
  * @see <a href="http://docs.oasis-open.org/mqtt/mqtt/v3.1.1/mqtt-v3.1.1.html">MQTT v3.1.1 Spec</a>
  */
-public class MqttPacketConnect implements BinaryStruct {
+public class MqttPacketConnect extends MqttPacketHeader {
 
     // Variable header
 
@@ -33,10 +33,10 @@ public class MqttPacketConnect implements BinaryStruct {
     public int protocolLevel = 0x04;
 
 
-    /** Indicates that the payload contains a username */
+    /** Indicates that the controlHeader contains a username */
     @BinaryField(index = 2010, length = 1)
     public boolean flagUsername;
-    /** Indicates that the payload contains a password */
+    /** Indicates that the controlHeader contains a password */
     @BinaryField(index = 2011, length = 1)
     public boolean flagPassword;
     /** Specifies if the Will Message is to be Retained when it is published. */

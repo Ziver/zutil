@@ -35,6 +35,8 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.cert.CertificateException;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -47,7 +49,8 @@ import java.util.logging.Logger;
 public abstract class ThreadedTCPNetworkServer extends Thread{
 	private static final Logger logger = LogUtil.getLogger();
 	
-	public final int port;
+	private final int port;
+	private Executor executor;
 	private File keyStore;
 	private String keyStorePass;
 
@@ -62,45 +65,47 @@ public abstract class ThreadedTCPNetworkServer extends Thread{
 	/**
 	 * Creates a new instance of the sever
 	 * 
-	 * @param 	port 		The port that the server should listen to
-	 * @param 	sslCert 	If this is not null then the server will use SSL connection with this keyStore file path
-	 * @param 	sslCert 	If this is not null then the server will use a SSL connection with the given certificate
+	 * @param 	port 		    The port that the server should listen to
+	 * @param 	keyStore 	    If this is not null then the server will use SSL connection with this keyStore file path
+	 * @param 	keyStorePass 	If this is not null then the server will use a SSL connection with the given certificate
 	 */
 	public ThreadedTCPNetworkServer(int port, File keyStore, String keyStorePass){	
 		this.port = port;
+        executor = Executors.newCachedThreadPool();
 		this.keyStorePass = keyStorePass;
 		this.keyStore = keyStore;
 	}
 
 
 	public void run(){
-		ServerSocket ss = null;
+		ServerSocket serverSocket = null;
 		try{
 			if(keyStorePass != null && keyStore != null){
 				registerCertificate(keyStore, keyStorePass);
-				ss = initSSL( port );
+				serverSocket = initSSL( port );
 			}
 			else{
-				ss = new ServerSocket( port );
+				serverSocket = new ServerSocket( port );
 			}
 			logger.info("Listening for TCP Connections on port: "+port);
 
 			while(true){
-				Socket s = ss.accept();
-				ThreadedTCPNetworkServerThread t = getThreadInstance( s );
-				if( t!=null )
-					new Thread( t ).start();
+				Socket connectionSocket = serverSocket.accept();
+				ThreadedTCPNetworkServerThread thread = getThreadInstance( connectionSocket );
+				if( thread!=null ) {
+                    executor.execute(thread);
+				}
 				else{
 					logger.severe("Unable to instantiate ThreadedTCPNetworkServerThread, closing connection!");
-					s.close();
+					connectionSocket.close();
 				}
 			}
 		} catch(Exception e) {
 			logger.log(Level.SEVERE, null, e);
 		} finally {
-			if( ss!=null ){
+			if( serverSocket!=null ){
 				try{
-					ss.close();
+					serverSocket.close();
 				}catch(IOException e){ logger.log(Level.SEVERE, null, e); }
 			}	
 		}
@@ -114,7 +119,7 @@ public abstract class ThreadedTCPNetworkServer extends Thread{
 	 * @param 		s 		is an new connection to an host
 	 * @return 				a new instance of an thread or null
 	 */
-	protected abstract ThreadedTCPNetworkServerThread getThreadInstance( Socket s );
+	protected abstract ThreadedTCPNetworkServerThread getThreadInstance( Socket s ) throws IOException;
 
 	/**
 	 * Initiates a SSLServerSocket
@@ -132,7 +137,7 @@ public abstract class ThreadedTCPNetworkServer extends Thread{
 	/**
 	 * Registers the given cert file to the KeyStore
 	 * 
-	 * @param 		certFile 	The cert file
+	 * @param 		keyStore 	The cert file
 	 */
 	protected void registerCertificate(File keyStore, String keyStorePass) throws CertificateException, IOException, KeyStoreException, NoSuchProviderException, NoSuchAlgorithmException{
 		System.setProperty("javax.net.ssl.keyStore", keyStore.getAbsolutePath());

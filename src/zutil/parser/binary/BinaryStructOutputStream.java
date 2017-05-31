@@ -66,6 +66,19 @@ public class BinaryStructOutputStream {
     }
 
     /**
+     * @see OutputStream#write(byte[])
+     */
+    public void write(byte b[]) throws IOException {
+        out.write(b);
+    }
+    /**
+     * @see OutputStream#write(byte[], int, int)
+     */
+    public void write(byte b[], int off, int len) throws IOException {
+        out.write(b, off, len);
+    }
+
+    /**
      * Generate a binary stream from the provided struct and
      * write the data to the underlying stream.
      */

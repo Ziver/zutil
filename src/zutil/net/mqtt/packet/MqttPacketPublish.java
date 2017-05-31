@@ -7,7 +7,7 @@ import zutil.parser.binary.BinaryStruct;
  *
  * @see <a href="http://docs.oasis-open.org/mqtt/mqtt/v3.1.1/mqtt-v3.1.1.html">MQTT v3.1.1 Spec</a>
  */
-public class MqttPacketPublish implements BinaryStruct{
+public class MqttPacketPublish extends MqttPacketHeader{
 
     // Static Header
 /*
@@ -26,7 +26,7 @@ public class MqttPacketPublish implements BinaryStruct{
 
     @BinaryField(index = 2101, length = 16)
     private int topicNameLength;
-    /** The Topic Name identifies the information channel to which payload data is published. */
+    /** The Topic Name identifies the information channel to which controlHeader data is published. */
     @VariableLengthBinaryField(index = 2102, lengthField = "topicNameLength")
     public String topicName;
 

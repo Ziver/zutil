@@ -74,7 +74,7 @@ public class UpdateServer extends ThreadedTCPNetworkServer{
 		/**
 		 * Creates a UpdateServerThread
 		 * 
-		 * @param 		client 		is the socket to the client
+		 * @param 		c 		is the socket to the client
 		 */
 		public UpdateServerThread(Socket c){
 			socket = c;

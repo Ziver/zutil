@@ -107,6 +107,27 @@ public class BinaryStructInputStream {
         return totalReadLength;
     }
 
+    /**
+     * @see InputStream#markSupported()
+     */
+    public boolean markSupported(){
+        return in.markSupported();
+    }
+    /**
+     * @see InputStream#mark(int)
+     */
+    public void mark(int limit){
+        in.mark(limit);
+    }
+    /**
+     * @see InputStream#reset()
+     */
+    public void reset() throws IOException {
+        in.reset();
+    }
+
+
+
     protected static int shiftLeftBy(int bitIndex, int bitLength){
         int shiftBy = (8 - ((7-bitIndex) + bitLength) % 8) % 8;
         return shiftBy;

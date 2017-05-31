@@ -8,6 +8,7 @@ import zutil.parser.binary.BinaryStruct;
 public class MqttPacketHeader implements BinaryStruct {
 
     //                      RESERVED                = 0;
+    public static final int PACKET_TYPE_CONN        = 1;
     public static final int PACKET_TYPE_CONNACK     = 2;
     public static final int PACKET_TYPE_PUBLISH     = 3;
     public static final int PACKET_TYPE_PUBACK      = 4;
@@ -26,11 +27,11 @@ public class MqttPacketHeader implements BinaryStruct {
 
 
     @BinaryField(index = 1, length = 4)
-    private byte type;
+    public byte type;
     @BinaryField(index = 2, length = 4)
-    private byte flags;
+    public byte flags;
 
     @CustomBinaryField(index = 3, serializer = MqttVariableIntSerializer.class)
-    private int length;
+    public int payloadLength;
 
 }

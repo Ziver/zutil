@@ -141,7 +141,7 @@ public class NetLogServer extends Handler {
 					logger.log(Level.SEVERE, "Unable to send message to client: "+s.getInetAddress(), e);
 				}
 			}
-			
+
 			public void sendAllExceptions(){
 				logger.fine("Sending all exceptions to client: "+s.getInetAddress());
 				for(NetLogExceptionMessage e : exceptions.values())
