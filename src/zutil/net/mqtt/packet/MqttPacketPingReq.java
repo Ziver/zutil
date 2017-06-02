@@ -9,5 +9,7 @@ import zutil.parser.binary.BinaryStruct;
  */
 public class MqttPacketPingReq extends MqttPacketHeader{
 
+    // No variable header
 
+    // No payload
 }

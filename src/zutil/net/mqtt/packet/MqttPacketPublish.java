@@ -34,6 +34,7 @@ public class MqttPacketPublish extends MqttPacketHeader{
     public int packetId;
 
 
-    // Optional Payload
+    // Payload
+    // - Application data
 
 }

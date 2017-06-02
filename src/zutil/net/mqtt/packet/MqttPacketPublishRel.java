@@ -16,5 +16,5 @@ public class MqttPacketPublishRel extends MqttPacketHeader{
     @BinaryField(index = 2000, length = 16)
     public int packetId;
 
-
+    // No Payload
 }

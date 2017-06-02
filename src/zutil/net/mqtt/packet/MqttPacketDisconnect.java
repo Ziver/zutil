@@ -10,5 +10,7 @@ import zutil.parser.binary.BinaryStruct;
  */
 public class MqttPacketDisconnect extends MqttPacketHeader{
 
+    // No variable header
 
+    // No payload
 }

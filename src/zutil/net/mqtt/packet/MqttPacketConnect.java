@@ -66,6 +66,11 @@ public class MqttPacketConnect extends MqttPacketHeader {
     public int keepAlive;
 
 
-    // Payload
+    // Payload:
+    // - Client identifier
+    // - Will Topic
+    // - Will message
+    // - User name
+    // - Password
 
 }

@@ -25,6 +25,7 @@ public class MqttPacketHeader implements BinaryStruct {
     //                      RESERVED                = 15
 
 
+    // Fixed Header
 
     @BinaryField(index = 1, length = 4)
     public byte type;
