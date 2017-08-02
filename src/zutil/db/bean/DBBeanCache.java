@@ -8,6 +8,10 @@ import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -20,7 +24,7 @@ class DBBeanCache {
     /** A cache for detecting recursion **/
     private static Map<Class<?>, Map<Long, CacheItem>> cache =
             new ConcurrentHashMap<>();
-    private static Timer timer;
+    private static ScheduledExecutorService executor;
 
 
     static {
@@ -41,18 +45,18 @@ class DBBeanCache {
      * This function cancels the internal cache garbage collector in DBBean.
      * GBC is enabled by default
      */
-    public static void enableBeanGBC(boolean enable){
+    public static synchronized void enableBeanGBC(boolean enable){
         if(enable){
-            if( timer == null ){
-                timer = new Timer( true ); // Run as daemon
-                timer.schedule( new DBBeanGarbageCollector(), CACHE_DATA_TTL, CACHE_DATA_TTL *2 );
+            if( executor == null ){
+                executor = Executors.newSingleThreadScheduledExecutor();
+                executor.scheduleAtFixedRate( new DBBeanGarbageCollector(), CACHE_DATA_TTL, CACHE_DATA_TTL *2, TimeUnit.MILLISECONDS );
                 logger.fine("Bean garbage collection daemon enabled");
             }
         }
         else {
-            if (timer != null) {
-                timer.cancel();
-                timer = null;
+            if (executor != null) {
+                executor.shutdown();
+                executor = null;
                 logger.fine("Bean garbage collection daemon disabled");
             }
         }
@@ -61,31 +65,35 @@ class DBBeanCache {
     /**
      * This class acts as an garbage collector that removes old DBBeans
      */
-    private static class DBBeanGarbageCollector extends TimerTask {
-        public void run(){
-            if( cache == null ){
-                logger.severe("DBBeanSQLResultHandler not initialized, stopping DBBeanGarbageCollector timer.");
-                this.cancel();
-                return;
-            }
+    private static class DBBeanGarbageCollector implements Runnable {
+        public void run() {
+            try {
+                if (cache == null) {
+                    logger.severe("DBBeanSQLResultHandler not initialized, stopping DBBeanGarbageCollector timer.");
+                    enableBeanGBC(false);
+                    return;
+                }
 
-            int removed = 0;
-            for(Object classKey : cache.keySet()){
-                if( classKey == null ) continue;
+                int removed = 0;
+                for (Object classKey : cache.keySet()) {
+                    if (classKey == null) continue;
 
-                Map<Long, CacheItem> class_cache = cache.get(classKey);
-                for(Iterator<Map.Entry<Long, CacheItem>> it = class_cache.entrySet().iterator(); it.hasNext(); ) {
-                    Map.Entry<Long, CacheItem> entry = it.next();
-                    if( entry.getKey() == null ) continue;
-                    // Check if session is still valid
-                    if( entry.getValue().bean.get() == null ){
-                        it.remove();
-                        removed++;
+                    Map<Long, CacheItem> class_cache = cache.get(classKey);
+                    for (Iterator<Map.Entry<Long, CacheItem>> it = class_cache.entrySet().iterator(); it.hasNext(); ) {
+                        Map.Entry<Long, CacheItem> entry = it.next();
+                        if (entry.getKey() == null) continue;
+                        // Check if session is still valid
+                        if (entry.getValue().bean.get() == null) {
+                            it.remove();
+                            removed++;
+                        }
                     }
                 }
+                if (removed > 0)
+                    logger.info("DBBean GarbageCollector has cleared " + removed + " beans from cache.");
+            } catch (Exception e) {
+                logger.log(Level.SEVERE, "DBBeanGarbageCollector thread has crashed", e);
             }
-            if (removed > 0)
-                logger.info("DBBean GarbageCollector has cleared "+removed+" beans from cache.");
         }
     }
 
