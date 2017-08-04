@@ -94,6 +94,27 @@ public class BinaryStructInputStreamTest {
     }
 
     @Test
+    public void basicByteTest(){
+        BinaryTestStruct struct = new BinaryTestStruct() {
+            @BinaryField(index=1, length=1)
+            public byte b1;
+            @BinaryField(index=2, length=4)
+            public byte b2;
+            @BinaryField(index=3, length=3)
+            public byte b3;
+
+            public void assertObj(){
+                assertEquals(0, b1);
+                assertEquals(6, b2);
+                assertEquals(6, b3);
+            }
+        };
+
+        BinaryStructInputStream.read(struct, new byte[]{0b0011_0110});
+        struct.assertObj();
+    }
+
+    @Test
     public void nonLinedLength(){
         BinaryTestStruct struct = new BinaryTestStruct() {
             @BinaryField(index=1, length=12)

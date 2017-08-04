@@ -95,9 +95,11 @@ public class BinaryFieldData {
         try {
             field.setAccessible(true);
             if (field.getType() == Boolean.class || field.getType() == boolean.class)
-                field.set(obj, data[0] != 0);
+                field.setBoolean(obj, data[0] != 0);
+            else if (field.getType() == Byte.class || field.getType() == byte.class)
+                field.setByte(obj, data[0]);
             else if (field.getType() == Integer.class || field.getType() == int.class)
-                field.set(obj, Converter.toInt(data));
+                field.setInt(obj, Converter.toInt(data));
             else if (field.getType() == String.class)
                 field.set(obj, new String(ByteUtil.getReverseByteOrder(data), StandardCharsets.ISO_8859_1));
             else
@@ -121,6 +123,10 @@ public class BinaryFieldData {
             if (field.getType() == Boolean.class || field.getType() == boolean.class)
                 return ByteUtil.getBits(
                         new byte[]{ (byte)(field.getBoolean(obj) ? 0x01 : 0x00)},
+                        getBitLength(obj));
+            else if (field.getType() == Byte.class || field.getType() == byte.class)
+                return ByteUtil.getBits(
+                        new byte[]{field.getByte(obj)},
                         getBitLength(obj));
             else if (field.getType() == Integer.class || field.getType() == int.class)
                 return ByteUtil.getBits(

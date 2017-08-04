@@ -39,6 +39,32 @@ import static org.junit.Assert.assertArrayEquals;
 public class BinaryStructOutputStreamTest {
 
     @Test
+    public void basicBooleanTest() throws IOException {
+        BinaryStruct struct = new BinaryStruct() {
+            @BinaryField(index=1, length=1)
+            public boolean b1 = false;
+            @BinaryField(index=2, length=1)
+            public boolean b2 = true;
+        };
+
+        byte[] data = BinaryStructOutputStream.serialize(struct);
+        assertArrayEquals(new byte[]{(byte)0b0100_0000}, data);
+    }
+
+    @Test
+    public void basicByteTest() throws IOException {
+        BinaryStruct struct = new BinaryStruct() {
+            @BinaryField(index=1, length=3)
+            public byte b1 = 3;
+            @BinaryField(index=2, length=5)
+            public byte b2 = Byte.MAX_VALUE;
+        };
+
+        byte[] data = BinaryStructOutputStream.serialize(struct);
+        assertArrayEquals(new byte[]{(byte)0b0111_1111}, data);
+    }
+
+    @Test
     public void basicIntTest() throws IOException {
         BinaryStruct struct = new BinaryStruct() {
             @BinaryField(index=1, length=32)
@@ -62,20 +88,6 @@ public class BinaryStructOutputStreamTest {
 
         byte[] data = BinaryStructOutputStream.serialize(struct);
         assertArrayEquals(new byte[]{0,1, 0,2}, data);
-    }
-
-
-    @Test
-    public void basicBooleanTest() throws IOException {
-        BinaryStruct struct = new BinaryStruct() {
-            @BinaryField(index=1, length=1)
-            public boolean b1 = false;
-            @BinaryField(index=2, length=1)
-            public boolean b2 = true;
-        };
-
-        byte[] data = BinaryStructOutputStream.serialize(struct);
-        assertArrayEquals(new byte[]{(byte)0b0100_0000}, data);
     }
 
     @Test
