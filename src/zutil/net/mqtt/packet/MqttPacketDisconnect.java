@@ -1,6 +1,5 @@
 package zutil.net.mqtt.packet;
 
-import zutil.parser.binary.BinaryStruct;
 
 /**
  * The DISCONNECT Packet is the final Control Packet sent from the Client to
@@ -13,4 +12,5 @@ public class MqttPacketDisconnect extends MqttPacketHeader{
     // No variable header
 
     // No payload
+
 }

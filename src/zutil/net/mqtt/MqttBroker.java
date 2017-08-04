@@ -53,11 +53,11 @@ public class MqttBroker extends ThreadedTCPNetworkServer{
         public void run() {
             try {
                 // Setup connection
-                MqttPacket packet = MqttPacket.read(in);
+                MqttPacketHeader packet = MqttPacket.read(in);
                 // Unexpected packet?
-                if ( ! (packet.header instanceof MqttPacketConnect))
-                    throw new IOException("Expected MqttPacketConnect but received "+packet.header.getClass());
-                MqttPacketConnect conn = (MqttPacketConnect) packet.header;
+                if ( ! (packet instanceof MqttPacketConnect))
+                    throw new IOException("Expected MqttPacketConnect but received "+packet.getClass());
+                MqttPacketConnect conn = (MqttPacketConnect) packet;
 
                 // Reply
                 MqttPacketConnectAck connack = new MqttPacketConnectAck();
@@ -78,7 +78,7 @@ public class MqttBroker extends ThreadedTCPNetworkServer{
                     if (packet == null)
                         return;
 
-                    switch (packet.header.type){
+                    switch (packet.type){
                         // Publish
                         case MqttPacketHeader.PACKET_TYPE_PUBLISH:
                             break;
@@ -94,7 +94,7 @@ public class MqttBroker extends ThreadedTCPNetworkServer{
                             break;
                         // Close connection
                         default:
-                            logger.warning("Received unknown packet type: "+packet.header.type);
+                            logger.warning("Received unknown packet type: "+packet.type);
                         case MqttPacketHeader.PACKET_TYPE_DISCONNECT:
                             return;
                     }

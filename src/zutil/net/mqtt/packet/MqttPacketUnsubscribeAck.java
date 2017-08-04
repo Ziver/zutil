@@ -1,8 +1,5 @@
 package zutil.net.mqtt.packet;
 
-import zutil.parser.binary.BinaryStruct;
-
-import java.util.List;
 
 /**
  * The UNSUBACK Packet is sent by the Server to the Client to confirm receipt
@@ -18,4 +15,5 @@ public class MqttPacketUnsubscribeAck extends MqttPacketHeader{
     public int packetId;
 
     // No payload
+
 }

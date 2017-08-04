@@ -29,4 +29,5 @@ public class MqttPacketConnectAck extends MqttPacketHeader{
     public int returnCode;
 
     // No payload
+
 }

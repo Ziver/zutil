@@ -1,13 +1,12 @@
 package zutil.net.mqtt.packet;
 
-import zutil.parser.binary.BinaryStruct;
 
 /**
  * A PUBLISH Control Packet is sent from a Client to a Server
  *
  * @see <a href="http://docs.oasis-open.org/mqtt/mqtt/v3.1.1/mqtt-v3.1.1.html">MQTT v3.1.1 Spec</a>
  */
-public class MqttPacketPublish extends MqttPacketHeader{
+public class MqttPacketPublish extends MqttPacketHeader {
 
     // Static Header
 /*
@@ -26,7 +25,9 @@ public class MqttPacketPublish extends MqttPacketHeader{
 
     @BinaryField(index = 2101, length = 16)
     private int topicNameLength;
-    /** The Topic Name identifies the information channel to which controlHeader data is published. */
+    /**
+     * The Topic Name identifies the information channel to which controlHeader data is published.
+     */
     @VariableLengthBinaryField(index = 2102, lengthField = "topicNameLength")
     public String topicName;
 

@@ -1,6 +1,5 @@
 package zutil.net.mqtt.packet;
 
-import zutil.parser.binary.BinaryStruct;
 
 /**
  * A PINGRESP Packet is sent by the Server to the Client in response to a
@@ -13,4 +12,6 @@ public class MqttPacketPingResp extends MqttPacketHeader{
     // No variable header
 
     // No payload
+
+
 }

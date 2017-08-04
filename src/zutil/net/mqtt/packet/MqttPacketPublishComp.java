@@ -1,6 +1,5 @@
 package zutil.net.mqtt.packet;
 
-import zutil.parser.binary.BinaryStruct;
 
 /**
  * Publish complete.
@@ -17,4 +16,5 @@ public class MqttPacketPublishComp extends MqttPacketHeader{
     public int packetId;
 
     // No payload
+
 }

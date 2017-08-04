@@ -22,7 +22,6 @@ public class MqttPacketSubscribe extends MqttPacketHeader{
 
 
 
-
     public static class MqttSubscribePayload implements BinaryStruct{
 
         @BinaryField(index = 3001, length = 16)

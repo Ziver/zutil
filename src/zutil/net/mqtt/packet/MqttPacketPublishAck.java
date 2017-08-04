@@ -1,6 +1,5 @@
 package zutil.net.mqtt.packet;
 
-import zutil.parser.binary.BinaryStruct;
 
 /**
  * A PUBACK Packet is the response to a PUBLISH Packet with QoS level 1.
@@ -15,4 +14,5 @@ public class MqttPacketPublishAck extends MqttPacketHeader{
     public int packetId;
 
     // No payload
+
 }

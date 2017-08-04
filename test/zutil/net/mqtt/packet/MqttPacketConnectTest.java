@@ -6,6 +6,8 @@ import zutil.net.mqtt.packet.MqttPacketConnect;
 import zutil.parser.binary.BinaryStructInputStream;
 import zutil.parser.binary.BinaryStructOutputStream;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
 import static org.junit.Assert.*;
@@ -14,6 +16,10 @@ import static org.junit.Assert.*;
 public class MqttPacketConnectTest {
 
     char[] data = new char[]{
+            // Fixed Header
+            0b0001_0000, // Packet Type + Reserved
+            0b0000_1010, // Variable Header + Payload Length
+            // Variable Header
             0b0000_0000, // length
             0b0000_0100, // length
             0b0100_1101, // 'M'
@@ -31,9 +37,11 @@ public class MqttPacketConnectTest {
 
 
     @Test
-    public void decode(){
-        MqttPacketConnect obj = new MqttPacketConnect();
-        BinaryStructInputStream.read(obj, Converter.toBytes(data));
+    public void decode() throws IOException {
+        MqttPacketConnect obj = (MqttPacketConnect)MqttPacket.read(
+                new BinaryStructInputStream(
+                        new ByteArrayInputStream(
+                                Converter.toBytes(data))));
 
         assertEquals("MQTT", obj.protocolName);
         assertEquals(4, obj.protocolLevel);
@@ -50,6 +58,7 @@ public class MqttPacketConnectTest {
     @Test
     public void encode() throws IOException {
         MqttPacketConnect obj = new MqttPacketConnect();
+        obj.payloadLength = 10;
         obj.keepAlive = 10;
 
         obj.flagUsername = true;
@@ -59,7 +68,9 @@ public class MqttPacketConnectTest {
         obj.flagWillFlag = true;
         obj.flagCleanSession = true;
 
-        assertArrayEquals(Converter.toBytes(data),
-                BinaryStructOutputStream.serialize(obj));
+        ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+        BinaryStructOutputStream binOut = new BinaryStructOutputStream(buffer);
+        MqttPacket.write(binOut, obj);
+        assertArrayEquals(Converter.toBytes(data), buffer.toByteArray());
     }
 }

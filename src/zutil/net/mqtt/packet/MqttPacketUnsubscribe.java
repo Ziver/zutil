@@ -22,7 +22,6 @@ public class MqttPacketUnsubscribe extends MqttPacketHeader{
 
 
 
-
     public static class MqttUnsubscribePayload implements BinaryStruct{
 
         @BinaryField(index = 3001, length = 16)

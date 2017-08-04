@@ -1,7 +1,6 @@
 package zutil.net.mqtt.packet;
 
 
-import zutil.parser.binary.BinaryStruct;
 import zutil.parser.binary.BinaryStructInputStream;
 import zutil.parser.binary.BinaryStructOutputStream;
 
@@ -14,40 +13,35 @@ import static zutil.net.mqtt.packet.MqttPacketHeader.*;
  */
 public class MqttPacket {
 
-    public MqttPacketHeader header;
 
-
-    private MqttPacket() {}
-
-    public static MqttPacket read(BinaryStructInputStream in) throws IOException {
-        MqttPacket packet = new MqttPacket();
+    public static MqttPacketHeader read(BinaryStructInputStream in) throws IOException {
+        MqttPacketHeader packet = new MqttPacketHeader();
 
         // Peek into stream and find packet type
         in.mark(10);
-        packet.header = new MqttPacketHeader();
-        in.read(packet.header);
+        in.read(packet);
         in.reset();
 
         // Resolve the correct header class
-        switch (packet.header.type){
-            case PACKET_TYPE_CONN:        packet.header = new MqttPacketConnect(); break;
-            case PACKET_TYPE_CONNACK:     packet.header = new MqttPacketConnectAck(); break;
-            case PACKET_TYPE_PUBLISH:     packet.header = new MqttPacketPublish(); break;
-            case PACKET_TYPE_PUBACK:      packet.header = new MqttPacketPublishAck(); break;
-            case PACKET_TYPE_PUBREC:      packet.header = new MqttPacketPublishRec(); break;
-            case PACKET_TYPE_PUBREL:      packet.header = new MqttPacketPublishRec(); break;
-            case PACKET_TYPE_PUBCOMP:     packet.header = new MqttPacketPublishComp(); break;
-            case PACKET_TYPE_SUBSCRIBE:   packet.header = new MqttPacketSubscribe(); break;
-            case PACKET_TYPE_SUBACK:      packet.header = new MqttPacketSubscribeAck(); break;
-            case PACKET_TYPE_UNSUBSCRIBE: packet.header = new MqttPacketUnsubscribe(); break;
-            case PACKET_TYPE_UNSUBACK:    packet.header = new MqttPacketUnsubscribeAck(); break;
-            case PACKET_TYPE_PINGREQ:     packet.header = new MqttPacketPingReq(); break;
-            case PACKET_TYPE_PINGRESP:    packet.header = new MqttPacketPingResp(); break;
-            case PACKET_TYPE_DISCONNECT:  packet.header = new MqttPacketDisconnect(); break;
+        switch (packet.type){
+            case PACKET_TYPE_CONN:        packet = new MqttPacketConnect(); break;
+            case PACKET_TYPE_CONNACK:     packet = new MqttPacketConnectAck(); break;
+            case PACKET_TYPE_PUBLISH:     packet = new MqttPacketPublish(); break;
+            case PACKET_TYPE_PUBACK:      packet = new MqttPacketPublishAck(); break;
+            case PACKET_TYPE_PUBREC:      packet = new MqttPacketPublishRec(); break;
+            case PACKET_TYPE_PUBREL:      packet = new MqttPacketPublishRec(); break;
+            case PACKET_TYPE_PUBCOMP:     packet = new MqttPacketPublishComp(); break;
+            case PACKET_TYPE_SUBSCRIBE:   packet = new MqttPacketSubscribe(); break;
+            case PACKET_TYPE_SUBACK:      packet = new MqttPacketSubscribeAck(); break;
+            case PACKET_TYPE_UNSUBSCRIBE: packet = new MqttPacketUnsubscribe(); break;
+            case PACKET_TYPE_UNSUBACK:    packet = new MqttPacketUnsubscribeAck(); break;
+            case PACKET_TYPE_PINGREQ:     packet = new MqttPacketPingReq(); break;
+            case PACKET_TYPE_PINGRESP:    packet = new MqttPacketPingResp(); break;
+            case PACKET_TYPE_DISCONNECT:  packet = new MqttPacketDisconnect(); break;
             default:
-                throw new IOException("Unknown header type: "+ packet.header.type);
+                throw new IOException("Unknown header type: "+ packet.type);
         }
-        in.read(packet.header);
+        in.read(packet);
         // TODO: payload
 
         return packet;

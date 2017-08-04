@@ -23,7 +23,6 @@ public class MqttPacketSubscribeAck extends MqttPacketHeader{
 
 
 
-
     public static class MqttSubscribeAckPayload implements BinaryStruct{
         public static final int RETCODE_SUCESS_MAX_QOS_0 = 0;
         public static final int RETCODE_SUCESS_MAX_QOS_1 = 1;

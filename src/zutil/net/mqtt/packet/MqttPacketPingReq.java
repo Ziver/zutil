@@ -12,4 +12,5 @@ public class MqttPacketPingReq extends MqttPacketHeader{
     // No variable header
 
     // No payload
+
 }
