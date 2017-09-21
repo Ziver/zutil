@@ -24,6 +24,7 @@
 
 package zutil.net.ssdp;
 
+import zutil.ClassUtil;
 import zutil.log.LogUtil;
 
 import java.io.IOException;
@@ -36,7 +37,7 @@ import java.util.logging.Level;
 public class SSDPClientTest {
 
     public static void main(String[] args) throws IOException {
-        System.out.println(LogUtil.getCallingClass());
+        System.out.println(ClassUtil.getCallingClass());
         LogUtil.setGlobalLevel(Level.FINEST);
         SSDPClient ssdp = new SSDPClient();
         ssdp.requestService("upnp:rootdevice");

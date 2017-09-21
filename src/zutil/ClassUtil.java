@@ -27,6 +27,7 @@ package zutil;
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.util.ArrayList;
 import java.util.HashSet;
 
 /**
@@ -161,5 +162,24 @@ public class ClassUtil {
             return classArray;
         }
         return new Class[0];
+    }
+
+
+    /**
+     * @return the first class in the stack that do not match the filter
+     */
+    public static String getCallingClass(Class... filter){
+        ArrayList filterStr = new ArrayList();
+        for (Class clazz : filter)
+            filterStr.add(clazz.getName());
+
+        StackTraceElement[] stackTraceElements = Thread.currentThread().getStackTrace();
+        for(int i=1; i<stackTraceElements.length ;++i){
+            String className = stackTraceElements[i].getClassName();
+            if( !filterStr.contains(className) ){
+                return className;
+            }
+        }
+        return null;
     }
 }

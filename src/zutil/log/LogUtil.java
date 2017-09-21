@@ -24,6 +24,7 @@
 
 package zutil.log;
 
+import zutil.ClassUtil;
 import zutil.io.file.FileUtil;
 
 import java.io.File;
@@ -45,21 +46,7 @@ public class LogUtil {
 	 * @return a new Logger for the calling class
 	 */
 	public static Logger getLogger(){
-		return Logger.getLogger(getCallingClass());
-	}
-
-	/**
-	 * @return the parent class other than Logger in the stack
-	 */
-	public static String getCallingClass(){
-		StackTraceElement[] stackTraceElements = Thread.currentThread().getStackTrace();
-		for(int i=1; i<stackTraceElements.length ;++i){
-			String name = stackTraceElements[i].getClassName();
-			if( !name.equals( LogUtil.class.getName() ) ){
-				return name;
-			}
-		}
-		return null;
+		return Logger.getLogger(ClassUtil.getCallingClass(LogUtil.class));
 	}
 
 	/**
