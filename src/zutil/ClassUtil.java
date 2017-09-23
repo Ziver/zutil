@@ -169,7 +169,8 @@ public class ClassUtil {
      * @return the first class in the stack that do not match the filter
      */
     public static String getCallingClass(Class... filter){
-        ArrayList filterStr = new ArrayList();
+        ArrayList filterStr = new ArrayList(filter.length + 1);
+        filterStr.add(ClassUtil.class.getName());
         for (Class clazz : filter)
             filterStr.add(clazz.getName());
 
