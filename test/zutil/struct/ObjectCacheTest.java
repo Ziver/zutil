@@ -62,9 +62,8 @@ public class ObjectCacheTest {
         ObjectCache cache = new ObjectCache(10);
         cache.put(KEY, OBJECT);
         assertEquals(OBJECT, cache.get(KEY));
-        Thread.sleep(1);
         assertTrue(cache.containsKey(KEY));
-        Thread.sleep(10);
+        Thread.sleep(20);
         assertFalse(cache.containsKey(KEY));
         assertEquals(0, cache.size());
     }

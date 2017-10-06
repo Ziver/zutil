@@ -51,7 +51,7 @@ public class TimedHashSetTest {
         TimedHashSet set = new TimedHashSet(10);
         set.add(ENTRY);
         assertTrue(set.contains(ENTRY));
-        Thread.sleep(15);
+        Thread.sleep(20);
         assertFalse(set.contains(ENTRY));
     }
 
