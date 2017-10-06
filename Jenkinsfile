@@ -1,43 +1,41 @@
+#!groovy​
 // Jenkinsfile (Pipeline Script)
 node {
     // Configure environment
-    env.JAVA_HOME = tool name: 'JDK8'
     env.REPO_URL = "repo.koc.se/zutil-java.git" //scm.getUserRemoteConfigs()[0].getUrl()
     env.BUILD_NAME = "BUILD-" + env.BUILD_ID
 
 
     checkout scm
 
-    stage('Build') {
-        sh 'ant clean'
-        sh 'ant build'
-    }
+    withMaven(JDK: "JDK8") {
 
-    stage('Test') {
-        try {
-            sh 'ant test'
-        } finally {
-            step([$class: 'JUnitResultArchiver', testResults: 'build/reports/*.xml'])
+        stage('Build') {
+            sh 'mvn clean compile'
         }
-    }
 
+        stage('Test') {
+            sh 'mvn surefire:test failsafe:integration-test'
+        }
 
-    stage('Package') {
-        sh 'ant package'
-        archiveArtifacts artifacts: 'build/release/*', fingerprint: true
+        stage('Package') {
+            sh 'mvn -DskipStatic -DskipTests install'
 
-        // Tag artifact
-        withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'f8e5f6c6-4adb-4ab2-bb5d-1c8535dff491',
-                                      usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
-            sh "git tag ${env.BUILD_NAME}"
-            sh "git push 'https://${USERNAME}:${PASSWORD}@${env.REPO_URL}' ${env.BUILD_NAME}"
+            // Tag artifact
+            withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'f8e5f6c6-4adb-4ab2-bb5d-1c8535dff491',
+                                          usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
+                sh "git tag ${env.BUILD_NAME}"
+                sh "git push 'https://${USERNAME}:${PASSWORD}@${env.REPO_URL}' ${env.BUILD_NAME}"
+            }
         }
     }
 }
 
 //stage('Deploy') {
-//    input message: 'Deploy?', submitter: 'ziver'
-//    node {
-//        sh 'ant deploy'
+//    timeout(time: 5, unit: 'HOURS') {
+//        input message: 'Deploy?', submitter: 'ziver'
+//        node {
+//            sh 'mvn deploy'
+//        }
 //    }
 //}
