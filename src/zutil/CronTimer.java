@@ -1,8 +1,5 @@
 package zutil;
 
-
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
-
 import java.util.*;
 
 /**
@@ -149,7 +146,7 @@ public class CronTimer implements Iterator<Long>, Iterable<Long>{
     }
     @Override
     public void remove() {
-        throw new NotImplementedException();
+        throw new UnsupportedOperationException();
     }
 
     /**
