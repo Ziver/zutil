@@ -29,14 +29,9 @@ node {
                 sh "git push 'https://${USERNAME}:${PASSWORD}@${env.REPO_URL}' ${env.BUILD_NAME}"
             }
         }
+
+        stage('Deploy') {
+            sh 'mvn -DskipStatic -DskipTests deploy'
+        }
     }
 }
-
-//stage('Deploy') {
-//    timeout(time: 5, unit: 'HOURS') {
-//        input message: 'Deploy?', submitter: 'ziver'
-//        node {
-//            sh 'mvn deploy'
-//        }
-//    }
-//}
