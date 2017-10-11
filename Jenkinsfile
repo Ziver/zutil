@@ -9,7 +9,7 @@ node {
         git url: "https://" + env.REPO_URL
     }
 
-    withMaven(jdk: "jdk8", maven: "m3.5", mavenLocalRepo: ".repository") {
+    withMaven(jdk: "jdk8", maven: "m3.5", mavenLocalRepo: ".repository", mavenSettingsConfig: "DefaultMaven") {
 
         stage('Build') {
             sh 'mvn clean compile'
