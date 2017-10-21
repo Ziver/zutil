@@ -10,7 +10,7 @@
     <packaging>jar</packaging>
 
     <name>Zutil</name>
-    <description>A library containuin utility classes and code snippets</description>
+    <description>A library containing utility classes and code snippets</description>
 
     <licenses>
         <license>
@@ -162,7 +162,7 @@
                 <version>1.6.7</version>
                 <extensions>true</extensions>
                 <configuration>
-                    <serverId>sonatype-nexus</serverId>
+                    <serverId>sonatype-nexus-snapshot</serverId>
                     <nexusUrl>https://oss.sonatype.org/</nexusUrl>
                     <autoReleaseAfterClose>true</autoReleaseAfterClose>
                 </configuration>
@@ -172,12 +172,12 @@
 
     <distributionManagement>
         <snapshotRepository>
-            <id>sonatype-nexus</id>
+            <id>sonatype-nexus-snapshot</id>
             <name>Sonatype Nexus Snapshots</name>
             <url>http://oss.sonatype.org/content/repositories/snapshots</url>
         </snapshotRepository>
         <repository>
-            <id>sonatype-nexus</id>
+            <id>sonatype-nexus-release</id>
             <name>Nexus Release Repository</name>
             <url>http://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
         </repository>
