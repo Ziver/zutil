@@ -41,7 +41,6 @@ public class BEncodedParser {
 	 * Returns the representation of the data in the BEncoded string
 	 * 
 	 * @param	data	is the data to be decoded
-	 * @return
 	 */
 	public static DataNode read(String data) throws ParseException {
 		return decode_BEncoded(new MutableInt(), new StringBuilder(data));

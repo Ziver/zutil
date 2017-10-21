@@ -33,7 +33,7 @@ import java.math.BigInteger;
  * The algorithm solves the discreet log equation x^2 = n mod p
  * 
  * @author Ziver
- * @see http://en.wikipedia.org/wiki/Shanks-Tonelli_algorithm
+ * @see <a href="http://en.wikipedia.org/wiki/Shanks-Tonelli_algorithm">Wikipedia</a>
  */
 public class ShanksTonelliAlgo {
 	public static BigInteger calc(BigInteger n, BigInteger p){

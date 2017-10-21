@@ -40,7 +40,7 @@ public class QuickSort{
     /**
      * Sort the elements in ascending order using Quicksort.
      *
-     * @param A is the list to sort.
+     * @param	list	is the list to sort.
      */
 	public static void sort(SortableDataList<?> list){
     	sort(list, 0, list.size()-1, MIDDLE_PIVOT, true);
@@ -49,9 +49,9 @@ public class QuickSort{
     /**
      * Sort the elements in ascending order using Quicksort.
      *
-     * @param A is the list to sort.
-     * @param type is the type of pivot
-     * @param insert is if insertion sort will be used
+     * @param	list	is the list to sort.
+     * @param	type	is the type of pivot
+     * @param	insert	is if insertion sort will be used
      */
 	public static void sort(SortableDataList<?> list, int type, boolean insert){
     	sort(list, 0, list.size()-1, type, insert);
@@ -62,10 +62,10 @@ public class QuickSort{
      * Reference: http://www.inf.fh-flensburg.de/lang/algorithmen/sortieren/quick/quicken.htm
      * Complexity: O(n*log n) normally, but O(n^2) if the pivot is bad
      *
-     * @param A is the list to sort.
-     * @param start is the index to start from
-     * @param stop is the index to stop
-     * @param type is the type of pivot to use
+     * @param	list	is the list to sort.
+     * @param	start	is the index to start from
+     * @param	stop 	is the index to stop
+     * @param	type	is the type of pivot to use
      */	
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public static void sort(SortableDataList list, int start, int stop, int type, boolean insertionSort){

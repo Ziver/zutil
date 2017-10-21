@@ -36,87 +36,87 @@ import java.awt.event.FocusListener;
 import java.util.HashMap;
 
 public class WizardActionHandler implements ActionListener, FocusListener, ListSelectionListener{
-	private HashMap<String, Object> values;
+    private HashMap<String, Object> values;
 
-	public WizardActionHandler(HashMap<String, Object> values){
-		this.values = values;
-	}
+    public WizardActionHandler(HashMap<String, Object> values){
+        this.values = values;
+    }
 
-	public void actionPerformed(ActionEvent e) {
-		event(e);
-	}	
-	public void focusGained(FocusEvent e) {
-		event(e);
-	}
-	public void focusLost(FocusEvent e) {
-		event(e);
-	}	
-	public void event(AWTEvent e){
-		if(e.getSource() instanceof Component) 
-			registerValue( (Component)e.getSource() );
-	}
-	public void valueChanged(ListSelectionEvent e) {
-		if(e.getSource() instanceof Component) 
-			registerValue( (Component)e.getSource() );
-	}
+    public void actionPerformed(ActionEvent e) {
+        event(e);
+    }
+    public void focusGained(FocusEvent e) {
+        event(e);
+    }
+    public void focusLost(FocusEvent e) {
+        event(e);
+    }
+    public void event(AWTEvent e){
+        if(e.getSource() instanceof Component)
+            registerValue( (Component)e.getSource() );
+    }
+    public void valueChanged(ListSelectionEvent e) {
+        if(e.getSource() instanceof Component)
+            registerValue( (Component)e.getSource() );
+    }
 
-	public void registerListener(Component c){
-		/**
-		 * JToggleButton
-		 * JCheckBox
-		 * JRadioButton
-		 */
-		if(c instanceof JToggleButton){
-			JToggleButton o = (JToggleButton) c;
-			o.addActionListener( this );
-		}		
-		/**
-		 * JEditorPane
-		 * JTextArea
-		 * JTextField
-		 */
-		else if(c instanceof JTextComponent){
-			JTextComponent o = (JTextComponent) c;
-			o.addFocusListener( this );
-		}
-		/**
-		 * JList
-		 */
-		else if(c instanceof JList){
-			JList<?> o = (JList<?>) c;
-			o.addListSelectionListener( this );
-		}
-	}
+    public void registerListener(Component c){
+        /**
+         * JToggleButton
+         * JCheckBox
+         * JRadioButton
+         */
+        if(c instanceof JToggleButton){
+            JToggleButton o = (JToggleButton) c;
+            o.addActionListener( this );
+        }
+        /**
+         * JEditorPane
+         * JTextArea
+         * JTextField
+         */
+        else if(c instanceof JTextComponent){
+            JTextComponent o = (JTextComponent) c;
+            o.addFocusListener( this );
+        }
+        /**
+         * JList
+         */
+        else if(c instanceof JList){
+            JList<?> o = (JList<?>) c;
+            o.addListSelectionListener( this );
+        }
+    }
 
-	/**
-	 * Registers the state of the event source
-	 * @param e is the event
-	 */
-	public void registerValue(Component c) {
-		/**
-		 * JToggleButton
-		 * JCheckBox
-		 * JRadioButton
-		 */
-		if(c instanceof JToggleButton){
-			JToggleButton o = (JToggleButton) c;
-			values.put( o.getName() , o.isSelected() );
-		}		
-		/**
-		 * JEditorPane
-		 * JTextArea
-		 * JTextField
-		 */
-		else if(c instanceof JTextComponent){
-			JTextComponent o = (JTextComponent) c;
-			values.put( o.getName() , o.getText() );
-		}
-		/**
-		 * JList
-		 */
-		else if(c instanceof JList){
-			JList<?> o = (JList<?>) c;
-			values.put( o.getName() , o.getSelectedValue() );
-		}
-	}
+    /**
+     * Registers the state of the event source
+     * @param	c 	is the event
+     */
+    public void registerValue(Component c) {
+        /**
+         * JToggleButton
+         * JCheckBox
+         * JRadioButton
+         */
+        if(c instanceof JToggleButton){
+            JToggleButton o = (JToggleButton) c;
+            values.put( o.getName() , o.isSelected() );
+        }
+        /**
+         * JEditorPane
+         * JTextArea
+         * JTextField
+         */
+        else if(c instanceof JTextComponent){
+            JTextComponent o = (JTextComponent) c;
+            values.put( o.getName() , o.getText() );
+        }
+        /**
+         * JList
+         */
+        else if(c instanceof JList){
+            JList<?> o = (JList<?>) c;
+            values.put( o.getName() , o.getSelectedValue() );
+        }
+    }
 }

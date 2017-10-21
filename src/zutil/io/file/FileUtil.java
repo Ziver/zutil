@@ -273,7 +273,6 @@ public class FileUtil {
      *
      * @param 		file		is the name of the file
      * @param 		ext			is the new extension, without the dot
-     * @return
      */
     public static String replaceExtension(String file, String ext) {
         if( file == null )

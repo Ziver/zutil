@@ -33,49 +33,49 @@ import java.io.OutputStream;
  *
  */
 public class StringOutputStream extends OutputStream{
-	// The buffer
-	protected StringBuilder buffer;
-	
-	/**
-	 * Creates an new instance of this class
-	 */
-	public StringOutputStream(){
-		clear();
-	}
-	
-	@Override
-	public void write(int b) {
-		buffer.append( b );
-	}
+    // The buffer
+    protected StringBuilder buffer;
 
-	@Override
-	public void write(byte[] b) {
-		buffer.append( new String(b) );
-	}
-	
-	@Override
-	public void write(byte[] b, int off, int len) {
-		buffer.append( new String(b, off, len) );
-	}
+    /**
+     * Creates an new instance of this class
+     */
+    public StringOutputStream(){
+        clear();
+    }
 
-	/**
-	 * Same as {@link OutputStream:clear()}
-	 */
-	@Override
-	public void close() {}
-	
-	/**
-	 * Clears the String buffer
-	 */
-	public void clear(){
-		buffer = new StringBuilder();
-	}
-	
-	/**
-	 * @return the String with the data
-	 */
-	@Override
-	public String toString() {
-		return buffer.toString();
-	}
+    @Override
+    public void write(int b) {
+        buffer.append( b );
+    }
+
+    @Override
+    public void write(byte[] b) {
+        buffer.append( new String(b) );
+    }
+
+    @Override
+    public void write(byte[] b, int off, int len) {
+        buffer.append( new String(b, off, len) );
+    }
+
+    /**
+     * Same as {@link OutputStream#close()}
+     */
+    @Override
+    public void close() {}
+
+    /**
+     * Clears the String buffer
+     */
+    public void clear(){
+        buffer = new StringBuilder();
+    }
+
+    /**
+     * @return the String with the data
+     */
+    @Override
+    public String toString() {
+        return buffer.toString();
+    }
 }

@@ -99,8 +99,8 @@ public class Hasher {
 	/**
 	 * Returns the MD5 hash of the given file
 	 * 
-	 * @param 		object 		is the file to hash
-	 * @return 					an String containing the hash
+	 * @param	file	is the file to hash
+	 * @return 			an String containing the hash
 	 */
 	public static String MD5(File file) throws IOException{
 		try {

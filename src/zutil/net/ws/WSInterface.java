@@ -38,22 +38,22 @@ import java.lang.annotation.Target;
  *	private static class Test implements WSInterface{
  *		public Test(){}
  *	
- *		@WSDocumentation("blabla")
- *		@WSDLParamDocumentation("olle = a variable?")
+ *		&#64;WSDocumentation("blabla")
+ *		&#64;WSDLParamDocumentation("olle = a variable?")
  *		public void pubZ( 
- *				@WSParamName("olle") int lol) 
+ *				&#64;WSParamName("olle") int lol)
  *				throws Exception{ 
  *			....
  *		}
  *	
- *		@WSReturnName("param")
+ *		&#64;WSReturnName("param")
  *		public String pubA( 
- *				@WSParamName(value="lol", optional=true) String lol) 
+ *				&#64;WSParamName(value="lol", optional=true) String lol)
  *				throws Exception{ 
  *			....
  *		}
  *	
- *		@WSIgnore()
+ *		&#64;WSIgnore()
  *		public void privaZ(....){ 
  *			...
  *		}		
@@ -63,79 +63,78 @@ import java.lang.annotation.Target;
  * @author Ziver
  */
 public interface WSInterface {
-	/**
-	 * Annotation that assigns a name to an parameters
-	 * in an method.
-	 * 
-	 * @author Ziver
-	 */
-	@Retention(RetentionPolicy.RUNTIME)
-	@Target(ElementType.PARAMETER)
-	public @interface WSParamName {
-	    String value();
-	    boolean optional() default false;
-	}
-	
-	/**
-	 * Annotation that assigns a name to the return value
-	 * in an method.
-	 * 
-	 * @author Ziver
-	 */
-	@Retention(RetentionPolicy.RUNTIME)
-	@Target(ElementType.METHOD)
-	public @interface WSReturnName {
-	    String value();
-	}
-	
-	/**
-	 * Skipp publication of the given method
-	 * 
-	 * @author Ziver
-	 */
-	@Retention(RetentionPolicy.RUNTIME)
-	@Target(ElementType.METHOD)
-	public @interface WSIgnore { }
-	
-	/**
-	 * Method or Parameter comments for the WSDL. 
-	 * These comments are put in the message part of the WSDL
-	 * 
-	 * @author Ziver
-	 */
-	@Retention(RetentionPolicy.RUNTIME)
-	public @interface WSDocumentation{
-		String value();
-	}
+    /**
+     * Annotation that assigns a name to an parameters
+     * in an method.
+     *
+     * @author Ziver
+     */
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target(ElementType.PARAMETER)
+    @interface WSParamName {
+        String value();
+        boolean optional() default false;
+    }
 
-	/**
-	 * Parameter comments for the WSDL. 
-	 * These comments are put in the message part of the WSDL
-	 * 
-	 * @author Ziver
-	 */
-	@Retention(RetentionPolicy.RUNTIME)
-	public @interface WSParamDocumentation{
-		String value();
-	}
-	
-	/**
-	 * This method will be used in the header.
-	 * 
-	 * @author Ziver
-	 */
-	@Retention(RetentionPolicy.RUNTIME)
-	@Target(ElementType.METHOD)
-	public @interface WSHeader { }
-	
-	/**
-	 * Specifies the name space for method.
-	 * 
-	 * @author Ziver
-	 */
-	@Retention(RetentionPolicy.RUNTIME)
-	//@Target(ElementType.TYPE)
-	public @interface WSNamespace {
-		String value();
-	}
+    /**
+     * Annotation that assigns a name to the return value
+     * in an method.
+     *
+     * @author Ziver
+     */
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target(ElementType.METHOD)
+    @interface WSReturnName {
+        String value();
+    }
+
+    /**
+     * Skipp publication of the given method
+     *
+     * @author Ziver
+     */
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target(ElementType.METHOD)
+    public @interface WSIgnore { }
+
+    /**
+     * Method or Parameter comments for the WSDL.
+     * These comments are put in the message part of the WSDL
+     *
+     * @author Ziver
+     */
+    @Retention(RetentionPolicy.RUNTIME)
+    @interface WSDocumentation{
+        String value();
+    }
+
+    /**
+     * Parameter comments for the WSDL.
+     * These comments are put in the message part of the WSDL
+     *
+     * @author Ziver
+     */
+    @Retention(RetentionPolicy.RUNTIME)
+    @interface WSParamDocumentation{
+        String value();
+    }
+
+    /**
+     * This method will be used in the header.
+     *
+     * @author Ziver
+     */
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target(ElementType.METHOD)
+    @interface WSHeader { }
+
+    /**
+     * Specifies the name space for method.
+     *
+     * @author Ziver
+     */
+    @Retention(RetentionPolicy.RUNTIME)
+    @interface WSNamespace {
+        String value();
+    }
 }

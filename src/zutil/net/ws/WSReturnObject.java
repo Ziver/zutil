@@ -38,9 +38,9 @@ import java.lang.reflect.Field;
  * 
  * <pre>
  * 	private static class TestObject implements WSReturnObject{
- *		@WSValueName("name")
+ *		&#64;WSValueName("name")
  *		public String name;
- *		@WSValueName("lastname")
+ *		&#64;WSValueName("lastname")
  *		public String lastname;
  *
  *		public TestObject(String n, String l){

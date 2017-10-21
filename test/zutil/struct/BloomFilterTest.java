@@ -70,7 +70,7 @@ public class BloomFilterTest extends TestCase {
 					falsePositives++;
 				}
 			}
-			double expectedFP = bf.falsePosetiveProbability();
+			double expectedFP = bf.falsePositiveProbability();
 			double actualFP = (double) falsePositives / (double) addCount;
 			System.out.println("Got " + falsePositives
 					+ " false positives out of " + addCount + " added items, rate = "

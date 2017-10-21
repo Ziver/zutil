@@ -13,7 +13,7 @@ import java.util.logging.Logger;
 
 /**
  * A intermediate class for loading Objects of generic Classes.
- * The extending class must set the "superBean" parameter to true in {@link @DBBean.DBTable}.
+ * The extending class must set the "superBean" parameter to true in {@link DBBean.DBTable}.
  * The Object that is stored must use Configurator to define what fields that should be stored.
  *
  * This class needs to fields in DB:
