@@ -37,7 +37,7 @@ stage('Release') {
         input message: 'Deploy?', submitter: 'ziver'
         node {
             withMaven(mavenConfiguration) {
-                sh 'mvn --batch-mode -DskipStatic -DskipTests release:prepare release:perform'
+                sh 'mvn --batch-mode -Darguments="-Dmaven.test.skip=true" release:prepare release:perform'
             }
         }
     }
