@@ -10,7 +10,7 @@ mavenConfiguration = [
 
 node {
     stage('Checkout') {
-        git url: "https://" + env.REPO_URL
+        checkout scm
     }
 
     withMaven(mavenConfiguration) {
