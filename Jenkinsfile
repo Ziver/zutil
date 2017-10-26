@@ -1,15 +1,14 @@
 #!groovy
 // Jenkinsfile (Pipeline Script)
-node {
-    // Configure environment
-    env.REPO_URL = "repo.koc.se/zutil-java.git" //scm.getUserRemoteConfigs()[0].getUrl()
-    env.BUILD_NAME = "BUILD-" + env.BUILD_ID
+withMaven(jdk: "jdk8", maven: "m3.5", mavenLocalRepo: ".repository", mavenSettingsConfig: "639c4560-87b7-4502-bb3d-2c44845cd2b5") {
+    node {
+        // Configure environment
+        env.REPO_URL = "repo.koc.se/zutil-java.git" //scm.getUserRemoteConfigs()[0].getUrl()
+        env.BUILD_NAME = "BUILD-" + env.BUILD_ID
 
-    stage('Checkout') {
-        git url: "https://" + env.REPO_URL
-    }
-
-    withMaven(jdk: "jdk8", maven: "m3.5", mavenLocalRepo: ".repository", mavenSettingsConfig: "639c4560-87b7-4502-bb3d-2c44845cd2b5") {
+        stage('Checkout') {
+            git url: "https://" + env.REPO_URL
+        }
 
         stage('Build') {
             sh 'mvn clean compile'
@@ -32,6 +31,15 @@ node {
 
         stage('Deploy') {
             sh 'mvn -DskipStatic -DskipTests deploy'
+        }
+    }
+
+    stage('Release') {
+        timeout(time: 1, unit: 'HOURS') {
+            input message: 'Deploy?', submitter: 'ziver'
+            node {
+                sh 'mvn --batch-mode -DskipStatic -DskipTests release:prepare release:perform'
+            }
         }
     }
 }
