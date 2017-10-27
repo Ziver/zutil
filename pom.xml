@@ -6,7 +6,7 @@
 
     <groupId>se.koc</groupId>
     <artifactId>zutil</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>1.0.0</version>
     <packaging>jar</packaging>
 
     <name>Zutil</name>
