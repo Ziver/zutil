@@ -28,17 +28,7 @@ node {
 
         stage('Deploy') {
             sh 'mvn -DskipStatic -DskipTests deploy'
-        }
-    }
-}
-
-stage('Release') {
-    timeout(time: 1, unit: 'HOURS') {
-        input message: 'Deploy?', submitter: 'ziver'
-        node {
-            withMaven(mavenConfiguration) {
-                sh 'mvn --batch-mode -Darguments="-Dmaven.test.skip=true" release:prepare release:perform'
-            }
+            sh 'mvn scm:tag'
         }
     }
 }
