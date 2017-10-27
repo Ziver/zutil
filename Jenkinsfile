@@ -27,8 +27,13 @@ node {
         }
 
         stage('Deploy') {
+            // Figure out Pom version
+            def version = (readFile('pom.xml') =~ '<version>(.+?)</version>')[0][1]
+
+            // Start deployment
             sh 'mvn -DskipStatic -DskipTests deploy'
-            sh 'mvn scm:tag'
+            if ( ! version.contains("SNAPSHOT"))
+                sh 'mvn scm:tag'
         }
     }
 }
