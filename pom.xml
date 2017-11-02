@@ -173,7 +173,7 @@
                 <artifactId>maven-scm-plugin</artifactId>
                 <version>1.9.5</version>
                 <configuration>
-                    <tag>${project.version}</tag>
+                    <tag>${project.artifactId}-${project.version}</tag>
                     <connectionType>developerConnection</connectionType>
                 </configuration>
             </plugin>
