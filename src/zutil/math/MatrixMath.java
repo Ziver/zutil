@@ -196,4 +196,20 @@ public class MatrixMath {
                     "matrix1 " + matrix1.length + "x" + matrix1[0].length + ", " +
                     "matrix2 " + matrix2.length + "x" + matrix2[0].length + ", ");
     }
+
+    /***********************************************************************
+     *                      Util Methods
+     **********************************************************************/
+
+    /**
+     * @return a identity matrix (n x n) where the diagonal elements have the value 1
+     */
+    public static double[][] identity(int n){
+        double[][] result = new double[n][n];
+
+        for (int i=0; i < n; ++i) {
+            result[i][i] = 1;
+        }
+        return result;
+    }
 }

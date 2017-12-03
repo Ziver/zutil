@@ -80,4 +80,15 @@ public class MatrixMathTest {
     }
 
 
+
+    @Test
+    public void identity(){
+        assertArrayEquals(
+                new double[][]{{1}},
+                MatrixMath.identity(1));
+
+        assertArrayEquals(
+                new double[][]{{1,0,0,0},{0,1,0,0},{0,0,1,0},{0,0,0,1}},
+                MatrixMath.identity(4));
+    }
 }
