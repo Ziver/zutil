@@ -47,15 +47,37 @@ public class MatrixMathTest {
                 MatrixMath.subtract(new double[][]{{2,3},{-4,9}}, new double[][]{{1,2},{3,4}}));
     }
 
+
+
     @Test
-    public void elementalMultiply(){
-        assertArrayEquals(new double[][]{{2,6},{-12,36}},
-                MatrixMath.multiply(new double[][]{{2,3},{-4,9}}, new double[][]{{1,2},{3,4}}));
+    public void vectorMultiply(){
+        assertArrayEquals(
+                new double[]{8,14},
+                MatrixMath.multiply(new double[][]{{2,3},{-4,9}}, new double[]{1,2}),
+                0.0
+        );
     }
 
     @Test
-    public void elementalDivision(){
-        assertArrayEquals(new double[][]{{2,2},{-3,3}},
-                MatrixMath.divide(new double[][]{{2,4},{-9,12}}, new double[][]{{1,2},{3,4}}));
+    public void vectorDivision(){
+        assertArrayEquals(
+                new double[]{4,1},
+                MatrixMath.divide(new double[][]{{2,4},{-4,10}}, new double[]{1,2}),
+                0.0
+        );
     }
+
+
+
+    @Test
+    public void matrixMultiply(){
+        assertArrayEquals(
+                new double[][]{{486,410.4,691.6},{314,341.6,416.4},{343.5,353.4,463.6},{173,285.2,190.8}},
+                MatrixMath.multiply(
+                        new double[][]{{1,2104},{1,1416},{1,1534},{1,852}},
+                        new double[][]{{-40,200,-150},{0.25,0.1,0.4}})
+        );
+    }
+
+
 }
