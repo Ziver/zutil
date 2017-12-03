@@ -79,6 +79,15 @@ public class MatrixMathTest {
         );
     }
 
+    @Test
+    public void matrixTranspose(){
+        assertArrayEquals(
+                new double[][]{{1,3},{2,5},{0,9}},
+                MatrixMath.transpose(
+                        new double[][]{{1,2,0},{3,5,9}})
+        );
+    }
+
 
 
     @Test

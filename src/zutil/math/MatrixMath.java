@@ -189,6 +189,20 @@ public class MatrixMath {
         return result;
     }
 
+    /**
+     * @return a new matrix with the transpose of the input matrix.
+     */
+    public static double[][] transpose(double[][] matrix){
+        double[][] result = new double[matrix[0].length][matrix.length];
+
+        for (int y=0; y < result.length; ++y) {
+            for (int x=0; x < result[y].length; ++x){
+                result[y][x] = matrix[x][y];
+            }
+        }
+        return result;
+    }
+
 
     private static void matrixPreCheck(double[][] matrix1, double[][] matrix2) {
         if (matrix1[0].length != matrix2.length)
@@ -212,4 +226,5 @@ public class MatrixMath {
         }
         return result;
     }
+
 }
