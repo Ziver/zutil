@@ -47,6 +47,12 @@ public class MatrixMathTest {
                 MatrixMath.subtract(new double[][]{{2,3},{-4,9}}, new double[][]{{1,2},{3,4}}));
     }
 
+    @Test
+    public void elementalMultiply(){
+        assertArrayEquals(new double[][]{{2,6},{-12,36}},
+                MatrixMath.elemMultiply(new double[][]{{2,3},{-4,9}}, new double[][]{{1,2},{3,4}}));
+    }
+
 
 
     @Test

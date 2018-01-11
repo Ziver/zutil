@@ -110,6 +110,24 @@ public class MatrixMath {
         return result;
     }
 
+    /**
+     * Element multiplication, each element in matrix1 will be
+     * multiplied with the corresponding element in matrix2.
+     *
+     * @return a new matrix with the result
+     */
+    public static double[][] elemMultiply(double[][] matrix1, double[][] matrix2){
+        elementalPreCheck(matrix1, matrix2);
+        double[][] result = new double[matrix1.length][matrix1[0].length];
+
+        for (int y=0; y < matrix1.length; ++y) {
+            for (int x=0; x < matrix1[y].length; ++x){
+                result[y][x] = matrix1[y][x] * matrix2[y][x];
+            }
+        }
+        return result;
+    }
+
     private static void elementalPreCheck(double[][] matrix1, double[][] matrix2) {
         if (matrix1.length != matrix2.length || matrix1[0].length != matrix2[0].length)
             throw new IllegalArgumentException("Matrices need to be of same dimension: " +
