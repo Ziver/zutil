@@ -30,77 +30,77 @@ import java.util.HashMap;
 import java.util.List;
 
 public class ChartData {
-	
-	private HashMap<Integer,String> xStrings;
-	private HashMap<Integer,String> yStrings;
-	private int maxx;
-	private int minx;
-	private int maxy;
-	private int miny;
 
-	private ArrayList<Point> points;
-	
-	
-	public ChartData(){
-		xStrings = new HashMap<Integer,String>();
-		yStrings = new HashMap<Integer,String>();
-		
-		points = new ArrayList<Point>();
-	}
-	
-	public void setXValueString(int x, String name){
-		xStrings.put(x, name);
-	}
-	public void setYValueString(int y, String name){
-		yStrings.put(y, name);
-	}
+    private HashMap<Integer,String> xStrings;
+    private HashMap<Integer,String> yStrings;
+    private int maxX;
+    private int minX;
+    private int maxY;
+    private int minY;
 
-	
-	public void addPoint(int x, int y){
-		points.add( new Point( x, y));
-		setMaxMin(x, y);
-	}	
-	public void addPoint(int y){
-		points.add( new Point( maxx, y));
-		maxx++;
-		setMaxMin(maxx, y);
-	}
-	public void addPoint(String x, int y){
-		xStrings.put(maxx, x);		
-		points.add( new Point( maxx, y));
-		maxx++;
-		setMaxMin(maxx, y);
-	}
-	
-	
-	private void setMaxMin(int x, int y){
-		if( x > maxx )	maxx = x;
-		else if( x < minx ) minx = x;
-		
-		if( y > maxy )	maxx = y;
-		else if( y < miny ) minx = y;
-	}
-	
-	public int getMaxX(){
-		return maxx;
-	}
-	public int getMinX(){
-		return minx;
-	}
-	public int getMaxY(){
-		return maxy;
-	}
-	public int getMinY(){
-		return miny;
-	}
-	public String getXString(int x){
-		return xStrings.get(x);
-	}
-	public String getYString(int y){
-		return yStrings.get(y);
-	}
-	
-	protected List<Point> getPoints(){
-		return points;
-	}
+    private ArrayList<Point> points;
+
+
+    public ChartData(){
+        xStrings = new HashMap<Integer,String>();
+        yStrings = new HashMap<Integer,String>();
+
+        points = new ArrayList<Point>();
+    }
+
+    public void setXValueString(int x, String name){
+        xStrings.put(x, name);
+    }
+    public void setYValueString(int y, String name){
+        yStrings.put(y, name);
+    }
+
+
+    public void addPoint(int x, int y){
+        points.add( new Point( x, y));
+        setMaxMin(x, y);
+    }
+    public void addPoint(int y){
+        points.add( new Point(maxX, y));
+        maxX++;
+        setMaxMin(maxX, y);
+    }
+    public void addPoint(String x, int y){
+        xStrings.put(maxX, x);
+        points.add( new Point(maxX, y));
+        maxX++;
+        setMaxMin(maxX, y);
+    }
+
+
+    private void setMaxMin(int x, int y){
+        if( x > maxX) maxX = x;
+        if( x < minX) minX = x;
+
+        if( y > maxY) maxY = y;
+        if( y < minY) minY = y;
+    }
+
+    public int getMaxX(){
+        return maxX;
+    }
+    public int getMinX(){
+        return minX;
+    }
+    public int getMaxY(){
+        return maxY;
+    }
+    public int getMinY(){
+        return minY;
+    }
+    public String getXString(int x){
+        return xStrings.get(x);
+    }
+    public String getYString(int y){
+        return yStrings.get(y);
+    }
+
+    protected List<Point> getPoints(){
+        return points;
+    }
 }

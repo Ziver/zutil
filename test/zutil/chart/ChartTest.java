@@ -41,21 +41,22 @@ public class ChartTest extends JFrame{
 	
 	public ChartTest(){
 		ChartData data = new ChartData();
+		data.addPoint(0,0);
 		data.addPoint(1,1);
-		data.addPoint(2,1);
-		data.addPoint(3,1);
-		data.addPoint(4,1);
-		data.addPoint(5,1);
-		data.addPoint(6,1);
-		data.addPoint(7,1);
-		data.addPoint(8,1);
+		data.addPoint(2,2);
+		data.addPoint(3,3);
+		data.addPoint(4,4);
+		data.addPoint(5,5);
+		data.addPoint(6,6);
+		data.addPoint(7,7);
+		data.addPoint(8,8);
 		
 		LineChart chart = new LineChart();
 		chart.setChartData( data );
-		this.add( chart );
+		add( chart );
 
-		this.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );
-		this.setSize(600, 400);
+		setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );
+		setSize(600, 400);
 	}
 
 }

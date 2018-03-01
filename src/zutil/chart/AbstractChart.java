@@ -33,7 +33,6 @@ import java.util.logging.Logger;
 
 public abstract class AbstractChart extends JPanel{
     private static final Logger logger = LogUtil.getLogger();
-    private static final long serialVersionUID = 1L;
 
     /** The offset from the borders of the panel in pixels */
     public static final int PADDING = 20;
@@ -46,72 +45,24 @@ public abstract class AbstractChart extends JPanel{
 
 
     protected void paintComponent(Graphics g){
-        Graphics2D g2 = (Graphics2D)g;
+        Graphics2D g2 = (Graphics2D) g;
+        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+                RenderingHints.VALUE_ANTIALIAS_ON);
+        g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION,
+                RenderingHints.VALUE_INTERPOLATION_BILINEAR);
 
-        Rectangle bound = drawScale( g2 );
+        Rectangle bound = drawAxis( g2, new Rectangle(0, 0, getWidth(), getHeight()));
         drawChart( g2, bound );
     }
 
-    protected Rectangle drawScale(Graphics2D g2){
-        if( data == null )
-            return null;
 
-        // update values
-        width = this.getWidth();
-        height = this.getHeight();
-        Rectangle bound = new Rectangle();
-
-        // Values
-        int stepLength = 7;
-
-        /////// Temp values
-        // Calculate Font sizes
-        FontMetrics metric = g2.getFontMetrics();
-        int fontHeight = metric.getHeight();
-        int fontXWidth = 0;
-        int fontYWidth = 0;
-        for( Point p : data.getPoints() ){
-            int length = 0;
-            String tmp = data.getXString( p.x );
-            if( tmp != null ) 	length = metric.stringWidth( tmp );
-            else				length = metric.stringWidth( ""+p.x );
-            fontXWidth = Math.max(length, fontXWidth);
-
-            tmp = data.getXString( p.y );
-            if( tmp != null ) 	length = metric.stringWidth( tmp );
-            else				length = metric.stringWidth( ""+p.y );
-            fontYWidth = Math.max(length, fontYWidth);
-        }
-        // Calculate origo
-        Point origo = new Point( PADDING+fontYWidth+stepLength, height-PADDING-fontHeight-stepLength );
-        bound.x = (int) (origo.getX()+1);
-        bound.y = PADDING;
-        bound.width = width-bound.x-PADDING;
-        bound.height = (int) (origo.getY()-PADDING-1);
-        // Calculate Axis scales
-        double xScale = (double)(Math.abs(data.getMaxX())+Math.abs(data.getMinX()))/bound.width;
-        double yScale = (double)(Math.abs(data.getMaxY())+Math.abs(data.getMinY()))/bound.height;
-
-
-        /////// Draw
-        // Y Axis
-        g2.draw( new Line2D.Double( origo.getX(), PADDING, origo.getX(), origo.getY() ));
-        // X Axis
-        g2.draw( new Line2D.Double( origo.getX(), origo.getY(), width-PADDING, origo.getY() ));
-        // Y Axis steps and labels
-        g2.draw( new Line2D.Double( origo.getX(), origo.getY(), origo.getX()-stepLength, origo.getY() ));
-        g2.draw( new Line2D.Double( origo.getX(), PADDING, origo.getX()-stepLength, PADDING ));
-
-        // X Axis steps and labels
-        g2.draw( new Line2D.Double( width-PADDING, origo.getY(), width-PADDING, origo.getY()+stepLength ));
-
-        // DEBUG
-        /*
-        g2.setColor(Color.red);
-        g2.drawRect(bound.x, bound.y, bound.width, bound.height);
-        */
-        return bound;
-    }
+    /**
+     * This method will draw the axis of the chart
+     *
+     * @param 		g2		is the Graphics object that will paint the chart
+     * @param 		bound	is the bounds of the axis, the drawing should not exceed this bound
+     */
+    protected abstract Rectangle drawAxis(Graphics2D g2, Rectangle bound);
 
     /**
      * This method is called after the chart scale has been drawn.
@@ -133,22 +84,34 @@ public abstract class AbstractChart extends JPanel{
     }
 
     /**
-     * Converts a x value to ax pixel coordinate
+     * Converts a x value to a x pixel coordinate
      *
-     * @param 		x		is the x data value
-     * @return				pixel coordinate, or 0 if the chart have not been drawn yet.
+     * @param   x       is the x data value
+     * @param   scale   is the data scale
+     * @param   bound   is the drawing boundds
+     * @return a x pixel coordinate
      */
-    protected int getXCoordinate(int x){
-        return 0;
+    static protected double getXCoordinate(double x, double scale, Rectangle bound){
+        return bound.x + x * scale;
     }
 
     /**
      * Converts a y value to a y pixel coordinate
      *
-     * @param 		y		is the y data value
-     * @return				pixel coordinate, or 0 if the chart have not been drawn yet.
+     * @param 	y       is the y data value
+     * @param   scale   is the data scale
+     * @param   bound   is the drawing boundds
+     * @return a y pixel coordinate
      */
-    protected int getYCoordinate(int y){
-        return 0;
+    static protected double getYCoordinate(double y, double scale, Rectangle bound){
+        return bound.y + bound.height - ( y * scale );
+    }
+
+    static protected double getXScale(ChartData data, Rectangle bound){
+        return (double) bound.width / (Math.abs(data.getMaxX()) + Math.abs(data.getMinX()));
+    }
+
+    static protected double getYScale(ChartData data, Rectangle bound){
+        return (double) bound.height / (Math.abs(data.getMaxY()) + Math.abs(data.getMinY()));
     }
 }

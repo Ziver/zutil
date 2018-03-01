@@ -27,36 +27,36 @@ package zutil.chart;
 import java.awt.*;
 import java.awt.geom.Line2D;
 
-public class LineChart extends AbstractChart{
-	private static final long serialVersionUID = 1L;
+public class LineChart extends LineAxis{
+    private static final long serialVersionUID = 1L;
 
-	@Override
-	protected void drawChart(Graphics2D g2, Rectangle bound) {
-		// TODO Auto-generated method stub
-		drawLine(g2,  50, 50,100,150);
-		drawLine(g2, 100,150,150,100);
-		drawLine(g2, 150,100,200,300);
-		drawLine(g2, 200,300,250,40);
-	}
+    @Override
+    protected void drawChart(Graphics2D g2, Rectangle bound) {
+        g2.setPaint(new Color(237,28,36));
+        g2.setStroke(new BasicStroke(2.0f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
 
-	private void drawLine(Graphics2D g2, float x1, float y1, float x2, float y2){
-		// Shadow
-		g2.setPaint(new Color(220,220,220));
-		g2.setStroke(new BasicStroke(1.0f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND)); 
-		g2.draw( new Line2D.Float(x1, y1+2, x2, y2+2));
-		// Smoth shadow
-		g2.setPaint(new Color(230,230,230));
-		g2.setStroke(new BasicStroke(1.0f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND)); 
-		g2.draw( new Line2D.Float(x1+1, y1+3, x2-1, y2+3));
-		
-		// Line border
-		g2.setPaint(new Color(255,187,187));
-		g2.setStroke(new BasicStroke(4.0f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND)); 
-		g2.draw( new Line2D.Float(x1, y1, x2, y2));
-		
-		// Line
-		g2.setPaint(new Color(237,28,36));
-		g2.setStroke(new BasicStroke(2.0f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND)); 
-		g2.draw( new Line2D.Float(x1, y1, x2, y2));
-	}
+        // Calculate position
+
+        double xScale = getXScale(data, bound);
+        double yScale = getYScale(data, bound);
+
+        // Draw lines
+
+        Point prevP = null;
+        for(Point p : data.getPoints()){
+            if (prevP != null)
+                drawLine(g2, bound, xScale, yScale, prevP.x, prevP.y, p.x, p.y);
+            prevP = p;
+        }
+    }
+
+    private void drawLine(Graphics2D g2, Rectangle bound, double xScale, double yScale,
+                          double x1, double y1, double x2, double y2){
+        // Line
+        g2.draw(new Line2D.Double(
+                getXCoordinate(x1, xScale, bound),
+                getYCoordinate(y1, yScale, bound),
+                getXCoordinate(x2, xScale, bound),
+                getYCoordinate(y2, yScale, bound)));
+    }
 }
