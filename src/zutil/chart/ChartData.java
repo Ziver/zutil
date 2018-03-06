@@ -60,17 +60,6 @@ public class ChartData {
         points.add( new Point( x, y));
         setMaxMin(x, y);
     }
-    public void addPoint(int y){
-        points.add( new Point(maxX, y));
-        maxX++;
-        setMaxMin(maxX, y);
-    }
-    public void addPoint(String x, int y){
-        xStrings.put(maxX, x);
-        points.add( new Point(maxX, y));
-        maxX++;
-        setMaxMin(maxX, y);
-    }
 
 
     private void setMaxMin(int x, int y){
@@ -100,7 +89,7 @@ public class ChartData {
         return yStrings.get(y);
     }
 
-    protected List<Point> getPoints(){
+    protected List<Point> getData(){
         return points;
     }
 }

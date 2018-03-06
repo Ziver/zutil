@@ -26,7 +26,7 @@ public abstract class LineAxis extends AbstractChart{
         int fontHeight = metric.getHeight();
         int fontXWidth = 0;
         int fontYWidth = 0;
-        for( Point p : data.getPoints() ){
+        for( Point p : data.getData() ){
             int length;
             String tmp = data.getXString( p.x );
             if( tmp != null ) 	length = metric.stringWidth( tmp );
@@ -57,9 +57,9 @@ public abstract class LineAxis extends AbstractChart{
         g2.setStroke(new BasicStroke(1.5f, BasicStroke.CAP_SQUARE, BasicStroke.JOIN_ROUND));
 
         // Y Axis
-        g2.draw( new Line2D.Double( origo.getX(), PADDING, origo.getX(), origo.getY() ));
+        g2.draw( new Line2D.Double( origo.getX(), PADDING, origo.getX(), origo.getY()+PADDING/2 ));
         // X Axis
-        g2.draw( new Line2D.Double( origo.getX(), origo.getY(), width-PADDING, origo.getY() ));
+        g2.draw( new Line2D.Double( origo.getX()-PADDING/2, origo.getY(), width-PADDING, origo.getY() ));
         // Y Axis steps and labels
 
         // X Axis steps and labels

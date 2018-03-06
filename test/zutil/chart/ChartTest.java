@@ -31,32 +31,34 @@ import java.util.logging.Level;
 
 
 public class ChartTest extends JFrame{
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-	public static void main(String[] args) {
-		LogUtil.setLevel("zutil", Level.FINEST);
-		ChartTest frame = new ChartTest();
-		frame.setVisible(true);
-	}
-	
-	public ChartTest(){
-		ChartData data = new ChartData();
-		data.addPoint(0,0);
-		data.addPoint(1,1);
-		data.addPoint(2,2);
-		data.addPoint(3,3);
-		data.addPoint(4,4);
-		data.addPoint(5,5);
-		data.addPoint(6,6);
-		data.addPoint(7,7);
-		data.addPoint(8,8);
-		
-		LineChart chart = new LineChart();
-		chart.setChartData( data );
-		add( chart );
+    public static void main(String[] args) {
+        LogUtil.setLevel("zutil", Level.FINEST);
+        ChartTest frame = new ChartTest();
+        frame.setVisible(true);
+    }
 
-		setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );
-		setSize(600, 400);
-	}
+    public ChartTest(){
+        ChartData data = new ChartData();
+
+        int min = (int)(Math.random() * -10000);
+        int max = (int)(Math.random() * 10000);
+        int size = (int)(Math.random() * 100);
+
+        for (int i=0; i<size; i++){
+            data.addPoint(
+                    i,
+                    (int)(Math.random() * (max+Math.abs(min)) - min)
+            );
+        }
+
+        LineChart chart = new LineChart();
+        chart.setChartData( data );
+        add( chart );
+
+        setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );
+        setSize(600, 400);
+    }
 
 }

@@ -43,7 +43,7 @@ public class LineChart extends LineAxis{
         // Draw lines
 
         Point prevP = null;
-        for(Point p : data.getPoints()){
+        for(Point p : data.getData()){
             if (prevP != null)
                 drawLine(g2, bound, xScale, yScale, prevP.x, prevP.y, p.x, p.y);
             prevP = p;
