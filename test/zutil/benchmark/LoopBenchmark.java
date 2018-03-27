@@ -11,30 +11,51 @@ public class LoopBenchmark {
     public BenchmarkRule benchmarkRun = new BenchmarkRule();
 
 
-    private int[] matrix  = new int[100_000];
-    private int[] matrix2 = new int[50_000];
+    private int[] array1 = new int[100_000];
+    private int[] array2 = new int[50_000];
 
 
     @Test
-    public void oneLoop() {
+    public void writeArrayOneLoop() {
         for(int k=0; k<TEST_EXECUTIONS; k++) {
-            for (int i = 0; i < Math.max(matrix.length, matrix.length); i++) {
-                if (i < matrix.length)
-                    matrix[i] = i;
-                if (i < matrix2.length)
-                    matrix2[i] = i;
+            for (int i = 0; i < Math.max(array1.length, array1.length); i++) {
+                if (i < array1.length)
+                    array1[i] = i;
+                if (i < array2.length)
+                    array2[i] = i;
             }
         }
     }
 
     @Test
-    public void twoLoops(){
+    public void writeArraySeparateLoops(){
         for(int k=0; k<TEST_EXECUTIONS; k++) {
-            for (int i = 0; i < matrix.length; i++) {
-                matrix[i] = i;
+            for (int i = 0; i < array1.length; i++) {
+                array1[i] = i;
             }
-            for (int j = 0; j < matrix2.length; j++) {
-                matrix2[j] = j;
+            for (int j = 0; j < array2.length; j++) {
+                array2[j] = j;
+            }
+        }
+    }
+
+
+    @Test
+    public void readArrayLoop() {
+        int sum = 0;
+        for(int k=0; k<TEST_EXECUTIONS; k++) {
+            for (int i = 0; i < array1.length; i++) {
+                sum += array1[i];
+            }
+        }
+    }
+
+    @Test
+    public void readArrayForeach() {
+        int sum = 0;
+        for(int k=0; k<TEST_EXECUTIONS; k++) {
+            for (int i : array1) {
+                sum += array1[i];
             }
         }
     }
