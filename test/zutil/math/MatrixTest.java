@@ -70,12 +70,44 @@ public class MatrixTest {
 
 
     @Test
-    public void vectorMultiply(){
+    public void vectorAddition(){
         assertArrayEquals(
-                new double[]{8,14},
-                Matrix.multiply(new double[][]{{2,3},{-4,9}}, new double[]{1,2}),
+                new double[]{3,5,-1,13},
+                Matrix.add(new double[]{2,3,-4,9}, new double[]{1,2,3,4}),
                 0.0
         );
+    }
+
+    @Test
+    public void vectorMatrixAddition(){
+        assertArrayEquals(
+                new double[][]{{2,3,4,5},{2,3,4,5},{2,3,4,5},{2,3,4,5}},
+                Matrix.add(new double[][]{{1,2,3,4},{1,2,3,4},{1,2,3,4},{1,2,3,4}}, new double[]{1,1,1,1})
+        );
+    }
+
+    @Test
+    public void vectorSubtraction(){
+        assertArrayEquals(
+                new double[]{1,1,-7,5},
+                Matrix.subtract(new double[]{2,3,-4,9}, new double[]{1,2,3,4}),
+                0.0
+        );
+    }
+
+    @Test
+    public void vectorMatrixSubtraction(){
+        assertArrayEquals(
+                new double[][]{{0,1,2,3},{0,1,2,3},{0,1,2,3},{0,1,2,3}},
+                Matrix.subtract(new double[][]{{1,2,3,4},{1,2,3,4},{1,2,3,4},{1,2,3,4}}, new double[]{1,1,1,1})
+        );
+    }
+
+    @Test
+    public void vectorMultiply(){
+        assertArrayEquals(
+                new double[][]{{8},{14}},
+                Matrix.multiply(new double[][]{{2,3},{-4,9}}, new double[]{1,2}));
     }
 
     @Test
@@ -137,5 +169,14 @@ public class MatrixTest {
         assertArrayEquals(
                 new double[][]{{1,0,0,0},{0,1,0,0},{0,0,1,0},{0,0,0,1}},
                 Matrix.identity(4));
+    }
+
+    @Test
+    public void getColumn(){
+        assertArrayEquals(
+                new double[]{2,3,4,1},
+                Matrix.getColumn(new double[][]{{1,2,3,4},{2,3,4,1},{3,4,1,2},{4,1,2,3}}, 1),
+                0.0
+        );
     }
 }

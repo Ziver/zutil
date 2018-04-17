@@ -173,6 +173,40 @@ public class Matrix {
      **********************************************************************/
 
     /**
+     * Vector addition, every element in the first vector will be added
+     * with the corresponding element in the second vector.
+     *
+     * @return a new vector with subtracted elements
+     */
+    public static double[] add(double[] vector1, double[] vector2){
+        vectorPreCheck(vector1, vector2);
+        double[] result = new double[vector1.length];
+
+        for (int i=0; i < result.length; ++i) {
+            result[i] = vector1[i] + vector2[i];
+        }
+        return result;
+    }
+
+    /**
+     * Matrix Vector addition, every column in the matrix will be added
+     * with the vector.
+     *
+     * @return a new matrix with subtracted elements
+     */
+    public static double[][] add(double[][] matrix, double[] vector){
+        vectorPreCheck(matrix, vector);
+        double[][] result = new double[matrix.length][matrix[0].length];
+
+        for (int y=0; y < result.length; ++y) {
+            for (int x=0; x < result.length; ++x) {
+                result[y][x] = matrix[y][x] + vector[x];
+            }
+        }
+        return result;
+    }
+
+    /**
      * Vector subtraction, every element in the first vector will be subtracted
      * with the corresponding element in the second vector.
      *
@@ -189,18 +223,39 @@ public class Matrix {
     }
 
     /**
+     * Matrix Vector subtraction, each column in the matrix will be subtracted
+     * with the vector.
+     *
+     * @return a new vector with subtracted elements
+     */
+    public static double[][] subtract(double[][] matrix, double[] vector){
+        vectorPreCheck(matrix, vector);
+        double[][] result = new double[matrix.length][matrix[0].length];
+
+        for (int y=0; y < result.length; ++y) {
+            for (int x=0; x < result.length; ++x) {
+                result[y][x] = matrix[y][x] - vector[x];
+            }
+        }
+
+        return result;
+    }
+
+    /**
      * Matrix Vector multiplication, each element column in the matrix will be
      * multiplied with the corresponding element row in the vector.
      *
      * @return a new vector with the result
      */
-    public static double[] multiply(double[][] matrix, double[] vector){
+    public static double[][] multiply(double[][] matrix, double[] vector){
         vectorPreCheck(matrix, vector);
-        double[] result = new double[matrix.length];
+        double[][] result = new double[matrix.length][1];
 
-        for (int y=0; y < matrix.length; ++y) {
-            for (int x=0; x < matrix[y].length; ++x){
-                result[y] += matrix[y][x] * vector[x];
+        for (int y=0; y < result.length; ++y) {
+            for (int x=0; x<matrix[0].length; ++x) {
+                for (int i=0; i < result[y].length; ++i){
+                    result[y][i] += matrix[y][x] * vector[x];
+                }
             }
         }
         return result;
@@ -263,10 +318,10 @@ public class Matrix {
         matrixPreCheck(matrix1, matrix2);
         double[][] result = new double[matrix1.length][matrix2[0].length];
 
-        for (int i=0; i < result.length; ++i) {
-            for (int k=0; k<matrix1[0].length; ++k) {
-                for (int j=0; j < result[i].length; ++j){
-                    result[i][j] += matrix1[i][k] * matrix2[k][j];
+        for (int y=0; y < result.length; ++y) {
+            for (int x=0; x<matrix1[0].length; ++x) {
+                for (int i=0; i < result[y].length; ++i){
+                    result[y][i] += matrix1[y][x] * matrix2[x][i];
                 }
             }
         }
@@ -323,4 +378,15 @@ public class Matrix {
         return result;
     }
 
+    /**
+     * @return a single dimension double array containing the elements of the j:th column
+     */
+    public static double[] getColumn(double[][] x, int j) {
+        double[] col = new double[x.length];
+
+        for (int i = 0; i<x.length; i++)
+            col[i] = x[i][j];
+
+        return col;
+    }
 }
