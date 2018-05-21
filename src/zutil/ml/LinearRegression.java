@@ -16,12 +16,12 @@ public class LinearRegression {
      *     h(x) = theta0 * x0 + theta1 * x1 + ... + thetan * xn => transpose(theta) * x
      * </i>
      */
-    protected static double[][] calculateHypotesis(double[][] x, double[] theta){
+    protected static double[] calculateHypothesis(double[][] x, double[] theta){
         return Matrix.multiply(x, theta);
     }
 
     /**
-     * Linear Regresion cost method.
+     * Linear Regression cost method.
      * <br /><br />
      * <i>
      *      J(O) = 1 / (2 * m) * Σ { ( h(Xi) - Yi )^2 }
@@ -30,10 +30,11 @@ public class LinearRegression {
      * @return a number indicating the error rate
      */
     protected static double calculateCost(double[][] x, double[] y, double[] theta){
+        double[] hypothesis = calculateHypothesis(x, theta);
+        double[] normalized = Matrix.subtract(hypothesis, y);
+
         return 1.0 / (2.0 * x.length) * Matrix.sum(
-                Matrix.Elemental.pow(
-                        Matrix.subtract(calculateHypotesis(x, theta), y),
-                        2));
+                Matrix.Elemental.pow(normalized,2));
     }
 
     /**
@@ -45,13 +46,14 @@ public class LinearRegression {
      *
      * @return the theta that was found to minimize the cost function
      */
-    public static double[] gradientAscent(double[][] x, double[] y, double[] theta, double alpha){
+    public static double[] gradientDescent(double[][] x, double[] y, double[] theta, double alpha){
         double[] newTheta = new double[theta.length];
         double m = y.length;
-        double[][] hypotesisCache = Matrix.subtract(calculateHypotesis(x, theta), y);
+        double[] hypothesis = calculateHypothesis(x, theta);
+        double[] normalized = Matrix.subtract(hypothesis, y);
 
         for (int j= 0; j < theta.length; j++) {
-            newTheta[j] = theta[j] - alpha * (1.0/m) * Matrix.sum(Matrix.add(hypotesisCache, Matrix.getColumn(x, j)));
+            newTheta[j] = theta[j] - alpha * (1.0/m) * Matrix.sum(Matrix.add(normalized, Matrix.getColumn(x, j)));
         }
 
         return newTheta;

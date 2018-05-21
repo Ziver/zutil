@@ -12,12 +12,12 @@ public class LinearRegressionTest {
 
     @Test
     public void calculateHypotesis() {
-        double[][] hypotesis = LinearRegression.calculateHypotesis(
-                /* x */ new double[][]{{1, 2}, {1, 3}, {1, 4}, {1, 5}},
-                /* theta */ new double[]{0.1, 0.2}
+        double[] hypotesis = LinearRegression.calculateHypothesis(
+                /* x */ new double[][]{{1, 2, 3}, {1, 3, 4}, {1, 4, 5}, {1, 5, 6}},
+                /* theta */ new double[]{0.1, 0.2, 0.3}
         );
 
-        assertArrayEquals(new double[][]{{0.5}, {0.7}, {0.9}, {1.1}}, hypotesis);
+        assertArrayEquals(new double[]{1.4, 1.9, 2.4, 2.9}, hypotesis, 0.001);
     }
 
     @Test
@@ -33,7 +33,7 @@ public class LinearRegressionTest {
 
     @Test
     public void gradientAscent() {
-        double[] theta = LinearRegression.gradientAscent(
+        double[] theta = LinearRegression.gradientDescent( // one iteration
                 /* x */ new double[][]{{1, 5},{1, 2},{1, 4},{1, 5}},
                 /* y */ new double[]{1, 6, 4, 2},
                 /* theta */ new double[]{0, 0},

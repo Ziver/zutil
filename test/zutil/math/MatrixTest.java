@@ -106,8 +106,11 @@ public class MatrixTest {
     @Test
     public void vectorMultiply(){
         assertArrayEquals(
-                new double[][]{{8},{14}},
-                Matrix.multiply(new double[][]{{2,3},{-4,9}}, new double[]{1,2}));
+                new double[]{1.4, 1.9, 2.4, 2.9},
+                Matrix.multiply(
+                        new double[][]{{1, 2, 3}, {1, 3, 4}, {1, 4, 5}, {1, 5, 6}},
+                        new double[]{0.1, 0.2, 0.3}),
+                0.001);
     }
 
     @Test

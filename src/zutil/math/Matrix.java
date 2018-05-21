@@ -226,7 +226,7 @@ public class Matrix {
      * Matrix Vector subtraction, each column in the matrix will be subtracted
      * with the vector.
      *
-     * @return a new vector with subtracted elements
+     * @return a new matrix with subtracted elements
      */
     public static double[][] subtract(double[][] matrix, double[] vector){
         vectorPreCheck(matrix, vector);
@@ -247,15 +247,13 @@ public class Matrix {
      *
      * @return a new vector with the result
      */
-    public static double[][] multiply(double[][] matrix, double[] vector){
+    public static double[] multiply(double[][] matrix, double[] vector){
         vectorPreCheck(matrix, vector);
-        double[][] result = new double[matrix.length][1];
+        double[] result = new double[matrix.length];
 
-        for (int y=0; y < result.length; ++y) {
+        for (int y=0; y < matrix.length; ++y) {
             for (int x=0; x<matrix[0].length; ++x) {
-                for (int i=0; i < result[y].length; ++i){
-                    result[y][i] += matrix[y][x] * vector[x];
-                }
+                result[y] += matrix[y][x] * vector[x];
             }
         }
         return result;
@@ -299,7 +297,7 @@ public class Matrix {
     }
     private static void vectorPreCheck(double[][] matrix, double[] vector) {
         if (matrix[0].length != vector.length)
-            throw new IllegalArgumentException("Matrix columns need to have same length as vector length: " +
+            throw new IllegalArgumentException("Matrix columns need to have same length as the vector length: " +
                     "matrix " + matrix.length + "x" + matrix[0].length + ", " +
                     "vector " + vector.length + "x1");
     }
