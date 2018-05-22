@@ -113,6 +113,22 @@ public class Matrix {
         }
 
         /**
+         * Element multiplication, each element in vector1 will be
+         * multiplied with the corresponding element in vector2.
+         *
+         * @return a new vector with the result
+         */
+        public static double[] multiply(double[] vector1, double[] vector2) {
+            vectorPreCheck(vector1, vector2);
+            double[] result = new double[vector1.length];
+
+            for (int i = 0; i < vector1.length; ++i) {
+                result[i] = vector1[i] * vector2[i];
+            }
+            return result;
+        }
+
+        /**
          * Element multiplication, each element in matrix1 will be
          * multiplied with the corresponding element in matrix2.
          *
@@ -159,6 +175,7 @@ public class Matrix {
             }
             return result;
         }
+
 
         private static void elementalPreCheck(double[][] matrix1, double[][] matrix2) {
             if (matrix1.length != matrix2.length || matrix1[0].length != matrix2[0].length)

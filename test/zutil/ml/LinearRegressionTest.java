@@ -33,7 +33,7 @@ public class LinearRegressionTest {
 
     @Test
     public void gradientAscent() {
-        double[] theta = LinearRegression.gradientDescent( // one iteration
+        double[] theta = LinearRegression.gradientDescentIteration( // one iteration
                 /* x */ new double[][]{{1, 5},{1, 2},{1, 4},{1, 5}},
                 /* y */ new double[]{1, 6, 4, 2},
                 /* theta */ new double[]{0, 0},

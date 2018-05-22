@@ -46,14 +46,15 @@ public class LinearRegression {
      *
      * @return the theta that was found to minimize the cost function
      */
-    public static double[] gradientDescent(double[][] x, double[] y, double[] theta, double alpha){
+    public static double[] gradientDescentIteration(double[][] x, double[] y, double[] theta, double alpha){
         double[] newTheta = new double[theta.length];
         double m = y.length;
         double[] hypothesis = calculateHypothesis(x, theta);
         double[] normalized = Matrix.subtract(hypothesis, y);
 
         for (int j= 0; j < theta.length; j++) {
-            newTheta[j] = theta[j] - alpha * (1.0/m) * Matrix.sum(Matrix.add(normalized, Matrix.getColumn(x, j)));
+            newTheta[j] = theta[j] - alpha * (1.0/m) * Matrix.sum(
+                    Matrix.Elemental.multiply(normalized, Matrix.getColumn(x, j)));
         }
 
         return newTheta;
