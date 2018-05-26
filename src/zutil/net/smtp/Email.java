@@ -18,34 +18,34 @@ import static zutil.net.smtp.SmtpClient.NEWLINE;
 public class Email {
 
     public enum ContentType{
-		PLAIN, HTML
-	}
-	private static final SimpleDateFormat dateFormatter = 
-		new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss Z", Locale.ENGLISH);
+        PLAIN, HTML
+    }
+    private static final SimpleDateFormat dateFormatter =
+        new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss Z", Locale.ENGLISH);
     private static final Pattern PATTERN_NEWLINE = Pattern.compile("(\\r\\n|\\n)");
 
-	private String fromAddress;
-	private String fromName = null;
-	private String toAddress;
+    private String fromAddress;
+    private String fromName = null;
+    private String toAddress;
     private String toName = null;
-	private String replyToAddress = null;
-	private Date date = null;
-	private ContentType type = ContentType.PLAIN;
-	private String subject;
-	private String message;
+    private String replyToAddress = null;
+    private Date date = null;
+    private ContentType type = ContentType.PLAIN;
+    private String subject;
+    private String message;
 
 
 
-	public Email(){	}
-	
-	
-	public void setFrom(String address){
-		this.fromAddress = sanitizeParam(address);
-	}
-	public void setFrom(String address, String niceName){
-		fromAddress = sanitizeParam(address);
-		fromName = sanitizeParam(niceName);
-	}
+    public Email(){	}
+
+
+    public void setFrom(String address){
+        this.fromAddress = sanitizeParam(address);
+    }
+    public void setFrom(String address, String niceName){
+        fromAddress = sanitizeParam(address);
+        fromName = sanitizeParam(niceName);
+    }
     public String getFromAddress(){
         return fromAddress;
     }
@@ -53,52 +53,52 @@ public class Email {
         return fromName;
     }
 
-	public void setReplyTo(String address){
-		this.replyToAddress = sanitizeParam(address);
-	}
+    public void setReplyTo(String address){
+        this.replyToAddress = sanitizeParam(address);
+    }
     public String getReplyToAddress() {
         return replyToAddress;
     }
 
-	public void setTo(String address){
-		this.toAddress = sanitizeParam(address);
-	}
-	public void setTo(String address, String niceName){
-		this.toAddress = sanitizeParam(address);
-		this.toName = sanitizeParam(niceName);
-	}
-	public String getToAddress(){
-		return toAddress;
-	}
+    public void setTo(String address){
+        this.toAddress = sanitizeParam(address);
+    }
+    public void setTo(String address, String niceName){
+        this.toAddress = sanitizeParam(address);
+        this.toName = sanitizeParam(niceName);
+    }
+    public String getToAddress(){
+        return toAddress;
+    }
     public String getToName() {
         return toName;
     }
 
-	public void setDate(Date date){
-		this.date = date;
-	}
-	public void setContentType(ContentType t){
-		type = t;
-	}
+    public void setDate(Date date){
+        this.date = date;
+    }
+    public void setContentType(ContentType t){
+        type = t;
+    }
 
-	public void setSubject(String subject){
-		this.subject = sanitizeParam(subject);
-	}
+    public void setSubject(String subject){
+        this.subject = sanitizeParam(subject);
+    }
     public String getSubject(){
         return subject;
     }
 
-	public void setMessage(String msg){
-		message = msg.replaceAll("(\\r\\n|\\n)", NEWLINE);
-		message = message.replaceAll(NEWLINE+"\\.", NEWLINE +"..");
-	}
+    public void setMessage(String msg){
+        message = msg.replaceAll("(\\r\\n|\\n)", NEWLINE);
+        message = message.replaceAll(NEWLINE+"\\.", NEWLINE +"..");
+    }
     public String getMessage(){
         return message;
     }
 
 
-	private String sanitizeParam(String param){
-	    return PATTERN_NEWLINE.matcher(param).replaceAll("");
+    private String sanitizeParam(String param){
+        return PATTERN_NEWLINE.matcher(param).replaceAll("");
     }
 
 
@@ -107,48 +107,48 @@ public class Email {
      *
      * @throws IllegalArgumentException if from address and to address has not been set
      */
-	public void write(Writer out) throws IOException{
+    public void write(Writer out) throws IOException{
         if(fromAddress == null)
             throw new IllegalArgumentException("From value cannot be null!");
         if(toAddress == null)
             throw new IllegalArgumentException("To value cannot be null!");
 
-		//************ Headers
+        //************ Headers
         // From
-		if (fromName !=null)
-			out.write("From: "+ fromName +" <"+ fromAddress +">"+ NEWLINE);
-		else
-			out.write("From: "+ fromAddress + NEWLINE);
+        if (fromName !=null)
+            out.write("From: "+ fromName +" <"+ fromAddress +">"+ NEWLINE);
+        else
+            out.write("From: "+ fromAddress + NEWLINE);
 
-		// Reply-To
-		if ( replyToAddress != null )
-			out.write("Reply-To: <"+ replyToAddress +">"+ NEWLINE);
+        // Reply-To
+        if ( replyToAddress != null )
+            out.write("Reply-To: <"+ replyToAddress +">"+ NEWLINE);
 
-		// To
+        // To
         if (toName !=null)
             out.write("To: "+ toName +" <"+ toAddress +">"+ NEWLINE);
         else
             out.write("To: "+ toAddress + NEWLINE);
 
-		// Date
+        // Date
         if (date != null)
             out.write("Date: "+dateFormatter.format(date) + NEWLINE);
         else
-		    out.write("Date: "+dateFormatter.format(new Date(System.currentTimeMillis())) + NEWLINE);
+            out.write("Date: "+dateFormatter.format(new Date(System.currentTimeMillis())) + NEWLINE);
 
-		// Content type
-		switch( type ){
-		case HTML:
-			out.write("Content-Type: text/html;"+ NEWLINE); break;
-		default:
-			out.write("Content-Type: text/plain;"+ NEWLINE); break;
-		}
+        // Content type
+        switch( type ){
+        case HTML:
+            out.write("Content-Type: text/html;"+ NEWLINE); break;
+        default:
+            out.write("Content-Type: text/plain;"+ NEWLINE); break;
+        }
 
-		// Subject
-		out.write("Subject: "+(subject!=null ? subject : "") + NEWLINE);
+        // Subject
+        out.write("Subject: "+(subject!=null ? subject : "") + NEWLINE);
 
-		out.write(NEWLINE);
-		//*********** Mesasge
-		out.write( message );
-	}
+        out.write(NEWLINE);
+        //*********** Mesasge
+        out.write( message );
+    }
 }

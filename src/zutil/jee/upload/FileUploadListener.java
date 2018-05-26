@@ -36,126 +36,126 @@ import zutil.parser.DataNode.DataType;
  * uploaded file.
  */
 public class FileUploadListener implements ProgressListener{
-	public static enum Status{
-		Initializing,
-		Uploading,
-		Processing,
-		Done,
-		Error
-	}
-	
-	private String id;
-	private volatile Status status;
-	private volatile String filename;
-	private volatile String message;
-	private volatile long bytes = 0l;
-	private volatile long length = 0l;
-	private volatile int item = 0;
-	private volatile long time;
-	
-	// Speed
-	private volatile int speed;
-	private volatile long speedRead;
-	private volatile long speedTime;
-	
-	public FileUploadListener(){
-		id = ""+(int)(Math.random()*Integer.MAX_VALUE);
-		status = Status.Initializing;
-		filename = "";
-		message = "";
-	}
-	
-	public void update(long pBytesRead, long pContentLength, int pItems) {
-		if(pContentLength < 0)	this.length = pBytesRead;
-		else					this.length = pContentLength;
-		this.bytes = pBytesRead;
-		this.item = pItems;
-		
-		// Calculate Speed
-		if(speedTime == 0 || speedTime+1000 < System.currentTimeMillis() || pBytesRead == pContentLength){
-			speedTime = System.currentTimeMillis();
-			speed = (int)(pBytesRead-speedRead);
-			speedRead = pBytesRead;
-		}
-		//try{Thread.sleep(10);}catch(Exception e){}
+    public static enum Status{
+        Initializing,
+        Uploading,
+        Processing,
+        Done,
+        Error
+    }
 
-		// Set Status
-		status = Status.Uploading;
-		time = System.currentTimeMillis();
-	}
-	
-	protected void setFileName(String filename){
-		this.filename = filename;
-	}
-	protected void setStatus(Status status){
-		this.status = status;
-		time = System.currentTimeMillis();
-	}
-	protected void setMessage(String msg){
-		this.message = msg;
-	}
-	
-	
-	public String getID(){
-		return id;
-	}
-	
-	public String getFilename() {
-		return filename;
-	}
-	
-	public long getBytesRead() {
-		return bytes;
-	}
+    private String id;
+    private volatile Status status;
+    private volatile String filename;
+    private volatile String message;
+    private volatile long bytes = 0l;
+    private volatile long length = 0l;
+    private volatile int item = 0;
+    private volatile long time;
 
-	public long getContentLength() {
-		return length;
-	}
+    // Speed
+    private volatile int speed;
+    private volatile long speedRead;
+    private volatile long speedTime;
 
-	public long getItem() {
-		return item;
-	}
-	
-	public Status getStatus(){
-		return status;
-	}
-	
-	protected long getTime(){
-		return time;
-	}
-	
-	protected String getMessage(){
-		return message;
-	}
-	
-	/**
-	 * @return bytes per second
-	 */
-	public int getSpeed(){
-		return speed;
-	}
+    public FileUploadListener(){
+        id = ""+(int)(Math.random()*Integer.MAX_VALUE);
+        status = Status.Initializing;
+        filename = "";
+        message = "";
+    }
 
-	/**
-	 * Calculate the percent complete
-	 */
-	public int getPercentComplete(){
-		if(length == 0)
-			return 0;
-		return (int)((100 * bytes) / length);
-	}
+    public void update(long pBytesRead, long pContentLength, int pItems) {
+        if(pContentLength < 0)	this.length = pBytesRead;
+        else					this.length = pContentLength;
+        this.bytes = pBytesRead;
+        this.item = pItems;
 
-	public DataNode getJSON() {
-		DataNode node = new DataNode( DataType.Map );
-		node.set("id", id);
-		
-		node.set("status", status.toString());
-		node.set("message", message.replaceAll("\"", "\\\"") );
-		node.set("filename", filename);
-		node.set("percent", getPercentComplete());
-		
-		node.set("uploaded", StringUtil.formatByteSizeToString(bytes));
-		node.set("total", StringUtil.formatByteSizeToString(length));
-		node.set("speed", StringUtil.formatByteSizeToString(speed)+"/s");
-		return node;
-	}
+        // Calculate Speed
+        if(speedTime == 0 || speedTime+1000 < System.currentTimeMillis() || pBytesRead == pContentLength){
+            speedTime = System.currentTimeMillis();
+            speed = (int)(pBytesRead-speedRead);
+            speedRead = pBytesRead;
+        }
+        //try{Thread.sleep(10);}catch(Exception e){}
+
+        // Set Status
+        status = Status.Uploading;
+        time = System.currentTimeMillis();
+    }
+
+    protected void setFileName(String filename){
+        this.filename = filename;
+    }
+    protected void setStatus(Status status){
+        this.status = status;
+        time = System.currentTimeMillis();
+    }
+    protected void setMessage(String msg){
+        this.message = msg;
+    }
+
+
+    public String getID(){
+        return id;
+    }
+
+    public String getFilename() {
+        return filename;
+    }
+
+    public long getBytesRead() {
+        return bytes;
+    }
+
+    public long getContentLength() {
+        return length;
+    }
+
+    public long getItem() {
+        return item;
+    }
+
+    public Status getStatus(){
+        return status;
+    }
+
+    protected long getTime(){
+        return time;
+    }
+
+    protected String getMessage(){
+        return message;
+    }
+
+    /**
+     * @return bytes per second
+     */
+    public int getSpeed(){
+        return speed;
+    }
+
+    /**
+     * Calculate the percent complete
+     */
+    public int getPercentComplete(){
+        if(length == 0)
+            return 0;
+        return (int)((100 * bytes) / length);
+    }
+
+    public DataNode getJSON() {
+        DataNode node = new DataNode( DataType.Map );
+        node.set("id", id);
+
+        node.set("status", status.toString());
+        node.set("message", message.replaceAll("\"", "\\\"") );
+        node.set("filename", filename);
+        node.set("percent", getPercentComplete());
+
+        node.set("uploaded", StringUtil.formatByteSizeToString(bytes));
+        node.set("total", StringUtil.formatByteSizeToString(length));
+        node.set("speed", StringUtil.formatByteSizeToString(speed)+"/s");
+        return node;
+    }
 }

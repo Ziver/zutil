@@ -53,21 +53,21 @@ public class SOAPClientInvocationHandler implements InvocationHandler {
     private static Logger logger = LogUtil.getLogger();
 
     private WebServiceDef wsDef;
-	/** Web address of the web service */
-	protected URL url;
+    /** Web address of the web service */
+    protected URL url;
 
 
-	public SOAPClientInvocationHandler(URL url, WebServiceDef wsDef){
-		this.url = url;
+    public SOAPClientInvocationHandler(URL url, WebServiceDef wsDef){
+        this.url = url;
         this.wsDef = wsDef;
-	}
+    }
 
 
-	/**
-	 * Makes a request to the target web service
-	 */
-	@Override
-	public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+    /**
+     * Makes a request to the target web service
+     */
+    @Override
+    public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
         // Generate XML
         Document document = genSOAPRequest((WSInterface)proxy, method.getName(), args);
         String reqXml = document.asXML();
@@ -89,21 +89,21 @@ public class SOAPClientInvocationHandler implements InvocationHandler {
             System.out.println(rspXml);
         }
 
-		return parseSOAPResponse(rspXml);
-	}
+        return parseSOAPResponse(rspXml);
+    }
 
 
-	private Document genSOAPRequest(WSInterface obj, String targetMethod, Object[] args){
-		logger.fine("Sending request for "+targetMethod);
-		Document document = DocumentHelper.createDocument();
-		Element envelope = document.addElement("soap:Envelope");
+    private Document genSOAPRequest(WSInterface obj, String targetMethod, Object[] args){
+        logger.fine("Sending request for "+targetMethod);
+        Document document = DocumentHelper.createDocument();
+        Element envelope = document.addElement("soap:Envelope");
         WSMethodDef methodDef = wsDef.getMethod( targetMethod );
-		try {
-			envelope.addNamespace("soap", "http://schemas.xmlsoap.org/soap/envelope/");
-			envelope.addNamespace("xsi", "http://www.w3.org/2001/XMLSchema-instance");
-			envelope.addNamespace("xsd", "http://www.w3.org/2001/XMLSchema");
+        try {
+            envelope.addNamespace("soap", "http://schemas.xmlsoap.org/soap/envelope/");
+            envelope.addNamespace("xsi", "http://www.w3.org/2001/XMLSchema-instance");
+            envelope.addNamespace("xsd", "http://www.w3.org/2001/XMLSchema");
 
-			Element body = envelope.addElement( "soap:Body" );
+            Element body = envelope.addElement( "soap:Body" );
             Element method = body.addElement("");
             method.addNamespace("m",  methodDef.getNamespace() );
             method.setName("m:"+methodDef.getName()+"Request");
@@ -112,12 +112,12 @@ public class SOAPClientInvocationHandler implements InvocationHandler {
                 SOAPHttpPage.generateSOAPXMLForObj(method, args[i] , param.getName());
             }
 
-		} catch (Exception e) {
-			logger.log(Level.SEVERE, "Exception in SOAP generation", e);
-		}
+        } catch (Exception e) {
+            logger.log(Level.SEVERE, "Exception in SOAP generation", e);
+        }
 
-		return document;
-	}
+        return document;
+    }
 
     private Object parseSOAPResponse(String xml){
         try {

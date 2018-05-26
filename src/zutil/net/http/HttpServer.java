@@ -50,122 +50,122 @@ import java.util.logging.Logger;
  * @author Ziver
  */
 public class HttpServer extends ThreadedTCPNetworkServer{
-	private static final Logger logger = LogUtil.getLogger();
+    private static final Logger logger = LogUtil.getLogger();
 
-	public static final String SESSION_KEY_ID  = "session_id";
-	public static final String SESSION_KEY_TTL = "session_ttl";
-	public static final String SERVER_NAME     = "Zutil HttpServer";
-	public static final int SESSION_TTL = 10*60*1000; // in milliseconds
-
-
-	private Map<String,HttpPage> pages;
-	private HttpPage defaultPage;
-	private Map<String,Map<String,Object>> sessions;
-	private int nextSessionId;
-
-	/**
-	 * Creates a new instance of the sever
-	 *
-	 * @param   port    The port that the server should listen to
-	 */
-	public HttpServer(int port){
-		this(port, null, null);
-	}
+    public static final String SESSION_KEY_ID  = "session_id";
+    public static final String SESSION_KEY_TTL = "session_ttl";
+    public static final String SERVER_NAME     = "Zutil HttpServer";
+    public static final int SESSION_TTL = 10*60*1000; // in milliseconds
 
 
-	/**
-	 * Creates a new instance of the sever
-	 *
-	 * @param   port            The port that the server should listen to
-	 * @param   keyStore        If this is not null then the server will use SSL connection with this keyStore file path
-	 * @param   keyStorePass    If this is not null then the server will use a SSL connection with the given certificate
-	 */
-	public HttpServer(int port, File keyStore, String keyStorePass){
-		super( port, keyStore, keyStorePass );
+    private Map<String,HttpPage> pages;
+    private HttpPage defaultPage;
+    private Map<String,Map<String,Object>> sessions;
+    private int nextSessionId;
 
-		pages = new ConcurrentHashMap<>();
-		sessions = new ConcurrentHashMap<>();
-		nextSessionId = 0;
+    /**
+     * Creates a new instance of the sever
+     *
+     * @param   port    The port that the server should listen to
+     */
+    public HttpServer(int port){
+        this(port, null, null);
+    }
+
+
+    /**
+     * Creates a new instance of the sever
+     *
+     * @param   port            The port that the server should listen to
+     * @param   keyStore        If this is not null then the server will use SSL connection with this keyStore file path
+     * @param   keyStorePass    If this is not null then the server will use a SSL connection with the given certificate
+     */
+    public HttpServer(int port, File keyStore, String keyStorePass){
+        super( port, keyStore, keyStorePass );
+
+        pages = new ConcurrentHashMap<>();
+        sessions = new ConcurrentHashMap<>();
+        nextSessionId = 0;
 
         ScheduledExecutorService exec = Executors.newSingleThreadScheduledExecutor();
-		exec.scheduleWithFixedDelay(new SessionGarbageCollector(), 10000, SESSION_TTL / 2, TimeUnit.MILLISECONDS);
+        exec.scheduleWithFixedDelay(new SessionGarbageCollector(), 10000, SESSION_TTL / 2, TimeUnit.MILLISECONDS);
 
-		logger.info("HTTP"+(keyStore==null?"":"S")+" Server ready!");
-	}
+        logger.info("HTTP"+(keyStore==null?"":"S")+" Server ready!");
+    }
 
-	/**
-	 * This class acts as an garbage collector that 
-	 * removes old sessions from the session HashMap
-	 */
-	private class SessionGarbageCollector implements Runnable {
-		public void run(){
-			Object[] keys = sessions.keySet().toArray();
-			int count = 0;
-			for(Object key : keys){
-				Map<String,Object> session = sessions.get(key);
+    /**
+     * This class acts as an garbage collector that
+     * removes old sessions from the session HashMap
+     */
+    private class SessionGarbageCollector implements Runnable {
+        public void run(){
+            Object[] keys = sessions.keySet().toArray();
+            int count = 0;
+            for(Object key : keys){
+                Map<String,Object> session = sessions.get(key);
 
-				// Check if session is still valid
-				if(((Timer) session.get(SESSION_KEY_TTL)).hasTimedOut()){
-					sessions.remove(key);
-					++count;
-				}
-			}
-			if (count > 0)
-				logger.fine("Removed "+count+" old sessions");
-		}
-	}
+                // Check if session is still valid
+                if(((Timer) session.get(SESSION_KEY_TTL)).hasTimedOut()){
+                    sessions.remove(key);
+                    ++count;
+                }
+            }
+            if (count > 0)
+                logger.fine("Removed "+count+" old sessions");
+        }
+    }
 
-	/**
-	 * Add a HttpPage to a specific URL
-	 * 
-	 * @param   name    The URL or name of the page
-	 * @param   page    The page itself
-	 */
-	public void setPage(String name, HttpPage page){
-		if(name.charAt(0) != '/')
-			name = "/"+name;
-		pages.put(name, page);
-	}
+    /**
+     * Add a HttpPage to a specific URL
+     *
+     * @param   name    The URL or name of the page
+     * @param   page    The page itself
+     */
+    public void setPage(String name, HttpPage page){
+        if(name.charAt(0) != '/')
+            name = "/"+name;
+        pages.put(name, page);
+    }
 
-	/**
-	 * This is a default page that will be shown
-	 * if there is no other matching page,
-	 * 
-	 * @param   page    The HttpPage that will be shown
-	 */
-	public void setDefaultPage(HttpPage page){
-		defaultPage = page;
-	}
+    /**
+     * This is a default page that will be shown
+     * if there is no other matching page,
+     *
+     * @param   page    The HttpPage that will be shown
+     */
+    public void setDefaultPage(HttpPage page){
+        defaultPage = page;
+    }
 
-	protected ThreadedTCPNetworkServerThread getThreadInstance( Socket s ){
-		try {
-			return new HttpServerThread( s );
-		} catch (IOException e) {
-			logger.log(Level.SEVERE, "Could not start new Thread", e);
-		}
-		return null;
-	}
+    protected ThreadedTCPNetworkServerThread getThreadInstance( Socket s ){
+        try {
+            return new HttpServerThread( s );
+        } catch (IOException e) {
+            logger.log(Level.SEVERE, "Could not start new Thread", e);
+        }
+        return null;
+    }
 
-	/**
-	 * Internal class that handles all the requests
-	 */
-	protected class HttpServerThread implements ThreadedTCPNetworkServerThread{
-		private HttpPrintStream out;
-		private BufferedInputStream in;
-		private Socket socket;
+    /**
+     * Internal class that handles all the requests
+     */
+    protected class HttpServerThread implements ThreadedTCPNetworkServerThread{
+        private HttpPrintStream out;
+        private BufferedInputStream in;
+        private Socket socket;
 
-		public HttpServerThread(Socket socket) throws IOException{
-			out = new HttpPrintStream(socket.getOutputStream());
-			in = new BufferedInputStream(socket.getInputStream());
-			this.socket = socket;
-		}
+        public HttpServerThread(Socket socket) throws IOException{
+            out = new HttpPrintStream(socket.getOutputStream());
+            in = new BufferedInputStream(socket.getInputStream());
+            this.socket = socket;
+        }
 
-		public void run(){
+        public void run(){
             long time = System.currentTimeMillis();
             HttpHeaderParser headerParser;
             HttpHeader header = null;
             Map<String, Object> session = null;
-			try {
+            try {
                 //**************************** PARSE REQUEST *********************************
                 headerParser = new HttpHeaderParser(in);
                 header = headerParser.read();
@@ -176,8 +176,8 @@ public class HttpServer extends ThreadedTCPNetworkServer{
 
                 //******* Read in the post data if available
                 if (header.getHeader("Content-Length") != null &&
-						header.getHeader("Content-Type") != null &&
-						header.getHeader("Content-Type").contains("application/x-www-form-urlencoded")) {
+                        header.getHeader("Content-Type") != null &&
+                        header.getHeader("Content-Type").contains("application/x-www-form-urlencoded")) {
                     // Reads the post data size
                     int postDataLength = Integer.parseInt(header.getHeader("Content-Length"));
                     // read the data
@@ -186,8 +186,8 @@ public class HttpServer extends ThreadedTCPNetworkServer{
                     for (int i = 0; i < postDataLength; i++) {
                         tmpBuff.append((char) in.read());
                     }
-					// get the variables
-					HttpHeaderParser.parseURLParameters(header, tmpBuff.toString());
+                    // get the variables
+                    HttpHeaderParser.parseURLParameters(header, tmpBuff.toString());
                 }
 
                 //****************************  HANDLE REQUEST *********************************
@@ -228,25 +228,25 @@ public class HttpServer extends ThreadedTCPNetworkServer{
                     out.setStatusCode(404);
                     out.println("404 Page Not Found: " + header.getRequestURL());
                     logger.warning("Page not defined: " + header.getRequestURL());
-				}
-				//********************************************************************************
-			} catch (Exception e) {
-				logRequest(header, session, time);
-				logger.log(Level.SEVERE, "500 Internal Server Error", e);
-				try {
-					if (!out.isHeaderSent())
-						out.setStatusCode(500);
-					if (e.getMessage() != null)
-						out.println("500 Internal Server Error: " + e.getMessage());
-					else if (e.getCause() != null) {
-						out.println("500 Internal Server Error: " + e.getCause().getMessage());
-					} else {
-						out.println("500 Internal Server Error: " + e);
-					}
-				}catch(IOException ioe){
-					logger.log(Level.SEVERE, null, ioe);
-				}
-			}
+                }
+                //********************************************************************************
+            } catch (Exception e) {
+                logRequest(header, session, time);
+                logger.log(Level.SEVERE, "500 Internal Server Error", e);
+                try {
+                    if (!out.isHeaderSent())
+                        out.setStatusCode(500);
+                    if (e.getMessage() != null)
+                        out.println("500 Internal Server Error: " + e.getMessage());
+                    else if (e.getCause() != null) {
+                        out.println("500 Internal Server Error: " + e.getCause().getMessage());
+                    } else {
+                        out.println("500 Internal Server Error: " + e);
+                    }
+                }catch(IOException ioe){
+                    logger.log(Level.SEVERE, null, ioe);
+                }
+            }
             finally {
                 try{
                     out.close();
@@ -256,8 +256,8 @@ public class HttpServer extends ThreadedTCPNetworkServer{
                     logger.log(Level.WARNING, "Could not close connection", e);
                 }
             }
-		}
-	}
+        }
+    }
 
 
     protected static void logRequest(HttpHeader header,

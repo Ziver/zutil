@@ -41,53 +41,53 @@ import java.util.HashMap;
  */
 public class HttpClient implements AutoCloseable{
     public static enum HttpRequestType{
-		GET, POST
-	}
+        GET, POST
+    }
 
-	// Request variables
-	private HttpURL url;
-	private HttpRequestType type;
-	private HashMap<String,String> headers;
-	private HashMap<String,String> cookies;
+    // Request variables
+    private HttpURL url;
+    private HttpRequestType type;
+    private HashMap<String,String> headers;
+    private HashMap<String,String> cookies;
     private String data;
 
-	// Response variables
+    // Response variables
     private HttpHeaderParser    rspHeader;
     private InputStream rspStream;
 
-	
-	
-	public HttpClient(HttpRequestType type){
-		this.type = type;
-		headers = new HashMap<String,String>();
-		cookies = new HashMap<String,String>();
-	}
-	
-	
-	public void setURL( URL url){
-		this.url = new HttpURL( url );
-	}
-	
-	/**
-	 * Adds a parameter to the request
-	 */
-	public void setParameter( String key, String value ){
-		url.setParameter(key, value);
-	}
-	
-	/**
-	 * Adds a cookie to the request
-	 */
-	public void setCookie( String key, String value ){
-		cookies.put(key, value);
-	}
-	
-	/**
-	 * Adds a header value to the request
-	 */
-	public void setHeader( String key, String value ){
-		headers.put(key, value);
-	}
+
+
+    public HttpClient(HttpRequestType type){
+        this.type = type;
+        headers = new HashMap<String,String>();
+        cookies = new HashMap<String,String>();
+    }
+
+
+    public void setURL( URL url){
+        this.url = new HttpURL( url );
+    }
+
+    /**
+     * Adds a parameter to the request
+     */
+    public void setParameter( String key, String value ){
+        url.setParameter(key, value);
+    }
+
+    /**
+     * Adds a cookie to the request
+     */
+    public void setCookie( String key, String value ){
+        cookies.put(key, value);
+    }
+
+    /**
+     * Adds a header value to the request
+     */
+    public void setHeader( String key, String value ){
+        headers.put(key, value);
+    }
 
     /**
      * Sets the content data that will be included in the request.
@@ -101,38 +101,38 @@ public class HttpClient implements AutoCloseable{
      * Will send a HTTP request to the target host.
      * NOTE: any previous request connections will be closed
      */
-	public HttpHeaderParser send() throws IOException{
-		Socket conn = new Socket( url.getHost(), url.getPort());
-		
-		// Request
-		HttpPrintStream request = new HttpPrintStream( conn.getOutputStream(), HttpMessageType.REQUEST );
-		request.setRequestType( type.toString() );
-		request.setRequestURL( url.getHttpURL() );
-		request.setHeaders( headers );
-		request.setCookies( cookies );
-		
-		if( type == HttpRequestType.POST ){
-			String postData = null;
+    public HttpHeaderParser send() throws IOException{
+        Socket conn = new Socket( url.getHost(), url.getPort());
+
+        // Request
+        HttpPrintStream request = new HttpPrintStream( conn.getOutputStream(), HttpMessageType.REQUEST );
+        request.setRequestType( type.toString() );
+        request.setRequestURL( url.getHttpURL() );
+        request.setHeaders( headers );
+        request.setCookies( cookies );
+
+        if( type == HttpRequestType.POST ){
+            String postData = null;
             if(data != null)
                 postData = data;
             else
                 postData = url.getParameterString();
-			request.setHeader("Content-Length", ""+postData.length());
-			request.println();
-			request.print( postData );
-		}
-		else
-			request.println();
-		request.close();
-		
-		// Response
+            request.setHeader("Content-Length", ""+postData.length());
+            request.println();
+            request.print( postData );
+        }
+        else
+            request.println();
+        request.close();
+
+        // Response
         if(rspHeader != null || rspStream != null) // Close previous request
             this.close();
-		rspStream = new BufferedInputStream(conn.getInputStream());
-		rspHeader = new HttpHeaderParser(rspStream);
+        rspStream = new BufferedInputStream(conn.getInputStream());
+        rspHeader = new HttpHeaderParser(rspStream);
 
-		return rspHeader;
-	}
+        return rspHeader;
+    }
 
     public HttpHeaderParser getResponseHeader(){
         return rspHeader;

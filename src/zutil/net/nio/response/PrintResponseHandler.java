@@ -27,9 +27,9 @@ package zutil.net.nio.response;
 
 public class PrintResponseHandler extends ResponseHandler {
 
-	@Override
-	protected void responseEvent(Object rsp) {
-		System.out.println(rsp);
-	}
+    @Override
+    protected void responseEvent(Object rsp) {
+        System.out.println(rsp);
+    }
 
 }

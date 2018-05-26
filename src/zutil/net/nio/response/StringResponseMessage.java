@@ -28,27 +28,27 @@ package zutil.net.nio.response;
 import zutil.net.nio.message.EchoMessage;
 
 public class StringResponseMessage extends EchoMessage implements RequestResponseMessage {
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-	private long responseId;
-	private String msg;
+    private long responseId;
+    private String msg;
 
 
-	public StringResponseMessage(String msg){
-		this.msg = msg;
-		responseId = (long)(Math.random()*Long.MAX_VALUE);
-	}
+    public StringResponseMessage(String msg){
+        this.msg = msg;
+        responseId = (long)(Math.random()*Long.MAX_VALUE);
+    }
 
 
     public long getResponseId() {
         return responseId;
     }
 
-	public void setString(String msg){
-		this.msg = msg;
-	}
-	
-	public String toString(){
-		return msg;
-	}
+    public void setString(String msg){
+        this.msg = msg;
+    }
+
+    public String toString(){
+        return msg;
+    }
 }

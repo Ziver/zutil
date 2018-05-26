@@ -26,33 +26,33 @@ package zutil.net.nio.response;
 
 // TODO: this class has a strange structure, should be refactored
 public abstract class ResponseHandler {
-	private Object rsp = null;
+    private Object rsp = null;
 
-	public synchronized void handleResponse(Object rsp) {
-		this.rsp = rsp;
+    public synchronized void handleResponse(Object rsp) {
+        this.rsp = rsp;
         responseEvent(rsp);
-		notify();
-	}
+        notify();
+    }
 
-	/**
-	 * Blocks the calling thread until there is a response
-	 */
-	public void waitForResponse() {
-		while(!gotResponse()) {
-			try {
-			    synchronized (this) {
+    /**
+     * Blocks the calling thread until there is a response
+     */
+    public void waitForResponse() {
+        while(!gotResponse()) {
+            try {
+                synchronized (this) {
                     this.wait();
                 }
-			} catch (InterruptedException e) {}
-		}
-	}
+            } catch (InterruptedException e) {}
+        }
+    }
 
-	/**
-	 * @return true if a response has been received
-	 */
-	public boolean gotResponse(){
-		return (rsp != null);
-	}
+    /**
+     * @return true if a response has been received
+     */
+    public boolean gotResponse(){
+        return (rsp != null);
+    }
 
-	protected abstract void responseEvent(Object rsp);
+    protected abstract void responseEvent(Object rsp);
 }

@@ -33,16 +33,16 @@ import zutil.algo.sort.sortable.SortableDataList;
  * @author Ziver
  */
 public class Randomizer {
-	
-	/**
-	 * Randomizes the index of all the elements
-	 * @param list The list
-	 */
-	@SuppressWarnings({ "rawtypes" })
-	public static void sort(SortableDataList list){
-		int size = list.size();
-		for(int i=0; i<size ;i++){
-			list.swap(i, (int)(Math.random()*size));
-		}
-	}
+
+    /**
+     * Randomizes the index of all the elements
+     * @param list The list
+     */
+    @SuppressWarnings({ "rawtypes" })
+    public static void sort(SortableDataList list){
+        int size = list.size();
+        for(int i=0; i<size ;i++){
+            list.swap(i, (int)(Math.random()*size));
+        }
+    }
 }

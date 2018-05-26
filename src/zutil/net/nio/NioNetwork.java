@@ -43,33 +43,33 @@ import java.util.logging.Logger;
 
 
 public abstract class NioNetwork implements Runnable {
-	private static Logger logger = LogUtil.getLogger();
+    private static Logger logger = LogUtil.getLogger();
 
-	protected SocketAddress localAddress;
-	// The channel on which we'll accept connections
-	protected ServerSocketChannel serverChannel;
-	// The selector we will be monitoring
-	private Selector selector;
-	// The buffer into which we'll read data when it's available
-	private ByteBuffer readBuffer = ByteBuffer.allocate(8192);
-	protected Worker worker;
+    protected SocketAddress localAddress;
+    // The channel on which we'll accept connections
+    protected ServerSocketChannel serverChannel;
+    // The selector we will be monitoring
+    private Selector selector;
+    // The buffer into which we'll read data when it's available
+    private ByteBuffer readBuffer = ByteBuffer.allocate(8192);
+    protected Worker worker;
 
-	// This map contains all the clients that are connected
-	protected Map<InetSocketAddress, ClientData> clients = new HashMap<InetSocketAddress, ClientData>();
+    // This map contains all the clients that are connected
+    protected Map<InetSocketAddress, ClientData> clients = new HashMap<InetSocketAddress, ClientData>();
 
-	// A list of PendingChange instances
-	private List<ChangeRequest> pendingChanges = new LinkedList<ChangeRequest>();
-	// Maps a SocketChannel to a list of ByteBuffer instances
-	private Map<SocketChannel, List<ByteBuffer>> pendingWriteData = new HashMap<SocketChannel, List<ByteBuffer>>();
+    // A list of PendingChange instances
+    private List<ChangeRequest> pendingChanges = new LinkedList<ChangeRequest>();
+    // Maps a SocketChannel to a list of ByteBuffer instances
+    private Map<SocketChannel, List<ByteBuffer>> pendingWriteData = new HashMap<SocketChannel, List<ByteBuffer>>();
 
 
 
-	/**
-	 * Create a client based Network object
-	 */
-	public NioNetwork() throws IOException {
-		this(null);
-	}
+    /**
+     * Create a client based Network object
+     */
+    public NioNetwork() throws IOException {
+        this(null);
+    }
 
     /**
      * Create a server based Network object
@@ -77,25 +77,25 @@ public abstract class NioNetwork implements Runnable {
      * @param   localAddress    the address the server will listen on
      */
     public NioNetwork(SocketAddress localAddress) throws IOException {
-	    this.localAddress = localAddress;
-	    // init selector
+        this.localAddress = localAddress;
+        // init selector
         this.selector = initSelector();
         // init traffic thread
         new Thread(this).start();
     }
 
-	protected abstract Selector initSelector() throws IOException;
+    protected abstract Selector initSelector() throws IOException;
 
 
 
-	/**
-	 * Sets the default worker for non System messages.
-	 * 
-	 * @param   worker  the worker that should handle incoming messages
-	 */
-	public void setDefaultWorker(Worker worker){
-		this.worker = worker;
-	}
+    /**
+     * Sets the default worker for non System messages.
+     *
+     * @param   worker  the worker that should handle incoming messages
+     */
+    public void setDefaultWorker(Worker worker){
+        this.worker = worker;
+    }
 
 
     /**
@@ -118,9 +118,9 @@ public abstract class NioNetwork implements Runnable {
     }
 
 
-	public void send(SocketAddress address, Object data) throws IOException{
-		send(address, Converter.toBytes(data));
-	}
+    public void send(SocketAddress address, Object data) throws IOException{
+        send(address, Converter.toBytes(data));
+    }
 
     /**
      * Queues a message to be sent
@@ -128,61 +128,61 @@ public abstract class NioNetwork implements Runnable {
      * @param   address the target address where the message should be sent
      * @param   data    the data to send
      */
-	public void send(SocketAddress address, byte[] data){
+    public void send(SocketAddress address, byte[] data){
         logger.finest("Sending Queue...");
-	    SocketChannel socket = getSocketChannel(address);
+        SocketChannel socket = getSocketChannel(address);
 
-		// And queue the data we want written
-		synchronized (pendingWriteData) {
-			List<ByteBuffer> queue = pendingWriteData.get(socket);
-			if (queue == null) {
-				queue = new ArrayList<>();
-				pendingWriteData.put(socket, queue);
-			}
-			queue.add(ByteBuffer.wrap(data));
-		}
-		// Changing the key state to write 
-		synchronized (pendingChanges) {
-			// Indicate we want the interest ops set changed
-			pendingChanges.add(new ChangeRequest(socket, ChangeRequest.CHANGEOPS, SelectionKey.OP_WRITE));
-		}
-		// Finally, wake up our selecting thread so it can make the required changes
-		selector.wakeup();
-	}
-
-
+        // And queue the data we want written
+        synchronized (pendingWriteData) {
+            List<ByteBuffer> queue = pendingWriteData.get(socket);
+            if (queue == null) {
+                queue = new ArrayList<>();
+                pendingWriteData.put(socket, queue);
+            }
+            queue.add(ByteBuffer.wrap(data));
+        }
+        // Changing the key state to write
+        synchronized (pendingChanges) {
+            // Indicate we want the interest ops set changed
+            pendingChanges.add(new ChangeRequest(socket, ChangeRequest.CHANGEOPS, SelectionKey.OP_WRITE));
+        }
+        // Finally, wake up our selecting thread so it can make the required changes
+        selector.wakeup();
+    }
 
 
 
-	public void run() {
-		logger.info("NioNetwork Started.");
-		while (selector.isOpen()) {
-			try {
-				// Handle any pending changes
-				synchronized (pendingChanges) {
-					Iterator<ChangeRequest> changes = pendingChanges.iterator();
-					while (changes.hasNext()) {
-						ChangeRequest change = changes.next();
-						switch (change.type) {
-						case ChangeRequest.CHANGEOPS:
-							SelectionKey key = change.socket.keyFor(selector);
-							key.interestOps(change.ops);
-							logger.finest("change.ops "+change.ops);
-							break;
-						case ChangeRequest.REGISTER:
-							change.socket.register(selector, change.ops);
-							logger.finest("register socket ");
-							break;
-						}
-					}
-					pendingChanges.clear();
-				}
 
-				// Wait for an event from one of the channels
-				selector.select();
-				logger.finest("selector is awake");
 
-				// Iterate over the set of keys for which events are available
+    public void run() {
+        logger.info("NioNetwork Started.");
+        while (selector.isOpen()) {
+            try {
+                // Handle any pending changes
+                synchronized (pendingChanges) {
+                    Iterator<ChangeRequest> changes = pendingChanges.iterator();
+                    while (changes.hasNext()) {
+                        ChangeRequest change = changes.next();
+                        switch (change.type) {
+                        case ChangeRequest.CHANGEOPS:
+                            SelectionKey key = change.socket.keyFor(selector);
+                            key.interestOps(change.ops);
+                            logger.finest("change.ops "+change.ops);
+                            break;
+                        case ChangeRequest.REGISTER:
+                            change.socket.register(selector, change.ops);
+                            logger.finest("register socket ");
+                            break;
+                        }
+                    }
+                    pendingChanges.clear();
+                }
+
+                // Wait for an event from one of the channels
+                selector.select();
+                logger.finest("selector is awake");
+
+                // Iterate over the set of keys for which events are available
                 if (selector.isOpen()) {
                     Iterator<SelectionKey> selectedKeys = selector.selectedKeys().iterator();
                     while (selectedKeys.hasNext()) {
@@ -208,33 +208,33 @@ public abstract class NioNetwork implements Runnable {
                         }
                     }
                 }
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		}
-		logger.info("Shutting down NioNetwork");
-	}
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        logger.info("Shutting down NioNetwork");
+    }
 
-	/**
-	 * Handle an accept event from a remote host. Channel can only be a server socket.
-	 */
-	private void accept(SelectionKey key) throws IOException {
-		// For an accept to be pending the channel must be a server socket channel.
-		ServerSocketChannel serverSocketChannel = (ServerSocketChannel) key.channel();
+    /**
+     * Handle an accept event from a remote host. Channel can only be a server socket.
+     */
+    private void accept(SelectionKey key) throws IOException {
+        // For an accept to be pending the channel must be a server socket channel.
+        ServerSocketChannel serverSocketChannel = (ServerSocketChannel) key.channel();
 
-		// Accept the connection and make it non-blocking
-		SocketChannel socketChannel = serverSocketChannel.accept();
-		socketChannel.socket().setReuseAddress(true);
-		socketChannel.configureBlocking(false);
+        // Accept the connection and make it non-blocking
+        SocketChannel socketChannel = serverSocketChannel.accept();
+        socketChannel.socket().setReuseAddress(true);
+        socketChannel.configureBlocking(false);
 
-		// Register the new SocketChannel with our Selector, indicating
-		// we'd like to be notified when there's data waiting to be read
-		socketChannel.register(selector, SelectionKey.OP_READ);
+        // Register the new SocketChannel with our Selector, indicating
+        // we'd like to be notified when there's data waiting to be read
+        socketChannel.register(selector, SelectionKey.OP_READ);
 
-		// adds the client to the clients list
+        // adds the client to the clients list
         registerSocketChannel(socketChannel);
         logger.fine("New Connection("+socketChannel.getRemoteAddress()+")!!! Count: "+clients.size());
-	}
+    }
 
     /**
      * Finnish an ongoing remote connection establishment procedure
@@ -291,47 +291,47 @@ public abstract class NioNetwork implements Runnable {
         }
     }
 
-	/**
-	 * Handle a read event from a socket specified by the key.
-	 */
-	private void read(SelectionKey key) throws IOException {
-		SocketChannel socketChannel = (SocketChannel) key.channel();
-		SocketAddress remoteAdr = socketChannel.socket().getRemoteSocketAddress();
+    /**
+     * Handle a read event from a socket specified by the key.
+     */
+    private void read(SelectionKey key) throws IOException {
+        SocketChannel socketChannel = (SocketChannel) key.channel();
+        SocketAddress remoteAdr = socketChannel.socket().getRemoteSocketAddress();
 
-		// Clear out our read buffer so it's ready for new data
-		readBuffer.clear();
+        // Clear out our read buffer so it's ready for new data
+        readBuffer.clear();
 
-		// Attempt to read off the channel
-		int numRead;
-		try {
-			numRead = socketChannel.read(readBuffer);
-		} catch (IOException e) {
-			// The remote forcibly closed the connection, cancel
-			// the selection key and close the channel.
-			key.cancel();
-			socketChannel.close();
-			clients.remove(remoteAdr);
-			pendingWriteData.remove(socketChannel);
-			logger.fine("Connection forcibly closed("+remoteAdr+")! Remaining connections: "+clients.size());
-			throw new IOException("Remote forcibly closed the connection");
-		}
+        // Attempt to read off the channel
+        int numRead;
+        try {
+            numRead = socketChannel.read(readBuffer);
+        } catch (IOException e) {
+            // The remote forcibly closed the connection, cancel
+            // the selection key and close the channel.
+            key.cancel();
+            socketChannel.close();
+            clients.remove(remoteAdr);
+            pendingWriteData.remove(socketChannel);
+            logger.fine("Connection forcibly closed("+remoteAdr+")! Remaining connections: "+clients.size());
+            throw new IOException("Remote forcibly closed the connection");
+        }
 
-		if (numRead == -1) {
-			// Remote entity shut the socket down cleanly. Do the
-			// same from our end and cancel the channel.
-			key.channel().close();
-			key.cancel();
-			clients.remove(remoteAdr);
-			pendingWriteData.remove(socketChannel);
-			logger.fine("Connection Closed("+remoteAdr+")! Remaining connections: "+clients.size());
+        if (numRead == -1) {
+            // Remote entity shut the socket down cleanly. Do the
+            // same from our end and cancel the channel.
+            key.channel().close();
+            key.cancel();
+            clients.remove(remoteAdr);
+            pendingWriteData.remove(socketChannel);
+            logger.fine("Connection Closed("+remoteAdr+")! Remaining connections: "+clients.size());
             throw new IOException("Remote closed the connection");
-		}
+        }
 
-		// Make a correctly sized copy of the data before handing it to the client
-		//byte[] rspByteData = new byte[numRead];
-		//System.arraycopy(readBuffer.array(), 0, rspByteData, 0, numRead);
+        // Make a correctly sized copy of the data before handing it to the client
+        //byte[] rspByteData = new byte[numRead];
+        //System.arraycopy(readBuffer.array(), 0, rspByteData, 0, numRead);
 
-		try{
+        try{
             Object rspData = Converter.toObject(readBuffer.array());
 
             // Hand the data off to our worker thread
@@ -341,10 +341,10 @@ public abstract class NioNetwork implements Runnable {
             } else {
                 logger.fine("No worker set, message unhandled!");
             }
-		}catch(Exception e){
-			e.printStackTrace();
-		}
-	}
+        }catch(Exception e){
+            e.printStackTrace();
+        }
+    }
 
 
 
@@ -370,22 +370,22 @@ public abstract class NioNetwork implements Runnable {
         closeConnection(getSocketChannel(address));
     }
 
-	private void closeConnection(SocketChannel socketChannel) throws IOException{
-		socketChannel.close();
-		socketChannel.keyFor(selector).cancel();
-	}
+    private void closeConnection(SocketChannel socketChannel) throws IOException{
+        socketChannel.close();
+        socketChannel.keyFor(selector).cancel();
+    }
 
     /**
      * Close all connections
      */
-	public void close() throws IOException{
-		if(serverChannel != null){
-			serverChannel.close();
-			serverChannel.keyFor(selector).cancel();
-		}
+    public void close() throws IOException{
+        if(serverChannel != null){
+            serverChannel.close();
+            serverChannel.keyFor(selector).cancel();
+        }
         clients.clear();
         pendingChanges.clear();
         pendingWriteData.clear();
         selector.close();
-	}
+    }
 }

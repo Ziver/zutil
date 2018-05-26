@@ -40,7 +40,7 @@ class DBBeanConfig{
     private static HashMap<String,DBBeanConfig> beanConfigs = new HashMap<>();
 
 
-	/** The name of the table in the DB **/
+    /** The name of the table in the DB **/
     private String tableName;
     /** The name of the id column **/
     private String idColumnName;

@@ -36,28 +36,28 @@ import java.io.IOException;
 
 
 public class UPnPServerTest {
-	
-	public static void main(String[] args) throws IOException{		
-		UPnPMediaServer upnp = new UPnPMediaServer("http://192.168.0.60:8080/");
-		MultiPrintStream.out.println("UPNP Server running");
-		
-		UPnPContentDirectory cds = new UPnPContentDirectory(new File("C:\\Users\\Ziver\\Desktop\\lan"));
-		WebServiceDef ws = new WebServiceDef( UPnPContentDirectory.class );
-		
-		HttpServer http = new HttpServer(8080);
-		//http.setDefaultPage(upnp);
-		http.setPage("/RootDesc", upnp );
-		http.setPage("/SCP/ContentDir", cds );
-		SOAPHttpPage soap = new SOAPHttpPage(ws);
-		soap.setObject( cds );
-		soap.enableSession( false );
-		http.setPage("/Action/ContentDir", soap );
-		http.start();
-		MultiPrintStream.out.println("HTTP Server running");
-		
-		SSDPServer ssdp = new SSDPServer();
-		ssdp.addService( upnp );
-		ssdp.start();
-		MultiPrintStream.out.println("SSDP Server running");
-	}
+
+    public static void main(String[] args) throws IOException{
+        UPnPMediaServer upnp = new UPnPMediaServer("http://192.168.0.60:8080/");
+        MultiPrintStream.out.println("UPNP Server running");
+
+        UPnPContentDirectory cds = new UPnPContentDirectory(new File("C:\\Users\\Ziver\\Desktop\\lan"));
+        WebServiceDef ws = new WebServiceDef( UPnPContentDirectory.class );
+
+        HttpServer http = new HttpServer(8080);
+        //http.setDefaultPage(upnp);
+        http.setPage("/RootDesc", upnp );
+        http.setPage("/SCP/ContentDir", cds );
+        SOAPHttpPage soap = new SOAPHttpPage(ws);
+        soap.setObject( cds );
+        soap.enableSession( false );
+        http.setPage("/Action/ContentDir", soap );
+        http.start();
+        MultiPrintStream.out.println("HTTP Server running");
+
+        SSDPServer ssdp = new SSDPServer();
+        ssdp.addService( upnp );
+        ssdp.start();
+        MultiPrintStream.out.println("SSDP Server running");
+    }
 }

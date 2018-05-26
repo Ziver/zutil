@@ -31,23 +31,23 @@ import java.util.logging.Logger;
 
 
 public class NetLogServerTest {
-	private static final Logger logger = LogUtil.getLogger();
+    private static final Logger logger = LogUtil.getLogger();
 
-	public static void main(String[] args){
-		LogUtil.setGlobalLevel(Level.FINEST);
-		LogUtil.addGlobalHandler(new NetLogServer(5050));
-		
-		while(true){
-			logger.log(Level.SEVERE,  "Test Severe");
-			logger.log(Level.WARNING, "Test Warning");
-			logger.log(Level.INFO,    "Test Info");
-			logger.log(Level.FINE,    "Test Fine");
-			logger.log(Level.FINER,   "Test Finer");
-			logger.log(Level.FINEST,  "Test Finest");
-			
-			logger.log(Level.SEVERE,  "Test Exception", new Exception("Test"));
-			
-			try{Thread.sleep(3000);}catch(Exception e){}
-		}
-	}
+    public static void main(String[] args){
+        LogUtil.setGlobalLevel(Level.FINEST);
+        LogUtil.addGlobalHandler(new NetLogServer(5050));
+
+        while(true){
+            logger.log(Level.SEVERE,  "Test Severe");
+            logger.log(Level.WARNING, "Test Warning");
+            logger.log(Level.INFO,    "Test Info");
+            logger.log(Level.FINE,    "Test Fine");
+            logger.log(Level.FINER,   "Test Finer");
+            logger.log(Level.FINEST,  "Test Finest");
+
+            logger.log(Level.SEVERE,  "Test Exception", new Exception("Test"));
+
+            try{Thread.sleep(3000);}catch(Exception e){}
+        }
+    }
 }

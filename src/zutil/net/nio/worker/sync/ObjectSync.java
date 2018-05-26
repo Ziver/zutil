@@ -25,25 +25,25 @@
 package zutil.net.nio.worker.sync;
 
 public abstract class ObjectSync {
-	public String id;
+    public String id;
 
-	public ObjectSync(String id){
-		this.id = id;
-	}
-	
-	/**
-	 * Sends sync message if the object has bean changed
-	 */
-	public abstract void sendSync();
-	
-	/**
-	 * Applies the SyncMessage to the object
-	 * @param message
-	 */
-	public abstract void syncObject(SyncMessage message);
-	
-	/**
-	 * Called when the object is removed from the sync list
-	 */
-	public abstract void remove();
+    public ObjectSync(String id){
+        this.id = id;
+    }
+
+    /**
+     * Sends sync message if the object has bean changed
+     */
+    public abstract void sendSync();
+
+    /**
+     * Applies the SyncMessage to the object
+     * @param message
+     */
+    public abstract void syncObject(SyncMessage message);
+
+    /**
+     * Called when the object is removed from the sync list
+     */
+    public abstract void remove();
 }

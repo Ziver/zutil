@@ -30,20 +30,20 @@ import java.io.InputStreamReader;
 
 
 public class ConsoleTest {
-	public static void main(String[] args) throws IOException{
-		Console terminal = new Console("Console Test");
-		terminal.enableTray(true);
-		BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
+    public static void main(String[] args) throws IOException{
+        Console terminal = new Console("Console Test");
+        terminal.enableTray(true);
+        BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
 
-		while(true){
-			System.out.println("hello= "+in.readLine());
-			for(int i=0; i<2 ;i++){
-				System.out.println(i+"Hello World!!!sssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss");
-				System.err.println(i+"Hello World!!!sssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss");
-				try {
-					Thread.sleep(100);
-				} catch (InterruptedException e) {}
-			}
-		}
-	}
+        while(true){
+            System.out.println("hello= "+in.readLine());
+            for(int i=0; i<2 ;i++){
+                System.out.println(i+"Hello World!!!sssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss");
+                System.err.println(i+"Hello World!!!sssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss");
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException e) {}
+            }
+        }
+    }
 }

@@ -33,9 +33,9 @@ package zutil.net.nio.response;
  */
 public interface RequestResponseMessage {
 
-	/**
-	 * @return a unique id for this message
-	 */
-	long getResponseId();
-	
+    /**
+     * @return a unique id for this message
+     */
+    long getResponseId();
+
 }

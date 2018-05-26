@@ -37,116 +37,116 @@ import zutil.parser.wsdl.WSDLWriter;
 // TODO: Convert to JUnit
 public class SOAPTest {
     /************************* TEST CASES ************************/
-	public static void main(String[] args){
-		WebServiceDef wsDef = new WebServiceDef( MainSOAPClass.class );
-		SOAPHttpPage soap = new SOAPHttpPage( wsDef );
+    public static void main(String[] args){
+        WebServiceDef wsDef = new WebServiceDef( MainSOAPClass.class );
+        SOAPHttpPage soap = new SOAPHttpPage( wsDef );
 
-		System.out.println( "****************** WSDL *********************" );
-		WSDLWriter wsdl = new WSDLWriter( wsDef );
-		wsdl.write(System.out);
-		
-		// Response		
-		try {
-			System.out.println( "\n****************** REQUEST *********************" );
-			String request = "<?xml version=\"1.0\"?>\n" +
-					"<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\n" +
-					"	<soap:Body xmlns:m=\"http://www.example.org/stock\">\n" +
-					"		<m:stringArrayMethod>\n" +
-					"			<m:StringName>IBM</m:StringName>\n" +
-					"		</m:stringArrayMethod>\n" +
+        System.out.println( "****************** WSDL *********************" );
+        WSDLWriter wsdl = new WSDLWriter( wsDef );
+        wsdl.write(System.out);
 
-					"		<m:simpleReturnClassMethod>\n" +
-					"			<m:byte>IBM</m:byte>\n" +
-					"		</m:simpleReturnClassMethod>\n" +
-					"	</soap:Body>\n" +
-					"</soap:Envelope>";
-			System.out.println(request);
+        // Response
+        try {
+            System.out.println( "\n****************** REQUEST *********************" );
+            String request = "<?xml version=\"1.0\"?>\n" +
+                    "<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\n" +
+                    "	<soap:Body xmlns:m=\"http://www.example.org/stock\">\n" +
+                    "		<m:stringArrayMethod>\n" +
+                    "			<m:StringName>IBM</m:StringName>\n" +
+                    "		</m:stringArrayMethod>\n" +
+
+                    "		<m:simpleReturnClassMethod>\n" +
+                    "			<m:byte>IBM</m:byte>\n" +
+                    "		</m:simpleReturnClassMethod>\n" +
+                    "	</soap:Body>\n" +
+                    "</soap:Envelope>";
+            System.out.println(request);
             System.out.println( "\n****************** EXECUTION *********************" );
-			Document document = soap.genSOAPResponse(request);
-			System.out.println( "\n****************** RESPONSE *********************" );
+            Document document = soap.genSOAPResponse(request);
+            System.out.println( "\n****************** RESPONSE *********************" );
 
-			OutputFormat format = OutputFormat.createPrettyPrint();
-			XMLWriter writer = new XMLWriter( System.out, format );
-			writer.write( document );
+            OutputFormat format = OutputFormat.createPrettyPrint();
+            XMLWriter writer = new XMLWriter( System.out, format );
+            writer.write( document );
 
-			System.out.println();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
+            System.out.println();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
     /************************* TEST CLASSES ************************/
     @SuppressWarnings("unused")
-	public static class SpecialReturnClass extends WSReturnObject{
-		@WSValueName(value="otherValue1")
-		public String param1 = "otherValue1";
-		@WSValueName("otherName2")
-		public String param2 = "otherValue2";
-		public byte[] b = new byte[]{0x12, 0x23};
-		public InnerClass inner = new InnerClass();
-	}
+    public static class SpecialReturnClass extends WSReturnObject{
+        @WSValueName(value="otherValue1")
+        public String param1 = "otherValue1";
+        @WSValueName("otherName2")
+        public String param2 = "otherValue2";
+        public byte[] b = new byte[]{0x12, 0x23};
+        public InnerClass inner = new InnerClass();
+    }
 
     @SuppressWarnings("unused")
-	public static class InnerClass extends WSReturnObject{
-		public String innerClassParam1 = "innerClass1";
-		public String innerClassParam2 = "innerClass2";
-	}
+    public static class InnerClass extends WSReturnObject{
+        public String innerClassParam1 = "innerClass1";
+        public String innerClassParam2 = "innerClass2";
+    }
 
     @SuppressWarnings("unused")
-	public static class SimpleReturnClass extends WSReturnObject{
-		@WSValueName("otherParam1")
-		public String param1 = "param1";
-		public String param2 = "param2";
-	}
+    public static class SimpleReturnClass extends WSReturnObject{
+        @WSValueName("otherParam1")
+        public String param1 = "param1";
+        public String param2 = "param2";
+    }
 
     @SuppressWarnings("unused")
-	@WSNamespace("http://test.se:8080/")
-	public static class MainSOAPClass implements WSInterface{
-		public MainSOAPClass(){}
-		
-		@WSHeader()
-		@WSDocumentation("Documentation of method exceptionMethod()")
-		public void exceptionMethod(
-				@WSParamName(value="otherParam1", optional=true) int param1,
-				@WSParamName(value="otherParam2", optional=true) int param2) throws Exception{ 
-			System.out.println("Executing method: exceptionMethod(int param1="+param1+", int param2="+param2+",)");
-			throw new Exception("This is an Exception");
-		}
+    @WSNamespace("http://test.se:8080/")
+    public static class MainSOAPClass implements WSInterface{
+        public MainSOAPClass(){}
 
-		@WSReturnName("stringArray")
-		@WSParamDocumentation("Documentation of stringArrayMethod()")
-		public String[][] stringArrayMethod (
-				@WSParamName("StringName") String str) throws Exception{ 
-			System.out.println("Executing method: stringArrayMethod(String str='"+str+"')");
-			return new String[][]{{"test","test2"},{"test3","test4"}};
-		}
+        @WSHeader()
+        @WSDocumentation("Documentation of method exceptionMethod()")
+        public void exceptionMethod(
+                @WSParamName(value="otherParam1", optional=true) int param1,
+                @WSParamName(value="otherParam2", optional=true) int param2) throws Exception{
+            System.out.println("Executing method: exceptionMethod(int param1="+param1+", int param2="+param2+",)");
+            throw new Exception("This is an Exception");
+        }
 
-		@WSReturnName("specialReturnClass")
-		@WSParamDocumentation("Documentation of specialReturnMethod()")
-		public SpecialReturnClass[] specialReturnMethod (
-				@WSParamName("StringName2") String str) throws Exception{ 
-			System.out.println("Executing method: specialReturnMethod(String str='"+str+"')");
-			return new SpecialReturnClass[]{new SpecialReturnClass(), new SpecialReturnClass()};
-		}
+        @WSReturnName("stringArray")
+        @WSParamDocumentation("Documentation of stringArrayMethod()")
+        public String[][] stringArrayMethod (
+                @WSParamName("StringName") String str) throws Exception{
+            System.out.println("Executing method: stringArrayMethod(String str='"+str+"')");
+            return new String[][]{{"test","test2"},{"test3","test4"}};
+        }
 
-		@WSReturnName("SimpleReturnClass")
-		@WSParamDocumentation("null is the kala")
-		public SimpleReturnClass simpleReturnClassMethod (
-				@WSParamName("byte") String lol) throws Exception{ 
-			System.out.println("Executing method: simpleReturnClassMethod()");
-			SimpleReturnClass tmp = new SimpleReturnClass();
-			tmp.param1 = "newParam1";
-			tmp.param2 = "newParam2";
-			return tmp;
-		}
-		
-		@WSParamDocumentation("void method documentation")
-		public void voidMethod (){ }
-		
-		@WSIgnore()
-		public void disabledMethod(){ }
-		protected void protectedMethod(){ }	
+        @WSReturnName("specialReturnClass")
+        @WSParamDocumentation("Documentation of specialReturnMethod()")
+        public SpecialReturnClass[] specialReturnMethod (
+                @WSParamName("StringName2") String str) throws Exception{
+            System.out.println("Executing method: specialReturnMethod(String str='"+str+"')");
+            return new SpecialReturnClass[]{new SpecialReturnClass(), new SpecialReturnClass()};
+        }
 
-		private void privateMethod(){ }
-	}
+        @WSReturnName("SimpleReturnClass")
+        @WSParamDocumentation("null is the kala")
+        public SimpleReturnClass simpleReturnClassMethod (
+                @WSParamName("byte") String lol) throws Exception{
+            System.out.println("Executing method: simpleReturnClassMethod()");
+            SimpleReturnClass tmp = new SimpleReturnClass();
+            tmp.param1 = "newParam1";
+            tmp.param2 = "newParam2";
+            return tmp;
+        }
+
+        @WSParamDocumentation("void method documentation")
+        public void voidMethod (){ }
+
+        @WSIgnore()
+        public void disabledMethod(){ }
+        protected void protectedMethod(){ }
+
+        private void privateMethod(){ }
+    }
 }

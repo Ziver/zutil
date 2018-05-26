@@ -39,24 +39,24 @@ import java.util.logging.Logger;
  * @author Ziver
  */
 public class ChatService extends ThreadedEventWorker{
-	private static Logger logger = LogUtil.getLogger();
+    private static Logger logger = LogUtil.getLogger();
 
-	private HashMap<String,LinkedList<SocketAddress>> rooms = new HashMap<>();
-	private ChatListener listener;
-
-
+    private HashMap<String,LinkedList<SocketAddress>> rooms = new HashMap<>();
+    private ChatListener listener;
 
 
 
-	@Override
+
+
+    @Override
     public void messageEvent(WorkerEventData event) {
-		try {
-			// New message
-			if(event.data instanceof ChatMessage){
-				ChatMessage chatmessage = (ChatMessage)event.data;
-				//is this a new message
-				if(chatmessage.type == ChatMessage.ChatMessageType.MESSAGE){
-					// Is this the server
+        try {
+            // New message
+            if(event.data instanceof ChatMessage){
+                ChatMessage chatmessage = (ChatMessage)event.data;
+                //is this a new message
+                if(chatmessage.type == ChatMessage.ChatMessageType.MESSAGE){
+                    // Is this the server
                     if(rooms.containsKey(chatmessage.room)){
                         LinkedList<SocketAddress> tmpList = rooms.get(chatmessage.room);
 
@@ -65,81 +65,81 @@ public class ChatService extends ThreadedEventWorker{
                             event.network.send(remote, chatmessage); // TODO: should not be done for clients
                         }
                     }
-					logger.finer("New Chat Message: "+chatmessage.msg);
-					listener.messageAction(chatmessage.msg, chatmessage.room);
-				}
-				// register to a room
-				else if(chatmessage.type == ChatMessage.ChatMessageType.REGISTER){
-					registerUser(chatmessage.room, event.remoteAddress);
-				}
-				// unregister to a room
-				else if(chatmessage.type == ChatMessage.ChatMessageType.UNREGISTER){
-					unRegisterUser(chatmessage.room, event.remoteAddress);
-				}
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+                    logger.finer("New Chat Message: "+chatmessage.msg);
+                    listener.messageAction(chatmessage.msg, chatmessage.room);
+                }
+                // register to a room
+                else if(chatmessage.type == ChatMessage.ChatMessageType.REGISTER){
+                    registerUser(chatmessage.room, event.remoteAddress);
+                }
+                // unregister to a room
+                else if(chatmessage.type == ChatMessage.ChatMessageType.UNREGISTER){
+                    unRegisterUser(chatmessage.room, event.remoteAddress);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
-	}
+    }
 
-	/**
-	 * Registers a user to the main room
-	 * 
-	 * @param	remoteAddress	the address of the remote user
-	 */
-	public void registerUser(SocketAddress remoteAddress){
-		registerUser("", remoteAddress);
-	}
+    /**
+     * Registers a user to the main room
+     *
+     * @param	remoteAddress	the address of the remote user
+     */
+    public void registerUser(SocketAddress remoteAddress){
+        registerUser("", remoteAddress);
+    }
 
-	/**
-	 * Registers the given user to a specific room
-	 * 
-	 * @param 	room			the room name
-	 * @param	remoteAddress	the address of the remote user
-	 */
-	public void registerUser(String room, SocketAddress remoteAddress){
-		addRoom(room);
-		logger.fine("New Chat User: "+remoteAddress);
-		rooms.get(room).add(remoteAddress);
-	}
+    /**
+     * Registers the given user to a specific room
+     *
+     * @param 	room			the room name
+     * @param	remoteAddress	the address of the remote user
+     */
+    public void registerUser(String room, SocketAddress remoteAddress){
+        addRoom(room);
+        logger.fine("New Chat User: "+remoteAddress);
+        rooms.get(room).add(remoteAddress);
+    }
 
-	/**
-	 * Unregisters a user from a room and removes the room if its empty
-	 *
-	 * @param 	room			the room name
-	 * @param	remoteAddress	the address of the remote user
-	 */
-	public void unRegisterUser(String room, SocketAddress remoteAddress){
-		if(rooms.containsKey(room)){
-			logger.fine("Remove Chat User: "+remoteAddress);
-			rooms.get(room).remove(remoteAddress);
-			removeRoom(room);
-		}
-	}
+    /**
+     * Unregisters a user from a room and removes the room if its empty
+     *
+     * @param 	room			the room name
+     * @param	remoteAddress	the address of the remote user
+     */
+    public void unRegisterUser(String room, SocketAddress remoteAddress){
+        if(rooms.containsKey(room)){
+            logger.fine("Remove Chat User: "+remoteAddress);
+            rooms.get(room).remove(remoteAddress);
+            removeRoom(room);
+        }
+    }
 
-	/**
-	 * Adds a room into the list
-	 * 
-	 * @param room The name of the room
-	 */
-	private void addRoom(String room){
-		if(!rooms.containsKey(room)){
-			logger.fine("New Chat Room: "+room);
-			rooms.put(room, new LinkedList<SocketAddress>());
-		}
-	}
-	
-	/**
-	 * Removes the given room if its empty
-	 * 
-	 * @param room The room
-	 */
-	private void removeRoom(String room){
-		if(rooms.get(room).isEmpty()){
-			logger.fine("Remove Chat Room: "+room);
-			rooms.remove(room);
-		}
-	}
+    /**
+     * Adds a room into the list
+     *
+     * @param room The name of the room
+     */
+    private void addRoom(String room){
+        if(!rooms.containsKey(room)){
+            logger.fine("New Chat Room: "+room);
+            rooms.put(room, new LinkedList<SocketAddress>());
+        }
+    }
+
+    /**
+     * Removes the given room if its empty
+     *
+     * @param room The room
+     */
+    private void removeRoom(String room){
+        if(rooms.get(room).isEmpty()){
+            logger.fine("Remove Chat Room: "+room);
+            rooms.remove(room);
+        }
+    }
 
 }

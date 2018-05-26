@@ -39,138 +39,138 @@ import java.util.logging.Logger;
  * @author Ziver
  */
 public class PluginData {
-	private static Logger log = LogUtil.getLogger();
+    private static Logger log = LogUtil.getLogger();
 
-	private double pluginVersion;
-	private String pluginName;
-	private HashMap<Class<?>, List<Class<?>>>  classMap;
-	private HashMap<Class, Object> objectMap;
-
-	
-	protected PluginData(DataNode data) throws ClassNotFoundException, MalformedURLException {
-		classMap = new HashMap<>();
-		objectMap = new HashMap<Class, Object>();
-
-		pluginVersion = data.getDouble("version");
-		pluginName = data.getString("name");
-		log.fine("Plugin: " + this);
-
-		DataNode node = data.get("interfaces");
-		if(node.isMap())
-			addInterfaces(node);
-		else if(node.isList()) {
-			Iterator<DataNode> intfs_it = node.iterator();
-			while (intfs_it.hasNext()) {
-				addInterfaces(intfs_it.next());
-			}
-		}
-	}
-	private void addInterfaces(DataNode node){
-		Iterator<String> intf_it = node.keyIterator();
-		while (intf_it.hasNext()) {
-			String pluginIntf = intf_it.next();
-			String className = node.get(pluginIntf).getString();
-
-			Class intfClass = getClassByName(pluginIntf);
-			Class pluginClass = getClassByName(className);
-			if (intfClass == null || pluginClass == null)
-				log.warning("Plugin interface: " +
-						(intfClass==null ? "(Not Available) " : "") + pluginIntf + " --> " +
-						(pluginClass==null ? "(Not Available) " : "") + className);
-			else
-				log.finer("Plugin interface: "+ pluginIntf +" --> "+ className);
-
-			if (intfClass == null || pluginClass == null)
-				continue;
-
-			if (!classMap.containsKey(intfClass))
-				classMap.put(intfClass, new ArrayList<Class<?>>());
-			classMap.get(intfClass).add(pluginClass);
-		}
-	}
-	private static Class getClassByName(String name) {
-		try {
-			return Class.forName(name);
-		}catch (Exception e){
-			//log.log(Level.WARNING, null, e); // No need to log, we are handling it
-		}
-		return null;
-	}
+    private double pluginVersion;
+    private String pluginName;
+    private HashMap<Class<?>, List<Class<?>>>  classMap;
+    private HashMap<Class, Object> objectMap;
 
 
-	public double getVersion(){
-		return pluginVersion;
-	}
-	public String getName(){
-		return pluginName;
-	}
+    protected PluginData(DataNode data) throws ClassNotFoundException, MalformedURLException {
+        classMap = new HashMap<>();
+        objectMap = new HashMap<Class, Object>();
+
+        pluginVersion = data.getDouble("version");
+        pluginName = data.getString("name");
+        log.fine("Plugin: " + this);
+
+        DataNode node = data.get("interfaces");
+        if(node.isMap())
+            addInterfaces(node);
+        else if(node.isList()) {
+            Iterator<DataNode> intfs_it = node.iterator();
+            while (intfs_it.hasNext()) {
+                addInterfaces(intfs_it.next());
+            }
+        }
+    }
+    private void addInterfaces(DataNode node){
+        Iterator<String> intf_it = node.keyIterator();
+        while (intf_it.hasNext()) {
+            String pluginIntf = intf_it.next();
+            String className = node.get(pluginIntf).getString();
+
+            Class intfClass = getClassByName(pluginIntf);
+            Class pluginClass = getClassByName(className);
+            if (intfClass == null || pluginClass == null)
+                log.warning("Plugin interface: " +
+                        (intfClass==null ? "(Not Available) " : "") + pluginIntf + " --> " +
+                        (pluginClass==null ? "(Not Available) " : "") + className);
+            else
+                log.finer("Plugin interface: "+ pluginIntf +" --> "+ className);
+
+            if (intfClass == null || pluginClass == null)
+                continue;
+
+            if (!classMap.containsKey(intfClass))
+                classMap.put(intfClass, new ArrayList<Class<?>>());
+            classMap.get(intfClass).add(pluginClass);
+        }
+    }
+    private static Class getClassByName(String name) {
+        try {
+            return Class.forName(name);
+        }catch (Exception e){
+            //log.log(Level.WARNING, null, e); // No need to log, we are handling it
+        }
+        return null;
+    }
 
 
-	public <T> Iterator<T> getObjectIterator(Class<T> intf){
-		if(!classMap.containsKey(intf))
-			return Collections.emptyIterator();
-		return new PluginObjectIterator<T>(classMap.get(intf).iterator());
-	}
-	public Iterator<Class<?>> getClassIterator(Class<?> intf){
-		if(!classMap.containsKey(intf))
-			return Collections.emptyIterator();
-		return classMap.get(intf).iterator();
-	}
-
-	private <T> T getObject(Class<T> objClass) {
-		try {
-			if (!objectMap.containsKey(objClass))
-				objectMap.put(objClass, objClass.newInstance());
-			return (T) objectMap.get(objClass);
-		} catch (Exception e) {
-			log.log(Level.WARNING, null, e);
-		}
-		return null;
-	}
+    public double getVersion(){
+        return pluginVersion;
+    }
+    public String getName(){
+        return pluginName;
+    }
 
 
-	public boolean contains(Class<?> intf){
-		return classMap.containsKey(intf);
-	}
+    public <T> Iterator<T> getObjectIterator(Class<T> intf){
+        if(!classMap.containsKey(intf))
+            return Collections.emptyIterator();
+        return new PluginObjectIterator<T>(classMap.get(intf).iterator());
+    }
+    public Iterator<Class<?>> getClassIterator(Class<?> intf){
+        if(!classMap.containsKey(intf))
+            return Collections.emptyIterator();
+        return classMap.get(intf).iterator();
+    }
 
-	public String toString(){
-		return getName()+"(ver: "+getVersion()+")";
-	}
+    private <T> T getObject(Class<T> objClass) {
+        try {
+            if (!objectMap.containsKey(objClass))
+                objectMap.put(objClass, objClass.newInstance());
+            return (T) objectMap.get(objClass);
+        } catch (Exception e) {
+            log.log(Level.WARNING, null, e);
+        }
+        return null;
+    }
+
+
+    public boolean contains(Class<?> intf){
+        return classMap.containsKey(intf);
+    }
+
+    public String toString(){
+        return getName()+"(ver: "+getVersion()+")";
+    }
 
 
 
-	private class PluginObjectIterator<T> implements Iterator<T>{
-		private Iterator<Class<?>> classIt;
-		private T currentObj;
+    private class PluginObjectIterator<T> implements Iterator<T>{
+        private Iterator<Class<?>> classIt;
+        private T currentObj;
 
-		public PluginObjectIterator(Iterator<Class<?>> it) {
-			classIt = it;
-		}
+        public PluginObjectIterator(Iterator<Class<?>> it) {
+            classIt = it;
+        }
 
-		@Override
-		public boolean hasNext() {
-			if(currentObj != null)
-				return true;
-			while (classIt.hasNext()){
-				currentObj = (T)getObject(classIt.next());
-				if(currentObj != null)
-					return true;
-			}
-			return false;
-		}
+        @Override
+        public boolean hasNext() {
+            if(currentObj != null)
+                return true;
+            while (classIt.hasNext()){
+                currentObj = (T)getObject(classIt.next());
+                if(currentObj != null)
+                    return true;
+            }
+            return false;
+        }
 
-		@Override
-		public T next() {
-			if(!hasNext())
-				throw new NoSuchElementException();
-			T tmp = currentObj;
-			currentObj = null;
-			return tmp;
-		}
+        @Override
+        public T next() {
+            if(!hasNext())
+                throw new NoSuchElementException();
+            T tmp = currentObj;
+            currentObj = null;
+            return tmp;
+        }
 
-		@Override
-		public void remove() {
-			throw new RuntimeException("Iterator is ReadOnly");
-		}
-	}
+        @Override
+        public void remove() {
+            throw new RuntimeException("Iterator is ReadOnly");
+        }
+    }
 }

@@ -50,152 +50,152 @@ import static zutil.net.ssdp.SSDPServer.SSDP_PORT;
  * @author Ziver
  */
 public class SSDPClient extends ThreadedUDPNetwork implements ThreadedUDPNetworkThread{
-	private static final Logger logger = LogUtil.getLogger();
+    private static final Logger logger = LogUtil.getLogger();
     public static final String USER_AGENT = "Zutil SSDP Client";
-	/** Mapping of search targets and list of associated services **/
-	private HashMap<String, LinkedList<StandardSSDPInfo>> services_st;
+    /** Mapping of search targets and list of associated services **/
+    private HashMap<String, LinkedList<StandardSSDPInfo>> services_st;
     /** Map of all unique services received **/
-	private HashMap<String, StandardSSDPInfo> 			  services_usn;
+    private HashMap<String, StandardSSDPInfo> 			  services_usn;
 
-	private SSDPServiceListener listener;
+    private SSDPServiceListener listener;
 
-	
-	/**
-	 * Creates new instance of this class. An UDP
-	 * listening socket at the SSDP port.
-	 * 
-	 * @throws IOException
-	 */
-	public SSDPClient() throws IOException{
+
+    /**
+     * Creates new instance of this class. An UDP
+     * listening socket at the SSDP port.
+     *
+     * @throws IOException
+     */
+    public SSDPClient() throws IOException{
         super( SSDP_MULTICAST_ADDR, SSDP_PORT );
-		super.setThread(this);
-		
-		services_st = new HashMap<>();
-		services_usn = new HashMap<>();
-	}
+        super.setThread(this);
 
-	/**
-	 * Sends an request for an service
-	 * 
-	 * @param   searchTarget    is the SearchTarget of the service
-	 * 
-	 * ***** REQUEST: 
-	 * M-SEARCH * HTTP/1.1 
-	 * Host: 239.255.255.250:reservedSSDPport 
-	 * Man: "ssdp:discover" 
-	 * ST: ge:fridge 
-	 * MX: 3 
-	 * 
-	 */
-	public void requestService(String searchTarget){
-		requestService(searchTarget, null);
-	}
-	public void requestService(String searchTarget, HashMap<String,String> headers){
-		try {
-			// Generate an SSDP discover message
-			ByteArrayOutputStream buffer = new ByteArrayOutputStream();
-			HttpPrintStream http = new HttpPrintStream( buffer, HttpPrintStream.HttpMessageType.REQUEST );
-			http.setRequestType("M-SEARCH");
-			http.setRequestURL("*");
-			http.setHeader("Host", SSDP_MULTICAST_ADDR +":"+ SSDP_PORT );
-			http.setHeader("ST", searchTarget );
-			http.setHeader("Man", "\"ssdp:discover\"" );
-			http.setHeader("MX", "3" );
-			http.setHeader("USER-AGENT", USER_AGENT );
-			if(headers != null) {
-				for (String key : headers.keySet()) {
-					http.setHeader(key, headers.get(key));
-				}
-			}
-			logger.log(Level.FINEST, "Sending Multicast: "+ http);
-			http.flush();
+        services_st = new HashMap<>();
+        services_usn = new HashMap<>();
+    }
 
-			byte[] data = buffer.toByteArray();
+    /**
+     * Sends an request for an service
+     *
+     * @param   searchTarget    is the SearchTarget of the service
+     *
+     * ***** REQUEST:
+     * M-SEARCH * HTTP/1.1
+     * Host: 239.255.255.250:reservedSSDPport
+     * Man: "ssdp:discover"
+     * ST: ge:fridge
+     * MX: 3
+     *
+     */
+    public void requestService(String searchTarget){
+        requestService(searchTarget, null);
+    }
+    public void requestService(String searchTarget, HashMap<String,String> headers){
+        try {
+            // Generate an SSDP discover message
+            ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+            HttpPrintStream http = new HttpPrintStream( buffer, HttpPrintStream.HttpMessageType.REQUEST );
+            http.setRequestType("M-SEARCH");
+            http.setRequestURL("*");
+            http.setHeader("Host", SSDP_MULTICAST_ADDR +":"+ SSDP_PORT );
+            http.setHeader("ST", searchTarget );
+            http.setHeader("Man", "\"ssdp:discover\"" );
+            http.setHeader("MX", "3" );
+            http.setHeader("USER-AGENT", USER_AGENT );
+            if(headers != null) {
+                for (String key : headers.keySet()) {
+                    http.setHeader(key, headers.get(key));
+                }
+            }
+            logger.log(Level.FINEST, "Sending Multicast: "+ http);
+            http.flush();
+
+            byte[] data = buffer.toByteArray();
             //System.out.println(new String(data)+"****************");
-			DatagramPacket packet = new DatagramPacket( 
-					data, data.length, 
-					InetAddress.getByName( SSDP_MULTICAST_ADDR ),
-					SSDP_PORT );
-			super.send( packet );
-			http.close();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
+            DatagramPacket packet = new DatagramPacket(
+                    data, data.length,
+                    InetAddress.getByName( SSDP_MULTICAST_ADDR ),
+                    SSDP_PORT );
+            super.send( packet );
+            http.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
-	/**
-	 * Set a listener that will be notified when new services are detected
-	 */
-	public void setListener(SSDPServiceListener listener){
-		this.listener = listener;
-	}
+    /**
+     * Set a listener that will be notified when new services are detected
+     */
+    public void setListener(SSDPServiceListener listener){
+        this.listener = listener;
+    }
 
-	/**
-	 * Returns a list of received services by 
-	 * the given search target. 
-	 * 
-	 * @param   searchTarget    is the search target
-	 * @return a list of received services
-	 */
-	public LinkedList<StandardSSDPInfo> getServices(String searchTarget){
+    /**
+     * Returns a list of received services by
+     * the given search target.
+     *
+     * @param   searchTarget    is the search target
+     * @return a list of received services
+     */
+    public LinkedList<StandardSSDPInfo> getServices(String searchTarget){
         if(services_st.get(searchTarget) == null)
             return new LinkedList<>();
-		return services_st.get(searchTarget);
-	}
-	
-	/**
-	 * Returns the amount of services in the search target
-	 * 
-	 * @param   searchTarget      is the search target
-	 * @return the amount of services cached
-	 */
-	public int getServicesCount(String searchTarget){
-		if(services_st.containsKey(searchTarget)){
-			return services_st.get(searchTarget).size();
-		}
-		return 0;
-	}
-	
-	/**
-	 * Returns a service with the given USN.
-	 * 
-	 * @param   usn     is the unique identifier for a service
-	 * @return an service, null if there is no such service
-	 */
-	public StandardSSDPInfo getService(String usn){
-		return services_usn.get( usn );
-	}
-	
-	/**
-	 * Clears all the received information of the services
-	 */
-	public void clearServices(){
-		services_usn.clear();
-		services_st.clear();
-	}
-	/**
-	 * Clears all services matching the search target
-	 */
-	public void clearServices(String st){
+        return services_st.get(searchTarget);
+    }
+
+    /**
+     * Returns the amount of services in the search target
+     *
+     * @param   searchTarget      is the search target
+     * @return the amount of services cached
+     */
+    public int getServicesCount(String searchTarget){
+        if(services_st.containsKey(searchTarget)){
+            return services_st.get(searchTarget).size();
+        }
+        return 0;
+    }
+
+    /**
+     * Returns a service with the given USN.
+     *
+     * @param   usn     is the unique identifier for a service
+     * @return an service, null if there is no such service
+     */
+    public StandardSSDPInfo getService(String usn){
+        return services_usn.get( usn );
+    }
+
+    /**
+     * Clears all the received information of the services
+     */
+    public void clearServices(){
+        services_usn.clear();
+        services_st.clear();
+    }
+    /**
+     * Clears all services matching the search target
+     */
+    public void clearServices(String st){
         if(services_st.get(st) != null) {
             for (StandardSSDPInfo service : services_st.get(st)) {
                 services_usn.remove(service.getUSN());
             }
         }
-	}
-	
-	/**
-	 * Waits for responses
-	 * 
-	 * ***** RESPONSE; 
-	 * HTTP/1.1 200 OK 
-	 * Ext: 
-	 * Cache-Control: no-cache="Ext", max-age = 5000 
-	 * ST: ge:fridge 
-	 * USN: uuid:abcdefgh-7dec-11d0-a765-00a0c91e6bf6 
-	 * Location: http://localhost:80
-	 */
-	public void receivedPacket(DatagramPacket packet, ThreadedUDPNetwork network) {
+    }
+
+    /**
+     * Waits for responses
+     *
+     * ***** RESPONSE;
+     * HTTP/1.1 200 OK
+     * Ext:
+     * Cache-Control: no-cache="Ext", max-age = 5000
+     * ST: ge:fridge
+     * USN: uuid:abcdefgh-7dec-11d0-a765-00a0c91e6bf6
+     * Location: http://localhost:80
+     */
+    public void receivedPacket(DatagramPacket packet, ThreadedUDPNetwork network) {
         try {
             String msg = new String(packet.getData(), packet.getOffset(), packet.getLength());
             HttpHeaderParser headerParser = new HttpHeaderParser(msg);
@@ -221,7 +221,7 @@ public class SSDPClient extends ThreadedUDPNetwork implements ThreadedUDPNetwork
                 }
             }
             // Existing or new service update
-			else if (header.isResponse() || "NOTIFY".equals(header.getRequestType())) {
+            else if (header.isResponse() || "NOTIFY".equals(header.getRequestType())) {
                 logger.log(Level.FINER, "Received service update (from: " + packet.getAddress() + "): " + header);
                 boolean newService = false;
 
@@ -254,22 +254,22 @@ public class SSDPClient extends ThreadedUDPNetwork implements ThreadedUDPNetwork
         } catch (IOException e){
             logger.log(Level.SEVERE, null, e);
         }
-	}
-	
-	private long getCacheTime(String cache_control){
-		long ret = 0;
-		HashMap<String,String> tmpMap = new HashMap<>();
-		HttpHeaderParser.parseHeaderValues(tmpMap, cache_control, ",");
+    }
+
+    private long getCacheTime(String cache_control){
+        long ret = 0;
+        HashMap<String,String> tmpMap = new HashMap<>();
+        HttpHeaderParser.parseHeaderValues(tmpMap, cache_control, ",");
         if(tmpMap.containsKey("max-age"))
             ret = Long.parseLong( tmpMap.get("max-age") );
-		return ret;
-	}
+        return ret;
+    }
 
-	public interface SSDPServiceListener{
+    public interface SSDPServiceListener{
         /**
          * Is called when a new service is discovered. Will only be called once per service.
          */
-		void serviceDiscovered(StandardSSDPInfo service);
+        void serviceDiscovered(StandardSSDPInfo service);
 
         /**
          * Is called when a service goes down and is not available anymore.

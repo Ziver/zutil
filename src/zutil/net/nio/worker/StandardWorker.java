@@ -40,29 +40,29 @@ import java.util.logging.Logger;
 
 
 public class StandardWorker extends ThreadedEventWorker {
-	private static Logger logger = LogUtil.getLogger();
+    private static Logger logger = LogUtil.getLogger();
 
-	private NioNetwork nio;
-	// Maps a responseId to a RspHandler
-	private Map<Long, ResponseHandler> rspEvents = new HashMap<>();
-	// Different services listening on specific messages
-	private Map<Class<?>, ThreadedEventWorker> services = new HashMap<>();
-
-
-
-	/**
-	 * Creates a new StandardWorker
-	 */
-	public StandardWorker(NioNetwork nio){
-		this.nio = nio;
-	}
+    private NioNetwork nio;
+    // Maps a responseId to a RspHandler
+    private Map<Long, ResponseHandler> rspEvents = new HashMap<>();
+    // Different services listening on specific messages
+    private Map<Class<?>, ThreadedEventWorker> services = new HashMap<>();
 
 
 
-	@Override
-	public void messageEvent(WorkerEventData event) {
-		try {
-			logger.finer("Message: "+event.data.getClass().getName());
+    /**
+     * Creates a new StandardWorker
+     */
+    public StandardWorker(NioNetwork nio){
+        this.nio = nio;
+    }
+
+
+
+    @Override
+    public void messageEvent(WorkerEventData event) {
+        try {
+            logger.finer("Message: "+event.data.getClass().getName());
 
             if(event.data instanceof EchoMessage && !((EchoMessage)event.data).echo()){
                 // Echo back the received message
@@ -86,29 +86,29 @@ public class StandardWorker extends ThreadedEventWorker {
                     services.get(event.data.getClass()).messageEvent(event);
                 }
             }
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
-	/**
-	 * Maps a Worker to a specific message
-	 * 
-	 * @param   messageClass    the received message class
-	 * @param   worker          the worker that should handle the specified message type
-	 */
-	public void registerWorker(Class<?> messageClass, ThreadedEventWorker worker){
-		services.put(messageClass, worker);
-	}
-
-	/**
-	 * Un-maps a message class to a worker
-	 *
+    /**
+     * Maps a Worker to a specific message
+     *
      * @param   messageClass    the received message class
-	 */
-	public void unregisterWorker(Class<?> messageClass){
-		services.remove(messageClass);
-	}
+     * @param   worker          the worker that should handle the specified message type
+     */
+    public void registerWorker(Class<?> messageClass, ThreadedEventWorker worker){
+        services.put(messageClass, worker);
+    }
+
+    /**
+     * Un-maps a message class to a worker
+     *
+     * @param   messageClass    the received message class
+     */
+    public void unregisterWorker(Class<?> messageClass){
+        services.remove(messageClass);
+    }
 
     /**
      * Send a message with a defined response handler
@@ -117,10 +117,10 @@ public class StandardWorker extends ThreadedEventWorker {
      * @param   message     the message object
      * @param   handler     the handler that should be called when a response is received
      */
-	public void send(SocketAddress address, RequestResponseMessage message, ResponseHandler handler) throws IOException {
-		// Register the response handler
-		rspEvents.put(message.getResponseId(), handler);
+    public void send(SocketAddress address, RequestResponseMessage message, ResponseHandler handler) throws IOException {
+        // Register the response handler
+        rspEvents.put(message.getResponseId(), handler);
 
-		nio.send(address, Converter.toBytes(message));
-	}
+        nio.send(address, Converter.toBytes(message));
+    }
 }

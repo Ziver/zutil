@@ -31,24 +31,24 @@ import static org.junit.Assert.assertEquals;
 
 
 public class EncrypterTest {
-	public static final String data = "Hello there, wats yor name, my is a secret, 123456789";
+    public static final String data = "Hello there, wats yor name, my is a secret, 123456789";
     public static final String key = "abcdefghijklmnopqrstuvwxyz";
 
 
-	@Test
-	public void encryptDES() throws Exception {
-		Encrypter.randomizeSalt();
-		Encrypter encrypter = new Encrypter(key, Algorithm.DES);
-		Encrypter decrypter = new Encrypter(key, Algorithm.DES);
+    @Test
+    public void encryptDES() throws Exception {
+        Encrypter.randomizeSalt();
+        Encrypter encrypter = new Encrypter(key, Algorithm.DES);
+        Encrypter decrypter = new Encrypter(key, Algorithm.DES);
 
         assertEquals(data, encryptDecrypt(encrypter, decrypter, data));
-	}
+    }
 
-	@Test
-	public void encryptBLOWFISH() throws Exception {
-	    Encrypter.randomizeSalt();
+    @Test
+    public void encryptBLOWFISH() throws Exception {
+        Encrypter.randomizeSalt();
         Encrypter encrypter = new Encrypter(Algorithm.Blowfish);
-		Encrypter.randomizeSalt();
+        Encrypter.randomizeSalt();
         Encrypter decrypter = new Encrypter(encrypter.getKey());
 
         assertEquals(data, encryptDecrypt(encrypter, decrypter, data));

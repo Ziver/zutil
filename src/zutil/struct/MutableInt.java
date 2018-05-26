@@ -31,11 +31,11 @@ package zutil.struct;
  * @author Ziver
  */
 public class MutableInt {
-	public int i = 0;
-	
-	public MutableInt(){}
-	
-	public MutableInt(int i){
-		this.i = i;
-	}
+    public int i = 0;
+
+    public MutableInt(){}
+
+    public MutableInt(int i){
+        this.i = i;
+    }
 }

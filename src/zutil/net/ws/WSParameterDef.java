@@ -30,54 +30,54 @@ package zutil.net.ws;
  * @author Ziver
  */
 public class WSParameterDef{
-	/** The parent method **/
-	private WSMethodDef mDef;
-	/** The class type of the parameter **/
-	private Class<?> paramClass;
-	/** The web service name of the parameter **/
-	private String name;
-	/** Developer documentation **/
-	private String doc;
-	/** If this parameter is optional **/
-	private boolean optional;
-	/** Is it an header parameter **/
-	//boolean header;
-	
-	protected WSParameterDef( WSMethodDef mDef ){
-		this.mDef = mDef;
-		this.optional = false;
-	}
-	
-	
-	public Class<?> getParamClass() {
-		return paramClass;
-	}
-	protected void setParamClass(Class<?> paramClass) {
-		this.paramClass = paramClass;
-	}
-	
-	public String getName() {
-		return name;
-	}
-	protected void setName(String name) {
-		this.name = name;
-	}
-	
-	public String getDoc() {
-		return doc;
-	}
-	protected void setDoc(String doc) {
-		this.doc = doc;
-	}
-	
-	public boolean isOptional() {
-		return optional;
-	}
-	protected void setOptional(boolean optional) {
-		this.optional = optional;
-	}
-	
-	public WSMethodDef getMethod(){
-		return mDef;
-	}
+    /** The parent method **/
+    private WSMethodDef mDef;
+    /** The class type of the parameter **/
+    private Class<?> paramClass;
+    /** The web service name of the parameter **/
+    private String name;
+    /** Developer documentation **/
+    private String doc;
+    /** If this parameter is optional **/
+    private boolean optional;
+    /** Is it an header parameter **/
+    //boolean header;
+
+    protected WSParameterDef( WSMethodDef mDef ){
+        this.mDef = mDef;
+        this.optional = false;
+    }
+
+
+    public Class<?> getParamClass() {
+        return paramClass;
+    }
+    protected void setParamClass(Class<?> paramClass) {
+        this.paramClass = paramClass;
+    }
+
+    public String getName() {
+        return name;
+    }
+    protected void setName(String name) {
+        this.name = name;
+    }
+
+    public String getDoc() {
+        return doc;
+    }
+    protected void setDoc(String doc) {
+        this.doc = doc;
+    }
+
+    public boolean isOptional() {
+        return optional;
+    }
+    protected void setOptional(boolean optional) {
+        this.optional = optional;
+    }
+
+    public WSMethodDef getMethod(){
+        return mDef;
+    }
 }

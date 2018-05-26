@@ -37,85 +37,85 @@ import java.nio.channels.OverlappingFileLockException;
  * @author Ziver Koc
  */
 public class OneInstanceFile implements OneInstance{
-	private File file;
-	private FileChannel channel;
-	private FileLock lock;
+    private File file;
+    private FileChannel channel;
+    private FileLock lock;
 
-	/**
-	 * Creates a OneApp class
-	 * 
-	 * @param filename The name of the file to be locked
-	 */
-	public OneInstanceFile(String filename){
-		this.file = new File(System.getProperty("user.home"), filename);
-	}
+    /**
+     * Creates a OneApp class
+     *
+     * @param filename The name of the file to be locked
+     */
+    public OneInstanceFile(String filename){
+        this.file = new File(System.getProperty("user.home"), filename);
+    }
 
-	/**
-	 * Checks if the file have already bean locked
-	 * 
-	 * @return True if the file is locked else false
-	 */
-	public boolean check() {
-		boolean tmp = lockApp();
-		if( tmp ) closeLock();
-		return !tmp;
-	}
+    /**
+     * Checks if the file have already bean locked
+     *
+     * @return True if the file is locked else false
+     */
+    public boolean check() {
+        boolean tmp = lockApp();
+        if( tmp ) closeLock();
+        return !tmp;
+    }
 
-	/**
-	 * Locks the file
-	 *  
-	 * @return False if there are a error else true
-	 */
-	public boolean lockApp() {	    
-		try {
-			channel = new RandomAccessFile(file, "rw").getChannel();
+    /**
+     * Locks the file
+     *
+     * @return False if there are a error else true
+     */
+    public boolean lockApp() {
+        try {
+            channel = new RandomAccessFile(file, "rw").getChannel();
 
-			try {
-				lock = channel.tryLock();
-			}
-			catch (OverlappingFileLockException e) {
-				// already locked by this application
-				return false;
-			}
+            try {
+                lock = channel.tryLock();
+            }
+            catch (OverlappingFileLockException e) {
+                // already locked by this application
+                return false;
+            }
 
-			if (lock == null || lock.isShared()) {
-				// already locked by another application
-				return false;
-			}
+            if (lock == null || lock.isShared()) {
+                // already locked by another application
+                return false;
+            }
 
-			Runtime.getRuntime().addShutdownHook(new Thread() {
-				// destroy the lock when the JVM is closing
-				public void run() {
-					closeLock();
-					deleteFile();
-				}
-			});
-			return true;
-		}
-		catch (Exception e) {
-			closeLock();
-			return false;
-		}
-	}
+            Runtime.getRuntime().addShutdownHook(new Thread() {
+                // destroy the lock when the JVM is closing
+                public void run() {
+                    closeLock();
+                    deleteFile();
+                }
+            });
+            return true;
+        }
+        catch (Exception e) {
+            closeLock();
+            return false;
+        }
+    }
 
-	private void closeLock() {
-		try { 
-			lock.release(); 
-			channel.close();
-		}
-		catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
+    private void closeLock() {
+        try {
+            lock.release();
+            channel.close();
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
-	private void deleteFile() {
-		try { 
-			file.delete(); 
-		}
-		catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
+    private void deleteFile() {
+        try {
+            file.delete();
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 }
 
 

@@ -30,19 +30,19 @@ package zutil.net.torrent;
  * @author Ziver
  */
 public class TorrentFile{
-	private String filename;
-	private long size;
-	
-	public TorrentFile(String filename, long size){
-		this.filename = filename;
-		this.size = size;
-	}
-	
+    private String filename;
+    private long size;
 
-	public String getFilename() {
-		return filename;
-	}
-	public long getSize() {
-		return size;
-	}
+    public TorrentFile(String filename, long size){
+        this.filename = filename;
+        this.size = size;
+    }
+
+
+    public String getFilename() {
+        return filename;
+    }
+    public long getSize() {
+        return size;
+    }
 }

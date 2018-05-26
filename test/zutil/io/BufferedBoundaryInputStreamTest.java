@@ -58,18 +58,18 @@ public class BufferedBoundaryInputStreamTest {
 
 
 
-	@Test
-	public void read_normal() throws IOException {
+    @Test
+    public void read_normal() throws IOException {
         BufferedBoundaryInputStream in = getBufferedBoundaryInputStream("aaa#a##aaaaaaa#", "#");
 
-		assertTrue(in.hasNext());
+        assertTrue(in.hasNext());
         assertEquals('a', in.read());
         assertEquals('a', in.read());
         assertEquals('a', in.read());
         assertEquals(-1, in.read());
 
         assertTrue(in.hasNext());
-		in.next();
+        in.next();
         assertEquals('a', in.read());
         assertEquals(-1, in.read());
 
@@ -89,33 +89,33 @@ public class BufferedBoundaryInputStreamTest {
         assertEquals(-1, in.read());
 
         assertFalse(in.hasNext());
-		in.next();
-		assertEquals(-1, in.read());
+        in.next();
+        assertEquals(-1, in.read());
         assertFalse(in.hasNext());
-	}
+    }
     @Test
-	public void readArr_normal() throws IOException {
+    public void readArr_normal() throws IOException {
         BufferedBoundaryInputStream in = getBufferedBoundaryInputStream("aaa#aaaaaaaaaaaaaaaa#aaaaaaaaaaaaaaa#", "#");
 
-		byte[] buff = new byte[100];
-		int n = in.read(buff);
-		assertEquals(3, n);
+        byte[] buff = new byte[100];
+        int n = in.read(buff);
+        assertEquals(3, n);
 
-		assertTrue(in.hasNext());
-		in.next();
-		n = in.read(buff);
-		assertEquals(16, n);
+        assertTrue(in.hasNext());
+        in.next();
+        n = in.read(buff);
+        assertEquals(16, n);
 
-		assertTrue(in.hasNext());
-		in.next();
-		n = in.read(buff);
-		assertEquals(15, n);
+        assertTrue(in.hasNext());
+        in.next();
+        n = in.read(buff);
+        assertEquals(15, n);
 
-		assertFalse(in.hasNext());
-		in.next();
-		n = in.read(buff);
-		assertEquals(-1, n);
-	}
+        assertFalse(in.hasNext());
+        in.next();
+        n = in.read(buff);
+        assertEquals(-1, n);
+    }
 
     @Test
     public void read_multiCharBoundary() throws IOException {
@@ -151,57 +151,57 @@ public class BufferedBoundaryInputStreamTest {
         assertFalse(in.hasNext());
     }
 
-	@Test
-	public void read_startWithBound() throws IOException {
+    @Test
+    public void read_startWithBound() throws IOException {
         BufferedBoundaryInputStream in = getBufferedBoundaryInputStream("#aaa", "#");
 
-		assertEquals(-1, in.read());
-	}
-	@Test
-	public void readArr_startWithBound() throws IOException {
+        assertEquals(-1, in.read());
+    }
+    @Test
+    public void readArr_startWithBound() throws IOException {
         BufferedBoundaryInputStream in = getBufferedBoundaryInputStream("#aaa", "#");
 
         assertEquals(-1, in.read(new byte[10], 0, 10));
-	}
+    }
 
-	@Test
-	public void read_onlyBoundaries() throws IOException {
+    @Test
+    public void read_onlyBoundaries() throws IOException {
         BufferedBoundaryInputStream in = getBufferedBoundaryInputStream("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "a");
-		
-		int n;
-		for(n=1; in.hasNext(); n++){
-			assertEquals(-1, in.read());
-			assertEquals(-1, in.read());
-			in.next();
-		}
-		assertEquals(35, n);
-	}
-	@Test
-	public void readArr_onlyBoundaries() throws IOException {
+
+        int n;
+        for(n=1; in.hasNext(); n++){
+            assertEquals(-1, in.read());
+            assertEquals(-1, in.read());
+            in.next();
+        }
+        assertEquals(35, n);
+    }
+    @Test
+    public void readArr_onlyBoundaries() throws IOException {
         BufferedBoundaryInputStream in = getBufferedBoundaryInputStream("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "a");
 
         byte[] buff = new byte[100];
-		int n;
-		for(n=1; in.hasNext(); n++){
-			assertEquals(-1, in.read(buff));
-			assertEquals(-1, in.read(buff));
-			in.next();
-		}
-		assertEquals(35, n);
-	}
-	
-	@Test
-	public void read_noBounds() throws IOException {
-		String data = "1234567891011121314151617181920";
+        int n;
+        for(n=1; in.hasNext(); n++){
+            assertEquals(-1, in.read(buff));
+            assertEquals(-1, in.read(buff));
+            in.next();
+        }
+        assertEquals(35, n);
+    }
+
+    @Test
+    public void read_noBounds() throws IOException {
+        String data = "1234567891011121314151617181920";
         BufferedBoundaryInputStream in = getBufferedBoundaryInputStream(data, "#");
-		
-		int out;
-		StringBuilder output = new StringBuilder();
-		while((out = in.read()) != -1){
-			output.append((char)out);
-		}
-		assertEquals(data, output.toString());
-	}
+
+        int out;
+        StringBuilder output = new StringBuilder();
+        while((out = in.read()) != -1){
+            output.append((char)out);
+        }
+        assertEquals(data, output.toString());
+    }
     @Test
     public void readArr_noBounds() throws IOException {
         String data = "1234567891011121314151617181920";

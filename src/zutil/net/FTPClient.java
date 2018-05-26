@@ -81,285 +81,285 @@ public class FTPClient extends Thread{
             return UNKNOWN;
         }
     }
-	//***************************************************
+    //***************************************************
 
     private FTPConnectionType connectionType;
-	private BufferedReader in;
-	private Writer out;
-	private Socket socket;
-	private long last_sent;
+    private BufferedReader in;
+    private Writer out;
+    private Socket socket;
+    private long last_sent;
 
-	/**
-	 * Creates a FTP connection and logs in
-	 * 
-	 * @param   url         the address to server
-	 * @param   port        port number
-	 * @param   user        login username
-	 * @param   pass        password
-	 * @param   conn_type   connection type
-	 */
-	public FTPClient(String url, int port, String user, String pass, FTPConnectionType conn_type) throws UnknownHostException, IOException, AccountException{
-		socket = new Socket(url, port);
-		in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-		out = new OutputStreamWriter(socket.getOutputStream());
+    /**
+     * Creates a FTP connection and logs in
+     *
+     * @param   url         the address to server
+     * @param   port        port number
+     * @param   user        login username
+     * @param   pass        password
+     * @param   conn_type   connection type
+     */
+    public FTPClient(String url, int port, String user, String pass, FTPConnectionType conn_type) throws UnknownHostException, IOException, AccountException{
+        socket = new Socket(url, port);
+        in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+        out = new OutputStreamWriter(socket.getOutputStream());
         connectionType = conn_type;
-		
-		readCommand();
-		sendCommand("USER "+user);
-		sendNoReplyCommand("PASS "+pass);
-		String tmp = readCommand();
-		if(parseReturnCode(tmp) == FTPReturnCode.LOGIN_NO){
-			close();
-			throw new AccountException(tmp);
-		}
-		
-		start();
-	}
+
+        readCommand();
+        sendCommand("USER "+user);
+        sendNoReplyCommand("PASS "+pass);
+        String tmp = readCommand();
+        if(parseReturnCode(tmp) == FTPReturnCode.LOGIN_NO){
+            close();
+            throw new AccountException(tmp);
+        }
+
+        start();
+    }
 
 //**************************************************************************************
 //********************************* Command channel ************************************
-	
-	/**
-	 * Sends the given command to the server and returns a status integer
-     *
-	 * @return last line received from the server
-	 */
-	private FTPReturnCode sendCommand(String cmd) throws IOException{
-		sendNoReplyCommand(cmd);
-		return parseReturnCode( readCommand( ) );
-	}
-	
-	/**
-	 * Sends a command and don't cares about the reply
-	 */
-	private void sendNoReplyCommand(String cmd) throws IOException{
-        last_sent = System.currentTimeMillis();
-		out.append(cmd).append('\n');
-	}
 
-	/**
-	 * Reads from the command channel until there are nothing
-	 * left to read and returns the last line
-	 *
-	 * @return last line received by the server
-	 */
-	private String readCommand() throws IOException{
-		String tmp = in.readLine();
-		while(!Character.isWhitespace(tmp.charAt(3))){
-			tmp = in.readLine();
+    /**
+     * Sends the given command to the server and returns a status integer
+     *
+     * @return last line received from the server
+     */
+    private FTPReturnCode sendCommand(String cmd) throws IOException{
+        sendNoReplyCommand(cmd);
+        return parseReturnCode( readCommand( ) );
+    }
+
+    /**
+     * Sends a command and don't cares about the reply
+     */
+    private void sendNoReplyCommand(String cmd) throws IOException{
+        last_sent = System.currentTimeMillis();
+        out.append(cmd).append('\n');
+    }
+
+    /**
+     * Reads from the command channel until there are nothing
+     * left to read and returns the last line
+     *
+     * @return last line received by the server
+     */
+    private String readCommand() throws IOException{
+        String tmp = in.readLine();
+        while(!Character.isWhitespace(tmp.charAt(3))){
+            tmp = in.readLine();
             if(parseReturnCode(tmp).isError()) throw new IOException(tmp);
-		}
-		return tmp;
-	}
-	
-	/**
-	 * Parses the return line from the server and returns the status code
-	 * 
-	 * @param   msg     message String from the server
-	 * @return a status code response
-	 */
-	private FTPReturnCode parseReturnCode(String msg){
-		return FTPReturnCode.fromCode(Integer.parseInt(msg.substring(0, 3)));
-	}
+        }
+        return tmp;
+    }
+
+    /**
+     * Parses the return line from the server and returns the status code
+     *
+     * @param   msg     message String from the server
+     * @return a status code response
+     */
+    private FTPReturnCode parseReturnCode(String msg){
+        return FTPReturnCode.fromCode(Integer.parseInt(msg.substring(0, 3)));
+    }
 
 //**************************************************************************************
 //****************************** File system actions ************************************
-	
-	/**
-	 * Returns a LinkedList with names of all the files in the directory
-	 *
+
+    /**
+     * Returns a LinkedList with names of all the files in the directory
+     *
      * @deprecated
-	 * @return List with filenames
-	 */
-	public String[] getFileList(String path) throws IOException{
-		BufferedInputStream data_in = getDataInputStream();
-		sendCommand("NLST "+path);
-
-        String data = new String(IOUtil.readContent(data_in));
-		
-		data_in.close();
-		readCommand();
-		return data.split("[\n\r]");
-	}
-	
-	/**
-	 * Returns information about a file or directory
-	 * 
-	 * @deprecated
-	 * @return a List of Strings with information
-	 */
-	public String getFileInfo(String path) throws IOException{
-		Pattern regex = Pattern.compile("\\s{1,}");
-		
-		BufferedInputStream data_in = getDataInputStream();
-		sendCommand("LIST "+path);
+     * @return List with filenames
+     */
+    public String[] getFileList(String path) throws IOException{
+        BufferedInputStream data_in = getDataInputStream();
+        sendCommand("NLST "+path);
 
         String data = new String(IOUtil.readContent(data_in));
 
-		data_in.close();
-		readCommand();
-		return data;
-	}
-	
-	/**
-	 * Creates a file in the server with the given data
-	 * 
-	 * @param   path    filepath
-	 * @param   data    data to put in the file
-	 */
-	public void sendFile(String path, String data) throws IOException{
-		BufferedOutputStream data_out = getDataOutputStream();
-		sendCommand("STOR "+path);
+        data_in.close();
+        readCommand();
+        return data.split("[\n\r]");
+    }
+
+    /**
+     * Returns information about a file or directory
+     *
+     * @deprecated
+     * @return a List of Strings with information
+     */
+    public String getFileInfo(String path) throws IOException{
+        Pattern regex = Pattern.compile("\\s{1,}");
+
+        BufferedInputStream data_in = getDataInputStream();
+        sendCommand("LIST "+path);
+
+        String data = new String(IOUtil.readContent(data_in));
+
+        data_in.close();
+        readCommand();
+        return data;
+    }
+
+    /**
+     * Creates a file in the server with the given data
+     *
+     * @param   path    filepath
+     * @param   data    data to put in the file
+     */
+    public void sendFile(String path, String data) throws IOException{
+        BufferedOutputStream data_out = getDataOutputStream();
+        sendCommand("STOR "+path);
 
         byte[] byte_data = data.getBytes();
-		data_out.write(byte_data, 0, byte_data.length);
-		data_out.close();
+        data_out.write(byte_data, 0, byte_data.length);
+        data_out.close();
 
-		readCommand();
-	}
-	
-	/**
-	 * Creates a directory in the server
-	 * 
-	 * @param path The path to the directory
-	 */
-	public boolean createDir(String path) throws IOException{
-		if(sendCommand("MKD "+path) == FTPReturnCode.PATH_CREATED)
-			return true;
-		return false;
-	}
-	
-	/**
-	 * Returns a InputStream for a file on the server
-	 * WARNING: you must run readCommand(); after you close the stream
-	 *
-	 * @return a stream with file data
-	 */
-	private BufferedInputStream getFileInputStream(String path) throws IOException{
+        readCommand();
+    }
+
+    /**
+     * Creates a directory in the server
+     *
+     * @param path The path to the directory
+     */
+    public boolean createDir(String path) throws IOException{
+        if(sendCommand("MKD "+path) == FTPReturnCode.PATH_CREATED)
+            return true;
+        return false;
+    }
+
+    /**
+     * Returns a InputStream for a file on the server
+     * WARNING: you must run readCommand(); after you close the stream
+     *
+     * @return a stream with file data
+     */
+    private BufferedInputStream getFileInputStream(String path) throws IOException{
         BufferedInputStream input = getDataInputStream();
-		sendCommand("RETR "+path);
-		return input;
-	}
-	
-	/**
-	 * Download a file from the server to a local file
-	 * 
-	 * @param   source      source file on the server
-	 * @param   destination local destination file
-	 */
-	public void getFile(String source, String destination) throws IOException{
+        sendCommand("RETR "+path);
+        return input;
+    }
+
+    /**
+     * Download a file from the server to a local file
+     *
+     * @param   source      source file on the server
+     * @param   destination local destination file
+     */
+    public void getFile(String source, String destination) throws IOException{
         BufferedInputStream ext_file_in = getFileInputStream(source);
-		BufferedOutputStream local_file_out = new BufferedOutputStream(new FileOutputStream(new File(destination)));
+        BufferedOutputStream local_file_out = new BufferedOutputStream(new FileOutputStream(new File(destination)));
 
         IOUtil.copyStream(ext_file_in, local_file_out);
-		readCommand();
-	}
-	
-	/**
-	 * Remove a file from the FTP server
-	 *
-	 * @return true if the command was successful, false otherwise
-	 */
-	public boolean removeFile(String path) throws IOException{
-		if(sendCommand("DELE "+path) == FTPReturnCode.FILE_ACTION_OK)
-			return true;
-		return false;
-	}
-	
-	/**
-	 * Removes a directory from the FTP server
-	 *
-	 * @return True if the command was successful or false otherwise
-	 */
-	public boolean removeDir(String path) throws IOException{
-		if(sendCommand("RMD "+path) == FTPReturnCode.FILE_ACTION_OK)
-			return true;
-		return false;
-	}
+        readCommand();
+    }
+
+    /**
+     * Remove a file from the FTP server
+     *
+     * @return true if the command was successful, false otherwise
+     */
+    public boolean removeFile(String path) throws IOException{
+        if(sendCommand("DELE "+path) == FTPReturnCode.FILE_ACTION_OK)
+            return true;
+        return false;
+    }
+
+    /**
+     * Removes a directory from the FTP server
+     *
+     * @return True if the command was successful or false otherwise
+     */
+    public boolean removeDir(String path) throws IOException{
+        if(sendCommand("RMD "+path) == FTPReturnCode.FILE_ACTION_OK)
+            return true;
+        return false;
+    }
 
 //**************************************************************************************
 //******************************** Data Connection *************************************
-	
-	/**
-	 * Start a data connection to the server.
-	 * 
-	 * @return a PrintStream for the channel
-	 */
-	public BufferedOutputStream getDataOutputStream() throws IOException{
+
+    /**
+     * Start a data connection to the server.
+     *
+     * @return a PrintStream for the channel
+     */
+    public BufferedOutputStream getDataOutputStream() throws IOException{
         if(connectionType == FTPConnectionType.PASSIVE){ // Passive Mode
             int port = setPassiveMode();
             Socket data_socket = new Socket(socket.getInetAddress().getHostAddress(), port);
             return new BufferedOutputStream(data_socket.getOutputStream());
-		}
-		else{ // Active Mode
-			return null;
-		}
-	}
-	
-	/**
-	 * Start a data connection to the server.
-	 * 
-	 * @return a BufferedReader for the data channel
-	 */
-	public BufferedInputStream getDataInputStream() throws IOException{
-		if(connectionType == FTPConnectionType.PASSIVE){ // Passive Mode
-			int port = setPassiveMode();
+        }
+        else{ // Active Mode
+            return null;
+        }
+    }
+
+    /**
+     * Start a data connection to the server.
+     *
+     * @return a BufferedReader for the data channel
+     */
+    public BufferedInputStream getDataInputStream() throws IOException{
+        if(connectionType == FTPConnectionType.PASSIVE){ // Passive Mode
+            int port = setPassiveMode();
             Socket data_socket = new Socket(socket.getInetAddress().getHostAddress(), port);
             return new BufferedInputStream(data_socket.getInputStream());
-		}
-		else{ // Active Mode
-			return null;
-		}
-	}
+        }
+        else{ // Active Mode
+            return null;
+        }
+    }
 
-	
-	/**
-	 * Sets Passive mode to the server
-	 * 
-	 * @return a port number for data channel
-	 */
-	private int setPassiveMode() throws IOException{
-		sendNoReplyCommand("PASV");
+
+    /**
+     * Sets Passive mode to the server
+     *
+     * @return a port number for data channel
+     */
+    private int setPassiveMode() throws IOException{
+        sendNoReplyCommand("PASV");
         String ret_msg = readCommand();
-		if(parseReturnCode(ret_msg) != FTPReturnCode.ENTERING_PASSIVE){
-			throw new IOException("Passive mode rejected by server: "+ret_msg);
-		}
+        if(parseReturnCode(ret_msg) != FTPReturnCode.ENTERING_PASSIVE){
+            throw new IOException("Passive mode rejected by server: "+ret_msg);
+        }
         ret_msg = ret_msg.substring(ret_msg.indexOf('(')+1, ret_msg.indexOf(')'));
-		String[] tmpArray = ret_msg.split("[,]");
-		
-		if(tmpArray.length <= 1)
-			return Integer.parseInt(tmpArray[0]);
-		else
-			return Integer.parseInt(tmpArray[4])*256 + Integer.parseInt(tmpArray[5]);
-	}
-	
-//**************************************************************************************
-//**************************************************************************************
-	
-	/**
-	 * Keep the connection alive
-	 */
-	public void run(){
-		try {
-			while(true){
-				if(last_sent > System.currentTimeMillis() + FTP_NOOP_INT*1000){
-					sendCommand("NOOP");
-				}
-				try{ Thread.sleep(5000); }catch(Exception e){}
-			}
-		} catch (IOException e1) {
-			e1.printStackTrace();
-		}
-	}
+        String[] tmpArray = ret_msg.split("[,]");
 
-	/**
-	 * Close the FTP connection
-	 */
-	public void close() throws IOException{
-		sendCommand("QUIT");
-		in.close();
-		out.close();
-		socket.close();
-		this.interrupt();
-	}
+        if(tmpArray.length <= 1)
+            return Integer.parseInt(tmpArray[0]);
+        else
+            return Integer.parseInt(tmpArray[4])*256 + Integer.parseInt(tmpArray[5]);
+    }
+
+//**************************************************************************************
+//**************************************************************************************
+
+    /**
+     * Keep the connection alive
+     */
+    public void run(){
+        try {
+            while(true){
+                if(last_sent > System.currentTimeMillis() + FTP_NOOP_INT*1000){
+                    sendCommand("NOOP");
+                }
+                try{ Thread.sleep(5000); }catch(Exception e){}
+            }
+        } catch (IOException e1) {
+            e1.printStackTrace();
+        }
+    }
+
+    /**
+     * Close the FTP connection
+     */
+    public void close() throws IOException{
+        sendCommand("QUIT");
+        in.close();
+        out.close();
+        socket.close();
+        this.interrupt();
+    }
 }

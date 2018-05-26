@@ -32,67 +32,67 @@ import java.awt.image.BufferedImage;
 
 
 public class DitheringFilter extends ImageFilterProcessor{
-	// default palette is black and white
-	private int[][] palette = {
-			{255,0,0,0},
-			{255,255,255,255}
-	};
+    // default palette is black and white
+    private int[][] palette = {
+            {255,0,0,0},
+            {255,255,255,255}
+    };
 
 
-	/**
-	 * Sets up a default DitheringEffect
-	 */
-	public DitheringFilter(BufferedImage img){
-		super(img);
-	}
-	
-	/**
-	 * Creates a Dithering Effect object
-	 * @param img The image to apply the effect on
-	 * @param palette The palette to use on the image 
-	 * int[colorCount][4]
-	 * 0 -> Alpha data
-	 * 		Red data
-	 * 		Green data
-	 * 4 ->	Blue data
-	 */
-	public DitheringFilter(BufferedImage img, int[][] palette){
-		super(img);
-		this.palette = palette;
-	}
+    /**
+     * Sets up a default DitheringEffect
+     */
+    public DitheringFilter(BufferedImage img){
+        super(img);
+    }
 
-	@Override
-	public int[][][] process(int[][][] data, int startX, int startY, int stopX, int stopY) {
-		int error, index;
-		int[] currentPixel;
-		int[][][] output = RAWImageUtil.copyArray(data);
-		
-		for(int y=startY; y<stopY ;y++){
-			setProgress(ZMath.percent(0, stopY-startY-1, y));
-			for(int x=startX; x<stopX ;x++){
-				currentPixel = output[y][x];
-				index = findNearestColor(currentPixel, palette);
-				output[y][x] = palette[index];
+    /**
+     * Creates a Dithering Effect object
+     * @param img The image to apply the effect on
+     * @param palette The palette to use on the image
+     * int[colorCount][4]
+     * 0 -> Alpha data
+     * 		Red data
+     * 		Green data
+     * 4 ->	Blue data
+     */
+    public DitheringFilter(BufferedImage img, int[][] palette){
+        super(img);
+        this.palette = palette;
+    }
 
-				for (int i = 1; i < 4; i++)	{
-					error = currentPixel[i] - palette[index][i];
-					if (x + 1 < output[0].length) {
-						output[y+0][x+1][i] = RAWImageUtil.clip( output[y+0][x+1][i] + (error*7)/16 );
-					}
-					if (y + 1 < data.length) {
-						if (x - 1 > 0) 
-							output[y+1][x-1][i] = RAWImageUtil.clip( output[y+1][x-1][i] + (error*3)/16 );
-						output[y+1][x+0][i] = RAWImageUtil.clip( output[y+1][x+0][i] + (error*5)/16 );
-						if (x + 1 < data[0].length) 
-							output[y+1][x+1][i] = RAWImageUtil.clip( output[y+1][x+1][i] + (error*1)/16 );
-					}
-				}
-			}
-		}
-		
-		return output;
-	}
-	
+    @Override
+    public int[][][] process(int[][][] data, int startX, int startY, int stopX, int stopY) {
+        int error, index;
+        int[] currentPixel;
+        int[][][] output = RAWImageUtil.copyArray(data);
+
+        for(int y=startY; y<stopY ;y++){
+            setProgress(ZMath.percent(0, stopY-startY-1, y));
+            for(int x=startX; x<stopX ;x++){
+                currentPixel = output[y][x];
+                index = findNearestColor(currentPixel, palette);
+                output[y][x] = palette[index];
+
+                for (int i = 1; i < 4; i++)	{
+                    error = currentPixel[i] - palette[index][i];
+                    if (x + 1 < output[0].length) {
+                        output[y+0][x+1][i] = RAWImageUtil.clip( output[y+0][x+1][i] + (error*7)/16 );
+                    }
+                    if (y + 1 < data.length) {
+                        if (x - 1 > 0)
+                            output[y+1][x-1][i] = RAWImageUtil.clip( output[y+1][x-1][i] + (error*3)/16 );
+                        output[y+1][x+0][i] = RAWImageUtil.clip( output[y+1][x+0][i] + (error*5)/16 );
+                        if (x + 1 < data[0].length)
+                            output[y+1][x+1][i] = RAWImageUtil.clip( output[y+1][x+1][i] + (error*1)/16 );
+                    }
+                }
+            }
+        }
+
+        return output;
+    }
+
     private static int findNearestColor(int[] color, int[][] palette) {
         int minDistanceSquared = 255*255 + 255*255 + 255*255 + 1;
         int bestIndex = 0;

@@ -28,12 +28,12 @@ import zutil.net.ws.WSReturnObject;
 
 
 public class BrowseRetObj extends WSReturnObject{
-		@WSValueName("Result")
-		public String Result;
-		@WSValueName("NumberReturned")
-		public int NumberReturned;
-		@WSValueName("TotalMatches")
-		public int TotalMatches;
-		@WSValueName("UpdateID")
-		public int UpdateID;
-	}
+    @WSValueName("Result")
+    public String Result;
+    @WSValueName("NumberReturned")
+    public int NumberReturned;
+    @WSValueName("TotalMatches")
+    public int TotalMatches;
+    @WSValueName("UpdateID")
+    public int UpdateID;
+}

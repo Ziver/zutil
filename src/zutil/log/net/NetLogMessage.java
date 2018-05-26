@@ -31,82 +31,82 @@ import java.util.Date;
 import java.util.logging.LogRecord;
 
 public class NetLogMessage implements Message {
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
     private static final SimpleDateFormat dataFormat =
             new SimpleDateFormat("yyyy--MM-dd HH:mm:ss");
-	
-	private long   timestamp;
-	private String level;
-	private int    threadID;
-	private String className;
-	private String methodName;
-	private String log;
+
+    private long   timestamp;
+    private String level;
+    private int    threadID;
+    private String className;
+    private String methodName;
+    private String log;
 
 
-	public NetLogMessage(String level, long timestamp, String log){
-		this.level = level;
-		this.timestamp = timestamp;
-		this.log = log;
-	}
+    public NetLogMessage(String level, long timestamp, String log){
+        this.level = level;
+        this.timestamp = timestamp;
+        this.log = log;
+    }
 
-	public NetLogMessage( LogRecord record ){
-		timestamp	= record.getMillis();
-		level		= record.getLevel().getName();
-		threadID	= record.getThreadID();
-		className	= record.getSourceClassName();
-		methodName	= record.getSourceMethodName();
-		log			= record.getMessage();
-	}
+    public NetLogMessage( LogRecord record ){
+        timestamp	= record.getMillis();
+        level		= record.getLevel().getName();
+        threadID	= record.getThreadID();
+        className	= record.getSourceClassName();
+        methodName	= record.getSourceMethodName();
+        log			= record.getMessage();
+    }
 
-	
-	
-	public String getTimestamp() {
-		return dataFormat.format(new Date(timestamp));
-	}
 
-	public void setTimestamp(long timestamp) {
-		this.timestamp = timestamp;
-	}
 
-	public String getLevel() {
-		return level;
-	}
+    public String getTimestamp() {
+        return dataFormat.format(new Date(timestamp));
+    }
 
-	public void setLevel(String level) {
-		this.level = level;
-	}
+    public void setTimestamp(long timestamp) {
+        this.timestamp = timestamp;
+    }
 
-	public int getThreadID() {
-		return threadID;
-	}
+    public String getLevel() {
+        return level;
+    }
 
-	public void setThreadID(int threadID) {
-		this.threadID = threadID;
-	}
+    public void setLevel(String level) {
+        this.level = level;
+    }
 
-	public String getClassName() {
-		return className;
-	}
+    public int getThreadID() {
+        return threadID;
+    }
 
-	public void setClassName(String className) {
-		this.className = className;
-	}
+    public void setThreadID(int threadID) {
+        this.threadID = threadID;
+    }
 
-	public String getMethodName() {
-		return methodName;
-	}
+    public String getClassName() {
+        return className;
+    }
 
-	public void setMethodName(String methodName) {
-		this.methodName = methodName;
-	}
+    public void setClassName(String className) {
+        this.className = className;
+    }
 
-	public String getLog() {
-		return log;
-	}
+    public String getMethodName() {
+        return methodName;
+    }
 
-	public void setLog(String log) {
-		this.log = log;
-	}
-	
+    public void setMethodName(String methodName) {
+        this.methodName = methodName;
+    }
+
+    public String getLog() {
+        return log;
+    }
+
+    public void setLog(String log) {
+        this.log = log;
+    }
+
 
 }

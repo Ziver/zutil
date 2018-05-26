@@ -32,23 +32,23 @@ import static org.junit.Assert.assertEquals;
 
 public class ConverterTest {
 
-	@Test
-	public void testHexToByte() {
-		assertEquals( (byte)1, Converter.hexToByte('1') );
-		assertEquals( (byte)5, Converter.hexToByte('5') );
-		assertEquals( (byte)10, Converter.hexToByte('A') );
-		assertEquals( (byte)10, Converter.hexToByte('a') );
-	}
-	
-	@Test
-	public void testHexToByte2() {
-		assertEquals( 0x00, Converter.hexToByte('0','0') );
-		assertEquals( 0x11, Converter.hexToByte('1','1') );
-		assertEquals( 0x75, Converter.hexToByte('7','5') );
-		assertEquals( 0xDA, Converter.hexToByte('D','A') & 0xFF );
-		assertEquals( 0xFA, Converter.hexToByte('F','a') & 0xFF );
-		assertEquals( 0xFF, Converter.hexToByte('f','f') & 0xFF );
-	}
+    @Test
+    public void testHexToByte() {
+        assertEquals( (byte)1, Converter.hexToByte('1') );
+        assertEquals( (byte)5, Converter.hexToByte('5') );
+        assertEquals( (byte)10, Converter.hexToByte('A') );
+        assertEquals( (byte)10, Converter.hexToByte('a') );
+    }
+
+    @Test
+    public void testHexToByte2() {
+        assertEquals( 0x00, Converter.hexToByte('0','0') );
+        assertEquals( 0x11, Converter.hexToByte('1','1') );
+        assertEquals( 0x75, Converter.hexToByte('7','5') );
+        assertEquals( 0xDA, Converter.hexToByte('D','A') & 0xFF );
+        assertEquals( 0xFA, Converter.hexToByte('F','a') & 0xFF );
+        assertEquals( 0xFF, Converter.hexToByte('f','f') & 0xFF );
+    }
 
     @Test
     public void testHexStringToByte() {
@@ -61,42 +61,42 @@ public class ConverterTest {
         assertArrayEquals( new byte[]{(byte)0xF1,0x10}, Converter.hexToByte("F11") );
     }
 
-	@Test
-	public void testUrlEncode() {
-		assertEquals( "fas8dg7%20a0d1%2313f9g8d7%200h9a%25h0",
-				Converter.urlEncode("fas8dg7 a0d1#13f9g8d7 0h9a%h0") );
-		assertEquals( "9i34%202y9252%25%2623%20463765(%2f%26(",
-				Converter.urlEncode("9i34 2y9252%&23 463765(/&(") );
-		
-	}
-	
-	@Test
-	public void testUrlDecode() {
-		assertEquals( "fas8dg7 a0d1#13f9g8d7 0h9a%h0", 
-				Converter.urlDecode("fas8dg7%20a0d1%2313f9g8d7%200h9a%25h0") );
-		assertEquals( "9i34 2y9252%&23 463765(/&(",
-				Converter.urlDecode("9i34%202y9252%25%2623%20463765(%2f%26(") );
-	}
+    @Test
+    public void testUrlEncode() {
+        assertEquals( "fas8dg7%20a0d1%2313f9g8d7%200h9a%25h0",
+                Converter.urlEncode("fas8dg7 a0d1#13f9g8d7 0h9a%h0") );
+        assertEquals( "9i34%202y9252%25%2623%20463765(%2f%26(",
+                Converter.urlEncode("9i34 2y9252%&23 463765(/&(") );
+
+    }
+
+    @Test
+    public void testUrlDecode() {
+        assertEquals( "fas8dg7 a0d1#13f9g8d7 0h9a%h0",
+                Converter.urlDecode("fas8dg7%20a0d1%2313f9g8d7%200h9a%25h0") );
+        assertEquals( "9i34 2y9252%&23 463765(/&(",
+                Converter.urlDecode("9i34%202y9252%25%2623%20463765(%2f%26(") );
+    }
 
 
-	@Test
-	public void byteArrayToInt(){
-		assertEquals(0, Converter.toInt(new byte[]{}));
-		assertEquals(1, Converter.toInt(new byte[]{0b0000_0001}));
-		assertEquals(1, Converter.toInt(new byte[]{0x01,0x00}));
-		assertEquals(256, Converter.toInt(new byte[]{0x00,0x01,0x00}));
-		assertEquals(-1, Converter.toInt(new byte[]{(byte)0xFF,(byte)0xFF,(byte)0xFF,(byte)0xFF}));
-		assertEquals(Integer.MAX_VALUE, Converter.toInt(new byte[]{(byte)0xFF,(byte)0xFF,(byte)0xFF,(byte)0x7F}));
-		assertEquals(Integer.MAX_VALUE, Converter.toInt(new byte[]{(byte)0xFF,(byte)0xFF,(byte)0xFF,(byte)0x7F, (byte)0xFF,(byte)0xFF}));
-	}
+    @Test
+    public void byteArrayToInt(){
+        assertEquals(0, Converter.toInt(new byte[]{}));
+        assertEquals(1, Converter.toInt(new byte[]{0b0000_0001}));
+        assertEquals(1, Converter.toInt(new byte[]{0x01,0x00}));
+        assertEquals(256, Converter.toInt(new byte[]{0x00,0x01,0x00}));
+        assertEquals(-1, Converter.toInt(new byte[]{(byte)0xFF,(byte)0xFF,(byte)0xFF,(byte)0xFF}));
+        assertEquals(Integer.MAX_VALUE, Converter.toInt(new byte[]{(byte)0xFF,(byte)0xFF,(byte)0xFF,(byte)0x7F}));
+        assertEquals(Integer.MAX_VALUE, Converter.toInt(new byte[]{(byte)0xFF,(byte)0xFF,(byte)0xFF,(byte)0x7F, (byte)0xFF,(byte)0xFF}));
+    }
 
-	@Test
-	public void intToByteArray(){
-		assertArrayEquals(new byte[]{0x00,0x00,0x00,0x00}, Converter.toBytes(0));
-		assertArrayEquals(new byte[]{0x01,0x00,0x00,0x00}, Converter.toBytes(1));
-		assertArrayEquals(new byte[]{0x00,0x01,0x00,0x00}, Converter.toBytes(256));
-		assertArrayEquals(new byte[]{(byte)0xFF,(byte)0xFF,(byte)0xFF,(byte)0xFF}, Converter.toBytes(-1));
-		assertArrayEquals(new byte[]{(byte)0xFF,(byte)0xFF,(byte)0xFF,(byte)0x7F}, Converter.toBytes(Integer.MAX_VALUE));
-		assertArrayEquals(new byte[]{(byte)0x00,(byte)0x00,(byte)0x00,(byte)0x80}, Converter.toBytes(Integer.MIN_VALUE));
-	}
+    @Test
+    public void intToByteArray(){
+        assertArrayEquals(new byte[]{0x00,0x00,0x00,0x00}, Converter.toBytes(0));
+        assertArrayEquals(new byte[]{0x01,0x00,0x00,0x00}, Converter.toBytes(1));
+        assertArrayEquals(new byte[]{0x00,0x01,0x00,0x00}, Converter.toBytes(256));
+        assertArrayEquals(new byte[]{(byte)0xFF,(byte)0xFF,(byte)0xFF,(byte)0xFF}, Converter.toBytes(-1));
+        assertArrayEquals(new byte[]{(byte)0xFF,(byte)0xFF,(byte)0xFF,(byte)0x7F}, Converter.toBytes(Integer.MAX_VALUE));
+        assertArrayEquals(new byte[]{(byte)0x00,(byte)0x00,(byte)0x00,(byte)0x80}, Converter.toBytes(Integer.MIN_VALUE));
+    }
 }

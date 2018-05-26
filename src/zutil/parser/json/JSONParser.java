@@ -43,10 +43,10 @@ public class JSONParser extends Parser {
     private static final int END_WITH_NULL  = 1;
     private static final int END_WITH_VALUE = 2;
     // Regex for parsing primitives
-	private static final Pattern NUMBER_PATTERN = Pattern.compile("^[0-9.]++$");
-	private static final Pattern BOOLEAN_PATTERN = Pattern.compile("^(true|false)$", Pattern.CASE_INSENSITIVE);
+    private static final Pattern NUMBER_PATTERN = Pattern.compile("^[0-9.]++$");
+    private static final Pattern BOOLEAN_PATTERN = Pattern.compile("^(true|false)$", Pattern.CASE_INSENSITIVE);
     private static final Pattern NULL_PATTERN = Pattern.compile("^null$", Pattern.CASE_INSENSITIVE);
-	
+
     private Reader in;
 
 
@@ -68,20 +68,20 @@ public class JSONParser extends Parser {
         return parse(in, new MutableInt());
     }
 
-	/**
-	 * Starts parsing from a string
-	 * 
-	 * @param 	json	is the JSON String to parse
-	 * @return a DataNode object representing the JSON in the input String
-	 */
-	public static DataNode read(String json){
+    /**
+     * Starts parsing from a string
+     *
+     * @param 	json	is the JSON String to parse
+     * @return a DataNode object representing the JSON in the input String
+     */
+    public static DataNode read(String json){
         try{
-		    return parse(new StringReader(json), new MutableInt());
+            return parse(new StringReader(json), new MutableInt());
         }catch (IOException e){
             e.printStackTrace();
         }catch (NullPointerException e){}
         return null;
-	}
+    }
 
     /**
      * This is the real recursive parsing method
@@ -152,9 +152,9 @@ public class JSONParser extends Parser {
                 if( NULL_PATTERN.matcher(data).matches() )
                     root = null;
                 else if( BOOLEAN_PATTERN.matcher(data).matches() )
-                	root = new DataNode(DataType.Boolean);
+                    root = new DataNode(DataType.Boolean);
                 else if( NUMBER_PATTERN.matcher(data).matches() )
-                	root = new DataNode(DataType.Number);
+                    root = new DataNode(DataType.Number);
                 else {
                     root = new DataNode(DataType.String);
                     data = unEscapeString(data);

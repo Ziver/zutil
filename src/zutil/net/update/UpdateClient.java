@@ -41,134 +41,134 @@ import java.util.logging.Logger;
  *
  */
 public class UpdateClient{
-	private static final Logger logger = LogUtil.getLogger();
+    private static final Logger logger = LogUtil.getLogger();
 
-	private String path;
-	private Socket socket;
-	private FileListMessage fileList;
+    private String path;
+    private Socket socket;
+    private FileListMessage fileList;
 
-	private long speed;
-	private long totalReceived;
-	private long expectedSize;
-	private ProgressListener<UpdateClient,FileInfo> progress;
+    private long speed;
+    private long totalReceived;
+    private long expectedSize;
+    private ProgressListener<UpdateClient,FileInfo> progress;
 
-	/**
-	 * Creates a UpdateClient
-	 * 
-	 * @param address Address to the UpdateServer
-	 * @param port The port on the server
-	 * @param path Path to the files to update
-	 * @throws Exception
-	 */
-	public UpdateClient(String address, int port, String path) throws Exception{
-		fileList = new FileListMessage(path);
-		socket = new Socket(address, port);
-		this.path = path;
-	}
+    /**
+     * Creates a UpdateClient
+     *
+     * @param address Address to the UpdateServer
+     * @param port The port on the server
+     * @param path Path to the files to update
+     * @throws Exception
+     */
+    public UpdateClient(String address, int port, String path) throws Exception{
+        fileList = new FileListMessage(path);
+        socket = new Socket(address, port);
+        this.path = path;
+    }
 
-	public void setProgressListener(ProgressListener<UpdateClient,FileInfo> p){
-		progress = p;
-	}
+    public void setProgressListener(ProgressListener<UpdateClient,FileInfo> p){
+        progress = p;
+    }
 
-	/**
-	 * Updates the files
-	 */
-	public void update() throws IOException{
-		try{
-			ObjectOutputStream out = new ObjectOutputStream( socket.getOutputStream());
-			ObjectInputStream  in  = new ObjectInputStream ( socket.getInputStream() );
+    /**
+     * Updates the files
+     */
+    public void update() throws IOException{
+        try{
+            ObjectOutputStream out = new ObjectOutputStream( socket.getOutputStream());
+            ObjectInputStream  in  = new ObjectInputStream ( socket.getInputStream() );
 
-			// send client file list
-			out.writeObject( fileList );
-			out.flush();
-			// get update list
-			FileListMessage updateList = (FileListMessage) in.readObject();
-			expectedSize = updateList.getTotalSize();
+            // send client file list
+            out.writeObject( fileList );
+            out.flush();
+            // get update list
+            FileListMessage updateList = (FileListMessage) in.readObject();
+            expectedSize = updateList.getTotalSize();
 
-			// receive file updates
-			File tmpPath = FileUtil.find(path);
-			totalReceived = 0;
-			for(FileInfo info : updateList.getFileList() ){
-				// reading new file data
-				File file = new File( tmpPath, info.getPath() );
-				logger.fine("Updating file: "+file);
-				if( !file.getParentFile().exists() && !file.getParentFile().mkdirs() ){
-					throw new IOException("Unable to create folder: "+file.getParentFile());
-				}
-				File tmpFile = File.createTempFile(file.getName(), ".tmp", tmpPath);				
-				tmpFile.deleteOnExit();
+            // receive file updates
+            File tmpPath = FileUtil.find(path);
+            totalReceived = 0;
+            for(FileInfo info : updateList.getFileList() ){
+                // reading new file data
+                File file = new File( tmpPath, info.getPath() );
+                logger.fine("Updating file: "+file);
+                if( !file.getParentFile().exists() && !file.getParentFile().mkdirs() ){
+                    throw new IOException("Unable to create folder: "+file.getParentFile());
+                }
+                File tmpFile = File.createTempFile(file.getName(), ".tmp", tmpPath);
+                tmpFile.deleteOnExit();
 
-				FileOutputStream fileOut = new FileOutputStream(tmpFile);
-				byte[] buffer = new byte[socket.getReceiveBufferSize()];
+                FileOutputStream fileOut = new FileOutputStream(tmpFile);
+                byte[] buffer = new byte[socket.getReceiveBufferSize()];
 
-				long bytesReceived = 0;
-				int byteRead = 0;
-				long time = System.currentTimeMillis();
-				long timeTotalRecived = 0;
+                long bytesReceived = 0;
+                int byteRead = 0;
+                long time = System.currentTimeMillis();
+                long timeTotalRecived = 0;
 
-				while( bytesReceived < info.getSize() ) {
-					byteRead = in.read(buffer);
-					fileOut.write(buffer, 0, byteRead);
-					bytesReceived += byteRead;
+                while( bytesReceived < info.getSize() ) {
+                    byteRead = in.read(buffer);
+                    fileOut.write(buffer, 0, byteRead);
+                    bytesReceived += byteRead;
 
-					if(time+1000 < System.currentTimeMillis()){
-						time = System.currentTimeMillis();
-						speed = (int)(totalReceived - timeTotalRecived);
-						timeTotalRecived = totalReceived;
-					}
+                    if(time+1000 < System.currentTimeMillis()){
+                        time = System.currentTimeMillis();
+                        speed = (int)(totalReceived - timeTotalRecived);
+                        timeTotalRecived = totalReceived;
+                    }
 
-					totalReceived += byteRead;
-					if(progress != null) progress.progressUpdate(this, info, ((double)totalReceived/updateList.getTotalSize())*100);
-				}
-				fileOut.close();
-				speed = 0;
+                    totalReceived += byteRead;
+                    if(progress != null) progress.progressUpdate(this, info, ((double)totalReceived/updateList.getTotalSize())*100);
+                }
+                fileOut.close();
+                speed = 0;
 
-				// delete old file and replace whit new
-				file.delete();
-				if( !tmpFile.renameTo(file) ){
-					throw new IOException("Can not move downloaded file: "+tmpFile.getAbsolutePath()+" to: "+file);
-				}
-			}
-		}catch(ClassNotFoundException e){
-			logger.log(Level.SEVERE, null, e);
-		}
+                // delete old file and replace whit new
+                file.delete();
+                if( !tmpFile.renameTo(file) ){
+                    throw new IOException("Can not move downloaded file: "+tmpFile.getAbsolutePath()+" to: "+file);
+                }
+            }
+        }catch(ClassNotFoundException e){
+            logger.log(Level.SEVERE, null, e);
+        }
 
-		logger.info("Update done.");
-	}
+        logger.info("Update done.");
+    }
 
-	/**
-	 * Returns the speed of the transfer
-	 * 
-	 * @return The speed in bytes/s
-	 */
-	public long getSpeed(){
-		return speed;
-	}
+    /**
+     * Returns the speed of the transfer
+     *
+     * @return The speed in bytes/s
+     */
+    public long getSpeed(){
+        return speed;
+    }
 
-	/**
-	 * Returns the total amount of data received
-	 * 
-	 * @return a long that represents bytes
-	 */
-	public long getTotalReceived(){
-		return totalReceived;
-	}
-	
-	/**
-	 * Returns the expected total amount of data that will be received
-	 * 
-	 * @return a long that represents bytes
-	 */
-	public long getTotalSize(){
-		return expectedSize;
-	}
+    /**
+     * Returns the total amount of data received
+     *
+     * @return a long that represents bytes
+     */
+    public long getTotalReceived(){
+        return totalReceived;
+    }
 
-	/**
-	 * Closes the connection
-	 * 
-	 * @throws IOException
-	 */
-	public void close() throws IOException{
-		socket.close();
-	}
+    /**
+     * Returns the expected total amount of data that will be received
+     *
+     * @return a long that represents bytes
+     */
+    public long getTotalSize(){
+        return expectedSize;
+    }
+
+    /**
+     * Closes the connection
+     *
+     * @throws IOException
+     */
+    public void close() throws IOException{
+        socket.close();
+    }
 }

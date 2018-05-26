@@ -35,43 +35,43 @@ import java.nio.channels.spi.SelectorProvider;
 
 
 public class NioClient extends NioNetwork{
-	private InetSocketAddress remoteAddress;
-	
-	/**
-	 * Creates a NioClient that connects to a server
-	 * 
-	 * @param	remoteAddress   the server address
-	 * @param	remotePort      the port to listen on
-	 */
-	public NioClient(InetAddress remoteAddress, int remotePort) throws IOException {
-		this.remoteAddress = new InetSocketAddress(remoteAddress, remotePort);
-		connect(this.remoteAddress);
-	}
+    private InetSocketAddress remoteAddress;
 
-	protected Selector initSelector() throws IOException {
-		// Create a new selector
-		return SelectorProvider.provider().openSelector();
-	}
-	
-	/**
-	 * Sends a Message to the connected server
-	 * 
-	 * @param   data    the data to be sent
-	 */
-	public void send(Message data) throws IOException {
-		send(remoteAddress, data);
-	}
+    /**
+     * Creates a NioClient that connects to a server
+     *
+     * @param	remoteAddress   the server address
+     * @param	remotePort      the port to listen on
+     */
+    public NioClient(InetAddress remoteAddress, int remotePort) throws IOException {
+        this.remoteAddress = new InetSocketAddress(remoteAddress, remotePort);
+        connect(this.remoteAddress);
+    }
 
-	/**
-	 * Sends a Message to the connected server
-	 *
-	 * @param   data    the data to be sent
-	 */
-	public void send(byte[] data) throws IOException {
-		send(remoteAddress, data);
-	}
+    protected Selector initSelector() throws IOException {
+        // Create a new selector
+        return SelectorProvider.provider().openSelector();
+    }
 
-	public SocketAddress getRemoteAddress(){
-	    return remoteAddress;
+    /**
+     * Sends a Message to the connected server
+     *
+     * @param   data    the data to be sent
+     */
+    public void send(Message data) throws IOException {
+        send(remoteAddress, data);
+    }
+
+    /**
+     * Sends a Message to the connected server
+     *
+     * @param   data    the data to be sent
+     */
+    public void send(byte[] data) throws IOException {
+        send(remoteAddress, data);
+    }
+
+    public SocketAddress getRemoteAddress(){
+        return remoteAddress;
     }
 }

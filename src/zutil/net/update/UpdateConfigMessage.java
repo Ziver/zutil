@@ -32,8 +32,8 @@ import java.io.Serializable;
  * @author Ziver
  */
 class UpdateConfigMessage implements Serializable{
-	private static final long serialVersionUID = 1L;
-	
-	protected String hashAlgorithm;
-	protected boolean compression;
+    private static final long serialVersionUID = 1L;
+
+    protected String hashAlgorithm;
+    protected boolean compression;
 }

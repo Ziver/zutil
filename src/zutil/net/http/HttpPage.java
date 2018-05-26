@@ -34,20 +34,20 @@ import java.util.Map;
  *
  */
 public interface HttpPage{	
-	/**
-	 * This method has to be implemented for every page.
-	 * This method is called when a client wants a response
-	 * from this specific page.
-	 *
-	 * @param out           is a output stream to the client
-	 * @param headers   	is the header received from the client
+    /**
+     * This method has to be implemented for every page.
+     * This method is called when a client wants a response
+     * from this specific page.
+     *
+     * @param out           is a output stream to the client
+     * @param headers   	is the header received from the client
      * @param session       is the session associated with the current client
-	 * @param cookie        is cookie information from the client
-	 * @param request       is POST and GET requests from the client
+     * @param cookie        is cookie information from the client
+     * @param request       is POST and GET requests from the client
      */
-	public abstract void respond(HttpPrintStream out,
-								 HttpHeader headers,
-								 Map<String,Object> session,
-								 Map<String,String> cookie,
-								 Map<String,String> request) throws IOException;
+    public abstract void respond(HttpPrintStream out,
+                                 HttpHeader headers,
+                                 Map<String,Object> session,
+                                 Map<String,String> cookie,
+                                 Map<String,String> request) throws IOException;
 }

@@ -36,86 +36,86 @@ import java.util.Set;
  * @author Ziver
  */
 public class WebServiceDef {
-	/** A map of methods in this Service **/
-	private HashMap<String,WSMethodDef> methods;
-	/** Namespace of the service **/
-	private String namespace;
-	/** Name of the web service **/
-	private String name;
-	/** This is the WSInterface class **/
-	private Class<? extends WSInterface> intf;
-	
-	
-	public WebServiceDef(Class<? extends WSInterface> intf){
-		this.intf = intf;
-		methods = new HashMap<String,WSMethodDef>();
-		name = intf.getSimpleName();
+    /** A map of methods in this Service **/
+    private HashMap<String,WSMethodDef> methods;
+    /** Namespace of the service **/
+    private String namespace;
+    /** Name of the web service **/
+    private String name;
+    /** This is the WSInterface class **/
+    private Class<? extends WSInterface> intf;
 
-		if( intf.getAnnotation( WSInterface.WSNamespace.class ) != null )
-			this.namespace = intf.getAnnotation( WSInterface.WSNamespace.class ).value();
-		
-		for(Method m : intf.getDeclaredMethods()){
-			// check for public methods
-			if((m.getModifiers() & Modifier.PUBLIC) > 0 && 
-					!m.isAnnotationPresent(WSInterface.WSIgnore.class)){
-				WSMethodDef method = new WSMethodDef(this, m);
-				methods.put(method.getName(), method);
-			}
-		}
-	}
-	
-	/**
-	 * @return the class that defines this web service
-	 */
-	public Class<? extends WSInterface> getWSClass(){
-		return intf;
-	}
-	
-	/**
-	 * @return the name of the Service (usually the class name of the WSInterface)
-	 */
-	public String getName(){
-		return name;
-	}
-	
-	/**
-	 * @param 		name		is the name of the method
-	 * @return					if there is a method by the given name
-	 */
-	public boolean hasMethod( String name ){
-		return methods.containsKey( name );
-	}
-	
-	/**
-	 * @param 		name		is the name of the method
-	 * @return					the method or null if there is no such method
-	 */
-	public WSMethodDef getMethod( String name ){
-		return methods.get( name );
-	}
-	
-	/**
-	 * @return a Set of all the method names
-	 */
-	public Set<String> getMethodNames(){
-		return methods.keySet();
-	}
-	
-	/**
-	 * @return all the methods
-	 */
-	public Collection<WSMethodDef> getMethods(){
-		return methods.values();
-	}
-	
-	/**
-	 * @return the namespace of this web service ( usually the URL of the service )
-	 */
-	public String getNamespace(){
-		return namespace;
-	}
 
-	public WSInterface newInstance() throws InstantiationException, IllegalAccessException {
-		return intf.newInstance();
-	}
+    public WebServiceDef(Class<? extends WSInterface> intf){
+        this.intf = intf;
+        methods = new HashMap<String,WSMethodDef>();
+        name = intf.getSimpleName();
+
+        if( intf.getAnnotation( WSInterface.WSNamespace.class ) != null )
+            this.namespace = intf.getAnnotation( WSInterface.WSNamespace.class ).value();
+
+        for(Method m : intf.getDeclaredMethods()){
+            // check for public methods
+            if((m.getModifiers() & Modifier.PUBLIC) > 0 &&
+                    !m.isAnnotationPresent(WSInterface.WSIgnore.class)){
+                WSMethodDef method = new WSMethodDef(this, m);
+                methods.put(method.getName(), method);
+            }
+        }
+    }
+
+    /**
+     * @return the class that defines this web service
+     */
+    public Class<? extends WSInterface> getWSClass(){
+        return intf;
+    }
+
+    /**
+     * @return the name of the Service (usually the class name of the WSInterface)
+     */
+    public String getName(){
+        return name;
+    }
+
+    /**
+     * @param 		name		is the name of the method
+     * @return					if there is a method by the given name
+     */
+    public boolean hasMethod( String name ){
+        return methods.containsKey( name );
+    }
+
+    /**
+     * @param 		name		is the name of the method
+     * @return					the method or null if there is no such method
+     */
+    public WSMethodDef getMethod( String name ){
+        return methods.get( name );
+    }
+
+    /**
+     * @return a Set of all the method names
+     */
+    public Set<String> getMethodNames(){
+        return methods.keySet();
+    }
+
+    /**
+     * @return all the methods
+     */
+    public Collection<WSMethodDef> getMethods(){
+        return methods.values();
+    }
+
+    /**
+     * @return the namespace of this web service ( usually the URL of the service )
+     */
+    public String getNamespace(){
+        return namespace;
+    }
+
+    public WSInterface newInstance() throws InstantiationException, IllegalAccessException {
+        return intf.newInstance();
+    }
 }

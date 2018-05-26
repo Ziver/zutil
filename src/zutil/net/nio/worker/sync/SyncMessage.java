@@ -27,16 +27,16 @@ package zutil.net.nio.worker.sync;
 import zutil.net.nio.message.Message;
 
 public class SyncMessage implements Message {
-	private static final long serialVersionUID = 1L;
-	public enum MessageType {
-		REQUEST_ID,
-		NEW,
-		REMOVE,
-		SYNC
-	}
-	
-	// type of message
-	public MessageType type;
-	// id of the Object
-	public String id;
+    private static final long serialVersionUID = 1L;
+    public enum MessageType {
+        REQUEST_ID,
+        NEW,
+        REMOVE,
+        SYNC
+    }
+
+    // type of message
+    public MessageType type;
+    // id of the Object
+    public String id;
 }

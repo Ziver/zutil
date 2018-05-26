@@ -35,19 +35,19 @@ import java.util.logging.Level;
 
 @SuppressWarnings("unused")
 public class NetworkServerTest {
-	public static void main(String[] args) throws NoSuchAlgorithmException, InterruptedException {
-		try {
-			//LogUtil.setGlobalLevel(Level.ALL);
-			LogUtil.setGlobalFormatter(new CompactLogFormatter());
+    public static void main(String[] args) throws NoSuchAlgorithmException, InterruptedException {
+        try {
+            //LogUtil.setGlobalLevel(Level.ALL);
+            LogUtil.setGlobalFormatter(new CompactLogFormatter());
 
-			NioServer server = new NioServer(6056);
-			server.setDefaultWorker(new StandardWorker(server));
+            NioServer server = new NioServer(6056);
+            server.setDefaultWorker(new StandardWorker(server));
 
-			while(true){
-			    Thread.sleep(1000);
+            while(true){
+                Thread.sleep(1000);
             }
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 }

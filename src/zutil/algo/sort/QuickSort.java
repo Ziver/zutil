@@ -33,17 +33,17 @@ import zutil.algo.sort.sortable.SortableDataList;
  * @author Ziver
  */
 public class QuickSort{
-	public static final int RANDOM_PIVOT = 0;
-	public static final int MEDIAN_PIVOT = 1;
-	public static final int MIDDLE_PIVOT = 2;
-	
+    public static final int RANDOM_PIVOT = 0;
+    public static final int MEDIAN_PIVOT = 1;
+    public static final int MIDDLE_PIVOT = 2;
+
     /**
      * Sort the elements in ascending order using Quicksort.
      *
      * @param	list	is the list to sort.
      */
-	public static void sort(SortableDataList<?> list){
-    	sort(list, 0, list.size()-1, MIDDLE_PIVOT, true);
+    public static void sort(SortableDataList<?> list){
+        sort(list, 0, list.size()-1, MIDDLE_PIVOT, true);
     }
     
     /**
@@ -53,10 +53,10 @@ public class QuickSort{
      * @param	type	is the type of pivot
      * @param	insert	is if insertion sort will be used
      */
-	public static void sort(SortableDataList<?> list, int type, boolean insert){
-    	sort(list, 0, list.size()-1, type, insert);
+    public static void sort(SortableDataList<?> list, int type, boolean insert){
+        sort(list, 0, list.size()-1, type, insert);
     }
-	
+
     /**
      * Sort the elements in ascending order using Quicksort.
      * Reference: http://www.inf.fh-flensburg.de/lang/algorithmen/sortieren/quick/quicken.htm
@@ -67,59 +67,59 @@ public class QuickSort{
      * @param	stop 	is the index to stop
      * @param	type	is the type of pivot to use
      */	
-	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public static void sort(SortableDataList list, int start, int stop, int type, boolean insertionSort){
-		if(stop-start <= 15 && insertionSort){
-			SimpleSort.insertionSort( list, start, stop);
-		}
-		int pivotIndex = pivot(list,start,stop,type);
-		Object pivot = list.get(pivotIndex);
-		int left=start, right=stop;
-		
-		do{
-			while(list.compare(left, pivot) < 0){
-				left++;
-			}
-			while(list.compare(right, pivot) > 0){
-				right--;
-			}
-				
-			if(left <= right){
-				list.swap(left, right);
-				left++;
-				right--;
-			}
-		}while(left <= right);
-		
-		if(start < right){
-			sort(list, start, right, type, insertionSort);
-		}
-		if(left < stop){
-			sort(list, left, stop, type, insertionSort);
-		}
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    public static void sort(SortableDataList list, int start, int stop, int type, boolean insertionSort){
+        if(stop-start <= 15 && insertionSort){
+            SimpleSort.insertionSort( list, start, stop);
+        }
+        int pivotIndex = pivot(list,start,stop,type);
+        Object pivot = list.get(pivotIndex);
+        int left=start, right=stop;
 
-	}
+        do{
+            while(list.compare(left, pivot) < 0){
+                left++;
+            }
+            while(list.compare(right, pivot) > 0){
+                right--;
+            }
 
-	@SuppressWarnings({ "unchecked", "rawtypes" })
-	private static int pivot(SortableDataList<?> list, int start, int stop,int type){
-    	switch(type){
-    		case RANDOM_PIVOT:
-    			return start+(int)(Math.random()*(stop-start));
-    		case MEDIAN_PIVOT:
-    			Comparable[] i = new Comparable[]{
-    					(Comparable)list.get(0), 
-    					(Comparable)list.get(list.size()/2), 
-    					(Comparable)list.get(list.size()-1)};
-    			SimpleSort.insertionSort(new SortableComparableArray(i));
-    			if(i[i.length/2].compareTo(list.get(start)) == 0)
-    				return start;
-    			else if(i[i.length/2].compareTo(list.get(stop)) == 0)
-    				return stop;
-    			else 
-    				return start+(stop-start)/2;
-    		case MIDDLE_PIVOT:
-    			return (start+stop)/2;
-    	}
-    	return 0;
+            if(left <= right){
+                list.swap(left, right);
+                left++;
+                right--;
+            }
+        }while(left <= right);
+
+        if(start < right){
+            sort(list, start, right, type, insertionSort);
+        }
+        if(left < stop){
+            sort(list, left, stop, type, insertionSort);
+        }
+
+    }
+
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    private static int pivot(SortableDataList<?> list, int start, int stop,int type){
+        switch(type){
+            case RANDOM_PIVOT:
+                return start+(int)(Math.random()*(stop-start));
+            case MEDIAN_PIVOT:
+                Comparable[] i = new Comparable[]{
+                        (Comparable)list.get(0),
+                        (Comparable)list.get(list.size()/2),
+                        (Comparable)list.get(list.size()-1)};
+                SimpleSort.insertionSort(new SortableComparableArray(i));
+                if(i[i.length/2].compareTo(list.get(start)) == 0)
+                    return start;
+                else if(i[i.length/2].compareTo(list.get(stop)) == 0)
+                    return stop;
+                else
+                    return start+(stop-start)/2;
+            case MIDDLE_PIVOT:
+                return (start+stop)/2;
+        }
+        return 0;
     }
 }

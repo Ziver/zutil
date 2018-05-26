@@ -36,16 +36,16 @@ import java.sql.Statement;
  * @author Ziver
  */
 public class SimpleSQLResult<T> implements SQLResultHandler<T> {
-	/**
-	 * Is called to handle an result from an query.
-	 * 
-	 * @param stmt is the query
-	 * @param result is the ResultSet
-	 */
-	@SuppressWarnings("unchecked")
-	public T handleQueryResult(Statement stmt, ResultSet result) throws SQLException{
-		if( result.next() )
-			return (T) result.getObject(1);
-		return null;
-	}
+    /**
+     * Is called to handle an result from an query.
+     *
+     * @param stmt is the query
+     * @param result is the ResultSet
+     */
+    @SuppressWarnings("unchecked")
+    public T handleQueryResult(Statement stmt, ResultSet result) throws SQLException{
+        if( result.next() )
+            return (T) result.getObject(1);
+        return null;
+    }
 }

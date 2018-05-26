@@ -30,19 +30,19 @@ package zutil.net.nio.worker.grid;
  * @author Ziver
  */
 public class GridJob{
-	public int jobID;
-	public Object job;
-	public long timestamp;
+    public int jobID;
+    public Object job;
+    public long timestamp;
 
 
-	public GridJob(int jobID, Object job){
-		this.jobID = jobID;
-		this.job = job;
-		renewTimeStamp();
-	}
+    public GridJob(int jobID, Object job){
+        this.jobID = jobID;
+        this.job = job;
+        renewTimeStamp();
+    }
 
 
-	public void renewTimeStamp(){
-		timestamp = System.currentTimeMillis();
-	}
+    public void renewTimeStamp(){
+        timestamp = System.currentTimeMillis();
+    }
 }

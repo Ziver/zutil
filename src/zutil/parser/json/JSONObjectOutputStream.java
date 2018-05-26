@@ -136,7 +136,7 @@ public class JSONObjectOutputStream extends OutputStream implements ObjectOutput
             }
         }
         // Object is a complex data type
-    	else {
+        else {
             root = new DataNode(DataNode.DataType.Map);
             // Generate meta data
             if(generateMetaData){
@@ -170,30 +170,30 @@ public class JSONObjectOutputStream extends OutputStream implements ObjectOutput
     }
 
     private DataNode getPrimitiveDataNode(Class<?> type, Object value) throws UnsupportedDataTypeException, IllegalArgumentException, IllegalAccessException {
-    	DataNode node = null;
+        DataNode node = null;
         if     (type == int.class ||
-        		type == Integer.class ||
-        		type == long.class ||
-        		type == Long.class ||
-		        type == double.class ||
-        		type == Double.class)
-        	node = new DataNode(DataType.Number);
+                type == Integer.class ||
+                type == long.class ||
+                type == Long.class ||
+                type == double.class ||
+                type == Double.class)
+            node = new DataNode(DataType.Number);
 
         else if(type == boolean.class || 
-        		type == Boolean.class)
-        	node = new DataNode(DataType.Boolean);
+                type == Boolean.class)
+            node = new DataNode(DataType.Boolean);
         
         else if(type == String.class ||
-        		type == char.class ||
-        		type == Character.class)
-        	node = new DataNode(DataType.String);
+                type == char.class ||
+                type == Character.class)
+            node = new DataNode(DataType.String);
         else
-        	throw new UnsupportedDataTypeException("Unsupported primitive data type: "+type.getName());
+            throw new UnsupportedDataTypeException("Unsupported primitive data type: "+type.getName());
 
         if(value != null)
-    	    node.set(value.toString());
-		return node;
-	}
+            node.set(value.toString());
+        return node;
+    }
 
     /**
      * Enable or disables the use of meta data in the JSON

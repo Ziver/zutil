@@ -38,35 +38,35 @@ import java.util.logging.Level;
 
 @SuppressWarnings("unused")
 public class NetworkClientTest {
-	public static void main(String[] args) throws NoSuchAlgorithmException, InterruptedException {
-		try {
+    public static void main(String[] args) throws NoSuchAlgorithmException, InterruptedException {
+        try {
             //LogUtil.setGlobalLevel(Level.ALL);
             LogUtil.setGlobalFormatter(new CompactLogFormatter());
 
             int count = 0;
-			long time = System.currentTimeMillis()+1000*60;
-			NioClient client = new NioClient(InetAddress.getByName("localhost"), 6056);
-			StandardWorker worker = new StandardWorker(client);
-			client.setDefaultWorker(worker);
+            long time = System.currentTimeMillis()+1000*60;
+            NioClient client = new NioClient(InetAddress.getByName("localhost"), 6056);
+            StandardWorker worker = new StandardWorker(client);
+            client.setDefaultWorker(worker);
 
             Thread.sleep(1000);
-			while(time > System.currentTimeMillis()){
-				PrintResponseHandler handler = new PrintResponseHandler();
-				worker.send(client.getRemoteAddress(),
+            while(time > System.currentTimeMillis()){
+                PrintResponseHandler handler = new PrintResponseHandler();
+                worker.send(client.getRemoteAddress(),
                         new StringResponseMessage("StringResponseMessage: "+count),
                         handler);
-				handler.waitForResponse();
-				//Thread.sleep(100);
-				//System.out.println("sending..");
-				count++;
-			}
-			client.close();
-			
-			System.out.println("Message Count 1m: "+count);
-			System.out.println("Message Count 1s: "+count/60);
-			System.exit(0);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
+                handler.waitForResponse();
+                //Thread.sleep(100);
+                //System.out.println("sending..");
+                count++;
+            }
+            client.close();
+
+            System.out.println("Message Count 1m: "+count);
+            System.out.println("Message Count 1s: "+count/60);
+            System.exit(0);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 }

@@ -32,44 +32,44 @@ import java.util.HashMap;
 import java.util.logging.Logger;
 
 public class SyncService extends ThreadedEventWorker{
-	private static Logger logger = LogUtil.getLogger();
+    private static Logger logger = LogUtil.getLogger();
 
-	// list of objects to sync	
-	private HashMap<String, ObjectSync> sync = new HashMap<>();
+    // list of objects to sync
+    private HashMap<String, ObjectSync> sync = new HashMap<>();
 
 
 
-	/**
-	 * Adds a object to be synced
-	 */
-	public void addSyncObject(ObjectSync os){
-		sync.put(os.id, os);
-		logger.fine("New Sync object: "+os);
-	}
+    /**
+     * Adds a object to be synced
+     */
+    public void addSyncObject(ObjectSync os){
+        sync.put(os.id, os);
+        logger.fine("New Sync object: "+os);
+    }
 
-	@Override
-	public void messageEvent(WorkerEventData event){
-		if(event.data instanceof SyncMessage){
-			SyncMessage syncMessage = (SyncMessage)event.data;
-			if(syncMessage.type == SyncMessage.MessageType.SYNC){
-				ObjectSync obj = sync.get(syncMessage.id);
-				if(obj != null){
-					logger.finer("Syncing Message...");
-					obj.syncObject(syncMessage);
-				}
-			}
-			else if(syncMessage.type == SyncMessage.MessageType.REMOVE){
-				sync.remove(syncMessage.id).remove();
-			}
-		}
-	}
+    @Override
+    public void messageEvent(WorkerEventData event){
+        if(event.data instanceof SyncMessage){
+            SyncMessage syncMessage = (SyncMessage)event.data;
+            if(syncMessage.type == SyncMessage.MessageType.SYNC){
+                ObjectSync obj = sync.get(syncMessage.id);
+                if(obj != null){
+                    logger.finer("Syncing Message...");
+                    obj.syncObject(syncMessage);
+                }
+            }
+            else if(syncMessage.type == SyncMessage.MessageType.REMOVE){
+                sync.remove(syncMessage.id).remove();
+            }
+        }
+    }
 
-	/**
-	 * Syncs all the objects whit the server
-	 */
-	public void sync(){
-		for(String id : sync.keySet()){
-			sync.get(id).sendSync();
-		}
-	}
+    /**
+     * Syncs all the objects whit the server
+     */
+    public void sync(){
+        for(String id : sync.keySet()){
+            sync.get(id).sendSync();
+        }
+    }
 }

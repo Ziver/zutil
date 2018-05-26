@@ -51,12 +51,12 @@ public class MultipartParser implements Iterable<MultipartField>{
     protected static final String HEADER_CONTENT_DISPOSITION = "Content-Disposition".toUpperCase();
     protected static final String HEADER_CONTENT_TYPE        = "Content-Type".toUpperCase();
 
-	/** This is the delimiter that will separate the fields */
-	private String delimiter;
-	/** The length of the HTTP Body */
-	private long contentLength;
-	/** This is the input stream */
-	private InputStream in;
+    /** This is the delimiter that will separate the fields */
+    private String delimiter;
+    /** The length of the HTTP Body */
+    private long contentLength;
+    /** This is the input stream */
+    private InputStream in;
 
     private MultiPartIterator iterator;
 
@@ -66,11 +66,11 @@ public class MultipartParser implements Iterable<MultipartField>{
         this.delimiter = delimiter;
         this.contentLength = length;
     }
-	public MultipartParser(HttpHeader header){
-		this(header.getInputStream(),
+    public MultipartParser(HttpHeader header){
+        this(header.getInputStream(),
                 parseDelimiter(header.getHeader("Content-type")),
                 Long.parseLong(header.getHeader("Content-Length")));
-	}
+    }
 
     private static String parseDelimiter(String contentTypeHeader){
         String delimiter = contentTypeHeader.split(" *; *")[1];
@@ -78,18 +78,18 @@ public class MultipartParser implements Iterable<MultipartField>{
         return delimiter;
     }
 
-	public long getContentLength(){
-		return contentLength;
-	}
+    public long getContentLength(){
+        return contentLength;
+    }
 
 
 
-	@Override
-	public Iterator<MultipartField> iterator() {
+    @Override
+    public Iterator<MultipartField> iterator() {
         if (iterator == null)
             iterator = new MultiPartIterator();
-		return iterator;
-	}
+        return iterator;
+    }
 
 
     protected class MultiPartIterator implements Iterator<MultipartField>{

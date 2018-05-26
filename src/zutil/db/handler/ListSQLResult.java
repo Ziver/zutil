@@ -41,27 +41,27 @@ import java.util.List;
  */
 public class ListSQLResult<T> implements SQLResultHandler<List<T>> {
 
-	private List<T> list;
+    private List<T> list;
 
-	/**
-	 * Creates a new List.
-	 */
-	public ListSQLResult(){
-		this.list = new ArrayList<>();
-	}
+    /**
+     * Creates a new List.
+     */
+    public ListSQLResult(){
+        this.list = new ArrayList<>();
+    }
 
-	/**
-	 * Uses a existing list that items will be appended on.
-	 */
-	public ListSQLResult(List l){
-		this.list = l;
-	}
-	
-	
+    /**
+     * Uses a existing list that items will be appended on.
+     */
+    public ListSQLResult(List l){
+        this.list = l;
+    }
 
-	public List<T> handleQueryResult(Statement stmt, ResultSet result) throws SQLException{
-		while( result.next() )
-			list.add((T)result.getObject(1));
-		return list;
-	}
+
+
+    public List<T> handleQueryResult(Statement stmt, ResultSet result) throws SQLException{
+        while( result.next() )
+            list.add((T)result.getObject(1));
+        return list;
+    }
 }

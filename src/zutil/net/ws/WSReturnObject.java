@@ -54,32 +54,32 @@ import java.lang.reflect.Field;
  *
  */
 public class WSReturnObject{
-	/**
-	 * Method comments for the WSDL. 
-	 * These comments are put in the operation part of the WSDL
-	 * 
-	 * @author Ziver
-	 */
-	@Retention(RetentionPolicy.RUNTIME)
-	public @interface WSDLDocumentation{
-		String value();
-	}
-	
-	/**
-	 * Annotation that assigns a name to the return value
-	 * to the field.
-	 * 
-	 * @author Ziver
-	 */
-	@Retention(RetentionPolicy.RUNTIME)
-	@Target(ElementType.FIELD)
-	public @interface WSValueName {
-	    String value();
-	    boolean optional() default false;
-	}
-	
-	
-	public Object getValue(Field field) throws IllegalArgumentException, IllegalAccessException{
-		return field.get(this);
-	}
+    /**
+     * Method comments for the WSDL.
+     * These comments are put in the operation part of the WSDL
+     *
+     * @author Ziver
+     */
+    @Retention(RetentionPolicy.RUNTIME)
+    public @interface WSDLDocumentation{
+        String value();
+    }
+
+    /**
+     * Annotation that assigns a name to the return value
+     * to the field.
+     *
+     * @author Ziver
+     */
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target(ElementType.FIELD)
+    public @interface WSValueName {
+        String value();
+        boolean optional() default false;
+    }
+
+
+    public Object getValue(Field field) throws IllegalArgumentException, IllegalAccessException{
+        return field.get(this);
+    }
 }

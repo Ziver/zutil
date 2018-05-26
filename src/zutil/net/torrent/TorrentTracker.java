@@ -37,14 +37,14 @@ import java.net.URL;
  * @author Ziver
  */
 public class TorrentTracker {
-	/** The address to the tracker **/
-	private URL trackerURL;
-	
-	
-	// TODO: incomplete
-	public void update() throws IOException {
-		HttpClient request = new HttpClient(HttpClient.HttpRequestType.GET);
-		request.setURL( trackerURL );
-		HttpHeaderParser response = request.send();
-	}
+    /** The address to the tracker **/
+    private URL trackerURL;
+
+
+    // TODO: incomplete
+    public void update() throws IOException {
+        HttpClient request = new HttpClient(HttpClient.HttpRequestType.GET);
+        request.setURL( trackerURL );
+        HttpHeaderParser response = request.send();
+    }
 }

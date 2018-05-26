@@ -40,37 +40,37 @@ import static zutil.net.http.HttpServer.SESSION_KEY_ID;
 
 public class HttpGuessTheNumber implements HttpPage {
 
-	private static final String SESSION_KEY_NUMBER = "random_number";
-	private static final String REQUEST_KEY_GUESS  = "guess";
-	private static final String COOKIE_KEY_LOW     = "low";
-	private static final String COOKIE_KEY_HIGH    = "high";
+    private static final String SESSION_KEY_NUMBER = "random_number";
+    private static final String REQUEST_KEY_GUESS  = "guess";
+    private static final String COOKIE_KEY_LOW     = "low";
+    private static final String COOKIE_KEY_HIGH    = "high";
 
 
-	public static void main(String[] args) throws IOException{
+    public static void main(String[] args) throws IOException{
         LogUtil.setGlobalLevel(Level.ALL);
         LogUtil.setGlobalFormatter(new CompactLogFormatter());
 
         //HttpServer server = new HttpServer("localhost", 443, FileFinder.find("keySSL"), "rootroot");//SSL
-		HttpServer server = new HttpServer(8080);
-		server.setDefaultPage(new HttpGuessTheNumber());
-		server.run();
-	}
+        HttpServer server = new HttpServer(8080);
+        server.setDefaultPage(new HttpGuessTheNumber());
+        server.run();
+    }
 
-	public void respond(HttpPrintStream out,
-			HttpHeader client_info,
-			Map<String, Object> session, 
-			Map<String, String> cookie,
-			Map<String, String> request) throws IOException {
+    public void respond(HttpPrintStream out,
+            HttpHeader client_info,
+            Map<String, Object> session,
+            Map<String, String> cookie,
+            Map<String, String> request) throws IOException {
 
-		out.enableBuffering(true);
-		out.println("<html>");
-		out.println("<H2>Welcome To The Number Guess Game!</H2>");
+        out.enableBuffering(true);
+        out.println("<html>");
+        out.println("<H2>Welcome To The Number Guess Game!</H2>");
 
-		String low = cookie.get(COOKIE_KEY_LOW);
-		String high = cookie.get(COOKIE_KEY_HIGH);
+        String low = cookie.get(COOKIE_KEY_LOW);
+        String high = cookie.get(COOKIE_KEY_HIGH);
 
-		if(session.containsKey(SESSION_KEY_NUMBER)){
-			if (request.containsKey(REQUEST_KEY_GUESS)) {
+        if(session.containsKey(SESSION_KEY_NUMBER)){
+            if (request.containsKey(REQUEST_KEY_GUESS)) {
                 int guess = Integer.parseInt(request.get(REQUEST_KEY_GUESS));
                 int number = (Integer) session.get(SESSION_KEY_NUMBER);
 
@@ -93,26 +93,26 @@ public class HttpGuessTheNumber implements HttpPage {
                     }
                 }
             }
-		}
-		else{
-			session.put(SESSION_KEY_NUMBER, (int)(Math.random()*99+1));
-			low = "0";
-			high = "100";
+        }
+        else{
+            session.put(SESSION_KEY_NUMBER, (int)(Math.random()*99+1));
+            low = "0";
+            high = "100";
             out.setCookie(COOKIE_KEY_LOW, low);
             out.setCookie(COOKIE_KEY_HIGH, high);
-		}
+        }
 
-		out.println("<form method='post'>");
-		out.println(low+" < X < "+high+"<br>");
-		out.println("Guess a number between 0 and 100:<br>");
-		out.println("<input type='text' name='guess'>");
-		out.println("<input type='hidden' name='test' value='test'>");
-		out.println("<input type='submit' value='Guess'>");
-		out.println("</form>");
-		out.println("<script>document.all.guess.focus();</script>");
-		out.println("<b>DEBUG: session_id="+session.get(SESSION_KEY_ID)+"</b><br>");
-		out.println("<b>DEBUG: number="+session.get(SESSION_KEY_NUMBER)+"</b><br>");
-		out.println("</html>");
-	}
+        out.println("<form method='post'>");
+        out.println(low+" < X < "+high+"<br>");
+        out.println("Guess a number between 0 and 100:<br>");
+        out.println("<input type='text' name='guess'>");
+        out.println("<input type='hidden' name='test' value='test'>");
+        out.println("<input type='submit' value='Guess'>");
+        out.println("</form>");
+        out.println("<script>document.all.guess.focus();</script>");
+        out.println("<b>DEBUG: session_id="+session.get(SESSION_KEY_ID)+"</b><br>");
+        out.println("<b>DEBUG: number="+session.get(SESSION_KEY_NUMBER)+"</b><br>");
+        out.println("</html>");
+    }
 
 }

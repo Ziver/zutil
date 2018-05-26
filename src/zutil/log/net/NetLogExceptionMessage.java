@@ -29,77 +29,77 @@ import zutil.net.nio.message.Message;
 import java.util.logging.LogRecord;
 
 public class NetLogExceptionMessage implements Message {
-	private static final long serialVersionUID = 1L;
-	
-	private int    count;
-	private String name;
-	private String message;
-	private String stackTrace;
-	
-	NetLogExceptionMessage(String name, String message, String stackTrace){
-		this.count = 1;
-		this.name = name;
-		this.message = message;
-		this.stackTrace = stackTrace;
-	}
+    private static final long serialVersionUID = 1L;
 
-	public NetLogExceptionMessage(LogRecord record) {
-		Throwable exception = record.getThrown();
-		
-		this.count = 1;
-		this.name = exception.getClass().getName();
-		this.message = exception.getMessage();
-		this.stackTrace = "";
-		for(int i=0; i<exception.getStackTrace().length; i++){
-			this.stackTrace += exception.getStackTrace()[i].toString();
-		}
-	}
+    private int    count;
+    private String name;
+    private String message;
+    private String stackTrace;
+
+    NetLogExceptionMessage(String name, String message, String stackTrace){
+        this.count = 1;
+        this.name = name;
+        this.message = message;
+        this.stackTrace = stackTrace;
+    }
+
+    public NetLogExceptionMessage(LogRecord record) {
+        Throwable exception = record.getThrown();
+
+        this.count = 1;
+        this.name = exception.getClass().getName();
+        this.message = exception.getMessage();
+        this.stackTrace = "";
+        for(int i=0; i<exception.getStackTrace().length; i++){
+            this.stackTrace += exception.getStackTrace()[i].toString();
+        }
+    }
 
 
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((name == null) ? 0 : name.hashCode());
-		result = prime * result + ((message == null) ? 0 : message.hashCode());
-		result = prime * result
-				+ ((stackTrace == null) ? 0 : stackTrace.hashCode());
-		return result;
-	}
-	
-	
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null || getClass() != obj.getClass())
-			return false;
-		
-		NetLogExceptionMessage other = (NetLogExceptionMessage) obj;
-		if (name.equals(other.name) && message.equals(other.message) &&
-				stackTrace.equals(other.stackTrace)) {
-			return true;
-		}
-		return false;
-	}
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((name == null) ? 0 : name.hashCode());
+        result = prime * result + ((message == null) ? 0 : message.hashCode());
+        result = prime * result
+                + ((stackTrace == null) ? 0 : stackTrace.hashCode());
+        return result;
+    }
 
-	public void addCount(int add){
-		count += add;
-	}
-	
-	public int getCount() {
-		return count;
-	}
 
-	public String getName() {
-		return name;
-	}
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null || getClass() != obj.getClass())
+            return false;
 
-	public String getMessage() {
-		return message;
-	}
+        NetLogExceptionMessage other = (NetLogExceptionMessage) obj;
+        if (name.equals(other.name) && message.equals(other.message) &&
+                stackTrace.equals(other.stackTrace)) {
+            return true;
+        }
+        return false;
+    }
 
-	public String getStackTrace() {
-		return stackTrace;
-	}
+    public void addCount(int add){
+        count += add;
+    }
+
+    public int getCount() {
+        return count;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public String getStackTrace() {
+        return stackTrace;
+    }
 }

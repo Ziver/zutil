@@ -35,56 +35,56 @@ import java.util.Iterator;
 
 public class NioServer extends NioNetwork{
 
-	
-	/**
-	 * Creates a NioServer object which listens on localhost
-	 * 
-	 * @param	port	the port to listen to
-	 */
-	public NioServer(int port) throws IOException {
-		this(null, port);
-	}
-	
-	/**
-	 * Creates a NioServer object which listens to a specific address
-	 * 
-	 * @param	address	the address to listen to
-	 * @param	port	the port to listen to
-	 */
-	public NioServer(InetAddress address, int port) throws IOException {
-		super(new InetSocketAddress(address, port));
-	}
 
-	protected Selector initSelector() throws IOException {
-		// Create a new selector
-		Selector socketSelector = SelectorProvider.provider().openSelector();
+    /**
+     * Creates a NioServer object which listens on localhost
+     *
+     * @param	port	the port to listen to
+     */
+    public NioServer(int port) throws IOException {
+        this(null, port);
+    }
 
-		// Create a new non-blocking server socket channel
-		serverChannel = ServerSocketChannel.open();
-		serverChannel.socket().setReuseAddress(true);
-		serverChannel.configureBlocking(false);
+    /**
+     * Creates a NioServer object which listens to a specific address
+     *
+     * @param	address	the address to listen to
+     * @param	port	the port to listen to
+     */
+    public NioServer(InetAddress address, int port) throws IOException {
+        super(new InetSocketAddress(address, port));
+    }
 
-		// Bind the server socket to the specified address and port
-		serverChannel.socket().bind(localAddress);
+    protected Selector initSelector() throws IOException {
+        // Create a new selector
+        Selector socketSelector = SelectorProvider.provider().openSelector();
 
-		// Register the server socket channel, indicating an interest in 
-		// accepting new connections
-		serverChannel.register(socketSelector, SelectionKey.OP_ACCEPT);
+        // Create a new non-blocking server socket channel
+        serverChannel = ServerSocketChannel.open();
+        serverChannel.socket().setReuseAddress(true);
+        serverChannel.configureBlocking(false);
 
-		return socketSelector;
-	}
+        // Bind the server socket to the specified address and port
+        serverChannel.socket().bind(localAddress);
 
-	/**
-	 * Broadcasts the message to all the connected clients
-	 * 
-	 * @param	data	the data to broadcast
-	 */
-	public void broadcast(byte[] data){
-		synchronized(clients){
-			for(InetSocketAddress target : clients.keySet()){
-				send(target, data);
-			}
-		}
-	}
-	
+        // Register the server socket channel, indicating an interest in
+        // accepting new connections
+        serverChannel.register(socketSelector, SelectionKey.OP_ACCEPT);
+
+        return socketSelector;
+    }
+
+    /**
+     * Broadcasts the message to all the connected clients
+     *
+     * @param	data	the data to broadcast
+     */
+    public void broadcast(byte[] data){
+        synchronized(clients){
+            for(InetSocketAddress target : clients.keySet()){
+                send(target, data);
+            }
+        }
+    }
+
 }

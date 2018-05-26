@@ -32,17 +32,17 @@ package zutil;
  *
  */
 public interface OneInstance {
-	/**
-	 * Checks if the application is already running
-	 * 
-	 * @return True if the file is locked else false
-	 */
-	public boolean check();
+    /**
+     * Checks if the application is already running
+     *
+     * @return True if the file is locked else false
+     */
+    public boolean check();
 
-	/**
-	 * Locks the application so that another one can not run
-	 *  
-	 * @return False if there are a error else true
-	 */
-	public boolean lockApp();
+    /**
+     * Locks the application so that another one can not run
+     *
+     * @return False if there are a error else true
+     */
+    public boolean lockApp();
 }

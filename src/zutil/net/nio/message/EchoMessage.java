@@ -30,22 +30,22 @@ package zutil.net.nio.message;
  * @author Ziver
  */
 public abstract class EchoMessage implements Message{
-	private static final long serialVersionUID = 1L;
-	
-	private boolean echo = false;
+    private static final long serialVersionUID = 1L;
+
+    private boolean echo = false;
 
 
-	/**
-	 * @return true if this message is an echo/copy of an original message
-	 */
-	public boolean echo() {
-		return echo;
-	}
-	
-	/**
-	 * Called by the receiver to mark this message as an echo copy
-	 */
-	public void received() {
-		echo = true;
-	}
+    /**
+     * @return true if this message is an echo/copy of an original message
+     */
+    public boolean echo() {
+        return echo;
+    }
+
+    /**
+     * Called by the receiver to mark this message as an echo copy
+     */
+    public void received() {
+        echo = true;
+    }
 }

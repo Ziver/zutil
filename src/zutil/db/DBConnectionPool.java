@@ -37,162 +37,162 @@ import java.util.TimerTask;
  * @author Ziver
  */
 public class DBConnectionPool extends TimerTask implements Closeable{
-	public static final long DEFAULT_TIMEOUT = 10*60*60*1000; // 10 minutes;
-	public static final int DEFAULT_MAX_SIZE = 5;
-	
-	// DB details
-	private DBMS dbms;
-	private String url;
-	private String db;
-	private String user;
-	private String password;
+    public static final long DEFAULT_TIMEOUT = 10*60*60*1000; // 10 minutes;
+    public static final int DEFAULT_MAX_SIZE = 5;
 
-	// Pool details
-	private int max_conn;
-	private long timeout;
-	private Timer timeout_timer;
+    // DB details
+    private DBMS dbms;
+    private String url;
+    private String db;
+    private String user;
+    private String password;
 
-	protected class PoolItem{
-		public DBConnection conn;
-		public long timestamp;
+    // Pool details
+    private int max_conn;
+    private long timeout;
+    private Timer timeout_timer;
 
-		public boolean equals(Object o){
-			return conn.equals(o);
-		}
-	}
+    protected class PoolItem{
+        public DBConnection conn;
+        public long timestamp;
 
-	// The pool
-	private LinkedList<PoolItem> inusePool;
-	private LinkedList<PoolItem> readyPool;
+        public boolean equals(Object o){
+            return conn.equals(o);
+        }
+    }
 
-	/**
-	 * Creates a new pool of DB connections
-	 * 
-	 * @param dbms is the DB type
-	 * @param url is the URL to the DB
-	 * @param db is the name of the database
-	 * @param user is the user name to the DB
-	 * @param password is the password to the DB
-	 */
-	public DBConnectionPool(DBMS dbms, String url, String db, String user, String password) throws Exception{
-		this.dbms = dbms;
-		this.url = url;
-		this.db = db;
-		this.user = user;
-		this.password = password;
+    // The pool
+    private LinkedList<PoolItem> inusePool;
+    private LinkedList<PoolItem> readyPool;
 
-		inusePool = new LinkedList<PoolItem>();
-		readyPool = new LinkedList<PoolItem>();
-		
-		this.setTimeout(DEFAULT_TIMEOUT);
-		this.setMaxSize(DEFAULT_MAX_SIZE);
-	}
+    /**
+     * Creates a new pool of DB connections
+     *
+     * @param dbms is the DB type
+     * @param url is the URL to the DB
+     * @param db is the name of the database
+     * @param user is the user name to the DB
+     * @param password is the password to the DB
+     */
+    public DBConnectionPool(DBMS dbms, String url, String db, String user, String password) throws Exception{
+        this.dbms = dbms;
+        this.url = url;
+        this.db = db;
+        this.user = user;
+        this.password = password;
 
-	/**
-	 * Registers a Connection to the pool
-	 * 
-	 * @param conn is the Connection to register
-	 */
-	protected void addConnection(DBConnection conn){
-		PoolItem item = new PoolItem();
-		item.conn = conn;
-		readyPool.addLast(item);
-	}
+        inusePool = new LinkedList<PoolItem>();
+        readyPool = new LinkedList<PoolItem>();
 
-	/**
-	 * Removes an connection from the pool
-	 * 
-	 * @param conn is the connection to remove
-	 */
-	protected void removeConnection(DBConnection conn){
-		inusePool.remove(conn);
-		readyPool.remove(conn);
-	}
+        this.setTimeout(DEFAULT_TIMEOUT);
+        this.setMaxSize(DEFAULT_MAX_SIZE);
+    }
 
-	/**
-	 * Lease one connection from the pool
-	 * 
-	 * @return an DB connection or null if the pool is empty
-	 */
-	public synchronized DBConnection getConnection() throws Exception{
-		if(readyPool.isEmpty()){
-			if( size() < max_conn ){
-				DBConnection conn = new DBConnection(dbms, url, db, user, password);
-				conn.setPool( this );
-				addConnection( conn );
-				return conn;
-			}
-			return null;
-		}
-		else{
-			PoolItem item = readyPool.poll();
-			inusePool.addLast(item);
-			item.timestamp = System.currentTimeMillis();
-			return item.conn;
-		}
-	}
+    /**
+     * Registers a Connection to the pool
+     *
+     * @param conn is the Connection to register
+     */
+    protected void addConnection(DBConnection conn){
+        PoolItem item = new PoolItem();
+        item.conn = conn;
+        readyPool.addLast(item);
+    }
 
-	/**
-	 * Registers the Connection as not used
-	 * 
-	 * @param conn is the connection that is not used anymore
-	 */
-	protected synchronized void releaseConnection(DBConnection conn){
-		int index = inusePool.indexOf(conn);
-		PoolItem item = inusePool.remove(index);
-		readyPool.addLast(item);
-	}
+    /**
+     * Removes an connection from the pool
+     *
+     * @param conn is the connection to remove
+     */
+    protected void removeConnection(DBConnection conn){
+        inusePool.remove(conn);
+        readyPool.remove(conn);
+    }
 
-	/**
-	 * @return the current size of the pool
-	 */
-	public int size(){
-		return inusePool.size() + readyPool.size();
-	}
+    /**
+     * Lease one connection from the pool
+     *
+     * @return an DB connection or null if the pool is empty
+     */
+    public synchronized DBConnection getConnection() throws Exception{
+        if(readyPool.isEmpty()){
+            if( size() < max_conn ){
+                DBConnection conn = new DBConnection(dbms, url, db, user, password);
+                conn.setPool( this );
+                addConnection( conn );
+                return conn;
+            }
+            return null;
+        }
+        else{
+            PoolItem item = readyPool.poll();
+            inusePool.addLast(item);
+            item.timestamp = System.currentTimeMillis();
+            return item.conn;
+        }
+    }
 
-	/**
-	 * Closes all the connections
-	 */
-	public synchronized void close(){
-		for( PoolItem item : inusePool ){
-			item.conn.forceClose();
-		}
-		inusePool.clear();
-		for( PoolItem item : readyPool ){
-			item.conn.forceClose();
-		}
-		readyPool.clear();
-	}
+    /**
+     * Registers the Connection as not used
+     *
+     * @param conn is the connection that is not used anymore
+     */
+    protected synchronized void releaseConnection(DBConnection conn){
+        int index = inusePool.indexOf(conn);
+        PoolItem item = inusePool.remove(index);
+        readyPool.addLast(item);
+    }
 
-	/**
-	 * Set the max size of the pool
-	 */
-	public void setMaxSize(int max){
-		this.max_conn = max;
-	}
+    /**
+     * @return the current size of the pool
+     */
+    public int size(){
+        return inusePool.size() + readyPool.size();
+    }
 
-	/**
-	 * Sets the timeout of the Connections
-	 */
-	public synchronized void setTimeout(long timeout){
-		this.timeout = timeout;
-		if(timeout_timer!=null)
-			timeout_timer.cancel();
-		timeout_timer = new Timer();
-		timeout_timer.schedule(this, 0, timeout / 2);
-	}
+    /**
+     * Closes all the connections
+     */
+    public synchronized void close(){
+        for( PoolItem item : inusePool ){
+            item.conn.forceClose();
+        }
+        inusePool.clear();
+        for( PoolItem item : readyPool ){
+            item.conn.forceClose();
+        }
+        readyPool.clear();
+    }
 
-	/**
-	 * Checks every DB connection if they are valid and has not timed out
-	 */
-	public void run(){
-		long stale = System.currentTimeMillis() - timeout;
+    /**
+     * Set the max size of the pool
+     */
+    public void setMaxSize(int max){
+        this.max_conn = max;
+    }
 
-		for(PoolItem item : inusePool){
-			if( !item.conn.valid() && stale > item.timestamp ) {
-				removeConnection(item.conn);
-				item.conn.forceClose();
-			}
-		}
-	}
+    /**
+     * Sets the timeout of the Connections
+     */
+    public synchronized void setTimeout(long timeout){
+        this.timeout = timeout;
+        if(timeout_timer!=null)
+            timeout_timer.cancel();
+        timeout_timer = new Timer();
+        timeout_timer.schedule(this, 0, timeout / 2);
+    }
+
+    /**
+     * Checks every DB connection if they are valid and has not timed out
+     */
+    public void run(){
+        long stale = System.currentTimeMillis() - timeout;
+
+        for(PoolItem item : inusePool){
+            if( !item.conn.valid() && stale > item.timestamp ) {
+                removeConnection(item.conn);
+                item.conn.forceClose();
+            }
+        }
+    }
 }

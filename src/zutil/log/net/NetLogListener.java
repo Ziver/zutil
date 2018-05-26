@@ -26,18 +26,18 @@ package zutil.log.net;
 
 
 public interface NetLogListener {
-	/**
-	 * Handle incoming log messages
-	 */
-	public void handleLogMessage( NetLogMessage log );
-	
-	/**
-	 * Handle incoming exception messages
-	 */
-	public void handleExceptionMessage( NetLogExceptionMessage exception );
-	
-	/**
-	 * Handle incoming status messages
-	 */
-	public void handleStatusMessage( NetLogStatusMessage status );
+    /**
+     * Handle incoming log messages
+     */
+    public void handleLogMessage( NetLogMessage log );
+
+    /**
+     * Handle incoming exception messages
+     */
+    public void handleExceptionMessage( NetLogExceptionMessage exception );
+
+    /**
+     * Handle incoming status messages
+     */
+    public void handleStatusMessage( NetLogStatusMessage status );
 }

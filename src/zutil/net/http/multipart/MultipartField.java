@@ -31,14 +31,14 @@ package zutil.net.http.multipart;
  * @author Ziver
  */
 public interface MultipartField{
-	/**
-	 * @return the amount of data received for this field. Might only be available when all data has been processed
-	 */
-	public long getLength();
-	
-	/**
-	 * @return the name of the field.
-	 */
-	public String getName();
+    /**
+     * @return the amount of data received for this field. Might only be available when all data has been processed
+     */
+    public long getLength();
+
+    /**
+     * @return the name of the field.
+     */
+    public String getName();
 
 }

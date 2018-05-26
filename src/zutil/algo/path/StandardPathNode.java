@@ -33,32 +33,32 @@ import java.util.LinkedList;
  *
  */
 public class StandardPathNode implements PathNode{
-	private HashMap<PathNode,Integer> neighbors;
-	private PathNode parent;
-	
-	public StandardPathNode(){
-		neighbors = new HashMap<PathNode,Integer>();
-	}
+    private HashMap<PathNode,Integer> neighbors;
+    private PathNode parent;
 
-	public int getNeighborCost(PathNode neighbor) {
-		return neighbors.get(neighbor);
-	}
+    public StandardPathNode(){
+        neighbors = new HashMap<PathNode,Integer>();
+    }
 
-	public Iterable<PathNode> getNeighbors() {
-		return neighbors.keySet();
-	}
+    public int getNeighborCost(PathNode neighbor) {
+        return neighbors.get(neighbor);
+    }
 
-	public PathNode getParentNeighbor() {
-		return parent;
-	}
+    public Iterable<PathNode> getNeighbors() {
+        return neighbors.keySet();
+    }
 
-	public void setParentNeighbor(PathNode parent) {
-		this.parent = parent;		
-	}
+    public PathNode getParentNeighbor() {
+        return parent;
+    }
 
-	public LinkedList<PathNode> traversTo(PathNode goal) {
-		LinkedList<PathNode> path = new LinkedList<PathNode>();
-		PathNode current = this;
+    public void setParentNeighbor(PathNode parent) {
+        this.parent = parent;
+    }
+
+    public LinkedList<PathNode> traversTo(PathNode goal) {
+        LinkedList<PathNode> path = new LinkedList<PathNode>();
+        PathNode current = this;
         while(current != null){
                 path.addFirst(current);
                 current = current.getParentNeighbor();
@@ -68,6 +68,6 @@ public class StandardPathNode implements PathNode{
                 }
         }       
         return new LinkedList<PathNode>();
-	}
+    }
 
 }

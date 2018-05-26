@@ -45,24 +45,24 @@ public class IOUtil {
         return readContent(stream, false);
     }
 
-	/**
-	 * Reads and returns all the content of a stream.
-	 *
-	 * @param 		stream
+    /**
+     * Reads and returns all the content of a stream.
+     *
+     * @param 		stream
      * @param       close       true if the stream should be closed at the end
-	 * @return a byte array with the stream contents
-	 */
-	public static byte[] readContent(InputStream stream, boolean close) throws IOException{
+     * @return a byte array with the stream contents
+     */
+    public static byte[] readContent(InputStream stream, boolean close) throws IOException{
         DynamicByteArrayStream dyn_buff = new DynamicByteArrayStream();
         byte[] buff = new byte[8192];
         int len = 0;
-		while((len = stream.read(buff)) != -1){
-			dyn_buff.append(buff, 0, len);
-		}
+        while((len = stream.read(buff)) != -1){
+            dyn_buff.append(buff, 0, len);
+        }
 
-		if (close) stream.close();
-		return dyn_buff.getBytes();
-	}
+        if (close) stream.close();
+        return dyn_buff.getBytes();
+    }
 
     /**
      * Reads and returns all the content of a stream as a String.

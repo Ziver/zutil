@@ -32,11 +32,11 @@ import java.io.File;
  * @author Ziver
  */
 public interface FileChangeListener{
-	
-	/**
-	 * This method is called when there is a change in a file
-	 * 
-	 * @param file The file that has changed
-	 */
-	public void fileChangedEvent(File file);
+
+    /**
+     * This method is called when there is a change in a file
+     *
+     * @param file The file that has changed
+     */
+    public void fileChangedEvent(File file);
 }

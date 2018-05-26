@@ -28,11 +28,11 @@ import java.io.IOException;
 
 
 public class ServerFindServerTest {
-	public static void main(String[] args){
-		try {
-			new ServerFind(2000);			
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
+    public static void main(String[] args){
+        try {
+            new ServerFind(2000);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 }

@@ -31,14 +31,14 @@ import java.nio.channels.SocketChannel;
 
 
 public class WorkerEventData {
-	public NioNetwork network;
-	public SocketAddress remoteAddress;
-	public Object data;
+    public NioNetwork network;
+    public SocketAddress remoteAddress;
+    public Object data;
 
 
-	public WorkerEventData(NioNetwork server, SocketAddress remoteAddress, Object data) {
-		this.network = server;
-		this.remoteAddress = remoteAddress;
-		this.data = data;
-	}
+    public WorkerEventData(NioNetwork server, SocketAddress remoteAddress, Object data) {
+        this.network = server;
+        this.remoteAddress = remoteAddress;
+        this.data = data;
+    }
 }

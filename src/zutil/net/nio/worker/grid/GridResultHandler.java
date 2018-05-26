@@ -30,6 +30,6 @@ package zutil.net.nio.worker.grid;
  * @author Ziver
  */
 public interface GridResultHandler<T> {
-	
-	void resultEvent(int jobID, boolean correct, T result);
+
+    void resultEvent(int jobID, boolean correct, T result);
 }

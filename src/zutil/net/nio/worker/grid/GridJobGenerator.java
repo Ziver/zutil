@@ -31,12 +31,12 @@ package zutil.net.nio.worker.grid;
  * @author Ziver
  */
 public interface GridJobGenerator<T> {
-	/**
-	 * @return static and final values that do not change for every job
-	 */
-	Object initValues();
-	/**
-	 * @return a new generated job
-	 */
-	T generateJob();
+    /**
+     * @return static and final values that do not change for every job
+     */
+    Object initValues();
+    /**
+     * @return a new generated job
+     */
+    T generateJob();
 }

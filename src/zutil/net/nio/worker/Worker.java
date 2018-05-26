@@ -32,37 +32,37 @@ import java.util.List;
 
 
 public abstract class Worker {
-	private LinkedList<WorkerEventData> queue = new LinkedList<>();
+    private LinkedList<WorkerEventData> queue = new LinkedList<>();
 
 
-	public void processData(NioNetwork server, SocketAddress remote, Object data) {
-		synchronized(queue) {
-			queue.add(new WorkerEventData(server, remote, data));
-			queue.notify();
-		}
-	}
-	
+    public void processData(NioNetwork server, SocketAddress remote, Object data) {
+        synchronized(queue) {
+            queue.add(new WorkerEventData(server, remote, data));
+            queue.notify();
+        }
+    }
 
-	/**
-	 * @return true if there is a event in the queue
-	 */
-	protected boolean hasEvent(){
-		return !queue.isEmpty();
-	}
-	
-	/**
-	 * Polls a event from the list or blocks until there is a event available
+
+    /**
+     * @return true if there is a event in the queue
+     */
+    protected boolean hasEvent(){
+        return !queue.isEmpty();
+    }
+
+    /**
+     * Polls a event from the list or blocks until there is a event available
      *
-	 * @return the next event
-	 */
-	protected WorkerEventData pollEvent(){
-		synchronized(queue) {
-			while (queue.isEmpty()) {
-				try {
-					queue.wait();
-				} catch (InterruptedException e) {}
-			}
-		}
-		return queue.poll();
-	}
+     * @return the next event
+     */
+    protected WorkerEventData pollEvent(){
+        synchronized(queue) {
+            while (queue.isEmpty()) {
+                try {
+                    queue.wait();
+                } catch (InterruptedException e) {}
+            }
+        }
+        return queue.poll();
+    }
 }

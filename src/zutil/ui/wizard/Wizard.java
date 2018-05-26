@@ -46,164 +46,164 @@ import java.util.ResourceBundle;
  * @author Ziver
  */
 public class Wizard implements ActionListener{
-	public static final boolean DEBUG = false;
-	
-	/** Some defoult backgrounds for the sidebar */
-	public static final String BACKGROUND_1 = "zutil/data/wizard1.jpg";
-	public static final String BACKGROUND_2 = "zutil/data/wizard2.jpg";
-	public static final String BACKGROUND_3 = "zutil/data/wizard3.png";
+    public static final boolean DEBUG = false;
 
-	/** An list with all the previous pages and the current at the beginning */
-	private HistoryList<WizardPage> pages;
-	/** HashMap containing all the selected values */
-	private HashMap<String, Object> values;
-	/** The general component listener */
-	private WizardActionHandler handler;
-	/** This is the user listener that handles all the values after the wizard */
-	private WizardListener listener;
-	
-	/** This is the old validation fail, this is needed for reseting purposes */
-	private ValidationFail oldFail;
-	
+    /** Some defoult backgrounds for the sidebar */
+    public static final String BACKGROUND_1 = "zutil/data/wizard1.jpg";
+    public static final String BACKGROUND_2 = "zutil/data/wizard2.jpg";
+    public static final String BACKGROUND_3 = "zutil/data/wizard3.png";
 
-	private Wizard(WizardListener listener){
-		this(listener, null);
-	}
+    /** An list with all the previous pages and the current at the beginning */
+    private HistoryList<WizardPage> pages;
+    /** HashMap containing all the selected values */
+    private HashMap<String, Object> values;
+    /** The general component listener */
+    private WizardActionHandler handler;
+    /** This is the user listener that handles all the values after the wizard */
+    private WizardListener listener;
 
-	/**
-	 * Creates a new Wizard
-	 */
-	public Wizard(WizardListener listener, WizardPage start){
-		this(listener, start, BACKGROUND_1);
-	}
+    /** This is the old validation fail, this is needed for reseting purposes */
+    private ValidationFail oldFail;
 
-	/**
-	 * Creates a new Wizard
-	 * 
-	 * @param start is the first page in the wizard
-	 * @param bg is the background image to use
-	 */
-	public Wizard(WizardListener listener, final WizardPage start, final String bg){
-		try {
-			this.listener = listener;
-			pages = new HistoryList<WizardPage>();
-			values = new HashMap<String, Object>();
-			handler = new WizardActionHandler( values );
 
-			// GUI
-			frame = new JFrame();
-			initComponents();
-			sidebar.scale( false );
-			
-			// add action listener to the buttons
-			back.addActionListener( this );
-			next.addActionListener( this );
-			cancel.addActionListener( this );
-			finish.addActionListener( this );
-			
-			// Set the image in the sidebar
-			sidebar.setImage(ImageIO.read( FileUtil.getInputStream( bg ) ));
-			
-			// add the first page
-			pages.add( start );
-			displayWizardPage( start );
+    private Wizard(WizardListener listener){
+        this(listener, null);
+    }
 
-		} catch (Exception e) {
-			e.printStackTrace(MultiPrintStream.out);
-		}
-	}
+    /**
+     * Creates a new Wizard
+     */
+    public Wizard(WizardListener listener, WizardPage start){
+        this(listener, start, BACKGROUND_1);
+    }
 
-	/**
-	 * Sets the title of the Wizard
-	 */
-	public void setTitle(String s){
-		frame.setTitle(s);
-	}
-	
-	/**
-	 * Sets the size of the Wizard frame
-	 * 
-	 * @param w is the width
-	 * @param h is the height
-	 */
-	public void setSize(int w, int h){
-		frame.setSize(w, h);
-	}
+    /**
+     * Creates a new Wizard
+     *
+     * @param start is the first page in the wizard
+     * @param bg is the background image to use
+     */
+    public Wizard(WizardListener listener, final WizardPage start, final String bg){
+        try {
+            this.listener = listener;
+            pages = new HistoryList<WizardPage>();
+            values = new HashMap<String, Object>();
+            handler = new WizardActionHandler( values );
 
-	/**
-	 * Displays the wizard
-	 */
-	public void start(){
-		frame.setVisible(true);
-	}
-	
-	/**
-	 * @return the JFrame used for the wizard
-	 */
-	public JFrame getFrame(){
-		return frame;
-	}
-	
-	/**
-	 * Set the current WizardPage
-	 * 
-	 * @param page is the page to be displayed
-	 */
-	protected void displayWizardPage(WizardPage page){
-		pageContainer.getViewport().setView(page);
-		pageTitle.setText( page.getPageDescription() );
-	}
+            // GUI
+            frame = new JFrame();
+            initComponents();
+            sidebar.scale( false );
 
-	public void actionPerformed(ActionEvent e) {
-		// Back Button
-		if(e.getSource() == back){
-			WizardPage page = pages.getPrevious();
-			displayWizardPage( page );
-			if(pages.get(0) == page){
-				back.setEnabled( false );
-			}
-		}
-		// Next Button and Finish Button
-		else if(e.getSource() == next || e.getSource() == finish){
-			WizardPage page = pages.getCurrent();
-			page.registerValues( handler );
-			if(DEBUG) MultiPrintStream.out.println(values);
-			
-			ValidationFail fail = page.validate( values );
-			if(fail != null){
-				// reset old fail
-				if(oldFail != null) oldFail.getSource().setBorder( BorderFactory.createEmptyBorder() );
-				if(fail.getSource() != null) 
-					fail.getSource().setBorder( BorderFactory.createLineBorder(Color.RED) );
-				//pageStatus.setText( fail.getMessage() );
-			}
-			else if(e.getSource() == finish){
-				frame.dispose();
-				listener.onFinished( values );
-			}
-			else if(e.getSource() == next){
-				WizardPage nextPage = page.getNextPage( values );
-				if(nextPage == null){
-					frame.dispose();
-					listener.onCancel(page, values );
-					return;
-				}
-				pages.add( nextPage );
-				displayWizardPage( nextPage );
-				back.setEnabled( true );
-				if( nextPage.isFinalPage() ){
-					next.setEnabled( false );
-					finish.setEnabled( true );
-				}
-			}
-		}
-		// Cancel Button
-		else if(e.getSource() == cancel){
-			frame.dispose();
-			listener.onCancel(pages.getCurrent(), values );
-		}		
-	}	
-	
+            // add action listener to the buttons
+            back.addActionListener( this );
+            next.addActionListener( this );
+            cancel.addActionListener( this );
+            finish.addActionListener( this );
+
+            // Set the image in the sidebar
+            sidebar.setImage(ImageIO.read( FileUtil.getInputStream( bg ) ));
+
+            // add the first page
+            pages.add( start );
+            displayWizardPage( start );
+
+        } catch (Exception e) {
+            e.printStackTrace(MultiPrintStream.out);
+        }
+    }
+
+    /**
+     * Sets the title of the Wizard
+     */
+    public void setTitle(String s){
+        frame.setTitle(s);
+    }
+
+    /**
+     * Sets the size of the Wizard frame
+     *
+     * @param w is the width
+     * @param h is the height
+     */
+    public void setSize(int w, int h){
+        frame.setSize(w, h);
+    }
+
+    /**
+     * Displays the wizard
+     */
+    public void start(){
+        frame.setVisible(true);
+    }
+
+    /**
+     * @return the JFrame used for the wizard
+     */
+    public JFrame getFrame(){
+        return frame;
+    }
+
+    /**
+     * Set the current WizardPage
+     *
+     * @param page is the page to be displayed
+     */
+    protected void displayWizardPage(WizardPage page){
+        pageContainer.getViewport().setView(page);
+        pageTitle.setText( page.getPageDescription() );
+    }
+
+    public void actionPerformed(ActionEvent e) {
+        // Back Button
+        if(e.getSource() == back){
+            WizardPage page = pages.getPrevious();
+            displayWizardPage( page );
+            if(pages.get(0) == page){
+                back.setEnabled( false );
+            }
+        }
+        // Next Button and Finish Button
+        else if(e.getSource() == next || e.getSource() == finish){
+            WizardPage page = pages.getCurrent();
+            page.registerValues( handler );
+            if(DEBUG) MultiPrintStream.out.println(values);
+
+            ValidationFail fail = page.validate( values );
+            if(fail != null){
+                // reset old fail
+                if(oldFail != null) oldFail.getSource().setBorder( BorderFactory.createEmptyBorder() );
+                if(fail.getSource() != null)
+                    fail.getSource().setBorder( BorderFactory.createLineBorder(Color.RED) );
+                //pageStatus.setText( fail.getMessage() );
+            }
+            else if(e.getSource() == finish){
+                frame.dispose();
+                listener.onFinished( values );
+            }
+            else if(e.getSource() == next){
+                WizardPage nextPage = page.getNextPage( values );
+                if(nextPage == null){
+                    frame.dispose();
+                    listener.onCancel(page, values );
+                    return;
+                }
+                pages.add( nextPage );
+                displayWizardPage( nextPage );
+                back.setEnabled( true );
+                if( nextPage.isFinalPage() ){
+                    next.setEnabled( false );
+                    finish.setEnabled( true );
+                }
+            }
+        }
+        // Cancel Button
+        else if(e.getSource() == cancel){
+            frame.dispose();
+            listener.onCancel(pages.getCurrent(), values );
+        }
+    }
+
 
     private void initComponents() {
         cancel = new JButton();
@@ -328,31 +328,31 @@ public class Wizard implements ActionListener{
     }
     
     
-	/**
-	 * @param args the command line arguments
-	 */
-	public static void main(String args[]) {
-		final BlockingWizardListener listener = new BlockingWizardListener();
-		EventQueue.invokeLater(new Runnable() {
-			public void run() {				
-				Wizard wizard = new Wizard(listener);
-				wizard.start();				
-			}
-		});
-		MultiPrintStream.out.dump( listener.getValues() );
+    /**
+     * @param args the command line arguments
+     */
+    public static void main(String args[]) {
+        final BlockingWizardListener listener = new BlockingWizardListener();
+        EventQueue.invokeLater(new Runnable() {
+            public void run() {
+                Wizard wizard = new Wizard(listener);
+                wizard.start();
+            }
+        });
+        MultiPrintStream.out.dump( listener.getValues() );
 
-	}
+    }
 
-	// Variables declaration - do not modify
-	private JLabel error;
-	private JButton back;
-	private JButton cancel;
-	private JButton finish;
-	private JButton next;
-	private JScrollPane pageContainer;
-	private JLabel pageTitle;
-	private JImagePanel sidebar;
-	private JFrame frame;
-	// End of variables declaration
+    // Variables declaration - do not modify
+    private JLabel error;
+    private JButton back;
+    private JButton cancel;
+    private JButton finish;
+    private JButton next;
+    private JScrollPane pageContainer;
+    private JLabel pageTitle;
+    private JImagePanel sidebar;
+    private JFrame frame;
+    // End of variables declaration
 
 }

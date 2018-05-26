@@ -31,30 +31,30 @@ package zutil.net.nio.worker.grid;
  * @author Ziver
  */
 public abstract class GridThread implements Runnable{
-	/**
-	 * The initial static and final data will be sent to this method.
-	 * 
-	 * @param data is the static and or final data
-	 */
-	public abstract void setInitData(Object data);
-	
-	public void run(){
-		while(true){
-			GridJob tmp = null;
-			try {
-				tmp = GridClient.getNextJob();
-				compute(tmp);
-			} catch (Exception e) {
-				e.printStackTrace();
-				if(tmp != null){
-					GridClient.jobError(tmp.jobID);
-				}
-			}
-		}
-	}
-	
-	/**
-	 * Compute the given data and return
-	 */
-	public abstract void compute(GridJob data) throws Exception;
+    /**
+     * The initial static and final data will be sent to this method.
+     *
+     * @param data is the static and or final data
+     */
+    public abstract void setInitData(Object data);
+
+    public void run(){
+        while(true){
+            GridJob tmp = null;
+            try {
+                tmp = GridClient.getNextJob();
+                compute(tmp);
+            } catch (Exception e) {
+                e.printStackTrace();
+                if(tmp != null){
+                    GridClient.jobError(tmp.jobID);
+                }
+            }
+        }
+    }
+
+    /**
+     * Compute the given data and return
+     */
+    public abstract void compute(GridJob data) throws Exception;
 }

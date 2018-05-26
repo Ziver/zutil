@@ -41,22 +41,22 @@ import java.util.logging.Logger;
  *
  */
 public class SmtpClient {
-	private static final Logger logger = LogUtil.getLogger();
+    private static final Logger logger = LogUtil.getLogger();
 
-	protected static final String NEWLINE   = "\r\n";
-	private static final String CMD_HELO  = "HELO";
-	private static final String CMD_FROM  = "MAIL FROM";
-	private static final String CMD_TO    = "RCPT TO";
-	private static final String CMD_DATA  = "DATA";
-	private static final String CMD_DATA_END  = ".";
-	private static final String CMD_RESET = "RSET";
-	private static final String CMD_NOOP  = "NOOP";
-	private static final String CMD_QUIT  = "QUIT";
+    protected static final String NEWLINE   = "\r\n";
+    private static final String CMD_HELO  = "HELO";
+    private static final String CMD_FROM  = "MAIL FROM";
+    private static final String CMD_TO    = "RCPT TO";
+    private static final String CMD_DATA  = "DATA";
+    private static final String CMD_DATA_END  = ".";
+    private static final String CMD_RESET = "RSET";
+    private static final String CMD_NOOP  = "NOOP";
+    private static final String CMD_QUIT  = "QUIT";
 
 
     private Socket socket;
-	private BufferedReader in;
-	private Writer out;
+    private BufferedReader in;
+    private Writer out;
 
 
     /**
@@ -68,36 +68,36 @@ public class SmtpClient {
     /**
      * Will look for a SMTP server on specified host on port 25
      */
-	public SmtpClient(String host) throws IOException {
-		this(host, 25);
-	}
-	public SmtpClient(String host, int port) throws IOException {
+    public SmtpClient(String host) throws IOException {
+        this(host, 25);
+    }
+    public SmtpClient(String host, int port) throws IOException {
         socket = new Socket(host, port);
         in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
         out = new OutputStreamWriter(socket.getOutputStream());
 
         readCommand();
         sendCommand(CMD_HELO + " " + InetAddress.getLocalHost().getHostName());
-	}
+    }
 
 
 
-	/**
-	 * Sends a basic email to the smtp server
-	 * 
-	 * @param   from    the senders email address
-	 * @param   to      the recipients email address
-	 * @param   subj    the email subject line
-	 * @param   msg     the email body message
-	 */
-	public synchronized void send(String from, String to, String subj, String msg) throws IOException{
+    /**
+     * Sends a basic email to the smtp server
+     *
+     * @param   from    the senders email address
+     * @param   to      the recipients email address
+     * @param   subj    the email subject line
+     * @param   msg     the email body message
+     */
+    public synchronized void send(String from, String to, String subj, String msg) throws IOException{
         Email email = new Email();
         email.setFrom(from);
         email.setTo(to);
         email.setSubject(subj);
         email.setMessage(msg);
         send(email);
-	}
+    }
 
     /**
      * Sends a email to the connected SMTP server
@@ -126,33 +126,33 @@ public class SmtpClient {
 
 
 
-	/**
-	 * Sends the given line to the server and return the last line of the response
-	 *
-     * @param   cmd     a String command that will be sent to the server
-	 * @return the server response code
-	 */
-	public synchronized int sendCommand(String cmd) throws IOException{
-		logger.finest(">> "+cmd);
-	    out.write(cmd + NEWLINE);
-	    out.flush();
-		String reply = readCommand();
-		return parseReturnCode(reply);
-	}
-
-	/**
-	 * Reads on line from the command channel
+    /**
+     * Sends the given line to the server and return the last line of the response
      *
-	 * @throws IOException if the server returns a error code
-	 */
-	public synchronized String readCommand() throws IOException{
-		String tmp = in.readLine();
-		logger.finest(">> "+tmp);
-		if(parseReturnCode(tmp) >= 400 )
-			throw new IOException(tmp);
+     * @param   cmd     a String command that will be sent to the server
+     * @return the server response code
+     */
+    public synchronized int sendCommand(String cmd) throws IOException{
+        logger.finest(">> "+cmd);
+        out.write(cmd + NEWLINE);
+        out.flush();
+        String reply = readCommand();
+        return parseReturnCode(reply);
+    }
 
-		return tmp;
-	}
+    /**
+     * Reads on line from the command channel
+     *
+     * @throws IOException if the server returns a error code
+     */
+    public synchronized String readCommand() throws IOException{
+        String tmp = in.readLine();
+        logger.finest(">> "+tmp);
+        if(parseReturnCode(tmp) >= 400 )
+            throw new IOException(tmp);
+
+        return tmp;
+    }
 
     private static int parseReturnCode(String msg){
         return Integer.parseInt(msg.substring(0, 3));
@@ -166,7 +166,7 @@ public class SmtpClient {
         sendCommand(CMD_RESET);
     }
 
-	public synchronized void close() throws IOException{
+    public synchronized void close() throws IOException{
         if (in != null) {
             sendCommand(CMD_QUIT);
             socket.close();
@@ -174,5 +174,5 @@ public class SmtpClient {
             in = null;
             out = null;
         }
-	}
+    }
 }

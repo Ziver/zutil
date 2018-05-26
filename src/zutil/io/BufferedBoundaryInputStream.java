@@ -33,23 +33,23 @@ import java.io.InputStream;
  * until it gets to a boundary and will return -1 (end of stream).
  * The stream will not return any data until the {@link #next()}
  * method is called.
- * 
+ *
  * @author Ziver
  *
  */
 public class BufferedBoundaryInputStream extends FilterInputStream{
-	/** The size of the buffer in bytes */
-	protected static final int DEFAULT_BUF_SIZE = 8192;
+    /** The size of the buffer in bytes */
+    protected static final int DEFAULT_BUF_SIZE = 8192;
 
-	/** The raw buffer */
+    /** The raw buffer */
     private byte buffer[];
     /** The current position in the buffer */
     private int buf_pos = 0;
-	/** The end position of the buffer */
+    /** The end position of the buffer */
     private int buf_end = 0;
     /** Boundary position, 0< means no boundary found */
     private int buf_bound_pos = -1;
-	/** The boundary (the delimiter)  */
+    /** The boundary (the delimiter)  */
     private byte[] boundary;
     /** The position in the buffer where user has marked, -1 if no mark is set **/
     private int buf_mark = -1;
@@ -57,77 +57,76 @@ public class BufferedBoundaryInputStream extends FilterInputStream{
     private int buf_mark_limit = 0;
 
 
-	/**
-	 * Creates a instance of this class with a default buffer size of 64K
-	 * 
-	 * @param 	in			is the InputStream that the buffer will use
-	 */
-	public BufferedBoundaryInputStream(InputStream in){
-		this(in, DEFAULT_BUF_SIZE);
-	}
+    /**
+     * Creates a instance of this class with a default buffer size of 64K
+     *
+     * @param 	in			is the InputStream that the buffer will use
+     */
+    public BufferedBoundaryInputStream(InputStream in){
+        this(in, DEFAULT_BUF_SIZE);
+    }
 
-	/**
-	 * Creates a instance of this class
-	 * 
-	 * @param 	in			is the InputStream that the buffer will use
-	 * @param	buf_size	speifies the buffer size
-	 */
-	public BufferedBoundaryInputStream(InputStream in, int buf_size){
-		super(in);
-		buffer = new byte[buf_size];
-	}
+    /**
+     * Creates a instance of this class
+     *
+     * @param 	in			is the InputStream that the buffer will use
+     * @param	buf_size	speifies the buffer size
+     */
+    public BufferedBoundaryInputStream(InputStream in, int buf_size){
+        super(in);
+        buffer = new byte[buf_size];
+    }
 
 
-
-	/**
+    /**
      * @return 			the next byte from the stream or -1 if EOF or stream has encountered a boundary
-	 */
-	public int read() throws IOException{
+     */
+    public int read() throws IOException{
         if (fillBuffer() < 0)
             return -1;
 
         if(isOnBoundary())
-			return -1; // boundary
-		return buffer[buf_pos++];
-	}
+            return -1; // boundary
+        return buffer[buf_pos++];
+    }
 
-	/**
-	 * Fills the given array with data from the buffer
-	 * 
-	 * @param 	b 		is the array that will be filled
-	 * @return 			the amount of bytes read or -1 if EOF or stream is on a boundary
-	 */	
-	public int read(byte b[]) throws IOException {
-		return read(b, 0, b.length);
-	}
-
-	/**
-	 * Reads a given length of bytes from the buffer
-	 * 
-	 * @param 	b 		is the array that will be filled
-	 * @param 	off 	is the offset in the array
-	 * @param 	len 	is the amount to read
+    /**
+     * Fills the given array with data from the buffer
+     *
+     * @param 	b 		is the array that will be filled
      * @return 			the amount of bytes read or -1 if EOF or stream is on a boundary
-	 */
-	public int read(byte b[], int off, int len) throws IOException {
+     */
+    public int read(byte b[]) throws IOException {
+        return read(b, 0, b.length);
+    }
+
+    /**
+     * Reads a given length of bytes from the buffer
+     *
+     * @param 	b 		is the array that will be filled
+     * @param 	off 	is the offset in the array
+     * @param 	len 	is the amount to read
+     * @return 			the amount of bytes read or -1 if EOF or stream is on a boundary
+     */
+    public int read(byte b[], int off, int len) throws IOException {
         if (fillBuffer() < 0)
             return -1; // EOF
         if (isOnBoundary())
-			return -1; // boundary
+            return -1; // boundary
 
-		// The request is larger then the buffer size
-		int leftover = available();
-		if (len > leftover)
-			len = leftover;
+        // The request is larger then the buffer size
+        int leftover = available();
+        if (len > leftover)
+            len = leftover;
 
-		// the boundary is in the read range
-		if (buf_pos < buf_bound_pos && buf_bound_pos < buf_pos+len)
-			len = buf_bound_pos - buf_pos;
-		
-		System.arraycopy(buffer, buf_pos, b, off, len);
-		buf_pos += len;
-		return len;
-	}
+        // the boundary is in the read range
+        if (buf_pos < buf_bound_pos && buf_bound_pos < buf_pos+len)
+            len = buf_bound_pos - buf_pos;
+
+        System.arraycopy(buffer, buf_pos, b, off, len);
+        buf_pos += len;
+        return len;
+    }
 
 
     /**
@@ -157,76 +156,76 @@ public class BufferedBoundaryInputStream extends FilterInputStream{
     /**
      * Skips over the closest boundary
      */
-	public void next() throws IOException {
-		// read data until we find the next boundary or get to the end of the stream
-		if (buf_bound_pos < 0) {
+    public void next() throws IOException {
+        // read data until we find the next boundary or get to the end of the stream
+        if (buf_bound_pos < 0) {
             while (fillBuffer() >= 0 && buf_bound_pos < 0)
                 buf_pos = buf_end;
         }
 
-		if (buf_bound_pos >= 0){ // is boundary in buffer?
-			buf_pos += boundary.length;
-			findNextBoundary();
-		}
-	}
-	
+        if (buf_bound_pos >= 0){ // is boundary in buffer?
+            buf_pos += boundary.length;
+            findNextBoundary();
+        }
+    }
 
-	/**
-	 * Skips a specific amounts of bytes in the buffer.
-	 * Note that his method does not check for boundaries
+
+    /**
+     * Skips a specific amounts of bytes in the buffer.
+     * Note that his method does not check for boundaries
      * and it will only skip in the local buffer.
-	 * 
+     *
      * @param	n 	the number of bytes to be skipped.
      * @return		the actual number of bytes skipped,
      *              0 if it has reach the end of the buffer but does not mean end of stream.
-	 */
-	public long skip(long n) throws IOException {
-		int leftover = available();
-		if(n > leftover){
-			buf_pos = buf_end;
-			return leftover;
-		}
-		return buf_pos += n;
-	}
-	
-	
-	/**
-	 * Sets the boundary for the stream
-	 */
-	public void setBoundary(String b){
-		this.boundary = b.getBytes();
-        findNextBoundary(); // redo the search with the new boundary
-	}
-	
-	/**
-	 * Sets the boundary for the stream
-	 */
-	public void setBoundary(byte[] b){
-		boundary = new byte[b.length];
-		System.arraycopy(b, 0, boundary, 0, b.length);
-        findNextBoundary(); // redo the search with the new boundary
-	}
+     */
+    public long skip(long n) throws IOException {
+        int leftover = available();
+        if(n > leftover){
+            buf_pos = buf_end;
+            return leftover;
+        }
+        return buf_pos += n;
+    }
 
-	/**
-	 * @return     an estimate of the number of bytes that can be read (or skipped
-	 *             over) from this buffered input stream without blocking.
-	 */
-	public int available() throws IOException {
-	    if (super.available() <= 0)
-	        return buf_end - buf_pos; // return the whole stream as there are no more boundaries
+
+    /**
+     * Sets the boundary for the stream
+     */
+    public void setBoundary(String b){
+        this.boundary = b.getBytes();
+        findNextBoundary(); // redo the search with the new boundary
+    }
+
+    /**
+     * Sets the boundary for the stream
+     */
+    public void setBoundary(byte[] b){
+        boundary = new byte[b.length];
+        System.arraycopy(b, 0, boundary, 0, b.length);
+        findNextBoundary(); // redo the search with the new boundary
+    }
+
+    /**
+     * @return     an estimate of the number of bytes that can be read (or skipped
+     *             over) from this buffered input stream without blocking.
+     */
+    public int available() throws IOException {
+        if (super.available() <= 0)
+            return buf_end - buf_pos; // return the whole stream as there are no more boundaries
         else if (buf_end < boundary.length)
-	        return 0; // we need a safety block in case boundary is split
-		return buf_end - boundary.length - buf_pos;
-	}
+            return 0; // we need a safety block in case boundary is split
+        return buf_end - boundary.length - buf_pos;
+    }
 
 
 
     /**
      * @return true for BufferedBoundaryInputStream
      */
-	public boolean markSupported(){
-		return true;
-	}
+    public boolean markSupported(){
+        return true;
+    }
 
     /**
      * See {@link InputStream#mark(int)} for details

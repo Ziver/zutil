@@ -32,13 +32,13 @@ package zutil;
  *
  */
 public interface ProgressListener<S,D> {
-	
-	/**
-	 * This method is called when the progress is updated
-	 * 
-	 * @param source is the source object of the progress
-	 * @param info is some information from the source object
-	 * @param percent is the progress of the object (0-100)
-	 */
-	public void progressUpdate(S source, D info, double percent);
+
+    /**
+     * This method is called when the progress is updated
+     *
+     * @param source is the source object of the progress
+     * @param info is some information from the source object
+     * @param percent is the progress of the object (0-100)
+     */
+    public void progressUpdate(S source, D info, double percent);
 }

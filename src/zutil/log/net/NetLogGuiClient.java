@@ -38,14 +38,14 @@ import javafx.stage.Stage;
 import java.io.IOException;
  
 public class NetLogGuiClient extends Application{
-	public static final String VERSION = "0.1";
-		
-	// UI elements
-    @FXML 
-	private TabPane tabPane;
+    public static final String VERSION = "0.1";
 
-	
-	public static void main(String[] args) {
+    // UI elements
+    @FXML 
+    private TabPane tabPane;
+
+
+    public static void main(String[] args) {
         Application.launch(NetLogGuiClient.class, args);
     }
     
@@ -57,40 +57,40 @@ public class NetLogGuiClient extends Application{
         stage.setScene(new Scene(root));
         stage.show();
     }
-	
-	// Menu Actions
+
+    // Menu Actions
     @FXML 
-	protected void handleConnectAction(ActionEvent event) {
-		try{
-			tabPane.getTabs().add(new NetLoggerClientTab("koc.se", 8080));
-		}catch(Exception e){
-			e.printStackTrace();
-		}
+    protected void handleConnectAction(ActionEvent event) {
+        try{
+            tabPane.getTabs().add(new NetLoggerClientTab("koc.se", 8080));
+        }catch(Exception e){
+            e.printStackTrace();
+        }
     }
-	
-	@FXML 
-	protected void handleExitAction(ActionEvent event) {
-		System.exit(0);
+
+    @FXML
+    protected void handleExitAction(ActionEvent event) {
+        System.exit(0);
     }
-	
-	@FXML 
-	protected void handleAboutAction(ActionEvent event) {
-		
+
+    @FXML
+    protected void handleAboutAction(ActionEvent event) {
+
     }
-	
-	private class NetLoggerClientTab extends Tab{
-		public NetLoggerClientTab(String host, int port) throws IOException{
-			this.setText( host+":"+port );
+
+    private class NetLoggerClientTab extends Tab{
+        public NetLoggerClientTab(String host, int port) throws IOException{
+            this.setText( host+":"+port );
 
             FXMLLoader loader = new FXMLLoader();
-			Parent tabRoot = loader.load(getClass().getResource("NetLogClientInstance.fxml"));
-			this.setContent(tabRoot);
-			AnchorPane.setRightAnchor(tabRoot, 0.0);
-			//this.setOnClosed(new EventHandler<Event>() {
-			//	public void handle(Event e) {
-			//		handleDisconnectAction(e);
-			//	}
-			//});
-		}
-	}
+            Parent tabRoot = loader.load(getClass().getResource("NetLogClientInstance.fxml"));
+            this.setContent(tabRoot);
+            AnchorPane.setRightAnchor(tabRoot, 0.0);
+            //this.setOnClosed(new EventHandler<Event>() {
+            //	public void handle(Event e) {
+            //		handleDisconnectAction(e);
+            //	}
+            //});
+        }
+    }
 }

@@ -40,30 +40,30 @@ import java.util.Properties;
  * @author Ziver
  */
 public class PropertiesSQLResult implements SQLResultHandler<Properties> {
-	
-	private Properties prop;
-	
-	/**
-	 * Creates a new Properties object to be filled
-	 */
-	public PropertiesSQLResult(){
-		this.prop = new Properties();
-	}
-	
-	/**
-	 * Adds data to a existing Properties object
-	 */
-	public PropertiesSQLResult(Properties p){
-		this.prop = p;
-	}
-	
-	
-	/**
-	 * Is called to handle an result from an query.
-	 */
-	public Properties handleQueryResult(Statement stmt, ResultSet result) throws SQLException{
-		while( result.next() )
-			prop.setProperty(result.getString(1), result.getString(2));
-		return prop;
-	}
+
+    private Properties prop;
+
+    /**
+     * Creates a new Properties object to be filled
+     */
+    public PropertiesSQLResult(){
+        this.prop = new Properties();
+    }
+
+    /**
+     * Adds data to a existing Properties object
+     */
+    public PropertiesSQLResult(Properties p){
+        this.prop = p;
+    }
+
+
+    /**
+     * Is called to handle an result from an query.
+     */
+    public Properties handleQueryResult(Statement stmt, ResultSet result) throws SQLException{
+        while( result.next() )
+            prop.setProperty(result.getString(1), result.getString(2));
+        return prop;
+    }
 }

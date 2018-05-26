@@ -52,7 +52,7 @@ public class DynamicByteArrayStreamTest {
 
         byte[] result = out.getBytes();
         for(int i=0; i<b.length; i++){
-        	assertEquals(b[i], result[i]);
+            assertEquals(b[i], result[i]);
         }
     }
 }

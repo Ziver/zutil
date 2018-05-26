@@ -42,26 +42,26 @@ import static zutil.net.http.multipart.MultipartParser.HEADER_CONTENT_TYPE;
 public class MultipartFileField implements MultipartField{
     private static final Logger logger = LogUtil.getLogger();
 
-	private String fieldname;
-	private String filename;
+    private String fieldname;
+    private String filename;
     private String contentType;
     private byte[] content;
     private InputStream in;
 
 
-	protected MultipartFileField(Map<String,String> headers, InputStream in) throws IOException {
-		this.fieldname = headers.get("name");
-		this.filename = headers.get("filename");
-		this.contentType = headers.get(HEADER_CONTENT_TYPE);
+    protected MultipartFileField(Map<String,String> headers, InputStream in) throws IOException {
+        this.fieldname = headers.get("name");
+        this.filename = headers.get("filename");
+        this.contentType = headers.get(HEADER_CONTENT_TYPE);
         this.in = in;
-	}
-	
-	/**
-	 * @return the amount of data received for this field
-	 */
-	public long getLength(){
-		return 0; //TODO:
-	}
+    }
+
+    /**
+     * @return the amount of data received for this field
+     */
+    public long getLength(){
+        return 0; //TODO:
+    }
 
     /**
      * @return the field name
@@ -70,13 +70,13 @@ public class MultipartFileField implements MultipartField{
         return fieldname;
     }
 
-	public String getFilename(){
-		return filename;
-	}
+    public String getFilename(){
+        return filename;
+    }
 
-	public String getContentType() {
-		return contentType;
-	}
+    public String getContentType() {
+        return contentType;
+    }
 
 
 
@@ -100,20 +100,20 @@ public class MultipartFileField implements MultipartField{
     }
 
     /**
-	 * Reads in all data and save it into the specified file.
+     * Reads in all data and save it into the specified file.
      *
      * Note: Only one of the methods {@link #getContent()} or
      * {@link #saveToFile(File)} can be used as they will consume the data in the stream.
-	 *
-	 * @param   file    is the new file where the data will be stored
-	 */
-	public void saveToFile(File file) throws IOException {
-	    if (in == null)
-	        throw new IOException("Stream already consumed.");
+     *
+     * @param   file    is the new file where the data will be stored
+     */
+    public void saveToFile(File file) throws IOException {
+        if (in == null)
+            throw new IOException("Stream already consumed.");
         BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(file));
         IOUtil.copyStream(in, out);
         out.close();
         in = null; // reset InputStream
-	}
+    }
 
 }

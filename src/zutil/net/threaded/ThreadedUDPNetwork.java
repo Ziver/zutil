@@ -35,102 +35,102 @@ import java.net.*;
  * @author Ziver
  */
 public class ThreadedUDPNetwork extends Thread{
-	public static final int BUFFER_SIZE = 512;
-	
-	// Type of UDP socket
-	enum UDPType{
-		MULTICAST,
-		UNICAST
-	}
-	protected final UDPType type;
-	protected final int port;	
-	protected DatagramSocket socket;
-	protected ThreadedUDPNetworkThread thread = null;
+    public static final int BUFFER_SIZE = 512;
 
-	/**
-	 * Creates a new unicast Client instance of the class
-	 *
-	 * @throws SocketException
-	 */
-	public ThreadedUDPNetwork() throws SocketException{
-		this.type = UDPType.UNICAST;
-		this.port = -1;
-		
-		socket = new DatagramSocket();
-	}
+    // Type of UDP socket
+    enum UDPType{
+        MULTICAST,
+        UNICAST
+    }
+    protected final UDPType type;
+    protected final int port;
+    protected DatagramSocket socket;
+    protected ThreadedUDPNetworkThread thread = null;
 
-	/**
-	 * Creates a new unicast Server instance of the class
-	 *
-	 * @param	port	is the port that the server should listen to
-	 * @throws SocketException
-	 */
-	public ThreadedUDPNetwork(int port) throws SocketException{
-		this.type = UDPType.UNICAST;
-		this.port = port;
-		
-		socket = new DatagramSocket( port );
-	}
-	
-	/**
-	 * Creates a new multicast Server instance of the class
-	 *
-	 * @param	port			is the port that the server should listen to
-	 * @param	multicastAddr	is the multicast address that the server will listen on
-	 * @throws IOException 
-	 */
-	public ThreadedUDPNetwork(String multicastAddr, int port ) throws IOException{
-		this.type = UDPType.MULTICAST;
-		this.port = port;
-		
-		// init udp socket
-		MulticastSocket msocket = new MulticastSocket( port );
-		InetAddress group = InetAddress.getByName( multicastAddr );
-		msocket.joinGroup( group );	
+    /**
+     * Creates a new unicast Client instance of the class
+     *
+     * @throws SocketException
+     */
+    public ThreadedUDPNetwork() throws SocketException{
+        this.type = UDPType.UNICAST;
+        this.port = -1;
 
-		socket = msocket;
-	}
+        socket = new DatagramSocket();
+    }
+
+    /**
+     * Creates a new unicast Server instance of the class
+     *
+     * @param	port	is the port that the server should listen to
+     * @throws SocketException
+     */
+    public ThreadedUDPNetwork(int port) throws SocketException{
+        this.type = UDPType.UNICAST;
+        this.port = port;
+
+        socket = new DatagramSocket( port );
+    }
+
+    /**
+     * Creates a new multicast Server instance of the class
+     *
+     * @param	port			is the port that the server should listen to
+     * @param	multicastAddr	is the multicast address that the server will listen on
+     * @throws IOException
+     */
+    public ThreadedUDPNetwork(String multicastAddr, int port ) throws IOException{
+        this.type = UDPType.MULTICAST;
+        this.port = port;
+
+        // init udp socket
+        MulticastSocket msocket = new MulticastSocket( port );
+        InetAddress group = InetAddress.getByName( multicastAddr );
+        msocket.joinGroup( group );
+
+        socket = msocket;
+    }
 
 
-	public void run(){
-		try{
-			while(true){
-				byte[] buf = new byte[BUFFER_SIZE];
-				DatagramPacket packet = new DatagramPacket(buf, buf.length);
-				socket.receive( packet );
-				if( thread!=null )
-					thread.receivedPacket( packet, this );
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
-	
-	/**
-	 * Sends the given packet
-	 * 
-	 * @param	packet	is the packet to send
-	 * @throws IOException
-	 */
-	public synchronized void send( DatagramPacket packet ) throws IOException{
-		socket.send(packet);
-	}
-	
-	/**
-	 * Sets the thread that will handle the incoming packets
-	 * 
-	 * @param	thread	is the thread
-	 */
-	public void setThread(ThreadedUDPNetworkThread thread){
-		this.thread = thread;
-	}
-	
-	/**
-	 * Stops the server and interrupts its internal thread. 
-	 * This is a permanent action that will not be able to recover from
-	 */
-	public void close(){
-		this.interrupt();
-		socket.close();
-	}
+    public void run(){
+        try{
+            while(true){
+                byte[] buf = new byte[BUFFER_SIZE];
+                DatagramPacket packet = new DatagramPacket(buf, buf.length);
+                socket.receive( packet );
+                if( thread!=null )
+                    thread.receivedPacket( packet, this );
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Sends the given packet
+     *
+     * @param	packet	is the packet to send
+     * @throws IOException
+     */
+    public synchronized void send( DatagramPacket packet ) throws IOException{
+        socket.send(packet);
+    }
+
+    /**
+     * Sets the thread that will handle the incoming packets
+     *
+     * @param	thread	is the thread
+     */
+    public void setThread(ThreadedUDPNetworkThread thread){
+        this.thread = thread;
+    }
+
+    /**
+     * Stops the server and interrupts its internal thread.
+     * This is a permanent action that will not be able to recover from
+     */
+    public void close(){
+        this.interrupt();
+        socket.close();
+    }
 }

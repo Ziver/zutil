@@ -46,70 +46,70 @@ import java.util.logging.Logger;
  * @author Ziver
  */
 public class PluginManager<T> implements Iterable<PluginData>{
-	private static Logger log = LogUtil.getLogger();
+    private static Logger log = LogUtil.getLogger();
 
-	private HashMap<String, PluginData> plugins;
+    private HashMap<String, PluginData> plugins;
 
 
-	public static <T> PluginManager<T> load(String path){
-		return new PluginManager<T>(path);
-	}
+    public static <T> PluginManager<T> load(String path){
+        return new PluginManager<T>(path);
+    }
 
-	public PluginManager(){
-		this("./");
-	}
-	public PluginManager(String path){
-		plugins = new HashMap<String, PluginData>();
+    public PluginManager(){
+        this("./");
+    }
+    public PluginManager(String path){
+        plugins = new HashMap<String, PluginData>();
 
-		FileSearcher search = new FileSearcher(new File(path));
-		search.setRecursive(true);
-		search.searchFolders(false);
-		search.searchCompressedFiles(true);
-		search.setFileName("plugin.json");
+        FileSearcher search = new FileSearcher(new File(path));
+        search.setRecursive(true);
+        search.searchFolders(false);
+        search.searchCompressedFiles(true);
+        search.setFileName("plugin.json");
 
-		log.fine("Searching for plugins...");
-		for(FileSearcher.FileSearchItem file : search){
-			try {
-				DataNode node = JSONParser.read(IOUtil.readContentAsString(file.getInputStream(), true));
-				log.fine("Found plugin: "+file.getPath());
-				PluginData plugin = new PluginData(node);
+        log.fine("Searching for plugins...");
+        for(FileSearcher.FileSearchItem file : search){
+            try {
+                DataNode node = JSONParser.read(IOUtil.readContentAsString(file.getInputStream(), true));
+                log.fine("Found plugin: "+file.getPath());
+                PluginData plugin = new PluginData(node);
 
-				if (!plugins.containsKey(plugin.getName())){
-					plugins.put(plugin.getName(), plugin);
-				}
-				else {
-					double version = plugins.get(plugin.getName()).getVersion();
-					if(version < plugin.getVersion())
-						plugins.put(plugin.getName(), plugin);
-					else if(version == plugin.getVersion())
-						log.fine("Ignoring duplicate plugin: " + plugin);
-					else
-						log.fine("Ignoring outdated plugin: "+plugin);
+                if (!plugins.containsKey(plugin.getName())){
+                    plugins.put(plugin.getName(), plugin);
+                }
+                else {
+                    double version = plugins.get(plugin.getName()).getVersion();
+                    if(version < plugin.getVersion())
+                        plugins.put(plugin.getName(), plugin);
+                    else if(version == plugin.getVersion())
+                        log.fine("Ignoring duplicate plugin: " + plugin);
+                    else
+                        log.fine("Ignoring outdated plugin: "+plugin);
 
-				}
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		}
-	}
-	
-	@Override
-	public Iterator<PluginData> iterator() {
-		return plugins.values().iterator();
-	}
-	public <T> Iterator<T> getObjectIterator(Class<T> intf) {
-		return new PluginObjectIterator<T>(plugins.values().iterator(), intf);
-	}
-	public <T> Iterator<Class<? extends T>> getClassIterator(Class<T> intf) {
-		return new PluginClassIterator<T>(plugins.values().iterator(), intf);
-	}
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
 
-	public ArrayList<PluginData> toArray() {
-		return toGenericArray(iterator());
-	}
-	public <T> ArrayList<T> toArray(Class<T> intf) {
+    @Override
+    public Iterator<PluginData> iterator() {
+        return plugins.values().iterator();
+    }
+    public <T> Iterator<T> getObjectIterator(Class<T> intf) {
+        return new PluginObjectIterator<T>(plugins.values().iterator(), intf);
+    }
+    public <T> Iterator<Class<? extends T>> getClassIterator(Class<T> intf) {
+        return new PluginClassIterator<T>(plugins.values().iterator(), intf);
+    }
+
+    public ArrayList<PluginData> toArray() {
+        return toGenericArray(iterator());
+    }
+    public <T> ArrayList<T> toArray(Class<T> intf) {
         return toGenericArray(getObjectIterator(intf));
-	}
+    }
     private <T> ArrayList<T> toGenericArray(Iterator<T> it) {
         ArrayList<T> list = new ArrayList<>();
         while(it.hasNext())
@@ -118,82 +118,82 @@ public class PluginManager<T> implements Iterable<PluginData>{
     }
 
 
-	public static class PluginClassIterator<T> implements Iterator<Class<? extends T>> {
-		private Class<T> intf;
-		private Iterator<PluginData> pluginIt;
-		private Iterator<Class<?>> classIt;
+    public static class PluginClassIterator<T> implements Iterator<Class<? extends T>> {
+        private Class<T> intf;
+        private Iterator<PluginData> pluginIt;
+        private Iterator<Class<?>> classIt;
 
-		PluginClassIterator(Iterator<PluginData> it, Class<T> intf){
-			this.intf = intf;
-			this.pluginIt = it;
-		}
+        PluginClassIterator(Iterator<PluginData> it, Class<T> intf){
+            this.intf = intf;
+            this.pluginIt = it;
+        }
 
-		@Override
-		public boolean hasNext() {
-			if(pluginIt == null)
-				return false;
-			if(classIt != null && classIt.hasNext())
-				return true;
+        @Override
+        public boolean hasNext() {
+            if(pluginIt == null)
+                return false;
+            if(classIt != null && classIt.hasNext())
+                return true;
 
-			while(pluginIt.hasNext()) {
-				classIt = pluginIt.next().getClassIterator(intf);
-				if(classIt.hasNext())
-					return true;
-			}
-			classIt = null;
-			return false;
-		}
+            while(pluginIt.hasNext()) {
+                classIt = pluginIt.next().getClassIterator(intf);
+                if(classIt.hasNext())
+                    return true;
+            }
+            classIt = null;
+            return false;
+        }
 
-		@Override
-		public Class<? extends T> next() {
-			if(!hasNext())
-				throw new NoSuchElementException();
-			return (Class<? extends T>) classIt.next();
-		}
+        @Override
+        public Class<? extends T> next() {
+            if(!hasNext())
+                throw new NoSuchElementException();
+            return (Class<? extends T>) classIt.next();
+        }
 
-		@Override
-		public void remove() {
-			throw new RuntimeException("Iterator is ReadOnly");
-		}
-	}
+        @Override
+        public void remove() {
+            throw new RuntimeException("Iterator is ReadOnly");
+        }
+    }
 
 
-	public static class PluginObjectIterator<T> implements Iterator<T> {
-		private Class<T> intf;
-		private Iterator<PluginData> pluginIt;
-		private Iterator<T> objectIt;
+    public static class PluginObjectIterator<T> implements Iterator<T> {
+        private Class<T> intf;
+        private Iterator<PluginData> pluginIt;
+        private Iterator<T> objectIt;
 
-		PluginObjectIterator(Iterator<PluginData> it, Class<T> intf){
-			this.intf = intf;
-			this.pluginIt = it;
-		}
+        PluginObjectIterator(Iterator<PluginData> it, Class<T> intf){
+            this.intf = intf;
+            this.pluginIt = it;
+        }
 
-		@Override
-		public boolean hasNext() {
-			if(pluginIt == null)
-				return false;
-			if(objectIt != null && objectIt.hasNext())
-				return true;
+        @Override
+        public boolean hasNext() {
+            if(pluginIt == null)
+                return false;
+            if(objectIt != null && objectIt.hasNext())
+                return true;
 
-			while(pluginIt.hasNext()) {
-				objectIt = pluginIt.next().getObjectIterator(intf);
-				if(objectIt.hasNext())
-					return true;
-			}
-			objectIt = null;
-			return false;
-		}
+            while(pluginIt.hasNext()) {
+                objectIt = pluginIt.next().getObjectIterator(intf);
+                if(objectIt.hasNext())
+                    return true;
+            }
+            objectIt = null;
+            return false;
+        }
 
-		@Override
-		public T next() {
-			if(!hasNext())
-				throw new NoSuchElementException();
-			return objectIt.next();
-		}
+        @Override
+        public T next() {
+            if(!hasNext())
+                throw new NoSuchElementException();
+            return objectIt.next();
+        }
 
-		@Override
-		public void remove() {
-			throw new RuntimeException("Iterator is ReadOnly");
-		}
-	}
+        @Override
+        public void remove() {
+            throw new RuntimeException("Iterator is ReadOnly");
+        }
+    }
 }

@@ -37,55 +37,55 @@ import java.util.logging.Logger;
 
 
 public class NetLogClient extends Thread{
-	private static final Logger logger = LogUtil.getLogger();
-	
-	private ConcurrentLinkedQueue<NetLogListener> listeners;
-	private Socket s;
-	private ObjectOutputStream out;
+    private static final Logger logger = LogUtil.getLogger();
 
-	public NetLogClient(String host, int port) throws UnknownHostException, IOException{
-		s = new Socket(host, port);
-		out = new ObjectOutputStream(s.getOutputStream());
-		listeners = new ConcurrentLinkedQueue<NetLogListener>();
-		this.start();
-	}
+    private ConcurrentLinkedQueue<NetLogListener> listeners;
+    private Socket s;
+    private ObjectOutputStream out;
 
-	public void addListener(NetLogListener listener){
-		logger.info("Registring new NetLogListener: "+listener.getClass().getName());
-		listeners.add( listener );
-	}
+    public NetLogClient(String host, int port) throws UnknownHostException, IOException{
+        s = new Socket(host, port);
+        out = new ObjectOutputStream(s.getOutputStream());
+        listeners = new ConcurrentLinkedQueue<NetLogListener>();
+        this.start();
+    }
 
-	public void run(){
-		try{
-			ObjectInputStream in = new ObjectInputStream(s.getInputStream());
-			while( true ){
-				Object o = in.readObject();
+    public void addListener(NetLogListener listener){
+        logger.info("Registring new NetLogListener: "+listener.getClass().getName());
+        listeners.add( listener );
+    }
 
-				for( NetLogListener listener : listeners ){
-					if( o instanceof NetLogMessage )
-						listener.handleLogMessage((NetLogMessage)o);
-					else if( o instanceof NetLogExceptionMessage )
-						listener.handleExceptionMessage((NetLogExceptionMessage)o);
-					else if( o instanceof NetLogStatusMessage )
-						listener.handleStatusMessage((NetLogStatusMessage)o);
-					else
-						logger.warning("Received unknown message: "+o.getClass().getName());
-				}
-			}
-		} catch( Exception e ){
-			logger.log(Level.SEVERE, null, e);
-			close();
-		}
-	}
+    public void run(){
+        try{
+            ObjectInputStream in = new ObjectInputStream(s.getInputStream());
+            while( true ){
+                Object o = in.readObject();
+
+                for( NetLogListener listener : listeners ){
+                    if( o instanceof NetLogMessage )
+                        listener.handleLogMessage((NetLogMessage)o);
+                    else if( o instanceof NetLogExceptionMessage )
+                        listener.handleExceptionMessage((NetLogExceptionMessage)o);
+                    else if( o instanceof NetLogStatusMessage )
+                        listener.handleStatusMessage((NetLogStatusMessage)o);
+                    else
+                        logger.warning("Received unknown message: "+o.getClass().getName());
+                }
+            }
+        } catch( Exception e ){
+            logger.log(Level.SEVERE, null, e);
+            close();
+        }
+    }
 
 
 
-	public void close(){
-		try{
-			this.interrupt();
-			s.close();
-		} catch (Exception e){
-			logger.log(Level.SEVERE, "Unable to close Client Socket.", e);
-		}
-	}
+    public void close(){
+        try{
+            this.interrupt();
+            s.close();
+        } catch (Exception e){
+            logger.log(Level.SEVERE, "Unable to close Client Socket.", e);
+        }
+    }
 }

@@ -32,27 +32,27 @@ import java.io.ObjectOutputStream;
 import java.io.Serializable;
 
 public class SerializableBufferedImage implements Serializable{
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-	private BufferedImage image;
+    private BufferedImage image;
 
-	public SerializableBufferedImage(BufferedImage image){
-		this.image = image;
-	}
-	
-	public BufferedImage getImage(){
-		return image;
-	}
-	
-	public void setImage(BufferedImage image){
-		this.image=image;
-	}
+    public SerializableBufferedImage(BufferedImage image){
+        this.image = image;
+    }
 
-	private void writeObject(ObjectOutputStream out)throws IOException{
-		ImageIO.write(image,"jpeg",ImageIO.createImageOutputStream(out));
-	}
+    public BufferedImage getImage(){
+        return image;
+    }
 
-	private void readObject(ObjectInputStream in)throws IOException, ClassNotFoundException{
-		image = ImageIO.read(ImageIO.createImageInputStream(in));
-	}
+    public void setImage(BufferedImage image){
+        this.image=image;
+    }
+
+    private void writeObject(ObjectOutputStream out)throws IOException{
+        ImageIO.write(image,"jpeg",ImageIO.createImageOutputStream(out));
+    }
+
+    private void readObject(ObjectInputStream in)throws IOException, ClassNotFoundException{
+        image = ImageIO.read(ImageIO.createImageInputStream(in));
+    }
 }
