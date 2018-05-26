@@ -26,14 +26,13 @@ package zutil.net.nio;
 
 import zutil.log.CompactLogFormatter;
 import zutil.log.LogUtil;
-import zutil.net.nio.response.StringResponseMessage;
 import zutil.net.nio.response.PrintResponseHandler;
+import zutil.net.nio.response.StringResponseMessage;
 import zutil.net.nio.worker.StandardWorker;
 
 import java.io.IOException;
 import java.net.InetAddress;
 import java.security.NoSuchAlgorithmException;
-import java.util.logging.Level;
 
 
 @SuppressWarnings("unused")

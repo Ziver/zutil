@@ -8,7 +8,7 @@ import java.io.OutputStreamWriter;
 import java.util.Date;
 import java.util.GregorianCalendar;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 import static zutil.net.smtp.SmtpClient.NEWLINE;
 
 /**

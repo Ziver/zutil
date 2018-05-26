@@ -5,7 +5,7 @@ import zutil.net.ws.WSInterface;
 
 import java.util.HashMap;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 /**
  * Created by Ziver on 2016-09-27.

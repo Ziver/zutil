@@ -24,7 +24,6 @@
 
 package zutil.osal.macos;
 
-import com.mysql.jdbc.NotImplemented;
 import zutil.osal.HardwareAbstractionLayer;
 import zutil.osal.OSAbstractionLayer;
 

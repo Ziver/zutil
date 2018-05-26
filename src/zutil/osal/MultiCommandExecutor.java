@@ -4,7 +4,6 @@ import zutil.parser.Base64Encoder;
 
 import java.io.*;
 import java.security.SecureRandom;
-import java.security.Security;
 
 /**
  * This class starts a platform specific shell and runs all commands

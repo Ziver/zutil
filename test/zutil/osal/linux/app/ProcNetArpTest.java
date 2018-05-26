@@ -4,11 +4,10 @@ import org.junit.Test;
 import zutil.io.StringInputStream;
 
 import java.io.BufferedReader;
-import java.io.FileInputStream;
 import java.io.InputStreamReader;
 import java.net.InetAddress;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 /**
  * Created by ezivkoc on 2016-09-30.

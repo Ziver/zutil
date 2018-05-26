@@ -27,7 +27,6 @@ package zutil.net.nio.worker;
 import zutil.net.nio.NioNetwork;
 
 import java.net.SocketAddress;
-import java.nio.channels.SocketChannel;
 
 
 public class WorkerEventData {

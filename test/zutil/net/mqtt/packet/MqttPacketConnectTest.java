@@ -2,7 +2,6 @@ package zutil.net.mqtt.packet;
 
 import org.junit.Test;
 import zutil.converter.Converter;
-import zutil.net.mqtt.packet.MqttPacketConnect;
 import zutil.parser.binary.BinaryStructInputStream;
 import zutil.parser.binary.BinaryStructOutputStream;
 

@@ -28,7 +28,6 @@ import zutil.net.nio.NioNetwork;
 
 import java.net.SocketAddress;
 import java.util.LinkedList;
-import java.util.List;
 
 
 public abstract class Worker {

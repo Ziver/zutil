@@ -9,7 +9,7 @@ import zutil.parser.DataNode;
 import java.io.IOException;
 import java.util.Map;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 /**
  * @author Ziver on 2016-11-04.

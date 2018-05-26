@@ -27,7 +27,6 @@ package zutil.parser;
 import zutil.parser.DataNode.DataType;
 import zutil.struct.MutableInt;
 
-import java.nio.charset.MalformedInputException;
 import java.text.ParseException;
 
 /**

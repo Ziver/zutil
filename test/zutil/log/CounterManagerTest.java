@@ -27,7 +27,8 @@ package zutil.log;
 import org.junit.Test;
 import zutil.log.CounterManager.Counter;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertSame;
 
 public class CounterManagerTest {
 

@@ -24,7 +24,6 @@
 
 package zutil.converter;
 
-import zutil.io.DynamicByteArrayStream;
 import zutil.parser.Base64Decoder;
 
 import java.io.*;

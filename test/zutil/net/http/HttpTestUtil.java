@@ -1,7 +1,6 @@
 package zutil.net.http;
 
 import zutil.io.StringOutputStream;
-import zutil.net.http.page.HttpDigestAuthPageTest;
 
 import java.io.IOException;
 import java.util.HashMap;

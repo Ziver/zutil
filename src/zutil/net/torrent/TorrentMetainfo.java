@@ -24,13 +24,11 @@
 
 package zutil.net.torrent;
 
-import zutil.io.MultiPrintStream;
 import zutil.io.file.FileUtil;
 import zutil.parser.BEncodedParser;
 import zutil.parser.DataNode;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.text.ParseException;
 import java.util.ArrayList;

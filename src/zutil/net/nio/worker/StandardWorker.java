@@ -27,7 +27,6 @@ package zutil.net.nio.worker;
 import zutil.converter.Converter;
 import zutil.log.LogUtil;
 import zutil.net.nio.NioNetwork;
-import zutil.net.nio.message.Message;
 import zutil.net.nio.message.EchoMessage;
 import zutil.net.nio.response.RequestResponseMessage;
 import zutil.net.nio.response.ResponseHandler;

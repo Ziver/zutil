@@ -28,7 +28,6 @@ import zutil.log.LogUtil;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.geom.Line2D;
 import java.util.logging.Logger;
 
 public abstract class AbstractChart extends JPanel{

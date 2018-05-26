@@ -4,7 +4,8 @@ import org.junit.Test;
 
 import java.text.ParseException;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
 
 /**
  * Created by Ziver on 2016-09-27.

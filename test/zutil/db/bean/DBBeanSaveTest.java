@@ -10,7 +10,7 @@ import zutil.log.LogUtil;
 import java.sql.SQLException;
 import java.util.logging.Level;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 import static zutil.db.bean.DBBeanTestBase.*;
 
 /**

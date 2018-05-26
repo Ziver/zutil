@@ -11,7 +11,6 @@ import java.util.logging.Level;
 
 import static junit.framework.TestCase.assertNull;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertSame;
 import static zutil.db.bean.DBBeanTestBase.*;
 
 /**

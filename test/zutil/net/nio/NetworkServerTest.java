@@ -30,7 +30,6 @@ import zutil.net.nio.worker.StandardWorker;
 
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
-import java.util.logging.Level;
 
 
 @SuppressWarnings("unused")

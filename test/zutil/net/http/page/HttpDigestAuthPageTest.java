@@ -1,9 +1,6 @@
 package zutil.net.http.page;
 
-import static org.hamcrest.CoreMatchers.*;
-
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import zutil.Hasher;
 import zutil.io.IOUtil;
@@ -13,6 +10,8 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.CoreMatchers.not;
 import static org.junit.Assert.*;
 
 /**

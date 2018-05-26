@@ -1,7 +1,5 @@
 package zutil.net.mqtt.packet;
 
-import zutil.parser.binary.BinaryStruct;
-
 /**
  * The CONNACK Packet is the packet sent by the Server in response to a
  * CONNECT Packet received from a Client.

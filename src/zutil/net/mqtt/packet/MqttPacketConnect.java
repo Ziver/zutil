@@ -1,7 +1,5 @@
 package zutil.net.mqtt.packet;
 
-import zutil.parser.binary.BinaryStruct;
-
 /**
  * This packet is the first message sent from a Client when it
  * has established a connection to a Server. A Client can only

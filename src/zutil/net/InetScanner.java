@@ -3,15 +3,8 @@ package zutil.net;
 import zutil.osal.MultiCommandExecutor;
 import zutil.osal.OSAbstractionLayer;
 
-import java.io.*;
-import java.net.Inet4Address;
+import java.io.IOException;
 import java.net.InetAddress;
-import java.net.NetworkInterface;
-import java.net.SocketException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.List;
 
 /**
  * This class is a IPv4 scanner, it will scan a

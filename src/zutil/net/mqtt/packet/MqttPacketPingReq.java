@@ -1,7 +1,5 @@
 package zutil.net.mqtt.packet;
 
-import zutil.parser.binary.BinaryStruct;
-
 /**
  * The PINGREQ Packet is used in Keep Alive processing
  *
