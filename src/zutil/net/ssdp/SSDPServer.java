@@ -43,13 +43,13 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * A Server class that announces an service by the SSDP 
+ * A Server class that announces an service by the SSDP
  * protocol specified at:
  * http://coherence.beebits.net/chrome/site/draft-cai-ssdp-v1-03.txt
  * ftp://ftp.pwg.org/pub/pwg/www/hypermail/ps/att-0188/01-psi_SSDP.pdf
- * 
+ *
  * @author Ziver
- * 
+ *
  * ********* Message clarification:
  * ****** Incoming:
  * ST: Search Target, this is object of the discovery request, (e.g., ssdp:all, etc.)
@@ -85,7 +85,7 @@ public class SSDPServer extends ThreadedUDPNetwork implements ThreadedUDPNetwork
         super( SSDP_MULTICAST_ADDR, SSDP_PORT );
         super.setThread( this );
 
-        services = new HashMap<String, SSDPServiceInfo>();
+        services = new HashMap<>();
 
         setCacheTime( DEFAULT_CACHE_TIME );
         enableNotify( true );

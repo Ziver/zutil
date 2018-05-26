@@ -36,118 +36,112 @@ import java.io.InputStreamReader;
  */
 public class MathParser {
 
-    public static MathNode parse(String functionString){
-        StringBuffer functionStringBuffer = new StringBuffer(functionString+(char)0);
+    public static MathNode parse(String functionString) {
+        StringBuffer functionStringBuffer = new StringBuffer(functionString + (char) 0);
         MathNode node = new MathNode();
 
         parse(functionStringBuffer, new StringBuffer(), null, node);
-
-        System.out.println("----------------------------------------------------------------------");
-        System.out.println(node+" = "+node.exec());
-        System.out.println("----------------------------------------------------------------------");
         return node;
     }
 
-    private static void parse(StringBuffer functionString, StringBuffer temp, MathOperation previus, MathNode rootNode){
-        if(functionString.length() <= 0){
+    private static void parse(StringBuffer functionString, StringBuffer temp, MathOperation previous, MathNode rootNode) {
+        if (functionString.length() <= 0) {
             return;
         }
         char c = functionString.charAt(0);
         functionString.deleteCharAt(0);
-        System.out.println("char: "+c);
         MathOperation current = null;
 
-        if(!Character.isWhitespace(c)){
-            if(isNumber(c)){
+        if (!Character.isWhitespace(c)) {
+            if (isNumber(c)) {
                 temp.append(c);
-            }
-            else{
+            } else {
                 Math container = new MathNumber();
-                if(temp.length() > 0){
-                    System.out.println("("+Double.parseDouble(temp.toString())+")");
-                    ((MathNumber)container).num = Double.parseDouble(temp.toString());
+                if (temp.length() > 0) {
+                    ((MathNumber) container).num = Double.parseDouble(temp.toString());
                     temp.delete(0, temp.length());
                 }
 
-                if(rootNode.math == null){
-                    System.out.println("Initializing rootNode");
-                    previus = getOperation(c);
-                    System.out.println("operation: "+previus.getClass().getName());
-                    previus.math1 = container;
-                    rootNode.math = previus;
-                }
-                else{
-                    if(c == '('){
-                        MathNode parenteses = new MathNode();
-                        MathOperation previousParanteses = previus;
-                        parse(functionString, temp, previus, parenteses);
-                        previousParanteses.math2 = parenteses;
-                        System.out.println(parenteses);
-                        container = parenteses;
+                if (rootNode.math == null) {
+                    previous = getOperation(c);
+                    previous.math1 = container;
+                    rootNode.math = previous;
+                } else {
+                    if (c == '(') {
+                        MathNode parentheses = new MathNode();
+                        parse(functionString, temp, previous, parentheses);
+                        previous.math2 = parentheses;
+                        container = parentheses;
 
                         // get the next operation
                         c = functionString.charAt(0);
                         functionString.deleteCharAt(0);
-                        System.out.println("char: "+c);
                     }
 
                     current = getOperation(c);
-                    System.out.println("operation: "+current.getClass().getName());
                     current.math1 = container;
-                    previus.math2 = current;
+                    previous.math2 = current;
 
-                    if(c == ')'){
+                    if (c == ')') {
                         return;
                     }
                 }
             }
         }
 
-        if(current != null) parse(functionString, temp, current, rootNode);
-        else parse(functionString, temp, previus, rootNode);
-        return;
+        if (current != null)
+            parse(functionString, temp, current, rootNode);
+        else
+            parse(functionString, temp, previous, rootNode);
     }
 
-    private static boolean isNumber(char c){
-        if(Character.isDigit(c)){
-            return true;
-        }
-        return false;
+    private static boolean isNumber(char c) {
+        return Character.isDigit(c);
     }
 
-    private static MathOperation getOperation(char c){
-        switch(c){
-            case '+': return new MathAddition();
-            case '-': return new MathSubtraction();
-            case '*': return new MathMultiplication();
-            case '/': return new MathDivision();
-            case '%': return new MathModulus();
-            case '^': return new MathPow();
+    private static MathOperation getOperation(char c) {
+        switch (c) {
+            case '+':
+                return new MathAddition();
+            case '-':
+                return new MathSubtraction();
+            case '*':
+                return new MathMultiplication();
+            case '/':
+                return new MathDivision();
+            case '%':
+                return new MathModulus();
+            case '^':
+                return new MathPow();
             case ')':
-            case (char)0: return new EmptyMath();
-            default: return null;
+            case (char) 0:
+                return new EmptyMath();
+            default:
+                return null;
         }
     }
 
-    public static void main(String[] args){
+    public static void main(String[] args) {
         try {
             BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
-            while(true){
-                System.out.print(">>Math: ");
-                parse(in.readLine());
+            while (true) {
+                System.out.print("<< Math: ");
+                MathNode math = parse(in.readLine());
+                System.out.println(">> = " + math.exec());
+
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    static abstract class Math{
+    static abstract class Math {
         public abstract double exec();
 
         public abstract String toString();
     }
 
-    static class MathNode extends Math{
+    static class MathNode extends Math {
         Math math;
 
         public double exec() {
@@ -155,11 +149,11 @@ public class MathParser {
         }
 
         public String toString() {
-            return "( "+math.toString()+" )";
+            return "( " + math.toString() + " )";
         }
     }
 
-    static class MathNumber extends Math{
+    static class MathNumber extends Math {
         double num;
 
         public double exec() {
@@ -167,84 +161,84 @@ public class MathParser {
         }
 
         public String toString() {
-            return ""+num;
+            return "" + num;
         }
     }
 
-    static abstract class MathOperation extends Math{
+    static abstract class MathOperation extends Math {
         Math math1;
         Math math2;
 
         public abstract double exec();
     }
 
-    static class MathAddition extends MathOperation{
+    static class MathAddition extends MathOperation {
         public double exec() {
             return math1.exec() + math2.exec();
         }
 
         public String toString() {
-            return math1.toString()+" + "+math2.toString();
+            return math1.toString() + " + " + math2.toString();
         }
     }
 
-    static class MathSubtraction extends MathOperation{
+    static class MathSubtraction extends MathOperation {
         public double exec() {
             return math1.exec() - math2.exec();
         }
 
         public String toString() {
-            return math1.toString()+" - "+math2.toString();
+            return math1.toString() + " - " + math2.toString();
         }
     }
 
-    static class MathMultiplication extends MathOperation{
+    static class MathMultiplication extends MathOperation {
         public double exec() {
             return math1.exec() * math2.exec();
         }
 
         public String toString() {
-            return math1.toString()+" * "+math2.toString();
+            return math1.toString() + " * " + math2.toString();
         }
     }
 
-    static class MathDivision extends MathOperation{
+    static class MathDivision extends MathOperation {
         public double exec() {
             return math1.exec() / math2.exec();
         }
 
         public String toString() {
-            return math1.toString()+" / "+math2.toString();
+            return math1.toString() + " / " + math2.toString();
         }
     }
 
-    static class MathModulus extends MathOperation{
+    static class MathModulus extends MathOperation {
         public double exec() {
             return math1.exec() % math2.exec();
         }
 
         public String toString() {
-            return math1.toString()+" % "+math2.toString();
+            return math1.toString() + " % " + math2.toString();
         }
     }
 
-    static class MathPow extends MathOperation{
+    static class MathPow extends MathOperation {
         public double exec() {
             double ret = 1;
             double tmp1 = math1.exec();
             double tmp2 = math2.exec();
-            for(int i=0; i<tmp2 ;i++){
+            for (int i = 0; i < tmp2; i++) {
                 ret *= tmp1;
             }
             return ret;
         }
 
         public String toString() {
-            return math1.toString()+"^"+math2.toString();
+            return math1.toString() + "^" + math2.toString();
         }
     }
 
-    static class EmptyMath extends MathOperation{
+    static class EmptyMath extends MathOperation {
         public double exec() {
             return math1.exec();
         }

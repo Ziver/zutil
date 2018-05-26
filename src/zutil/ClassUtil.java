@@ -39,7 +39,7 @@ public class ClassUtil {
     /** A Set that contains possible wrapper objects for primitives **/
     private static final HashSet<Class<?>> wrappers;
     static {
-        wrappers = new HashSet<Class<?>>();
+        wrappers = new HashSet<>();
         wrappers.add(Boolean.class);
         wrappers.add(Character.class);
         wrappers.add(Byte.class);
@@ -54,7 +54,7 @@ public class ClassUtil {
     /** A Set that contains possible primitives **/
     private static final HashSet<Class<?>> primitives;
     static {
-        primitives = new HashSet<Class<?>>();
+        primitives = new HashSet<>();
         primitives.add(boolean.class);
         primitives.add(char.class);
         primitives.add(byte.class);

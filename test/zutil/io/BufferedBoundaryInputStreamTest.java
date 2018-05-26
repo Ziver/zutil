@@ -262,7 +262,7 @@ public class BufferedBoundaryInputStreamTest {
                 "aaaaaaaaaaaa#aa#aaaaaaaaaaaaaaa#", "#", 10);
 
         byte[] buff = new byte[100];
-        int n = 0;
+        int n;
         assertTrue(in.hasNext());
         n = in.read(buff) + in.read(buff);
         assertEquals(12, n);

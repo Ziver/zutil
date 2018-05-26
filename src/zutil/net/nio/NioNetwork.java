@@ -55,12 +55,12 @@ public abstract class NioNetwork implements Runnable {
     protected Worker worker;
 
     // This map contains all the clients that are connected
-    protected Map<InetSocketAddress, ClientData> clients = new HashMap<InetSocketAddress, ClientData>();
+    protected Map<InetSocketAddress, ClientData> clients = new HashMap<>();
 
     // A list of PendingChange instances
-    private List<ChangeRequest> pendingChanges = new LinkedList<ChangeRequest>();
+    private List<ChangeRequest> pendingChanges = new LinkedList<>();
     // Maps a SocketChannel to a list of ByteBuffer instances
-    private Map<SocketChannel, List<ByteBuffer>> pendingWriteData = new HashMap<SocketChannel, List<ByteBuffer>>();
+    private Map<SocketChannel, List<ByteBuffer>> pendingWriteData = new HashMap<>();
 
 
 
@@ -160,19 +160,17 @@ public abstract class NioNetwork implements Runnable {
             try {
                 // Handle any pending changes
                 synchronized (pendingChanges) {
-                    Iterator<ChangeRequest> changes = pendingChanges.iterator();
-                    while (changes.hasNext()) {
-                        ChangeRequest change = changes.next();
+                    for (ChangeRequest change : pendingChanges) {
                         switch (change.type) {
-                        case ChangeRequest.CHANGEOPS:
-                            SelectionKey key = change.socket.keyFor(selector);
-                            key.interestOps(change.ops);
-                            logger.finest("change.ops "+change.ops);
-                            break;
-                        case ChangeRequest.REGISTER:
-                            change.socket.register(selector, change.ops);
-                            logger.finest("register socket ");
-                            break;
+                            case ChangeRequest.CHANGEOPS:
+                                SelectionKey key = change.socket.keyFor(selector);
+                                key.interestOps(change.ops);
+                                logger.finest("change.ops " + change.ops);
+                                break;
+                            case ChangeRequest.REGISTER:
+                                change.socket.register(selector, change.ops);
+                                logger.finest("register socket ");
+                                break;
                         }
                     }
                     pendingChanges.clear();

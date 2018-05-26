@@ -166,8 +166,8 @@ public class Encrypter {
     public byte[] encrypt(byte[] data){
         try {
             byte[] encryption = new byte[encipher.getOutputSize(data.length)];
-            int ctLength = encipher.update(data, 0, data.length, encryption, 0);
 
+            int ctLength = encipher.update(data, 0, data.length, encryption, 0);
             ctLength += encipher.doFinal(encryption, ctLength);
             return encryption;
         } catch (Exception e) {

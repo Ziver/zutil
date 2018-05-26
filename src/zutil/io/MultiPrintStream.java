@@ -31,10 +31,7 @@ import java.io.*;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author Ziver
@@ -48,7 +45,7 @@ public class MultiPrintStream extends PrintStream {
 
     public MultiPrintStream(){
         super(new PrintStream(System.out));
-        streams = new ArrayList<PrintStream>();
+        streams = new ArrayList<>();
         streams.add(new PrintStream(System.out));
     }
 
@@ -59,7 +56,7 @@ public class MultiPrintStream extends PrintStream {
     public MultiPrintStream(String file){
         super(new PrintStream(System.out));
         try {
-            streams = new ArrayList<PrintStream>();
+            streams = new ArrayList<>();
             streams.add(new PrintStream(System.out));
             streams.add(new PrintStream(new File(file)));
         } catch (FileNotFoundException e) {
@@ -74,10 +71,8 @@ public class MultiPrintStream extends PrintStream {
      */
     public MultiPrintStream(PrintStream[] streams){
         super(streams[0]);
-        this.streams = new ArrayList<PrintStream>();
-        for(int i=0; i<streams.length ;i++){
-            this.streams.add(streams[i]);
-        }
+        this.streams = new ArrayList<>();
+        Collections.addAll(this.streams, streams);
     }
 
     /**
@@ -238,7 +233,7 @@ public class MultiPrintStream extends PrintStream {
     private static String dumpToString(Object o , String head, int depth) {
         if(o == null)
             return "NULL";
-        StringBuffer buffer = new StringBuffer();
+        StringBuilder buffer = new StringBuilder();
         Class<?> oClass = o.getClass();
         buffer.append( oClass.getName() );
         String nextHead = head + "\t";

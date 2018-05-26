@@ -31,7 +31,7 @@ import java.util.List;
 
 /**
  * This is a class whit utility methods.
- * 
+ *
  * @author Ziver *
  */
 public class StringUtil {
@@ -57,7 +57,7 @@ public class StringUtil {
 
     public static String formatTimeToString(long milisec){
         StringBuilder str = new StringBuilder();
-        long tmp = 0;
+        long tmp;
 
         // Years
         if( milisec >= 31557032762.3361d ){
@@ -69,9 +69,9 @@ public class StringUtil {
                 str.append(tmp).append(" year ");
         }
         // Months
-        if( milisec >= 2629743830l ){
-            tmp = (long) (milisec / 2629743830l);
-            milisec -= tmp * 2629743830l;
+        if( milisec >= 2629743830L){
+            tmp = milisec / 2629743830L;
+            milisec -= tmp * 2629743830L;
             if( tmp > 1 )
                 str.append(tmp).append(" months ");
             else
@@ -79,7 +79,7 @@ public class StringUtil {
         }
         // Days
         if( milisec >= 86400000 ){
-            tmp = (long) (milisec / 86400000);
+            tmp = milisec / 86400000;
             milisec -= tmp * 86400000;
             if( tmp > 1 )
                 str.append(tmp).append(" days ");
@@ -88,7 +88,7 @@ public class StringUtil {
         }
         // Hours
         if( milisec >= 3600000 ){
-            tmp = (long) (milisec / 3600000);
+            tmp = milisec / 3600000;
             milisec -= tmp * 3600000;
             if( tmp > 1 )
                 str.append(tmp).append(" hours ");
@@ -97,13 +97,13 @@ public class StringUtil {
         }
         // Minutes
         if( milisec >= 60000 ){
-            tmp = (long) (milisec / 60000);
+            tmp = milisec / 60000;
             milisec -= tmp * 60000;
             str.append(tmp).append(" min ");
         }
         // sec
         if( milisec >= 1000 ){
-            tmp = (long) (milisec / 1000);
+            tmp = milisec / 1000;
             milisec -= tmp * 1000;
             str.append(tmp).append(" sec ");
         }
@@ -118,8 +118,6 @@ public class StringUtil {
      * Generates a String where the number has been prefixed
      * with zeros until the string has the wanted size.
      *
-     * @param      number
-     * @param      length
      * @return a new String with the given length or longer if the number has more characters.
      */
     public static String prefixInt(int number, int length){
@@ -135,6 +133,7 @@ public class StringUtil {
      * @param   array       a array of object that toString() will be called on
      * @return a String containing all entries in the list with the specified delimiter in between entries
      */
+    @SafeVarargs
     public static <T> String join(String delimiter, T... array){
         return join(delimiter, Arrays.asList(array));
     }

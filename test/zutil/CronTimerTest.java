@@ -15,13 +15,13 @@ import static org.junit.Assert.fail;
 public class CronTimerTest {
 
     @Test
-    public void getRange() throws Exception {
+    public void getRange() {
         // invalid numbers
         assertEquals(Collections.EMPTY_LIST, CronTimer.getRange("", 0,60));
         assertEquals(Collections.EMPTY_LIST, CronTimer.getRange(null, 0,60));
 
         // individual numbers
-        assertEquals(Arrays.asList(55), CronTimer.getRange("55", 0,60));
+        assertEquals(Collections.singletonList(55), CronTimer.getRange("55", 0,60));
         assertEquals(Arrays.asList(5,10,15), CronTimer.getRange("5,10,15", 0, 60));
 
         // ranges
@@ -29,7 +29,7 @@ public class CronTimerTest {
         assertEquals(Arrays.asList(5,6,7,8,9,10), CronTimer.getRange("5-10", 0,60));
 
         // intervals
-        assertEquals(Arrays.asList(), CronTimer.getRange("15/10", 0,60));
+        assertEquals(Collections.emptyList(), CronTimer.getRange("15/10", 0,60));
         assertEquals(Arrays.asList(0,10,20,30,40,50,60), CronTimer.getRange("0-60/10", 0,60));
 
         // wildcards

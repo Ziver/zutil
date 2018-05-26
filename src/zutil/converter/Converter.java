@@ -205,7 +205,7 @@ public class Converter {
      * @return a hex String
      */
     public static String toHexString(byte[][] raw){
-        StringBuffer ret = new StringBuffer();
+        StringBuilder ret = new StringBuilder();
 
         for(byte[] a : raw){
             for(byte b : a){
@@ -218,7 +218,7 @@ public class Converter {
     }
 
     public static String toHexStringByColumn(byte[][] raw){
-        StringBuffer ret = new StringBuffer();
+        StringBuilder ret = new StringBuilder();
 
         for(int col=0; col<raw[0].length ;col++){
             for(int row=0; row<raw.length ;row++){
@@ -237,7 +237,7 @@ public class Converter {
      * @return a hex String
      */
     public static String toHexString(byte[] raw){
-        StringBuffer ret = new StringBuffer();
+        StringBuilder ret = new StringBuilder();
 
         for(byte b : raw){
             ret.append(HEX_CHARS[(int) (b >>> 0x04)& 0x0F ]);
@@ -267,8 +267,8 @@ public class Converter {
      * @return a String with 1's and 0's
      */
     public static String toString(byte raw){
-        StringBuffer ret = new StringBuffer();
-        for(int i=128; i>0 ;i=( i<1 ? i=0 : i/2 ) ){
+        StringBuilder ret = new StringBuilder();
+        for(int i=128; i>0 ;i=( i<1 ? 0 : i/2 ) ){
             ret.append(( (raw & i) == 0 ? '0' : '1'));
         }
         return ret.toString();
@@ -281,9 +281,9 @@ public class Converter {
      * @return a String with 1's and 0's
      */
     public static String toString(byte[] raw){
-        StringBuffer ret = new StringBuffer();
+        StringBuilder ret = new StringBuilder();
         for(byte b : raw){
-            for(int i=128; i>0 ;i=( i<1 ? i=0 : i/2 ) ){
+            for(int i=128; i>0 ;i=( i<1 ? 0 : i/2 ) ){
                 ret.append(( (b & i) == 0 ? '0' : '1'));
             }
         }
@@ -419,8 +419,8 @@ public class Converter {
             else if(c == float.class) 		return (T) new Float(data);
             else if(c == Double.class) 		return (T) new Double(data);
             else if(c == double.class) 		return (T) new Double(data);
-            else if(c == Boolean.class) 	return (T) new Boolean(data);
-            else if(c == boolean.class) 	return (T) new Boolean(data);
+            else if(c == Boolean.class) 	return (T) Boolean.valueOf(data);
+            else if(c == boolean.class) 	return (T) Boolean.valueOf(data);
             else if(c == Byte.class) 		return (T) new Byte(data);
             else if(c == byte.class) 		return (T) new Byte(data);
             else if(byte[].class.isAssignableFrom(c))

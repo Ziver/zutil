@@ -30,10 +30,10 @@ import java.awt.image.BufferedImage;
 
 /**
  * This is a abstract class for all the effects
- * 
+ *
  * Inspiration:
  * http://www.dickbaldwin.com/tocadv.htm
- * 
+ *
  * @author Ziver
  */
 public abstract class ImageFilterProcessor {
@@ -73,7 +73,7 @@ public abstract class ImageFilterProcessor {
      * @param 		img			The image to process
      * @return 					The processed image
      */
-    public static ImageFilterProcessor getProcessor(String effect, BufferedImage img) throws InstantiationException, IllegalAccessException, ClassNotFoundException, InterruptedException{
+    public static ImageFilterProcessor getProcessor(String effect, BufferedImage img) throws InstantiationException, IllegalAccessException, ClassNotFoundException {
         ImageFilterProcessor processor = (ImageFilterProcessor)Class.forName(effect).newInstance();
         processor.img = img;
         return processor;

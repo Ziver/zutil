@@ -37,7 +37,7 @@ public class StandardPathNode implements PathNode{
     private PathNode parent;
 
     public StandardPathNode(){
-        neighbors = new HashMap<PathNode,Integer>();
+        neighbors = new HashMap<>();
     }
 
     public int getNeighborCost(PathNode neighbor) {
@@ -57,7 +57,7 @@ public class StandardPathNode implements PathNode{
     }
 
     public LinkedList<PathNode> traversTo(PathNode goal) {
-        LinkedList<PathNode> path = new LinkedList<PathNode>();
+        LinkedList<PathNode> path = new LinkedList<>();
         PathNode current = this;
         while(current != null){
                 path.addFirst(current);
@@ -66,8 +66,8 @@ public class StandardPathNode implements PathNode{
                         path.addFirst( goal );
                         return path;
                 }
-        }       
-        return new LinkedList<PathNode>();
+        }
+        return new LinkedList<>();
     }
 
 }

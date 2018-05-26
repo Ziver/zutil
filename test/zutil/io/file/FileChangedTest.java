@@ -30,7 +30,7 @@ import java.net.URISyntaxException;
 
 
 public class FileChangedTest implements FileChangeListener{
-    public static void main(String[] args) throws URISyntaxException, FileNotFoundException{
+    public static void main(String[] args) throws FileNotFoundException{
         FileWatcher watcher = new FileWatcher(FileUtil.find("test.txt"));
         watcher.setListener(new FileChangedTest());
 

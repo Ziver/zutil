@@ -38,7 +38,6 @@ public abstract class ObjectSync {
 
     /**
      * Applies the SyncMessage to the object
-     * @param message
      */
     public abstract void syncObject(SyncMessage message);
 

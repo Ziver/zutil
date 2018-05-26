@@ -30,9 +30,9 @@ import java.math.BigInteger;
 import java.util.LinkedList;
 
 /**
- * Euclidean algorithm is an algorithm to determine 
+ * Euclidean algorithm is an algorithm to determine
  * the greatest common divisor (GCD)
- * 
+ *
  * @author Ziver
  *
  */
@@ -40,7 +40,6 @@ public class EuclideansAlgo {
 
     /**
      * Simple Test
-     * @param args
      */
     public static void main(String[] args){
         MultiPrintStream.out.println("*** Correct Answer: ");
@@ -104,7 +103,7 @@ public class EuclideansAlgo {
      * @return a list of integers that is generators for a and b
      */
     public static LinkedList<Integer> calcGenerators(int a, int b){
-        LinkedList<Integer> list = new LinkedList<Integer>();
+        LinkedList<Integer> list = new LinkedList<>();
         int t;
 
         while( b != 0 ){
@@ -126,7 +125,7 @@ public class EuclideansAlgo {
      * @return a list of BigIntegers that is generators of a and b
      */
     public static LinkedList<BigInteger> calcGenerators(BigInteger a, BigInteger b){
-        LinkedList<BigInteger> list = new LinkedList<BigInteger>();
+        LinkedList<BigInteger> list = new LinkedList<>();
         BigInteger t;
 
         while( !b.equals(BigInteger.ZERO) ){

@@ -40,7 +40,6 @@ import java.awt.event.ActionListener;
 public class Zupdater extends JFrame implements ProgressListener<UpdateClient, FileInfo>{
     private static final long serialVersionUID = 1L;
 
-    private JPanel contentPane;
     private JLabel lblSpeed;
     private JLabel lblFile;
     private JProgressBar progressBar;
@@ -68,7 +67,7 @@ public class Zupdater extends JFrame implements ProgressListener<UpdateClient, F
             progressBar.setString( StringUtil.formatByteSizeToString(source.getTotalReceived()) +
                     " / "+StringUtil.formatByteSizeToString(source.getTotalSize()));
 
-            lblSpeed.setText( StringUtil.formatByteSizeToString(((UpdateClient) source).getSpeed())+"/s" );
+            lblSpeed.setText( StringUtil.formatByteSizeToString(source.getSpeed()) + "/s" );
     }
 
 
@@ -82,7 +81,7 @@ public class Zupdater extends JFrame implements ProgressListener<UpdateClient, F
         setResizable(false);
         setTitle("Updating...");
         setBounds(100, 100, 537, 124);
-        contentPane = new JPanel();
+        JPanel contentPane = new JPanel();
         contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
         setContentPane(contentPane);
 

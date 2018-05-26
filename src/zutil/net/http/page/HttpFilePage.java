@@ -119,17 +119,12 @@ public class HttpFilePage implements HttpPage{
                 }
             }
 
-        }catch (FileNotFoundException e){
+        }catch (FileNotFoundException | SecurityException e){
             if(!out.isHeaderSent())
                 out.setStatusCode(404);
             log.log(Level.WARNING, e.getMessage());
             out.println("404 Page Not Found: " + headers.getRequestURL());
-        }catch (SecurityException e){
-            if(!out.isHeaderSent())
-                out.setStatusCode(404);
-            log.log(Level.WARNING, e.getMessage());
-            out.println("404 Page Not Found: " + headers.getRequestURL() );
-        }catch (IOException e){
+        } catch (IOException e){
             if(!out.isHeaderSent())
                 out.setStatusCode(500);
             log.log(Level.WARNING, null, e);

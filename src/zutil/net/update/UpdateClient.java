@@ -36,7 +36,7 @@ import java.util.logging.Logger;
 /**
  * This class connects to a update server and updates a path
  * with the servers
- * 
+ *
  * @author Ziver
  *
  */
@@ -58,7 +58,6 @@ public class UpdateClient{
      * @param address Address to the UpdateServer
      * @param port The port on the server
      * @param path Path to the files to update
-     * @throws Exception
      */
     public UpdateClient(String address, int port, String path) throws Exception{
         fileList = new FileListMessage(path);
@@ -102,9 +101,9 @@ public class UpdateClient{
                 byte[] buffer = new byte[socket.getReceiveBufferSize()];
 
                 long bytesReceived = 0;
-                int byteRead = 0;
+                int byteRead;
                 long time = System.currentTimeMillis();
-                long timeTotalRecived = 0;
+                long timeTotalReceived = 0;
 
                 while( bytesReceived < info.getSize() ) {
                     byteRead = in.read(buffer);
@@ -113,8 +112,8 @@ public class UpdateClient{
 
                     if(time+1000 < System.currentTimeMillis()){
                         time = System.currentTimeMillis();
-                        speed = (int)(totalReceived - timeTotalRecived);
-                        timeTotalRecived = totalReceived;
+                        speed = (int)(totalReceived - timeTotalReceived);
+                        timeTotalReceived = totalReceived;
                     }
 
                     totalReceived += byteRead;
@@ -165,8 +164,6 @@ public class UpdateClient{
 
     /**
      * Closes the connection
-     *
-     * @throws IOException
      */
     public void close() throws IOException{
         socket.close();

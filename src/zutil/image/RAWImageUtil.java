@@ -127,8 +127,7 @@ public class RAWImageUtil {
             }
         }
         int meanSquare = (int)(accum/pixelCount);
-        int rms = (int)(Math.sqrt(meanSquare));
-        return rms;
+        return (int)(Math.sqrt(meanSquare));
     }
 
     /**

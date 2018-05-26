@@ -38,9 +38,9 @@ import java.io.PrintStream;
 
 /**
  * Creates a Swing console window That takes System.in and
- * System.out as Streams and has the ability to stay in the tray 
+ * System.out as Streams and has the ability to stay in the tray
  * when closed
- * 
+ *
  * @author Ziver
  *
  */
@@ -256,7 +256,7 @@ public class Console{
         private int input;
 
         @Override
-        public int read() throws IOException {
+        public int read() {
             if(input < 0) {
                 input = 0;
                 return -1;

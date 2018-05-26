@@ -52,7 +52,7 @@ public class UPnPContentDirectory implements UPnPService, HttpPage, WSInterface 
     public UPnPContentDirectory(){}
 
     public UPnPContentDirectory(File dir){
-        file_list = FileUtil.search(dir, new LinkedList<File>(), true, Integer.MAX_VALUE);
+        file_list = FileUtil.search(dir, new LinkedList<>(), true, Integer.MAX_VALUE);
     }
 
     /**
@@ -94,7 +94,6 @@ public class UPnPContentDirectory implements UPnPService, HttpPage, WSInterface 
      * exposed by the Content Directory Service, including
      * information listing the classes of objects available
      * in any particular object container.
-     * @throws DocumentException
      *
      */
     //@WSNameSpace("urn:schemas-upnp-org:service:ContentDirectory:1")
@@ -104,30 +103,30 @@ public class UPnPContentDirectory implements UPnPService, HttpPage, WSInterface 
             @WSParamName("Filter") String Filter,
             @WSParamName("StartingIndex") int StartingIndex,
             @WSParamName("RequestedCount") int RequestedCount,
-            @WSParamName("SortCriteria") String SortCriteria) throws DocumentException{
+            @WSParamName("SortCriteria") String SortCriteria) {
 
         BrowseRetObj ret = new BrowseRetObj();
         if( BrowseFlag.equals("BrowseMetadata") ){
 
         }
         else if( BrowseFlag.equals("BrowseDirectChildren") ){
-            StringBuffer xml = new StringBuffer();
+            StringBuilder xml = new StringBuilder();
             xml.append( "<DIDL-Lite xmlns:dc=\"http://purl.org/dc/elements/1.1/\" " +
                     "xmlns:upnp=\"urn:schemas-upnp-org:metadata-1-0/upnp/\" " +
                     "xmlns=\"urn:schemas-upnp-org:metadata-1-0/DIDL-Lite/\">" );
-            List<File> tmp = FileUtil.search( file_list.get(Integer.parseInt(ObjectID)), new LinkedList<File>(), false );
+            List<File> tmp = FileUtil.search( file_list.get(Integer.parseInt(ObjectID)), new LinkedList<>(), false );
             for(File file : tmp){
-                xml.append("	<container id=\""+file_list.indexOf(file)+"\" ");
-                if(tmp.get(0) != file) xml.append("parentID=\""+file_list.indexOf(file.getParent())+"\" ");
-                if(file.isDirectory()) xml.append("childCount=\""+file.list().length+"\" ");
+                xml.append("	<container id=\"").append(file_list.indexOf(file)).append("\" ");
+                if(tmp.get(0) != file) xml.append("parentID=\"").append(file_list.indexOf(file.getParent())).append("\" ");
+                if(file.isDirectory()) xml.append("childCount=\"").append(file.list().length).append("\" ");
                 xml.append("restricted=\"1\" searchable=\"0\" >");
 
-                xml.append("		<dc:title>"+file.getName()+"</dc:title> ");
+                xml.append("		<dc:title>").append(file.getName()).append("</dc:title> ");
                 if( file.isDirectory() )
                     xml.append("		<upnp:class>object.container.storageFolder</upnp:class> ");
                 else
                     xml.append("		<upnp:class>object.container</upnp:class> ");
-                xml.append("		<upnp:storageUsed>"+(int)(file.length()/1000)+"</upnp:storageUsed> ");
+                xml.append("		<upnp:storageUsed>").append((int) (file.length() / 1000)).append("</upnp:storageUsed> ");
                 xml.append("	</container> ");
 
                 ret.NumberReturned++;

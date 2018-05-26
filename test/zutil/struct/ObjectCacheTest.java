@@ -42,7 +42,7 @@ public class ObjectCacheTest {
 
 
     @Test
-    public void emptyCache() throws InterruptedException {
+    public void emptyCache() {
         ObjectCache cache = new ObjectCache(10);
         assertFalse(cache.containsKey(KEY));
         assertEquals(0, cache.size());
@@ -78,6 +78,7 @@ public class ObjectCacheTest {
 
     //@Test
     // This TC does not work
+    @SuppressWarnings("RedundantStringConstructorCall")
     public void javaGRC() throws InterruptedException {
         ObjectCache cache = new ObjectCache(10000);
         {

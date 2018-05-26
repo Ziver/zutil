@@ -36,7 +36,7 @@ import java.util.logging.Level;
 // TODO: COnvert to JUnit
 public class SOAPClientTest {
 
-    public static void main(String[] args) throws InstantiationException, IllegalAccessException, MalformedURLException {
+    public static void main(String[] args) throws MalformedURLException {
         LogUtil.setGlobalLevel(Level.ALL);
         LogUtil.setFormatter("", new CompactLogFormatter());
 
@@ -47,9 +47,9 @@ public class SOAPClientTest {
 
 
     public interface TestClient extends WSInterface{
-        public void m();
+        void m();
 
-        public void c();
+        void c();
 
     }
 }

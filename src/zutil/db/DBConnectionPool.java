@@ -33,7 +33,7 @@ import java.util.TimerTask;
 
 /**
  * This class is an connection pool
- * 
+ *
  * @author Ziver
  */
 public class DBConnectionPool extends TimerTask implements Closeable{
@@ -74,15 +74,15 @@ public class DBConnectionPool extends TimerTask implements Closeable{
      * @param user is the user name to the DB
      * @param password is the password to the DB
      */
-    public DBConnectionPool(DBMS dbms, String url, String db, String user, String password) throws Exception{
+    public DBConnectionPool(DBMS dbms, String url, String db, String user, String password) {
         this.dbms = dbms;
         this.url = url;
         this.db = db;
         this.user = user;
         this.password = password;
 
-        inusePool = new LinkedList<PoolItem>();
-        readyPool = new LinkedList<PoolItem>();
+        inusePool = new LinkedList<>();
+        readyPool = new LinkedList<>();
 
         this.setTimeout(DEFAULT_TIMEOUT);
         this.setMaxSize(DEFAULT_MAX_SIZE);

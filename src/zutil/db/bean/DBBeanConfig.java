@@ -164,7 +164,7 @@ class DBBeanConfig{
                     else if (field.getType() == Character.TYPE) field.setChar(obj, (char) 0);
                     else if (field.getType() == Byte.TYPE) field.setByte(obj, (byte) 0);
                     else if (field.getType() == Short.TYPE) field.setShort(obj, (short) 0);
-                    else if (field.getType() == Long.TYPE) field.setLong(obj, 0l);
+                    else if (field.getType() == Long.TYPE) field.setLong(obj, 0L);
                     else if (field.getType() == Float.TYPE) field.setFloat(obj, 0f);
                     else if (field.getType() == Double.TYPE) field.setDouble(obj, 0d);
                     else if (field.getType() == Boolean.TYPE) field.setBoolean(obj, false);

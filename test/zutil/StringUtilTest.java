@@ -27,6 +27,7 @@ package zutil;
 import org.junit.Test;
 
 import java.util.Arrays;
+import java.util.Collections;
 
 import static org.junit.Assert.assertEquals;
 
@@ -43,9 +44,9 @@ public class StringUtilTest {
     public void formatTimeToStringTest() {
         assertEquals( "1 sec ", StringUtil.formatTimeToString( 1000 ) );
         assertEquals( "1 month 1 day 1 hour 1 min 1 sec 1 milisec ",
-                StringUtil.formatTimeToString( 2629743830l+86400000+3600000+60000+1000+1 ) );
+                StringUtil.formatTimeToString(2629743830L +86400000+3600000+60000+1000+1 ) );
         assertEquals( "2 months 2 days 2 hours 2 min 2 sec 2 milisec ",
-                StringUtil.formatTimeToString( (2629743830l+86400000+3600000+60000+1000+1)*2 ) );
+                StringUtil.formatTimeToString( (2629743830L +86400000+3600000+60000+1000+1)*2 ) );
     }
 
     @Test
@@ -72,7 +73,7 @@ public class StringUtilTest {
 
     @Test
     public void joinTest(){
-        assertEquals("", StringUtil.join(",", Arrays.asList()));
+        assertEquals("", StringUtil.join(",", Collections.emptyList()));
         assertEquals("1,2,3,4,5", StringUtil.join(",", 1,2,3,4,5));
         assertEquals("1,2,3,4,5", StringUtil.join(",", Arrays.asList(1,2,3,4,5)));
         assertEquals("animal,monkey,dog", StringUtil.join(",", "animal", "monkey", "dog"));

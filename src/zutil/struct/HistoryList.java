@@ -43,11 +43,11 @@ public class HistoryList<T> implements Iterable<T>{
     /**
      * Creates an HistoryList object with an max size
      *
-     * @param histlength the maximum size of the list
+     * @param histLength the maximum size of the list
      */
-    public HistoryList(int histlength){
-        history_length = histlength;
-        history = new LinkedList<T>();
+    public HistoryList(int histLength){
+        history_length = histLength;
+        history = new LinkedList<>();
     }
 
     /**
@@ -67,11 +67,11 @@ public class HistoryList<T> implements Iterable<T>{
      * @param item is the item to add
      */
     public void add(T item){
-        while(historyIndex < history.size()-1){
+        while (historyIndex < history.size()-1){
             history.removeLast();
         }
         history.addLast(item);
-        if(history_length < history.size()){
+        if (history_length < history.size()){
             history.removeFirst();
         }
 
@@ -82,12 +82,10 @@ public class HistoryList<T> implements Iterable<T>{
      * @return the previous item in the list
      */
     public T getPrevious(){
-        if(historyIndex > 0){
+        if (historyIndex > 0)
             historyIndex -= 1;
-        }
-        else{
+        else
             historyIndex = 0;
-        }
         return history.get(historyIndex);
     }
 
@@ -95,7 +93,7 @@ public class HistoryList<T> implements Iterable<T>{
      * @return the next item in the list
      */
     public T getNext(){
-        if(next()){
+        if (next()){
             historyIndex += 1;
         }
         else{
@@ -112,12 +110,9 @@ public class HistoryList<T> implements Iterable<T>{
      * @return if there are items newer than the current
      */
     public boolean next(){
-        if(historyIndex < history.size()-1){
+        if (historyIndex < history.size()-1)
             return true;
-        }
-        else{
-            return false;
-        }
+        return false;
     }
 
     /**

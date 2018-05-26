@@ -129,7 +129,6 @@ public class BinaryStructInputStream {
 
 
     protected static int shiftLeftBy(int bitIndex, int bitLength){
-        int shiftBy = (8 - ((7-bitIndex) + bitLength) % 8) % 8;
-        return shiftBy;
+        return (8 - ((7-bitIndex) + bitLength) % 8) % 8;
     }
 }

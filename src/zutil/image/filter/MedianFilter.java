@@ -33,7 +33,7 @@ import java.awt.image.BufferedImage;
 
 /**
  * The MedianFilter is used for noise reduction and things
- * 
+ *
  * @author Ziver
  */
 public class MedianFilter extends ImageFilterProcessor{
@@ -92,7 +92,7 @@ public class MedianFilter extends ImageFilterProcessor{
         int edgeY = windowSize / 2;
 
         int[][] tmpArray = new int[4][256*2];
-        int pixelCount = 0;
+        int pixelCount;
         for(int y=startY; y<stopY ;y++){
             setProgress(ZMath.percent(0, stopY-startY-1, y));
             for(int x=startX; x<stopX ;x++){

@@ -40,7 +40,7 @@ public class CircularBufferTest {
 
     @Test
     public void addToEmpty() {
-        CircularBuffer<Integer> buff = new CircularBuffer<Integer>(0);
+        CircularBuffer<Integer> buff = new CircularBuffer<>(0);
         try {
             buff.add(10);
             fail("IndexOutOfBoundsException was not thrown");
@@ -49,7 +49,7 @@ public class CircularBufferTest {
 
     @Test
     public void addOneElement() {
-        CircularBuffer<Integer> buff = new CircularBuffer<Integer>(1);
+        CircularBuffer<Integer> buff = new CircularBuffer<>(1);
         assertEquals(0, buff.size());
         buff.add(10);
         assertEquals(1, buff.size());
@@ -58,7 +58,7 @@ public class CircularBufferTest {
 
     @Test
     public void addThreeElements() {
-        CircularBuffer<Integer> buff = new CircularBuffer<Integer>(10);
+        CircularBuffer<Integer> buff = new CircularBuffer<>(10);
         buff.add(10);
         buff.add(11);
         buff.add(12);
@@ -70,7 +70,7 @@ public class CircularBufferTest {
 
     @Test
     public void addOutOfRange() {
-        CircularBuffer<Integer> buff = new CircularBuffer<Integer>(2);
+        CircularBuffer<Integer> buff = new CircularBuffer<>(2);
         buff.add(10);
         buff.add(11);
         buff.add(12);
@@ -85,7 +85,7 @@ public class CircularBufferTest {
 
     @Test(expected = NoSuchElementException.class)
     public void iteratorEmpty() {
-        CircularBuffer<Integer> buff = new CircularBuffer<Integer>(10);
+        CircularBuffer<Integer> buff = new CircularBuffer<>(10);
         Iterator<Integer> it = buff.iterator();
 
         assert (!it.hasNext());
@@ -94,7 +94,7 @@ public class CircularBufferTest {
 
     @Test(expected = NoSuchElementException.class)
     public void iteratorThreeElements() {
-        CircularBuffer<Integer> buff = new CircularBuffer<Integer>(10);
+        CircularBuffer<Integer> buff = new CircularBuffer<>(10);
         buff.add(10);
         buff.add(11);
         buff.add(12);

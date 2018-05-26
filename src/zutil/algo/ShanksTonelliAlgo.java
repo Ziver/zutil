@@ -22,16 +22,13 @@
  * THE SOFTWARE.
  */
 
-/**
- * 
- */
 package zutil.algo;
 
 import java.math.BigInteger;
 
 /**
  * The algorithm solves the discreet log equation x^2 = n mod p
- * 
+ *
  * @author Ziver
  * @see <a href="http://en.wikipedia.org/wiki/Shanks-Tonelli_algorithm">Wikipedia</a>
  */

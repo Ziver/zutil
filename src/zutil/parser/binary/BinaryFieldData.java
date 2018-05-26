@@ -41,7 +41,7 @@ public class BinaryFieldData {
                             list.add(new BinaryFieldData(field));
                     }
                 }
-                Collections.sort(list, new Comparator<BinaryFieldData>(){
+                list.sort(new Comparator<BinaryFieldData>() {
                     @Override
                     public int compare(BinaryFieldData o1, BinaryFieldData o2) {
                         return o1.index - o2.index;

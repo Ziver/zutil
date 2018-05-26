@@ -93,34 +93,27 @@ public class JSONObjectInputStream extends InputStream implements ObjectInput, C
      * @return  the object read from the stream
      */
     @Override
-    public Object readObject() throws IOException {
+    public Object readObject() {
         return readObject(null);
     }
     /**
      * @param   <T>     is a simple cast to this type
      * @return  the object read from the stream
      */
-    public <T> T readGenericObject() throws IOException {
+    public <T> T readGenericObject() {
         return readObject(null);
     }
     /**
      * @param   c   will override the registered root class and use this value instead
-     * @param   <T>
      * @return  the object read from the stream
      */
-    public synchronized <T> T readObject(Class<T> c) throws IOException {
+    public synchronized <T> T readObject(Class<T> c) {
         try{
             DataNode root = parser.read();
             if(root != null){
                 return (T)readObject(c, null, root);
             }
-        } catch (ClassNotFoundException e) {
-            logger.log(Level.WARNING, null, e);
-        } catch (NoSuchFieldException e) {
-            logger.log(Level.WARNING, null, e);
-        } catch (InstantiationException e) {
-            logger.log(Level.WARNING, null, e);
-        } catch (IllegalAccessException e) {
+        } catch (Exception e) {
             logger.log(Level.WARNING, null, e);
         } finally {
             objectCache.clear();
@@ -187,7 +180,7 @@ public class JSONObjectInputStream extends InputStream implements ObjectInput, C
             return objectCache.get(json.getInt(MD_OBJECT_ID));
 
         // Resolve the class
-        Object obj = null;
+        Object obj;
         // Try using explicit class
         if(type != null){
             obj = type.newInstance();
@@ -248,49 +241,49 @@ public class JSONObjectInputStream extends InputStream implements ObjectInput, C
 
 
 
-    @Override public void readFully(byte[] b) throws IOException {
+    @Override public void readFully(byte[] b) {
         throw new UnsupportedOperationException ();
     }
-    @Override public void readFully(byte[] b, int off, int len) throws IOException {
+    @Override public void readFully(byte[] b, int off, int len) {
         throw new UnsupportedOperationException ();
     }
-    @Override public int skipBytes(int n) throws IOException {
+    @Override public int skipBytes(int n) {
         throw new UnsupportedOperationException ();
     }
-    @Override public boolean readBoolean() throws IOException {
+    @Override public boolean readBoolean() {
         throw new UnsupportedOperationException ();
     }
-    @Override public byte readByte() throws IOException {
+    @Override public byte readByte() {
         throw new UnsupportedOperationException ();
     }
-    @Override public int readUnsignedByte() throws IOException {
+    @Override public int readUnsignedByte() {
         throw new UnsupportedOperationException ();
     }
-    @Override public short readShort() throws IOException {
+    @Override public short readShort() {
         throw new UnsupportedOperationException ();
     }
-    @Override public int readUnsignedShort() throws IOException {
+    @Override public int readUnsignedShort() {
         throw new UnsupportedOperationException ();
     }
-    @Override public char readChar() throws IOException {
+    @Override public char readChar() {
         throw new UnsupportedOperationException ();
     }
-    @Override public int readInt() throws IOException {
+    @Override public int readInt() {
         throw new UnsupportedOperationException ();
     }
-    @Override public long readLong() throws IOException {
+    @Override public long readLong() {
         throw new UnsupportedOperationException ();
     }
-    @Override public float readFloat() throws IOException {
+    @Override public float readFloat() {
         throw new UnsupportedOperationException ();
     }
-    @Override public double readDouble() throws IOException {
+    @Override public double readDouble() {
         throw new UnsupportedOperationException ();
     }
-    @Override public String readLine() throws IOException {
+    @Override public String readLine() {
         throw new UnsupportedOperationException ();
     }
-    @Override public String readUTF() throws IOException {
+    @Override public String readUTF() {
         throw new UnsupportedOperationException ();
     }
     @Override public int read() throws IOException {

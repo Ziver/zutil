@@ -33,7 +33,7 @@ import java.util.LinkedList;
  * Sort very big files that doesn't fit in ram
  * Inspiration:
  * http://www.codeodor.com/index.cfm/2007/5/14/Re-Sorting-really-BIG-files---the-Java-source-code/1208
- * 
+ *
  * @author Ziver
  */
 public class ExternalSort {
@@ -48,7 +48,6 @@ public class ExternalSort {
      *
      * @param orgFile File to sort
      * @param sortedFile The sorted file
-     * @throws FileNotFoundException
      */
     public ExternalSort(File orgFile, File sortedFile) throws FileNotFoundException{
         in = new BufferedReader(new FileReader(orgFile));
@@ -62,7 +61,6 @@ public class ExternalSort {
      * @param orgFile File to sort
      * @param sortedFile The sorted file
      * @param chunk The chunk size
-     * @throws FileNotFoundException
      */
     public ExternalSort(File orgFile, File sortedFile, int chunk) throws FileNotFoundException{
         in = new BufferedReader(new FileReader(orgFile));
@@ -88,7 +86,8 @@ public class ExternalSort {
 
     /**
      * Merges all the files to one
-     * @param files
+     *
+     * @param   files   a list of files to be merged
      */
     private void mergeFiles(LinkedList<File> files){
         try	{
@@ -116,7 +115,7 @@ public class ExternalSort {
             String row;
             while (someFileStillHasRows){
                 String min;
-                int minIndex = 0;
+                int minIndex;
 
                 row = rows[0];
                 if (row!=null) {
@@ -208,8 +207,8 @@ public class ExternalSort {
      * @throws IOException Some kind of error
      */
     private LinkedList<File> sortChunks() throws IOException{
-        LinkedList<File> chunkFiles = new LinkedList<File>();
-        LinkedList<String> chunk = new LinkedList<String>();
+        LinkedList<File> chunkFiles = new LinkedList<>();
+        LinkedList<String> chunk;
         do{
             chunk = readChunk(in);
 
@@ -227,13 +226,11 @@ public class ExternalSort {
     /**
      * Reads in a chunk of rows into a LinkedList
      *
-     * @param list The list to populate
      * @param in The BufferedReader to read from
-     * @return The LinkeList with the chunk
-     * @throws IOException Some kind of error
+     * @return a LinkedList with the chunks
      */
     private LinkedList<String> readChunk(BufferedReader in) throws IOException{
-        LinkedList<String> list = new LinkedList<String>();
+        LinkedList<String> list = new LinkedList<>();
         String tmp;
         for(int i=0; i<CHUNK_SIZE ;i++){
             tmp = in.readLine();
@@ -252,18 +249,16 @@ public class ExternalSort {
      */
     private void writeChunk(LinkedList<String> list, File file) throws IOException{
         BufferedWriter out = new BufferedWriter(new FileWriter(file));
-        Iterator<String> it = list.iterator();
-        while(it.hasNext()){
-            out.write(it.next());
+        for (String str : list) {
+            out.write(str);
             out.newLine();
         }
         out.close();
     }
 
     private void removeFiles(LinkedList<File> list){
-        Iterator<File> it = list.iterator();
-        while(it.hasNext()){
-            it.next().delete();
+        for (File file : list) {
+            file.delete();
         }
     }
 }

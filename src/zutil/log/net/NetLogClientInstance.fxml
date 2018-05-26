@@ -36,93 +36,100 @@
     <URL value="@NetLogClientInstance.css" />
   </stylesheets>
   <bottom>
-    <ToolBar maxHeight="22.0" minHeight="19.0" prefHeight="22.0" prefWidth="839.0">
-      <items>
-        <ProgressBar fx:id="progressBar" prefWidth="200.0" progress="0.0" style="" />
-        <Label fx:id="errorLabel" text="" textFill="RED">
-          <font>
-            <Font size="11.0" />
-          </font>
-        </Label>
-        <Region HBox.Hgrow="ALWAYS" />
-        <Separator orientation="VERTICAL" prefHeight="200.0" valignment="CENTER" />
-        <Label fx:id="logCountLabel" text="0">
-          <graphic>
-            <Label text="Log Count:" />
-          </graphic>
-        </Label>
-      </items>
-    </ToolBar>
+      <ToolBar maxHeight="22.0" minHeight="19.0" prefHeight="22.0" prefWidth="839.0">
+          <ProgressBar fx:id="progressBar" prefWidth="200.0" progress="0.0"/>
+          <Label fx:id="errorLabel" textFill="RED">
+              <font>
+                  <Font size="11.0"/>
+              </font>
+          </Label>
+          <Region HBox.Hgrow="ALWAYS"/>
+          <Separator orientation="VERTICAL" prefHeight="200.0"/>
+          <Label fx:id="logCountLabel" text="0">
+              <graphic>
+                  <Label text="Log Count:"/>
+              </graphic>
+          </Label>
+      </ToolBar>
   </bottom>
   <center>
-    <SplitPane dividerPositions="0.7491525423728813" focusTraversable="true" orientation="VERTICAL" prefHeight="297.0" prefWidth="600.0">
-      <items>
-        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
-          <children>
-            <TableView fx:id="logTable" prefHeight="146.0" prefWidth="598.0" tableMenuButtonVisible="true" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-              <columns>
-                <TableColumn editable="false" prefWidth="130.0" sortable="false" text="Timestamp" fx:id="logTimestampColumn" />
-                <TableColumn editable="false" prefWidth="75.0" sortable="false" text="Level" fx:id="logLevelColumn" />
-                <TableColumn editable="false" prefWidth="400.0" sortable="false" text="Log" fx:id="logColumn" />
-              </columns>
-            </TableView>
-          </children>
-        </AnchorPane>
-        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
-          <children>
-            <TableView fx:id="exceptionTable" prefHeight="147.0" prefWidth="598.0" tableMenuButtonVisible="true" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-              <columns>
-                <TableColumn editable="false" prefWidth="45.0" style="-fx-alignment: TOP_CENTER;" text="#" fx:id="exCountColumn" />
-                <TableColumn editable="false" prefWidth="250.0" style="-fx-alignment: TOP_LEFT;&#10;-fx-font-weight: bold;" text="Exception" fx:id="exNameColumn" />
-                <TableColumn editable="false" prefWidth="300.0" style="-fx-alignment: TOP_LEFT;" text="Message" fx:id="exMessageColumn" />
-                <TableColumn editable="false" prefWidth="450.0" text="StackTrace" fx:id="exStackTraceColumn" />
-              </columns>
-            </TableView>
-          </children>
-        </AnchorPane>
-      </items>
-    </SplitPane>
+      <SplitPane dividerPositions="0.7491525423728813" focusTraversable="true" orientation="VERTICAL" prefHeight="297.0"
+                 prefWidth="600.0">
+          <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
+              <children>
+                  <TableView fx:id="logTable" prefHeight="146.0" prefWidth="598.0" tableMenuButtonVisible="true"
+                             AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
+                             AnchorPane.topAnchor="0.0">
+                      <columns>
+                          <TableColumn editable="false" prefWidth="130.0" sortable="false" text="Timestamp"
+                                       fx:id="logTimestampColumn"/>
+                          <TableColumn editable="false" prefWidth="75.0" sortable="false" text="Level"
+                                       fx:id="logLevelColumn"/>
+                          <TableColumn editable="false" prefWidth="400.0" sortable="false" text="Log"
+                                       fx:id="logColumn"/>
+                      </columns>
+                  </TableView>
+              </children>
+          </AnchorPane>
+          <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
+              <children>
+                  <TableView fx:id="exceptionTable" prefHeight="147.0" prefWidth="598.0" tableMenuButtonVisible="true"
+                             AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
+                             AnchorPane.topAnchor="0.0">
+                      <columns>
+                          <TableColumn editable="false" prefWidth="45.0" style="-fx-alignment: TOP_CENTER;" text="#"
+                                       fx:id="exCountColumn"/>
+                          <TableColumn editable="false" prefWidth="250.0"
+                                       style="-fx-alignment: TOP_LEFT;&#10;-fx-font-weight: bold;" text="Exception"
+                                       fx:id="exNameColumn"/>
+                          <TableColumn editable="false" prefWidth="300.0" style="-fx-alignment: TOP_LEFT;"
+                                       text="Message" fx:id="exMessageColumn"/>
+                          <TableColumn editable="false" prefWidth="450.0" text="StackTrace" fx:id="exStackTraceColumn"/>
+                      </columns>
+                  </TableView>
+              </children>
+          </AnchorPane>
+      </SplitPane>
   </center>
   <top>
-    <ToolBar maxHeight="30.0" minHeight="22.0" prefHeight="30.0" prefWidth="839.0">
-      <items>
-        <ToggleButton fx:id="pauseButton" mnemonicParsing="false" onAction="#handlePauseAction" text="Pause" />
-        <Region HBox.Hgrow="ALWAYS" />
-        <Group id="Group">
-          <children>
-            <Label fx:id="levelLabel" layoutX="0.0" layoutY="-7.0" text="Log Level: " />
-            <ComboBox fx:id="levelComboBox" layoutX="60.0" layoutY="-9.0" onAction="#handleLevelChanged">
-              <items>
-                <FXCollections fx:factory="observableArrayList">
-                  <String fx:value="01 - ERROR" />
-                  <String fx:value="02 - WARNING" />
-                  <String fx:value="03 - INFO" />
-                  <String fx:value="04 - FINE" />
-                  <String fx:value="05 - FINER" />
-                  <String fx:value="06 - FINEST" />
-                </FXCollections>
-              </items>
-            </ComboBox>
-          </children>
-        </Group>
-        <Group id="Group">
-          <children>
-            <Label fx:id="intervalLabel" alignment="CENTER_RIGHT" layoutX="0.0" layoutY="-7.0" prefWidth="60.0" text="Interval: " />
-            <ComboBox fx:id="intervalComboBox" layoutX="65.0" layoutY="-9.0" onAction="#handleIntervalChanged">
-              <items>
-                <FXCollections fx:factory="observableArrayList">
-                  <String fx:value="Instant" />
-                  <String fx:value="3 sec" />
-                  <String fx:value="5 sec" />
-                  <String fx:value="10 sec" />
-                  <String fx:value="30 sec" />
-                  <String fx:value="60 sec" />
-                </FXCollections>
-              </items>
-            </ComboBox>
-          </children>
-        </Group>
-      </items>
-    </ToolBar>
+      <ToolBar maxHeight="30.0" minHeight="22.0" prefHeight="30.0" prefWidth="839.0">
+          <ToggleButton fx:id="pauseButton" mnemonicParsing="false" onAction="#handlePauseAction" text="Pause"/>
+          <Region HBox.Hgrow="ALWAYS"/>
+          <Group id="Group">
+              <children>
+                  <Label fx:id="levelLabel" layoutY="-7.0" text="Log Level: "/>
+                  <ComboBox fx:id="levelComboBox" layoutX="60.0" layoutY="-9.0" onAction="#handleLevelChanged">
+                      <items>
+                          <FXCollections fx:factory="observableArrayList">
+                              <String fx:value="01 - ERROR"/>
+                              <String fx:value="02 - WARNING"/>
+                              <String fx:value="03 - INFO"/>
+                              <String fx:value="04 - FINE"/>
+                              <String fx:value="05 - FINER"/>
+                              <String fx:value="06 - FINEST"/>
+                          </FXCollections>
+                      </items>
+                  </ComboBox>
+              </children>
+          </Group>
+          <Group id="Group">
+              <children>
+                  <Label fx:id="intervalLabel" alignment="CENTER_RIGHT" layoutY="-7.0" prefWidth="60.0"
+                         text="Interval: "/>
+                  <ComboBox fx:id="intervalComboBox" layoutX="65.0" layoutY="-9.0" onAction="#handleIntervalChanged">
+                      <items>
+                          <FXCollections fx:factory="observableArrayList">
+                              <String fx:value="Instant"/>
+                              <String fx:value="3 sec"/>
+                              <String fx:value="5 sec"/>
+                              <String fx:value="10 sec"/>
+                              <String fx:value="30 sec"/>
+                              <String fx:value="60 sec"/>
+                          </FXCollections>
+                      </items>
+                  </ComboBox>
+              </children>
+          </Group>
+      </ToolBar>
   </top>
 </BorderPane>

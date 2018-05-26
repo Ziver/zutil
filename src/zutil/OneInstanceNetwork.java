@@ -33,7 +33,7 @@ import java.net.Socket;
 /**
  * This class checks if the app is alredy running
  * by Locking a port
- * 
+ *
  * @author Ziver Koc
  */
 public class OneInstanceNetwork extends Thread implements OneInstance{
@@ -63,8 +63,8 @@ public class OneInstanceNetwork extends Thread implements OneInstance{
      * should not be cald outside the class
      */
     public void run() {
-        ServerSocket serverSocket = null;
-        Socket clientSocket = null;
+        ServerSocket serverSocket;
+        Socket clientSocket;
         try {
             // Create the server socket
             serverSocket = new ServerSocket(port, 1);

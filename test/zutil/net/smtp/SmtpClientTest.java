@@ -9,7 +9,7 @@ import java.util.logging.Level;
 /**
  * Sends a test email with SmtpClient class.
  *
- * @See <a href="https://nilhcem.github.io/FakeSMTP/">Fake SMTP Server</a>
+ * @see <a href="https://nilhcem.github.io/FakeSMTP/">Fake SMTP Server</a>
  */
 public class SmtpClientTest {
 

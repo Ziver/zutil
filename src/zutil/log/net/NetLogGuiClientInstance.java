@@ -41,7 +41,7 @@ import java.util.logging.Logger;
 
 public class NetLogGuiClientInstance implements Initializable, NetLogListener {
     private static final Logger logger = LogUtil.getLogger();
-    private static enum Status{RUNNING, PAUSED, DISCONNECTED}
+    private enum Status{RUNNING, PAUSED, DISCONNECTED}
 
     // Logic variables
     private NetLogClient net;
@@ -83,19 +83,19 @@ public class NetLogGuiClientInstance implements Initializable, NetLogListener {
         updateStatus();
 
         // Setup Gui
-        logTimestampColumn.setCellValueFactory(new PropertyValueFactory<NetLogMessage, Long>("timestamp"));
-        logLevelColumn.setCellValueFactory(new PropertyValueFactory<NetLogMessage, String>("level"));
+        logTimestampColumn.setCellValueFactory(new PropertyValueFactory<>("timestamp"));
+        logLevelColumn.setCellValueFactory(new PropertyValueFactory<>("level"));
         logLevelColumn.setCellFactory(new RowCssCellFactory<NetLogMessage,String>(){
             public String getStyleName(String item){
                 return item;
             }
         });
-        logColumn.setCellValueFactory(new PropertyValueFactory<NetLogMessage, String>("log"));
+        logColumn.setCellValueFactory(new PropertyValueFactory<>("log"));
 
-        exCountColumn.setCellValueFactory(new PropertyValueFactory<NetLogExceptionMessage, Long>("count"));
-        exNameColumn.setCellValueFactory(new PropertyValueFactory<NetLogExceptionMessage, String>("name"));
-        exMessageColumn.setCellValueFactory(new PropertyValueFactory<NetLogExceptionMessage, String>("message"));
-        exStackTraceColumn.setCellValueFactory(new PropertyValueFactory<NetLogExceptionMessage, String>("stackTrace"));
+        exCountColumn.setCellValueFactory(new PropertyValueFactory<>("count"));
+        exNameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
+        exMessageColumn.setCellValueFactory(new PropertyValueFactory<>("message"));
+        exStackTraceColumn.setCellValueFactory(new PropertyValueFactory<>("stackTrace"));
     }
 
     /************* NETWORK *****************/

@@ -24,11 +24,12 @@
 
 package zutil.db;
 
+import java.util.Collections;
 import java.util.LinkedList;
 
 /**
  * A class that generates a query by objects, minimizes errors
- * 
+ *
  * @author Ziver
  */
 public class SQLQuery {
@@ -157,13 +158,12 @@ public class SQLQuery {
     //*******************************************
     // Sub Types
     public static class SQLFrom extends SQLQueryItem{
-        LinkedList<String> tables = new LinkedList<String>();
+        LinkedList<String> tables = new LinkedList<>();
         SQLQueryItem next;
 
         protected SQLFrom(SQLQueryItem root, String ...tables){
             setRoot(root);
-            for( String table : tables )
-                this.tables.add(table);
+            Collections.addAll(this.tables, tables);
         }
 
         public SQLFrom NATURAL_JOIN(String table){
@@ -190,8 +190,7 @@ public class SQLQuery {
         private SQLFrom joinLastTable(String type, String table){
             String last = tables.getLast();
             tables.removeLast();
-            tables.add(
-                    new StringBuilder(last).append(" ").append(type).append(" ").append(table).toString());
+            tables.add(last + " " + type + " " + table);
             return this;
         }
 
@@ -238,7 +237,7 @@ public class SQLQuery {
     //*******************************************
     // Condition Types
     public static class SQLWhere extends SQLQueryItem{
-        LinkedList<String> conds = new LinkedList<String>();
+        LinkedList<String> conds = new LinkedList<>();
         SQLQueryItem next;
 
         protected SQLWhere(SQLQueryItem root){
@@ -283,9 +282,7 @@ public class SQLQuery {
         }
 
         private SQLWhere cond(String cond, String arg1, String arg2){
-            conds.add(
-                    //new StringBuilder(arg1).append(cond).append('\"').append(arg2).append('\"').toString());
-                    new StringBuilder(arg1).append(cond).append(arg2).toString());
+            conds.add(arg1 + cond + arg2);
             return this;
         }
 

@@ -42,7 +42,7 @@ import java.util.ResourceBundle;
 
 /**
  * This class manages the whole wizard
- * 
+ *
  * @author Ziver
  */
 public class Wizard implements ActionListener{
@@ -86,8 +86,8 @@ public class Wizard implements ActionListener{
     public Wizard(WizardListener listener, final WizardPage start, final String bg){
         try {
             this.listener = listener;
-            pages = new HistoryList<WizardPage>();
-            values = new HashMap<String, Object>();
+            pages = new HistoryList<>();
+            values = new HashMap<>();
             handler = new WizardActionHandler( values );
 
             // GUI
@@ -217,7 +217,7 @@ public class Wizard implements ActionListener{
         JSeparator separator2 = new JSeparator();
         pageTitle = new JLabel();
         JSeparator separator3 = new JSeparator();
-        error = new JLabel();
+        JLabel error = new JLabel();
         pageContainer = new JScrollPane();
 
         frame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
@@ -326,8 +326,8 @@ public class Wizard implements ActionListener{
 
         frame.pack();
     }
-    
-    
+
+
     /**
      * @param args the command line arguments
      */
@@ -339,12 +339,11 @@ public class Wizard implements ActionListener{
                 wizard.start();
             }
         });
-        MultiPrintStream.out.dump( listener.getValues() );
+        MultiPrintStream.out.dump(listener.getValues());
 
     }
 
     // Variables declaration - do not modify
-    private JLabel error;
     private JButton back;
     private JButton cancel;
     private JButton finish;

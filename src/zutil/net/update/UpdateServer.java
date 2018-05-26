@@ -102,7 +102,7 @@ public class UpdateServer extends ThreadedTCPNetworkServer{
                     // send file data
                     FileInputStream input = new FileInputStream( info.getFile() );
                     byte[] nextBytes = new byte[ socket.getSendBufferSize() ];
-                    int bytesRead = 0;
+                    int bytesRead;
                     while((bytesRead = input.read(nextBytes)) > 0){
                         out.write(nextBytes,0,bytesRead);
                     }

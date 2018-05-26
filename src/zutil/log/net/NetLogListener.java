@@ -29,15 +29,15 @@ public interface NetLogListener {
     /**
      * Handle incoming log messages
      */
-    public void handleLogMessage( NetLogMessage log );
+    void handleLogMessage(NetLogMessage log);
 
     /**
      * Handle incoming exception messages
      */
-    public void handleExceptionMessage( NetLogExceptionMessage exception );
+    void handleExceptionMessage(NetLogExceptionMessage exception);
 
     /**
      * Handle incoming status messages
      */
-    public void handleStatusMessage( NetLogStatusMessage status );
+    void handleStatusMessage(NetLogStatusMessage status);
 }

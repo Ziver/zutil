@@ -107,7 +107,7 @@ public class Configurator<T> {
         return classConf.get(c);
     }
     protected static ConfigurationParam[] getConfiguration(Class c, Object obj){
-        ArrayList<ConfigurationParam> conf = new ArrayList<ConfigurationParam>();
+        ArrayList<ConfigurationParam> conf = new ArrayList<>();
 
         for(Class<?> cc = c; cc != Object.class ;cc = cc.getSuperclass()) { // iterate through all super classes
             for (Field f : cc.getDeclaredFields()) {
@@ -121,7 +121,7 @@ public class Configurator<T> {
             }
         }
 
-        ConfigurationParam[] list = conf.toArray(new ConfigurationParam[conf.size()]);
+        ConfigurationParam[] list = conf.toArray(new ConfigurationParam[0]);
         Arrays.sort(list);
         return list;
     }

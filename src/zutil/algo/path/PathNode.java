@@ -32,23 +32,23 @@ public interface PathNode {
     /**
      * @return an Iterator with all its neighbors
      */
-    public Iterable<PathNode> getNeighbors();
+    Iterable<PathNode> getNeighbors();
 
     /**
      * @param neighbor is the neighbor
      * @return the cost to the neighbor
      */
-    public int getNeighborCost(PathNode neighbor);
+    int getNeighborCost(PathNode neighbor);
 
     /**
      * Sets the parent node to this one
      */
-    public void setParentNeighbor(PathNode parent);
+    void setParentNeighbor(PathNode parent);
 
     /**
      * @return the parent node
      */
-    public PathNode getParentNeighbor();
+    PathNode getParentNeighbor();
 
     /**
      * Traverses the parent tree and returns the path.
@@ -56,5 +56,5 @@ public interface PathNode {
      * @param goal is the node to reach
      * @return the path to the goal, empty list if there is no goal
      */
-    public LinkedList<PathNode> traversTo(PathNode goal);
+    LinkedList<PathNode> traversTo(PathNode goal);
 }

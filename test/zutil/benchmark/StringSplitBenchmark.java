@@ -40,7 +40,7 @@ public class StringSplitBenchmark {
     public void substring(){
         for(int i=0; i<TEST_EXECUTIONS; i++) {
             List<String> splitList = StringUtil.split(str, delimiter.charAt(0));
-            assertSplit(splitList.toArray(new String[splitList.size()]));
+            assertSplit(splitList.toArray(new String[0]));
         }
     }
 

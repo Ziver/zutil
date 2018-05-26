@@ -73,9 +73,7 @@ public class MergeSort{
         int length = pivot-start;
         int[] tmp = new int[stop-start];
 
-        for(int i=0; i<tmp.length ;++i){
-            tmp[i] = list[start+i];
-        }
+        System.arraycopy(list, start + 0, tmp, 0, tmp.length);
 
         int index1 = 0;
         int index2 = length;
@@ -127,7 +125,6 @@ public class MergeSort{
      * This method is the merger, after the array
      * has been split this method will merge the
      * two parts of the array and sort it.
-     * @param <T>
      *
      * @param list is the list to merge
      * @param start is the start of the first sublist

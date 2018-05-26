@@ -33,33 +33,32 @@ import java.net.InetAddress;
 import java.net.MulticastSocket;
 
 /**
- * This class broadcast its address in the LAN so that 
+ * This class broadcast its address in the LAN so that
  * the ServerFindClient can get the server IP
- * 
+ *
  * @author Ziver
  *
  */
 public class ServerFind extends Thread {
-    public String broadcastAddress = "230.0.0.1";
+    private static final String BROADCAST_ADDRESS = "230.0.0.1";
 
     private InetAddress group;
-    private MulticastSocket Msocket;
+    private MulticastSocket mSocket;
 
-    private boolean avsluta;
+    private boolean shutdown;
     private int port;
 
     /**
      * Creates a ServerFind Thread an the specified port
      *
      * @param port The port to run the ServerFind Server on
-     * @throws IOException
      */
     public ServerFind (int port) throws IOException {
         this.port = port;
-        avsluta = false;
-        group = InetAddress.getByName(broadcastAddress);
-        Msocket = new MulticastSocket(port);
-        Msocket.joinGroup(group);
+        shutdown = false;
+        group = InetAddress.getByName(BROADCAST_ADDRESS);
+        mSocket = new MulticastSocket(port);
+        mSocket.joinGroup(group);
 
         start();
     }
@@ -67,12 +66,12 @@ public class ServerFind extends Thread {
     public void run (){
         byte[] buf = new byte[256];
         DatagramPacket packet;
-        DatagramSocket lan_socket = null;
+        DatagramSocket lan_socket;
 
-        while (!avsluta){
+        while (!shutdown){
             try {
                 packet = new DatagramPacket(buf, buf.length);
-                Msocket.receive(packet);
+                mSocket.receive(packet);
 
                 lan_socket = new DatagramSocket(port , packet.getAddress());
                 packet = new DatagramPacket(buf, buf.length, group, port);
@@ -91,7 +90,7 @@ public class ServerFind extends Thread {
      * Closes the broadcast socket
      */
     public void close(){
-        avsluta = true;
-        Msocket.close();
+        shutdown = true;
+        mSocket.close();
     }
 }

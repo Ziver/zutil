@@ -31,13 +31,12 @@ public class InetScanner {
      */
     public synchronized void scan(InetAddress ip){
         canceled = false;
-        MultiCommandExecutor exec = new MultiCommandExecutor();
         String netAddr = ip.getHostAddress().substring(0, ip.getHostAddress().lastIndexOf('.')+1);
 
-        try{
+        try (MultiCommandExecutor exec = new MultiCommandExecutor()) {
             for (int i = 1; i < 255 && !canceled; i++) {
                 try {
-                    String targetIp = netAddr+i;
+                    String targetIp = netAddr + i;
                     boolean online = isReachable(targetIp, exec);
                     if (online && listener != null)
                         listener.foundInetAddress(InetAddress.getByName(targetIp));
@@ -45,11 +44,8 @@ public class InetScanner {
                     e.printStackTrace();
                 }
             }
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
-        } finally {
-            exec.close();
         }
     }
 

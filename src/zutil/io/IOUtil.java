@@ -28,7 +28,7 @@ import java.io.*;
 
 /**
  * Utility class for streams and general IO stuff
- * 
+ *
  * @author Ziver
  *
  */
@@ -38,7 +38,6 @@ public class IOUtil {
      * Reads and returns all the content of a stream.
      * The InputStream will not be closed
      *
-     * @param 		stream
      * @return a byte array with the stream contents
      */
     public static byte[] readContent(InputStream stream) throws IOException{
@@ -48,14 +47,13 @@ public class IOUtil {
     /**
      * Reads and returns all the content of a stream.
      *
-     * @param 		stream
      * @param       close       true if the stream should be closed at the end
      * @return a byte array with the stream contents
      */
     public static byte[] readContent(InputStream stream, boolean close) throws IOException{
         DynamicByteArrayStream dyn_buff = new DynamicByteArrayStream();
         byte[] buff = new byte[8192];
-        int len = 0;
+        int len;
         while((len = stream.read(buff)) != -1){
             dyn_buff.append(buff, 0, len);
         }
@@ -68,7 +66,6 @@ public class IOUtil {
      * Reads and returns all the content of a stream as a String.
      * The InputStream will not be closed
      *
-     * @param 		stream
      * @return a String with the content of the stream
      */
     public static String readContentAsString(InputStream stream) throws IOException{
@@ -77,7 +74,6 @@ public class IOUtil {
     /**
      * Reads and returns all the content of a stream as a String.
      *
-     * @param 		stream
      * @param       close       true if the stream should be closed at the end
      * @return a String with the content of the stream
      */
@@ -89,7 +85,6 @@ public class IOUtil {
      * Reads and returns all the content of a stream as a String.
      * The Reader will not be closed
      *
-     * @param 		reader
      * @return a String with the content of the stream
      */
     public static String readContentAsString(Reader reader) throws IOException{
@@ -98,13 +93,12 @@ public class IOUtil {
     /**
      * Reads and returns all the content of a stream as a String.
      *
-     * @param 		reader
      * @param       close       true if the stream should be closed at the end
      * @return a String with the content of the stream
      */
     public static String readContentAsString(Reader reader, boolean close) throws IOException{
         StringBuilder str = new StringBuilder();
-        BufferedReader in = null;
+        BufferedReader in;
         if(reader instanceof BufferedReader)
             in = (BufferedReader) reader;
         else
@@ -131,7 +125,7 @@ public class IOUtil {
      */
     public static String readLine(InputStream in) throws IOException {
         StringBuilder str = new StringBuilder(80);
-        int c = 0;
+        int c;
         while ((c=in.read()) >= 0 && (c != '\n') && (c != '\r'))
             str.append((char)c);
         if (c == '\r')
@@ -150,7 +144,7 @@ public class IOUtil {
      */
     public static String readLine(Reader in) throws IOException {
         StringBuilder str = new StringBuilder(80);
-        int c = 0;
+        int c;
         while ((c=in.read()) >= 0 && (c != '\n') && (c != '\r'))
             str.append((char)c);
         if (c == '\r')

@@ -42,10 +42,10 @@ public class ChartData {
 
 
     public ChartData(){
-        xStrings = new HashMap<Integer,String>();
-        yStrings = new HashMap<Integer,String>();
+        xStrings = new HashMap<>();
+        yStrings = new HashMap<>();
 
-        points = new ArrayList<Point>();
+        points = new ArrayList<>();
     }
 
     public void setXValueString(int x, String name){

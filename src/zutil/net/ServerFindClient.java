@@ -32,7 +32,7 @@ import java.net.MulticastSocket;
 
 /**
  * This class is the client for ServerFind that receives the server IP
- * 
+ *
  * @author Ziver
  *
  */
@@ -54,7 +54,6 @@ public class ServerFindClient{
      * Requests IP from server
      *
      * @return The address of the server
-     * @throws IOException
      */
     public InetAddress find() throws IOException{
         InetAddress	group = InetAddress.getByName(broadcastAddress);

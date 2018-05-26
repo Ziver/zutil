@@ -54,12 +54,9 @@ public class WSClientFactory {
 
         try {
             Class proxyClass = Proxy.getProxyClass(
-                    WSClientFactory.class.getClassLoader(),
-                    new Class[]{intf});
-            Constructor<T> constructor = proxyClass.getConstructor(
-                    new Class[]{InvocationHandler.class});
-            T obj = constructor.newInstance(
-                    new Object[]{handler});
+                    WSClientFactory.class.getClassLoader(), intf);
+            Constructor<T> constructor = proxyClass.getConstructor(InvocationHandler.class);
+            T obj = constructor.newInstance(handler);
 
             return obj;
         } catch (Exception e){

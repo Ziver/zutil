@@ -29,11 +29,11 @@ import java.util.LinkedList;
 
 /**
  * A PathFinder class implemented with DFS
- * 
+ *
  * @author Ziver
  */
 public class DepthFirstSearch {
-    private HashSet<PathNode> visited = new HashSet<PathNode>();
+    private HashSet<PathNode> visited = new HashSet<>();
 
     /**
      * Returns the first path to the destination

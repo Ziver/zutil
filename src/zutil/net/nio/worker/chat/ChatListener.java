@@ -30,5 +30,5 @@ package zutil.net.nio.worker.chat;
  *
  */
 public interface ChatListener {
-    public void messageAction(String msg, String room);
+    void messageAction(String msg, String room);
 }

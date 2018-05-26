@@ -126,8 +126,7 @@ class DBBeanCache {
     public static DBBean get(Class<?> c, Long id) {
         if(contains(c, id)){
             CacheItem cacheItem = cache.get(c).get(id);
-            DBBean bean = cacheItem.bean.get();
-            return bean;
+            return cacheItem.bean.get();
         }
         logger.finer("Bean("+c.getName()+") cache miss for id: "+id);
         return null;

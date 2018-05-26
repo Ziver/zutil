@@ -52,7 +52,7 @@ public class NetLogServer extends Handler {
      */
     public NetLogServer(int port) {
         super();
-        exceptions = new ConcurrentHashMap<NetLogExceptionMessage,NetLogExceptionMessage>();
+        exceptions = new ConcurrentHashMap<>();
         net = new NetLogNetwork(port);
         net.start();
     }
@@ -96,7 +96,7 @@ public class NetLogServer extends Handler {
 
         public NetLogNetwork(int port) {
             super(port);
-            threads = new ConcurrentLinkedQueue<NetLogServerThread>();
+            threads = new ConcurrentLinkedQueue<>();
         }
 
         public void sendMessage(Message log){
@@ -108,8 +108,7 @@ public class NetLogServer extends Handler {
         @Override
         protected ThreadedTCPNetworkServerThread getThreadInstance(Socket s) {
             try {
-                NetLogServerThread thread = new NetLogServerThread(s);
-                return thread;
+                return new NetLogServerThread(s);
             } catch (IOException e) {
                 logger.log(Level.SEVERE, "Unable to start Client thread", e);
             }

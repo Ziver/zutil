@@ -39,10 +39,10 @@ import java.util.logging.Logger;
 
 /**
  * This class will search the file system for files
- * with the name "plugin.json" that defines data 
+ * with the name "plugin.json" that defines data
  * parameters for a single plugin.
  * The class will only load the latest version of the specific plugin.
- * 
+ *
  * @author Ziver
  */
 public class PluginManager<T> implements Iterable<PluginData>{
@@ -52,14 +52,14 @@ public class PluginManager<T> implements Iterable<PluginData>{
 
 
     public static <T> PluginManager<T> load(String path){
-        return new PluginManager<T>(path);
+        return new PluginManager<>(path);
     }
 
     public PluginManager(){
         this("./");
     }
     public PluginManager(String path){
-        plugins = new HashMap<String, PluginData>();
+        plugins = new HashMap<>();
 
         FileSearcher search = new FileSearcher(new File(path));
         search.setRecursive(true);
@@ -97,21 +97,21 @@ public class PluginManager<T> implements Iterable<PluginData>{
     public Iterator<PluginData> iterator() {
         return plugins.values().iterator();
     }
-    public <T> Iterator<T> getObjectIterator(Class<T> intf) {
-        return new PluginObjectIterator<T>(plugins.values().iterator(), intf);
+    public <K> Iterator<K> getObjectIterator(Class<K> intf) {
+        return new PluginObjectIterator<>(plugins.values().iterator(), intf);
     }
-    public <T> Iterator<Class<? extends T>> getClassIterator(Class<T> intf) {
-        return new PluginClassIterator<T>(plugins.values().iterator(), intf);
+    public <K> Iterator<Class<? extends K>> getClassIterator(Class<K> intf) {
+        return new PluginClassIterator<>(plugins.values().iterator(), intf);
     }
 
     public ArrayList<PluginData> toArray() {
         return toGenericArray(iterator());
     }
-    public <T> ArrayList<T> toArray(Class<T> intf) {
+    public <K> ArrayList<K> toArray(Class<K> intf) {
         return toGenericArray(getObjectIterator(intf));
     }
-    private <T> ArrayList<T> toGenericArray(Iterator<T> it) {
-        ArrayList<T> list = new ArrayList<>();
+    private <K> ArrayList<K> toGenericArray(Iterator<K> it) {
+        ArrayList<K> list = new ArrayList<>();
         while(it.hasNext())
             list.add(it.next());
         return list;

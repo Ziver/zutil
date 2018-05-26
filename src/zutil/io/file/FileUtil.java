@@ -90,9 +90,6 @@ public class FileUtil {
     /**
      * Copy the contents of a source file to another file.
      * NOTE: the method will replace the destination file if it exists.
-     *
-     * @param   source
-     * @param   destination
      */
     public static void copy(File source, File destination) throws IOException{
         try (BufferedInputStream in = new BufferedInputStream(new FileInputStream(source));
@@ -126,7 +123,6 @@ public class FileUtil {
      *
      * @param 		path 		is the path to the file (no / if not absolute path)
      * @return					A URL object for the file
-     * @throws URISyntaxException
      */
     public static URL findURL(String path){
         return Thread.currentThread().getContextClassLoader().getResource(path);
@@ -155,7 +151,6 @@ public class FileUtil {
     /**
      * Reads and returns the content of a file as a String.
      *
-     * @param 		file
      * @return the file content
      */
     public static String getContent(File file) throws IOException{
@@ -166,14 +161,12 @@ public class FileUtil {
     }
 
     /**
-     * Reads and returns the content of a file as a String.
+     * Connects to a URL and returns the content of it as a String.
      *
-     * @param 		url
-     * @return the file content
+     * @return the URL content
      */
     public static String getContent(URL url) throws IOException{
-        String data = new String(IOUtil.readContent(url.openStream(), true));
-        return data;
+        return new String(IOUtil.readContent(url.openStream(), true));
     }
 
     /**
@@ -195,7 +188,7 @@ public class FileUtil {
      * @return a List of files
      */
     public static List<File> search(File dir){
-        return search(dir, new LinkedList<File>(), true);
+        return search(dir, new LinkedList<>(), true);
     }
 
     /**
@@ -207,7 +200,7 @@ public class FileUtil {
      * @return A List of files
      */
     public static List<File> search(File dir, List<File> fileList, boolean recursive){
-        return search(dir, new LinkedList<File>(), false, (recursive ? Integer.MAX_VALUE : 0));
+        return search(dir, new LinkedList<>(), false, (recursive ? Integer.MAX_VALUE : 0));
     }
 
     /**

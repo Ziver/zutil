@@ -30,8 +30,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-import static junit.framework.TestCase.assertEquals;
-import static junit.framework.TestCase.assertFalse;
+import static junit.framework.TestCase.*;
 
 
 /**
@@ -166,10 +165,10 @@ public class BinaryStructInputStreamTest {
 
             public void assertObj(){
                 assertEquals("i1", 6, i1);
-                assertEquals("b2", true, b2);
-                assertEquals("b3", true, b3);
-                assertEquals("b4", false, b4);
-                assertEquals("b5", true, b5);
+                assertTrue("b2", b2);
+                assertTrue("b3", b3);
+                assertFalse("b4", b4);
+                assertTrue("b5", b5);
             }
         };
 
@@ -194,12 +193,12 @@ public class BinaryStructInputStreamTest {
     }
     public static class ByteStringSerializer implements BinaryFieldSerializer<String>{
         public String read(InputStream in, BinaryFieldData field) throws IOException {
-            String ret = "";
+            StringBuilder ret = new StringBuilder();
             for (int c; (c=in.read()) > 0; )
-                ret += c;
-            return ret;
+                ret.append(c);
+            return ret.toString();
         }
-        public void write(OutputStream out, String obj, BinaryFieldData field) throws IOException {}
+        public void write(OutputStream out, String obj, BinaryFieldData field) {}
     }
 
 

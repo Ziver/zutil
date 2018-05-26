@@ -41,7 +41,7 @@ import static org.junit.Assert.assertThat;
 public class JSONSerializerTest{
 
     @Test
-    public void testOutputSerializerWithPrimitives() throws InterruptedException, IOException, ClassNotFoundException{
+    public void testOutputSerializerWithPrimitives() throws IOException {
         TestClass sourceObj = new TestClass().init();
 
         String data = writeObjectToJson(sourceObj);
@@ -53,7 +53,7 @@ public class JSONSerializerTest{
     }
 
     @Test
-    public void testInputSerializerWithPrimitives() throws InterruptedException, IOException, ClassNotFoundException{
+    public void testInputSerializerWithPrimitives() throws IOException {
         TestClass sourceObj = new TestClass().init();
 
         TestClass targetObj = sendReceiveObject(sourceObj);
@@ -62,7 +62,7 @@ public class JSONSerializerTest{
     }
 
     @Test
-    public void testOutputSerializerWithClones() throws InterruptedException, IOException, ClassNotFoundException{
+    public void testOutputSerializerWithClones() throws IOException {
         TestClassObjClone sourceObj = new TestClassObjClone().init();
 
         String data = writeObjectToJson(sourceObj);
@@ -74,7 +74,7 @@ public class JSONSerializerTest{
     }
 
     @Test
-    public void testInputSerializerWithClones() throws InterruptedException, IOException, ClassNotFoundException{
+    public void testInputSerializerWithClones() throws IOException {
         TestClassObjClone sourceObj = new TestClassObjClone().init();
 
         TestClassObjClone targetObj = sendReceiveObject(sourceObj);
@@ -95,7 +95,7 @@ public class JSONSerializerTest{
     }
 
     @Test
-    public void testInputSerializerWithArrays() throws InterruptedException, IOException, ClassNotFoundException{
+    public void testInputSerializerWithArrays() throws IOException {
         TestClassArray sourceObj = new TestClassArray().init();
 
         TestClassArray targetObj = sendReceiveObject(sourceObj);
@@ -103,7 +103,7 @@ public class JSONSerializerTest{
     }
 
     @Test
-    public void testInputSerializerWithStringArrays() throws InterruptedException, IOException, ClassNotFoundException{
+    public void testInputSerializerWithStringArrays() throws IOException {
         TestClassStringArray sourceObj = new TestClassStringArray().init();
 
         TestClassStringArray targetObj = sendReceiveObject(sourceObj);
@@ -111,7 +111,7 @@ public class JSONSerializerTest{
     }
 
     @Test
-    public void testSerializerWithNullFieldsHidden() throws InterruptedException, IOException, ClassNotFoundException{
+    public void testSerializerWithNullFieldsHidden() throws IOException {
         TestClass sourceObj = new TestClass();
 
         String data = writeObjectToJson(sourceObj, false);
@@ -125,7 +125,7 @@ public class JSONSerializerTest{
     }
 
     @Test
-    public void testSerializerWithMapField() throws InterruptedException, IOException, ClassNotFoundException{
+    public void testSerializerWithMapField() throws IOException {
         TestClassMap sourceObj = new TestClassMap().init();
 
         TestClassMap targetObj = sendReceiveObject(sourceObj);
@@ -133,7 +133,7 @@ public class JSONSerializerTest{
     }
 
     @Test
-    public void testSerializerWithMapFieldWithNullEntry() throws InterruptedException, IOException, ClassNotFoundException{
+    public void testSerializerWithMapFieldWithNullEntry() throws IOException {
         TestClassMap sourceObj = new TestClassMap().init();
         sourceObj.map.put("key1", null);
 
@@ -143,7 +143,7 @@ public class JSONSerializerTest{
     }
 
     @Test
-    public void testSerializerWithListField() throws InterruptedException, IOException, ClassNotFoundException{
+    public void testSerializerWithListField() throws IOException {
         TestClassList sourceObj = new TestClassList().init();
 
         String data = writeObjectToJson(sourceObj);
@@ -155,7 +155,7 @@ public class JSONSerializerTest{
     }
 
     @Test
-    public void testSerializerWithMultipleObj() throws InterruptedException, IOException, ClassNotFoundException{
+    public void testSerializerWithMultipleObj() throws IOException {
         TestClass sourceObj1 = new TestClass().init();
         TestClass sourceObj2 = new TestClass().init();
 
@@ -175,13 +175,13 @@ public class JSONSerializerTest{
 
     /******************* Utility Functions ************************************/
 
-    public static <T> T sendReceiveObject(T sourceObj) throws IOException{
+    static <T> T sendReceiveObject(T sourceObj) throws IOException{
         return readObjectFromJson(
                 writeObjectToJson(sourceObj));
     }
 
     @SuppressWarnings("unchecked")
-    public static <T> T readObjectFromJson(String json) throws IOException{
+    static <T> T readObjectFromJson(String json) throws IOException{
         StringReader bin = new StringReader(json);
         JSONObjectInputStream in = new JSONObjectInputStream(bin);
         T targetObj = (T) in.readObject();
@@ -190,10 +190,10 @@ public class JSONSerializerTest{
         return targetObj;
     }
 
-    public static <T> String writeObjectToJson(T sourceObj) throws IOException{
+    static <T> String writeObjectToJson(T sourceObj) throws IOException{
         return writeObjectToJson(sourceObj, true);
     }
-    public static <T> String writeObjectToJson(T sourceObj, boolean metadata) throws IOException{
+    private static <T> String writeObjectToJson(T sourceObj, boolean metadata) throws IOException{
         StringOutputStream bout = new StringOutputStream();
         JSONObjectOutputStream out = new JSONObjectOutputStream(bout);
         out.enableMetaData(metadata);
@@ -202,8 +202,7 @@ public class JSONSerializerTest{
         out.flush();
         out.close();
 
-        String data = bout.toString();
-        return data;
+        return bout.toString();
     }
 
     /******************** Test Classes ************************************/

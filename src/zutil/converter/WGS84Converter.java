@@ -56,7 +56,7 @@ public class WGS84Converter {
             }
         }
         // 3444.0000S 13521.0000E
-        else if(coordinate.matches("[0-9]{4,5}.[0-9]*[NSEW]{1}")){
+        else if(coordinate.matches("[0-9]{4,5}.[0-9]*[NSEW]")){
             coordinate = coordinate.replaceAll("[NS EW]", "");
             float tmpf = Float.parseFloat(coordinate);
             deg = (int)(tmpf/100);

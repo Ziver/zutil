@@ -39,7 +39,7 @@ public class JSONSerializerBenchmark {
     public BenchmarkRule benchmarkRun = new BenchmarkRule();
 
     @Test
-    public void testJavaLegacySerialize() throws InterruptedException, IOException, ClassNotFoundException{
+    public void testJavaLegacySerialize() throws IOException, ClassNotFoundException{
         for(int i=0; i<TEST_EXECUTIONS; i++){
             TestClass sourceObj = new TestClass().init();
 
@@ -60,7 +60,7 @@ public class JSONSerializerBenchmark {
     }
 
     @Test
-    public void testJavaJSONSerialize() throws InterruptedException, IOException, ClassNotFoundException{
+    public void testJavaJSONSerialize() throws IOException {
         for(int i=0; i<TEST_EXECUTIONS; i++){
             TestClass sourceObj = new TestClass().init();
 
@@ -71,7 +71,7 @@ public class JSONSerializerBenchmark {
     }
 
     @Test
-    public void testOutputJavaLegacySerialize() throws InterruptedException, IOException, ClassNotFoundException{
+    public void testOutputJavaLegacySerialize() throws IOException {
         for(int i=0; i<TEST_EXECUTIONS; i++){
             TestClass sourceObj = new TestClass().init();
 
@@ -85,7 +85,7 @@ public class JSONSerializerBenchmark {
     }
 
     @Test
-    public void testOutputJavaJSONSerialize() throws InterruptedException, IOException, ClassNotFoundException{
+    public void testOutputJavaJSONSerialize() throws IOException {
         for(int i=0; i<TEST_EXECUTIONS; i++){
             TestClass sourceObj = new TestClass().init();
 
@@ -94,7 +94,7 @@ public class JSONSerializerBenchmark {
     }
 
     @Test
-    public void testInputJavaLegacySerialize() throws InterruptedException, IOException, ClassNotFoundException{
+    public void testInputJavaLegacySerialize() throws IOException, ClassNotFoundException{
         TestClass sourceObj = new TestClass().init();
 
         ByteArrayOutputStream bout = new ByteArrayOutputStream();
@@ -113,12 +113,12 @@ public class JSONSerializerBenchmark {
     }
 
     @Test
-    public void testInputJavaJSONSerialize() throws InterruptedException, IOException, ClassNotFoundException{
+    public void testInputJavaJSONSerialize() throws IOException {
         TestClass sourceObj = new TestClass().init();
         String sourceStr = JSONSerializerTest.writeObjectToJson(sourceObj);
 
         for(int i=0; i<TEST_EXECUTIONS; i++){
-            TestClass targetObj = JSONSerializerTest.readObjectFromJson(sourceStr);
+            JSONSerializerTest.readObjectFromJson(sourceStr);
         }
     }
 }

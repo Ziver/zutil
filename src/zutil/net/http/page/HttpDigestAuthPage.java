@@ -42,10 +42,7 @@ public class HttpDigestAuthPage implements HttpPage{
     private HttpPage targetPage;
 
 
-    /**
-     *
-     * @param page
-     */
+
     public HttpDigestAuthPage(HttpPage page){
         targetPage = page;
     }

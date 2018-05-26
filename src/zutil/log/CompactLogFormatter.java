@@ -49,7 +49,7 @@ public class CompactLogFormatter extends Formatter{
     /** Specifies the max length of the longest class name **/
     private int max_class_name = 0;
     /** Cache for the class padding **/
-    private static HashMap<String,String> padd_cache = new HashMap<String,String>();
+    private static HashMap<String,String> padd_cache = new HashMap<>();
     /** Date temp file **/
     private Date date = new Date();
 

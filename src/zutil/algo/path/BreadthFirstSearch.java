@@ -43,8 +43,8 @@ public class BreadthFirstSearch implements PathFinder{
      * @return A list with the path
      */
     public LinkedList<PathNode> find(PathNode start, PathNode stop){
-        Queue<PathNode> queue = new LinkedList<PathNode>();
-        HashSet<PathNode> visited = new HashSet<PathNode>();
+        Queue<PathNode> queue = new LinkedList<>();
+        HashSet<PathNode> visited = new HashSet<>();
 
         queue.add(start);
         visited.add( start );

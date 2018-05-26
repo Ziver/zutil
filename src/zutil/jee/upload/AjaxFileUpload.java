@@ -51,7 +51,7 @@ import java.util.logging.Logger;
 
 /**
  * <pre>
- * Example web.xml: 
+ * Example web.xml:
  * &lt;servlet&gt;
  * 	&lt;servlet-name&gt;Upload&lt;/servlet-name&gt;
  * 	&lt;servlet-class&gt;zall.util.AjaxFileUpload&lt;/servlet-class&gt;
@@ -64,19 +64,19 @@ import java.util.logging.Logger;
  * 		&lt;param-value&gt;SYSTEM|SERVLET|{PATH}&lt;/param-value&gt;
  * 	&lt;/init-param&gt;
  * &lt;/servlet&gt;
- * 
- * 
- * HTML Header: 
+ *
+ *
+ * HTML Header:
  * &lt;script type='text/javascript' src='{PATH_TO_SERVLET}?js'&gt;&lt;/script&gt;
  *
  *
- * HTML Body: 
+ * HTML Body:
  * &lt;FORM id="AjaxFileUpload"&gt;
  * 	&lt;input type="file" multiple name="file" /&gt;
  * &lt;/FORM&gt;
  * &lt;UL id="UploadQueue"&gt;&lt;/UL&gt;
- * 
- * 
+ *
+ *
  * </pre>
  * @author Ziver
  *
@@ -90,7 +90,7 @@ public abstract class AjaxFileUpload extends HttpServlet {
 
     public static File TEMPFILE_PATH = null;
     public static String JAVASCRIPT = "";
-    public static HashSet<String> ALLOWED_EXTENSIONS = new HashSet<String>();
+    public static HashSet<String> ALLOWED_EXTENSIONS = new HashSet<>();
 
     public void init(ServletConfig config) throws ServletException {
         super.init(config);
@@ -129,12 +129,12 @@ public abstract class AjaxFileUpload extends HttpServlet {
 
     @SuppressWarnings("unchecked")
     protected void doGet(HttpServletRequest request,
-            HttpServletResponse response) throws ServletException, IOException {
+            HttpServletResponse response) throws IOException {
         PrintWriter out = response.getWriter();
         if(request.getParameter("js") != null){
             response.setContentType("application/x-javascript");
-            String tmp = JAVASCRIPT;
-            tmp = JAVASCRIPT.replaceAll("\\{SERVLET_URL\\}", request.getRequestURI());
+
+            String tmp = JAVASCRIPT.replaceAll("\\{SERVLET_URL\\}", request.getRequestURI());
             tmp = tmp.replaceAll("\\{BGUPLOAD\\}", "false");
             tmp = tmp.replaceAll("\\{PROGHTML\\}", getProgressHTML());
             out.print(tmp);
@@ -178,15 +178,15 @@ public abstract class AjaxFileUpload extends HttpServlet {
         FileUploadListener listener = new FileUploadListener();
         try {
             // Initiate list and HashMap that will contain the data
-            HashMap<String,String> fields = new HashMap<String,String>();
-            ArrayList<FileItem> files = new ArrayList<FileItem>();
+            HashMap<String,String> fields = new HashMap<>();
+            ArrayList<FileItem> files = new ArrayList<>();
 
             // Add the listener to the session
             HttpSession session = request.getSession();
             LinkedList<FileUploadListener> list =
                 (LinkedList<FileUploadListener>)session.getAttribute(SESSION_FILEUPLOAD_LISTENER);
             if(list == null){
-                list = new LinkedList<FileUploadListener>();
+                list = new LinkedList<>();
                 session.setAttribute(SESSION_FILEUPLOAD_LISTENER, list);
             }
             list.add(listener);
@@ -258,8 +258,7 @@ public abstract class AjaxFileUpload extends HttpServlet {
     public abstract String getProgressHTML();
 
     /**
-     * Handle the uppload
-     * @throws ServletException
+     * Handle the upload
      */
     public abstract void doUpload(HttpServletRequest request, HttpServletResponse response,
                                         Map<String,String> fields, List<FileItem> files) throws ServletException;

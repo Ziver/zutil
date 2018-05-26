@@ -169,8 +169,8 @@ public class JSONObjectOutputStream extends OutputStream implements ObjectOutput
         return root;
     }
 
-    private DataNode getPrimitiveDataNode(Class<?> type, Object value) throws UnsupportedDataTypeException, IllegalArgumentException, IllegalAccessException {
-        DataNode node = null;
+    private DataNode getPrimitiveDataNode(Class<?> type, Object value) throws UnsupportedDataTypeException, IllegalArgumentException {
+        DataNode node;
         if     (type == int.class ||
                 type == Integer.class ||
                 type == long.class ||
@@ -179,10 +179,10 @@ public class JSONObjectOutputStream extends OutputStream implements ObjectOutput
                 type == Double.class)
             node = new DataNode(DataType.Number);
 
-        else if(type == boolean.class || 
+        else if(type == boolean.class ||
                 type == Boolean.class)
             node = new DataNode(DataType.Boolean);
-        
+
         else if(type == String.class ||
                 type == char.class ||
                 type == Character.class)
@@ -215,11 +215,11 @@ public class JSONObjectOutputStream extends OutputStream implements ObjectOutput
         ignoreNullFields = enable;
     }
 
-    public void flush() throws IOException {
+    public void flush() {
         out.flush();
     }
 
-    public void close() throws IOException {
+    public void close() {
         if (out != null) {
             out.flush();
             out.close();
@@ -228,40 +228,40 @@ public class JSONObjectOutputStream extends OutputStream implements ObjectOutput
 
 
 
-    @Override public void writeBoolean(boolean v) throws IOException {
+    @Override public void writeBoolean(boolean v) {
         out.write(new DataNode(v));
     }
-    @Override public void writeByte(int v) throws IOException {
+    @Override public void writeByte(int v) {
         throw new UnsupportedOperationException ();
     }
-    @Override public void writeShort(int v) throws IOException {
+    @Override public void writeShort(int v) {
         out.write(new DataNode(v));
     }
-    @Override public void writeChar(int v) throws IOException {
+    @Override public void writeChar(int v) {
         out.write(new DataNode((char)v));
     }
-    @Override public void writeInt(int v) throws IOException {
+    @Override public void writeInt(int v) {
         out.write(new DataNode(v));
     }
-    @Override public void writeLong(long v) throws IOException {
+    @Override public void writeLong(long v) {
         out.write(new DataNode(v));
     }
-    @Override public void writeFloat(float v) throws IOException {
+    @Override public void writeFloat(float v) {
         out.write(new DataNode(v));
     }
-    @Override public void writeDouble(double v) throws IOException {
+    @Override public void writeDouble(double v) {
         out.write(new DataNode(v));
     }
-    @Override public void writeBytes(String s) throws IOException {
+    @Override public void writeBytes(String s) {
         throw new UnsupportedOperationException ();
     }
-    @Override public void writeChars(String s) throws IOException {
+    @Override public void writeChars(String s) {
         out.write(new DataNode(s));
     }
-    @Override public void write(int b) throws IOException {
+    @Override public void write(int b) {
         out.write(new DataNode(b));
     }
-    @Override public void writeUTF(String s) throws IOException {
+    @Override public void writeUTF(String s) {
         out.write(new DataNode(s));
     }
 

@@ -42,12 +42,12 @@ import java.util.List;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Logger;
 
-/** 
+/**
  * The class that extends this will be able to save its state to a database.
- * Fields that are transient will be ignored, and fields that extend 
- * DBBean will be replaced with the an id which corresponds to the field 
+ * Fields that are transient will be ignored, and fields that extend
+ * DBBean will be replaced with the an id which corresponds to the field
  * of that object.
- * 
+ *
  * <XMP>
  * Supported fields:
  * 	*Boolean
@@ -335,8 +335,7 @@ public abstract class DBBean {
         logger.finest("Load all Beans("+c.getName()+") query: "+sql);
         PreparedStatement stmt = db.getPreparedStatement( sql );
         // Run query
-        List<T> list = DBConnection.exec(stmt, DBBeanSQLResultHandler.createList(c, db) );
-        return list;
+        return DBConnection.exec(stmt, DBBeanSQLResultHandler.createList(c, db) );
     }
 
     /**
@@ -369,7 +368,7 @@ public abstract class DBBean {
 
         // Generate the SQL
         StringBuilder query = new StringBuilder();
-        query.append("CREATE TABLE "+config.getTableName()+" (  ");
+        query.append("CREATE TABLE ").append(config.getTableName()).append(" (  ");
 
         // ID
         query.append(" ").append(config.getIdColumnName()).append(" ");

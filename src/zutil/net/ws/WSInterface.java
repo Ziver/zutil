@@ -29,7 +29,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 /**
- * 
+ *
  * Specifies web service definitions. Which methods that will
  * be published and other related metadata.
  *
@@ -37,28 +37,28 @@ import java.lang.annotation.Target;
  * <pre>
  *	private static class Test implements WSInterface{
  *		public Test(){}
- *	
+ *
  *		&#64;WSDocumentation("blabla")
  *		&#64;WSDLParamDocumentation("olle = a variable?")
- *		public void pubZ( 
+ *		public void pubZ(
  *				&#64;WSParamName("olle") int lol)
- *				throws Exception{ 
+ *				throws Exception{
  *			....
  *		}
- *	
+ *
  *		&#64;WSReturnName("param")
- *		public String pubA( 
+ *		public String pubA(
  *				&#64;WSParamName(value="lol", optional=true) String lol)
- *				throws Exception{ 
+ *				throws Exception{
  *			....
  *		}
- *	
+ *
  *		&#64;WSIgnore()
- *		public void privaZ(....){ 
+ *		public void privaZ(....){
  *			...
- *		}		
+ *		}
  *	}
- * 
+ *
  * </pre>
  * @author Ziver
  */
@@ -95,7 +95,7 @@ public interface WSInterface {
      */
     @Retention(RetentionPolicy.RUNTIME)
     @Target(ElementType.METHOD)
-    public @interface WSIgnore { }
+    @interface WSIgnore { }
 
     /**
      * Method or Parameter comments for the WSDL.

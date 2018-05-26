@@ -104,7 +104,7 @@ public class SmtpClient {
      *
      * @param   email   a email object containing message specific data
      */
-    public synchronized void send(Email email) throws IOException{
+    public synchronized void send(Email email) {
         if(email.getFromAddress() == null)
             throw new IllegalArgumentException("From value cannot be null!");
         if(email.getToAddress() == null)

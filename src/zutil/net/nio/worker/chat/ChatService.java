@@ -35,7 +35,7 @@ import java.util.logging.Logger;
 
 /**
  * A simple chat service with users and rooms
- * 
+ *
  * @author Ziver
  */
 public class ChatService extends ThreadedEventWorker{
@@ -126,7 +126,7 @@ public class ChatService extends ThreadedEventWorker{
     private void addRoom(String room){
         if(!rooms.containsKey(room)){
             logger.fine("New Chat Room: "+room);
-            rooms.put(room, new LinkedList<SocketAddress>());
+            rooms.put(room, new LinkedList<>());
         }
     }
 

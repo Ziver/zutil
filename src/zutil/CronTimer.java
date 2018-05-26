@@ -96,10 +96,8 @@ public class CronTimer implements Iterator<Long>, Iterable<Long>{
             String[] divisionArr = str.split("/", 2);
             if (divisionArr.length == 2) {
                 float divider = Integer.parseInt(divisionArr[1]);
-                Iterator<Integer> it = getRange(divisionArr[0], from, to).iterator();
-                while (it.hasNext()) {
-                    Integer i = it.next();
-                    if (i%divider == 0)
+                for (Integer i : getRange(divisionArr[0], from, to)) {
+                    if (i % divider == 0)
                         list.add(i);
                 }
             }

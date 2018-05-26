@@ -78,7 +78,7 @@ public abstract class OSAbstractionLayer {
      * @return a String list of the output of the command
      */
     public static String[] exec(String cmd) {
-        ArrayList<String> ret = new ArrayList<String>();
+        ArrayList<String> ret = new ArrayList<>();
         try {
             Process proc = Runtime.getRuntime().exec(cmd);
             proc.waitFor();

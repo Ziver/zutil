@@ -34,20 +34,27 @@ public class MqttPacketConnect extends MqttPacketHeader {
     /** Indicates that the controlHeader contains a username */
     @BinaryField(index = 2010, length = 1)
     public boolean flagUsername;
+
     /** Indicates that the controlHeader contains a password */
     @BinaryField(index = 2011, length = 1)
     public boolean flagPassword;
+
     /** Specifies if the Will Message is to be Retained when it is published. */
     @BinaryField(index = 2012, length = 1)
     public boolean flagWillRetain;
+
     /** Specifies the QoS level to be used when publishing the Will Message. */
     @BinaryField(index = 2013, length = 2)
     public int flagWillQoS;
+
     @BinaryField(index = 2014, length = 1)
     public boolean flagWillFlag;
-    @BinaryField(index = 2015, length = 1)
+
     /** This bit specifies the handling of the Session state. */
+    @BinaryField(index = 2015, length = 1)
+
     public boolean flagCleanSession;
+
     @BinaryField(index = 2016, length = 1)
     private boolean reserved;
 

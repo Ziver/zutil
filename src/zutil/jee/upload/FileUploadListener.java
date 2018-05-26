@@ -32,11 +32,11 @@ import zutil.parser.DataNode.DataType;
 
 /**
  * This is a File Upload Listener that is used by Apache
- * Commons File Upload to monitor the progress of the 
+ * Commons File Upload to monitor the progress of the
  * uploaded file.
  */
 public class FileUploadListener implements ProgressListener{
-    public static enum Status{
+    public enum Status{
         Initializing,
         Uploading,
         Processing,
@@ -48,8 +48,8 @@ public class FileUploadListener implements ProgressListener{
     private volatile Status status;
     private volatile String filename;
     private volatile String message;
-    private volatile long bytes = 0l;
-    private volatile long length = 0l;
+    private volatile long bytes = 0L;
+    private volatile long length = 0L;
     private volatile int item = 0;
     private volatile long time;
 

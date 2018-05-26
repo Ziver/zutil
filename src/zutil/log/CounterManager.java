@@ -69,7 +69,7 @@ public class CounterManager {
                 mbs.registerMBean(counter, objectName);
                 // Register the singleton
                 if ( ! counters.containsKey(clazz))
-                    counters.put(clazz, new HashMap<String, Counter>());
+                    counters.put(clazz, new HashMap<>());
                 counters.get(clazz).put(name, counter);
             } catch (Exception e) {
                 e.printStackTrace();

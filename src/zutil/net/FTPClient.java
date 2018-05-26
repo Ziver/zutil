@@ -34,7 +34,7 @@ import java.util.regex.Pattern;
 
 /**
  * A simple FTP client class
- * 
+ *
  * @author Ziver
  *
  * http://en.wikipedia.org/wiki/List_of_FTP_commands
@@ -48,12 +48,12 @@ public class FTPClient extends Thread{
     public static final int FTP_DATA_PORT = 20;
     public static final int FTP_NOOP_INT = 120;
 
-    public static enum FTPConnectionType{
+    public enum FTPConnectionType{
         ACTIVE,
         PASSIVE
     }
 
-    public static enum FTPReturnCode{
+    public enum FTPReturnCode{
         UNKNOWN          (  -1 ),
 
         USER_OK          ( 331 ),
@@ -66,7 +66,7 @@ public class FTPClient extends Thread{
         PATH_CREATED     ( 257 );
 
         private int code;
-        private FTPReturnCode(int code){
+        FTPReturnCode(int code){
             this.code = code;
         }
 
@@ -98,7 +98,7 @@ public class FTPClient extends Thread{
      * @param   pass        password
      * @param   conn_type   connection type
      */
-    public FTPClient(String url, int port, String user, String pass, FTPConnectionType conn_type) throws UnknownHostException, IOException, AccountException{
+    public FTPClient(String url, int port, String user, String pass, FTPConnectionType conn_type) throws IOException, AccountException{
         socket = new Socket(url, port);
         in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
         out = new OutputStreamWriter(socket.getOutputStream());
@@ -189,7 +189,7 @@ public class FTPClient extends Thread{
      * @return a List of Strings with information
      */
     public String getFileInfo(String path) throws IOException{
-        Pattern regex = Pattern.compile("\\s{1,}");
+        Pattern regex = Pattern.compile("\\s+");
 
         BufferedInputStream data_in = getDataInputStream();
         sendCommand("LIST "+path);

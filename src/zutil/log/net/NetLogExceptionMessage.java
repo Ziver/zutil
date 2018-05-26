@@ -49,10 +49,12 @@ public class NetLogExceptionMessage implements Message {
         this.count = 1;
         this.name = exception.getClass().getName();
         this.message = exception.getMessage();
-        this.stackTrace = "";
+
+        StringBuilder str = new StringBuilder();
         for(int i=0; i<exception.getStackTrace().length; i++){
-            this.stackTrace += exception.getStackTrace()[i].toString();
+            str.append(exception.getStackTrace()[i].toString());
         }
+        this.stackTrace = str.toString();
     }
 
 

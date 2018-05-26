@@ -29,7 +29,7 @@ import zutil.net.nio.message.Message;
 public class ChatMessage implements Message {
     private static final long serialVersionUID = 1L;
 
-    public static enum ChatMessageType {REGISTER, UNREGISTER, MESSAGE};
+    public enum ChatMessageType {REGISTER, UNREGISTER, MESSAGE};
 
     public ChatMessageType type;
     public String msg;

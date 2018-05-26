@@ -65,7 +65,7 @@ public class ProcNetArp {
     }
     protected static void parse(BufferedReader in) throws IOException {
         updateTimer.start();
-        String line = null;
+        String line;
         in.readLine(); // Skipp headers
         while ((line = in.readLine()) != null) {
             String[] str = line.split("\\s+");

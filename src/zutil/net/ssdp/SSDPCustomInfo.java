@@ -32,7 +32,7 @@ import zutil.net.http.HttpPrintStream;
  */
 public interface SSDPCustomInfo extends SSDPServiceInfo{
 
-    public void readHeaders(HttpHeader http);
+    void readHeaders(HttpHeader http);
 
-    public void writeHeaders(HttpPrintStream http);
+    void writeHeaders(HttpPrintStream http);
 }

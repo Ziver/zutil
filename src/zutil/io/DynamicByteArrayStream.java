@@ -45,7 +45,7 @@ public class DynamicByteArrayStream extends InputStream{
      * Create a new instance of DynamicByteArrayStream
      */
     public DynamicByteArrayStream(){
-        bytes = new ArrayList<byte[]>();
+        bytes = new ArrayList<>();
         globalPos = 0;
         globalSize = 0;
         globalArrayIndex = 0;
@@ -78,7 +78,7 @@ public class DynamicByteArrayStream extends InputStream{
     }
 
     @Override
-    public synchronized int read() throws IOException {
+    public synchronized int read() {
         if(globalPos >= globalSize)	return -1;
 
         int ret = bytes.get(globalArrayIndex)[localArrayOffset] & 0xff;

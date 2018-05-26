@@ -87,7 +87,7 @@ public class DBUpgradeHandler {
      * But if forced upgrade is set to true then the upgrade handler will
      * create a new table and migrate the data from the old one to the new table.
      *
-     * @param   enable
+     * @param   enable  true to enable forced upgrade
      */
     public void setForcedDBUpgrade(boolean enable){
         this.forceUpgradeEnabled = enable;
@@ -240,7 +240,7 @@ public class DBUpgradeHandler {
     private List<String> getTableList(DBConnection db) throws SQLException {
         return db.exec("SELECT name FROM sqlite_master WHERE type='table';", new SQLResultHandler<List<String>>() {
             public List<String> handleQueryResult(Statement stmt, ResultSet result) throws SQLException {
-                ArrayList<String> list = new ArrayList<String>();
+                ArrayList<String> list = new ArrayList<>();
                 while( result.next() ) {
                     String table = result.getString(1);
                     if(!ignoredTablesSet.contains(table))
@@ -253,7 +253,7 @@ public class DBUpgradeHandler {
     private static String getTableSql(DBConnection db, String table) throws SQLException {
         PreparedStatement stmt = db.getPreparedStatement("SELECT sql FROM sqlite_master WHERE name == ?");
         stmt.setString(1, table);
-        return DBConnection.exec(stmt, new SimpleSQLResult<String>());
+        return DBConnection.exec(stmt, new SimpleSQLResult<>());
     }
     private static List<DBColumn> getColumnList(DBConnection db, String table) throws SQLException {
         return db.exec(

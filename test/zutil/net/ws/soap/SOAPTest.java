@@ -116,7 +116,7 @@ public class SOAPTest {
         @WSReturnName("stringArray")
         @WSParamDocumentation("Documentation of stringArrayMethod()")
         public String[][] stringArrayMethod (
-                @WSParamName("StringName") String str) throws Exception{
+                @WSParamName("StringName") String str) {
             System.out.println("Executing method: stringArrayMethod(String str='"+str+"')");
             return new String[][]{{"test","test2"},{"test3","test4"}};
         }
@@ -124,7 +124,7 @@ public class SOAPTest {
         @WSReturnName("specialReturnClass")
         @WSParamDocumentation("Documentation of specialReturnMethod()")
         public SpecialReturnClass[] specialReturnMethod (
-                @WSParamName("StringName2") String str) throws Exception{
+                @WSParamName("StringName2") String str) {
             System.out.println("Executing method: specialReturnMethod(String str='"+str+"')");
             return new SpecialReturnClass[]{new SpecialReturnClass(), new SpecialReturnClass()};
         }
@@ -132,7 +132,7 @@ public class SOAPTest {
         @WSReturnName("SimpleReturnClass")
         @WSParamDocumentation("null is the kala")
         public SimpleReturnClass simpleReturnClassMethod (
-                @WSParamName("byte") String lol) throws Exception{
+                @WSParamName("byte") String lol) {
             System.out.println("Executing method: simpleReturnClassMethod()");
             SimpleReturnClass tmp = new SimpleReturnClass();
             tmp.param1 = "newParam1";

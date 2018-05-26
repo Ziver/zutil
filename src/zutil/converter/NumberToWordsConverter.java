@@ -38,39 +38,39 @@ public class NumberToWordsConverter {
     private static final HashMap<Long, String> NUMERIC_STRINGS;
     static{
         NUMERIC_STRINGS = new HashMap<>();
-        NUMERIC_STRINGS.put(1l, "one");
-        NUMERIC_STRINGS.put(2l, "two");
-        NUMERIC_STRINGS.put(3l, "three");
-        NUMERIC_STRINGS.put(4l, "four");
-        NUMERIC_STRINGS.put(5l, "five");
-        NUMERIC_STRINGS.put(6l, "six");
-        NUMERIC_STRINGS.put(7l, "seven");
-        NUMERIC_STRINGS.put(8l, "eight");
-        NUMERIC_STRINGS.put(9l, "nine");
-        NUMERIC_STRINGS.put(10l, "ten");
-        NUMERIC_STRINGS.put(11l, "eleven");
-        NUMERIC_STRINGS.put(12l, "twelve");
-        NUMERIC_STRINGS.put(13l, "thirteen");
-        NUMERIC_STRINGS.put(14l, "fourteen");
-        NUMERIC_STRINGS.put(15l, "fifteen");
-        NUMERIC_STRINGS.put(16l, "sixteen");
-        NUMERIC_STRINGS.put(17l, "seventeen");
-        NUMERIC_STRINGS.put(18l, "eightteen");
-        NUMERIC_STRINGS.put(19l, "nineteen");
+        NUMERIC_STRINGS.put(1L, "one");
+        NUMERIC_STRINGS.put(2L, "two");
+        NUMERIC_STRINGS.put(3L, "three");
+        NUMERIC_STRINGS.put(4L, "four");
+        NUMERIC_STRINGS.put(5L, "five");
+        NUMERIC_STRINGS.put(6L, "six");
+        NUMERIC_STRINGS.put(7L, "seven");
+        NUMERIC_STRINGS.put(8L, "eight");
+        NUMERIC_STRINGS.put(9L, "nine");
+        NUMERIC_STRINGS.put(10L, "ten");
+        NUMERIC_STRINGS.put(11L, "eleven");
+        NUMERIC_STRINGS.put(12L, "twelve");
+        NUMERIC_STRINGS.put(13L, "thirteen");
+        NUMERIC_STRINGS.put(14L, "fourteen");
+        NUMERIC_STRINGS.put(15L, "fifteen");
+        NUMERIC_STRINGS.put(16L, "sixteen");
+        NUMERIC_STRINGS.put(17L, "seventeen");
+        NUMERIC_STRINGS.put(18L, "eightteen");
+        NUMERIC_STRINGS.put(19L, "nineteen");
 
-        NUMERIC_STRINGS.put(20l, "twenty");
-        NUMERIC_STRINGS.put(30l, "thirty");
-        NUMERIC_STRINGS.put(40l, "forty");
-        NUMERIC_STRINGS.put(50l, "fifty");
-        NUMERIC_STRINGS.put(60l, "sixty");
-        NUMERIC_STRINGS.put(70l, "seventy");
-        NUMERIC_STRINGS.put(80l, "eighty");
-        NUMERIC_STRINGS.put(90l, "ninety");
+        NUMERIC_STRINGS.put(20L, "twenty");
+        NUMERIC_STRINGS.put(30L, "thirty");
+        NUMERIC_STRINGS.put(40L, "forty");
+        NUMERIC_STRINGS.put(50L, "fifty");
+        NUMERIC_STRINGS.put(60L, "sixty");
+        NUMERIC_STRINGS.put(70L, "seventy");
+        NUMERIC_STRINGS.put(80L, "eighty");
+        NUMERIC_STRINGS.put(90L, "ninety");
 
-        NUMERIC_STRINGS.put(100l, "hundred");
-        NUMERIC_STRINGS.put(1_000l, "thousand");
-        NUMERIC_STRINGS.put(1000_000l, "million");
-        NUMERIC_STRINGS.put(1000_000_000l, "billion");
+        NUMERIC_STRINGS.put(100L, "hundred");
+        NUMERIC_STRINGS.put(1_000L, "thousand");
+        NUMERIC_STRINGS.put(1000_000L, "million");
+        NUMERIC_STRINGS.put(1000_000_000L, "billion");
     }
 
 

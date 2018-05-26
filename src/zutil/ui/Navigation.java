@@ -53,7 +53,7 @@ public class Navigation implements Iterable{
         this.name = name;
         this.subNav = new ArrayList<>();
 
-        this.navMap.put(this.id, this);
+        navMap.put(this.id, this);
     }
 
 
@@ -83,7 +83,7 @@ public class Navigation implements Iterable{
         return nav;
     }
     private void sortSubNavs(){
-        Collections.sort(subNav, new Comparator<Navigation>() {
+        subNav.sort(new Comparator<Navigation>() {
             @Override
             public int compare(Navigation o1, Navigation o2) {
                 if (o1.weight == o2.weight)
@@ -149,8 +149,7 @@ public class Navigation implements Iterable{
     public boolean equals(Object o){
         if(o instanceof String)
             return this.name.equals(o);
-        return this == o ||
-                (o != null && this.id == (((Navigation)o).id));
+        return this == o || Objects.equals(this.id, ((Navigation) o).id);
     }
 
 
@@ -192,7 +191,7 @@ public class Navigation implements Iterable{
             return navMap.get(request.get(NAVIGATION_URL_KEY));
         return null;
     }
-    
+
 
 
     public NavInstance createPagedNavInstance(HttpHeader header){
@@ -216,7 +215,7 @@ public class Navigation implements Iterable{
     }
 
 
-    
+
 
     /**
      * @param   nav     the

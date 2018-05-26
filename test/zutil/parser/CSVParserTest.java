@@ -30,6 +30,7 @@ import java.io.IOException;
 import java.io.StringReader;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 
 /**
@@ -41,7 +42,7 @@ public class CSVParserTest {
     @Test
     public void emptyTest(){
         DataNode node = CSVParser.read("");
-        assertEquals(null, node);
+        assertNull(node);
     }
 
     @Test

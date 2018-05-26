@@ -85,7 +85,6 @@ public class MulticastDnsServer extends ThreadedUDPNetwork implements ThreadedUD
      * @param   name    is the domain name to add the entry under
      * @param   type    {@link zutil.net.dns.packet.DnsConstants.TYPE}
      * @param   clazz   {@link zutil.net.dns.packet.DnsConstants.CLASS}
-     * @param   data
      */
     public void addEntry(String name, int type, int clazz, byte[] data){
         DnsPacketResource resource = new DnsPacketResource();
@@ -101,7 +100,7 @@ public class MulticastDnsServer extends ThreadedUDPNetwork implements ThreadedUD
 
     private void addEntry(DnsPacketResource resource) {
         if ( ! entries.containsKey(resource.name))
-            entries.put(resource.name, new ArrayList<DnsPacketResource>());
+            entries.put(resource.name, new ArrayList<>());
         entries.get(resource.name).add(resource);
     }
 

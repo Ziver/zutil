@@ -44,13 +44,13 @@ public class DBConnectionTest {
             db.exec("UPDATE ...");
 
             // Query 3
-            String s = db.exec("SELECT hello", new SimpleSQLResult<String>());
+            String s = db.exec("SELECT hello", new SimpleSQLResult<>());
             System.out.println( s );
 
             // Query 4
             PreparedStatement sql2 = db.getPreparedStatement("SELECT ?");
             sql2.setString(1, "hello");
-            String s2 = DBConnection.exec(sql2, new SimpleSQLResult<String>());
+            String s2 = DBConnection.exec(sql2, new SimpleSQLResult<>());
             System.out.println( s2 );
 
             db.close();

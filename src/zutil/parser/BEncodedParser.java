@@ -50,15 +50,15 @@ public class BEncodedParser {
      *
      * @param	data	is the data to be decoded
      * @param	index	is the index in data to start from
-     * @return
+     * @return a DataNode representing the parsed content
      */
     private static DataNode decode_BEncoded(MutableInt index, StringBuilder data) throws ParseException {
         String tmp;
-        char c = ' ';
+        char c;
         int end;
 
         switch (data.charAt(index.i)) {
-            /**
+            /*
              * Integers are prefixed with an i and terminated by an e. For
              * example, 123 would bEcode to i123e, -3272002 would bEncode to
              * i-3272002e.
@@ -71,7 +71,7 @@ public class BEncodedParser {
                 tmp = data.substring(index.i, end);
                 index.i += tmp.length() + 1;
                 return new DataNode( new Long(tmp));
-            /**
+            /*
              * Lists are prefixed with a l and terminated by an e. The list
              * should contain a series of bEncoded elements. For example, the
              * list of strings ["Monduna", "Bit", "Torrents"] would bEncode to
@@ -89,7 +89,7 @@ public class BEncodedParser {
                 index.i++;
                 if(list.size() == 1) return list.get(0);
                 else return list;
-                /**
+                /*
                  * Dictionaries are prefixed with a d and terminated by an e. They
                  * are similar to list, except that items are in key value pairs. The
                  * dictionary {"key":"value", "Monduna":"com", "bit":"Torrents", "number":7}
@@ -108,7 +108,7 @@ public class BEncodedParser {
                 }
                 index.i++;
                 return map;
-            /**
+            /*
              * Strings are prefixed with their length followed by a colon.
              * For example, "Monduna" would bEncode to 7:Monduna and "BitTorrents"
              * would bEncode to 11:BitTorrents.

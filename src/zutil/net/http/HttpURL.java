@@ -29,7 +29,7 @@ import java.util.HashMap;
 
 /**
  * Handles URLs in the HTTP protocol
- * 
+ *
  * @author Ziver
  */
 public class HttpURL {
@@ -45,7 +45,7 @@ public class HttpURL {
     private String path;
     private String anchor;
 
-    private HashMap<String,String> parameters = new HashMap<String,String>();
+    private HashMap<String,String> parameters = new HashMap<>();
 
 
     public HttpURL(){}

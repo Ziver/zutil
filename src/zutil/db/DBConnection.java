@@ -129,7 +129,7 @@ public class DBConnection implements Closeable{
      */
     public long getLastInsertID(){
         try{
-            return exec("SELECT LAST_INSERT_ID()", new SimpleSQLResult<Long>());
+            return exec("SELECT LAST_INSERT_ID()", new SimpleSQLResult<>());
         }catch(SQLException e){
             logger.log(Level.WARNING, null, e);
         }
@@ -212,7 +212,6 @@ public class DBConnection implements Closeable{
     /**
      * Executes an query and cleans up after itself.
      *
-     * @param	<T>
      * @param	query		is the query
      * @param	handler		is the result handler
      * @return update count or -1 if the query is not an update query
@@ -229,7 +228,7 @@ public class DBConnection implements Closeable{
      * @param	handler		is the result handler that will be called with the output of the execution
      * @return the object from the handler
      */
-    public static <T> T exec(PreparedStatement stmt, SQLResultHandler<T> handler) throws SQLException {
+    public static <T> T exec(PreparedStatement stmt, SQLResultHandler<T> handler) {
         try{
             // Execute
             boolean isResultSet = stmt.execute();
@@ -253,7 +252,6 @@ public class DBConnection implements Closeable{
                         } catch (SQLException e) {
                             logger.log(Level.WARNING, null, e);
                         }
-                        result = null;
                     }
                 }
             }
@@ -267,7 +265,6 @@ public class DBConnection implements Closeable{
                 } catch (SQLException e) {
                     logger.log(Level.WARNING, null, e);
                 }
-                stmt = null;
             }
         }
         return null;
@@ -293,7 +290,6 @@ public class DBConnection implements Closeable{
                 } catch (SQLException e) {
                     logger.log(Level.WARNING, null, e);
                 }
-                stmt = null;
             }
         }
         return new int[0];

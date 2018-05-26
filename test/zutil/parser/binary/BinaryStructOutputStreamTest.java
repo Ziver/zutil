@@ -138,7 +138,7 @@ public class BinaryStructOutputStreamTest {
         assertArrayEquals(new byte[]{0b0000_0001,0b0000_0010,0b0000_0011,0b0000_0100}, data);
     }
     public static class ByteStringSerializer implements BinaryFieldSerializer<String>{
-        public String read(InputStream in, BinaryFieldData field) throws IOException {
+        public String read(InputStream in, BinaryFieldData field) {
             return null;
         }
         public void write(OutputStream out, String obj, BinaryFieldData field) throws IOException {

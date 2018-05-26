@@ -41,17 +41,15 @@ public class NetLogClient extends Thread{
 
     private ConcurrentLinkedQueue<NetLogListener> listeners;
     private Socket s;
-    private ObjectOutputStream out;
 
-    public NetLogClient(String host, int port) throws UnknownHostException, IOException{
+    public NetLogClient(String host, int port) throws IOException{
         s = new Socket(host, port);
-        out = new ObjectOutputStream(s.getOutputStream());
-        listeners = new ConcurrentLinkedQueue<NetLogListener>();
+        listeners = new ConcurrentLinkedQueue<>();
         this.start();
     }
 
     public void addListener(NetLogListener listener){
-        logger.info("Registring new NetLogListener: "+listener.getClass().getName());
+        logger.info("Registering new NetLogListener: "+listener.getClass().getName());
         listeners.add( listener );
     }
 

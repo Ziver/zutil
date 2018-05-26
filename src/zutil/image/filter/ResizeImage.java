@@ -33,8 +33,6 @@ public class ResizeImage extends ImageFilterProcessor{
     private int width;
     private int height;
 
-    private int[][][] newData;
-
     /**
      * Will create a ResizeImage object and fix the height with the aspect
      * of the width
@@ -68,7 +66,7 @@ public class ResizeImage extends ImageFilterProcessor{
             width = (int)(((double)height/(stopY-startY))*(stopX-startY));
         }
 
-        newData = new int[height][width][4];
+        int[][][] newData = new int[height][width][4];
         double xScale = ((double)(stopX-startX)/width);
         double yScale = ((double)(stopY-startY)/height);
 

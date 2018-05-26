@@ -35,7 +35,7 @@ import java.util.logging.Logger;
 /**
  * This class contains information about a plugin
  * and implementation instances of the plugin interfaces
- *  
+ *
  * @author Ziver
  */
 public class PluginData {
@@ -47,9 +47,9 @@ public class PluginData {
     private HashMap<Class, Object> objectMap;
 
 
-    protected PluginData(DataNode data) throws ClassNotFoundException, MalformedURLException {
+    protected PluginData(DataNode data) {
         classMap = new HashMap<>();
-        objectMap = new HashMap<Class, Object>();
+        objectMap = new HashMap<>();
 
         pluginVersion = data.getDouble("version");
         pluginName = data.getString("name");
@@ -59,9 +59,8 @@ public class PluginData {
         if(node.isMap())
             addInterfaces(node);
         else if(node.isList()) {
-            Iterator<DataNode> intfs_it = node.iterator();
-            while (intfs_it.hasNext()) {
-                addInterfaces(intfs_it.next());
+            for (DataNode childNode : node) {
+                addInterfaces(childNode);
             }
         }
     }
@@ -84,7 +83,7 @@ public class PluginData {
                 continue;
 
             if (!classMap.containsKey(intfClass))
-                classMap.put(intfClass, new ArrayList<Class<?>>());
+                classMap.put(intfClass, new ArrayList<>());
             classMap.get(intfClass).add(pluginClass);
         }
     }
@@ -109,7 +108,7 @@ public class PluginData {
     public <T> Iterator<T> getObjectIterator(Class<T> intf){
         if(!classMap.containsKey(intf))
             return Collections.emptyIterator();
-        return new PluginObjectIterator<T>(classMap.get(intf).iterator());
+        return new PluginObjectIterator<>(classMap.get(intf).iterator());
     }
     public Iterator<Class<?>> getClassIterator(Class<?> intf){
         if(!classMap.containsKey(intf))

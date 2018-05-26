@@ -31,7 +31,7 @@ import java.net.*;
 
 /**
  *  * A simple network server that handles UDP communication
- * 
+ *
  * @author Ziver
  */
 public class ThreadedUDPNetwork extends Thread{
@@ -49,8 +49,6 @@ public class ThreadedUDPNetwork extends Thread{
 
     /**
      * Creates a new unicast Client instance of the class
-     *
-     * @throws SocketException
      */
     public ThreadedUDPNetwork() throws SocketException{
         this.type = UDPType.UNICAST;
@@ -63,7 +61,6 @@ public class ThreadedUDPNetwork extends Thread{
      * Creates a new unicast Server instance of the class
      *
      * @param	port	is the port that the server should listen to
-     * @throws SocketException
      */
     public ThreadedUDPNetwork(int port) throws SocketException{
         this.type = UDPType.UNICAST;
@@ -77,7 +74,6 @@ public class ThreadedUDPNetwork extends Thread{
      *
      * @param	port			is the port that the server should listen to
      * @param	multicastAddr	is the multicast address that the server will listen on
-     * @throws IOException
      */
     public ThreadedUDPNetwork(String multicastAddr, int port ) throws IOException{
         this.type = UDPType.MULTICAST;
@@ -110,7 +106,6 @@ public class ThreadedUDPNetwork extends Thread{
      * Sends the given packet
      *
      * @param	packet	is the packet to send
-     * @throws IOException
      */
     public synchronized void send( DatagramPacket packet ) throws IOException{
         socket.send(packet);

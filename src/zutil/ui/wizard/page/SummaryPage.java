@@ -32,7 +32,7 @@ import java.util.HashMap;
 /**
  * This class will show a summary of all the values
  * in the wizard
- * 
+ *
  * @author Ziver
  *
  */
@@ -47,7 +47,7 @@ public class SummaryPage extends WizardPage{
         summary.setEnabled(false);
         this.add( summary );
 
-        StringBuffer tmp = new StringBuffer();
+        StringBuilder tmp = new StringBuilder();
         for(String key : values.keySet()){
             tmp.append(key);
             tmp.append(": ");

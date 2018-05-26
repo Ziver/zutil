@@ -28,12 +28,10 @@ package zutil.parser;
 public class Base64Encoder {
 
     public static String encode( byte[] data ){
-        Base64Encoder base64 = new Base64Encoder();
-        return base64.write( data );
+        return write( data );
     }
     public static String encode( String data ){
-        Base64Encoder base64 = new Base64Encoder();
-        return base64.write( data.getBytes() );
+        return write( data.getBytes() );
     }
 
     private static String write( byte[] data ){
@@ -88,7 +86,8 @@ public class Base64Encoder {
     }
 
 
-    private static char getChar( byte b ){
+    @SuppressWarnings("PointlessBitwiseExpression")
+    private static char getChar(byte b ){
         switch(b){
             case (byte)( 0 & 0xff): return 'A';
             case (byte)( 1 & 0xff): return 'B';

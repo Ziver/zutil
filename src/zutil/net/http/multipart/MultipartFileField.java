@@ -36,7 +36,7 @@ import static zutil.net.http.multipart.MultipartParser.HEADER_CONTENT_TYPE;
 
 /**
  * A class for handling multipart files
- * 
+ *
  * @author Ziver
  */
 public class MultipartFileField implements MultipartField{
@@ -49,7 +49,7 @@ public class MultipartFileField implements MultipartField{
     private InputStream in;
 
 
-    protected MultipartFileField(Map<String,String> headers, InputStream in) throws IOException {
+    protected MultipartFileField(Map<String,String> headers, InputStream in) {
         this.fieldname = headers.get("name");
         this.filename = headers.get("filename");
         this.contentType = headers.get(HEADER_CONTENT_TYPE);

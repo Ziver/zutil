@@ -32,7 +32,7 @@ import java.util.Random;
 
 
 /**
- * This code may be used, modified, and redistributed provided that the 
+ * This code may be used, modified, and redistributed provided that the
  * author tag below remains intact.
  *
  * @author Ian Clarke <ian@uprizer.com>
@@ -41,13 +41,13 @@ import java.util.Random;
 public class BloomFilterTest extends TestCase {
     public void testBloomFilter() {
         DecimalFormat df = new DecimalFormat("0.00000");
-        Random r = new Random(124445l);
+        Random r = new Random(124445L);
         int bfSize = 400000;
         System.out.println("Testing " + bfSize + " bit SimpleBloomFilter");
         for (int i = 5; i < 10; i++) {
             int addCount = 10000 * (i + 1);
-            BloomFilter<Integer> bf = new BloomFilter<Integer>(bfSize, addCount);
-            HashSet<Integer> added = new HashSet<Integer>();
+            BloomFilter<Integer> bf = new BloomFilter<>(bfSize, addCount);
+            HashSet<Integer> added = new HashSet<>();
             for (int x = 0; x < addCount; x++) {
                 int num = r.nextInt();
                 added.add(num);

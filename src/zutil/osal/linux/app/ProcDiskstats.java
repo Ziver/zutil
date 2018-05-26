@@ -46,7 +46,7 @@ public class ProcDiskstats {
     private static final String PROC_PATH = "/proc/diskstats";
     private static final int TTL = 500; // update stats every 0.5 second
 
-    private static HashMap<String, HddStats> hdds = new HashMap<String, HddStats>();
+    private static HashMap<String, HddStats> hdds = new HashMap<>();
     private static Timer updateTimer = new Timer(TTL);
 
 
@@ -64,7 +64,7 @@ public class ProcDiskstats {
     }
     protected static void parse(BufferedReader in) throws IOException {
         updateTimer.start();
-        String line = null;
+        String line;
         while((line=in.readLine()) != null){
             String[] str = line.trim().split("\\s+", 4);
             if(str.length >= 4) {

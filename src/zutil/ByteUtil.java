@@ -54,8 +54,7 @@ public class ByteUtil {
      * @return a new byte containing a sub byte defined by the index and length
      */
     public static byte getBits(byte data, int index, int length){
-        byte ret = (byte) (data & getBitMask(index, length));
-        return  ret;
+        return (byte) (data & getBitMask(index, length));
     }
 
     /**
@@ -153,7 +152,7 @@ public class ByteUtil {
         if (shiftBy == 0)
             return data;
 
-        byte rest = 0;
+        byte rest;
         for (int i=0; i<data.length; ++i){
             rest = (byte)(getBits(data[i], shiftBy-1, shiftBy) << 8 - shiftBy);
             data[i] = (byte)((data[i]&0xFF) >>> shiftBy);
@@ -207,7 +206,7 @@ public class ByteUtil {
      * @return A multiline String with human readable HEX and ASCII
      */
     public static String toFormattedString(byte[] data, int offset, int length){
-        StringBuffer output = new StringBuffer();
+        StringBuilder output = new StringBuilder();
 
         //000  XX XX XX XX XX XX XX XX  '........'
         int maxOffset = (""+length).length();

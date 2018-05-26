@@ -50,13 +50,13 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * This is an HTTPPage for the HTTPServer that 
+ * This is an HTTPPage for the HTTPServer that
  * handles soap messages.
- * 
+ *
  * TODO: Header should be variables not methods
  * TODO: Read WSReturnObjects as input parameter
  * TODO: Ability to have multiple arrays of same WSReturnObject
- * 
+ *
  * Features:
  * Input:
  * <br>-int
@@ -66,7 +66,7 @@ import java.util.logging.Logger;
  * <br>-String
  * <br>-byte[]
  * <br>-And the Wrappers Classes except for Byte
- * 
+ *
  * Output:
  * <br>-WSReturnObject
  * <br>-byte[]
@@ -77,7 +77,7 @@ import java.util.logging.Logger;
  * <br>-String
  * <br>-Arrays of Output
  * <br>-And the Wrappers Classes except for Byte
- * 
+ *
  * @author Ziver
  */
 public class SOAPHttpPage implements HttpPage{
@@ -142,7 +142,7 @@ public class SOAPHttpPage implements HttpPage{
             out.setHeader("Content-Type", "text/xml");
             out.flush();
 
-            WSInterface obj = null;
+            WSInterface obj;
             if(session_enabled){
                 if( session.containsKey("SOAPInterface"))
                     obj = (WSInterface)session.get("SOAPInterface");
@@ -185,7 +185,7 @@ public class SOAPHttpPage implements HttpPage{
      */
     public Document genSOAPResponse(String xml){
         try {
-            WSInterface obj = null;
+            WSInterface obj;
             if( ws == null )
                 ws = wsDef.newInstance();
             obj = ws;

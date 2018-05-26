@@ -67,7 +67,7 @@ public class NioClient extends NioNetwork{
      *
      * @param   data    the data to be sent
      */
-    public void send(byte[] data) throws IOException {
+    public void send(byte[] data) {
         send(remoteAddress, data);
     }
 

@@ -31,6 +31,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -67,9 +68,9 @@ public class WSMethodDef {
             throw new ClassCastException("Declaring class does not implement WSInterface!");
         this.wsDef = wsDef;
         method = me;
-        inputs = new ArrayList<WSParameterDef>();
-        outputs = new ArrayList<WSParameterDef>();
-        exceptions = new ArrayList<Class<?>>();
+        inputs = new ArrayList<>();
+        outputs = new ArrayList<>();
+        exceptions = new ArrayList<>();
         name = method.getName();
 
         //***** Documentation & Namespace
@@ -84,9 +85,7 @@ public class WSMethodDef {
             namespace = wsDef.getNamespace()+"?#"+name;
 
         //***** Exceptions
-        for( Class<?> exc : method.getExceptionTypes() ){
-            exceptions.add( exc );
-        }
+        Collections.addAll(exceptions, method.getExceptionTypes());
 
         //********* Get the input parameter names **********
         Annotation[][] paramAnnotation = method.getParameterAnnotations();

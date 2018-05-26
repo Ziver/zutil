@@ -29,11 +29,11 @@ import java.util.Map;
 
 /**
  * This is a interface for a ordinary page for the HttpServer
- * 
+ *
  * @author Ziver
  *
  */
-public interface HttpPage{	
+public interface HttpPage{
     /**
      * This method has to be implemented for every page.
      * This method is called when a client wants a response
@@ -45,9 +45,9 @@ public interface HttpPage{
      * @param cookie        is cookie information from the client
      * @param request       is POST and GET requests from the client
      */
-    public abstract void respond(HttpPrintStream out,
-                                 HttpHeader headers,
-                                 Map<String,Object> session,
-                                 Map<String,String> cookie,
-                                 Map<String,String> request) throws IOException;
+    void respond(HttpPrintStream out,
+                 HttpHeader headers,
+                 Map<String, Object> session,
+                 Map<String, String> cookie,
+                 Map<String, String> request) throws IOException;
 }

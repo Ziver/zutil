@@ -32,7 +32,7 @@ import java.util.Set;
 
 /**
  * Defines a web service from a class implementing the {@link zutil.net.ws.WSInterface}
- * 
+ *
  * @author Ziver
  */
 public class WebServiceDef {
@@ -48,7 +48,7 @@ public class WebServiceDef {
 
     public WebServiceDef(Class<? extends WSInterface> intf){
         this.intf = intf;
-        methods = new HashMap<String,WSMethodDef>();
+        methods = new HashMap<>();
         name = intf.getSimpleName();
 
         if( intf.getAnnotation( WSInterface.WSNamespace.class ) != null )

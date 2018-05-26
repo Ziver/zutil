@@ -52,7 +52,7 @@ public class SerializableBufferedImage implements Serializable{
         ImageIO.write(image,"jpeg",ImageIO.createImageOutputStream(out));
     }
 
-    private void readObject(ObjectInputStream in)throws IOException, ClassNotFoundException{
+    private void readObject(ObjectInputStream in) throws Exception {
         image = ImageIO.read(ImageIO.createImageInputStream(in));
     }
 }

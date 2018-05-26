@@ -29,6 +29,7 @@ import org.junit.Test;
 import java.io.UnsupportedEncodingException;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 
 /**
@@ -38,7 +39,7 @@ public class URLDecoderTest {
 
     @Test
     public void simpleTest(){
-        assertEquals(null, URLDecoder.decode(null));
+        assertNull(URLDecoder.decode(null));
         assertEquals("", URLDecoder.decode(""));
         assertEquals("space space", URLDecoder.decode("space space"));
         assertEquals("space space", URLDecoder.decode("space+space"));

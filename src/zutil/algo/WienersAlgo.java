@@ -33,7 +33,7 @@ import java.util.LinkedList;
  * The Wieners algorithm factorizes two big numbers a and b.
  * It uses the Euclidien algorithm to calculate the generator of the
  * numbers and then uses them to calculate the factorization.
- * 
+ *
  * @author Ziver
  *
  */
@@ -49,7 +49,7 @@ public class WienersAlgo {
      * 				If no value was found then it returns null.
      */
     public static BigInteger[] calc(BigInteger n, BigInteger e){
-        BigInteger[] ret = null;
+        BigInteger[] ret;
 
         LinkedList<BigInteger> gen = EuclideansAlgo.calcGenerators(e, n);
 

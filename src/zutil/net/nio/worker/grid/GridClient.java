@@ -37,7 +37,7 @@ import java.util.Queue;
  * This class is the client part of the grid.
  * It connects to a grid server and requests new job.
  * And then sends back the result to the server.
- * 
+ *
  * @author Ziver
  */
 @SuppressWarnings({ "unchecked", "rawtypes" })
@@ -54,7 +54,7 @@ public class GridClient extends ThreadedEventWorker {
      * @param	network	the NioClient to use to communicate to the server
      */
     public GridClient(GridThread thread, NioClient network){
-        jobQueue = new LinkedList<GridJob>();
+        jobQueue = new LinkedList<>();
         GridClient.thread = thread;
         GridClient.network = network;
 
@@ -85,7 +85,7 @@ public class GridClient extends ThreadedEventWorker {
                 thread.setInitData(msg.getData());
                 break;
             case GridMessage.COMP_DATA:
-                jobQueue.add(new GridJob(msg.getJobQueueID(), (Queue)msg.getData()));
+                jobQueue.add(new GridJob(msg.getJobQueueID(), msg.getData()));
                 break;
             }
         }

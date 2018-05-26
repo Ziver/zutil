@@ -87,7 +87,7 @@ public abstract class AbstractChart extends JPanel{
      *
      * @param   x       is the x data value
      * @param   scale   is the data scale
-     * @param   bound   is the drawing boundds
+     * @param   bound   is the drawing bounds
      * @return a x pixel coordinate
      */
     static protected double getXCoordinate(double x, double scale, Rectangle bound){
@@ -99,7 +99,7 @@ public abstract class AbstractChart extends JPanel{
      *
      * @param 	y       is the y data value
      * @param   scale   is the data scale
-     * @param   bound   is the drawing boundds
+     * @param   bound   is the drawing bounds
      * @return a y pixel coordinate
      */
     static protected double getYCoordinate(double y, double scale, Rectangle bound){

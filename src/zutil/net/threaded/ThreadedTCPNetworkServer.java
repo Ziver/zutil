@@ -43,7 +43,7 @@ import java.util.logging.Logger;
 
 /**
  * A simple network server that handles TCP communication
- * 
+ *
  * @author Ziver
  */
 public abstract class ThreadedTCPNetworkServer extends Thread{
@@ -139,7 +139,7 @@ public abstract class ThreadedTCPNetworkServer extends Thread{
      *
      * @param 		keyStore 	The cert file
      */
-    protected void registerCertificate(File keyStore, String keyStorePass) throws CertificateException, IOException, KeyStoreException, NoSuchProviderException, NoSuchAlgorithmException{
+    protected void registerCertificate(File keyStore, String keyStorePass) {
         System.setProperty("javax.net.ssl.keyStore", keyStore.getAbsolutePath());
         System.setProperty("javax.net.ssl.keyStorePassword", keyStorePass);
     }

@@ -38,11 +38,11 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * Parses a multipart/form-data http request, 
+ * Parses a multipart/form-data http request,
  * saves files to temporary location.
- * 
+ *
  * http://www.ietf.org/rfc/rfc1867.txt
- * 
+ *
  * @author Ziver
  *
  */
@@ -155,8 +155,7 @@ public class MultipartParser implements Iterable<MultipartField>{
                     HttpHeaderParser.parseCookieValues(headers, disposition);
                     if (headers.containsKey("form-data")){
                         if (headers.containsKey("filename")){
-                            MultipartFileField field = new MultipartFileField(headers, boundaryIn);
-                            return field;
+                            return new MultipartFileField(headers, boundaryIn);
                         }
                         else{
                             MultipartStringField field = new MultipartStringField(headers, boundaryIn);

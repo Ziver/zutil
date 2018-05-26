@@ -46,7 +46,7 @@ import static zutil.net.ssdp.SSDPServer.SSDP_PORT;
 /**
  * An SSDP client class that will request
  * service information.
- * 
+ *
  * @author Ziver
  */
 public class SSDPClient extends ThreadedUDPNetwork implements ThreadedUDPNetworkThread{
@@ -63,8 +63,6 @@ public class SSDPClient extends ThreadedUDPNetwork implements ThreadedUDPNetwork
     /**
      * Creates new instance of this class. An UDP
      * listening socket at the SSDP port.
-     *
-     * @throws IOException
      */
     public SSDPClient() throws IOException{
         super( SSDP_MULTICAST_ADDR, SSDP_PORT );
@@ -231,7 +229,7 @@ public class SSDPClient extends ThreadedUDPNetwork implements ThreadedUDPNetwork
                     service = new StandardSSDPInfo();
                     services_usn.put(usn, service);
                     if (!services_st.containsKey(st))
-                        services_st.put(st, new LinkedList<StandardSSDPInfo>());
+                        services_st.put(st, new LinkedList<>());
                     services_st.get(header.getHeader("ST")).add(service);
                 }
 

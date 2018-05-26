@@ -42,7 +42,7 @@ public class BBCodeParser {
      * Initiates a instance of the parser with the most used BBCodes.
      */
     public BBCodeParser(){
-        bbcodes = new HashMap<String,String>();
+        bbcodes = new HashMap<>();
         addBBCode("b", "<b>%2</b>");
         addBBCode("i", "<i>%2</i>");
         addBBCode("u", "<u>%2</u>");

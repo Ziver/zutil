@@ -32,7 +32,7 @@ import java.io.RandomAccessFile;
  * This class is a buffer for the RandomeAccesFile
  * Inspiration:
  * http://www.javaworld.com/javaworld/javatips/jw-javatip26.html
- * 
+ *
  * @author Ziver
  */
 public class BufferedRandomAccessFile extends RandomAccessFile{
@@ -76,7 +76,6 @@ public class BufferedRandomAccessFile extends RandomAccessFile{
      * @param filename is the file to read from
      * @param mode as in {@link java.io.RandomAccessFile#RandomAccessFile(File file, String mode)}
      * @param bufsize is the buffer size in bytes
-     * @throws IOException
      */
     public BufferedRandomAccessFile(String filename, String mode, int bufsize) throws IOException{
         this(new File(filename), mode, bufsize);
@@ -88,7 +87,6 @@ public class BufferedRandomAccessFile extends RandomAccessFile{
      * @param file is the file to read from
      * @param mode as in {@link java.io.RandomAccessFile#RandomAccessFile(File file, String mode)}
      * @param bufsize is the buffer size in bytes
-     * @throws IOException
      */
     public BufferedRandomAccessFile(File file, String mode, int bufsize) throws IOException{
         super(file,mode);
@@ -101,7 +99,6 @@ public class BufferedRandomAccessFile extends RandomAccessFile{
      * Reads in data from the file to the buffer
      *
      * @return the buffer
-     * @throws IOException
      */
     private int fillBuffer() throws IOException {
         int n = super.read(buffer, 0, BUF_SIZE );
@@ -115,8 +112,6 @@ public class BufferedRandomAccessFile extends RandomAccessFile{
 
     /**
      * Resets the buffer
-     *
-     * @throws IOException
      */
     private void invalidate() throws IOException {
         buf_end = 0;
@@ -192,7 +187,7 @@ public class BufferedRandomAccessFile extends RandomAccessFile{
     /**
      * @return the file pointer in the file
      */
-    public long getFilePointer() throws IOException{
+    public long getFilePointer() {
         long l = file_pos;
         return (l - buf_end + buf_pos) ;
     }
@@ -218,21 +213,21 @@ public class BufferedRandomAccessFile extends RandomAccessFile{
      * @return the next line in the file
      */
      public final String readNextLine() throws IOException {
-        String str = null;
+        String str;
         if(buf_end-buf_pos <= 0) {
             if(fillBuffer() < 0) {
                 throw new IOException("Error filling buffer!");
             }
         }
-        int lineend = -1;
+        int lineEnd = -1;
         for(int i = buf_pos; i < buf_end; i++) {
             if(buffer[i] == '\n') {
-                lineend = i;
+                lineEnd = i;
                 break;
             }
         }
-        if(lineend < 0) {
-            StringBuffer input = new StringBuffer(256);
+        if(lineEnd < 0) {
+            StringBuilder input = new StringBuilder(256);
             int c;
             while (((c = read()) != -1) && (c != '\n')) {
                 input.append((char)c);
@@ -243,13 +238,13 @@ public class BufferedRandomAccessFile extends RandomAccessFile{
             return input.toString();
         }
 
-        if(lineend > 0 && buffer[lineend-1] == '\r'){
-            str = new String(buffer, buf_pos, lineend - buf_pos -1);
+        if(lineEnd > 0 && buffer[lineEnd-1] == '\r'){
+            str = new String(buffer, buf_pos, lineEnd - buf_pos -1);
         }
         else {
-            str = new String(buffer, buf_pos, lineend - buf_pos);
+            str = new String(buffer, buf_pos, lineEnd - buf_pos);
         }
-        buf_pos = lineend +1;
+        buf_pos = lineEnd +1;
         return str;
      }
 

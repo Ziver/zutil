@@ -28,7 +28,9 @@ node {
 
         stage('Deploy') {
             // Figure out Pom version
-            def version = (readFile('pom.xml') =~ '<version>(.+?)</version>')[0][1]
+            def pom = readFile('pom.xml')
+            def versionMatch = pom =~ "<version>(.+?)</version>"
+            def version = versionMatch[0][1]
 
             // Start deployment
             sh 'mvn -DskipStatic -DskipTests deploy'

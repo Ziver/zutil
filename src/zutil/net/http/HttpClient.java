@@ -34,13 +34,13 @@ import java.net.URL;
 import java.util.HashMap;
 
 /**
- * This class connects to a HTTP server and 
+ * This class connects to a HTTP server and
  * parses the result
- * 
+ *
  * @author Ziver
  */
 public class HttpClient implements AutoCloseable{
-    public static enum HttpRequestType{
+    public enum HttpRequestType{
         GET, POST
     }
 
@@ -59,8 +59,8 @@ public class HttpClient implements AutoCloseable{
 
     public HttpClient(HttpRequestType type){
         this.type = type;
-        headers = new HashMap<String,String>();
-        cookies = new HashMap<String,String>();
+        headers = new HashMap<>();
+        cookies = new HashMap<>();
     }
 
 
@@ -112,7 +112,7 @@ public class HttpClient implements AutoCloseable{
         request.setCookies( cookies );
 
         if( type == HttpRequestType.POST ){
-            String postData = null;
+            String postData;
             if(data != null)
                 postData = data;
             else

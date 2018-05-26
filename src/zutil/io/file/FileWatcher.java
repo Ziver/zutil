@@ -32,9 +32,9 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 /**
- * This class calls a given listener 
+ * This class calls a given listener
  * when a file is changed
- * 
+ *
  * @author Ziver
  *
  */
@@ -48,7 +48,6 @@ public class FileWatcher extends TimerTask{
      * interval of 1 second
      *
      * @param 		file 	is the file to check
-     * @throws FileNotFoundException
      */
     public FileWatcher(File file) throws FileNotFoundException{
         this(file, 1000);
@@ -59,17 +58,16 @@ public class FileWatcher extends TimerTask{
      * check interval
      *
      * @param 		file 			is the file
-     * @param 		intervall 		is the interval
-     * @throws FileNotFoundException
+     * @param 		interval 		is the interval
      */
-    public FileWatcher(File file, int intervall) throws FileNotFoundException{
+    public FileWatcher(File file, int interval) throws FileNotFoundException{
         if(file==null || !file.exists())
             throw new FileNotFoundException("File not found: "+file);
         this.file = file;
         lastChanged = file.lastModified();
 
         Timer t = new Timer(true);
-        t.schedule(this, 0, intervall);
+        t.schedule(this, 0, interval);
     }
 
     public void setListener(FileChangeListener listener){

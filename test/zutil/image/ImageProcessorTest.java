@@ -41,11 +41,11 @@ import java.io.InputStream;
 
 @SuppressWarnings({ "unused", "rawtypes" })
 public class ImageProcessorTest implements ProgressListener{
-    private static String imgPath = "test.gif";
-    //private static String imgPath = "test2.jpg";
+    private static final String IMAGE_PATH = "test.gif";
+    //private static final String IMAGE_PATH = "test2.jpg";
 
     private JLabel processedLabel;
-    private JLabel orginalLabel;
+    private JLabel originalLabel;
     private JProgressBar progress;
 
     public static void main(String[] args){
@@ -59,15 +59,15 @@ public class ImageProcessorTest implements ProgressListener{
 
         try {
             // Read from an input stream
-            InputStream is = new BufferedInputStream(new FileInputStream(imgPath));
+            InputStream is = new BufferedInputStream(new FileInputStream(IMAGE_PATH));
             img = ImageIO.read(is);
         } catch (IOException e) {
             e.printStackTrace();
             System.exit(1);
         }
 
-        ImageIcon orginalIcon = new ImageIcon(img);
-        orginalLabel.setIcon(orginalIcon);
+        ImageIcon originalIcon = new ImageIcon(img);
+        originalLabel.setIcon(originalIcon);
         frame.setVisible(true);
         frame.pack();
 
@@ -98,7 +98,7 @@ public class ImageProcessorTest implements ProgressListener{
 
     private JFrame getJFrame() {
         processedLabel = new JLabel("Processed");
-        orginalLabel = new JLabel("Orginal");
+        originalLabel = new JLabel("Original");
 
         progress = new JProgressBar();
         progress.setMaximum(100);
@@ -108,7 +108,7 @@ public class ImageProcessorTest implements ProgressListener{
 
         JPanel jPanel = new JPanel();
         jPanel.setLayout(new BorderLayout());
-        jPanel.add(orginalLabel, BorderLayout.NORTH);
+        jPanel.add(originalLabel, BorderLayout.NORTH);
         jPanel.add(processedLabel, BorderLayout.CENTER);
         jPanel.add(progress, BorderLayout.SOUTH);
 

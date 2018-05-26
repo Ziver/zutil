@@ -82,7 +82,7 @@ public class StreamLogger {
 
 
     public interface LogCallback{
-        public boolean isLoggable();
-        public void log(String msg);
+        boolean isLoggable();
+        void log(String msg);
     }
 }

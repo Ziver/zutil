@@ -49,7 +49,7 @@ public class WSDLWriter{
     private ArrayList<WSDLService> services;
 
     public WSDLWriter( WebServiceDef ws ){
-        this.services = new ArrayList<WSDLService>();
+        this.services = new ArrayList<>();
         this.ws = ws;
     }
 
@@ -86,8 +86,6 @@ public class WSDLWriter{
                 writer.flush();
                 this.cache = out.toString();
                 out.close();
-            } catch (UnsupportedEncodingException e) {
-                e.printStackTrace();
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -269,7 +267,7 @@ public class WSDLWriter{
      *  </pre></b>
      */
     private void generateType(Element definitions){
-        ArrayList<Class<?>> types = new ArrayList<Class<?>>();
+        ArrayList<Class<?>> types = new ArrayList<>();
         // Find types
         for( WSMethodDef method : ws.getMethods() ){
             if( method.getOutputCount() > 0 ){

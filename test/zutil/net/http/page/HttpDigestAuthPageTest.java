@@ -37,7 +37,7 @@ public class HttpDigestAuthPageTest {
         HttpHeader rspHeader = HttpTestUtil.makeRequest(page);
 
         assertEquals(401, rspHeader.getHTTPCode());
-        assertTrue(rspHeader.getHeader("WWW-Authenticate") != null);
+        assertNotNull(rspHeader.getHeader("WWW-Authenticate"));
         assertEquals("Digest", parseAuthType(rspHeader));
         Map<String,String> authHeader = parseAuthHeader(rspHeader);
         assertTrue(authHeader.containsKey("realm"));

@@ -46,7 +46,7 @@ import java.util.logging.Logger;
 /**
  * A simple web server that handles both cookies and
  * sessions for all the clients
- * 
+ *
  * @author Ziver
  */
 public class HttpServer extends ThreadedTCPNetworkServer{
@@ -272,7 +272,7 @@ public class HttpServer extends ThreadedTCPNetworkServer{
             buff.append(", cookies: ").append(header==null ? null : header.toStringCookies());
             buff.append(", session: ").append(session);
             buff.append(")");
-            buff.append(", time: "+ StringUtil.formatTimeToString(System.currentTimeMillis() - time));
+            buff.append(", time: ").append(StringUtil.formatTimeToString(System.currentTimeMillis() - time));
 
             logger.finer(buff.toString());
         } else if(logger.isLoggable(Level.FINER)){

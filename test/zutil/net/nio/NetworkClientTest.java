@@ -37,7 +37,7 @@ import java.security.NoSuchAlgorithmException;
 
 @SuppressWarnings("unused")
 public class NetworkClientTest {
-    public static void main(String[] args) throws NoSuchAlgorithmException, InterruptedException {
+    public static void main(String[] args) throws InterruptedException {
         try {
             //LogUtil.setGlobalLevel(Level.ALL);
             LogUtil.setGlobalFormatter(new CompactLogFormatter());

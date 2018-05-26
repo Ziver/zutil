@@ -29,7 +29,7 @@ import java.util.*;
 
 /**
  * This is a data node used in JSON and BEncoding and other types
- * 
+ *
  * @author Ziver
  */
 public class DataNode implements Iterable<DataNode>{
@@ -84,9 +84,9 @@ public class DataNode implements Iterable<DataNode>{
         this.type = type;
         switch(type){
         case Map:
-            map = new HashMap<String,DataNode>(); break;
+            map = new HashMap<>(); break;
         case List:
-            list = new LinkedList<DataNode>(); break;
+            list = new LinkedList<>(); break;
         default:
             break;
         }

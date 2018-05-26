@@ -47,9 +47,9 @@ public class Hasher {
     public static String hash(File file, String hashType) throws NoSuchAlgorithmException, IOException {
         MessageDigest digest = MessageDigest.getInstance(hashType); //"MD5"
         InputStream is = new FileInputStream(file);
-        String output = "";
+        String output;
         byte[] buffer = new byte[8192];
-        int read = 0;
+        int read;
         try {
             while( (read = is.read(buffer)) > 0) {
                 digest.update(buffer, 0, read);
@@ -165,14 +165,14 @@ public class Hasher {
         try {
             // Get an hmac_sha1 key from the raw key bytes
             SecretKeySpec signingKey = new SecretKeySpec(key, algo);
-            
+
             // Get a MAC instance and initialize with the signing key
             Mac mac = Mac.getInstance(algo);
             mac.init(signingKey);
-            
+
             // Compute the HMAC on input data bytes
             byte[] raw = mac.doFinal( data );
-            
+
             return Converter.toHexString(raw);
         } catch (Exception e) {
             e.printStackTrace();
@@ -225,10 +225,9 @@ public class Hasher {
      * @param 		data 		is the byte array to hash
      * @param 		hashType 	is the hash method (MD2, MD5, SHA-1, SHA-256, SHA-384, SHA-512 )
      * @return 					an String containing the hash
-     * @throws Exception
      */
     public static String hash(byte[] data, String hashType) throws Exception {
-        MessageDigest md = null;
+        MessageDigest md;
         md = MessageDigest.getInstance(hashType); //MD5 || SHA
         md.update(data);
 

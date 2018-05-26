@@ -28,8 +28,7 @@ import org.junit.Test;
 import zutil.parser.DataNode;
 import zutil.parser.DataNode.DataType;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.junit.Assert.*;
 
 
 public class JSONParserTest {
@@ -75,23 +74,23 @@ public class JSONParserTest {
         assertEquals( DataType.Number, data.getType());
         assertEquals( 12.34, data.getDouble(), 0);
     }
-    
+
     @Test
     public void valueBoolean(){
         DataNode data = JSONParser.read("false");
         assert(data.isValue());
         assertEquals( DataType.Boolean, data.getType());
-        assertEquals( false, data.getBoolean());
+        assertFalse(data.getBoolean());
     }
-    
+
     @Test
     public void valueBooleanUpperCase(){
         DataNode data = JSONParser.read("TRUE");
         assert(data.isValue());
         assertEquals( DataType.Boolean, data.getType());
-        assertEquals( true, data.getBoolean());
+        assertTrue(data.getBoolean());
     }
-    
+
     @Test
     public void valueStringNoQuotes(){
         DataNode data = JSONParser.read("teststring");
@@ -99,7 +98,7 @@ public class JSONParserTest {
         assertEquals( DataType.String, data.getType());
         assertEquals( "teststring", data.getString());
     }
-    
+
     @Test
     public void toManyCommasInList(){
         DataNode data = JSONParser.read("[1,2,3,]");

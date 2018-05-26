@@ -36,30 +36,30 @@ import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
 
 import java.io.IOException;
- 
+
 public class NetLogGuiClient extends Application{
     public static final String VERSION = "0.1";
 
     // UI elements
-    @FXML 
+    @FXML
     private TabPane tabPane;
 
 
     public static void main(String[] args) {
         Application.launch(NetLogGuiClient.class, args);
     }
-    
+
     @Override
     public void start(Stage stage) throws Exception {
         Parent root = FXMLLoader.load(getClass().getResource("NetLogClient.fxml"));
-        
+
         stage.setTitle("NetLoggerClient ("+VERSION+")");
         stage.setScene(new Scene(root));
         stage.show();
     }
 
     // Menu Actions
-    @FXML 
+    @FXML
     protected void handleConnectAction(ActionEvent event) {
         try{
             tabPane.getTabs().add(new NetLoggerClientTab("koc.se", 8080));
@@ -82,8 +82,7 @@ public class NetLogGuiClient extends Application{
         public NetLoggerClientTab(String host, int port) throws IOException{
             this.setText( host+":"+port );
 
-            FXMLLoader loader = new FXMLLoader();
-            Parent tabRoot = loader.load(getClass().getResource("NetLogClientInstance.fxml"));
+            Parent tabRoot = FXMLLoader.load(getClass().getResource("NetLogClientInstance.fxml"));
             this.setContent(tabRoot);
             AnchorPane.setRightAnchor(tabRoot, 0.0);
             //this.setOnClosed(new EventHandler<Event>() {

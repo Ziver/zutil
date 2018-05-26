@@ -85,7 +85,7 @@ public class TorrentMetainfo {
             creation_date = metainfo.getLong("creation date");
         if( metainfo.get("announce-list") != null ){
             DataNode tmp = metainfo.get("announce-list");
-            announce_list = new ArrayList<String>();
+            announce_list = new ArrayList<>();
             for( DataNode tracker : tmp )
                 announce_list.add( tracker.getString() );
         }
@@ -98,7 +98,7 @@ public class TorrentMetainfo {
             is_private = (info.getInt("private") != 0);
         // Split the hashes
         String hashes = info.getString("pieces");
-        piece_hashes = new ArrayList<String>();
+        piece_hashes = new ArrayList<>();
         for(int i=0; i<hashes.length(); ){
             StringBuilder hash = new StringBuilder(20);
             for(int k=0; k<20; ++i, ++k)
@@ -107,7 +107,7 @@ public class TorrentMetainfo {
         }
 
         // File data
-        file_list = new ArrayList<TorrentFile>();
+        file_list = new ArrayList<>();
         // Single-file torrent
         if( info.get("files") == null ){
             Long fileSize = size = info.getLong("length");

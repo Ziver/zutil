@@ -31,7 +31,7 @@ import java.util.LinkedList;
 
 /**
  * This abstract class is one step in the wizard
- * 
+ *
  * @author Ziver
  */
 public abstract class WizardPage extends JPanel{
@@ -43,7 +43,7 @@ public abstract class WizardPage extends JPanel{
     private boolean lastPage = false;
 
     public WizardPage(){
-        components = new LinkedList<Component>();
+        components = new LinkedList<>();
     }
 
     /**
@@ -111,7 +111,7 @@ public abstract class WizardPage extends JPanel{
 
 /**
  * This class is for failed validations
- * 
+ *
  * @author Ziver
  */
 class ValidationFail{
@@ -123,7 +123,6 @@ class ValidationFail{
     /**
      * Creates an ValidationFail object
      *
-     * @param c is the component that failed the validation
      * @param msg is a message to the user about the fault
      */
     public ValidationFail(String msg){

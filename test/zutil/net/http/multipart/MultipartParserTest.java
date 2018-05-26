@@ -7,8 +7,7 @@ import java.io.IOException;
 import java.util.Iterator;
 
 import static junit.framework.TestCase.assertFalse;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 /**
  * JUnit test for MultipartParser class
@@ -41,8 +40,8 @@ public class MultipartParserTest {
         assertEquals("bar", stringField.getValue());
 
         assertFalse(it.hasNext());
-        assertEquals(null, it.next());
-        assertEquals(null, it.next());
+        assertNull(it.next());
+        assertNull(it.next());
     }
 
     @Test

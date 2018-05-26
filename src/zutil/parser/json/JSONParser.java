@@ -34,7 +34,7 @@ import java.util.regex.Pattern;
 
 /**
  * This is a JSON parser class
- * 
+ *
  * @author Ziver
  */
 public class JSONParser extends Parser {
@@ -87,12 +87,12 @@ public class JSONParser extends Parser {
      * This is the real recursive parsing method
      */
     protected static DataNode parse(Reader in, MutableInt end) throws IOException {
-        DataNode root = null;
-        DataNode key = null;
-        DataNode node = null;
+        DataNode root;
+        DataNode key;
+        DataNode node;
         end.i = CONTINUE;
 
-        int c = '_';
+        int c;
         while((c=in.read()) >= 0 &&
                 (Character.isWhitespace(c) || c == ',' || c == ':'));
 

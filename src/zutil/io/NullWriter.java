@@ -1,6 +1,5 @@
 package zutil.io;
 
-import java.io.IOException;
 import java.io.Writer;
 
 /**
@@ -17,7 +16,7 @@ public class NullWriter extends Writer{
     @Override
     public void write(char cbuf[], int off, int len) { }
     @Override
-    public void write(String str) throws IOException { }
+    public void write(String str) { }
     @Override
     public void write(String str, int off, int len) { }
 
@@ -37,5 +36,5 @@ public class NullWriter extends Writer{
     @Override
     public void flush() { }
     @Override
-    public void close() { };
+    public void close() { }
 }

@@ -36,9 +36,8 @@ import java.util.zip.ZipFile;
 
 public class FileSearcher implements Iterable<FileSearcher.FileSearchItem>{
     // Constants
-    private static final List<String> compressedFileExtensions = Arrays.asList(new String[]{
-            "jar", "zip"
-    });
+    private static final List<String> compressedFileExtensions = Arrays.asList(
+            "jar", "zip");
 
     // Constructor params
     private File root;
@@ -119,7 +118,7 @@ public class FileSearcher implements Iterable<FileSearcher.FileSearchItem>{
         private FileSearchItem nextItem;
 
         public FileSearchIterator(){
-            fileList = new ArrayList<FileSearchItem>();
+            fileList = new ArrayList<>();
             index = 0;
 
             addFiles(new FileSearchFileItem(root), root.list());
@@ -208,18 +207,18 @@ public class FileSearcher implements Iterable<FileSearcher.FileSearchItem>{
 
     public interface FileSearchItem{
         /** @return a file or folder name **/
-        public String getName();
+        String getName();
         /** @return a path to the file or folder, in case of a compressed file the path to the package will be returned **/
-        public String getPath();
+        String getPath();
 
-        public boolean isCompressed();
-        public boolean isFile();
-        public boolean isDirectory();
+        boolean isCompressed();
+        boolean isFile();
+        boolean isDirectory();
 
         /** @return an InputStream if this is a file otherwise null **/
-        public InputStream getInputStream() throws IOException;
+        InputStream getInputStream() throws IOException;
         /** @return an String array with all files if this is a folder otherwise null **/
-        public String[] listFiles();
+        String[] listFiles();
     }
 
 

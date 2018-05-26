@@ -61,7 +61,7 @@ public class WizardActionHandler implements ActionListener, FocusListener, ListS
     }
 
     public void registerListener(Component c){
-        /**
+        /*
          * JToggleButton
          * JCheckBox
          * JRadioButton
@@ -70,7 +70,7 @@ public class WizardActionHandler implements ActionListener, FocusListener, ListS
             JToggleButton o = (JToggleButton) c;
             o.addActionListener( this );
         }
-        /**
+        /*
          * JEditorPane
          * JTextArea
          * JTextField
@@ -79,7 +79,7 @@ public class WizardActionHandler implements ActionListener, FocusListener, ListS
             JTextComponent o = (JTextComponent) c;
             o.addFocusListener( this );
         }
-        /**
+        /*
          * JList
          */
         else if(c instanceof JList){
@@ -93,7 +93,7 @@ public class WizardActionHandler implements ActionListener, FocusListener, ListS
      * @param	c 	is the event
      */
     public void registerValue(Component c) {
-        /**
+        /*
          * JToggleButton
          * JCheckBox
          * JRadioButton
@@ -102,7 +102,7 @@ public class WizardActionHandler implements ActionListener, FocusListener, ListS
             JToggleButton o = (JToggleButton) c;
             values.put( o.getName() , o.isSelected() );
         }
-        /**
+        /*
          * JEditorPane
          * JTextArea
          * JTextField
@@ -111,7 +111,7 @@ public class WizardActionHandler implements ActionListener, FocusListener, ListS
             JTextComponent o = (JTextComponent) c;
             values.put( o.getName() , o.getText() );
         }
-        /**
+        /*
          * JList
          */
         else if(c instanceof JList){

@@ -34,7 +34,7 @@ import java.util.HashMap;
 /**
  * This PrintStream is written for HTTP use
  * It has buffer capabilities and cookie management.
- * 
+ *
  * @author Ziver
  *
  */
@@ -87,8 +87,8 @@ public class HttpPrintStream extends OutputStream{
         this.httpVersion = "1.0";
         this.message_type = type;
         this.res_status_code = 200;
-        this.headers = new HashMap<String, String>();
-        this.cookies = new HashMap<String, String>();
+        this.headers = new HashMap<>();
+        this.cookies = new HashMap<>();
         this.buffer = new StringBuffer();
         this.buffer_enabled = false;
     }
@@ -99,11 +99,9 @@ public class HttpPrintStream extends OutputStream{
      * is enabled until you close or flush the stream.
      * This function will flush the stream if buffering is
      * disabled.
-     *
-     * @param b
      */
-    public void enableBuffering(boolean b) throws IOException {
-        buffer_enabled = b;
+    public void enableBuffering(boolean enable) throws IOException {
+        buffer_enabled = enable;
         if(!buffer_enabled) flush();
     }
 
@@ -211,7 +209,7 @@ public class HttpPrintStream extends OutputStream{
     /**
      * Will buffer String or directly output headers if needed and then the String
      */
-    private void printOrBuffer(String s) throws IOException {
+    private void printOrBuffer(String s) {
         if(buffer_enabled){
             buffer.append(s);
         }

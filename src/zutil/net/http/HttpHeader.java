@@ -46,9 +46,9 @@ public class HttpHeader {
 
 
     public HttpHeader(){
-        urlAttributes = new HashMap<String, String>();
-        headers = new HashMap<String, String>();
-        cookies = new HashMap<String, String>();
+        urlAttributes = new HashMap<>();
+        headers = new HashMap<>();
+        cookies = new HashMap<>();
     }
 
 

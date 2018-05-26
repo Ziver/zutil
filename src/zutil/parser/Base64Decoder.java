@@ -122,7 +122,8 @@ public class Base64Decoder {
     }
 
 
-    private static byte getByte( char c ){
+    @SuppressWarnings("PointlessBitwiseExpression")
+    private static byte getByte(char c ){
         switch(c){
             case 'A': return (byte)( 0 & 0xff);
             case 'B': return (byte)( 1 & 0xff);

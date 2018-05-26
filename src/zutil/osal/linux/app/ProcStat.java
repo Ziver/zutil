@@ -46,7 +46,7 @@ public class ProcStat {
     private static final int TTL = 500; // update stats every 0.5 second
 
     private static CpuStats cpuTotal = new CpuStats();
-    private static ArrayList<CpuStats> cpus = new ArrayList<CpuStats>();
+    private static ArrayList<CpuStats> cpus = new ArrayList<>();
     private static long uptime;
     private static long processes;
     private static Timer updateTimer = new Timer(TTL);
@@ -66,7 +66,7 @@ public class ProcStat {
     }
     protected static void parse(BufferedReader in) throws IOException {
         updateTimer.start();
-        String line = null;
+        String line;
         while((line=in.readLine()) != null){
             String[] str = line.split("\\s+");
             if(str[0].equals("cpu")) {
@@ -137,7 +137,7 @@ public class ProcStat {
 
         protected CpuStats(){}
         protected void update(String[] stats){
-            long newUser=0, newNice=0, newSystem=0, newIdle=0, newIowait=0, newIrq=0, newSoftirq=0, newSteal=0, newGuest=0, newGuestNice=0;
+            long newUser, newNice, newSystem, newIdle, newIowait, newIrq, newSoftirq, newSteal=0, newGuest=0, newGuestNice=0;
             if(stats.length >= 1+8){
                 newUser =    Long.parseLong(stats[1]);
                 newNice =    Long.parseLong(stats[2]);

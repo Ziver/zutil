@@ -103,13 +103,13 @@ public class Templator {
     public Templator(File tmpl) throws IOException {
         if(tmpl == null)
             throw new IOException("File can not be null!");
-        this.data = new HashMap<String, Object>();
+        this.data = new HashMap<>();
         this.file = tmpl;
         parseTemplate(FileUtil.getContent(file));
         this.lastModified = file.lastModified();
     }
     public Templator(String tmpl){
-        this.data = new HashMap<String, Object>();
+        this.data = new HashMap<>();
         parseTemplate(tmpl);
     }
 
@@ -226,14 +226,14 @@ public class Templator {
     /**************************** Template Helper Classes *************************************/
 
     protected interface TemplateEntity {
-        public void compile(StringBuilder str);
+        void compile(StringBuilder str);
     }
 
     protected class TemplateNode implements TemplateEntity {
         private List<TemplateEntity> entities;
 
         public TemplateNode(){
-            this.entities = new ArrayList<TemplateEntity>();
+            this.entities = new ArrayList<>();
         }
         public TemplateNode(TemplateNode node){
             this.entities = node.entities;
@@ -275,7 +275,7 @@ public class Templator {
                         super.compile(str);
                 }
                 else if(obj instanceof Long){
-                    if ((Long) obj != 0l)
+                    if ((Long) obj != 0L)
                         super.compile(str);
                 }
                 else if(obj instanceof Float){
@@ -417,9 +417,7 @@ public class Templator {
                         }
                     }
                 }
-            }catch (IllegalAccessException e){
-                log.log(Level.WARNING, null, e);
-            } catch (InvocationTargetException e) {
+            }catch (IllegalAccessException | InvocationTargetException e){
                 log.log(Level.WARNING, null, e);
             }
             return null;
