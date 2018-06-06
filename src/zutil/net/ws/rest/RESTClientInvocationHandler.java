@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2015 Ziver Koc
+ * Copyright (c) 2018 Ziver Koc
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,46 +22,42 @@
  * THE SOFTWARE.
  */
 
-package zutil.net.ws.soap;
+package zutil.net.ws.rest;
 
-import org.dom4j.Document;
-import org.dom4j.DocumentException;
-import org.dom4j.DocumentHelper;
-import org.dom4j.Element;
 import zutil.io.IOUtil;
 import zutil.log.LogUtil;
 import zutil.net.http.HttpClient;
 import zutil.net.http.HttpHeaderParser;
+import zutil.net.http.HttpURL;
 import zutil.net.ws.WSInterface;
 import zutil.net.ws.WSMethodDef;
 import zutil.net.ws.WSParameterDef;
 import zutil.net.ws.WebServiceDef;
+import zutil.net.ws.soap.SOAPHttpPage;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
  * This is an abstract client that will do generic requests to a
- * SOAP Web service
- *
- * @author Ziver
+ * REST Web service using JSON response.
  */
-public class SOAPClientInvocationHandler implements InvocationHandler {
+public class RESTClientInvocationHandler implements InvocationHandler {
     private static Logger logger = LogUtil.getLogger();
 
     private WebServiceDef wsDef;
     /**
      * Web address of the web service
      */
-    protected URL url;
+    protected URL serviceUrl;
 
-
-    public SOAPClientInvocationHandler(URL url, WebServiceDef wsDef) {
-        this.url = url;
-        this.wsDef = wsDef;
+    public RESTClientInvocationHandler(URL url, WebServiceDef webServiceDef) {
+        this.serviceUrl = url;
+        this.wsDef = webServiceDef;
     }
 
 
@@ -71,62 +67,46 @@ public class SOAPClientInvocationHandler implements InvocationHandler {
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
         // Generate XML
-        Document document = genSOAPRequest((WSInterface) proxy, method.getName(), args);
-        String reqXml = document.asXML();
+        HttpURL url = generateRESTRequest(method.getName(), args);
 
         // Send request
         HttpClient request = new HttpClient(HttpClient.HttpRequestType.POST);
         request.setURL(url);
-        request.setData(reqXml);
         HttpHeaderParser response = request.send();
-        String rspXml = IOUtil.readContentAsString(request.getResponseInputStream());
+        String rspJson = IOUtil.readContentAsString(request.getResponseInputStream());
         request.close();
 
         // DEBUG
         if (logger.isLoggable(Level.FINEST)) {
             System.out.println("********** Request");
-            System.out.println(reqXml);
+            System.out.println(url);
             System.out.println("********** Response");
-            System.out.println(rspXml);
+            System.out.println(rspJson);
         }
 
-        return parseSOAPResponse(rspXml);
+        return parseRESTResponse(rspJson);
     }
 
 
-    private Document genSOAPRequest(WSInterface obj, String targetMethod, Object[] args) {
+    private HttpURL generateRESTRequest(String targetMethod, Object[] args) {
         logger.fine("Sending request for " + targetMethod);
-        Document document = DocumentHelper.createDocument();
-        Element envelope = document.addElement("soap:Envelope");
+        HttpURL url = new HttpURL(serviceUrl);
+
         WSMethodDef methodDef = wsDef.getMethod(targetMethod);
-        try {
-            envelope.addNamespace("soap", "http://schemas.xmlsoap.org/soap/envelope/");
-            envelope.addNamespace("xsi", "http://www.w3.org/2001/XMLSchema-instance");
-            envelope.addNamespace("xsd", "http://www.w3.org/2001/XMLSchema");
+        url.setPath(serviceUrl.getPath()
+                + (serviceUrl.getPath().endsWith("/") ? "" : "/")
+                + methodDef.getName());
 
-            Element body = envelope.addElement("soap:Body");
-            Element method = body.addElement("");
-            method.addNamespace("m", methodDef.getNamespace());
-            method.setName("m:" + methodDef.getName() + "Request");
-            for (int i = 0; i < methodDef.getOutputCount(); i++) {
-                WSParameterDef param = methodDef.getOutput(i);
-                SOAPHttpPage.generateSOAPXMLForObj(method, args[i], param.getName());
-            }
-
-        } catch (Exception e) {
-            logger.log(Level.SEVERE, "Exception in SOAP generation", e);
+        for (int i = 0; i < methodDef.getOutputCount(); i++) {
+            WSParameterDef param = methodDef.getOutput(i);
+            url.setParameter(param.getName(), args[i].toString());
         }
 
-        return document;
+        return url;
     }
 
-    private Object parseSOAPResponse(String xml) {
-        try {
-            Element response = SOAPHttpPage.getXMLRoot(xml);
-            // TODO:
-        } catch (DocumentException e) {
-            logger.log(Level.SEVERE, "Unable to parse SOAP response", e);
-        }
+    private Object parseRESTResponse(String json) {
+
         return null;
     }
 }

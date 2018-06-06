@@ -45,7 +45,7 @@ public class SOAPClientFactory {
      * Generates a Client Object for the web service.
      *
      * @param 	<T> 	is the class of the web service definition
-     * @param 	url 	is the target service url
+     * @param 	url 	is the target service serviceUrl
      * @param 	intf 	is the class of the web service definition
      * @return a client Object
      */
