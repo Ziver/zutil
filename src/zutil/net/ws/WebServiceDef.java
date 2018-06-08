@@ -31,7 +31,7 @@ import java.util.HashMap;
 import java.util.Set;
 
 /**
- * Defines a web service from a class implementing the {@link zutil.net.ws.WSInterface}
+ * Defines a web service (Server side) from a class implementing the {@link zutil.net.ws.WSInterface}
  *
  * @author Ziver
  */
