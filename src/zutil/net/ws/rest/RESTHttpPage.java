@@ -41,7 +41,7 @@ import java.util.Map;
 /**
  * User: Ziver
  */
-public class RestHttpPage implements HttpPage {
+public class RESTHttpPage implements HttpPage {
 
     /** The object that the functions will be invoked from **/
     private WebServiceDef wsDef;
@@ -49,7 +49,7 @@ public class RestHttpPage implements HttpPage {
     private WSInterface ws;
 
 
-    public RestHttpPage( WSInterface wsObject ){
+    public RESTHttpPage(WSInterface wsObject ){
         this.ws = wsObject;
         this.wsDef = new WebServiceDef(ws.getClass());
     }
