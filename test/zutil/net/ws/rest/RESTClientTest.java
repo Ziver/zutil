@@ -18,6 +18,7 @@ public class RESTClientTest {
 
     public interface OpenWeartherMap extends WSInterface {
 
+        @WSNamespace("")
         int weather(@WSParamName("q") String city);
     }
 

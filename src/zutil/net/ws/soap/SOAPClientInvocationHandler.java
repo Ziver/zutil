@@ -40,6 +40,7 @@ import zutil.net.ws.WebServiceDef;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.net.URL;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -108,8 +109,10 @@ public class SOAPClientInvocationHandler implements InvocationHandler {
             Element method = body.addElement("");
             method.addNamespace("m", methodDef.getNamespace());
             method.setName("m:" + methodDef.getName() + "Request");
-            for (int i = 0; i < methodDef.getOutputCount(); i++) {
-                WSParameterDef param = methodDef.getOutput(i);
+
+            List<WSParameterDef> outputParamDefs = methodDef.getOutputs();
+            for (int i = 0; i < outputParamDefs.size(); i++) {
+                WSParameterDef param = outputParamDefs.get(i);
                 SOAPHttpPage.generateSOAPXMLForObj(method, args[i], param.getName());
             }
 

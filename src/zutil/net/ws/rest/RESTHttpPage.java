@@ -36,6 +36,7 @@ import zutil.net.ws.WebServiceDef;
 import zutil.parser.json.JSONObjectOutputStream;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -71,32 +72,33 @@ public class RESTHttpPage implements HttpPage {
 
 
     protected String execute(String targetMethod, Map<String, String> input) throws Exception {
-        if( wsDef.hasMethod(targetMethod) ){
+        if (wsDef.hasMethod(targetMethod)) {
             // Parse request
             WSMethodDef m = wsDef.getMethod(targetMethod);
-            Object[] params = prepareInputParams(m, input);
+            Object[] inputParams = prepareInputParams(m, input);
 
             // Invoke
-            Object ret = m.invoke(ws, params);
+            Object ret = m.invoke(ws, inputParams);
 
             // Generate Response
-            StringOutputStream dummyOut = new StringOutputStream();
-            JSONObjectOutputStream out = new JSONObjectOutputStream(dummyOut);
+            StringOutputStream strBuffer = new StringOutputStream();
+            JSONObjectOutputStream out = new JSONObjectOutputStream(strBuffer);
             out.enableMetaData(false);
             out.writeObject(ret);
             out.close();
-            return dummyOut.toString();
+            return strBuffer.toString();
         }
         return "{error: \"Unknown target: "+targetMethod+"\"}";
     }
 
-    private Object[] prepareInputParams(WSMethodDef method, Map<String, String> input){
-        Object[] inputParams = new Object[method.getInputCount()];
+    private Object[] prepareInputParams(WSMethodDef methodDef, Map<String, String> input){
+        List<WSParameterDef> inputParamDefs = methodDef.getInputs();
+        Object[] inputParams = new Object[inputParamDefs.size()];
 
         // Get the parameter values
-        for(int i=0; i<method.getInputCount() ;i++){
-            WSParameterDef param = method.getInput( i );
-            if( input.containsKey(param.getName()) ){
+        for (int i=0; i<inputParamDefs.size(); i++){
+            WSParameterDef param = inputParamDefs.get(i);
+            if (input.containsKey(param.getName())){
                 inputParams[i] = Converter.fromString(
                         input.get(param.getName()),
                         param.getParamClass());

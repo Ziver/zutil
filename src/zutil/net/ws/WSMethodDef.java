@@ -64,7 +64,7 @@ public class WSMethodDef {
      * @param me is a method in a class that implements WSInterface
      */
     protected WSMethodDef( WebServiceDef wsDef, Method me) {
-        if( !WSInterface.class.isAssignableFrom(me.getDeclaringClass()) )
+        if (!WSInterface.class.isAssignableFrom(me.getDeclaringClass()))
             throw new ClassCastException("Declaring class does not implement WSInterface!");
         this.wsDef = wsDef;
         method = me;
@@ -74,12 +74,12 @@ public class WSMethodDef {
         name = method.getName();
 
         //***** Documentation & Namespace
-        WSDocumentation tmpDoc = method.getAnnotation( WSDocumentation.class );
-        if(tmpDoc != null){
+        WSDocumentation tmpDoc = method.getAnnotation(WSDocumentation.class);
+        if (tmpDoc != null){
             doc = tmpDoc.value();
         }
-        WSNamespace tmpSpace = method.getAnnotation( WSNamespace.class );
-        if( tmpSpace != null )
+        WSNamespace tmpSpace = method.getAnnotation(WSNamespace.class);
+        if ( tmpSpace != null )
             namespace = tmpSpace.value();
         else
             namespace = wsDef.getNamespace()+"?#"+name;
@@ -91,10 +91,10 @@ public class WSMethodDef {
         Annotation[][] paramAnnotation = method.getParameterAnnotations();
         Class<?>[] inputTypes = method.getParameterTypes();
 
-        for(int i=0; i<paramAnnotation.length ;i++){
+        for (int i=0; i<paramAnnotation.length ;i++){
             WSParameterDef param = new WSParameterDef( this );
-            for(Annotation annotation : paramAnnotation[i]){
-                if(annotation instanceof WSInterface.WSParamName){
+            for (Annotation annotation : paramAnnotation[i]){
+                if (annotation instanceof WSInterface.WSParamName){
                     WSInterface.WSParamName paramName = (WSInterface.WSParamName) annotation;
                     param.setName( paramName.value() );
                     param.setOptional( paramName.optional() );
@@ -102,7 +102,7 @@ public class WSMethodDef {
             }
             param.setParamClass( inputTypes[i] );
             // if no name was found then use default
-            if(param.getName() == null)
+            if (param.getName() == null)
                 param.setName( "args"+i );
 
             inputs.add( param );
@@ -110,11 +110,11 @@ public class WSMethodDef {
 
         //********  The return parameter name ************
         WSInterface.WSReturnName returnName = method.getAnnotation(WSInterface.WSReturnName.class);
-        if( WSReturnObject.class.isAssignableFrom( method.getReturnType() ) ){
+        if (WSReturnObject.class.isAssignableFrom( method.getReturnType())){
             Class<?> retClass = method.getReturnType();
             Field[] fields = retClass.getFields();
 
-            for(int i=0; i<fields.length ;i++){
+            for (int i=0; i<fields.length ;i++){
                 WSParameterDef ret_param = new WSParameterDef( this );
                 WSReturnObject.WSValueName retValName = fields[i]
                                    .getAnnotation( WSReturnObject.WSValueName.class );
@@ -128,7 +128,7 @@ public class WSMethodDef {
         }
         else if( method.getReturnType() != void.class ){
             WSParameterDef ret_param = new WSParameterDef( this );
-            if(returnName != null)
+            if (returnName != null)
                 ret_param.setName(returnName.value());
             else
                 ret_param.setName("return");
@@ -145,24 +145,10 @@ public class WSMethodDef {
     }
 
     /**
-     * @return the number of exceptions this method throws
-     */
-    public int exceptionCount(){
-        return exceptions.size();
-    }
-
-    /**
      * @return a list of exceptions this method throws
      */
     public List<Class<?>> getExceptions(){
         return exceptions;
-    }
-
-    /**
-     * @return the number of parameters for this method
-     */
-    public int getInputCount(){
-        return inputs.size();
     }
 
     /**
@@ -173,33 +159,10 @@ public class WSMethodDef {
     }
 
     /**
-     * @param		index		is a index
-     * @return					a {@link WSParameterDef} object in the given index
-     */
-    public WSParameterDef getInput( int index ){
-        return inputs.get( index );
-    }
-
-    /**
-     * @return the number of parameters for this method
-     */
-    public int getOutputCount(){
-        return outputs.size();
-    }
-
-    /**
      * @return a list of input parameters
      */
     public List<WSParameterDef> getOutputs(){
         return outputs;
-    }
-
-    /**
-     * @param		index		is a index
-     * @return					a {@link WSParameterDef} object in the given index
-     */
-    public WSParameterDef getOutput( int index ){
-        return outputs.get( index );
     }
 
     /**
@@ -210,15 +173,12 @@ public class WSMethodDef {
     }
 
     /**
-     * @return the namespace of the method
+     * @return the namespace or endpoint url of the method
      */
     public String getNamespace(){
         return namespace;
     }
 
-    public WebServiceDef getWebService(){
-        return wsDef;
-    }
 
     /**
      * Invokes a specified method
@@ -235,8 +195,8 @@ public class WSMethodDef {
         StringBuilder tmp = new StringBuilder();
         boolean first = true;
         tmp.append(name).append("(");
-        for(WSParameterDef param : inputs){
-            if(first)
+        for (WSParameterDef param : inputs){
+            if (first)
                 first = false;
             else
                 tmp.append(" ,");
@@ -246,8 +206,8 @@ public class WSMethodDef {
         }
         tmp.append(") => ");
         first = true;
-        for(WSParameterDef param : outputs){
-            if(first)
+        for (WSParameterDef param : outputs){
+            if (first)
                 first = false;
             else
                 tmp.append(" ,");

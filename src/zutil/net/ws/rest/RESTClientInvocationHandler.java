@@ -39,6 +39,7 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -97,8 +98,9 @@ public class RESTClientInvocationHandler implements InvocationHandler {
                 + (serviceUrl.getPath().endsWith("/") ? "" : "/")
                 + methodDef.getName());
 
-        for (int i = 0; i < methodDef.getOutputCount(); i++) {
-            WSParameterDef param = methodDef.getOutput(i);
+        List<WSParameterDef> params =  methodDef.getOutputs();
+        for (int i = 0; i < params.size(); i++) {
+            WSParameterDef param = params.get(i);
             url.setParameter(param.getName(), args[i].toString());
         }
 

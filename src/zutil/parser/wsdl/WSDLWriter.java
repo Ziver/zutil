@@ -139,7 +139,7 @@ public class WSDLWriter{
 
     private void generateMessage(Element parent, WSMethodDef method){
         //*************************** Input
-        if( method.getInputCount() > 0 ){
+        if(!method.getInputs().isEmpty()){
             // definitions -> message
             Element input = parent.addElement("wsdl:message");
             input.addAttribute("name", method.getName()+"Request");
@@ -156,7 +156,7 @@ public class WSDLWriter{
             }
         }
         //*************************** Output
-        if( method.getOutputCount() > 0 ){
+        if(!method.getOutputs().isEmpty()){
             // definitions -> message
             Element output = parent.addElement("wsdl:message");
             output.addAttribute("name", method.getName()+"Response");
@@ -205,19 +205,19 @@ public class WSDLWriter{
             }
 
             //*************************** Input
-            if( method.getInputCount() > 0 ){
+            if( method.getInputs().size() > 0 ){
                 // definitions -> message
                 Element input = operation.addElement("wsdl:input");
                 input.addAttribute("message", "tns:"+method.getName()+"Request");
             }
             //*************************** Output
-            if( method.getOutputCount() > 0 ){
+            if( method.getOutputs().size() > 0 ){
                 // definitions -> message
                 Element output = operation.addElement("wsdl:output");
                 output.addAttribute("message", "tns:"+method.getName()+"Response");
             }
             //*************************** Fault
-            if( method.getOutputCount() > 0 ){
+            if( method.getOutputs().size() > 0 ){
                 // definitions -> message
                 Element fault = operation.addElement("wsdl:fault");
                 fault.addAttribute("message", "tns:exception");
@@ -270,7 +270,7 @@ public class WSDLWriter{
         ArrayList<Class<?>> types = new ArrayList<>();
         // Find types
         for( WSMethodDef method : ws.getMethods() ){
-            if( method.getOutputCount() > 0 ){
+            if(!method.getOutputs().isEmpty()){
                 for( WSParameterDef param : method.getOutputs() ){
                     Class<?> paramClass = param.getParamClass();
                     Class<?> valueClass = getClass(paramClass);

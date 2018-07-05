@@ -66,7 +66,7 @@ public class WSDLServiceSOAP extends WSDLService{
         input_body.addAttribute("namespace", method.getNamespace());
 
         //*************************** output
-        if( method.getOutputCount() > 0 ){
+        if(!method.getOutputs().isEmpty()){
             // definitions -> binding -> operation -> output
             Element output = operation.addElement("wsdl:output");
             // definitions -> binding -> operation -> input -> body

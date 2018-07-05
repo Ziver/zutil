@@ -51,12 +51,12 @@ public class WebServiceDef {
         methods = new HashMap<>();
         name = intf.getSimpleName();
 
-        if( intf.getAnnotation( WSInterface.WSNamespace.class ) != null )
-            this.namespace = intf.getAnnotation( WSInterface.WSNamespace.class ).value();
+        if (intf.getAnnotation( WSInterface.WSNamespace.class) != null)
+            this.namespace = intf.getAnnotation(WSInterface.WSNamespace.class).value();
 
         for(Method m : intf.getDeclaredMethods()){
             // check for public methods
-            if((m.getModifiers() & Modifier.PUBLIC) > 0 &&
+            if ((m.getModifiers() & Modifier.PUBLIC) > 0 &&
                     !m.isAnnotationPresent(WSInterface.WSIgnore.class)){
                 WSMethodDef method = new WSMethodDef(this, m);
                 methods.put(method.getName(), method);

@@ -32,29 +32,31 @@ import java.lang.annotation.Target;
  *
  * Specifies web service definitions. Which methods that will
  * be published and other related metadata.
+ * Only public and non static methods will be published or
+ * the WSIgnore annotation can be used to ignore the specific method.
  *
  * Example:
  * <pre>
  *	private static class Test implements WSInterface{
  *		public Test(){}
  *
- *		&#64;WSDocumentation("blabla")
- *		&#64;WSDLParamDocumentation("olle = a variable?")
+ *		&#64;WSDocumentation("This is a description of the method")
+ *		&#64;WSDLParamDocumentation("arg1 = variable description?")
  *		public void pubZ(
- *				&#64;WSParamName("olle") int lol)
+ *				&#64;WSParamName("arg1") int randomName)
  *				throws Exception{
  *			....
  *		}
  *
  *		&#64;WSReturnName("param")
  *		public String pubA(
- *				&#64;WSParamName(value="lol", optional=true) String lol)
+ *				&#64;WSParamName(value="optArg", optional=true) String optionalParam)
  *				throws Exception{
  *			....
  *		}
  *
  *		&#64;WSIgnore()
- *		public void privaZ(....){
+ *		public void privatZ(....){
  *			...
  *		}
  *	}
@@ -129,7 +131,7 @@ public interface WSInterface {
     @interface WSHeader { }
 
     /**
-     * Specifies the name space for method.
+     * Specifies the name space for the method.
      *
      * @author Ziver
      */
