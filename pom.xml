@@ -37,7 +37,6 @@
         <build.number>SNAPSHOT</build.number>
         <java.version>1.8</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <project.scm.id>koc.se</project.scm.id>
     </properties>
 
     <dependencies>
