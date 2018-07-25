@@ -14,28 +14,23 @@ node {
     }
 
     withMaven(mavenConfiguration) {
+        def mvnParams = "-Dbuild.number=${BUILD_NUMBER}"
+
         stage('Build') {
-            sh 'mvn clean compile'
+            sh "mvn ${mvnParams} clean compile"
         }
 
         stage('Test') {
-            sh 'mvn test'
+            sh "mvn ${mvnParams} test"
         }
 
         stage('Package') {
-            sh 'mvn -DskipStatic -DskipTests package'
+            sh "mvn ${mvnParams} -DskipStatic -DskipTests package"
         }
 
         stage('Deploy') {
-            // Figure out Pom version
-            def pom = readFile('pom.xml')
-            def versionMatch = pom =~ "<version>(.+?)</version>"
-            def version = versionMatch[0][1]
-
-            // Start deployment
-            sh 'mvn -DskipStatic -DskipTests deploy'
-            if ( ! version.contains("SNAPSHOT"))
-                sh 'mvn scm:tag'
+            sh "mvn ${mvnParams} -DskipStatic -DskipTests deploy"
+            sh "mvn ${mvnParams} scm:tag"
         }
     }
 }
