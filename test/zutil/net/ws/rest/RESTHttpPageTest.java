@@ -28,8 +28,6 @@ public class RESTHttpPageTest {
     }
 
 
-
-
     public static class TestEchoClass implements WSInterface{
         public String echo(@WSParamName("input") String input){
             return "echo: "+input;
