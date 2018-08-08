@@ -35,6 +35,7 @@
 
     <properties>
         <build.number>SNAPSHOT</build.number>
+        <build.development>true</build.development>
         <java.version>1.8</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
@@ -148,6 +149,9 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-gpg-plugin</artifactId>
                 <version>1.5</version>
+                <configuration>
+                    <skip>${build.development}</skip>
+                </configuration>
                 <executions>
                     <execution>
                         <id>sign-artifacts</id>

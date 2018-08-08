@@ -14,7 +14,7 @@ node {
     }
 
     withMaven(mavenConfiguration) {
-        def mvnParams = "-Dbuild.number=${BUILD_NUMBER}"
+        def mvnParams = "-Dbuild.number=${BUILD_NUMBER} -Dbuild.development=false"
 
         stage('Build') {
             sh "mvn ${mvnParams} clean compile"
