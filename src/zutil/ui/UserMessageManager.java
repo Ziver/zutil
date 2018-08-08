@@ -108,7 +108,7 @@ public class UserMessageManager implements Iterable<UserMessageManager.UserMessa
         private int id;
         private MessageLevel level;
         private String title;
-        private String msg;
+        private String description;
         private int ttl;
 
 
@@ -122,7 +122,7 @@ public class UserMessageManager implements Iterable<UserMessageManager.UserMessa
             this.id = nextId++;
             this.level = level;
             this.title = title;
-            this.msg = description;
+            this.description = description;
             setTTL(ttl);
         }
 
@@ -151,8 +151,8 @@ public class UserMessageManager implements Iterable<UserMessageManager.UserMessa
             return title;
         }
 
-        public String getMessage() {
-            return msg;
+        public String getDescription() {
+            return description;
         }
 
         public void decreaseTTL() {
