@@ -147,6 +147,42 @@ public class Matrix {
         }
 
         /**
+         * Matrix Vector elemental multiplication, each element column in the matrix will be
+         * multiplied with the column  of the vector.
+         *
+         * @return a new matrix with the result
+         */
+        public static double[][] multiply(double[][] matrix, double[] vector){
+            vectorPreCheck(matrix, vector);
+            double[][] result = new double[matrix.length][matrix[0].length];
+
+            for (int y=0; y < matrix.length; ++y) {
+                for (int x=0; x<matrix[0].length; ++x) {
+                    result[y][x] = matrix[y][x] * vector[x];
+                }
+            }
+            return result;
+        }
+
+        /**
+         * Matrix Vector elemental division, each element column in the matrix will be
+         * divided with the column of the vector.
+         *
+         * @return a new matrix with the result
+         */
+        public static double[][] divide(double[][] matrix, double[] vector){
+            vectorPreCheck(matrix, vector);
+            double[][] result = new double[matrix.length][matrix[0].length];
+
+            for (int y=0; y < matrix.length; ++y) {
+                for (int x=0; x<matrix[0].length; ++x) {
+                    result[y][x] = matrix[y][x] / vector[x];
+                }
+            }
+            return result;
+        }
+
+        /**
          * Element exponential, each element in the vector will raised
          * to the power of the exp paramter
          *
@@ -181,7 +217,7 @@ public class Matrix {
             if (matrix1.length != matrix2.length || matrix1[0].length != matrix2[0].length)
                 throw new IllegalArgumentException("Matrices need to be of same dimension: " +
                         "matrix1 " + matrix1.length + "x" + matrix1[0].length + ", " +
-                        "matrix2 " + matrix2.length + "x" + matrix2[0].length + ", ");
+                        "matrix2 " + matrix2.length + "x" + matrix2[0].length);
         }
     }
 
@@ -374,7 +410,7 @@ public class Matrix {
         if (matrix1[0].length != matrix2.length)
             throw new IllegalArgumentException("Matrix1 columns need to match Matrix2 rows: " +
                     "matrix1 " + matrix1.length + "x" + matrix1[0].length + ", " +
-                    "matrix2 " + matrix2.length + "x" + matrix2[0].length + ", ");
+                    "matrix2 " + matrix2.length + "x" + matrix2[0].length);
     }
 
     /***********************************************************************

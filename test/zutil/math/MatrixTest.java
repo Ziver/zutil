@@ -125,12 +125,30 @@ public class MatrixTest {
     }
 
     @Test
-    public void vectorDivision(){
+    public void vectorMatrixDivision(){
         assertArrayEquals(
                 new double[]{4,1},
                 Matrix.divide(new double[][]{{2,4},{-4,10}}, new double[]{1,2}),
                 0.0
         );
+    }
+
+    @Test
+    public void vectorMatrixElementalMultiply(){
+        assertArrayEquals(
+                new double[][]{{1, 4, 9}, {1, 6, 12}, {1, 8, 15}, {1, 10, 18}},
+                Matrix.Elemental.multiply(
+                        new double[][]{{1, 2, 3}, {1, 3, 4}, {1, 4, 5}, {1, 5, 6}},
+                        new double[]{1, 2, 3}));
+    }
+
+    @Test
+    public void vectorMatrixElementalDivision(){
+        assertArrayEquals(
+                new double[][]{{2,2},{-4,5}},
+                Matrix.Elemental.divide(
+                        new double[][]{{2,4},{-4,10}},
+                        new double[]{1,2}));
     }
 
     @Test

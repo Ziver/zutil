@@ -1,13 +1,16 @@
 package zutil.ml;
 
+import zutil.log.LogUtil;
 import zutil.math.Matrix;
 
+import java.util.logging.Logger;
+
 /**
- * Implementation of a Linear Regression algorithm for "predicting"
+ * Implementation of a Linear Regression algorithm for predicting
  * numerical values depending on specific input
  */
 public class LinearRegression {
-
+    private static final Logger logger = LogUtil.getLogger();
 
     /**
      * Method for calculating a hypothesis value fr a specific input value x.
@@ -35,6 +38,34 @@ public class LinearRegression {
 
         return 1.0 / (2.0 * x.length) * Matrix.sum(
                 Matrix.Elemental.pow(normalized,2));
+    }
+
+    /**
+     * Calculates the gradiant of the current provided theta.
+     */
+    protected static double calculateGradiant(double[][] x, double[] y, double[] theta){
+        int m = y.length; // number of training examples
+        double[] hypothesis = calculateHypothesis(x, theta);
+        double[] normalized = Matrix.subtract(hypothesis, y);
+
+        return 1/m * Matrix.sum(
+                Matrix.Elemental.multiply(Matrix.transpose(x), normalized));
+
+    }
+
+    /**
+     * Will try to find the best theta value.
+     */
+    public static double[] gradientDescent(double[][] x, double[] y, double[] theta, double alpha){
+        double[] newTheta = theta.clone();
+        double gradient;
+
+        for (int i=0; (gradient = calculateGradiant(x, y, newTheta)) != 0; i++) {
+            logger.fine("Gradient Descent iteration " + i + ", gradiant: " + gradient);
+            newTheta = gradientDescentIteration(x, y, newTheta, alpha);
+        }
+
+        return newTheta;
     }
 
     /**
