@@ -40,17 +40,8 @@ public class LinearRegression {
                 Matrix.Elemental.pow(normalized,2));
     }
 
-    /**
-     * Calculates the gradiant of the current provided theta.
-     */
-    protected static double calculateGradiant(double[][] x, double[] y, double[] theta){
-        int m = y.length; // number of training examples
-        double[] hypothesis = calculateHypothesis(x, theta);
-        double[] normalized = Matrix.subtract(hypothesis, y);
-
-        return 1/m * Matrix.sum(
-                Matrix.Elemental.multiply(Matrix.transpose(x), normalized));
-
+    private static double calculateDiff(double[] vector1, double[] vector2){
+        return Math.abs(Matrix.sum(vector1) - Matrix.sum(vector2));
     }
 
     /**
@@ -58,12 +49,16 @@ public class LinearRegression {
      */
     public static double[] gradientDescent(double[][] x, double[] y, double[] theta, double alpha){
         double[] newTheta = theta.clone();
-        double gradient;
+        double[] prevTheta = new double[newTheta.length];
+        double thetaDiff = 0;
+        int i = 0;
 
-        for (int i=0; (gradient = calculateGradiant(x, y, newTheta)) != 0; i++) {
-            logger.fine("Gradient Descent iteration " + i + ", gradiant: " + gradient);
+        do {
+            logger.fine("Gradient Descent iteration " + i + ", diff to previous iteration: " + thetaDiff);
+            System.arraycopy(newTheta, 0, prevTheta, 0, newTheta.length);
             newTheta = gradientDescentIteration(x, y, newTheta, alpha);
-        }
+            ++i;
+        } while ((thetaDiff=calculateDiff(prevTheta, newTheta)) > 0.0001);
 
         return newTheta;
     }
@@ -84,7 +79,7 @@ public class LinearRegression {
         double[] normalized = Matrix.subtract(hypothesis, y);
 
         for (int j= 0; j < theta.length; j++) {
-            newTheta[j] = theta[j] - alpha * (1.0/m) * Matrix.sum(
+            newTheta[j] = theta[j] - (alpha/m) * Matrix.sum(
                     Matrix.Elemental.multiply(normalized, Matrix.getColumn(x, j)));
         }
 
