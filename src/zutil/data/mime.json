@@ -1,0 +1,242 @@
+{
+  "audio": {
+    "aac": {
+      "description": "AAC audio",
+      "extensions": ["aac"]
+    },
+    "midi": {
+      "description": "Musical Instrument Digital Interface (MIDI)",
+      "extensions": ["mid", "midi"]
+    },
+    "ogg": {
+      "description": "OGG audio",
+      "extensions": ["oga"]
+    },
+    "wav": {
+      "description": "Waveform Audio Format",
+      "extensions": ["wav"]
+    },
+    "webm": {
+      "description": "WEBM audio",
+      "extensions": ["weba"]
+    }
+  },
+  "application": {
+    "octet-stream": {
+      "description": "Binary data",
+      "extensions": ["arc", "bin"]
+    },
+    "vnd.amazon.ebook": {
+      "description": "Amazon Kindle eBook format",
+      "extensions": ["azw"]
+    },
+    "x-bzip": {
+      "description": "BZip archive",
+      "extensions": ["bz"]
+    },
+    "x-bzip2": {
+      "description": "BZip2 archive",
+      "extensions": ["bz2"]
+    },
+    "x-csh": {
+      "description": "C-Shell script",
+      "extensions": ["csh"]
+    },
+    "msword": {
+      "description": "Microsoft Word",
+      "extensions": ["doc"]
+    },
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document": {
+      "description": "Microsoft Word (OpenXML)",
+      "extensions": ["docx"]
+    },
+    "epub+zip": {
+      "description": "Electronic publication (EPUB)",
+      "extensions": ["epub"]
+    },
+    "java-archive": {
+      "description": "Java Archive (JAR)",
+      "extensions": ["jar"]
+    },
+    "json": {
+      "description": "JSON format",
+      "extensions": ["json"]
+    },
+    "vnd.apple.installer+xml": {
+      "description": "Apple Installer Package",
+      "extensions": ["mpkg"]
+    },
+    "vnd.oasis.opendocument.presentation": {
+      "description": "OpenDocument presentation document",
+      "extensions": ["odp"]
+    },
+    "vnd.oasis.opendocument.spreadsheet": {
+      "description": "OpenDocument spreadsheet document",
+      "extensions": ["ods"]
+    },
+    "vnd.oasis.opendocument.text": {
+      "description": "OpenDocument text document",
+      "extensions": ["odt"]
+    },
+    "ogg": {
+      "description": "OGG",
+      "extensions": ["ogx"]
+    },
+    "pdf": {
+      "description": "Adobe Portable Document Format (PDF)",
+      "extensions": ["pdf"]
+    },
+    "vnd.ms-powerpoint": {
+      "description": "Microsoft PowerPoint",
+      "extensions": ["ppt"]
+    },
+    "vnd.openxmlformats-officedocument.presentationml.presentation": {
+      "description": "Microsoft PowerPoint (OpenXML)",
+      "extensions": ["pptx"]
+    },
+    "x-rar-compressed": {
+      "description": "RAR archive",
+      "extensions": ["rar"]
+    },
+    "rtf": {
+      "description": "Rich Text Format (RTF)",
+      "extensions": ["rtf"]
+    },
+    "x-sh": {
+      "description": "Bourne shell script",
+      "extensions": ["sh"]
+    },
+    "x-shockwave-flash": {
+      "description": "Small web format (SWF) or Adobe Flash document",
+      "extensions": ["swf"]
+    },
+    "x-tar": {
+      "description": "Tape Archive (TAR)",
+      "extensions": ["tar"]
+    },
+    "typescript": {
+      "description": "Typescript file",
+      "extensions": ["ts"]
+    },
+    "xhtml+xml": {
+      "description": "XHTML",
+      "extensions": ["xhtml"]
+    },
+    "vnd.ms-excel": {
+      "description": "Microsoft Excel",
+      "extensions": ["xls"]
+    },
+    "vnd.openxmlformats-officedocument.spreadsheetml.sheet": {
+      "description": "Microsoft Excel (OpenXML)",
+      "extensions": ["xlsx"]
+    },
+    "xml": {
+      "description": "XML",
+      "extensions": ["xml"]
+    },
+    "zip": {
+      "description": "ZIP archive",
+      "extensions": ["zip"]
+    },
+    "x-7z-compressed": {
+      "description": "7-zip archive",
+      "extensions": ["7z"]
+    }
+  },
+  "font": {
+    "otf": {
+      "description": "OpenType font",
+      "extensions": ["otf"]
+    },
+    "ttf": {
+      "description": "TrueType Font",
+      "extensions": ["ttf"]
+    },
+    "woff": {
+      "description": "Web Open Font Format (WOFF)",
+      "extensions": ["woff"]
+    },
+    "woff2": {
+      "description": "Web Open Font Format (WOFF)",
+      "extensions": ["woff2"]
+    }
+  },
+  "video": {
+    "x-msvideo": {
+      "description": "AVI: Audio Video Interleave",
+      "extensions": ["avi"]
+    },
+    "mpeg": {
+      "description": "MPEG Video",
+      "extensions": ["mpeg"]
+    },
+    "ogg": {
+      "description": "OGG video",
+      "extensions": ["ogv"]
+    },
+    "webm": {
+      "description": "WEBM video",
+      "extensions": ["webm"]
+    }
+  },
+  "image": {
+    "bmp": {
+      "description": "Windows OS/2 Bitmap Graphics",
+      "extensions": ["bmp"]
+    },
+    "gif": {
+      "description": "Graphics Interchange Format (GIF)",
+      "extensions": ["gif"]
+    },
+    "x-icon": {
+      "description": "Icon format",
+      "extensions": ["ico"]
+    },
+    "jpeg": {
+      "description": "JPEG image",
+      "extensions": ["jpeg", "jpg"]
+    },
+    "png": {
+      "description": "Portable Network Graphics",
+      "extensions": ["png"]
+    },
+    "svg+xml": {
+      "description": "Scalable Vector Graphics (SVG)",
+      "extensions": ["svg"]
+    },
+    "tiff": {
+      "description": "Tagged Image File Format (TIFF)",
+      "extensions": ["tif", "tiff"]
+    },
+    "webp": {
+      "description": "WEBP image",
+      "extensions": ["webp"]
+    }
+  },
+  "text":{
+    "css": {
+      "description": "Cascading Style Sheets (CSS)",
+      "extensions": ["css"]
+    },
+    "csv": {
+      "description": "Comma-separated values (CSV)",
+      "extensions": ["csv"]
+    },
+    "html": {
+      "description": "HyperText Markup Language (HTML)",
+      "extensions": ["htm", "html"]
+    },
+    "calendar": {
+      "description": "iCalendar format",
+      "extensions": ["ics"]
+    },
+    "javascript": {
+      "description": "JavaScript",
+      "extensions": ["js"]
+    },
+    "plain": {
+      "description": "Text, (generally ASCII or ISO 8859-n)",
+      "extensions": ["txt"]
+    }
+  }
+}
