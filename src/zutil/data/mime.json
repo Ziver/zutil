@@ -162,9 +162,17 @@
     }
   },
   "video": {
+    "x-matroska": {
+      "description": "Matroska Multimedia Container",
+      "extensions": ["mkv"]
+    },
     "x-msvideo": {
       "description": "AVI: Audio Video Interleave",
       "extensions": ["avi"]
+    },
+    "mp4": {
+      "description": "MPEG-4 Video",
+      "extensions": ["mp4"]
     },
     "mpeg": {
       "description": "MPEG Video",

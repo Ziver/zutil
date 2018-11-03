@@ -28,10 +28,7 @@ import zutil.io.file.FileUtil;
 import zutil.parser.DataNode;
 import zutil.parser.json.JSONParser;
 
-import java.io.BufferedReader;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 import java.lang.reflect.Array;
 import java.util.*;
 
@@ -40,7 +37,12 @@ import java.util.*;
  */
 public class MimeTypeUtil {
 
-    // Define mime types
+    // Static variables
+
+    private static final ArrayList<MimeType> mimes = new ArrayList<MimeType>();
+    private static final HashMap<String, MimeType> mimesByExtenion = new HashMap<>();
+
+    // Initialize mime types
     static {
         try {
             readMimeFile("zutil/data/mime.json");
@@ -49,14 +51,8 @@ public class MimeTypeUtil {
         }
     }
 
-    // Static variables
-
-    private static final ArrayList<MimeType> mimes = new ArrayList<MimeType>();
-
-
     private static void readMimeFile(String path) throws IOException {
-        BufferedReader in = new BufferedReader(new FileReader(FileUtil.find(path)));
-        DataNode json = new JSONParser(in).read();
+        DataNode json = JSONParser.read(FileUtil.getContent(path));
 
         for (Iterator<String> it = json.keyIterator(); it.hasNext(); ) {
             String primaryType = it.next();
@@ -76,8 +72,16 @@ public class MimeTypeUtil {
 
     private static void addMimeType(MimeType mime){
         mimes.add(mime);
+
+        for (String extension : mime.getExtensions()) {
+            mimesByExtenion.put(extension, mime);
+        }
     }
 
+
+    public static MimeType getMimeByExtension(String extension) {
+        return mimesByExtenion.get(extension);
+    }
 
 
     public static class MimeType{
@@ -99,6 +103,14 @@ public class MimeTypeUtil {
 
         public String getSubType() {
             return subType;
+        }
+
+        public String getDescription() {
+            return description;
+        }
+
+        public String[] getExtensions() {
+            return extensions;
         }
 
         public String toString() {
