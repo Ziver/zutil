@@ -26,10 +26,9 @@ package zutil.io.file;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.net.URISyntaxException;
 
 
-public class FileChangedTest implements FileChangeListener{
+public class FileChangedTest implements FileWatcher.FileChangeListener {
     public static void main(String[] args) throws FileNotFoundException{
         FileWatcher watcher = new FileWatcher(FileUtil.find("test.txt"));
         watcher.setListener(new FileChangedTest());

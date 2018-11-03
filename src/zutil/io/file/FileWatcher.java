@@ -25,20 +25,24 @@
 package zutil.io.file;
 
 import zutil.io.MultiPrintStream;
+import zutil.log.LogUtil;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.logging.Logger;
 
 /**
- * This class calls a given listener
- * when a file is changed
+ * This class checks a file periodically for changes to the
+ * last modified date and calls the registered listeners.
  *
  * @author Ziver
  *
  */
 public class FileWatcher extends TimerTask{
+    private static Logger logger = LogUtil.getLogger();
+
     private FileChangeListener listener;
     private long lastChanged;
     private File file;
@@ -82,8 +86,23 @@ public class FileWatcher extends TimerTask{
                 listener.fileChangedEvent(file);
             }
             else{
-                MultiPrintStream.out.println("File Changed: "+file);
+                logger.fine("File was modified ("+file+") but no listeners was registered.");
             }
         }
+    }
+
+    /**
+     * Interface for the FileWatcher class
+     *
+     * @author Ziver
+     */
+    public interface FileChangeListener{
+
+        /**
+         * This method is called when there is a change in a file
+         *
+         * @param file The file that has changed
+         */
+        void fileChangedEvent(File file);
     }
 }
