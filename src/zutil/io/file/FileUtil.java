@@ -68,6 +68,8 @@ public class FileUtil {
     /**
      * Returns the File object for the given file.
      * Can not point to files in JAR files.
+     * This method might not be able to find files inside
+     * recursive archives, in this case {@link #getContent(String)}.
      *
      * @param 		path 		is the path to the file (no / if not absolute path)
      * @return 					A File object for the file
@@ -150,20 +152,36 @@ public class FileUtil {
 
     /**
      * Reads and returns the content of a file as a String.
-     *
-     * @return the file content
+     * This method can read files inside compressed archives also.
+     */
+    public static String getContent(String file) throws IOException {
+        return new String(getByteContent(file));
+    }
+    /**
+     * Reads and returns the content of a file as a byte array.
+     * This method can read files inside compressed archives also.
+     */
+    public static byte[] getByteContent(String file) throws IOException {
+        return IOUtil.readContent(
+                Thread.currentThread().getContextClassLoader().getResourceAsStream(file),
+                true);
+    }
+
+    /**
+     * Reads and returns the content of a file as a String.
      */
     public static String getContent(File file) throws IOException{
         return new String(getByteContent(file));
     }
+    /**
+     * Reads and returns the content of a file as a byte array.
+     */
     public static byte[] getByteContent(File file) throws IOException {
         return IOUtil.readContent(new FileInputStream(file), true);
     }
 
     /**
-     * Connects to a URL and returns the content of it as a String.
-     *
-     * @return the URL content
+     * Connects to a URL and returns the response of it as a String.
      */
     public static String getContent(URL url) throws IOException{
         return new String(IOUtil.readContent(url.openStream(), true));
