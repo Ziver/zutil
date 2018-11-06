@@ -15,11 +15,11 @@ jQuery(document).ready(function(){
 /* Initiates a new upload */
 function initUpload(){
 	var name = "uploadFrame_"+upload_index;
-	
+
 	// Add iframe
 	jQuery("body").append("<iframe id='"+name+"' name='"+name+"' height='0' " +
 			"width='0' frameborder='0' scrolling='yes' src='about:blank'></iframe>");
-	
+
 	// Init form settings
 	var form = jQuery("#AjaxFileUpload");
 	//form.attr("encoding", "multipart/form-data");
@@ -29,19 +29,19 @@ function initUpload(){
 	form.attr("action", "{SERVLET_URL}");
 	form.bind('submit', startUpload );
 	//form.attr("onSubmit", "startUpload()");
-	
+
 	// reset the form
 	jQuery("#AjaxFileUpload").each(function(){
         this.reset();
 	});
-	
+
 	upload_index++;
 }
 
 function startUpload(){
 	if(!upload_update)
-		setTimeout("updateUploadStatus()", 500);	
-	
+		setTimeout("updateUploadStatus()", 500);
+
 	// Init new upload
 	setTimeout("initUpload()", 500);
 }
@@ -59,7 +59,7 @@ function updateUploadStatus(){
 				upload_update = false;
 			}
 			else setTimeout("updateUploadStatus()", 1000);
-			
+
 			// Request upload info
 			jQuery.each(data, function(index,item){
 				// add new list item if needed
@@ -75,14 +75,14 @@ function updateUploadStatus(){
 					jQuery("#UploadQueue #"+item.id+" .filename").html( item.filename );
 				if(jQuery("#UploadQueue #"+item.id+" .progress").size() > 0)
 					jQuery("#UploadQueue #"+item.id+" .progress").animate({width: item.percent+"%"}, 'slow');
-				
+
 				if(jQuery("#UploadQueue #"+item.id+" .total").size() > 0)
 					jQuery("#UploadQueue #"+item.id+" .total").html( item.total );
 				if(jQuery("#UploadQueue #"+item.id+" .uploaded").size() > 0)
 					jQuery("#UploadQueue #"+item.id+" .uploaded").html( item.uploaded );
 				if(jQuery("#UploadQueue #"+item.id+" .speed").size() > 0)
 					jQuery("#UploadQueue #"+item.id+" .speed").html( item.speed );
-				
+
 				// remove li when done
 				if( item.status == "Done" ){
 					jQuery("#UploadQueue #"+item.id).delay(5000).fadeOut("slow", function(){
