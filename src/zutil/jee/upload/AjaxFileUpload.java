@@ -29,6 +29,7 @@ import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.apache.commons.fileupload.util.Streams;
 import zutil.StringUtil;
+import zutil.io.MultiPrintStream;
 import zutil.io.file.FileUtil;
 import zutil.jee.upload.FileUploadListener.Status;
 import zutil.log.LogUtil;
@@ -78,8 +79,8 @@ import java.util.logging.Logger;
  *
  *
  * </pre>
- * @author Ziver
  *
+ * @author Ziver
  */
 public abstract class AjaxFileUpload extends HttpServlet {
     private static final Logger logger = LogUtil.getLogger();
@@ -97,29 +98,26 @@ public abstract class AjaxFileUpload extends HttpServlet {
         try {
             // Read the javascript file to memory
             String path = JAVASCRIPT_FILE;
-            if(config.getInitParameter("JAVASCRIPT_FILE") != null)
+            if (config.getInitParameter("JAVASCRIPT_FILE") != null)
                 path = config.getInitParameter("JAVASCRIPT_FILE");
-            JAVASCRIPT = FileUtil.getContent( FileUtil.findURL(path) );
+            JAVASCRIPT = FileUtil.getContent(FileUtil.findURL(path));
 
             // Read temp dir
-            if(config.getInitParameter("TEMP_PATH") != null){
-                if( config.getInitParameter("TEMP_PATH").equalsIgnoreCase("SYSTEM") )
-                    TEMPFILE_PATH = new File( System.getProperty("java.io.tmpdir") );
-                else if( config.getInitParameter("TEMP_PATH").equalsIgnoreCase("SERVLET") )
+            if (config.getInitParameter("TEMP_PATH") != null) {
+                if (config.getInitParameter("TEMP_PATH").equalsIgnoreCase("SYSTEM"))
+                    TEMPFILE_PATH = new File(System.getProperty("java.io.tmpdir"));
+                else if (config.getInitParameter("TEMP_PATH").equalsIgnoreCase("SERVLET"))
                     TEMPFILE_PATH = (File) config.getServletContext().getAttribute("javax.servlet.context.tempdir");
                 else
-                    TEMPFILE_PATH = new File( config.getInitParameter("TEMP_PATH") );
+                    TEMPFILE_PATH = new File(config.getInitParameter("TEMP_PATH"));
             }
 
             // Read allowed file types
-            if(config.getInitParameter("ALLOWED_EXTENSIONS") != null){
-                String[] tmp = config.getInitParameter("ALLOWED_EXTENSIONS").split(",");
-                StringBuilder ext_log = new StringBuilder("Allowed extensions: ");
-                for( String ext : tmp ){
-                    ALLOWED_EXTENSIONS.add(ext.trim().toLowerCase());
-                    ext_log.append(ext).append(", ");
-                }
-                logger.info( ext_log.toString() );
+            if (config.getInitParameter("ALLOWED_EXTENSIONS") != null) {
+                ALLOWED_EXTENSIONS.addAll(Arrays.asList(
+                        config.getInitParameter("ALLOWED_EXTENSIONS").toLowerCase().split(",")));
+
+                logger.info("Allowed extensions: " + MultiPrintStream.dumpToString(ALLOWED_EXTENSIONS));
             }
 
         } catch (IOException e) {
@@ -129,9 +127,9 @@ public abstract class AjaxFileUpload extends HttpServlet {
 
     @SuppressWarnings("unchecked")
     protected void doGet(HttpServletRequest request,
-            HttpServletResponse response) throws IOException {
+                         HttpServletResponse response) throws IOException {
         PrintWriter out = response.getWriter();
-        if(request.getParameter("js") != null){
+        if (request.getParameter("js") != null) {
             response.setContentType("application/x-javascript");
 
             String tmp = JAVASCRIPT.replaceAll("\\{SERVLET_URL\\}", request.getRequestURI());
@@ -144,48 +142,47 @@ public abstract class AjaxFileUpload extends HttpServlet {
         response.setContentType("application/json");
         HttpSession session = request.getSession();
         LinkedList<FileUploadListener> list =
-            (LinkedList<FileUploadListener>)session.getAttribute(SESSION_FILEUPLOAD_LISTENER);
+                (LinkedList<FileUploadListener>) session.getAttribute(SESSION_FILEUPLOAD_LISTENER);
         if (list == null) {
             out.println("[]");
             return;
         }
 
         // Generate JSON
-        DataNode root = new DataNode( DataType.List );
+        DataNode root = new DataNode(DataType.List);
         Iterator<FileUploadListener> it = list.iterator();
-        while( it.hasNext() ) {
+        while (it.hasNext()) {
             FileUploadListener listener = it.next();
-            if( listener.getStatus() == Status.Done || listener.getStatus() == Status.Error ){
-                if( listener.getTime() + 5000 < System.currentTimeMillis() ){
+            if (listener.getStatus() == Status.Done || listener.getStatus() == Status.Error) {
+                if (listener.getTime() + 5000 < System.currentTimeMillis()) {
                     it.remove();
                 }
             }
 
-            root.add( listener.getJSON() );
+            root.add(listener.getJSON());
         }
 
         // Write to the user
-        JSONWriter json_out = new JSONWriter( out );
+        JSONWriter json_out = new JSONWriter(out);
         json_out.write(root);
     }
 
 
-
     @SuppressWarnings("unchecked")
     protected void doPost(HttpServletRequest request,
-            HttpServletResponse response) throws ServletException, IOException {
+                          HttpServletResponse response) throws ServletException, IOException {
 
         FileUploadListener listener = new FileUploadListener();
         try {
             // Initiate list and HashMap that will contain the data
-            HashMap<String,String> fields = new HashMap<>();
+            HashMap<String, String> fields = new HashMap<>();
             ArrayList<FileItem> files = new ArrayList<>();
 
             // Add the listener to the session
             HttpSession session = request.getSession();
             LinkedList<FileUploadListener> list =
-                (LinkedList<FileUploadListener>)session.getAttribute(SESSION_FILEUPLOAD_LISTENER);
-            if(list == null){
+                    (LinkedList<FileUploadListener>) session.getAttribute(SESSION_FILEUPLOAD_LISTENER);
+            if (list == null) {
                 list = new LinkedList<>();
                 session.setAttribute(SESSION_FILEUPLOAD_LISTENER, list);
             }
@@ -193,56 +190,62 @@ public abstract class AjaxFileUpload extends HttpServlet {
 
             // Create a factory for disk-based file items
             DiskFileItemFactory factory = new DiskFileItemFactory();
-            if(TEMPFILE_PATH != null)
-                factory.setRepository( TEMPFILE_PATH );
+            if (TEMPFILE_PATH != null)
+                factory.setRepository(TEMPFILE_PATH);
             // Create a new file upload handler
             ServletFileUpload upload = new ServletFileUpload(factory);
-            upload.setProgressListener( listener );
+            upload.setProgressListener(listener);
             // Set overall request size constraint
             //upload.setSizeMax(yourMaxRequestSize);
 
             // Parse the request
-            FileItemIterator it = upload.getItemIterator( request );
-            while( it.hasNext() ) {
+            FileItemIterator it = upload.getItemIterator(request);
+            while (it.hasNext()) {
                 FileItemStream item = it.next();
+
                 // Is the file type allowed?
-                if( !item.isFormField() && !ALLOWED_EXTENSIONS.contains( FileUtil.getFileExtension(item.getName()).toLowerCase() )){
-                    String msg = "Filetype '"+FileUtil.getFileExtension(item.getName())+"' is not allowed!";
-                    logger.warning( msg );
+                String ext = FileUtil.getFileExtension(item.getName()).toLowerCase();
+                if (!item.isFormField() &&
+                        !ALLOWED_EXTENSIONS.contains(ext)) {
+                    String msg = "File type '" + ext + "' is not allowed!";
+                    logger.warning(msg);
                     listener.setStatus(Status.Error);
-                    listener.setFileName( item.getName() );
-                    listener.setMessage( msg );
+                    listener.setFileName(item.getName());
+                    listener.setMessage(msg);
                     return;
                 }
-                listener.setFileName( item.getName() );
+
+                listener.setFileName(item.getName());
                 FileItem fileItem = factory.createItem(item.getFieldName(),
                         item.getContentType(), item.isFormField(), item.getName());
+
                 // Read the file data
-                Streams.copy(item.openStream(), fileItem.getOutputStream(),	true);
+                Streams.copy(item.openStream(), fileItem.getOutputStream(), true);
                 if (fileItem instanceof FileItemHeadersSupport) {
                     final FileItemHeaders fih = item.getHeaders();
                     ((FileItemHeadersSupport) fileItem).setHeaders(fih);
                 }
 
                 //Handle the item
-                if(fileItem.isFormField()){
-                    fields.put( fileItem.getFieldName(), fileItem.getString());
-                }
-                else{
-                    files.add( fileItem );
-                    logger.info("Recieved file: "+fileItem.getName()+" ("+StringUtil.formatByteSizeToString(fileItem.getSize())+")");
+                if (fileItem.isFormField()) {
+                    fields.put(fileItem.getFieldName(), fileItem.getString());
+                } else {
+                    files.add(fileItem);
+                    logger.info("Received file: " + fileItem.getName() + " (" + StringUtil.formatByteSizeToString(fileItem.getSize()) + ")");
                 }
             }
+
             // Process the upload
-            listener.setStatus( Status.Processing );
-            doUpload( request, response, fields, files );
+            listener.setStatus(Status.Processing);
+            doUpload(request, response, fields, files);
+
             // Done
-            listener.setStatus( Status.Done );
+            listener.setStatus(Status.Done);
         } catch (Exception e) {
             logger.log(Level.SEVERE, null, e);
             listener.setStatus(Status.Error);
             listener.setFileName("");
-            listener.setMessage( e.getMessage() );
+            listener.setMessage(e.getMessage());
         }
     }
 
@@ -261,5 +264,5 @@ public abstract class AjaxFileUpload extends HttpServlet {
      * Handle the upload
      */
     public abstract void doUpload(HttpServletRequest request, HttpServletResponse response,
-                                        Map<String,String> fields, List<FileItem> files) throws ServletException;
+                                  Map<String, String> fields, List<FileItem> files) throws ServletException;
 }
