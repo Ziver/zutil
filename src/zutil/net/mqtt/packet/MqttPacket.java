@@ -48,20 +48,6 @@ public class MqttPacket {
     }
 
     public static void write(BinaryStructOutputStream out, MqttPacketHeader header) throws IOException{
-        if      (header instanceof MqttPacketConnect)        header.type = PACKET_TYPE_CONN;
-        else if (header instanceof MqttPacketConnectAck)     header.type = PACKET_TYPE_CONNACK;
-        else if (header instanceof MqttPacketPublishAck)     header.type = PACKET_TYPE_PUBLISH;
-        else if (header instanceof MqttPacketPublishRec)     header.type = PACKET_TYPE_PUBACK;
-        else if (header instanceof MqttPacketPublishComp)    header.type = PACKET_TYPE_PUBREL;
-        else if (header instanceof MqttPacketSubscribe)      header.type = PACKET_TYPE_PUBCOMP;
-        else if (header instanceof MqttPacketSubscribeAck)   header.type = PACKET_TYPE_SUBSCRIBE;
-        else if (header instanceof MqttPacketUnsubscribe)    header.type = PACKET_TYPE_UNSUBSCRIBE;
-        else if (header instanceof MqttPacketUnsubscribeAck) header.type = PACKET_TYPE_UNSUBACK;
-        else if (header instanceof MqttPacketPingReq)        header.type = PACKET_TYPE_PINGREQ;
-        else if (header instanceof MqttPacketPingResp)       header.type = PACKET_TYPE_PINGRESP;
-        else if (header instanceof MqttPacketDisconnect)     header.type = PACKET_TYPE_DISCONNECT;
-        else
-            throw new IOException("Unknown header class: "+ header.getClass());
 
         out.write(header);
         // TODO: payload

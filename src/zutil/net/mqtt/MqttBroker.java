@@ -17,7 +17,7 @@ import java.util.logging.Logger;
  *
  * @see <a href="http://docs.oasis-open.org/mqtt/mqtt/v3.1.1/mqtt-v3.1.1.html">MQTT v3.1.1 Spec</a>
  */
-public class MqttBroker extends ThreadedTCPNetworkServer{
+public class MqttBroker extends ThreadedTCPNetworkServer {
     private static final Logger logger = LogUtil.getLogger();
 
     public static final int MQTT_PORT = 1883;
@@ -25,24 +25,28 @@ public class MqttBroker extends ThreadedTCPNetworkServer{
     public static final int MQTT_PROTOCOL_VERSION = 0x04; // MQTT 3.1.1
 
 
-    public MqttBroker(){
+    public MqttBroker() {
         super(MQTT_PORT);
     }
 
 
     @Override
     protected ThreadedTCPNetworkServerThread getThreadInstance(Socket s) throws IOException {
-        return new MQTTConnectionThread(s);
+        return new MqttConnectionThread(s);
     }
 
 
-    private static class MQTTConnectionThread implements ThreadedTCPNetworkServerThread {
+    protected static class MqttConnectionThread implements ThreadedTCPNetworkServerThread {
         private Socket socket;
         private BinaryStructInputStream in;
         private BinaryStructOutputStream out;
 
+        private boolean shutdown = false;
 
-        private MQTTConnectionThread(Socket s) throws IOException {
+        protected MqttConnectionThread() {
+        } // Test constructor
+
+        public MqttConnectionThread(Socket s) throws IOException {
             socket = s;
             in = new BinaryStructInputStream(socket.getInputStream());
             out = new BinaryStructOutputStream(socket.getOutputStream());
@@ -53,53 +57,42 @@ public class MqttBroker extends ThreadedTCPNetworkServer{
         public void run() {
             try {
                 // Setup connection
-                MqttPacketHeader packet = MqttPacket.read(in);
+                MqttPacketHeader connectPacket = MqttPacket.read(in);
                 // Unexpected packet?
-                if ( ! (packet instanceof MqttPacketConnect))
-                    throw new IOException("Expected MqttPacketConnect but received "+packet.getClass());
-                MqttPacketConnect conn = (MqttPacketConnect) packet;
+                if (!(connectPacket instanceof MqttPacketConnect))
+                    throw new IOException("Expected MqttPacketConnect but received " + connectPacket.getClass());
+                MqttPacketConnect conn = (MqttPacketConnect) connectPacket;
 
                 // Reply
-                MqttPacketConnectAck connack = new MqttPacketConnectAck();
-                connack.returnCode = MqttPacketConnectAck.RETCODE_OK;
+                MqttPacketConnectAck connectAck = new MqttPacketConnectAck();
+
                 // Incorrect protocol version?
-                if (conn.protocolLevel != MQTT_PROTOCOL_VERSION){
-                    connack.returnCode = MqttPacketConnectAck.RETCODE_PROT_VER_ERROR;
-                    MqttPacket.write(out, connack);
+                if (conn.protocolLevel != MQTT_PROTOCOL_VERSION) {
+                    connectAck.returnCode = MqttPacketConnectAck.RETCODE_PROT_VER_ERROR;
+                    MqttPacket.write(out, connectAck);
                     return;
+                } else {
+                    connectAck.returnCode = MqttPacketConnectAck.RETCODE_OK;
                 }
+
                 // TODO: authenticate
                 // TODO: clean session
-                MqttPacket.write(out, connack);
+                MqttPacket.write(out, connectAck);
 
                 // Connected
-                while (true) {
-                    packet = MqttPacket.read(in);
+
+                while (!shutdown) {
+                    MqttPacketHeader packet = MqttPacket.read(in);
                     if (packet == null)
                         return;
 
-                    switch (packet.type){
-                        // Publish
-                        case MqttPacketHeader.PACKET_TYPE_PUBLISH:
-                            break;
-                        // Subscribe
-                        case MqttPacketHeader.PACKET_TYPE_SUBSCRIBE:
-                            break;
-                        // Unsubscribe
-                        case MqttPacketHeader.PACKET_TYPE_UNSUBSCRIBE:
-                            break;
-                        // Ping
-                        case MqttPacketHeader.PACKET_TYPE_PINGREQ:
-                            MqttPacket.write(out, new MqttPacketPingResp());
-                            break;
-                        // Close connection
-                        default:
-                            logger.warning("Received unknown packet type: "+packet.type);
-                        case MqttPacketHeader.PACKET_TYPE_DISCONNECT:
-                            return;
-                    }
+                    MqttPacketHeader packetRsp = handleMqttPacket(packet);
+
+                    if (packetRsp != null)
+                        MqttPacket.write(out, packetRsp);
                 }
 
+                socket.close();
             } catch (IOException e) {
                 logger.log(Level.SEVERE, null, e);
             } finally {
@@ -109,6 +102,34 @@ public class MqttBroker extends ThreadedTCPNetworkServer{
                     logger.log(Level.SEVERE, null, e);
                 }
             }
+        }
+
+        public MqttPacketHeader handleMqttPacket(MqttPacketHeader packet) throws IOException {
+            switch (packet.type) {
+                // TODO: Publish
+                case MqttPacketHeader.PACKET_TYPE_PUBLISH:
+                    break;
+                // TODO: Subscribe
+                case MqttPacketHeader.PACKET_TYPE_SUBSCRIBE:
+                    break;
+                // TODO: Unsubscribe
+                case MqttPacketHeader.PACKET_TYPE_UNSUBSCRIBE:
+                    break;
+                // Ping
+                case MqttPacketHeader.PACKET_TYPE_PINGREQ:
+                    return new MqttPacketPingResp();
+                // Close connection
+                default:
+                    logger.warning("Received unknown packet type: " + packet.type);
+                case MqttPacketHeader.PACKET_TYPE_DISCONNECT:
+                    shutdown = true;
+            }
+
+            return null;
+        }
+
+        public boolean isShutdown() {
+            return shutdown;
         }
     }
 }

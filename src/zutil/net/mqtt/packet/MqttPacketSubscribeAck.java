@@ -12,6 +12,12 @@ import java.util.List;
  */
 public class MqttPacketSubscribeAck extends MqttPacketHeader{
 
+    // Header
+
+    {
+        type = MqttPacketHeader.PACKET_TYPE_SUBACK;
+    }
+
     // Variable Header
 
     @BinaryField(index = 2000, length = 16)

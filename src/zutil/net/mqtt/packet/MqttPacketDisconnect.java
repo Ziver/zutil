@@ -9,6 +9,12 @@ package zutil.net.mqtt.packet;
  */
 public class MqttPacketDisconnect extends MqttPacketHeader{
 
+    // Header
+
+    {
+        type = MqttPacketHeader.PACKET_TYPE_DISCONNECT;
+    }
+
     // No variable header
 
     // No payload

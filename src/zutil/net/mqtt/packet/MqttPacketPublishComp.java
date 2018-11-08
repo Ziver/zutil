@@ -10,6 +10,12 @@ package zutil.net.mqtt.packet;
  */
 public class MqttPacketPublishComp extends MqttPacketHeader{
 
+    // Header
+
+    {
+        type = MqttPacketHeader.PACKET_TYPE_PUBCOMP;
+    }
+
     // Variable Header
 
     @BinaryField(index = 2000, length = 16)

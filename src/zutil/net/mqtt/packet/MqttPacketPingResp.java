@@ -9,6 +9,12 @@ package zutil.net.mqtt.packet;
  */
 public class MqttPacketPingResp extends MqttPacketHeader{
 
+    // Header
+
+    {
+        type = MqttPacketHeader.PACKET_TYPE_PINGRESP;
+    }
+
     // No variable header
 
     // No payload

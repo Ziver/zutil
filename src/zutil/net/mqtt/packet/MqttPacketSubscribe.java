@@ -11,6 +11,12 @@ import java.util.List;
  */
 public class MqttPacketSubscribe extends MqttPacketHeader{
 
+    // Header
+
+    {
+        type = MqttPacketHeader.PACKET_TYPE_SUBSCRIBE;
+    }
+
     // Variable Header
 
     @BinaryField(index = 2000, length = 16)
