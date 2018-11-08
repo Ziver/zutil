@@ -43,8 +43,7 @@ public class MqttBroker extends ThreadedTCPNetworkServer {
 
         private boolean shutdown = false;
 
-        protected MqttConnectionThread() {
-        } // Test constructor
+        protected MqttConnectionThread() {} // Test constructor
 
         public MqttConnectionThread(Socket s) throws IOException {
             socket = s;
@@ -69,7 +68,7 @@ public class MqttBroker extends ThreadedTCPNetworkServer {
                 // Incorrect protocol version?
                 if (conn.protocolLevel != MQTT_PROTOCOL_VERSION) {
                     connectAck.returnCode = MqttPacketConnectAck.RETCODE_PROT_VER_ERROR;
-                    MqttPacket.write(out, connectAck);
+                    sendPacket(connectAck);
                     return;
                 } else {
                     connectAck.returnCode = MqttPacketConnectAck.RETCODE_OK;
@@ -77,7 +76,7 @@ public class MqttBroker extends ThreadedTCPNetworkServer {
 
                 // TODO: authenticate
                 // TODO: clean session
-                MqttPacket.write(out, connectAck);
+                sendPacket(connectAck);
 
                 // Connected
 
@@ -86,10 +85,10 @@ public class MqttBroker extends ThreadedTCPNetworkServer {
                     if (packet == null)
                         return;
 
-                    MqttPacketHeader packetRsp = handleMqttPacket(packet);
+                    MqttPacketHeader packetRsp = handlePacket(packet);
 
                     if (packetRsp != null)
-                        MqttPacket.write(out, packetRsp);
+                        sendPacket(packetRsp);
                 }
 
                 socket.close();
@@ -104,7 +103,7 @@ public class MqttBroker extends ThreadedTCPNetworkServer {
             }
         }
 
-        public MqttPacketHeader handleMqttPacket(MqttPacketHeader packet) throws IOException {
+        public MqttPacketHeader handlePacket(MqttPacketHeader packet) throws IOException {
             switch (packet.type) {
                 // TODO: Publish
                 case MqttPacketHeader.PACKET_TYPE_PUBLISH:
@@ -126,6 +125,10 @@ public class MqttBroker extends ThreadedTCPNetworkServer {
             }
 
             return null;
+        }
+
+        public void sendPacket(MqttPacketHeader packet) throws IOException {
+            MqttPacket.write(out, packet);
         }
 
         public boolean isShutdown() {
