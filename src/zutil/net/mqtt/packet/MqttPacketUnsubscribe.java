@@ -2,6 +2,7 @@ package zutil.net.mqtt.packet;
 
 import zutil.parser.binary.BinaryStruct;
 
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -14,7 +15,7 @@ public class MqttPacketUnsubscribe extends MqttPacketHeader{
     // Header
 
     {
-        type = MqttPacketHeader.PACKET_TYPE_UNSUBACK;
+        type = MqttPacketHeader.PACKET_TYPE_UNSUBSCRIBE;
     }
 
     // Variable Header
@@ -24,7 +25,7 @@ public class MqttPacketUnsubscribe extends MqttPacketHeader{
 
     // Payload
 
-    public List<MqttUnsubscribePayload> payload;
+    public List<MqttUnsubscribePayload> payload = new LinkedList<>();
 
 
 

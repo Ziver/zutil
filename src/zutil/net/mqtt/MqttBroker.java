@@ -2,6 +2,9 @@ package zutil.net.mqtt;
 
 import zutil.log.LogUtil;
 import zutil.net.mqtt.packet.*;
+import zutil.net.mqtt.packet.MqttPacketSubscribe.MqttSubscribePayload;
+import zutil.net.mqtt.packet.MqttPacketSubscribeAck.MqttSubscribeAckPayload;
+import zutil.net.mqtt.packet.MqttPacketUnsubscribe.MqttUnsubscribePayload;
 import zutil.net.threaded.ThreadedTCPNetworkServer;
 import zutil.net.threaded.ThreadedTCPNetworkServerThread;
 import zutil.parser.binary.BinaryStructInputStream;
@@ -9,6 +12,7 @@ import zutil.parser.binary.BinaryStructOutputStream;
 
 import java.io.IOException;
 import java.net.Socket;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -24,11 +28,12 @@ public class MqttBroker extends ThreadedTCPNetworkServer {
     public static final int MQTT_PORT_TLS = 8883;
     public static final int MQTT_PROTOCOL_VERSION = 0x04; // MQTT 3.1.1
 
+    private Map<String, List<MqttSubscriptionListener>> subscriptions;
 
     public MqttBroker() {
         super(MQTT_PORT);
+        subscriptions = new HashMap<>();
     }
-
 
     @Override
     protected ThreadedTCPNetworkServerThread getThreadInstance(Socket s) throws IOException {
@@ -36,12 +41,56 @@ public class MqttBroker extends ThreadedTCPNetworkServer {
     }
 
 
-    protected static class MqttConnectionThread implements ThreadedTCPNetworkServerThread {
+    public synchronized void subscribe(String topic, MqttSubscriptionListener listener) {
+        if (topic == null || topic.isEmpty() || listener == null)
+            return;
+
+        if (!subscriptions.containsKey(topic)) {
+            logger.fine("Creating new topic: " + topic);
+            subscriptions.put(topic, new ArrayList<>());
+        }
+        List topicSubscriptions = subscriptions.get(topic);
+
+        if (topicSubscriptions.contains(listener)) {
+            logger.finer("New subscriber on topic (" + topic + "), subscriber count: " + topicSubscriptions.size());
+            topicSubscriptions.add(listener);
+        }
+    }
+
+    public synchronized void unsubscribe(MqttSubscriptionListener listener) {
+        if (listener == null)
+            return;
+
+        for (String topic : subscriptions.keySet()){
+            unsubscribe(topic, listener);
+        }
+    }
+    public synchronized void unsubscribe(String topic, MqttSubscriptionListener listener) {
+        if (topic == null || topic.isEmpty() || listener == null)
+            return;
+
+        if (!subscriptions.containsKey(topic))
+            return;
+        List topicSubscriptions = subscriptions.get(topic);
+
+        if (topicSubscriptions.remove(listener)){
+            logger.finer("Subscriber unsubscribed from topic (" + topic + "), subscriber count: " + topicSubscriptions.size());
+
+            if (topicSubscriptions.isEmpty()) {
+                logger.fine("Removing empty topic: " + topic);
+                subscriptions.remove(topic);
+            }
+        }
+    }
+
+
+    protected static class MqttConnectionThread implements ThreadedTCPNetworkServerThread, MqttSubscriptionListener {
         private Socket socket;
         private BinaryStructInputStream in;
         private BinaryStructOutputStream out;
 
         private boolean shutdown = false;
+
 
         protected MqttConnectionThread() {} // Test constructor
 
@@ -85,10 +134,7 @@ public class MqttBroker extends ThreadedTCPNetworkServer {
                     if (packet == null)
                         return;
 
-                    MqttPacketHeader packetRsp = handlePacket(packet);
-
-                    if (packetRsp != null)
-                        sendPacket(packetRsp);
+                    handlePacket(packet);
                 }
 
                 socket.close();
@@ -103,36 +149,69 @@ public class MqttBroker extends ThreadedTCPNetworkServer {
             }
         }
 
-        public MqttPacketHeader handlePacket(MqttPacketHeader packet) throws IOException {
+        public void handlePacket(MqttPacketHeader packet) throws IOException {
+            // TODO: QOS
+
             switch (packet.type) {
                 // TODO: Publish
                 case MqttPacketHeader.PACKET_TYPE_PUBLISH:
                     break;
+
                 // TODO: Subscribe
                 case MqttPacketHeader.PACKET_TYPE_SUBSCRIBE:
+                    MqttPacketSubscribe subscribePacket = (MqttPacketSubscribe) packet;
+                    MqttPacketSubscribeAck subscribeAckPacket = new MqttPacketSubscribeAck();
+                    subscribeAckPacket.packetId = subscribePacket.packetId;
+
+                    for (MqttSubscribePayload payload : subscribePacket.payload) {
+                        // TODO: subscribe(payload.topicFilter, this)
+
+                        MqttSubscribeAckPayload ackPayload = new MqttSubscribeAckPayload();
+                        ackPayload.returnCode = MqttSubscribeAckPayload.RETCODE_SUCESS_MAX_QOS_0;
+                        subscribeAckPacket.payload.add(ackPayload);
+                    }
+                    sendPacket(subscribeAckPacket);
                     break;
+
                 // TODO: Unsubscribe
                 case MqttPacketHeader.PACKET_TYPE_UNSUBSCRIBE:
+                    MqttPacketUnsubscribe unsubscribePacket = (MqttPacketUnsubscribe) packet;
+
+                    for (MqttUnsubscribePayload payload : unsubscribePacket.payload) {
+                        // TODO: unsubscribe(payload.topicFilter, this)
+                    }
+
+                    MqttPacketUnsubscribeAck unsubscribeAckPacket = new MqttPacketUnsubscribeAck();
+                    unsubscribeAckPacket.packetId = unsubscribePacket.packetId;
+                    sendPacket(unsubscribeAckPacket);
                     break;
+
                 // Ping
                 case MqttPacketHeader.PACKET_TYPE_PINGREQ:
-                    return new MqttPacketPingResp();
+                    sendPacket(new MqttPacketPingResp());
+                    break;
+
                 // Close connection
                 default:
                     logger.warning("Received unknown packet type: " + packet.type);
                 case MqttPacketHeader.PACKET_TYPE_DISCONNECT:
                     shutdown = true;
+                    break;
             }
-
-            return null;
         }
 
-        public void sendPacket(MqttPacketHeader packet) throws IOException {
+        @Override
+        public void dataPublished(String topic, String data) {
+
+        }
+
+        public synchronized void sendPacket(MqttPacketHeader packet) throws IOException {
             MqttPacket.write(out, packet);
         }
 
         public boolean isShutdown() {
             return shutdown;
         }
+
     }
 }

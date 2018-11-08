@@ -2,6 +2,7 @@ package zutil.net.mqtt.packet;
 
 import zutil.parser.binary.BinaryStruct;
 
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -25,7 +26,7 @@ public class MqttPacketSubscribeAck extends MqttPacketHeader{
 
     // Payload
 
-    public List<MqttSubscribeAckPayload> payload;
+    public List<MqttSubscribeAckPayload> payload = new LinkedList<>();
 
 
 
