@@ -8,6 +8,12 @@ package zutil.net.mqtt.packet;
  */
 public class MqttPacketPublish extends MqttPacketHeader {
 
+    // Header
+
+    {
+        type = MqttPacketHeader.PACKET_TYPE_PUBLISH;
+    }
+
     // Static Header
 /*
     @BinaryField(index = 2000, length = 1)
@@ -20,7 +26,6 @@ public class MqttPacketPublish extends MqttPacketHeader {
     @CustomBinaryField(index = 3, serializer = MqttVariableIntSerializer.class)
     private int length;
 */
-
     // Variable Header
 
     @BinaryField(index = 2101, length = 16)

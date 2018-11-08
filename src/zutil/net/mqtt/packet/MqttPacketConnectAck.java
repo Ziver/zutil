@@ -14,6 +14,11 @@ public class MqttPacketConnectAck extends MqttPacketHeader{
     public static final int RETCODE_BADD_USER_OR_PASS  = 4;
     public static final int RETCODE_NOT_AUTHORIZED     = 5;
 
+    // Header
+
+    {
+        type = MqttPacketHeader.PACKET_TYPE_CONNACK;
+    }
 
     // Variable header
 

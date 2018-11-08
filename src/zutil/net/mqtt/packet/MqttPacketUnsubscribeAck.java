@@ -9,6 +9,12 @@ package zutil.net.mqtt.packet;
  */
 public class MqttPacketUnsubscribeAck extends MqttPacketHeader{
 
+    // Header
+
+    {
+        type = MqttPacketHeader.PACKET_TYPE_UNSUBACK;
+    }
+
     // Variable Header
 
     @BinaryField(index = 2000, length = 16)

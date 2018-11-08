@@ -9,6 +9,12 @@ package zutil.net.mqtt.packet;
  */
 public class MqttPacketConnect extends MqttPacketHeader {
 
+    // Header
+
+    {
+        type = MqttPacketHeader.PACKET_TYPE_CONN;
+    }
+
     // Variable header
 
     @BinaryField(index = 2001, length = 16)
