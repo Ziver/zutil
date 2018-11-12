@@ -1,5 +1,6 @@
 package zutil.net.mqtt;
 
+import zutil.ObjectUtil;
 import zutil.log.LogUtil;
 import zutil.net.mqtt.packet.*;
 import zutil.net.mqtt.packet.MqttPacketSubscribe.MqttSubscribePayload;
@@ -37,7 +38,20 @@ public class MqttBroker extends ThreadedTCPNetworkServer {
 
     @Override
     protected ThreadedTCPNetworkServerThread getThreadInstance(Socket s) throws IOException {
-        return new MqttConnectionThread(s);
+        return new MqttConnectionThread(this, s);
+    }
+
+
+    /**
+     * @return the subscriber count for the specific topic, -1 if
+     *         topic does not exist or has not been created yet.
+     */
+    public int getSubscriberCount(String topic) {
+        List topicSubscriptions = subscriptions.get(topic);
+        if (topicSubscriptions != null) {
+            return topicSubscriptions.size();
+        }
+        return -1;
     }
 
 
@@ -51,7 +65,7 @@ public class MqttBroker extends ThreadedTCPNetworkServer {
         }
         List topicSubscriptions = subscriptions.get(topic);
 
-        if (topicSubscriptions.contains(listener)) {
+        if (!topicSubscriptions.contains(listener)) {
             logger.finer("New subscriber on topic (" + topic + "), subscriber count: " + topicSubscriptions.size());
             topicSubscriptions.add(listener);
         }
@@ -85,16 +99,22 @@ public class MqttBroker extends ThreadedTCPNetworkServer {
 
 
     protected static class MqttConnectionThread implements ThreadedTCPNetworkServerThread, MqttSubscriptionListener {
+        private MqttBroker broker;
         private Socket socket;
         private BinaryStructInputStream in;
         private BinaryStructOutputStream out;
 
         private boolean shutdown = false;
 
+        /**
+         * Test constructor
+         */
+        protected MqttConnectionThread(MqttBroker b) {
+            broker = b;
+        }
 
-        protected MqttConnectionThread() {} // Test constructor
-
-        public MqttConnectionThread(Socket s) throws IOException {
+        public MqttConnectionThread(MqttBroker b, Socket s) throws IOException {
+            this(b);
             socket = s;
             in = new BinaryStructInputStream(socket.getInputStream());
             out = new BinaryStructOutputStream(socket.getOutputStream());
@@ -106,26 +126,7 @@ public class MqttBroker extends ThreadedTCPNetworkServer {
             try {
                 // Setup connection
                 MqttPacketHeader connectPacket = MqttPacket.read(in);
-                // Unexpected packet?
-                if (!(connectPacket instanceof MqttPacketConnect))
-                    throw new IOException("Expected MqttPacketConnect but received " + connectPacket.getClass());
-                MqttPacketConnect conn = (MqttPacketConnect) connectPacket;
-
-                // Reply
-                MqttPacketConnectAck connectAck = new MqttPacketConnectAck();
-
-                // Incorrect protocol version?
-                if (conn.protocolLevel != MQTT_PROTOCOL_VERSION) {
-                    connectAck.returnCode = MqttPacketConnectAck.RETCODE_PROT_VER_ERROR;
-                    sendPacket(connectAck);
-                    return;
-                } else {
-                    connectAck.returnCode = MqttPacketConnectAck.RETCODE_OK;
-                }
-
-                // TODO: authenticate
-                // TODO: clean session
-                sendPacket(connectAck);
+                handleConnect(connectPacket);
 
                 // Connected
 
@@ -137,53 +138,32 @@ public class MqttBroker extends ThreadedTCPNetworkServer {
                     handlePacket(packet);
                 }
 
-                socket.close();
             } catch (IOException e) {
                 logger.log(Level.SEVERE, null, e);
             } finally {
                 try {
                     socket.close();
+                    broker.unsubscribe(this);
                 } catch (IOException e) {
                     logger.log(Level.SEVERE, null, e);
                 }
             }
         }
 
-        public void handlePacket(MqttPacketHeader packet) throws IOException {
+        protected void handlePacket(MqttPacketHeader packet) throws IOException {
             // TODO: QOS
 
             switch (packet.type) {
-                // TODO: Publish
                 case MqttPacketHeader.PACKET_TYPE_PUBLISH:
+                    handlePublish((MqttPacketPublish) packet);
                     break;
 
-                // TODO: Subscribe
                 case MqttPacketHeader.PACKET_TYPE_SUBSCRIBE:
-                    MqttPacketSubscribe subscribePacket = (MqttPacketSubscribe) packet;
-                    MqttPacketSubscribeAck subscribeAckPacket = new MqttPacketSubscribeAck();
-                    subscribeAckPacket.packetId = subscribePacket.packetId;
-
-                    for (MqttSubscribePayload payload : subscribePacket.payload) {
-                        // TODO: subscribe(payload.topicFilter, this)
-
-                        MqttSubscribeAckPayload ackPayload = new MqttSubscribeAckPayload();
-                        ackPayload.returnCode = MqttSubscribeAckPayload.RETCODE_SUCESS_MAX_QOS_0;
-                        subscribeAckPacket.payload.add(ackPayload);
-                    }
-                    sendPacket(subscribeAckPacket);
+                    handleSubscribe((MqttPacketSubscribe) packet);
                     break;
 
-                // TODO: Unsubscribe
                 case MqttPacketHeader.PACKET_TYPE_UNSUBSCRIBE:
-                    MqttPacketUnsubscribe unsubscribePacket = (MqttPacketUnsubscribe) packet;
-
-                    for (MqttUnsubscribePayload payload : unsubscribePacket.payload) {
-                        // TODO: unsubscribe(payload.topicFilter, this)
-                    }
-
-                    MqttPacketUnsubscribeAck unsubscribeAckPacket = new MqttPacketUnsubscribeAck();
-                    unsubscribeAckPacket.packetId = unsubscribePacket.packetId;
-                    sendPacket(unsubscribeAckPacket);
+                    handleUnsubscribe((MqttPacketUnsubscribe) packet);
                     break;
 
                 // Ping
@@ -199,6 +179,61 @@ public class MqttBroker extends ThreadedTCPNetworkServer {
                     break;
             }
         }
+
+        private void handleConnect(MqttPacketHeader connectPacket) throws IOException {
+            // Unexpected packet?
+            if (!(connectPacket instanceof MqttPacketConnect))
+                throw new IOException("Expected MqttPacketConnect but received " + connectPacket.getClass());
+            MqttPacketConnect conn = (MqttPacketConnect) connectPacket;
+
+            // Reply
+            MqttPacketConnectAck connectAck = new MqttPacketConnectAck();
+
+            // Incorrect protocol version?
+            if (conn.protocolLevel != MQTT_PROTOCOL_VERSION) {
+                connectAck.returnCode = MqttPacketConnectAck.RETCODE_PROT_VER_ERROR;
+                sendPacket(connectAck);
+                return;
+            } else {
+                connectAck.returnCode = MqttPacketConnectAck.RETCODE_OK;
+            }
+
+            // TODO: authenticate
+            // TODO: clean session
+            sendPacket(connectAck);
+        }
+
+        private void handlePublish(MqttPacketPublish publishPacket) throws IOException {
+            // TODO: Publish
+        }
+
+        private void handleSubscribe(MqttPacketSubscribe subscribePacket) throws IOException {
+            MqttPacketSubscribeAck subscribeAckPacket = new MqttPacketSubscribeAck();
+            subscribeAckPacket.packetId = subscribePacket.packetId;
+
+            for (MqttSubscribePayload payload : subscribePacket.payload) {
+                broker.subscribe(payload.topicFilter, this);
+
+                // Prepare response
+                MqttSubscribeAckPayload ackPayload = new MqttSubscribeAckPayload();
+                ackPayload.returnCode = MqttSubscribeAckPayload.RETCODE_SUCESS_MAX_QOS_0;
+                subscribeAckPacket.payload.add(ackPayload);
+            }
+
+            sendPacket(subscribeAckPacket);
+        }
+
+        private void handleUnsubscribe(MqttPacketUnsubscribe unsubscribePacket) throws IOException {
+            for (MqttUnsubscribePayload payload : unsubscribePacket.payload) {
+                broker.unsubscribe(payload.topicFilter, this);
+            }
+
+            // Prepare response
+            MqttPacketUnsubscribeAck unsubscribeAckPacket = new MqttPacketUnsubscribeAck();
+            unsubscribeAckPacket.packetId = unsubscribePacket.packetId;
+            sendPacket(unsubscribeAckPacket);
+        }
+
 
         @Override
         public void dataPublished(String topic, String data) {

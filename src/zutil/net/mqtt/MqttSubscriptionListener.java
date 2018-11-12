@@ -30,5 +30,5 @@ package zutil.net.mqtt;
  */
 public interface MqttSubscriptionListener {
 
-    public void dataPublished(String topic, String data);
+    void dataPublished(String topic, String data);
 }

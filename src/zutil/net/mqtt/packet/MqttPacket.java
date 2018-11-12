@@ -9,7 +9,7 @@ import java.io.IOException;
 import static zutil.net.mqtt.packet.MqttPacketHeader.*;
 
 /**
- * A data class encapsulating a MQTT header and its controlHeader
+ * A class for serializing and deserialize MQTT data packets
  */
 public class MqttPacket {
 

@@ -14,7 +14,6 @@ public class MqttPacketPublish extends MqttPacketHeader {
         type = MqttPacketHeader.PACKET_TYPE_PUBLISH;
     }
 
-    // Static Header
 /*
     @BinaryField(index = 2000, length = 1)
     private int flagDup;
@@ -22,9 +21,6 @@ public class MqttPacketPublish extends MqttPacketHeader {
     private int flagQoS;
     @BinaryField(index = 2002, length = 1)
     private int flagRetain;
-
-    @CustomBinaryField(index = 3, serializer = MqttVariableIntSerializer.class)
-    private int length;
 */
     // Variable Header
 
