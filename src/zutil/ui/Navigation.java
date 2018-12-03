@@ -149,7 +149,7 @@ public class Navigation implements Iterable{
     public boolean equals(Object o){
         if(o instanceof String)
             return this.name.equals(o);
-        return this == o || Objects.equals(this.id, ((Navigation) o).id);
+        return this == o || o != null && Objects.equals(this.id, ((Navigation) o).id);
     }
 
 
