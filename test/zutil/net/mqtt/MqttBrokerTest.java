@@ -92,6 +92,35 @@ public class MqttBrokerTest {
     }
 
     @Test
+    public void publish() throws IOException {
+        // Setup subscriber
+        final String[] recivedTopic = new String[1];
+        final byte[] recievedPayload = new byte[1];
+        MqttSubscriptionListener subscriber = new MqttSubscriptionListener() {
+            public void dataPublished(String topic, byte[] data) {
+                recivedTopic[0] = topic;
+                recievedPayload[0] = data[0];
+            }
+        };
+
+        // Setup broker
+        MqttBroker broker = new MqttBroker();
+        MqttConnectionThreadMock thread = new MqttConnectionThreadMock(broker);
+        broker.subscribe("test/topic", subscriber);
+
+        // Setup publish
+        MqttPacketPublish publish = new MqttPacketPublish();
+        publish.topicName = "test/topic";
+        publish.payload = new byte[]{42};
+
+        thread.handlePacket(publish);
+
+        // Check response
+        assertEquals("test/topic", recivedTopic[0]);
+        assertEquals((byte) 42, recievedPayload[0]);
+    }
+
+    @Test
     public void unsubscribeEmpty() throws IOException {
         MqttBroker broker = new MqttBroker();
         MqttConnectionThreadMock thread = new MqttConnectionThreadMock(broker);

@@ -55,6 +55,9 @@ public class MqttBroker extends ThreadedTCPNetworkServer {
     }
 
 
+    /**
+     * Add the listener as a subscriber of the specific topic.
+     */
     public synchronized void subscribe(String topic, MqttSubscriptionListener listener) {
         if (topic == null || topic.isEmpty() || listener == null)
             return;
@@ -71,6 +74,26 @@ public class MqttBroker extends ThreadedTCPNetworkServer {
         }
     }
 
+    /**
+     * Publish data to the specific topic
+     */
+    public void publish(String topic, byte[] data) {
+        if (!subscriptions.containsKey(topic)) {
+            logger.fine("Data was published to topic (" + topic + ") with no subscribers.");
+            return;
+        }
+
+        logger.finer("Data has been published to topic (" + topic + ")");
+        List<MqttSubscriptionListener> topicSubscriptions = subscriptions.get(topic);
+
+        for (MqttSubscriptionListener subscriber : topicSubscriptions) {
+            subscriber.dataPublished(topic, data);
+        }
+    }
+
+    /**
+     * Unsubscribe the listener from all available MQTT topics.
+     */
     public synchronized void unsubscribe(MqttSubscriptionListener listener) {
         if (listener == null)
             return;
@@ -79,6 +102,10 @@ public class MqttBroker extends ThreadedTCPNetworkServer {
             unsubscribe(topic, listener);
         }
     }
+
+    /**
+     * Unsubscribe the listener from the specific MQTT topic.
+     */
     public synchronized void unsubscribe(String topic, MqttSubscriptionListener listener) {
         if (topic == null || topic.isEmpty() || listener == null)
             return;
@@ -150,8 +177,32 @@ public class MqttBroker extends ThreadedTCPNetworkServer {
             }
         }
 
+        private void handleConnect(MqttPacketHeader connectPacket) throws IOException {
+            // Unexpected packet?
+            if (!(connectPacket instanceof MqttPacketConnect))
+                throw new IOException("Expected MqttPacketConnect but received " + connectPacket.getClass());
+            MqttPacketConnect conn = (MqttPacketConnect) connectPacket;
+
+            // Reply
+            MqttPacketConnectAck connectAck = new MqttPacketConnectAck();
+
+            // Incorrect protocol version?
+            if (conn.protocolLevel != MQTT_PROTOCOL_VERSION) {
+                connectAck.returnCode = MqttPacketConnectAck.RETCODE_PROT_VER_ERROR;
+                sendPacket(connectAck);
+                return;
+            } else {
+                connectAck.returnCode = MqttPacketConnectAck.RETCODE_OK;
+            }
+
+            // TODO: authenticate
+            // TODO: clean session
+            sendPacket(connectAck);
+        }
+
         protected void handlePacket(MqttPacketHeader packet) throws IOException {
-            // TODO: QOS
+            // TODO: QOS 1
+            // TODO: QOS 2
 
             switch (packet.type) {
                 case MqttPacketHeader.PACKET_TYPE_PUBLISH:
@@ -180,31 +231,12 @@ public class MqttBroker extends ThreadedTCPNetworkServer {
             }
         }
 
-        private void handleConnect(MqttPacketHeader connectPacket) throws IOException {
-            // Unexpected packet?
-            if (!(connectPacket instanceof MqttPacketConnect))
-                throw new IOException("Expected MqttPacketConnect but received " + connectPacket.getClass());
-            MqttPacketConnect conn = (MqttPacketConnect) connectPacket;
-
-            // Reply
-            MqttPacketConnectAck connectAck = new MqttPacketConnectAck();
-
-            // Incorrect protocol version?
-            if (conn.protocolLevel != MQTT_PROTOCOL_VERSION) {
-                connectAck.returnCode = MqttPacketConnectAck.RETCODE_PROT_VER_ERROR;
-                sendPacket(connectAck);
-                return;
-            } else {
-                connectAck.returnCode = MqttPacketConnectAck.RETCODE_OK;
-            }
-
-            // TODO: authenticate
-            // TODO: clean session
-            sendPacket(connectAck);
-        }
 
         private void handlePublish(MqttPacketPublish publishPacket) throws IOException {
-            // TODO: Publish
+            if (publishPacket.getFlagQoS() != 0)
+                throw new UnsupportedOperationException("QoS larger then 0 not supported.");
+
+            broker.publish(publishPacket.topicName, publishPacket.payload);
         }
 
         private void handleSubscribe(MqttPacketSubscribe subscribePacket) throws IOException {
@@ -236,8 +268,8 @@ public class MqttBroker extends ThreadedTCPNetworkServer {
 
 
         @Override
-        public void dataPublished(String topic, String data) {
-
+        public void dataPublished(String topic, byte[] data) {
+            // Data has been published to a subscribed topic.
         }
 
         public synchronized void sendPacket(MqttPacketHeader packet) throws IOException {

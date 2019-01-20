@@ -1,6 +1,8 @@
 package zutil.net.mqtt.packet;
 
 
+import zutil.ByteUtil;
+
 /**
  * A PUBLISH Control Packet is sent from a Client to a Server
  *
@@ -14,17 +16,14 @@ public class MqttPacketPublish extends MqttPacketHeader {
         type = MqttPacketHeader.PACKET_TYPE_PUBLISH;
     }
 
-/*
-    @BinaryField(index = 2000, length = 1)
-    private int flagDup;
-    @BinaryField(index = 2001, length = 2)
-    private int flagQoS;
-    @BinaryField(index = 2002, length = 1)
-    private int flagRetain;
-*/
+
+    private byte flagDupBitmask = ByteUtil.getBitMask(3, 1);
+    private byte flagQoSBitmask = ByteUtil.getBitMask(1, 2);
+    private byte flagRetainBitmask = ByteUtil.getBitMask(0, 1);
+
     // Variable Header
 
-    @BinaryField(index = 2101, length = 16)
+    @BinaryField(index = 2001, length = 16)
     private int topicNameLength;
     /**
      * The Topic Name identifies the information channel to which controlHeader data is published.
@@ -32,11 +31,28 @@ public class MqttPacketPublish extends MqttPacketHeader {
     @VariableLengthBinaryField(index = 2102, lengthField = "topicNameLength")
     public String topicName;
 
-    @BinaryField(index = 2102, length = 16)
+    @BinaryField(index = 2002, length = 16)
     public int packetId;
 
 
     // Payload
     // - Application data
 
+    @BinaryField(index = 3001, length = 100000)
+    public byte[] payload;
+
+
+    // Util methods
+
+    public boolean getFlagDup() {
+        return (flags & flagDupBitmask) != 0;
+    }
+
+    public byte getFlagQoS() {
+        return (byte) ((flags & flagQoSBitmask) >> 1);
+    }
+
+    public boolean getFlagRetain() {
+        return (flags & flagRetainBitmask) != 0;
+    }
 }
