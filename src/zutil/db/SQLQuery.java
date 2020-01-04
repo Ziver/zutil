@@ -257,25 +257,25 @@ public class SQLQuery {
             return cond("!=", arg1, arg2);
         }
         /**
-         * Less than (arg1 < arg2)
+         * Less than (arg1 &lt; arg2)
          */
         public SQLWhere LT(String arg1, String arg2){
             return cond("<", arg1, arg2);
         }
         /**
-         * Greater than (arg1 > arg2)
+         * Greater than (arg1 &gt; arg2)
          */
         public SQLWhere GT(String arg1, String arg2){
             return cond(">", arg1, arg2);
         }
         /**
-         * Less than or equal (arg1 <= arg2)
+         * Less than or equal (arg1 &lt;= arg2)
          */
         public SQLWhere LE(String arg1, String arg2){
             return cond("<=", arg1, arg2);
         }
         /**
-         * Greater than or equal (arg1 >= arg2)
+         * Greater than or equal (arg1 &gt;= arg2)
          */
         public SQLWhere GE(String arg1, String arg2){
             return cond(">=", arg1, arg2);

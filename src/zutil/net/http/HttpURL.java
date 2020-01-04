@@ -103,7 +103,7 @@ public class HttpURL {
      * Generates the parameter string in a URL.
      *
      * e.g.
-     * "key=value&key2=value&..."
+     * "key=value&amp;key2=value&amp;..."
      */
     public String getParameterString(){
         StringBuilder param = new StringBuilder();

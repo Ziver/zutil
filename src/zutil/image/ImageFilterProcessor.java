@@ -101,12 +101,12 @@ public abstract class ImageFilterProcessor {
     }
 
     /**
-     * Creates a Integer array with the pixel data of the image <XMP>
+     * Creates a Integer array with the pixel data of the image <pre>
      * int[row][col][4]
-     * 0 -> Alpha data
+     * 0 -&gt; Alpha data
      *      Red data
      *      Green data
-     * 4 -> Blue data </XMP>
+     * 4 -&gt; Blue data </pre>
      *
      * @param 		img 		is the image to convert
      * @param 		cols 		is the columns of the image

@@ -58,9 +58,9 @@ public interface SortableDataList<T>{
 
     /**
      * Compares to indexes and returns:
-     * <0 if a<b ,
-     * >0 if a>b ,
-     * =0 if a=b
+     * <br>&lt;0 if a&lt;b ,
+     * <br>&gt;0 if a&gt;b ,
+     * <br>=0 if a=b
      *
      * @param	a	is the first index to compare
      * @param	b	is the second index to compare
@@ -70,9 +70,9 @@ public interface SortableDataList<T>{
 
     /**
      * Compares to indexes and returns:
-     * <0 if a<b ,
-     * >0 if a>b ,
-     * =0 if a=b
+     * <br>&lt;0 if a&lt;b ,
+     * <br>&gt;0 if a&gt;b ,
+     * <br>=0 if a=b
      *
      * @param	a	is the first index to compare
      * @param	b	is the second Object to compare

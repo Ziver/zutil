@@ -11,13 +11,13 @@ moving things around.
 
 ## Documentation
 Unfortunately, there is no dedicated documentation available. The only documentation
-is the JavaDoc in the source code and see the JUnit test cases for usage examples.
+is the JavaDoc in the source code and the JUnit test cases as usage examples.
 
 ## Running the tests
 
 Execute all JUnit test-cases by running: 
 ```
-ant test
+mvn verify
 ```
 
 ## Authors

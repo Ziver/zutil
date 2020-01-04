@@ -48,19 +48,20 @@ import java.util.logging.Logger;
  * DBBean will be replaced with the an id which corresponds to the field
  * of that object.
  *
- * <XMP>
+ * <p>
  * Supported fields:
- * 	*Boolean
- * 	*Integer
- * 	*Short
- * 	*Float
- * 	*Double
- * 	*String
- * 	*Character
- *  *java.sql.Timestamp
- * 	*DBBean (A Integer reference to another Bean in another table)
- * 	*List<DBBean> (A reference table is used to associate Beans into the list)
- * </XMP>
+ * <ul>
+ * <li>Boolean</li>
+ * <li>Integer</li>
+ * <li>Short</li>
+ * <li>Float</li>
+ * <li>Double</li>
+ * <li>String</li>
+ * <li>Character</li>
+ * <li>java.sql.Timestamp</li>
+ * <li>DBBean (A Integer reference to another Bean in another table)</li>
+ * <li>List&lt;DBBean&gt; (A reference table is used to associate Beans into the list)</li>
+ * </ul>
  * @author Ziver
  */
 public abstract class DBBean {

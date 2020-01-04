@@ -110,7 +110,7 @@ public class ByteUtil {
 
     /**
      * Creates a new byte array with reversed byte ordering
-     * (LittleEndian -> BigEndian, BigEndian -> LittleEndian)
+     * (LittleEndian -&gt; BigEndian, BigEndian -&gt; LittleEndian)
      *
      * @param   data    is the byte array that will be reversed.
      * @return a new byte array that will have the same data but in reverse byte order

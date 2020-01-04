@@ -6,7 +6,7 @@
 
     <groupId>se.koc</groupId>
     <artifactId>zutil</artifactId>
-    <version>1.0.2-${build.number}</version>
+    <version>1.0.${build.number}</version>
     <packaging>jar</packaging>
 
     <name>Zutil</name>
@@ -144,9 +144,9 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
-                <version>2.9.1</version>
+                <version>3.1.0</version>
                 <configuration> <!-- TODO: Temporary until javadoc issues are solved -->
-                    <additionalparam>-Xdoclint:none</additionalparam>
+                    <doclint>none</doclint>
                 </configuration>
                 <executions>
                     <execution>

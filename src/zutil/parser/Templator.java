@@ -81,8 +81,8 @@ import java.util.logging.Logger;
  *      Comment, will be ignored.</li>
  * </ul>
  *
- * TODO: {{> file}}: include file
- * TODO: {{=<% %>=}}: change delimiter
+ * TODO: {{&gt; file}}: include file
+ * TODO: {{=&lt;% %&gt;=}}: change delimiter
  *
  * @author Ziver koc
  */

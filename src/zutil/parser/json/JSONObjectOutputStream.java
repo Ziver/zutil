@@ -30,7 +30,6 @@ import zutil.parser.Base64Encoder;
 import zutil.parser.DataNode;
 import zutil.parser.DataNode.DataType;
 
-import javax.activation.UnsupportedDataTypeException;
 import java.io.*;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
@@ -169,7 +168,7 @@ public class JSONObjectOutputStream extends OutputStream implements ObjectOutput
         return root;
     }
 
-    private DataNode getPrimitiveDataNode(Class<?> type, Object value) throws UnsupportedDataTypeException, IllegalArgumentException {
+    private DataNode getPrimitiveDataNode(Class<?> type, Object value) throws IllegalArgumentException {
         DataNode node;
         if     (type == int.class ||
                 type == Integer.class ||
@@ -188,7 +187,7 @@ public class JSONObjectOutputStream extends OutputStream implements ObjectOutput
                 type == Character.class)
             node = new DataNode(DataType.String);
         else
-            throw new UnsupportedDataTypeException("Unsupported primitive data type: "+type.getName());
+            throw new IllegalArgumentException("Unsupported primitive data type: "+type.getName());
 
         if(value != null)
             node.set(value.toString());

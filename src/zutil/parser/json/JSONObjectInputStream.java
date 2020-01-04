@@ -29,7 +29,6 @@ import zutil.log.LogUtil;
 import zutil.parser.Base64Decoder;
 import zutil.parser.DataNode;
 
-import javax.activation.UnsupportedDataTypeException;
 import java.io.*;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
@@ -123,7 +122,7 @@ public class JSONObjectInputStream extends InputStream implements ObjectInput, C
 
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
-    protected Object readType(Class<?> type, Class<?>[] genType, String key, DataNode json) throws IllegalAccessException, ClassNotFoundException, InstantiationException, UnsupportedDataTypeException, NoSuchFieldException {
+    protected Object readType(Class<?> type, Class<?>[] genType, String key, DataNode json) throws IllegalAccessException, ClassNotFoundException, InstantiationException, NoSuchFieldException {
         if(json == null || type == null)
             return null;
         // Field type is a primitive?
@@ -171,7 +170,7 @@ public class JSONObjectInputStream extends InputStream implements ObjectInput, C
     }
 
 
-    protected Object readObject(Class<?> type, String key, DataNode json) throws IllegalAccessException, InstantiationException, ClassNotFoundException, IllegalArgumentException, UnsupportedDataTypeException, NoSuchFieldException {
+    protected Object readObject(Class<?> type, String key, DataNode json) throws IllegalAccessException, InstantiationException, ClassNotFoundException, IllegalArgumentException, NoSuchFieldException {
         // Only parse if json is a map
         if(json == null || !json.isMap())
             return null;

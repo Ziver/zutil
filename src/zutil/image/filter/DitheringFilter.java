@@ -49,12 +49,12 @@ public class DitheringFilter extends ImageFilterProcessor{
     /**
      * Creates a Dithering Effect object
      * @param img The image to apply the effect on
-     * @param palette The palette to use on the image
+     * @param palette The palette to use on the image <pre>
      * int[colorCount][4]
-     * 0 -> Alpha data
+     * 0 -&gt; Alpha data
      * 		Red data
      * 		Green data
-     * 4 ->	Blue data
+     * 4 -&gt; Blue data </pre>
      */
     public DitheringFilter(BufferedImage img, int[][] palette){
         super(img);

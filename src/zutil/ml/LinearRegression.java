@@ -16,7 +16,7 @@ public class LinearRegression {
      * Method for calculating a hypothesis value fr a specific input value x.
      * <br><br>
      * <i>
-     *     h(x) = theta0 * x0 + theta1 * x1 + ... + thetan * xn => transpose(theta) * x
+     *     h(x) = theta0 * x0 + theta1 * x1 + ... + thetan * xn =&gt; transpose(theta) * x
      * </i>
      */
     protected static double[] calculateHypothesis(double[][] x, double[] theta){
