@@ -34,7 +34,7 @@
     </scm>
 
     <properties>
-        <build.number>SNAPSHOT</build.number>
+        <build.number>0-SNAPSHOT</build.number>
         <build.development>true</build.development>
         <java.version>1.8</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
