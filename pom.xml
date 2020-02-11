@@ -6,7 +6,7 @@
 
     <groupId>se.koc</groupId>
     <artifactId>zutil</artifactId>
-    <version>1.0.${build.number}</version>
+    <version>${revision}</version>
     <packaging>jar</packaging>
 
     <name>Zutil</name>
@@ -34,7 +34,7 @@
     </scm>
 
     <properties>
-        <build.number>0-SNAPSHOT</build.number>
+        <build.version>1.0.0-SNAPSHOT</build.version>
         <build.development>true</build.development>
         <java.version>1.8</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -192,6 +192,11 @@
                     <tag>${project.version}</tag>
                     <connectionType>developerConnection</connectionType>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>com.github.danielflower.mavenplugins</groupId>
+                <artifactId>multi-module-maven-release-plugin</artifactId>
+                <version>3.2.0</version>
             </plugin>
         </plugins>
     </build>
