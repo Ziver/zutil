@@ -6,7 +6,7 @@
 
     <groupId>se.koc</groupId>
     <artifactId>zutil</artifactId>
-    <version>${revision}</version>
+    <version>${build.version}</version>
     <packaging>jar</packaging>
 
     <name>Zutil</name>
