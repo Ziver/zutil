@@ -30,7 +30,6 @@ node {
 
         stage('Deploy') {
             sh "mvn ${mvnParams} releaser:release"
-            sh "mvn ${mvnParams} scm:tag"
         }
     }
 }
