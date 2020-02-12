@@ -179,7 +179,7 @@
                 <artifactId>multi-module-maven-release-plugin</artifactId>
                 <version>3.2.0</version>
                 <configuration>
-                   <serverId>developerConnection</serverId>
+                   <serverId>repo.koc.se</serverId>
                 </configuration>
             </plugin>
         </plugins>
