@@ -14,7 +14,7 @@ node {
     }
 
     withMaven(mavenConfiguration) {
-        def mvnParams = "-Dbuild.version=1.0.${BUILD_NUMBER} -Dbuild.development=false"
+        def mvnParams = "-Dbuild.number=${BUILD_NUMBER} -Dbuild.development=false"
 
         stage('Build') {
             sh "mvn ${mvnParams} clean compile"
@@ -29,7 +29,8 @@ node {
         }
 
         stage('Deploy') {
-            sh "mvn ${mvnParams} releaser:release"
+            sh "mvn ${mvnParams} -DskipStatic -DskipTests deploy"
+            sh "mvn ${mvnParams} scm:tag"
         }
     }
 }

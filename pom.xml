@@ -6,7 +6,7 @@
 
     <groupId>se.koc</groupId>
     <artifactId>zutil</artifactId>
-    <version>${build.version}</version>
+    <version>1.0.${build.number}</version>
     <packaging>jar</packaging>
 
     <name>Zutil</name>
@@ -34,7 +34,7 @@
     </scm>
 
     <properties>
-        <build.version>1.0.0-SNAPSHOT</build.version>
+        <build.number>0-SNAPSHOT</build.number>
         <build.development>true</build.development>
         <java.version>1.8</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -144,9 +144,10 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
-                <version>3.1.0</version>
+                <version>3.1.1</version>
                 <configuration> <!-- TODO: Temporary until javadoc issues are solved -->
                     <doclint>none</doclint>
+                    <source>8</source>
                 </configuration>
                 <executions>
                     <execution>
@@ -175,12 +176,43 @@
                 </executions>
             </plugin>
             <plugin>
-                <groupId>com.github.danielflower.mavenplugins</groupId>
-                <artifactId>multi-module-maven-release-plugin</artifactId>
-                <version>3.2.0</version>
+                <groupId>org.sonatype.plugins</groupId>
+                <artifactId>nexus-staging-maven-plugin</artifactId>
+                <version>1.6.7</version>
+                <extensions>true</extensions>
                 <configuration>
-                   <serverId>repo.koc.se</serverId>
+                    <serverId>sonatype-nexus-snapshot</serverId>
+                    <nexusUrl>https://oss.sonatype.org/</nexusUrl>
+                    <autoReleaseAfterClose>true</autoReleaseAfterClose>
                 </configuration>
+            </plugin>
+            <plugin>
+                <artifactId>maven-scm-plugin</artifactId>
+                <version>1.9.5</version>
+                <configuration>
+                    <tag>${project.artifactId}-${project.version}</tag>
+                    <connectionType>developerConnection</connectionType>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>flatten-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>flatten</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>flatten</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>flatten.clean</id>
+                        <phase>clean</phase>
+                        <goals>
+                            <goal>clean</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
