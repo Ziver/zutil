@@ -378,7 +378,7 @@ public class DataNode implements Iterable<DataNode> {
      * @return the long value in this map
      * @throws NullPointerException if the node is not of type map
      */
-    public Map getMap(String key) {
+    public Map<String,?> getMap(String key) {
         if (!this.isMap())
             throw new NullPointerException("The node is not setup as a map");
 
@@ -425,7 +425,7 @@ public class DataNode implements Iterable<DataNode> {
      * @return a list with the items in the node
      * @throws NullPointerException if the node is not of type list
      */
-    public List getList() {
+    public List<?> getList() {
         if (!this.isList()) throw new NullPointerException("The node is not setup as a list");
 
         List output = new ArrayList();
@@ -445,10 +445,10 @@ public class DataNode implements Iterable<DataNode> {
      * @return a map with the items in the node
      * @throws NullPointerException if the node is not of type map
      */
-    public Map getMap() {
+    public Map<String,?> getMap() {
         if (!this.isMap()) throw new NullPointerException("The node is not setup as a map");
 
-        Map output = new HashMap();
+        Map<String,Object> output = new HashMap<>();
         for (String key : map.keySet()) {
             DataNode node = get(key);
             switch (node.getType()) {

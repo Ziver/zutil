@@ -2,3 +2,4 @@
 /bin/
 /target/
 /.repository/
+/.flattened-pom.xml
