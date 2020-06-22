@@ -199,6 +199,6 @@ public class MqttBrokerTest {
 
         // Check response
         assertEquals(null, thread.sentPackets.poll());
-        assertTrue(thread.isShutdown());
+        assertTrue(thread.isDisconnected());
     }
 }

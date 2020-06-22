@@ -1,6 +1,5 @@
 package zutil.net.mqtt;
 
-import zutil.ObjectUtil;
 import zutil.log.LogUtil;
 import zutil.net.mqtt.packet.*;
 import zutil.net.mqtt.packet.MqttPacketSubscribe.MqttSubscribePayload;
@@ -29,11 +28,11 @@ public class MqttBroker extends ThreadedTCPNetworkServer {
     public static final int MQTT_PORT_TLS = 8883;
     public static final int MQTT_PROTOCOL_VERSION = 0x04; // MQTT 3.1.1
 
-    private Map<String, List<MqttSubscriptionListener>> subscriptions;
+    private MqttSubscriptionListener globalListener;
+    private Map<String, List<MqttSubscriptionListener>> subscriptionListeners = new HashMap<>();
 
     public MqttBroker() {
         super(MQTT_PORT);
-        subscriptions = new HashMap<>();
     }
 
     @Override
@@ -47,13 +46,19 @@ public class MqttBroker extends ThreadedTCPNetworkServer {
      *         topic does not exist or has not been created yet.
      */
     public int getSubscriberCount(String topic) {
-        List topicSubscriptions = subscriptions.get(topic);
-        if (topicSubscriptions != null) {
+        List<MqttSubscriptionListener> topicSubscriptions = subscriptionListeners.get(topic);
+
+        if (topicSubscriptions != null)
             return topicSubscriptions.size();
-        }
         return -1;
     }
 
+    /**
+     * Assign a listener that will be called for any topic. Provide null to disable.
+     */
+    public void setGlobalSubscriber(MqttSubscriptionListener listener) {
+        globalListener = listener;
+    }
 
     /**
      * Add the listener as a subscriber of the specific topic.
@@ -62,11 +67,12 @@ public class MqttBroker extends ThreadedTCPNetworkServer {
         if (topic == null || topic.isEmpty() || listener == null)
             return;
 
-        if (!subscriptions.containsKey(topic)) {
+        if (!subscriptionListeners.containsKey(topic)) {
             logger.fine("Creating new topic: " + topic);
-            subscriptions.put(topic, new ArrayList<>());
+            subscriptionListeners.put(topic, new ArrayList<>());
         }
-        List topicSubscriptions = subscriptions.get(topic);
+
+        List<MqttSubscriptionListener> topicSubscriptions = subscriptionListeners.get(topic);
 
         if (!topicSubscriptions.contains(listener)) {
             logger.finer("New subscriber on topic (" + topic + "), subscriber count: " + topicSubscriptions.size());
@@ -78,13 +84,16 @@ public class MqttBroker extends ThreadedTCPNetworkServer {
      * Publish data to the specific topic
      */
     public void publish(String topic, byte[] data) {
-        if (!subscriptions.containsKey(topic)) {
+        if (!subscriptionListeners.containsKey(topic)) {
             logger.fine("Data was published to topic (" + topic + ") with no subscribers.");
             return;
         }
 
         logger.finer("Data has been published to topic (" + topic + ")");
-        List<MqttSubscriptionListener> topicSubscriptions = subscriptions.get(topic);
+        List<MqttSubscriptionListener> topicSubscriptions = subscriptionListeners.get(topic);
+
+        if (globalListener != null)
+            globalListener.dataPublished(topic, data);
 
         for (MqttSubscriptionListener subscriber : topicSubscriptions) {
             subscriber.dataPublished(topic, data);
@@ -98,7 +107,7 @@ public class MqttBroker extends ThreadedTCPNetworkServer {
         if (listener == null)
             return;
 
-        for (String topic : subscriptions.keySet()){
+        for (String topic : subscriptionListeners.keySet()){
             unsubscribe(topic, listener);
         }
     }
@@ -110,28 +119,29 @@ public class MqttBroker extends ThreadedTCPNetworkServer {
         if (topic == null || topic.isEmpty() || listener == null)
             return;
 
-        if (!subscriptions.containsKey(topic))
+        if (!subscriptionListeners.containsKey(topic))
             return;
-        List topicSubscriptions = subscriptions.get(topic);
+
+        List<MqttSubscriptionListener> topicSubscriptions = subscriptionListeners.get(topic);
 
         if (topicSubscriptions.remove(listener)){
             logger.finer("Subscriber unsubscribed from topic (" + topic + "), subscriber count: " + topicSubscriptions.size());
 
             if (topicSubscriptions.isEmpty()) {
                 logger.fine("Removing empty topic: " + topic);
-                subscriptions.remove(topic);
+                subscriptionListeners.remove(topic);
             }
         }
     }
 
 
     protected static class MqttConnectionThread implements ThreadedTCPNetworkServerThread, MqttSubscriptionListener {
-        private MqttBroker broker;
+        private final MqttBroker broker;
         private Socket socket;
         private BinaryStructInputStream in;
         private BinaryStructOutputStream out;
 
-        private boolean shutdown = false;
+        private boolean disconnected = false;
 
         /**
          * Test constructor
@@ -157,7 +167,7 @@ public class MqttBroker extends ThreadedTCPNetworkServer {
 
                 // Connected
 
-                while (!shutdown) {
+                while (!disconnected) {
                     MqttPacketHeader packet = MqttPacket.read(in);
                     if (packet == null)
                         return;
@@ -226,13 +236,13 @@ public class MqttBroker extends ThreadedTCPNetworkServer {
                 default:
                     logger.warning("Received unknown packet type: " + packet.type);
                 case MqttPacketHeader.PACKET_TYPE_DISCONNECT:
-                    shutdown = true;
+                    disconnected = true;
                     break;
             }
         }
 
 
-        private void handlePublish(MqttPacketPublish publishPacket) throws IOException {
+        private void handlePublish(MqttPacketPublish publishPacket) {
             if (publishPacket.getFlagQoS() != 0)
                 throw new UnsupportedOperationException("QoS larger then 0 not supported.");
 
@@ -276,8 +286,8 @@ public class MqttBroker extends ThreadedTCPNetworkServer {
             MqttPacket.write(out, packet);
         }
 
-        public boolean isShutdown() {
-            return shutdown;
+        public boolean isDisconnected() {
+            return disconnected;
         }
 
     }
