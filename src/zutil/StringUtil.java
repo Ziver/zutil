@@ -55,6 +55,9 @@ public class StringUtil {
         return value+" "+sizes[total];
     }
 
+    /**
+     * @return a human readable String with year/month/day/hour/min/sec/milisec delimitation.
+     */
     public static String formatTimeToString(long milisec){
         StringBuilder str = new StringBuilder();
         long tmp;
@@ -165,25 +168,28 @@ public class StringUtil {
         if( str == null || str.isEmpty() )
             return str;
         int start=0, stop=str.length();
+
         // The beginning
         for(int i=0; i<str.length() ;i++){
-            char c = str.charAt( i );
-            if( c <= ' ' || c == trim )
+            char c = str.charAt(i);
+            if(c <= ' ' || c == trim)
                 start = i+1;
             else
                 break;
         }
+
         // The end
         for(int i=str.length()-1; i>start ;i--){
-            char c = str.charAt( i );
-            if( c <= ' ' || c == trim )
+            char c = str.charAt(i);
+            if(c <= ' ' || c == trim)
                 stop = i;
             else
                 break;
         }
-        if( start >= str.length() )
+
+        if(start >= str.length())
             return "";
-        //System.out.println("str: \""+str+"\" start: "+start+" stop: "+stop);
+
         return str.substring(start, stop);
     }
 
@@ -195,15 +201,18 @@ public class StringUtil {
     public static String trimQuotes(String str){
         if( str == null )
             return null;
+
         str = str.trim();
         if( str.length() >= 2 && str.charAt(0)=='\"' && str.charAt(str.length()-1)=='\"'){
             str = str.substring(1, str.length()-1);
         }
+
         return str;
     }
 
 
     private static ArrayList<String> SPACES = new ArrayList<>();
+
     /**
      * @return A string containing a specific amount of spaces
      */
@@ -236,6 +245,7 @@ public class StringUtil {
     public static List<String> split(String str, char delimiter){
         ArrayList<String> splitList = new ArrayList<>();
         int from = 0, to = 0;
+
         while (to >= 0) {
             to = str.indexOf(delimiter, from + 1);
             if (to < 0)
@@ -244,6 +254,51 @@ public class StringUtil {
                 splitList.add(str.substring(from, to));
             from = to;
         }
+
         return splitList;
+    }
+
+    /**
+     * @return true only if the String contains correct numerical characters.
+     */
+    public static boolean isNumber(String str) {
+        if (str == null || str.length() < 1)
+            return false;
+
+        for (int i=0; i<str.length(); i++) {
+            char c = str.charAt(i);
+
+            if (i == 0 && c == '-')
+                continue;
+            else if (!Character.isDigit(c))
+                return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * @return true only if the String contains correct numerical characters and decimal notation.
+     */
+    public static boolean isDecimalNumber(String str) {
+        if (str == null || str.length() < 1)
+            return false;
+
+        boolean parsedPunctuation = false;
+
+        for (int i=0; i<str.length(); i++) {
+            char c = str.charAt(i);
+
+            if (i == 0 && c == '-')
+                continue;
+            else if (!parsedPunctuation && c == '.') {
+                parsedPunctuation = true;
+                continue;
+            }
+            else if (!Character.isDigit(c))
+                return false;
+        }
+
+        return true;
     }
 }

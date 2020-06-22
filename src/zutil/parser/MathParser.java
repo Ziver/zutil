@@ -53,7 +53,7 @@ public class MathParser {
         MathOperation current = null;
 
         if (!Character.isWhitespace(c)) {
-            if (isNumber(c)) {
+            if (Character.isDigit(c)) {
                 temp.append(c);
             } else {
                 Math container = new MathNumber();
@@ -93,10 +93,6 @@ public class MathParser {
             parse(functionString, temp, current, rootNode);
         else
             parse(functionString, temp, previous, rootNode);
-    }
-
-    private static boolean isNumber(char c) {
-        return Character.isDigit(c);
     }
 
     private static MathOperation getOperation(char c) {

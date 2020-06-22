@@ -29,7 +29,7 @@ import org.junit.Test;
 import java.util.Arrays;
 import java.util.Collections;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 
 public class StringUtilTest {
@@ -79,5 +79,38 @@ public class StringUtilTest {
         assertEquals("animal,monkey,dog", StringUtil.join(",", "animal", "monkey", "dog"));
         assertEquals("animal,monkey,dog", StringUtil.join(",", Arrays.asList("animal", "monkey", "dog")));
         assertEquals("12345", StringUtil.join("", 1,2,3,4,5));
+    }
+
+    @Test
+    public void isNumber() {
+        assertFalse(StringUtil.isNumber(null));
+        assertFalse(StringUtil.isNumber(""));
+        assertFalse(StringUtil.isNumber("a"));
+        assertFalse(StringUtil.isNumber("-monkey"));
+        assertFalse(StringUtil.isNumber("-123monkey"));
+        assertTrue(StringUtil.isNumber("0"));
+        assertTrue(StringUtil.isNumber("-1"));
+        assertTrue(StringUtil.isNumber("-500"));
+        assertTrue(StringUtil.isNumber("1"));
+        assertTrue(StringUtil.isNumber("500"));
+    }
+
+    @Test
+    public void isDecimalNumber() {
+        assertFalse(StringUtil.isDecimalNumber(null));
+        assertFalse(StringUtil.isDecimalNumber(""));
+        assertFalse(StringUtil.isDecimalNumber("a"));
+        assertFalse(StringUtil.isDecimalNumber("-monkey"));
+        assertFalse(StringUtil.isDecimalNumber("-123monkey"));
+        assertTrue(StringUtil.isDecimalNumber("0"));
+        assertTrue(StringUtil.isDecimalNumber("-1"));
+        assertTrue(StringUtil.isDecimalNumber("-500"));
+        assertTrue(StringUtil.isDecimalNumber("1"));
+        assertTrue(StringUtil.isDecimalNumber("500"));
+        assertTrue(StringUtil.isDecimalNumber("0.0"));
+        assertTrue(StringUtil.isDecimalNumber("-1.1"));
+        assertTrue(StringUtil.isDecimalNumber("-500.2"));
+        assertTrue(StringUtil.isDecimalNumber("1.3"));
+        assertTrue(StringUtil.isDecimalNumber("500.500"));
     }
 }
