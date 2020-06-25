@@ -136,18 +136,12 @@ public class Encrypter {
     }
 
     public Encrypter(String stringKey, Digest digest, Algorithm crypto, int iteration, int keyBitSize) throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchPaddingException, InvalidKeyException {
-        // Install SunJCE provider
-        Provider sunJce = new com.sun.crypto.provider.SunJCE();
-        Security.addProvider(sunJce);
-
         // Generate the secret key specs.
-        //String instance = "PBEWith"+ digest +"And"+ crypto;
         String instance = "PBKDF2With"+ digest;
         SecretKeyFactory factory = SecretKeyFactory.getInstance(instance);
         KeySpec keySpec = new PBEKeySpec(stringKey.toCharArray(), salt, iteration, keyBitSize);
         SecretKey tmp = factory.generateSecret(keySpec);
         key = new SecretKeySpec(tmp.getEncoded(), crypto.toString());
-        //key = new SecretKeySpec(stringKey.getBytes(), crypto.toString());
 
         encipher = Cipher.getInstance(key.getAlgorithm());
         decipher = Cipher.getInstance(key.getAlgorithm());
