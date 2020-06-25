@@ -31,17 +31,24 @@ import zutil.parser.DataNode;
 import zutil.parser.json.JSONParser;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.NoSuchElementException;
+import java.util.*;
 import java.util.logging.Logger;
 
 /**
- * This class will search the file system for files
- * with the name "plugin.json" that defines data
- * parameters for a single plugin.
- * The class will only load the latest version of the specific plugin.
+ * This class will search the file system for files with the name "plugin.json"
+ * that defines data parameters for a plugin.
+ * The class will only load the latest version of a specific plugin with the same name.
+ * <p>
+ * Example plugin.json content:<pre>
+ * {
+ *     "version": 1.0,
+ *     "name": "Nice name of Plugin",
+ *     "interfaces": [
+ *         {"plugin.interface.class": "plugin.implementation.class"},
+ *         {"wa.server.plugin.WAFrontend": "wa.server.plugin.apache.ApacheFrontend"}
+ *     ]
+ * }
+ * </pre>
  *
  * @author Ziver
  */
@@ -51,13 +58,15 @@ public class PluginManager<T> implements Iterable<PluginData>{
     private HashMap<String, PluginData> plugins;
 
 
-    public static <T> PluginManager<T> load(String path){
-        return new PluginManager<>(path);
-    }
-
+    /**
+     * Constructor that will look for plugins in the working directory.
+     */
     public PluginManager(){
         this("./");
     }
+    /**
+     * Constructor that will look for plugins in the specified directory.
+     */
     public PluginManager(String path){
         plugins = new HashMap<>();
 
@@ -71,7 +80,7 @@ public class PluginManager<T> implements Iterable<PluginData>{
         for(FileSearcher.FileSearchItem file : search){
             try {
                 DataNode node = JSONParser.read(IOUtil.readContentAsString(file.getInputStream(), true));
-                log.fine("Found plugin: "+file.getPath());
+                log.fine("Found plugin: " + file.getPath());
                 PluginData plugin = new PluginData(node);
 
                 if (!plugins.containsKey(plugin.getName())){
@@ -93,32 +102,104 @@ public class PluginManager<T> implements Iterable<PluginData>{
         }
     }
 
+    /**
+     * @return a Iterator of all enabled plugins.
+     */
     @Override
     public Iterator<PluginData> iterator() {
-        return plugins.values().iterator();
+        return new EnabledPluginIterator(toList(plugins.values().iterator()));
     }
-    public <K> Iterator<K> getObjectIterator(Class<K> intf) {
-        return new PluginObjectIterator<>(plugins.values().iterator(), intf);
+    /**
+     * @return a Iterator for singleton Objects from all plugins that are enabled and
+     *          has defined implementations of the given interface.
+     */
+    public <K> Iterator<K> getSingletonIterator(Class<K> intf) {
+        return new PluginSingletonIterator<>(iterator(), intf);
     }
+    /**
+     * @return a Iterator for classes from all plugins that are enabled and has defined
+     *          implementations of the given interface.
+     */
     public <K> Iterator<Class<? extends K>> getClassIterator(Class<K> intf) {
-        return new PluginClassIterator<>(plugins.values().iterator(), intf);
+        return new PluginClassIterator<>(iterator(), intf);
     }
 
-    public ArrayList<PluginData> toArray() {
-        return toGenericArray(iterator());
+    /**
+     * @return a Iterator of all plugins, independently on if they are enabled or disabled.
+     */
+    public Iterator<PluginData> iteratorAll() {
+        return plugins.values().iterator();
     }
-    public <K> ArrayList<K> toArray(Class<K> intf) {
-        return toGenericArray(getObjectIterator(intf));
+
+    /**
+     * @return a List of enabled plugins.
+     */
+    public List<PluginData> toArray() {
+        return toList(iterator());
     }
-    private <K> ArrayList<K> toGenericArray(Iterator<K> it) {
+    /**
+     * @return a list of enabled plugins that has specified the provided interface in their definition.
+     */
+    public <K> List<K> toArray(Class<K> intf) {
+        return toList(getSingletonIterator(intf));
+    }
+
+    /**
+     * @return a List of all plugins, independently on if they are enabled or disabled.
+     */
+    public List<PluginData> toArrayAll() {
+        return toList(iteratorAll());
+    }
+
+
+
+
+    private <K> List<K> toList(Iterator<K> it) {
         ArrayList<K> list = new ArrayList<>();
         while(it.hasNext())
             list.add(it.next());
         return list;
     }
 
+    /**
+     * @return the PluginData representing the given plugin by name, returns null if
+     *          there is no plugin by that name.
+     */
+    public PluginData getPluginData(String pluginName) {
+        return plugins.get(pluginName);
+    }
 
-    public static class PluginClassIterator<T> implements Iterator<Class<? extends T>> {
+
+    /**
+     * A Iterator that only returns enabled plugins.
+     */
+    protected static class EnabledPluginIterator implements Iterator<PluginData> {
+        private List<PluginData> pluginList;
+        private int nextIndex = 0;
+
+        EnabledPluginIterator(List<PluginData> pluginList) {
+            this.pluginList = pluginList;
+        }
+
+        @Override
+        public boolean hasNext() {
+            for (int i = nextIndex; i < pluginList.size(); i++) {
+                if (pluginList.get(i).isEnabled())
+                    return true;
+            }
+            return false;
+        }
+
+        @Override
+        public PluginData next() {
+            if(!hasNext())
+                throw new NoSuchElementException();
+            return pluginList.get(nextIndex++);
+        }
+    }
+
+
+    protected static class PluginClassIterator<T> implements Iterator<Class<? extends T>> {
         private Class<T> intf;
         private Iterator<PluginData> pluginIt;
         private Iterator<Class<?>> classIt;
@@ -150,20 +231,15 @@ public class PluginManager<T> implements Iterable<PluginData>{
                 throw new NoSuchElementException();
             return (Class<? extends T>) classIt.next();
         }
-
-        @Override
-        public void remove() {
-            throw new RuntimeException("Iterator is ReadOnly");
-        }
     }
 
 
-    public static class PluginObjectIterator<T> implements Iterator<T> {
+    protected static class PluginSingletonIterator<T> implements Iterator<T> {
         private Class<T> intf;
         private Iterator<PluginData> pluginIt;
         private Iterator<T> objectIt;
 
-        PluginObjectIterator(Iterator<PluginData> it, Class<T> intf){
+        PluginSingletonIterator(Iterator<PluginData> it, Class<T> intf){
             this.intf = intf;
             this.pluginIt = it;
         }
@@ -189,11 +265,6 @@ public class PluginManager<T> implements Iterable<PluginData>{
             if(!hasNext())
                 throw new NoSuchElementException();
             return objectIt.next();
-        }
-
-        @Override
-        public void remove() {
-            throw new RuntimeException("Iterator is ReadOnly");
         }
     }
 }

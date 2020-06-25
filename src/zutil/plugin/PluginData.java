@@ -27,7 +27,6 @@ package zutil.plugin;
 import zutil.log.LogUtil;
 import zutil.parser.DataNode;
 
-import java.net.MalformedURLException;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -43,6 +42,7 @@ public class PluginData {
 
     private double pluginVersion;
     private String pluginName;
+    private boolean enabled = true;
     private HashMap<Class<?>, List<Class<?>>>  classMap;
     private HashMap<Class, Object> objectMap;
 
@@ -97,19 +97,44 @@ public class PluginData {
     }
 
 
+    /**
+     * @return a version number for the plugin (specified in the plugin.json file
+     */
     public double getVersion(){
         return pluginVersion;
     }
+    /**
+     * @return the name of the plugin
+     */
     public String getName(){
         return pluginName;
     }
+    /**
+     * @return if this plugin is enabled
+     */
+    public boolean isEnabled(){
+        return enabled;
+    }
+
+    /**
+     * Enables or disables this plugin
+     */
+    public void setEnabled(boolean enabled){
+        this.enabled = enabled;
+    }
 
 
+    /**
+     * @return a Iterator for all singleton Object instance that implement the specified interface
+     */
     public <T> Iterator<T> getObjectIterator(Class<T> intf){
         if(!classMap.containsKey(intf))
             return Collections.emptyIterator();
-        return new PluginObjectIterator<>(classMap.get(intf).iterator());
+        return new PluginSingletonIterator<>(classMap.get(intf).iterator());
     }
+    /**
+     * @return a Iterator for all classes implementing the interface by the plugin
+     */
     public Iterator<Class<?>> getClassIterator(Class<?> intf){
         if(!classMap.containsKey(intf))
             return Collections.emptyIterator();
@@ -122,27 +147,32 @@ public class PluginData {
                 objectMap.put(objClass, objClass.newInstance());
             return (T) objectMap.get(objClass);
         } catch (Exception e) {
-            log.log(Level.WARNING, null, e);
+            log.log(Level.WARNING, "Unable to instantiate plugin class: " + objClass, e);
         }
         return null;
     }
 
-
+    /**
+     * @return true if the specified interface is defined by the plugin
+     */
     public boolean contains(Class<?> intf){
         return classMap.containsKey(intf);
     }
 
     public String toString(){
-        return getName()+"(ver: "+getVersion()+")";
+        return getName()+"(version: "+getVersion()+")";
     }
 
 
-
-    private class PluginObjectIterator<T> implements Iterator<T>{
+    /**
+     * A Iterator that goes through all defined classes that implements
+     * a provided interface and returns a singleton instance of that class
+     */
+    private class PluginSingletonIterator<T> implements Iterator<T>{
         private Iterator<Class<?>> classIt;
         private T currentObj;
 
-        public PluginObjectIterator(Iterator<Class<?>> it) {
+        public PluginSingletonIterator(Iterator<Class<?>> it) {
             classIt = it;
         }
 

@@ -115,7 +115,7 @@ public class MulticastDnsServer extends ThreadedUDPNetwork implements ThreadedUD
             DnsPacket dnsPacket = DnsPacket.read(in);
 
             // Just handle queries and no responses
-            if ( ! dnsPacket.getHeader().flagQueryResponse){
+            if ( ! dnsPacket.getHeader().flagQueryResponse) {
                 DnsPacket response = handleReceivedPacket(dnsPacket);
                 if (response != null){
                     ByteArrayOutputStream outBuffer = new ByteArrayOutputStream();
@@ -140,12 +140,15 @@ public class MulticastDnsServer extends ThreadedUDPNetwork implements ThreadedUD
         response.getHeader().setDefaultResponseData();
         for (DnsPacketQuestion question : request.getQuestions()){
             if (question.name == null) continue;
-            switch (question.type){
 
+            switch (question.type){
                 // Normal Domain Name Resolution
                 case DnsConstants.TYPE.A:
                     if (entries.containsKey(question.name)){
+                        logger.finer("Received request for domain: " + question.name);
                         response.addAnswerRecord(entries.get(question.name));
+                    } else {
+                        logger.finest("Received request for unknown domain: " + question.name);
                     }
                     break;
 
@@ -154,19 +157,31 @@ public class MulticastDnsServer extends ThreadedUDPNetwork implements ThreadedUD
                     if (question.name.startsWith("_service.")){
                         String postFix = question.name.substring(9);
                         for (String domain : entries.keySet()){
-                            if (domain.endsWith(postFix))
+                            if (domain.endsWith(postFix)) {
+                                logger.finer("Received request for service: " + question.name);
                                 response.addAnswerRecord(entries.get(domain));
+                            } else {
+                                logger.finest("Received request for unknown service: " + question.name);
+                            }
                         }
                     } else if (entries.containsKey(question.name)){
+                        logger.finer("Received request for service: " + question.name);
                         response.addAnswerRecord(entries.get(question.name));
+                    } else {
+                        logger.finer("Received request for unknown pointer: " + question.name);
                     }
                     break;
+
+                default:
+                    logger.finest("Unknown request type: " + question.type);
             }
         }
+
         if (response.getAnswerRecords().isEmpty() &&
                 response.getNameServers().isEmpty() &&
-                response.getAdditionalRecords().isEmpty())
+                response.getAdditionalRecords().isEmpty()) {
             return null;
+        }
         return response;
     }
 }
