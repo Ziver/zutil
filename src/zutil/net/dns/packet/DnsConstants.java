@@ -77,7 +77,7 @@ public final class DnsConstants {
         public static final int NULL  = 10;
         /** a well known service description */
         public static final int WKS   = 11;
-        /** a domain name pointer */
+        /** a domain name pointer, generally used for reverse DNS */
         public static final int PTR   = 12;
         /** host information */
         public static final int HINFO = 13;

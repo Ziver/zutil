@@ -21,12 +21,12 @@ public class MulticastDnsServerTest {
 
 
     @Test
-    public void domainLookupNoEntries(){
+    public void domainLookupNoEntries() throws UnknownHostException {
         DnsPacket request = creatRequestDnsPacket(
                 "example.com",
                 DnsConstants.TYPE.A);
 
-        DnsPacket response = server.handleReceivedPacket(request);
+        DnsPacket response = server.handleReceivedPacket(InetAddress.getLocalHost(), request);
         assertNull(response);
     }
 
@@ -38,19 +38,19 @@ public class MulticastDnsServerTest {
                 DnsConstants.TYPE.A);
 
         server.addEntry("example.com", InetAddress.getLocalHost());
-        DnsPacket response = server.handleReceivedPacket(request);
+        DnsPacket response = server.handleReceivedPacket(InetAddress.getLocalHost(), request);
         assertNotNull(response);
         assertEquals("example.com", response.getAnswerRecords().get(0).name);
     }
 
 
     @Test
-    public void serviceDiscoveryNoEntries(){
+    public void serviceDiscoveryNoEntries() throws UnknownHostException {
         DnsPacket request = creatRequestDnsPacket(
                 "_service._tcp.local",
                 DnsConstants.TYPE.PTR);
 
-        DnsPacket response = server.handleReceivedPacket(request);
+        DnsPacket response = server.handleReceivedPacket(InetAddress.getLocalHost(), request);
         assertNull(response);
     }
 
@@ -62,7 +62,7 @@ public class MulticastDnsServerTest {
                 DnsConstants.TYPE.PTR);
 
         server.addEntry("_http._tcp.local", InetAddress.getLocalHost());
-        DnsPacket response = server.handleReceivedPacket(request);
+        DnsPacket response = server.handleReceivedPacket(InetAddress.getLocalHost(), request);
         assertNotNull(response);
     }
 

@@ -116,7 +116,7 @@ public class MulticastDnsServer extends ThreadedUDPNetwork implements ThreadedUD
 
             // Just handle queries and no responses
             if ( ! dnsPacket.getHeader().flagQueryResponse) {
-                DnsPacket response = handleReceivedPacket(dnsPacket);
+                DnsPacket response = handleReceivedPacket(packet.getAddress(), dnsPacket);
                 if (response != null){
                     ByteArrayOutputStream outBuffer = new ByteArrayOutputStream();
                     BinaryStructOutputStream out = new BinaryStructOutputStream(outBuffer);
@@ -135,45 +135,48 @@ public class MulticastDnsServer extends ThreadedUDPNetwork implements ThreadedUD
         }
     }
 
-    protected DnsPacket handleReceivedPacket(DnsPacket request){
+    protected DnsPacket handleReceivedPacket(InetAddress address, DnsPacket request){
         DnsPacket response = new DnsPacket();
         response.getHeader().setDefaultResponseData();
         for (DnsPacketQuestion question : request.getQuestions()){
             if (question.name == null) continue;
 
             switch (question.type){
+                // ------------------------------------------
                 // Normal Domain Name Resolution
+                // ------------------------------------------
+
                 case DnsConstants.TYPE.A:
                     if (entries.containsKey(question.name)){
-                        logger.finer("Received request for domain: " + question.name);
+                        logger.finer("Received request for domain: '" + question.name + "' from source: " + address);
                         response.addAnswerRecord(entries.get(question.name));
                     } else {
-                        logger.finest("Received request for unknown domain: " + question.name);
+                        logger.finest("Received request for unknown domain: '" + question.name + "' from source: " + address);
                     }
                     break;
 
-                // Service Name Resolution
+                // ------------------------------------------
+                // Service Name Resolution (Reverse DNS)
+                // ------------------------------------------
+
                 case DnsConstants.TYPE.PTR:
                     if (question.name.startsWith("_service.")){
                         String postFix = question.name.substring(9);
                         for (String domain : entries.keySet()){
                             if (domain.endsWith(postFix)) {
-                                logger.finer("Received request for service: " + question.name);
+                                logger.finer("Received request for service: '" + question.name + "' from source: " + address);
                                 response.addAnswerRecord(entries.get(domain));
                             } else {
-                                logger.finest("Received request for unknown service: " + question.name);
+                                logger.finest("Received request for unknown service: '" + question.name + "' from source: " + address);
                             }
                         }
                     } else if (entries.containsKey(question.name)){
-                        logger.finer("Received request for service: " + question.name);
+                        logger.finer("Received request for service: '" + question.name + "' from source: " + address);
                         response.addAnswerRecord(entries.get(question.name));
                     } else {
-                        logger.finer("Received request for unknown pointer: " + question.name);
+                        logger.finer("Received request for unknown pointer: '" + question.name + "' from source: " + address);
                     }
                     break;
-
-                default:
-                    logger.finest("Unknown request type: " + question.type);
             }
         }
 
