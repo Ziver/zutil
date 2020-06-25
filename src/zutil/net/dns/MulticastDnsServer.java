@@ -160,7 +160,7 @@ public class MulticastDnsServer extends ThreadedUDPNetwork implements ThreadedUD
                 // ------------------------------------------
 
                 case DnsConstants.TYPE.PTR:
-                    if (question.name.startsWith("_service.")){
+                    if (question.name.startsWith("_service.")) {
                         String postFix = question.name.substring(9);
                         for (String domain : entries.keySet()){
                             if (domain.endsWith(postFix)) {
