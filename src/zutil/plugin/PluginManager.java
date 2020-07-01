@@ -93,7 +93,7 @@ public class PluginManager<T> implements Iterable<PluginData>{
                     else if(version == plugin.getVersion())
                         log.fine("Ignoring duplicate plugin: " + plugin);
                     else
-                        log.fine("Ignoring outdated plugin: "+plugin);
+                        log.fine("Ignoring outdated plugin: " + plugin);
 
                 }
             } catch (Exception e) {
