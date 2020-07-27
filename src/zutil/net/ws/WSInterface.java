@@ -65,11 +65,18 @@ import java.lang.annotation.Target;
  * @author Ziver
  */
 public interface WSInterface {
+
+    enum RequestType {
+        HTTP_GET,
+        HTTP_POST,
+        HTTP_PUT,
+        HTTP_DELETE
+    }
+
+
     /**
      * Annotation that assigns a name to an parameters
      * in an method.
-     *
-     * @author Ziver
      */
     @Retention(RetentionPolicy.RUNTIME)
     @Target(ElementType.PARAMETER)
@@ -81,8 +88,6 @@ public interface WSInterface {
     /**
      * Annotation that assigns a name to the return value
      * in an method.
-     *
-     * @author Ziver
      */
     @Retention(RetentionPolicy.RUNTIME)
     @Target(ElementType.METHOD)
@@ -92,8 +97,6 @@ public interface WSInterface {
 
     /**
      * Skipp publication of the given method
-     *
-     * @author Ziver
      */
     @Retention(RetentionPolicy.RUNTIME)
     @Target(ElementType.METHOD)
@@ -102,8 +105,6 @@ public interface WSInterface {
     /**
      * Method or Parameter comments for the WSDL.
      * These comments are put in the message part of the WSDL
-     *
-     * @author Ziver
      */
     @Retention(RetentionPolicy.RUNTIME)
     @interface WSDocumentation{
@@ -113,8 +114,6 @@ public interface WSInterface {
     /**
      * Parameter comments for the WSDL.
      * These comments are put in the message part of the WSDL
-     *
-     * @author Ziver
      */
     @Retention(RetentionPolicy.RUNTIME)
     @interface WSParamDocumentation{
@@ -123,8 +122,6 @@ public interface WSInterface {
 
     /**
      * This method will be used in the header.
-     *
-     * @author Ziver
      */
     @Retention(RetentionPolicy.RUNTIME)
     @Target(ElementType.METHOD)
@@ -132,11 +129,27 @@ public interface WSInterface {
 
     /**
      * Specifies the name space for the method.
-     *
-     * @author Ziver
      */
     @Retention(RetentionPolicy.RUNTIME)
     @interface WSNamespace {
+        String value();
+    }
+
+    /**
+     * Specifies the request type.
+     */
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target(ElementType.METHOD)
+    @interface WSRequestType {
+        RequestType value();
+    }
+
+    /**
+     * Specifies the specific path for the method overriding the auto generated path.
+     */
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target(ElementType.METHOD)
+    @interface WSPath {
         String value();
     }
 }

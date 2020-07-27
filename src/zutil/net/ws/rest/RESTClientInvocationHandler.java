@@ -46,6 +46,8 @@ import java.util.logging.Logger;
 /**
  * This is an abstract client that will do generic requests to a
  * REST Web service using JSON response.
+ *
+ * TODO: Implement WSPath and WSRequestType
  */
 public class RESTClientInvocationHandler implements InvocationHandler {
     private static Logger logger = LogUtil.getLogger();
