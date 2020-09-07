@@ -36,8 +36,8 @@ import java.util.Map;
 public interface HttpPage{
     /**
      * This method has to be implemented for every page.
-     * This method is called when a client wants a response
-     * from this specific page.
+     * The method is called when a client sends a request
+     * and is expecting a response from the specific page.
      *
      * @param out           is a output stream to the client
      * @param headers   	is the header received from the client

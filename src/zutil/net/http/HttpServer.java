@@ -210,7 +210,7 @@ public class HttpServer extends ThreadedTCPNetworkServer{
                 }
 
                 //****************************  RESPONSE  ************************************
-                out.setHttpVersion("1.0");
+                out.setProtocolVersion("1.0");
                 out.setStatusCode(200);
                 out.setHeader("Server", SERVER_NAME);
                 out.setHeader("Content-Type", "text/html");

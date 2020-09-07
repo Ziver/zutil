@@ -39,80 +39,89 @@ public class HttpURL {
     public static final String PARAMETER_SEPARATOR = "?";
     public static final String ANCHOR_SEPARATOR = "#";
 
-    private String protocol	= "";
-    private String host		= "127.0.0.1";
-    private int port		= -1;
+    private String protocol = "";
+    private String host = "127.0.0.1";
+    private int port = -1;
     private String path;
     private String anchor;
 
-    private HashMap<String,String> parameters = new HashMap<>();
+    private HashMap<String, String> parameters = new HashMap<>();
 
 
-    public HttpURL(){}
+    public HttpURL() {}
 
-    public HttpURL( URL url ){
-        this.setProtocol( url.getProtocol() );
-        this.setHost( url.getHost() );
-        this.setPort( url.getPort() );
-        this.setPath( url.getPath() );
+    public HttpURL(URL url) {
+        this.setProtocol(url.getProtocol());
+        this.setHost(url.getHost());
+        this.setPort(url.getPort());
+        this.setPath(url.getPath());
     }
 
 
-    public String getProtocol( ){
+    public String getProtocol() {
         return protocol;
     }
-    public String getHost( ){
+
+    public String getHost() {
         return host;
     }
-    public int getPort( ){
+
+    public int getPort() {
         return port;
     }
-    public String getPath( ){
+
+    public String getPath() {
         return path;
     }
-    public String getAnchor( ){
+
+    public String getAnchor() {
         return anchor;
     }
 
-    public void setProtocol( String prot ){
+    public void setProtocol(String prot) {
         this.protocol = prot;
     }
-    public void setHost( String host ){
+
+    public void setHost(String host) {
         this.host = host;
     }
-    public void setPort( int port ){
+
+    public void setPort(int port) {
         this.port = port;
     }
-    public void setPath( String path ){
-        if( path.length() >= 1 && !path.startsWith(PATH_SEPARATOR))
+
+    public void setPath(String path) {
+        if (path.length() >= 1 && !path.startsWith(PATH_SEPARATOR))
             path = PATH_SEPARATOR + path;
         this.path = path;
     }
-    public void setAnchor( String anch ){
+
+    public void setAnchor(String anch) {
         this.anchor = anch;
     }
-    public void setParameter( String key, String value ){
+
+    public void setParameter(String key, String value) {
         this.parameters.put(key, value);
     }
 
-    protected void setParameters( HashMap<String,String> pars ){
+    protected void setParameters(HashMap<String, String> pars) {
         this.parameters = pars;
     }
 
     /**
      * Generates the parameter string in a URL.
-     *
+     * <p>
      * e.g.
      * "key=value&amp;key2=value&amp;..."
      */
-    public String getParameterString(){
+    public String getParameterString() {
         StringBuilder param = new StringBuilder();
-        for(String key : parameters.keySet()){
+        for (String key : parameters.keySet()) {
             if (param.length() > 0)
                 param.append('&');
             param.append(key);
             param.append('=');
-            param.append( parameters.get(key) );
+            param.append(parameters.get(key));
         }
         return param.toString();
     }
@@ -120,11 +129,11 @@ public class HttpURL {
     /**
      * Generates a path that are used in the HTTP header
      */
-    public String getHttpURL(){
+    public String getHttpURL() {
         StringBuilder url = new StringBuilder();
-        url.append( path );
-        if( !parameters.isEmpty() )
-            url.append( PARAMETER_SEPARATOR ).append( getParameterString() );
+        url.append(path);
+        if (!parameters.isEmpty())
+            url.append(PARAMETER_SEPARATOR).append(getParameterString());
 
         return url.toString();
     }
@@ -132,30 +141,30 @@ public class HttpURL {
     /**
      * Generates a full URL
      */
-    public String getURL(){
+    public String getURL() {
         return toString();
     }
 
     /**
      * Generates the whole URL
      */
-    public String toString(){
+    public String toString() {
         StringBuilder url = new StringBuilder();
-        url.append( protocol );
-        url.append( PROTOCOL_SEPARATOR );
-        url.append( host );
-        if( port > 0 )
-            url.append( PORT_SEPARATOR ).append( port );
+        url.append(protocol);
+        url.append(PROTOCOL_SEPARATOR);
+        url.append(host);
+        if (port > 0)
+            url.append(PORT_SEPARATOR).append(port);
 
-        if( path != null )
-            url.append( path );
+        if (path != null)
+            url.append(path);
         else
-            url.append( PATH_SEPARATOR );
+            url.append(PATH_SEPARATOR);
 
-        if( !parameters.isEmpty() )
-            url.append( PARAMETER_SEPARATOR ).append( getParameterString() );
-        if( anchor != null )
-            url.append( ANCHOR_SEPARATOR ).append( anchor );
+        if (!parameters.isEmpty())
+            url.append(PARAMETER_SEPARATOR).append(getParameterString());
+        if (anchor != null)
+            url.append(ANCHOR_SEPARATOR).append(anchor);
 
         return url.toString();
     }

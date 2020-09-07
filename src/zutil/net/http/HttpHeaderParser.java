@@ -50,9 +50,9 @@ public class HttpHeaderParser {
     /**
      * Parses the HTTP header information from a stream
      *
-     * @param 	in 				is the stream
+     * @param in is the stream
      */
-    public HttpHeaderParser(InputStream in){
+    public HttpHeaderParser(InputStream in) {
         this.in = in;
         this.skipStatusLine = false;
     }
@@ -60,9 +60,9 @@ public class HttpHeaderParser {
     /**
      * Parses the HTTP header information from a String
      *
-     * @param   in 		is the String
+     * @param in is the String
      */
-    public HttpHeaderParser(String in){
+    public HttpHeaderParser(String in) {
         this(new StringInputStream(in));
     }
 
@@ -73,13 +73,13 @@ public class HttpHeaderParser {
 
         // First line
         if (!skipStatusLine) {
-            if( (line=IOUtil.readLine(in)) != null && !line.isEmpty() )
+            if ((line = IOUtil.readLine(in)) != null && !line.isEmpty())
                 parseStatusLine(header, line);
             else
                 return null;
         }
         // Read header body
-        while( (line=IOUtil.readLine(in)) != null && !line.isEmpty() ){
+        while ((line = IOUtil.readLine(in)) != null && !line.isEmpty()) {
             parseHeaderLine(header.getHeaderMap(), line);
         }
 
@@ -90,40 +90,39 @@ public class HttpHeaderParser {
     }
 
     /**
-     * @param   skipStatusLine      indicates if the parser should expect a  http status lines. (default: true)
+     * @param skipStatusLine indicates if the parser should expect a  http status lines. (default: true)
      */
-    public void skipStatusLine(boolean skipStatusLine){
+    public void skipStatusLine(boolean skipStatusLine) {
         this.skipStatusLine = skipStatusLine;
     }
 
     /**
      * Parses the first line of a http request/response and stores the values in a HttpHeader object
      *
-     * @param   header          the header object where the cookies will be stored.
-     * @param 	statusLine 		the status line String
+     * @param header     the header object where the cookies will be stored.
+     * @param statusLine the status line String
      */
-    private static void parseStatusLine(HttpHeader header, String statusLine){
+    private static void parseStatusLine(HttpHeader header, String statusLine) {
         // Server Response
-        if( statusLine.startsWith("HTTP/") ){
+        if (statusLine.startsWith("HTTP/")) {
             header.setIsRequest(false);
-            header.setHTTPVersion( Float.parseFloat( statusLine.substring( 5 , 8)));
-            header.setHTTPCode( Integer.parseInt( statusLine.substring( 9, statusLine.indexOf(' ', 9) )));
+            header.setProtocolVersion(Float.parseFloat(statusLine.substring(5, 8)));
+            header.setStatusCode(Integer.parseInt(statusLine.substring(9, statusLine.indexOf(' ', 9))));
         }
         // Client Request
-        else if(statusLine.contains("HTTP/")){
+        else if (statusLine.contains("HTTP/")) {
             header.setIsRequest(true);
-            header.setRequestType( statusLine.substring(0, statusLine.indexOf(" ")).trim() );
-            header.setHTTPVersion( Float.parseFloat( statusLine.substring(statusLine.lastIndexOf("HTTP/")+5 , statusLine.length()).trim()));
-            statusLine = (statusLine.substring(header.getRequestType().length()+1, statusLine.lastIndexOf("HTTP/")));
+            header.setRequestType(statusLine.substring(0, statusLine.indexOf(" ")).trim());
+            header.setProtocolVersion(Float.parseFloat(statusLine.substring(statusLine.lastIndexOf("HTTP/") + 5).trim()));
+            statusLine = (statusLine.substring(header.getRequestType().length() + 1, statusLine.lastIndexOf("HTTP/")));
 
             // parse URL and attributes
             int index = statusLine.indexOf('?');
-            if(index > -1){
-                header.setRequestURL( statusLine.substring(0, index));
-                statusLine = statusLine.substring( index+1, statusLine.length());
+            if (index > -1) {
+                header.setRequestURL(statusLine.substring(0, index));
+                statusLine = statusLine.substring(index + 1);
                 parseURLParameters(header.getUrlAttributeMap(), statusLine);
-            }
-            else{
+            } else {
                 header.setRequestURL(statusLine);
             }
         }
@@ -134,23 +133,23 @@ public class HttpHeaderParser {
      * Note that all header keys will be stored with
      * uppercase notation to make them case insensitive.
      *
-     * @param   map     a map where the header key(Uppercase) and value will be stored.
-     * @param 	line 	is the next line in the header
+     * @param map  a map where the header key(Uppercase) and value will be stored.
+     * @param line is the next line in the header
      */
-    public static void parseHeaderLine(Map<String,String> map, String line){
-        String[] data = PATTERN_COLON.split( line, 2 );
+    public static void parseHeaderLine(Map<String, String> map, String line) {
+        String[] data = PATTERN_COLON.split(line, 2);
         map.put(
-                data[0].trim().toUpperCase(), 					// Key
-                (data.length>1 ? data[1] : "").trim()); 		//Value
+                data[0].trim().toUpperCase(),                    // Key
+                (data.length > 1 ? data[1] : "").trim());        //Value
     }
 
     /**
      * Parses a raw cookie header into key and value pairs
      *
-     * @param   map             the Map where the cookies will be stored.
-     * @param   cookieValue		the raw cookie header value String that will be parsed
+     * @param map         the Map where the cookies will be stored.
+     * @param cookieValue the raw cookie header value String that will be parsed
      */
-    public static void parseCookieValues(Map<String,String> map, String cookieValue){
+    public static void parseCookieValues(Map<String, String> map, String cookieValue) {
         parseHeaderValues(map, cookieValue, ";");
     }
 
@@ -159,34 +158,37 @@ public class HttpHeaderParser {
      * Parses a header value string that contains key and value paired data and
      * stores them in a HashMap. If a pair only contain a key then the value
      * will be set as a empty string.
-     *
+     * <p>
      * TODO: method is not quote aware
-     * @param   headerValue         the raw header value String that will be parsed.
-     * @param   delimiter           the delimiter that separates key and value pairs (e.g. ';' for Cookies or ',' for Cache-Control)
+     *
+     * @param headerValue the raw header value String that will be parsed.
+     * @param delimiter   the delimiter that separates key and value pairs (e.g. ';' for Cookies or ',' for Cache-Control)
      */
-    public static HashMap<String, String> parseHeaderValues(String headerValue, String delimiter){
+    public static HashMap<String, String> parseHeaderValues(String headerValue, String delimiter) {
         HashMap<String, String> map = new HashMap<>();
         parseHeaderValues(map, headerValue, delimiter);
         return map;
     }
+
     /**
      * Parses a header value string that contains key and value paired data and
      * stores them in a HashMap. If a pair only contain a key then the value
      * will be set as a empty string.
-     *
+     * <p>
      * TODO: method is not quote aware
-     * @param   map             the Map where key and values will be stored.
-     * @param   headerValue		the raw header value String that will be parsed.
-     * @param 	delimiter		the delimiter that separates key and value pairs (e.g. ';' for Cookies or ',' for Cache-Control)
+     *
+     * @param map         the Map where key and values will be stored.
+     * @param headerValue the raw header value String that will be parsed.
+     * @param delimiter   the delimiter that separates key and value pairs (e.g. ';' for Cookies or ',' for Cache-Control)
      */
-    public static void parseHeaderValues(Map<String,String> map, String headerValue, String delimiter){
-        if(headerValue != null && !headerValue.isEmpty()){
+    public static void parseHeaderValues(Map<String, String> map, String headerValue, String delimiter) {
+        if (headerValue != null && !headerValue.isEmpty()) {
             String[] tmpArr = headerValue.split(delimiter);
-            for(String cookie : tmpArr){
+            for (String cookie : tmpArr) {
                 String[] tmpStr = PATTERN_EQUAL.split(cookie, 2);
                 map.put(
                         tmpStr[0].trim(), // Key
-                        StringUtil.trim((tmpStr.length>1 ? tmpStr[1] : "").trim(), '\"')); //Value
+                        StringUtil.trim((tmpStr.length > 1 ? tmpStr[1] : "").trim(), '\"')); //Value
             }
         }
     }
@@ -195,28 +197,29 @@ public class HttpHeaderParser {
     /**
      * Parses a string with variables from a get or post request that was sent from a client
      *
-     * @param   header              the header object where the url attributes key and value will be stored.
-     * @param 	urlAttributes 		is the String containing all the attributes
+     * @param header        the header object where the url attributes key and value will be stored.
+     * @param urlAttributes is the String containing all the attributes
      */
-    public static void parseURLParameters(HttpHeader header, String urlAttributes){
+    public static void parseURLParameters(HttpHeader header, String urlAttributes) {
         parseURLParameters(header.getUrlAttributeMap(), urlAttributes);
     }
+
     /**
      * Parses a string with variables from a get or post request that was sent from a client
      *
-     * @param   map                 a map where the url attributes key and value will be stored.
-     * @param 	urlAttributes 		is the String containing all the attributes
+     * @param map           a map where the url attributes key and value will be stored.
+     * @param urlAttributes is the String containing all the attributes
      */
-    public static void parseURLParameters(Map<String,String> map, String urlAttributes){
+    public static void parseURLParameters(Map<String, String> map, String urlAttributes) {
         String[] tmp;
         urlAttributes = URLDecoder.decode(urlAttributes);
         // get the variables
-        String[] data = PATTERN_AND.split( urlAttributes );
-        for(String element : data){
+        String[] data = PATTERN_AND.split(urlAttributes);
+        for (String element : data) {
             tmp = PATTERN_EQUAL.split(element, 2);
             map.put(
-                    tmp[0].trim(), 								// Key
-                    (tmp.length>1 ? tmp[1] : "").trim()); 		//Value
+                    tmp[0].trim(),                                // Key
+                    (tmp.length > 1 ? tmp[1] : "").trim());       //Value
         }
     }
 }

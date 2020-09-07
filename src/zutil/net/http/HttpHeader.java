@@ -31,13 +31,12 @@ import java.util.HashMap;
 import java.util.Iterator;
 
 public class HttpHeader {
-    // HTTP info
     private boolean request = true;
-    private String type     = "GET";
-    private String url      = "/";
+    private String type = "GET";
+    private String url = "/";
     private HashMap<String, String> urlAttributes;
-    private float version   = 1.0f;
-    private int httpCode    = 200;
+    private float protocolVersion = 1.0f;
+    private int statusCode = 200;
     private InputStream in;
 
     // Parameters
@@ -45,7 +44,7 @@ public class HttpHeader {
     private HashMap<String, String> cookies;
 
 
-    public HttpHeader(){
+    public HttpHeader() {
         urlAttributes = new HashMap<>();
         headers = new HashMap<>();
         cookies = new HashMap<>();
@@ -53,46 +52,52 @@ public class HttpHeader {
 
 
     /**
-     * @return      true if this header represents a server response
+     * @return true if this header represents a server response
      */
-    public boolean isResponse(){
+    public boolean isResponse() {
         return !request;
     }
+
     /**
-     * @return      true if this header represents a client request
+     * @return true if this header represents a client request
      */
-    public boolean isRequest(){
+    public boolean isRequest() {
         return request;
     }
+
     /**
-     * @return 		the HTTP message type( ex. GET,POST...)
+     * @return the HTTP message type( ex. GET,POST...)
      */
-    public String getRequestType(){
+    public String getRequestType() {
         return type;
     }
+
     /**
-     * @return 		the HTTP version of this header
+     * @return the protocol version from this header
      */
-    public float getHTTPVersion(){
-        return version;
+    public float getProtocolVersion() {
+        return protocolVersion;
     }
+
     /**
-     * @return 		the HTTP Return Code from a Server
+     * @return the HTTP Return Code from a Server
      */
-    public int getHTTPCode(){
-        return httpCode;
+    public int getStatusCode() {
+        return statusCode;
     }
+
     /**
-     * @return 		the URL that the client sent the server
+     * @return the URL that the client sent the server
      */
-    public String getRequestURL(){
+    public String getRequestURL() {
         return url;
     }
+
     /**
      * @return parses out the page name from the request url and returns it.
      */
     public String getRequestPage() {
-        if (url != null){
+        if (url != null) {
             int start = 0;
             if (url.charAt(0) == '/')
                 start = 1;
@@ -104,87 +109,103 @@ public class HttpHeader {
         }
         return null;
     }
+
     /**
-     * @return      a Iterator with all defined url keys
+     * @return a Iterator with all defined url keys
      */
-    public Iterator<String> getURLAttributeKeys(){
+    public Iterator<String> getURLAttributeKeys() {
         return urlAttributes.keySet().iterator();
     }
+
     /**
-     * @return     the URL attribute value of the given name. null if there is no such attribute
+     * @return the URL attribute value of the given name. null if there is no such attribute
      */
-    public String getURLAttribute(String name){
-        return urlAttributes.get( name );
+    public String getURLAttribute(String name) {
+        return urlAttributes.get(name);
     }
+
     /**
-     * @return      a Iterator with all defined headers
+     * @return a Iterator with all defined headers
      */
-    public Iterator<String> getHeaderKeys(){
+    public Iterator<String> getHeaderKeys() {
         return headers.keySet().iterator();
     }
+
     /**
-     * @return     the HTTP attribute value of the given name. null if there is no such attribute
+     * @return the HTTP attribute value of the given name. null if there is no such attribute
      */
-    public String getHeader(String name){
-        return headers.get( name.toUpperCase() );
+    public String getHeader(String name) {
+        return headers.get(name.toUpperCase());
     }
+
     /**
-     * @return      a Iterator with all defined cookies
+     * @return a Iterator with all defined cookies
      */
-    public Iterator<String> getCookieKeys(){
+    public Iterator<String> getCookieKeys() {
         return cookies.keySet().iterator();
     }
+
     /**
-     * @return     the cookie value of the given name. null if there is no such attribute.
+     * @return the cookie value of the given name. null if there is no such attribute.
      */
-    public String getCookie(String name){
-        return cookies.get( name );
+    public String getCookie(String name) {
+        return cookies.get(name);
     }
+
     /**
-     * @return     a Reader that contains the body of the http request.
+     * @return a Reader that contains the body of the http request.
      */
-    public InputStream getInputStream(){
+    public InputStream getInputStream() {
         return in;
     }
 
 
-    public void setIsRequest(boolean request) { this.request = request; }
-    public void setRequestType(String type){
+    public void setIsRequest(boolean request) {
+        this.request = request;
+    }
+
+    public void setRequestType(String type) {
         this.type = type;
     }
-    public void setHTTPVersion(float version){
-        this.version = version;
+
+    public void setProtocolVersion(float version) {
+        this.protocolVersion = version;
     }
-    public void setHTTPCode(int code){
-        this.httpCode = code;
+
+    public void setStatusCode(int code) {
+        this.statusCode = code;
     }
-    public void setRequestURL(String url){
+
+    public void setRequestURL(String url) {
         this.url = url.trim().replaceAll("//", "/");
     }
-    public void setHeader(String key, String value){
+
+    public void setHeader(String key, String value) {
         this.headers.put(key.toUpperCase(), value);
     }
-    protected void setInputStream(InputStream in){
+
+    protected void setInputStream(InputStream in) {
         this.in = in;
     }
 
-    protected HashMap<String,String> getHeaderMap(){
+    protected HashMap<String, String> getHeaderMap() {
         return headers;
     }
-    protected HashMap<String,String> getCookieMap(){
+
+    protected HashMap<String, String> getCookieMap() {
         return cookies;
     }
-    protected HashMap<String,String> getUrlAttributeMap(){
+
+    protected HashMap<String, String> getUrlAttributeMap() {
         return urlAttributes;
     }
 
 
-
-    public String toString(){
+    public String toString() {
         StringBuilder tmp = new StringBuilder();
         tmp.append("{Type: ").append(type);
-        tmp.append(", HTTP_version: HTTP/").append(version);
-        if(url == null)
+        tmp.append(", HTTP_version: HTTP/").append(protocolVersion);
+        if (url == null)
             tmp.append(", URL: null");
         else
             tmp.append(", URL: \"").append(url).append('\"');
@@ -196,13 +217,13 @@ public class HttpHeader {
         tmp.append('}');
         return tmp.toString();
     }
-    public String toStringHeaders(){
+    public String toStringHeaders() {
         return Converter.toString(headers);
     }
-    public String toStringCookies(){
+    public String toStringCookies() {
         return Converter.toString(cookies);
     }
-    public String toStringAttributes(){
+    public String toStringAttributes() {
         return Converter.toString(urlAttributes);
     }
 

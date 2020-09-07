@@ -36,7 +36,7 @@ public class HttpDigestAuthPageTest {
     public void cleanRequest() throws IOException {
         HttpHeader rspHeader = HttpTestUtil.makeRequest(page);
 
-        assertEquals(401, rspHeader.getHTTPCode());
+        assertEquals(401, rspHeader.getStatusCode());
         assertNotNull(rspHeader.getHeader("WWW-Authenticate"));
         assertEquals("Digest", parseAuthType(rspHeader));
         Map<String,String> authHeader = parseAuthHeader(rspHeader);
@@ -49,21 +49,21 @@ public class HttpDigestAuthPageTest {
     @Test
     public void authenticate() throws IOException {
         HttpHeader rspHeader = authenticate(PAGE_USERNAME, PAGE_PASSWORD);
-        assertEquals(200, rspHeader.getHTTPCode());
+        assertEquals(200, rspHeader.getStatusCode());
         assertThat(IOUtil.readContentAsString(rspHeader.getInputStream()),
                 containsString(PAGE_CONTENT));
     }
     @Test
     public void wrongUsername() throws IOException {
         HttpHeader rspHeader = authenticate(PAGE_USERNAME+"wrong", PAGE_PASSWORD);
-        assertEquals(403, rspHeader.getHTTPCode());
+        assertEquals(403, rspHeader.getStatusCode());
         assertThat(IOUtil.readContentAsString(rspHeader.getInputStream()),
                 not(containsString(PAGE_CONTENT)));
     }
     @Test
     public void wrongPassword() throws IOException {
         HttpHeader rspHeader = authenticate(PAGE_USERNAME, PAGE_PASSWORD+"wrong");
-        assertEquals(403, rspHeader.getHTTPCode());
+        assertEquals(403, rspHeader.getStatusCode());
         assertThat(IOUtil.readContentAsString(rspHeader.getInputStream()),
                 not(containsString(PAGE_CONTENT)));
     }
