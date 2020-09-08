@@ -56,15 +56,15 @@ public class HttpPrintStream extends OutputStream {
     /**
      * Specifies the protocol that should be used
      */
-    private String protocol;
+    private String protocol = "HTTP";
     /**
      * Specifies the protocol version that should be used
      */
-    private String protocolVersion;
+    private String protocolVersion = "1.0";
     /**
      * The status code of the message, ONLY for response
      */
-    private Integer responseStatusCode;
+    private Integer responseStatusCode = 200;
     /**
      * The request type of the message ONLY for request
      */
@@ -76,19 +76,15 @@ public class HttpPrintStream extends OutputStream {
     /**
      * An Map of all the header values
      */
-    private HashMap<String, String> headers;
+    private HashMap<String, String> headers = new HashMap<>();
     /**
      * An Map of all the cookies
      */
-    private HashMap<String, String> cookies;
+    private HashMap<String, String> cookies = new HashMap<>();
     /**
-     * The header data buffer
+     * The header data buffer, buffering is enabled if this variable is not null
      */
-    private StringBuffer buffer;
-    /**
-     * If the header buffering is enabled
-     */
-    private boolean bufferEnabled;
+    private StringBuffer buffer = null;
 
 
     /**
@@ -110,14 +106,7 @@ public class HttpPrintStream extends OutputStream {
      */
     public HttpPrintStream(OutputStream out, HttpMessageType type) {
         this.out = new PrintStream(out);
-        this.protocol = "HTTP";
-        this.protocolVersion = "1.0";
         this.messageType = type;
-        this.responseStatusCode = 200;
-        this.headers = new HashMap<>();
-        this.cookies = new HashMap<>();
-        this.buffer = new StringBuffer();
-        this.bufferEnabled = false;
     }
 
 
@@ -129,8 +118,12 @@ public class HttpPrintStream extends OutputStream {
      * disabled.
      */
     public void enableBuffering(boolean enable) {
-        bufferEnabled = enable;
-        if (!bufferEnabled) flush();
+        if (enable && !isBufferEnabled()) {
+            buffer = new StringBuffer();
+        } else if (!enable && isBufferEnabled()) {
+            flush();
+            buffer = null;
+        }
     }
 
     /**
@@ -173,10 +166,10 @@ public class HttpPrintStream extends OutputStream {
      * @throws IllegalStateException if the header has already been sent or the message type is wrong
      */
     public void setStatusCode(int code) {
-        if (responseStatusCode == null)
-            throw new IllegalStateException("Header already sent.");
         if (messageType != HttpMessageType.RESPONSE)
             throw new IllegalStateException("Status Code is only available with HTTP requests");
+        if (responseStatusCode == null)
+            throw new IllegalStateException("Header already sent.");
         responseStatusCode = code;
     }
 
@@ -187,10 +180,10 @@ public class HttpPrintStream extends OutputStream {
      * @throws IllegalStateException if the header has already been sent or the message type is wrong
      */
     public void setRequestType(String req_type) {
-        if (req_type == null)
-            throw new IllegalStateException("Header already sent.");
         if (messageType != HttpMessageType.REQUEST)
             throw new IllegalStateException("Request Message Type is only available with HTTP requests");
+        if (req_type == null)
+            throw new IllegalStateException("Header already sent.");
         this.requestType = req_type;
     }
 
@@ -201,10 +194,10 @@ public class HttpPrintStream extends OutputStream {
      * @throws IllegalStateException if the header has already been sent or the message type is wrong
      */
     public void setRequestURL(String req_url) {
-        if (req_url == null)
-            throw new IllegalStateException("Header already sent.");
         if (messageType != HttpMessageType.REQUEST)
             throw new IllegalStateException("Request URL is only available with a HTTP request");
+        if (req_url == null)
+            throw new IllegalStateException("Header already sent.");
         this.requestUrl = req_url;
     }
 
@@ -239,54 +232,68 @@ public class HttpPrintStream extends OutputStream {
     }
 
     /**
-     * Will buffer the body data or directly send the headers if needed and then the append the body
+     * Will buffer the body data or directly send the headers if needed and then append the body
      */
     private void printOrBuffer(String s) {
-        if (bufferEnabled) {
+        if (isBufferEnabled()) {
             buffer.append(s);
         } else {
-            if (responseStatusCode != null) {
-                if (messageType == HttpMessageType.REQUEST)
-                    out.print(requestType + " " + requestUrl + " " + protocol + "/" + protocolVersion);
-                else
-                    out.print("HTTP/" + protocolVersion + " " + responseStatusCode + " " + getStatusString(responseStatusCode));
-                out.println();
-                responseStatusCode = null;
-                requestType = null;
-                requestUrl = null;
-            }
-
-            if (headers != null) {
-                for (String key : headers.keySet()) {
-                    out.println(key + ": " + headers.get(key));
-                }
-                headers = null;
-            }
-
-            if (cookies != null) {
-                if (!cookies.isEmpty()) {
-                    if (messageType == HttpMessageType.REQUEST) {
-                        out.print("Cookie: ");
-                        for (String key : cookies.keySet()) {
-                            out.print(key + "=" + cookies.get(key) + "; ");
-                        }
-                        out.println();
-                    } else {
-                        for (String key : cookies.keySet()) {
-                            out.print("Set-Cookie: " + key + "=" + cookies.get(key) + ";");
-                            out.println();
-                        }
-                    }
-                }
-                out.println();
-                cookies = null;
-            }
-            out.print(s);
+            printForced(s);
         }
     }
 
     /**
-     * @return if headers has been sent. The setHeader, setStatusCode, setCookie method will throw IllegalStateException
+     * Method will directly print the provided String, if any headers are set then they will firstly be sent and cleared proceeded by the given String.
+     */
+    private void printForced(String s) {
+        if (responseStatusCode != null) {
+            if (messageType == HttpMessageType.REQUEST)
+                out.print(requestType + " " + requestUrl + " " + protocol + "/" + protocolVersion);
+            else
+                out.print("HTTP/" + protocolVersion + " " + responseStatusCode + " " + getStatusString(responseStatusCode));
+            out.println();
+            responseStatusCode = null;
+            requestType = null;
+            requestUrl = null;
+        }
+
+        if (headers != null) {
+            for (String key : headers.keySet()) {
+                out.println(key + ": " + headers.get(key));
+            }
+            headers = null;
+        }
+
+        if (cookies != null) {
+            if (!cookies.isEmpty()) {
+                if (messageType == HttpMessageType.REQUEST) {
+                    out.print("Cookie: ");
+                    for (String key : cookies.keySet()) {
+                        out.print(key + "=" + cookies.get(key) + "; ");
+                    }
+                    out.println();
+                } else {
+                    for (String key : cookies.keySet()) {
+                        out.print("Set-Cookie: " + key + "=" + cookies.get(key) + ";");
+                        out.println();
+                    }
+                }
+            }
+            out.println();
+            cookies = null;
+        }
+        out.print(s);
+    }
+
+    /**
+     * @return true if the HTTP header buffer is enabled. If enabled all output will be buffered until the headers has been sent.
+     */
+    public boolean isBufferEnabled() {
+        return buffer != null;
+    }
+
+    /**
+     * @return true if headers has been sent. The setHeader, setStatusCode, setCookie method will throw IllegalStateException
      */
     public boolean isHeaderSent() {
         return responseStatusCode == null && headers == null && cookies == null;
@@ -309,11 +316,9 @@ public class HttpPrintStream extends OutputStream {
     }
 
     protected void flushBuffer() {
-        if (bufferEnabled) {
-            bufferEnabled = false;
-            printOrBuffer(buffer.toString());
+        if (isBufferEnabled()) {
+            printForced(buffer.toString());
             buffer.delete(0, buffer.length());
-            bufferEnabled = true;
         } else if (responseStatusCode != null || headers != null || cookies != null) {
             printOrBuffer("");
         }
