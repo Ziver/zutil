@@ -20,8 +20,9 @@ public class HttpTestUtil {
     public static HttpHeader makeRequest(HttpPage page, HttpHeader headers) throws IOException {
         StringOutputStream buff = new StringOutputStream();
         HttpPrintStream out = new HttpPrintStream(buff);
-        page.respond(
-                out, headers, session, new HashMap(), new HashMap());
+
+        page.respond(out, headers, session, new HashMap(), new HashMap());
+
         out.flush();
         HttpHeaderParser parser = new HttpHeaderParser(buff.toString());
         return parser.read();

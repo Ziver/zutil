@@ -122,12 +122,12 @@ public class HttpFilePage implements HttpPage{
 
         }catch (FileNotFoundException | SecurityException e){
             if(!out.isHeaderSent())
-                out.setStatusCode(404);
+                out.setResponseStatusCode(404);
             log.log(Level.WARNING, e.getMessage());
             out.println("404 Page Not Found: " + headers.getRequestURL());
         } catch (IOException e){
             if(!out.isHeaderSent())
-                out.setStatusCode(500);
+                out.setResponseStatusCode(500);
             log.log(Level.WARNING, null, e);
             out.println("500 Internal Server Error: "+e.getMessage() );
         }
@@ -140,7 +140,7 @@ public class HttpFilePage implements HttpPage{
 
         if (eTag != null && headers.getHeader("If-None-Match") != null &&
                 eTag.equals(StringUtil.trimQuotes(headers.getHeader("If-None-Match")))){ // File has not changed
-            out.setStatusCode(304);
+            out.setResponseStatusCode(304);
         } else {
             deliverFile(file, out);
         }

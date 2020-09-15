@@ -37,7 +37,7 @@ import java.util.UUID;
 /**
  * This class contains information about a service from
  * or through the SSDP protocol
- * 
+ *
  * @author Ziver
  */
 public class StandardSSDPInfo implements SSDPServiceInfo, SSDPCustomInfo{
@@ -138,11 +138,8 @@ public class StandardSSDPInfo implements SSDPServiceInfo, SSDPCustomInfo{
     }
     @Override
     public void writeHeaders(HttpPrintStream http) {
-        try {
-            for (String key : headers.keySet())
-                http.setHeader(key, headers.get(key));
-        }catch(IOException e){
-            e.printStackTrace();
+        for (String key : headers.keySet()) {
+            http.setHeader(key, headers.get(key));
         }
     }
     @Override

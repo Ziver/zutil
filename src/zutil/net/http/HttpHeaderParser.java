@@ -107,7 +107,7 @@ public class HttpHeaderParser {
         if (statusLine.startsWith("HTTP/")) {
             header.setIsRequest(false);
             header.setProtocolVersion(Float.parseFloat(statusLine.substring(5, 8)));
-            header.setStatusCode(Integer.parseInt(statusLine.substring(9, statusLine.indexOf(' ', 9))));
+            header.setResponseStatusCode(Integer.parseInt(statusLine.substring(9, statusLine.indexOf(' ', 9))));
         }
         // Client Request
         else if (statusLine.contains("HTTP/")) {
@@ -121,7 +121,7 @@ public class HttpHeaderParser {
             if (index > -1) {
                 header.setRequestURL(statusLine.substring(0, index));
                 statusLine = statusLine.substring(index + 1);
-                parseURLParameters(header.getUrlAttributeMap(), statusLine);
+                parseURLParameters(header.getURLAttributeMap(), statusLine);
             } else {
                 header.setRequestURL(statusLine);
             }
@@ -201,7 +201,7 @@ public class HttpHeaderParser {
      * @param urlAttributes is the String containing all the attributes
      */
     public static void parseURLParameters(HttpHeader header, String urlAttributes) {
-        parseURLParameters(header.getUrlAttributeMap(), urlAttributes);
+        parseURLParameters(header.getURLAttributeMap(), urlAttributes);
     }
 
     /**

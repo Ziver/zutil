@@ -187,7 +187,7 @@ public class SSDPServer extends ThreadedUDPNetwork implements ThreadedUDPNetwork
                         // Generate the SSDP response
                         ByteArrayOutputStream buffer = new ByteArrayOutputStream();
                         HttpPrintStream http = new HttpPrintStream( buffer );
-                        http.setStatusCode(200);
+                        http.setResponseStatusCode(200);
                         http.setHeader("Location", services.get(st).getLocation() );
                         http.setHeader("USN", services.get(st).getUSN() );
                         http.setHeader("Server", SERVER_INFO );

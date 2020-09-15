@@ -29,48 +29,68 @@ import zutil.converter.Converter;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
+import java.util.TreeMap;
 
 public class HttpHeader {
-    private boolean request = true;
-    private String type = "GET";
-    private String url = "/";
-    private HashMap<String, String> urlAttributes;
+    private boolean isRequest = true;
+
+    /** Specifies the protocol that should be used */
+    private String protocol = "HTTP";
+    /** The protocol version specified in the header */
     private float protocolVersion = 1.0f;
-    private int statusCode = 200;
+
+    /** HTTP type specified in a HTTP request, e.g GET POST DELETE PUT etc */
+    private String requestType = "GET";
+    /** String containing the target URL */
+    private String requestUrl = "/";
+    /** Map containing all the properties from the URL */
+    private Map<String, String> requestUrlAttributes = new HashMap<>();
+
+    /** Status code specified in a HTTP response message */
+    private int responseStatusCode = 200;
+
+    /** An Map of all header fields */
+    private Map<String, String> headers = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
+    /** An Map of all cookies */
+    private Map<String, String> cookies = new HashMap<>();
+
     private InputStream in;
 
-    // Parameters
-    private HashMap<String, String> headers;
-    private HashMap<String, String> cookies;
 
-
-    public HttpHeader() {
-        urlAttributes = new HashMap<>();
-        headers = new HashMap<>();
-        cookies = new HashMap<>();
-    }
+    public HttpHeader() {  }
 
 
     /**
      * @return true if this header represents a server response
      */
     public boolean isResponse() {
-        return !request;
+        return !isRequest;
     }
 
     /**
      * @return true if this header represents a client request
      */
     public boolean isRequest() {
-        return request;
+        return isRequest;
     }
 
-    /**
-     * @return the HTTP message type( ex. GET,POST...)
-     */
-    public String getRequestType() {
-        return type;
+    public void setIsRequest(boolean request) {
+        this.isRequest = request;
     }
+
+
+    /**
+     * @return the protocol specified in the header. e.g. HTTP, HTTPS, RTSP etc.
+     */
+    public String getProtocol() {
+        return protocol;
+    }
+
+    public void setProtocol(String protocol) {
+        this.protocol = protocol;
+    }
+
 
     /**
      * @return the protocol version from this header
@@ -79,50 +99,86 @@ public class HttpHeader {
         return protocolVersion;
     }
 
+    public void setProtocolVersion(float version) {
+        this.protocolVersion = version;
+    }
+
+
+    /**
+     * @return the HTTP message type( ex. GET,POST...)
+     */
+    public String getRequestType() {
+        return requestType;
+    }
+
+    public void setRequestType(String type) {
+        this.requestType = type;
+    }
+
+
     /**
      * @return the HTTP Return Code from a Server
      */
-    public int getStatusCode() {
-        return statusCode;
+    public int getResponseStatusCode() {
+        return responseStatusCode;
     }
+
+    public void setResponseStatusCode(int code) {
+        this.responseStatusCode = code;
+    }
+
 
     /**
      * @return the URL that the client sent the server
      */
     public String getRequestURL() {
-        return url;
+        return requestUrl;
+    }
+
+    public void setRequestURL(String url) {
+        this.requestUrl = url.trim().replaceAll("//", "/");
     }
 
     /**
      * @return parses out the page name from the request url and returns it.
      */
     public String getRequestPage() {
-        if (url != null) {
+        if (requestUrl != null) {
             int start = 0;
-            if (url.charAt(0) == '/')
+            if (requestUrl.charAt(0) == '/')
                 start = 1;
-            int end = url.indexOf('?');
+            int end = requestUrl.indexOf('?');
             if (end < 0)
-                end = url.length();
+                end = requestUrl.length();
 
-            return url.substring(start, end);
+            return requestUrl.substring(start, end);
         }
         return null;
     }
+
 
     /**
      * @return a Iterator with all defined url keys
      */
     public Iterator<String> getURLAttributeKeys() {
-        return urlAttributes.keySet().iterator();
+        return requestUrlAttributes.keySet().iterator();
     }
 
     /**
      * @return the URL attribute value of the given name. null if there is no such attribute
      */
     public String getURLAttribute(String name) {
-        return urlAttributes.get(name);
+        return requestUrlAttributes.get(name);
     }
+
+    protected Map<String, String> getURLAttributeMap() {
+        return requestUrlAttributes;
+    }
+
+    public void setURLAttribute(String key, String value) {
+        this.requestUrlAttributes.put(key, value);
+    }
+
 
     /**
      * @return a Iterator with all defined headers
@@ -138,6 +194,19 @@ public class HttpHeader {
         return headers.get(name.toUpperCase());
     }
 
+    protected Map<String, String> getHeaderMap() {
+        return headers;
+    }
+
+    public void setHeader(String key, String value) {
+        this.headers.put(key, value);
+    }
+
+    public void setHeaders(Map headerSrc) {
+        this.headers.putAll(headerSrc);
+    }
+
+
     /**
      * @return a Iterator with all defined cookies
      */
@@ -152,6 +221,19 @@ public class HttpHeader {
         return cookies.get(name);
     }
 
+    protected Map<String, String> getCookieMap() {
+        return cookies;
+    }
+
+    public void setCookie(String key, String value) {
+        this.cookies.put(key, value);
+    }
+
+    public void setCookies(Map cookieSrc) {
+        this.cookies.putAll(cookieSrc);
+    }
+
+
     /**
      * @return a Reader that contains the body of the http request.
      */
@@ -159,61 +241,20 @@ public class HttpHeader {
         return in;
     }
 
-
-    public void setIsRequest(boolean request) {
-        this.request = request;
-    }
-
-    public void setRequestType(String type) {
-        this.type = type;
-    }
-
-    public void setProtocolVersion(float version) {
-        this.protocolVersion = version;
-    }
-
-    public void setStatusCode(int code) {
-        this.statusCode = code;
-    }
-
-    public void setRequestURL(String url) {
-        this.url = url.trim().replaceAll("//", "/");
-    }
-
-    public void setHeader(String key, String value) {
-        this.headers.put(key.toUpperCase(), value);
-    }
-
     protected void setInputStream(InputStream in) {
         this.in = in;
     }
 
-    protected HashMap<String, String> getHeaderMap() {
-        return headers;
-    }
-
-    protected HashMap<String, String> getCookieMap() {
-        return cookies;
-    }
-
-    protected HashMap<String, String> getUrlAttributeMap() {
-        return urlAttributes;
-    }
 
 
     public String toString() {
         StringBuilder tmp = new StringBuilder();
-        tmp.append("{Type: ").append(type);
-        tmp.append(", HTTP_version: HTTP/").append(protocolVersion);
-        if (url == null)
-            tmp.append(", URL: null");
-        else
-            tmp.append(", URL: \"").append(url).append('\"');
-
+        tmp.append("{Type: ").append(requestType);
+        tmp.append(", HTTP_version: ").append(protocol).append("/").append(protocolVersion);
+        tmp.append(", URL: \"").append((String) requestUrl).append('\"');
         tmp.append(", URL_attr: ").append(toStringAttributes());
         tmp.append(", Headers: ").append(toStringHeaders());
         tmp.append(", Cookies: ").append(toStringCookies());
-
         tmp.append('}');
         return tmp.toString();
     }
@@ -224,7 +265,40 @@ public class HttpHeader {
         return Converter.toString(cookies);
     }
     public String toStringAttributes() {
-        return Converter.toString(urlAttributes);
+        return Converter.toString(requestUrlAttributes);
     }
 
+
+    public String getResponseStatusString() {
+        return getResponseStatusString(responseStatusCode);
+    }
+
+    public static String getResponseStatusString(int type) {
+        switch (type) {
+            case 100:
+                return "Continue";
+            case 200:
+                return "OK";
+            case 301:
+                return "Moved Permanently";
+            case 304:
+                return "Not Modified";
+            case 307:
+                return "Temporary Redirect";
+            case 400:
+                return "Bad Request";
+            case 401:
+                return "Unauthorized";
+            case 403:
+                return "Forbidden";
+            case 404:
+                return "Not Found";
+            case 500:
+                return "Internal Server Error";
+            case 501:
+                return "Not Implemented";
+            default:
+                return "";
+        }
+    }
 }

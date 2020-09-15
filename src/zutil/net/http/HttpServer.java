@@ -210,22 +210,22 @@ public class HttpServer extends ThreadedTCPNetworkServer{
                 }
 
                 //****************************  RESPONSE  ************************************
-                out.setProtocolVersion("1.0");
-                out.setStatusCode(200);
+                out.setProtocolVersion(1.0f);
+                out.setResponseStatusCode(200);
                 out.setHeader("Server", SERVER_NAME);
                 out.setHeader("Content-Type", "text/html");
 
                 if (header.getRequestURL() != null && pages.containsKey(header.getRequestURL())) {
                     HttpPage page = pages.get(header.getRequestURL());
-                    page.respond(out, header, session, header.getCookieMap(), header.getUrlAttributeMap());
+                    page.respond(out, header, session, header.getCookieMap(), header.getURLAttributeMap());
                     if (LogUtil.isLoggable(page.getClass(), Level.FINER))
                         logRequest(header, session, time);
                 } else if (header.getRequestURL() != null && defaultPage != null) {
-                    defaultPage.respond(out, header, session, header.getCookieMap(), header.getUrlAttributeMap());
+                    defaultPage.respond(out, header, session, header.getCookieMap(), header.getURLAttributeMap());
                     if (LogUtil.isLoggable(defaultPage.getClass(), Level.FINER))
                         logRequest(header, session, time);
                 } else {
-                    out.setStatusCode(404);
+                    out.setResponseStatusCode(404);
                     out.println("404 Page Not Found: " + header.getRequestURL());
                     logger.warning("Page not defined: " + header.getRequestURL());
                 }
@@ -233,18 +233,15 @@ public class HttpServer extends ThreadedTCPNetworkServer{
             } catch (Exception e) {
                 logRequest(header, session, time);
                 logger.log(Level.SEVERE, "500 Internal Server Error", e);
-                try {
-                    if (!out.isHeaderSent())
-                        out.setStatusCode(500);
-                    if (e.getMessage() != null)
-                        out.println("500 Internal Server Error: " + e.getMessage());
-                    else if (e.getCause() != null) {
-                        out.println("500 Internal Server Error: " + e.getCause().getMessage());
-                    } else {
-                        out.println("500 Internal Server Error: " + e);
-                    }
-                }catch(IOException ioe){
-                    logger.log(Level.SEVERE, null, ioe);
+
+                if (!out.isHeaderSent())
+                    out.setResponseStatusCode(500);
+                if (e.getMessage() != null)
+                    out.println("500 Internal Server Error: " + e.getMessage());
+                else if (e.getCause() != null) {
+                    out.println("500 Internal Server Error: " + e.getCause().getMessage());
+                } else {
+                    out.println("500 Internal Server Error: " + e);
                 }
             }
             finally {

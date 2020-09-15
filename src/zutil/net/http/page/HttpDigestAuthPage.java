@@ -69,12 +69,12 @@ public class HttpDigestAuthPage implements HttpPage{
 
         if (headers.getHeader(HTTP_CLIENT_HEADER) == null || !session.containsKey(AUTH_NONCE)) {
             session.put(AUTH_NONCE, generateNonce());
-            out.setStatusCode(401);
+            out.setResponseStatusCode(401);
             out.setHeader(HTTP_AUTH_HEADER, generateAuthHeader((String) session.get(AUTH_NONCE)));
             out.println("401 Unauthorized");
         }
         else if ( ! headers.getHeader(HTTP_CLIENT_HEADER).startsWith(AUTH_TYPE)){
-            out.setStatusCode(501);
+            out.setResponseStatusCode(501);
             out.println("501 Not Implemented");
         }
         else{
@@ -91,7 +91,7 @@ public class HttpDigestAuthPage implements HttpPage{
                 targetPage.respond(out, headers, session, cookie, request);
             }
             else{
-                out.setStatusCode(403);
+                out.setResponseStatusCode(403);
                 out.println("403 Forbidden");
             }
         }

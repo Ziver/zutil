@@ -45,46 +45,18 @@ public class HttpPrintStream extends OutputStream {
         RESPONSE
     }
 
-    /**
-     * The actual output stream
-     */
-    private PrintStream out;
-    /**
-     * This defines the type of message that will be generated
-     */
-    private final HttpMessageType messageType;
-    /**
-     * Specifies the protocol that should be used
-     */
-    private String protocol = "HTTP";
-    /**
-     * Specifies the protocol version that should be used
-     */
-    private String protocolVersion = "1.0";
-    /**
-     * The status code of the message, ONLY for response
-     */
-    private Integer responseStatusCode = 200;
-    /**
-     * The request type of the message ONLY for request
-     */
-    private String requestType;
-    /**
-     * The requesting url ONLY for request
-     */
-    private String requestUrl;
-    /**
-     * An Map of all the header values
-     */
-    private HashMap<String, String> headers = new HashMap<>();
-    /**
-     * An Map of all the cookies
-     */
-    private HashMap<String, String> cookies = new HashMap<>();
+
+    private HttpHeader header = new HttpHeader();
+
     /**
      * The header data buffer, buffering is enabled if this variable is not null
      */
     private StringBuffer buffer = null;
+
+    /**
+     * The actual output stream
+     */
+    private PrintStream out;
 
 
     /**
@@ -106,7 +78,7 @@ public class HttpPrintStream extends OutputStream {
      */
     public HttpPrintStream(OutputStream out, HttpMessageType type) {
         this.out = new PrintStream(out);
-        this.messageType = type;
+        header.setIsRequest(type == HttpMessageType.REQUEST);
     }
 
 
@@ -129,8 +101,8 @@ public class HttpPrintStream extends OutputStream {
     /**
      * Set the http version that will be used in the http header
      */
-    public void setProtocolVersion(String version) {
-        this.protocolVersion = version;
+    public void setProtocolVersion(float version) {
+        header.setProtocolVersion(version);
     }
 
     /**
@@ -141,9 +113,9 @@ public class HttpPrintStream extends OutputStream {
      * @throws IllegalStateException if the header has already been sent
      */
     public void setCookie(String key, String value) {
-        if (cookies == null)
-            throw new IllegalStateException("Header already sent");
-        cookies.put(key, value);
+        headerSentCheck();
+
+        header.setCookie(key, value);
     }
 
     /**
@@ -154,9 +126,9 @@ public class HttpPrintStream extends OutputStream {
      * @throws IllegalStateException if the header has already been sent
      */
     public void setHeader(String key, String value) {
-        if (headers == null)
-            throw new IllegalStateException("Header already sent");
-        headers.put(key, value);
+        headerSentCheck();
+
+        header.setHeader(key, value);
     }
 
     /**
@@ -165,12 +137,12 @@ public class HttpPrintStream extends OutputStream {
      * @param code the code from 100 up to 599
      * @throws IllegalStateException if the header has already been sent or the message type is wrong
      */
-    public void setStatusCode(int code) {
-        if (messageType != HttpMessageType.RESPONSE)
+    public void setResponseStatusCode(int code) {
+        if (!header.isResponse())
             throw new IllegalStateException("Status Code is only available with HTTP requests");
-        if (responseStatusCode == null)
-            throw new IllegalStateException("Header already sent.");
-        responseStatusCode = code;
+        headerSentCheck();
+
+        header.setResponseStatusCode(code);
     }
 
     /**
@@ -180,11 +152,11 @@ public class HttpPrintStream extends OutputStream {
      * @throws IllegalStateException if the header has already been sent or the message type is wrong
      */
     public void setRequestType(String req_type) {
-        if (messageType != HttpMessageType.REQUEST)
+        if (!header.isRequest())
             throw new IllegalStateException("Request Message Type is only available with HTTP requests");
-        if (req_type == null)
-            throw new IllegalStateException("Header already sent.");
-        this.requestType = req_type;
+        headerSentCheck();
+
+        header.setRequestType(req_type);
     }
 
     /**
@@ -194,19 +166,19 @@ public class HttpPrintStream extends OutputStream {
      * @throws IllegalStateException if the header has already been sent or the message type is wrong
      */
     public void setRequestURL(String req_url) {
-        if (messageType != HttpMessageType.REQUEST)
+        if (!header.isRequest())
             throw new IllegalStateException("Request URL is only available with a HTTP request");
-        if (req_url == null)
-            throw new IllegalStateException("Header already sent.");
-        this.requestUrl = req_url;
+        headerSentCheck();
+
+        header.setRequestURL(req_url);
     }
 
     protected void setHeaders(HashMap<String, String> map) {
-        headers = map;
+        header.setHeaders(map);
     }
 
     protected void setCookies(HashMap<String, String> map) {
-        cookies = map;
+        header.setCookies(map);
     }
 
 
@@ -246,42 +218,40 @@ public class HttpPrintStream extends OutputStream {
      * Method will directly print the provided String, if any headers are set then they will firstly be sent and cleared proceeded by the given String.
      */
     private void printForced(String s) {
-        if (responseStatusCode != null) {
-            if (messageType == HttpMessageType.REQUEST)
-                out.print(requestType + " " + requestUrl + " " + protocol + "/" + protocolVersion);
+        if (header != null) {
+            if (header.isRequest())
+                out.print(header.getRequestType() + " " + header.getRequestURL() + " " + header.getProtocol() + "/" + header.getProtocolVersion());
             else
-                out.print("HTTP/" + protocolVersion + " " + responseStatusCode + " " + getStatusString(responseStatusCode));
+                out.print(header.getProtocol() + "/" + header.getProtocolVersion() + " " + header.getResponseStatusCode() + " " + header.getResponseStatusString());
             out.println();
-            responseStatusCode = null;
-            requestType = null;
-            requestUrl = null;
-        }
 
-        if (headers != null) {
-            for (String key : headers.keySet()) {
-                out.println(key + ": " + headers.get(key));
+            // Send headers
+
+            for (String key : header.getHeaderMap().keySet()) {
+                out.println(key + ": " + header.getHeader(key));
             }
-            headers = null;
-        }
 
-        if (cookies != null) {
-            if (!cookies.isEmpty()) {
-                if (messageType == HttpMessageType.REQUEST) {
-                    out.print("Cookie: ");
-                    for (String key : cookies.keySet()) {
-                        out.print(key + "=" + cookies.get(key) + "; ");
+            // Send cookies
+
+            if (!header.getCookieMap().isEmpty()) {
+                if (header.isRequest()) {
+                    out.print("Cookie:");
+                    for (String key : header.getCookieMap().keySet()) {
+                        out.print(" " + key + "=" + header.getCookie(key) + ";");
                     }
                     out.println();
                 } else {
-                    for (String key : cookies.keySet()) {
-                        out.print("Set-Cookie: " + key + "=" + cookies.get(key) + ";");
+                    for (String key : header.getCookieMap().keySet()) {
+                        out.print("Set-Cookie: " + key + "=" + header.getCookie(key) + ";");
                         out.println();
                     }
                 }
             }
             out.println();
-            cookies = null;
+
+            header = null;
         }
+
         out.print(s);
     }
 
@@ -296,7 +266,12 @@ public class HttpPrintStream extends OutputStream {
      * @return true if headers has been sent. The setHeader, setStatusCode, setCookie method will throw IllegalStateException
      */
     public boolean isHeaderSent() {
-        return responseStatusCode == null && headers == null && cookies == null;
+        return header == null;
+    }
+
+    public void headerSentCheck() {
+        if (isHeaderSent())
+            throw new IllegalStateException("Header already sent.");
     }
 
 
@@ -319,7 +294,7 @@ public class HttpPrintStream extends OutputStream {
         if (isBufferEnabled()) {
             printForced(buffer.toString());
             buffer.delete(0, buffer.length());
-        } else if (responseStatusCode != null || headers != null || cookies != null) {
+        } else if (!isHeaderSent()) {
             printOrBuffer("");
         }
     }
@@ -342,59 +317,13 @@ public class HttpPrintStream extends OutputStream {
         out.write(buf, off, len);
     }
 
-    private String getStatusString(int type) {
-        switch (type) {
-            case 100:
-                return "Continue";
-            case 200:
-                return "OK";
-            case 301:
-                return "Moved Permanently";
-            case 304:
-                return "Not Modified";
-            case 307:
-                return "Temporary Redirect";
-            case 400:
-                return "Bad Request";
-            case 401:
-                return "Unauthorized";
-            case 403:
-                return "Forbidden";
-            case 404:
-                return "Not Found";
-            case 500:
-                return "Internal Server Error";
-            case 501:
-                return "Not Implemented";
-            default:
-                return "";
-        }
-    }
 
     public String toString() {
         StringBuilder str = new StringBuilder();
-        str.append("{http_type: ").append(messageType);
-        if (responseStatusCode != null) {
-            if (messageType == HttpMessageType.REQUEST) {
-                str.append(", req_type: ").append(requestType);
-                if (requestUrl == null)
-                    str.append(", req_url: null");
-                else
-                    str.append(", req_url: \"").append(requestUrl).append('\"');
-            } else if (messageType == HttpMessageType.RESPONSE) {
-                str.append(", status_code: ").append(responseStatusCode);
-                str.append(", status_str: ").append(getStatusString(responseStatusCode));
-            }
-
-            if (headers != null) {
-                str.append(", Headers: ").append(Converter.toString(headers));
-            }
-            if (cookies != null) {
-                str.append(", Cookies: ").append(Converter.toString(cookies));
-            }
-        } else
-            str.append(", HEADER ALREADY SENT ");
-        str.append('}');
+        if (!isHeaderSent())
+            str.append(header);
+        else
+            str.append("{HEADER ALREADY SENT}");
 
         return str.toString();
     }

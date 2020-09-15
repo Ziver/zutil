@@ -32,7 +32,7 @@ public class HttpRedirectPage implements HttpPage{
                         Map<String, String> cookie,
                         Map<String, String> request) throws IOException {
 
-        out.setStatusCode((permanent ? 301 : 307));
+        out.setResponseStatusCode((permanent ? 301 : 307));
         out.setHeader("Location", redirectUrl);
         out.print(
                 "<!DOCTYPE HTML>\n" +
