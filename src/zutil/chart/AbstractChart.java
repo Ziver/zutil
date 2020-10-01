@@ -60,6 +60,7 @@ public abstract class AbstractChart extends JPanel{
      *
      * @param 		g2		is the Graphics object that will paint the chart
      * @param 		bound	is the bounds of the axis, the drawing should not exceed this bound
+     * @return a Rectangle object specifying the drawn are of the axis
      */
     protected abstract Rectangle drawAxis(Graphics2D g2, Rectangle bound);
 

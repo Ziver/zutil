@@ -33,6 +33,8 @@ public class LevenshteinDistance {
      * Calculates the Levenshtein Distance(Number of character
      * changes to equalize the two strings) for two Strings.
      *
+     * @param   str1    first String to be compared
+     * @param   str2    second string to be compared
      * @return The number of changes needed to equalize the two Strings
      */
     public static int getDistance(String str1, String str2) {
@@ -44,6 +46,8 @@ public class LevenshteinDistance {
      * Calculates the Levenshtein Distance(Number of character
      * changes to equalize the two strings) for two Strings.
      *
+     * @param   str1    first String to be compared
+     * @param   str2    second string to be compared
      * @param   matrix  is a int matrix that will be used for the dynamic programing algorithm.
      *                  NOTE: matrix must be 1 larger than the largest string
      * @return The number of changes needed to equalize the two Strings

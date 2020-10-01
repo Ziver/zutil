@@ -145,89 +145,86 @@ public class ProcDiskstats {
             return devName;
         }
         /**
-         * This values increment when an I/O request completes.
+         * @return number of completed I/O requests.
          */
         public long getReadIO() {
             return readIO;
         }
         /**
-         * This value increment when an I/O request is merged with an
-         * already-queued I/O request.
+         * @return number of merged I/O requests with an already-queued I/O request.
          */
         public long getReadMerges() {
             return readMerges;
         }
         /**
-         * This value count the number of sectors read from to this
-         * block device.  The "sectors" in question are the standard UNIX 512-byte
-         * sectors, not any device- or filesystem-specific block size.  The
-         * counter is incremented when the I/O completes.
+         * @return the number of sectors read from to this block device.
+         *          The "sectors" in question are the standard UNIX 512-byte
+         *          sectors, not any device- or filesystem-specific block size.  The
+         *          counter is incremented when the I/O completes.
          */
         public long getReadSectors() {
             return readSectors;
         }
         /**
-         * This value count the number of milliseconds that I/O requests have
-         * waited on this block device.  If there are multiple I/O requests waiting,
-         * this value will increase at a rate greater than 1000/second; for
-         * example, if 60 read requests wait for an average of 30 ms, the read_ticks
-         * field will increase by 60*30 = 1800.
+         * @return the number of milliseconds that I/O requests have
+         *          waited on this block device.  If there are multiple I/O requests waiting,
+         *          this value will increase at a rate greater than 1000/second; for
+         *          example, if 60 read requests wait for an average of 30 ms, the read_ticks
+         *          field will increase by 60*30 = 1800.
          */
         public long getReadTicks() {
             return readTicks;
         }
         /**
-         * This values increment when an I/O request completes.
+         * @return number of completed I/O requests.
          */
         public long getWriteIO() {
             return writeIO;
         }
         /**
-         * This value increment when an I/O request is merged with an
-         * already-queued I/O request.
+         * @return the number of merged I/O requests with an already-queued I/O request.
          */
         public long getWriteMerges() {
             return writeMerges;
         }
         /**
-         * This value count the number of sectors written to this
-         * block device.  The "sectors" in question are the standard UNIX 512-byte
-         * sectors, not any device- or filesystem-specific block size.  The
-         * counter is incremented when the I/O completes.
+         * @return the number of sectors written to this block device.
+         *          The "sectors" in question are the standard UNIX 512-byte
+         *          sectors, not any device- or filesystem-specific block size.
+         *          The counter is incremented when the I/O completes.
          */
         public long getWriteSectors() {
             return writeSectors;
         }
         /**
-         * This value count the number of milliseconds that I/O requests have
-         * waited on this block device.  If there are multiple I/O requests waiting,
-         * this value will increase at a rate greater than 1000/second; for
-         * example, if 60 write requests wait for an average of 30 ms, the write_ticks
-         * field will increase by 60*30 = 1800.
+         * @return the number of milliseconds that I/O requests have
+         *          waited on this block device.  If there are multiple I/O requests waiting,
+         *          this value will increase at a rate greater than 1000/second; for
+         *          example, if 60 write requests wait for an average of 30 ms, the write_ticks
+         *          field will increase by 60*30 = 1800.
          */
         public long getWriteTicks() {
             return writeTicks;
         }
         /**
-         * This value counts the number of I/O requests that have been issued to
-         * the device driver but have not yet completed.  It does not include I/O
-         * requests that are in the queue but not yet issued to the device driver.
+         * @return the number of I/O requests that have been issued to
+         *          the device driver but have not yet completed.  It does not include I/O
+         *          requests that are in the queue but not yet issued to the device driver.
          */
         public long getInFlight() {
             return inFlight;
         }
         /**
-         * This value counts the number of milliseconds during which the device has
-         * had I/O requests queued.
+         * @return the number of milliseconds during which the device has had I/O requests queued.
          */
         public long getIoTicks() {
             return ioTicks;
         }
         /**
-         * This value counts the number of milliseconds that I/O requests have waited
-         * on this block device.  If there are multiple I/O requests waiting, this
-         * value will increase as the product of the number of milliseconds times the
-         * number of requests waiting (see "read ticks" above for an example).
+         * @return the number of milliseconds that I/O requests have waited
+         *          on this block device.  If there are multiple I/O requests waiting, this
+         *          value will increase as the product of the number of milliseconds times the
+         *          number of requests waiting (see "read ticks" above for an example).
          */
         public long getTimeInQueue() {
             return timeInQueue;

@@ -49,6 +49,8 @@ public class ThreadedUDPNetwork extends Thread{
 
     /**
      * Creates a new unicast Client instance of the class
+     *
+     * @throws SocketException if there is any issue creating the new socket
      */
     public ThreadedUDPNetwork() throws SocketException{
         this.type = UDPType.UNICAST;
@@ -61,6 +63,7 @@ public class ThreadedUDPNetwork extends Thread{
      * Creates a new unicast Server instance of the class
      *
      * @param	port	is the port that the server should listen to
+     * @throws SocketException if there is any issue creating the new socket
      */
     public ThreadedUDPNetwork(int port) throws SocketException{
         this.type = UDPType.UNICAST;

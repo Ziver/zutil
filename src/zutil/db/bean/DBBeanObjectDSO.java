@@ -10,13 +10,12 @@ import java.sql.SQLException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-
 /**
  * A intermediate class for loading Objects of generic Classes.
  * The extending class must set the "superBean" parameter to true in {@link DBBean.DBTable}.
  * The Object that is stored must use Configurator to define what fields that should be stored.
  *
- * This class needs to fields in DB:
+ * This class needs two fields in DB:
  * <ul>
  *     <li>String type: defining the class name</li>
  *     <li>Text config: the object configuration is stored as JSON</li>
@@ -74,6 +73,8 @@ public abstract class DBBeanObjectDSO<T> extends DBBean{
 
     /**
      * Will replace the current object.
+     *
+     * @param obj is the object to set or null to reset the DSO
      */
     public void setObject(T obj){
         if(obj != null) {

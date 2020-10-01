@@ -36,8 +36,8 @@ import java.util.TimerTask;
  *
  * @author Ziver
  */
-public class DBConnectionPool extends TimerTask implements Closeable{
-    public static final long DEFAULT_TIMEOUT = 10*60*60*1000; // 10 minutes;
+public class DBConnectionPool extends TimerTask implements Closeable {
+    public static final long DEFAULT_TIMEOUT = 10 * 60 * 60 * 1000; // 10 minutes;
     public static final int DEFAULT_MAX_SIZE = 5;
 
     // DB details
@@ -52,26 +52,26 @@ public class DBConnectionPool extends TimerTask implements Closeable{
     private long timeout;
     private Timer timeout_timer;
 
-    protected class PoolItem{
+    protected class PoolItem {
         public DBConnection conn;
         public long timestamp;
 
-        public boolean equals(Object o){
+        public boolean equals(Object o) {
             return conn.equals(o);
         }
     }
 
     // The pool
-    private LinkedList<PoolItem> inusePool;
+    private LinkedList<PoolItem> inUsePool;
     private LinkedList<PoolItem> readyPool;
 
     /**
      * Creates a new pool of DB connections
      *
-     * @param dbms is the DB type
-     * @param url is the URL to the DB
-     * @param db is the name of the database
-     * @param user is the user name to the DB
+     * @param dbms     is the DB type
+     * @param url      is the URL to the DB
+     * @param db       is the name of the database
+     * @param user     is the user name to the DB
      * @param password is the password to the DB
      */
     public DBConnectionPool(DBMS dbms, String url, String db, String user, String password) {
@@ -81,7 +81,7 @@ public class DBConnectionPool extends TimerTask implements Closeable{
         this.user = user;
         this.password = password;
 
-        inusePool = new LinkedList<>();
+        inUsePool = new LinkedList<>();
         readyPool = new LinkedList<>();
 
         this.setTimeout(DEFAULT_TIMEOUT);
@@ -93,7 +93,7 @@ public class DBConnectionPool extends TimerTask implements Closeable{
      *
      * @param conn is the Connection to register
      */
-    protected void addConnection(DBConnection conn){
+    protected void addConnection(DBConnection conn) {
         PoolItem item = new PoolItem();
         item.conn = conn;
         readyPool.addLast(item);
@@ -104,8 +104,8 @@ public class DBConnectionPool extends TimerTask implements Closeable{
      *
      * @param conn is the connection to remove
      */
-    protected void removeConnection(DBConnection conn){
-        inusePool.remove(conn);
+    protected void removeConnection(DBConnection conn) {
+        inUsePool.remove(conn);
         readyPool.remove(conn);
     }
 
@@ -113,20 +113,20 @@ public class DBConnectionPool extends TimerTask implements Closeable{
      * Lease one connection from the pool
      *
      * @return an DB connection or null if the pool is empty
+     * @throws Exception will be thrown if there is any issue instantiating a DBConnection
      */
-    public synchronized DBConnection getConnection() throws Exception{
-        if(readyPool.isEmpty()){
-            if( size() < max_conn ){
+    public synchronized DBConnection getConnection() throws Exception {
+        if (readyPool.isEmpty()) {
+            if (size() < max_conn) {
                 DBConnection conn = new DBConnection(dbms, url, db, user, password);
-                conn.setPool( this );
-                addConnection( conn );
+                conn.setPool(this);
+                addConnection(conn);
                 return conn;
             }
             return null;
-        }
-        else{
+        } else {
             PoolItem item = readyPool.poll();
-            inusePool.addLast(item);
+            inUsePool.addLast(item);
             item.timestamp = System.currentTimeMillis();
             return item.conn;
         }
@@ -137,28 +137,29 @@ public class DBConnectionPool extends TimerTask implements Closeable{
      *
      * @param conn is the connection that is not used anymore
      */
-    protected synchronized void releaseConnection(DBConnection conn){
-        int index = inusePool.indexOf(conn);
-        PoolItem item = inusePool.remove(index);
+    protected synchronized void releaseConnection(DBConnection conn) {
+        int index = inUsePool.indexOf(conn);
+        PoolItem item = inUsePool.remove(index);
         readyPool.addLast(item);
     }
 
     /**
      * @return the current size of the pool
      */
-    public int size(){
-        return inusePool.size() + readyPool.size();
+    public int size() {
+        return inUsePool.size() + readyPool.size();
     }
 
     /**
      * Closes all the connections
      */
-    public synchronized void close(){
-        for( PoolItem item : inusePool ){
+    public synchronized void close() {
+        for (PoolItem item : inUsePool) {
             item.conn.forceClose();
         }
-        inusePool.clear();
-        for( PoolItem item : readyPool ){
+        inUsePool.clear();
+
+        for (PoolItem item : readyPool) {
             item.conn.forceClose();
         }
         readyPool.clear();
@@ -166,17 +167,22 @@ public class DBConnectionPool extends TimerTask implements Closeable{
 
     /**
      * Set the max size of the pool
+     *
+     * @param max the new maximum size of the pool
      */
-    public void setMaxSize(int max){
+    public void setMaxSize(int max) {
         this.max_conn = max;
     }
 
     /**
      * Sets the timeout of the Connections
+     *
+     * @param timeout the new timeout value in milliseconds
      */
-    public synchronized void setTimeout(long timeout){
+    public synchronized void setTimeout(long timeout) {
         this.timeout = timeout;
-        if(timeout_timer!=null)
+
+        if (timeout_timer != null)
             timeout_timer.cancel();
         timeout_timer = new Timer();
         timeout_timer.schedule(this, 0, timeout / 2);
@@ -185,11 +191,11 @@ public class DBConnectionPool extends TimerTask implements Closeable{
     /**
      * Checks every DB connection if they are valid and has not timed out
      */
-    public void run(){
+    public void run() {
         long stale = System.currentTimeMillis() - timeout;
 
-        for(PoolItem item : inusePool){
-            if( !item.conn.valid() && stale > item.timestamp ) {
+        for (PoolItem item : inUsePool) {
+            if (!item.conn.valid() && stale > item.timestamp) {
                 removeConnection(item.conn);
                 item.conn.forceClose();
             }

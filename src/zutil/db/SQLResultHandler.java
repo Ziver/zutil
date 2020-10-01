@@ -34,6 +34,8 @@ public interface SQLResultHandler<T> {
      *
      * @param stmt is the query
      * @param result is the ResultSet
+     * @return a value based on the result handler description
+     * @throws SQLException if there is any database related issues
      */
     T handleQueryResult(Statement stmt, ResultSet result) throws SQLException;
 }

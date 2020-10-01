@@ -39,7 +39,7 @@ import java.util.List;
 import java.util.logging.Logger;
 
 
-public class DBBeanSQLResultHandler<T> implements SQLResultHandler<T>{
+public class DBBeanSQLResultHandler<T> implements SQLResultHandler<T> {
     private static final Logger logger = LogUtil.getLogger();
 
     private Class<? extends DBBean> beanClass;
@@ -48,46 +48,49 @@ public class DBBeanSQLResultHandler<T> implements SQLResultHandler<T>{
     private boolean list;
 
 
-
     /**
      * Creates a new instance of this class that returns only one bean
      *
-     * @param 	cl		is the DBBean class that will be parsed from the SQL result
-     * @return			a new instance of this class
+     * @param <C> is the class type that should be instantiated
+     * @param cl  is the DBBean class that will be parsed from the SQL result
+     * @return a new instance of this class
      */
-    public static <C extends DBBean> DBBeanSQLResultHandler<C> create(Class<C> cl){
+    public static <C extends DBBean> DBBeanSQLResultHandler<C> create(Class<C> cl) {
         return new DBBeanSQLResultHandler<>(cl, null, false);
     }
 
     /**
      * Creates a new instance of this class that returns a bean with all its containing beans
      *
-     * @param 	cl		is the DBBean class that will be parsed from the SQL result
-     * @param	db		is the DB connection for loading internal beans
-     * @return			a new instance of this class
+     * @param <C> is the class type that should be instantiated
+     * @param cl  is the DBBean class that will be parsed from the SQL result
+     * @param db  is the DB connection for loading internal beans
+     * @return a new instance of this class
      */
-    public static <C extends DBBean> DBBeanSQLResultHandler<C> create(Class<C> cl, DBConnection db){
+    public static <C extends DBBean> DBBeanSQLResultHandler<C> create(Class<C> cl, DBConnection db) {
         return new DBBeanSQLResultHandler<>(cl, db, false);
     }
 
     /**
      * Creates a new instance of this class that returns a list of beans
      *
-     * @param 	cl		is the DBBean class that will be parsed from the SQL result
-     * @return			a new instance of this class
+     * @param <C> is the class type that should be instantiated
+     * @param cl  is the DBBean class that will be parsed from the SQL result
+     * @return a new instance of this class
      */
-    public static <C extends DBBean> DBBeanSQLResultHandler<List<C>> createList(Class<C> cl){
+    public static <C extends DBBean> DBBeanSQLResultHandler<List<C>> createList(Class<C> cl) {
         return new DBBeanSQLResultHandler<>(cl, null, true);
     }
 
     /**
      * Creates a new instance of this class that returns a list of beans with all the internal beans
      *
-     * @param 	cl		is the DBBean class that will be parsed from the SQL result
-     * @param	db		is the DB connection for loading internal beans
-     * @return			a new instance of this class
+     * @param <C> is the class type that should be instantiated
+     * @param cl  is the DBBean class that will be parsed from the SQL result
+     * @param db  is the DB connection for loading internal beans
+     * @return a new instance of this class
      */
-    public static <C extends DBBean> DBBeanSQLResultHandler<List<C>> createList(Class<C> cl, DBConnection db){
+    public static <C extends DBBean> DBBeanSQLResultHandler<List<C>> createList(Class<C> cl, DBConnection db) {
         return new DBBeanSQLResultHandler<>(cl, db, true);
     }
 
@@ -95,36 +98,35 @@ public class DBBeanSQLResultHandler<T> implements SQLResultHandler<T>{
     /**
      * Creates a new instance of this class
      *
-     * @param 	cl		is the DBBean class that will be parsed from the SQL result
-     * @param	db		is the DB connection for loading internal beans, may be null to disable internal beans
-     * @param	list	is if the handler should return a list of beans instead of one
+     * @param cl   is the DBBean class that will be parsed from the SQL result
+     * @param db   is the DB connection for loading internal beans, may be null to disable internal beans
+     * @param list is if the handler should return a list of beans instead of one
      */
     protected DBBeanSQLResultHandler(Class<? extends DBBean> cl, DBConnection db, boolean list) {
         this.beanClass = cl;
         this.list = list;
         this.db = db;
-        this.beanConfig = DBBeanConfig.getBeanConfig( cl );
+        this.beanConfig = DBBeanConfig.getBeanConfig(cl);
     }
 
 
     /**
-     *  Is called to handle a result from a query.
+     * Is called to handle a result from a query.
      *
-     * @param stmt 		is the query
-     * @param result 	is the ResultSet
+     * @param stmt   is the query
+     * @param result is the ResultSet
      */
     @SuppressWarnings("unchecked")
-    public T handleQueryResult(Statement stmt, ResultSet result) throws SQLException{
-        if( list ){
+    public T handleQueryResult(Statement stmt, ResultSet result) throws SQLException {
+        if (list) {
             List<DBBean> bean_list = new LinkedList<>();
-            while( result.next() ){
+            while (result.next()) {
                 DBBean obj = createBean(result);
-                bean_list.add( obj );
+                bean_list.add(obj);
             }
             return (T) bean_list;
-        }
-        else{
-            if( result.next() ){
+        } else {
+            if (result.next()) {
                 return (T) createBean(result);
             }
             return null;
@@ -136,22 +138,21 @@ public class DBBeanSQLResultHandler<T> implements SQLResultHandler<T>{
     /**
      * Instantiates a new bean and assigns field values from the ResultSet
      *
-     * @param 		result		is where the field values for the bean will bee read from, the cursor should be in front of the data
-     * @return					a new instance of the bean
+     * @param result is where the field values for the bean will bee read from, the cursor should be in front of the data
+     * @return a new instance of the bean
      */
-    private DBBean createBean(ResultSet result) throws SQLException{
+    private DBBean createBean(ResultSet result) throws SQLException {
         try {
-            Long id = result.getLong( "id" );
+            Long id = result.getLong("id");
             // Check cache first
             DBBean obj = DBBeanCache.get(beanClass, id);
-            if ( obj == null ) {
+            if (obj == null) {
                 // Cache miss create a new bean
                 logger.fine("Creating new Bean(" + beanClass.getName() + ") with id: " + id);
                 obj = beanClass.newInstance();
                 obj.setId(id);
-                updateBean( result, obj );
-            }
-            else if (DBBeanCache.isOutDated(obj)){
+                updateBean(result, obj);
+            } else if (DBBeanCache.isOutDated(obj)) {
                 // Update fields
                 logger.finer("Bean(" + beanClass.getName() + ") cache to old for id: " + id);
                 updateBean(result, obj);
@@ -167,14 +168,14 @@ public class DBBeanSQLResultHandler<T> implements SQLResultHandler<T>{
     /**
      * Updates an existing bean and assigns field values from the ResultSet
      *
-     * @param 		result		is where the field values for the bean will be read from, the cursor should be in front of the data
-     * @param		obj			is the bean that will be updated
+     * @param result is where the field values for the bean will be read from, the cursor should be in front of the data
+     * @param obj    is the bean that will be updated
      */
     @SuppressWarnings("unchecked")
-    private void updateBean(ResultSet result, DBBean obj) throws SQLException{
+    private void updateBean(ResultSet result, DBBean obj) throws SQLException {
         if (obj.readLock.tryLock()) {
             try {
-                logger.fine("Updating Bean("+ beanClass.getName() +") with id: "+ obj.getId());
+                logger.fine("Updating Bean(" + beanClass.getName() + ") with id: " + obj.getId());
                 // Read fields
                 for (DBBeanFieldConfig field : beanConfig.getFields()) {
                     String name = field.getName();
@@ -204,11 +205,11 @@ public class DBBeanSQLResultHandler<T> implements SQLResultHandler<T>{
                         DBBeanConfig subBeanConfig = subBeanField.getSubBeanConfig();
 
                         // Load List from link table
-                        String subSql = "SELECT subBeanTable.* FROM "+
-                                subBeanField.getLinkTableName() +" as linkTable, "+
-                                subBeanConfig.getTableName() +" as subBeanTable " +
-                                "WHERE linkTable."+subBeanField.getParentIdColumnName()+"=? AND " +
-                                "linkTable."+subBeanConfig.getIdColumnName()+"=subBeanTable."+subBeanConfig.getIdColumnName();
+                        String subSql = "SELECT subBeanTable.* FROM " +
+                                subBeanField.getLinkTableName() + " as linkTable, " +
+                                subBeanConfig.getTableName() + " as subBeanTable " +
+                                "WHERE linkTable." + subBeanField.getParentIdColumnName() + "=? AND " +
+                                "linkTable." + subBeanConfig.getIdColumnName() + "=subBeanTable." + subBeanConfig.getIdColumnName();
                         logger.finest("List Load Query: " + subSql);
                         PreparedStatement subStmt = db.getPreparedStatement(subSql);
                         subStmt.setObject(1, obj.getId());
