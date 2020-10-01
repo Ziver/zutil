@@ -38,9 +38,6 @@ import java.util.LinkedList;
  */
 public class EuclideansAlgo {
 
-    /**
-     * Simple Test
-     */
     public static void main(String[] args){
         MultiPrintStream.out.println("*** Correct Answer: ");
         MultiPrintStream.out.println("java.util.LinkedList{0, 2, 1, 1, 1, 4, 12, 102, 1, 1, 2, 3, 2, 2, 36}");

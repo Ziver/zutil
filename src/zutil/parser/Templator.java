@@ -45,7 +45,7 @@ import java.util.logging.Logger;
  * Class for generating dynamic text/code from set data.
  * The syntax is similar to the javascript mustache library.
  *
- * <br /><br />
+ * <p><br>
  * Supported tags:
  * <ul>
  *  <li><b> {{key}} </b><br>

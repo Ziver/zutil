@@ -60,7 +60,7 @@ public class BBCodeParser {
      * Registers a new BBCode to the parser. Only one type of BBCode allowed.
      *
      * @param 	bbcode 		is the BBCode e.g. "b" or "url"
-     * @param 	html 		is the corresponding HTML e.g. "<a href='%1'>%2</a>"
+     * @param 	html 		is the corresponding HTML e.g. {@code <a href='%1'>%2</a>}
      * 						where the %x corresponds to BBCode like this: [url=%1]%2[/url]
      */
     public void addBBCode(String bbcode, String html){

@@ -54,7 +54,7 @@ public class SQLQuery {
     //*******************************************
     // Main Types
     /**
-     * <XMP>
+     * <pre>
      *	SELECT
      *	    [ALL | DISTINCT | DISTINCTROW ]
      *	    [FROM table_references
@@ -65,7 +65,7 @@ public class SQLQuery {
      *	    [ORDER BY {col_name | expr | position}
      *	      [ASC | DESC], ...]
      *	    [LIMIT {[offset,] row_count | row_count OFFSET offset}]
-     * </XMP>
+     * </pre>
      */
     public static class SQLSelect extends SQLQueryItem{
         String[] params;

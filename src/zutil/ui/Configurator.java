@@ -47,15 +47,15 @@ import java.util.logging.Logger;
  * object the {@link Configurator#setValues(DataNode)} or {@link Configurator#setValues(Map)}
  * can be used to set the individual fields and finally call {@link Configurator#applyConfiguration()}
  * to configure the target object.
- * <br />
+ * <p>
  * External listener can be registered to be called before or after configuration changes
  * by implementing {@link PreConfigurationActionListener} or {@link PostConfigurationActionListener}.
  * The configured object will autmatically be registered as a listener if it also implements
  * these interfaces.
  *
- * <br>
+ * <p>
  * Supported field types: String, int, boolean, enum
- * <br>
+ * <p>
  * Created by Ziver
  */
 public class Configurator<T> {

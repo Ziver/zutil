@@ -56,7 +56,7 @@ public class URLDecoderTest {
 
     @Test
     public void percentMultibyteTest() throws UnsupportedEncodingException {
-        assertEquals("Ã„ngen", java.net.URLDecoder.decode("%C3%84ngen", "UTF-8"));
-        assertEquals("Ã„ngen", URLDecoder.decode("%C3%84ngen"));
+        assertEquals("Ängen", java.net.URLDecoder.decode("%C3%84ngen", "UTF-8"));
+        assertEquals("Ängen", URLDecoder.decode("%C3%84ngen"));
     }
 }

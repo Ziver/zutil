@@ -2,9 +2,9 @@ package zutil.ml.neural;
 
 /**
  * This class represents one "nuron" in a neural network.
- *
- * <p/><b>From Wikipedia: </b>
- * <blockquote cite="https://en.wikipedia.org/wiki/Perceptron">
+ * <p>
+ * <b>From Wikipedia:</b> https://en.wikipedia.org/wiki/Perceptron
+ * <blockquote>
  *     The perceptron is an algorithm for supervised learning of
  *     binary classifiers (functions that can decide whether an
  *     input, represented by a vector of numbers, belongs to some

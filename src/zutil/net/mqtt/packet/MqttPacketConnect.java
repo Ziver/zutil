@@ -21,7 +21,7 @@ public class MqttPacketConnect extends MqttPacketHeader {
     private int protocolNameLength = 4;
     /**
      * The Protocol Name is a UTF-8 encoded string that represents
-     * the protocol name “MQTT”, capitalized as shown. The string,
+     * the protocol name "MQTT", capitalized as shown. The string,
      * its offset and length will not be changed by future versions
      * of the MQTT specification.
      */

@@ -25,7 +25,7 @@ public class LinearRegression {
 
     /**
      * Linear Regression cost method.
-     * <br /><br />
+     * <p><br>
      * <i>
      *      J(O) = 1 / (2 * m) * Σ { ( h(Xi) - Yi )^2 }
      * </i><br>
@@ -65,11 +65,11 @@ public class LinearRegression {
 
     /**
      * Gradient Descent algorithm
-     * <br /><br />
+     * <p><br>
      * <i>
      *     Oj = Oj - α * (1 / m) *  Σ { ( h(Xi) - Yi ) * Xij }
-     * </i><br />
-     *
+     * </i>
+     * <br>
      * @return the theta that was found to minimize the cost function
      */
     public static double[] gradientDescentIteration(double[][] x, double[] y, double[] theta, double alpha){
