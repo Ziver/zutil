@@ -146,8 +146,10 @@ public class HttpFilePage implements HttpPage{
         }
     }
     private void deliverFile(File file, HttpPrintStream out) throws IOException {
-        out.setHeader("Content-Type",
-                MimeTypeUtil.getMimeByExtension(FileUtil.getFileExtension(file)).toString());
+        String fileExt = FileUtil.getFileExtension(file);
+
+        if (MimeTypeUtil.getMimeByExtension(fileExt) != null)
+            out.setHeader("Content-Type", MimeTypeUtil.getMimeByExtension(fileExt).toString());
         out.setHeader("Content-Length", "" + file.length());
         out.flush();
 

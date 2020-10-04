@@ -34,29 +34,35 @@ import java.net.URL;
 import java.util.HashMap;
 
 /**
- * This class connects to a HTTP server and
- * parses the result
- *
- * @author Ziver
+ * This class connects to a HTTP server and parses the result.
  */
 public class HttpClient implements AutoCloseable {
     public enum HttpRequestType {
-        GET, POST
+        GET,
+        POST
     }
 
     // Request variables
     private HttpURL url;
-    private HttpRequestType type;
+    private String type;
     private HashMap<String, String> headers;
     private HashMap<String, String> cookies;
     private String data;
 
     // Response variables
-    private HttpHeaderParser rspHeader;
-    private InputStream rspStream;
+    private HttpHeaderParser responseHeader;
+    private InputStream responseStream;
 
+
+    public HttpClient() {
+        this(HttpRequestType.GET);
+    }
 
     public HttpClient(HttpRequestType type) {
+        this(type.toString());
+    }
+
+    public HttpClient(String type) {
         this.type = type;
         headers = new HashMap<>();
         cookies = new HashMap<>();
@@ -94,7 +100,7 @@ public class HttpClient implements AutoCloseable {
 
     /**
      * Sets the content data that will be included in the request.
-     * NOTE: this will override the POST data parameter inclusion.
+     * NOTE: this will disable the POST data parameter inclusion.
      */
     public void setData(String data) {
         this.data = data;
@@ -109,12 +115,12 @@ public class HttpClient implements AutoCloseable {
 
         // Request
         HttpPrintStream request = new HttpPrintStream(conn.getOutputStream(), HttpMessageType.REQUEST);
-        request.setRequestType(type.toString());
+        request.setRequestType(type);
         request.setRequestURL(url.getHttpURL());
         request.setHeaders(headers);
         request.setCookies(cookies);
 
-        if (type == HttpRequestType.POST) {
+        if (HttpRequestType.POST.toString().equals(type)) {
             String postData;
             if (data != null)
                 postData = data;
@@ -128,27 +134,27 @@ public class HttpClient implements AutoCloseable {
         request.close();
 
         // Response
-        if (rspHeader != null || rspStream != null) // Close previous request
+        if (responseHeader != null || responseStream != null) // Close previous request
             this.close();
-        rspStream = new BufferedInputStream(conn.getInputStream());
-        rspHeader = new HttpHeaderParser(rspStream);
+        responseStream = new BufferedInputStream(conn.getInputStream());
+        responseHeader = new HttpHeaderParser(responseStream);
 
-        return rspHeader;
+        return responseHeader;
     }
 
     public HttpHeaderParser getResponseHeader() {
-        return rspHeader;
+        return responseHeader;
     }
 
     public InputStream getResponseInputStream() {
-        return rspStream;
+        return responseStream;
     }
 
     @Override
     public void close() throws IOException {
-        if (rspStream != null)
-            rspStream.close();
-        rspStream = null;
-        rspHeader = null;
+        if (responseStream != null)
+            responseStream.close();
+        responseStream = null;
+        responseHeader = null;
     }
 }

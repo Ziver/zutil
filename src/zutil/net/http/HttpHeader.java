@@ -275,30 +275,51 @@ public class HttpHeader {
 
     public static String getResponseStatusString(int type) {
         switch (type) {
-            case 100:
-                return "Continue";
-            case 200:
-                return "OK";
-            case 301:
-                return "Moved Permanently";
-            case 304:
-                return "Not Modified";
-            case 307:
-                return "Temporary Redirect";
-            case 400:
-                return "Bad Request";
-            case 401:
-                return "Unauthorized";
-            case 403:
-                return "Forbidden";
-            case 404:
-                return "Not Found";
-            case 500:
-                return "Internal Server Error";
-            case 501:
-                return "Not Implemented";
-            default:
-                return "";
+            case 100: return "Continue";
+            case 200: return "OK";
+            case 201: return "Created";
+            case 250: return "Low on Storage Space";
+            case 300: return "Multiple Choices";
+            case 301: return "Moved Permanently";
+            case 302: return "Moved Temporarily";
+            case 303: return "See Other";
+            case 304: return "Not Modified";
+            case 305: return "Use Proxy";
+            case 307: return "Temporary Redirect";
+            case 400: return "Bad Request";
+            case 401: return "Unauthorized";
+            case 403: return "Forbidden";
+            case 404: return "Not Found";
+            case 405: return "Method Not Allowed";
+            case 406: return "Not Acceptable";
+            case 407: return "Proxy Authentication Required";
+            case 408: return "Request Time-out";
+            case 410: return "Gone";
+            case 411: return "Length Required";
+            case 412: return "Precondition Failed";
+            case 413: return "Request Entity Too Large";
+            case 414: return "Request-URI Too Large";
+            case 415: return "Unsupported Media Type";
+            case 451: return "Parameter Not Understood";
+            case 452: return "Conference Not Found";
+            case 453: return "Not Enough Bandwidth";
+            case 454: return "Session Not Found";
+            case 455: return "Method Not Valid in This State";
+            case 456: return "Header Field Not Valid for Resource";
+            case 457: return "Invalid Range";
+            case 458: return "Parameter Is Read-Only";
+            case 459: return "Aggregate operation not allowed";
+            case 460: return "Only aggregate operation allowed";
+            case 461: return "Unsupported transport";
+            case 462: return "Destination unreachable";
+            case 500: return "Internal Server Error";
+            case 501: return "Not Implemented";
+            case 502: return "Bad Gateway";
+            case 503: return "Service Unavailable";
+            case 504: return "Gateway Time-out";
+            case 505: return "RTSP Version not supported";
+            case 551: return "Option not supported";
+            default:  return "";
         }
     }
 }
