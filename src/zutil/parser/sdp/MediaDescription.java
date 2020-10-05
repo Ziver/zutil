@@ -55,4 +55,21 @@ public class MediaDescription {
     public String getLabel() {
         return label;
     }
+
+
+    public String toString() {
+        StringBuffer output = new StringBuffer();
+
+        output.append("m=").append(type).append(' ').append(transportPort).append(' ').append(transport).append('\n'); // TODO: media formats
+
+        if (label != null) output.append("i=").append(label).append('\n');
+        // TODO: [optional] c=<network type> <address type> <connection address> // Media specific connection information
+        // TODO: [optional] b=(bandwidth information)
+        // TODO: [optional] k=(encryption key)
+
+        // TODO: [optional] a=<media attribute>:<value>
+        // TODO: [optional] a=rtpmap:<attribute>:<value>
+
+        return output.toString().trim();
+    }
 }

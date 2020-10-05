@@ -162,7 +162,7 @@ public class SDPParser {
                     if (currentSession == null) throw new RuntimeException("Time description received before a session has been defined: '" + line + "'");
 
                     currentTiming = new TimingDescription();
-                    currentSession.timing.add(currentTiming);
+                    currentSession.timings.add(currentTiming);
 
                     tmpArr = getValueArray(line);
                     if (tmpArr.length != 2) throw new RuntimeException("Incorrect time definition found: '" + line + "'");

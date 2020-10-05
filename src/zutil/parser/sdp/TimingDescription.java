@@ -41,4 +41,15 @@ public class TimingDescription {
     public long getEndTime() {
         return endTime;
     }
+
+
+    public String toString() {
+        StringBuffer output = new StringBuffer();
+
+        output.append("t=").append(startTime).append(' ').append(endTime).append('\n');
+
+        // TODO: [optional] r=<repeat interval> <active duration> <list of offsets from start-time> // Repeat information
+
+        return output.toString().trim();
+    }
 }
