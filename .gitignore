@@ -1,7 +1,6 @@
 /build/
 /bin/
 /target/
-/gradle/
 /.gradle/
 
 /.repository/
