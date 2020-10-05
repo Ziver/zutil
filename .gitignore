@@ -1,7 +1,8 @@
 /build/
 /bin/
 /target/
-/target/
+/gradle/
+/.gradle/
 
 /.repository/
 /.flattened-pom.xml
