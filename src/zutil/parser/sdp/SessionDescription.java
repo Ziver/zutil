@@ -12,11 +12,11 @@ public class SessionDescription {
     protected int protocolVersion;
 
     protected String sessionOwner;
-    protected String sessionId;
-    protected String sessionVersion;
-    protected String networkType;
-    protected String addressType;
-    protected String address;
+    protected long sessionId;
+    protected long sessionAnnouncementVersion;
+    protected String ownerNetworkType = "IN";
+    protected String ownerAddressType = "IP4"; // IP4 or IP6
+    protected String ownerAddress;
 
     protected String sessionTitle;
     protected String sessionDescription;
@@ -40,24 +40,24 @@ public class SessionDescription {
         return sessionOwner;
     }
 
-    public String getSessionId() {
+    public long getSessionId() {
         return sessionId;
     }
 
-    public String getSessionVersion() {
-        return sessionVersion;
+    public long getAnnouncementVersion() {
+        return sessionAnnouncementVersion;
     }
 
-    public String getNetworkType() {
-        return networkType;
+    public String getOwnerNetworkType() {
+        return ownerNetworkType;
     }
 
-    public String getAddressType() {
-        return addressType;
+    public String getOwnerAddressType() {
+        return ownerAddressType;
     }
 
-    public String getAddress() {
-        return address;
+    public String getOwnerAddress() {
+        return ownerAddress;
     }
 
     public String getSessionTitle() {
@@ -93,8 +93,9 @@ public class SessionDescription {
         StringBuffer output = new StringBuffer();
 
         output.append("v=").append(protocolVersion).append('\n');
-        // TODO: o=<owner username> <session id> <session version> <network type> <address type> <address>
-        output.append("s=").append(sessionTitle).append('\n');;
+        output.append("o=").append(sessionOwner).append(' ').append(sessionId).append(' ').append(sessionAnnouncementVersion)
+                .append(' ').append(ownerNetworkType).append(' ').append(ownerAddressType).append(' ').append(ownerAddress).append('\n');
+        output.append("s=").append(sessionTitle).append('\n');
 
         if (sessionDescription != null)   output.append("i=").append(sessionDescription).append('\n');
         if (sessionURI != null)           output.append("u=").append(sessionURI).append('\n');

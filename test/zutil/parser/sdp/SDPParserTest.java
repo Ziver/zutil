@@ -66,10 +66,22 @@ public class SDPParserTest {
         assertEquals(1, sessions.size());
 
         SessionDescription session = sessions.get(0);
+        // v=
         assertEquals(0, session.getProtocolVersion());
+        // o=
+        assertEquals("mhandley", session.getSessionOwner());
+        assertEquals(2890844526l, session.getSessionId());
+        assertEquals(2890842807l, session.getAnnouncementVersion());
+        assertEquals("IN", session.getOwnerNetworkType());
+        assertEquals("IP4", session.getOwnerAddressType());
+        assertEquals("126.16.64.4", session.getOwnerAddress());
+        // s=
         assertEquals("SDP Seminar", session.getSessionTitle());
+        // i=
         assertEquals("A Seminar on the session description protocol", session.getSessionDescription());
+        // u=
         assertEquals("http://www.cs.ucl.ac.uk/staff/M.Handley/sdp.03.ps", session.getSessionURI());
+        // e=
         assertEquals("mjh@isi.edu (Mark Handley)", session.getOrganizerEmail());
     }
 

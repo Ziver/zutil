@@ -88,10 +88,10 @@ public class SDPParser {
     public List<SessionDescription> parse() throws IOException {
         List<SessionDescription> sessions = new ArrayList<>();
 
-        String line;
         SessionDescription currentSession = null;
         TimingDescription currentTiming = null;
         MediaDescription currentMedia = null;
+        String line;
         String[] tmpArr;
 
         while ((line=IOUtil.readLine(in)) != null) {
@@ -115,7 +115,20 @@ public class SDPParser {
                     currentSession.protocolVersion = Integer.parseInt(getValue(line));
                     break;
 
-                // TODO: o=<owner username> <session id> <session version> <network type> <address type> <address>
+                // o=<owner username> <session id> <session version> <network type> <address type> <address>
+                case 'o':
+                    if (currentSession == null) throw new RuntimeException("Received session owner before session definition: '" + line + "'");
+
+                    tmpArr = getValueArray(line);
+                    if (tmpArr.length != 6) throw new RuntimeException("Incorrect owner definition found: '" + line + "'");
+
+                    currentSession.sessionOwner     = tmpArr[0];
+                    currentSession.sessionId        = Long.parseLong(tmpArr[1]);
+                    currentSession.sessionAnnouncementVersion = Long.parseLong(tmpArr[2]);
+                    currentSession.ownerNetworkType = tmpArr[3];
+                    currentSession.ownerAddressType = tmpArr[4];
+                    currentSession.ownerAddress     = tmpArr[5];
+                    break;
 
                 // s=<session title>
                 case 's':

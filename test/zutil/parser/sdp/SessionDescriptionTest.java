@@ -26,7 +26,7 @@ package zutil.parser.sdp;
 
 import org.junit.Test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 public class SessionDescriptionTest {
 
@@ -46,9 +46,7 @@ public class SessionDescriptionTest {
     // TODO: [optional] k=<method=clear|base64|uri|prompt>:<encryption key> // Encryption information
     // TODO: [optional] a=<session attribute>:<value>
 
-    // --------------------------------------
-    // Media description
-    // --------------------------------------
+
 
     @Test
     public void basicSession() {
@@ -56,8 +54,28 @@ public class SessionDescriptionTest {
         session.protocolVersion = 0;
         session.sessionTitle = "SDP Seminar";
 
-        assertEquals(session.toString(), "v=0\n" +
-                "s=SDP Seminar"
+        assertEquals("v=0\n" +
+                "o=null 0 0 IN IP4 null\n" +
+                "s=SDP Seminar",
+                session.toString()
+        );
+    }
+
+    @Test
+    public void basicOwner() {
+        SessionDescription session = new SessionDescription();
+        session.protocolVersion = 0;
+        session.sessionTitle = "SDP Seminar";
+
+        session.sessionOwner = "mhandley";
+        session.sessionId = 2890844526l;
+        session.sessionAnnouncementVersion = 2890842807l;
+        session.ownerAddress = "126.16.64.4";
+
+        assertEquals("v=0\n" +
+                "o=mhandley 2890844526 2890842807 IN IP4 126.16.64.4\n" +
+                "s=SDP Seminar",
+                session.toString()
         );
     }
 
@@ -72,9 +90,11 @@ public class SessionDescriptionTest {
         session.sessionTitle = "SDP Seminar";
         session.timings.add(timing);
 
-        assertEquals(session.toString(), "v=0\n" +
-                        "s=SDP Seminar\n" +
-                        "t=2873397496 2873404696"
+        assertEquals("v=0\n" +
+                "o=null 0 0 IN IP4 null\n" +
+                "s=SDP Seminar\n" +
+                "t=2873397496 2873404696",
+                session.toString()
         );
     }
 
@@ -91,11 +111,12 @@ public class SessionDescriptionTest {
         session.sessionTitle = "SDP Seminar";
         session.media.add(media);
 
-        assertEquals(session.toString(), "v=0\n" +
+        assertEquals("v=0\n" +
+                "o=null 0 0 IN IP4 null\n" +
                 "s=SDP Seminar\n" +
                 "m=video 51372 RTP/AVP\n" +
-                "i=main video feed"
+                "i=main video feed",
+                session.toString()
         );
     }
-
 }
