@@ -82,20 +82,19 @@ public class HttpFilePage implements HttpPage{
             // Is the root only one file or a folder
             if (resource_root.isFile()) {
                 deliverFileWithCache(headers, resource_root, out);
-            }
-            else { // Resource root is a folder
+            } else { // Resource root is a folder
                 File file = new File(resource_root,
                         headers.getRequestURL());
-                if(file.getCanonicalPath().startsWith(resource_root.getCanonicalPath())){
+                if (file.getCanonicalPath().startsWith(resource_root.getCanonicalPath())) {
                     // Web Gui
-                    if(file.isDirectory() && showFolders){
+                    if (file.isDirectory() && showFolders) {
                         File indexFile = new File(file, "index.html");
                         // Redirect to index.html
-                        if(redirectToIndex && indexFile.isFile()) {
+                        if (redirectToIndex && indexFile.isFile()) {
                             deliverFile(indexFile, out);
                         }
                         // Show folder contents
-                        else if(showFolders){
+                        else if (showFolders) {
                             out.println("<HTML><BODY><H1>Directory: " + headers.getRequestURL() + "</H1>");
                             out.println("<HR><UL>");
                             for (String f : file.list()) {
@@ -114,19 +113,18 @@ public class HttpFilePage implements HttpPage{
                     else {
                         deliverFileWithCache(headers, file, out);
                     }
-                }
-                else {
+                } else {
                     throw new SecurityException("File is outside of root directory: root=" + resource_root.getAbsolutePath() + " file=" + file.getAbsolutePath());
                 }
             }
 
-        }catch (FileNotFoundException | SecurityException e){
-            if(!out.isHeaderSent())
+        } catch (FileNotFoundException | SecurityException e) {
+            if (!out.isHeaderSent())
                 out.setResponseStatusCode(404);
             log.log(Level.WARNING, e.getMessage());
             out.println("404 Page Not Found: " + headers.getRequestURL());
-        } catch (IOException e){
-            if(!out.isHeaderSent())
+        } catch (IOException e) {
+            if (!out.isHeaderSent())
                 out.setResponseStatusCode(500);
             log.log(Level.WARNING, null, e);
             out.println("500 Internal Server Error: "+e.getMessage() );
@@ -136,13 +134,16 @@ public class HttpFilePage implements HttpPage{
     private void deliverFileWithCache(HttpHeader headers, File file, HttpPrintStream out) throws IOException {
         String eTag = getFileHash(file);
         out.setHeader("Cache-Control", "max-age=" + MAX_CACHE_AGE_SECONDS);
-        out.setHeader("ETag", "\"" + eTag + "\"");
 
-        if (eTag != null && headers.getHeader("If-None-Match") != null &&
-                eTag.equals(StringUtil.trimQuotes(headers.getHeader("If-None-Match")))){ // File has not changed
-            out.setResponseStatusCode(304);
-        } else {
-            deliverFile(file, out);
+        if (eTag != null) {
+            out.setHeader("ETag", "\"" + eTag + "\"");
+
+            if (headers.getHeader("If-None-Match") != null &&
+                    eTag.equals(StringUtil.trimQuotes(headers.getHeader("If-None-Match")))) { // File has not changed
+                out.setResponseStatusCode(304);
+            } else {
+                deliverFile(file, out);
+            }
         }
     }
     private void deliverFile(File file, HttpPrintStream out) throws IOException {
@@ -169,7 +170,7 @@ public class HttpFilePage implements HttpPage{
                 fileCache.lastModified = file.lastModified();
             }
             return fileCache.hash;
-        } catch (NoSuchAlgorithmException e){
+        } catch (NoSuchAlgorithmException e) {
             log.log(Level.WARNING, "Unable to generate hash", e);
         }
         return "";
