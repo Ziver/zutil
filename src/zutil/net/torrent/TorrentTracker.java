@@ -25,15 +25,16 @@
 package zutil.net.torrent;
 
 import zutil.net.http.HttpClient;
+import zutil.net.http.HttpHeader;
 import zutil.net.http.HttpHeaderParser;
 
 import java.io.IOException;
 import java.net.URL;
 
 /**
- * This tracker represents a tracker client 
+ * This tracker represents a tracker client
  * that connects to a tracker
- * 
+ *
  * @author Ziver
  */
 public class TorrentTracker {
@@ -45,6 +46,6 @@ public class TorrentTracker {
     public void update() throws IOException {
         HttpClient request = new HttpClient(HttpClient.HttpRequestType.GET);
         request.setURL( trackerURL );
-        HttpHeaderParser response = request.send();
+        HttpHeader response = request.send();
     }
 }

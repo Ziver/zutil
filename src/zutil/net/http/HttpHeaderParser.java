@@ -36,8 +36,6 @@ import java.util.Map;
 import java.util.regex.Pattern;
 
 public class HttpHeaderParser {
-    private static final String HEADER_COOKIE = "COOKIE";
-
     private static final Pattern PATTERN_COLON = Pattern.compile(":");
     private static final Pattern PATTERN_EQUAL = Pattern.compile("=");
     private static final Pattern PATTERN_AND = Pattern.compile("&");
@@ -84,7 +82,7 @@ public class HttpHeaderParser {
         }
 
         // Post processing
-        parseCookieValues(header.getCookieMap(), header.getHeader(HEADER_COOKIE));
+        parseCookieValues(header.getCookieMap(), header.getHeader(HttpHeader.HEADER_COOKIE));
         header.setInputStream(in);
         return header;
     }

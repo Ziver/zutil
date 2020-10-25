@@ -43,13 +43,15 @@ public class HttpClient implements AutoCloseable {
     }
 
     // Request variables
+
     private HttpURL url;
     private String type;
     private HashMap<String, String> headers;
     private HashMap<String, String> cookies;
-    private String data;
+    private String content;
 
     // Response variables
+
     private HttpHeaderParser responseHeader;
     private InputStream responseStream;
 
@@ -102,18 +104,21 @@ public class HttpClient implements AutoCloseable {
      * Sets the content data that will be included in the request.
      * NOTE: this will disable the POST data parameter inclusion.
      */
-    public void setData(String data) {
-        this.data = data;
+    public void setContent(String content) {
+        this.content = content;
     }
 
     /**
      * Will send a HTTP request to the target host.
      * NOTE: any previous request connections will be closed
      */
-    public HttpHeaderParser send() throws IOException {
+    public HttpHeader send() throws IOException {
         Socket conn = new Socket(url.getHost(), url.getPort());
 
+        // ---------------------------------
         // Request
+        // ---------------------------------
+
         HttpPrintStream request = new HttpPrintStream(conn.getOutputStream(), HttpMessageType.REQUEST);
         request.setRequestType(type);
         request.setRequestURL(url.getHttpURL());
@@ -122,28 +127,27 @@ public class HttpClient implements AutoCloseable {
 
         if (HttpRequestType.POST.toString().equals(type)) {
             String postData;
-            if (data != null)
-                postData = data;
+            if (content != null)
+                postData = content;
             else
                 postData = url.getParameterString();
-            request.setHeader("Content-Length", "" + postData.length());
+            request.setHeader(HttpHeader.HEADER_CONTENT_LENGTH, "" + postData.length());
             request.println();
             request.print(postData);
         } else
             request.println();
-        request.close();
+        request.flush();
 
+        // ---------------------------------
         // Response
+        // ---------------------------------
+
         if (responseHeader != null || responseStream != null) // Close previous request
             this.close();
         responseStream = new BufferedInputStream(conn.getInputStream());
         responseHeader = new HttpHeaderParser(responseStream);
 
-        return responseHeader;
-    }
-
-    public HttpHeaderParser getResponseHeader() {
-        return responseHeader;
+        return responseHeader.read();
     }
 
     public InputStream getResponseInputStream() {

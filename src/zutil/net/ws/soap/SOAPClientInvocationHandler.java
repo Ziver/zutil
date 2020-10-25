@@ -31,7 +31,7 @@ import org.dom4j.Element;
 import zutil.io.IOUtil;
 import zutil.log.LogUtil;
 import zutil.net.http.HttpClient;
-import zutil.net.http.HttpHeaderParser;
+import zutil.net.http.HttpHeader;
 import zutil.net.ws.WSInterface;
 import zutil.net.ws.WSMethodDef;
 import zutil.net.ws.WSParameterDef;
@@ -78,8 +78,8 @@ public class SOAPClientInvocationHandler implements InvocationHandler {
         // Send request
         HttpClient request = new HttpClient(HttpClient.HttpRequestType.POST);
         request.setURL(url);
-        request.setData(reqXml);
-        HttpHeaderParser response = request.send();
+        request.setContent(reqXml);
+        HttpHeader response = request.send();
         String rspXml = IOUtil.readContentAsString(request.getResponseInputStream());
         request.close();
 

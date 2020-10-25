@@ -33,6 +33,16 @@ import java.util.Map;
 import java.util.TreeMap;
 
 public class HttpHeader {
+    // Constants
+
+    public static final String HEADER_CONTENT_TYPE   = "Content-Type";
+    public static final String HEADER_CONTENT_LENGTH = "Content-Length";
+    public static final String HEADER_COOKIE         = "Cookie";
+    public static final String HEADER_SET_COOKIE     = "Set-Cookie";
+    public static final String HEADER_SERVER         = "Server";
+
+    // Variables
+
     private boolean isRequest = true;
 
     /** Specifies the protocol that should be used */
@@ -181,6 +191,13 @@ public class HttpHeader {
 
 
     /**
+     * @return true if the specified header has been set, false otherwise.
+     */
+    public boolean containsHeader(String name) {
+        return headers.containsKey(name);
+    }
+
+    /**
      * @return a Iterator with all defined headers
      */
     public Iterator<String> getHeaderKeys() {
@@ -206,6 +223,13 @@ public class HttpHeader {
         this.headers.putAll(headerSrc);
     }
 
+
+    /**
+     * @return true if the specified cookie has been set, false otherwise.
+     */
+    public boolean containsCookie(String name) {
+        return cookies.containsKey(name);
+    }
 
     /**
      * @return a Iterator with all defined cookies

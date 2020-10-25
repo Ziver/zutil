@@ -27,6 +27,7 @@ package zutil.net.ws.rest;
 import zutil.io.IOUtil;
 import zutil.log.LogUtil;
 import zutil.net.http.HttpClient;
+import zutil.net.http.HttpHeader;
 import zutil.net.http.HttpHeaderParser;
 import zutil.net.http.HttpURL;
 import zutil.net.ws.WSInterface;
@@ -75,7 +76,7 @@ public class RESTClientInvocationHandler implements InvocationHandler {
         // Send request
         HttpClient request = new HttpClient(HttpClient.HttpRequestType.POST);
         request.setURL(url);
-        HttpHeaderParser response = request.send();
+        HttpHeader response = request.send();
         String rspJson = IOUtil.readContentAsString(request.getResponseInputStream());
         request.close();
 

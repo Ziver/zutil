@@ -42,6 +42,9 @@ import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import static zutil.net.http.HttpHeader.HEADER_CONTENT_LENGTH;
+import static zutil.net.http.HttpHeader.HEADER_CONTENT_TYPE;
+
 
 /**
  * A simple web server that handles both cookies and
@@ -166,23 +169,27 @@ public class HttpServer extends ThreadedTCPNetworkServer{
             HttpHeader header = null;
             Map<String, Object> session = null;
             try {
-                //**************************** PARSE REQUEST *********************************
+                // ----------------------------------------------------------------
+                // PARSE REQUEST
+                // ----------------------------------------------------------------
+
                 headerParser = new HttpHeaderParser(in);
                 header = headerParser.read();
+
                 if (header == null) {
                     logger.finer("No header received");
                     return;
                 }
 
-                //******* Read in the post data if available
-                if (header.getHeader("Content-Length") != null &&
-                        header.getHeader("Content-Type") != null &&
-                        header.getHeader("Content-Type").contains("application/x-www-form-urlencoded")) {
+                // Read in the post data if available
+
+                if (header.containsHeader(HEADER_CONTENT_LENGTH) &&
+                        header.containsHeader(HEADER_CONTENT_TYPE) &&
+                        header.getHeader(HEADER_CONTENT_TYPE).contains("application/x-www-form-urlencoded")) {
                     // Reads the post data size
-                    int postDataLength = Integer.parseInt(header.getHeader("Content-Length"));
+                    int postDataLength = Integer.parseInt(header.getHeader(HEADER_CONTENT_LENGTH));
                     // read the data
                     StringBuilder tmpBuff = new StringBuilder();
-                    // read the data
                     for (int i = 0; i < postDataLength; i++) {
                         tmpBuff.append((char) in.read());
                     }
@@ -190,7 +197,10 @@ public class HttpServer extends ThreadedTCPNetworkServer{
                     HttpHeaderParser.parseURLParameters(header, tmpBuff.toString());
                 }
 
-                //****************************  HANDLE REQUEST *********************************
+                // ----------------------------------------------------------------
+                // HANDLE REQUEST
+                // ----------------------------------------------------------------
+
                 // Get the client session or create one
                 String sessionCookie = header.getCookie(SESSION_KEY_ID);
                 if (sessionCookie != null && sessions.containsKey(sessionCookie) &&
@@ -201,27 +211,33 @@ public class HttpServer extends ThreadedTCPNetworkServer{
                 } else {
                     synchronized (sessions) {
                         session = new ConcurrentHashMap<>();
-                        session.put(SESSION_KEY_ID, ""+nextSessionId);
+                        session.put(SESSION_KEY_ID, "" + nextSessionId);
                         session.put(SESSION_KEY_TTL, new Timer(SESSION_TTL).start());
-                        sessions.put(""+nextSessionId, session);
-                        out.setCookie(SESSION_KEY_ID, ""+nextSessionId);
+
+                        sessions.put("" + nextSessionId, session);
+                        out.setCookie(SESSION_KEY_ID, "" + nextSessionId);
                         ++nextSessionId;
                     }
                 }
 
-                //****************************  RESPONSE  ************************************
+                // ----------------------------------------------------------------
+                // RESPONSE
+                // ----------------------------------------------------------------
+
                 out.setProtocolVersion(1.0f);
                 out.setResponseStatusCode(200);
-                out.setHeader("Server", SERVER_NAME);
-                out.setHeader("Content-Type", "text/html");
+                out.setHeader(HttpHeader.HEADER_SERVER, SERVER_NAME);
+                out.setHeader(HEADER_CONTENT_TYPE, "text/html");
 
                 if (header.getRequestURL() != null && pages.containsKey(header.getRequestURL())) {
                     HttpPage page = pages.get(header.getRequestURL());
                     page.respond(out, header, session, header.getCookieMap(), header.getURLAttributeMap());
+
                     if (LogUtil.isLoggable(page.getClass(), Level.FINER))
                         logRequest(header, session, time);
                 } else if (header.getRequestURL() != null && defaultPage != null) {
                     defaultPage.respond(out, header, session, header.getCookieMap(), header.getURLAttributeMap());
+
                     if (LogUtil.isLoggable(defaultPage.getClass(), Level.FINER))
                         logRequest(header, session, time);
                 } else {
@@ -229,7 +245,7 @@ public class HttpServer extends ThreadedTCPNetworkServer{
                     out.println("404 Page Not Found: " + header.getRequestURL());
                     logger.warning("Page not defined: " + header.getRequestURL());
                 }
-                //********************************************************************************
+
             } catch (Exception e) {
                 logRequest(header, session, time);
                 logger.log(Level.SEVERE, "500 Internal Server Error", e);
