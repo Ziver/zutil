@@ -259,7 +259,6 @@ public class HttpPrintStream extends OutputStream {
                     }
                 }
             }
-            out.println();
 
             header = null;
         }

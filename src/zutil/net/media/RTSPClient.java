@@ -226,6 +226,7 @@ public class RTSPClient {
         http.setURL(url);
         http.setAbsoluteURL(true);
         http.setHeader("Accept", "application/sdp");
+        http.setHeader("Accept", "application/sdp");
         http.setHeader("CSeq", "" + sequenceId++);
         if (sessionId != null)
             http.setHeader(PARAMETER_SESSION, sessionId);
@@ -240,7 +241,7 @@ public class RTSPClient {
         resp.header = http.send();
         logger.finest("RTSP Response: " + resp.header);
 
-        resp.content = IOUtil.readContentAsString(http.getResponseInputStream());
+        //resp.content = IOUtil.readContentAsString(http.getResponseInputStream());
         http.close();
         return resp;
     }
