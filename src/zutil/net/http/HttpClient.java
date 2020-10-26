@@ -24,6 +24,7 @@
 
 package zutil.net.http;
 
+import zutil.converter.Converter;
 import zutil.net.http.HttpPrintStream.HttpMessageType;
 
 import java.io.BufferedInputStream;
@@ -44,7 +45,9 @@ public class HttpClient implements AutoCloseable {
 
     // Request variables
 
+    private String protocol = "HTTP";
     private HttpURL url;
+    private boolean absoluteURL;
     private String type;
     private HashMap<String, String> headers;
     private HashMap<String, String> cookies;
@@ -71,12 +74,26 @@ public class HttpClient implements AutoCloseable {
     }
 
 
+    /**
+     * Set the protocol that should be provided by the request. Default is HTTP.
+     */
+    public void setProtocol(String protocol) {
+        this.protocol = protocol;
+    }
+
     public void setURL(URL url) {
         setURL(new HttpURL(url));
     }
 
     public void setURL(HttpURL url) {
         this.url = url;
+    }
+
+    /**
+     * If set to true the the request will contain the full URL instead of only the path to the page.
+     */
+    public void setAbsoluteURL(boolean absoluteURL) {
+        this.absoluteURL = absoluteURL;
     }
 
     /**
@@ -120,8 +137,9 @@ public class HttpClient implements AutoCloseable {
         // ---------------------------------
 
         HttpPrintStream request = new HttpPrintStream(conn.getOutputStream(), HttpMessageType.REQUEST);
+        request.setProtocol(protocol);
         request.setRequestType(type);
-        request.setRequestURL(url.getHttpURL());
+        request.setRequestURL(absoluteURL ? url.getURL() : url.getHttpURL());
         request.setHeaders(headers);
         request.setCookies(cookies);
 
@@ -160,5 +178,16 @@ public class HttpClient implements AutoCloseable {
             responseStream.close();
         responseStream = null;
         responseHeader = null;
+    }
+
+
+    public String toString() {
+        StringBuilder tmp = new StringBuilder();
+        tmp.append("{Type: ").append(type);
+        tmp.append(", URL: \"").append(url).append('\"');
+        tmp.append(", Headers: ").append(Converter.toString(headers));
+        tmp.append(", Cookies: ").append(Converter.toString(cookies));
+        tmp.append('}');
+        return tmp.toString();
     }
 }

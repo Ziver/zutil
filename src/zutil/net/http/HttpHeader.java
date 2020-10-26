@@ -40,6 +40,7 @@ public class HttpHeader {
     public static final String HEADER_COOKIE         = "Cookie";
     public static final String HEADER_SET_COOKIE     = "Set-Cookie";
     public static final String HEADER_SERVER         = "Server";
+    public static final String HEADER_USER_AGENT     = "User-Agent";
 
     // Variables
 
@@ -146,7 +147,7 @@ public class HttpHeader {
     }
 
     public void setRequestURL(String url) {
-        this.requestUrl = url.trim().replaceAll("//", "/");
+        this.requestUrl = url;
     }
 
     /**
@@ -273,10 +274,19 @@ public class HttpHeader {
 
     public String toString() {
         StringBuilder tmp = new StringBuilder();
-        tmp.append("{Type: ").append(requestType);
-        tmp.append(", HTTP_version: ").append(protocol).append("/").append(protocolVersion);
-        tmp.append(", URL: \"").append((String) requestUrl).append('\"');
-        tmp.append(", URL_attr: ").append(toStringAttributes());
+        tmp.append("{");
+
+        if (isRequest) {
+            tmp.append("Type: ").append(requestType);
+            tmp.append(", HTTP_version: ").append(protocol).append("/").append(protocolVersion);
+            tmp.append(", URL: \"").append(requestUrl).append('\"');
+            tmp.append(", URL_attr: ").append(toStringAttributes());
+        } else {
+            tmp.append("HTTP_version: ").append(protocol).append("/").append(protocolVersion);
+            tmp.append(", Status_code: ").append(responseStatusCode);
+            tmp.append(", Status_msg: \"").append(getResponseStatusString()).append('\"');
+        }
+
         tmp.append(", Headers: ").append(toStringHeaders());
         tmp.append(", Cookies: ").append(toStringCookies());
         tmp.append('}');

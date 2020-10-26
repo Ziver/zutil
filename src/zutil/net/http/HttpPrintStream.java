@@ -99,36 +99,17 @@ public class HttpPrintStream extends OutputStream {
     }
 
     /**
+     * Set the protocol name that should be provided in the HTTP header.
+     */
+    public void setProtocol(String protocol) {
+        header.setProtocol(protocol);
+    }
+
+    /**
      * Set the http version that will be used in the http header
      */
     public void setProtocolVersion(float version) {
         header.setProtocolVersion(version);
-    }
-
-    /**
-     * Adds a cookie that will be sent to the client
-     *
-     * @param key   is the name of the cookie
-     * @param value is the value of the cookie
-     * @throws IllegalStateException if the header has already been sent
-     */
-    public void setCookie(String key, String value) {
-        headerSentCheck();
-
-        header.setCookie(key, value);
-    }
-
-    /**
-     * Adds an header value
-     *
-     * @param key   is the header name
-     * @param value is the value of the header
-     * @throws IllegalStateException if the header has already been sent
-     */
-    public void setHeader(String key, String value) {
-        headerSentCheck();
-
-        header.setHeader(key, value);
     }
 
     /**
@@ -171,6 +152,32 @@ public class HttpPrintStream extends OutputStream {
         headerSentCheck();
 
         header.setRequestURL(req_url);
+    }
+
+    /**
+     * Adds a cookie that will be sent to the client
+     *
+     * @param key   is the name of the cookie
+     * @param value is the value of the cookie
+     * @throws IllegalStateException if the header has already been sent
+     */
+    public void setCookie(String key, String value) {
+        headerSentCheck();
+
+        header.setCookie(key, value);
+    }
+
+    /**
+     * Adds an header value
+     *
+     * @param key   is the header name
+     * @param value is the value of the header
+     * @throws IllegalStateException if the header has already been sent
+     */
+    public void setHeader(String key, String value) {
+        headerSentCheck();
+
+        header.setHeader(key, value);
     }
 
     protected void setHeaders(HashMap<String, String> map) {
@@ -219,10 +226,15 @@ public class HttpPrintStream extends OutputStream {
      */
     private void printForced(String s) {
         if (header != null) {
-            if (header.isRequest())
-                out.print(header.getRequestType() + " " + header.getRequestURL() + " " + header.getProtocol() + "/" + header.getProtocolVersion());
-            else
-                out.print(header.getProtocol() + "/" + header.getProtocolVersion() + " " + header.getResponseStatusCode() + " " + header.getResponseStatusString());
+            if (header.isRequest()) {
+                out.print(header.getRequestType() + " " +
+                        header.getRequestURL() + " " +
+                        header.getProtocol() + "/" + header.getProtocolVersion());
+            } else {
+                out.print(header.getProtocol() + "/" + header.getProtocolVersion() + " " +
+                        header.getResponseStatusCode() + " " +
+                        header.getResponseStatusString());
+            }
             out.println();
 
             // Send headers
