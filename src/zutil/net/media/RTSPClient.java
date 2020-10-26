@@ -23,14 +23,20 @@
  */
 package zutil.net.media;
 
+import zutil.ObjectUtil;
+import zutil.converter.Converter;
 import zutil.io.IOUtil;
+import zutil.log.LogUtil;
 import zutil.net.http.HttpClient;
 import zutil.net.http.HttpHeader;
+import zutil.net.http.HttpURL;
 import zutil.parser.sdp.SessionDescription;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Arrays;
+import java.util.logging.Logger;
 
 import static zutil.net.media.RTSPClient.RTSPRequestType.*;
 
@@ -40,6 +46,8 @@ import static zutil.net.media.RTSPClient.RTSPRequestType.*;
  * @see <a href="https://tools.ietf.org/html/rfc2326">RFC2326</a>
  */
 public class RTSPClient {
+    private static final Logger logger = LogUtil.getLogger();
+
     public enum RTSPRequestType {
         DESCRIBE,      // RFC Section 10.2
         ANNOUNCE,      // RFC Section 10.3
@@ -57,11 +65,14 @@ public class RTSPClient {
     // Constants
 
     private static final String PARAMETER_SESSION = "Session";
+    private static final String PARAMETER_PUBLIC  = "Public";
 
     // Current media variables
 
-    private final URL url;
+    private final HttpURL url;
 
+    private RTSPRequestType[] supportedOptions;
+    private int sequenceId;
     private String sessionId;
     private String transport;
 
@@ -69,7 +80,8 @@ public class RTSPClient {
     public RTSPClient(String strUrl) throws MalformedURLException {
         if (strUrl.startsWith("rtsp://"))
             strUrl = strUrl.substring(7);
-        this.url = new URL("http://" + strUrl);
+        this.url = new HttpURL(new URL("http://" + strUrl));
+        url.setProtocol("rtsp");
     }
 
     // -----------------------------
@@ -106,19 +118,18 @@ public class RTSPClient {
      */
     public String getDescription() throws IOException {
         HttpClient http = getHttpClient(DESCRIBE);
-        HttpHeader resp = http.send();
+
+        ResponseData resp = sendRequest(http);
         // TODO: parse response
 
-        http.close();
         return null;
     }
 
     public void setDescription(SessionDescription description) throws IOException {
         HttpClient http = getHttpClient(ANNOUNCE);
         http.setContent(description.toString());
-        http.send();
 
-        http.close();
+        sendRequest(http);
     }
 
 
@@ -126,9 +137,8 @@ public class RTSPClient {
         HttpClient http = getHttpClient(GET_PARAMETER);
         http.setHeader(HttpHeader.HEADER_CONTENT_TYPE, "text/parameters");
         http.setContent(key);
-        http.send();
 
-        String response = IOUtil.readContentAsString(http.getResponseInputStream());
+        ResponseData resp = sendRequest(http);
         // TODO: parse response
 
         http.close();
@@ -139,9 +149,9 @@ public class RTSPClient {
         HttpClient http = getHttpClient(SET_PARAMETER);
         http.setHeader("Content-Type", "text/parameters");
         http.setContent(key + ": " + value);
-        http.send();
 
-        http.close();
+        ResponseData resp = sendRequest(http);
+        // TODO: parse response
     }
 
 
@@ -162,16 +172,43 @@ public class RTSPClient {
      * This function will only initiate the resources once any other call
      * will only return without any action.
      */
-    private void setup() throws IOException {
+    protected void setup() throws IOException {
         if (sessionId == null) {
+            supportedOptions = getOptions();
+
             HttpClient http = getHttpClient(SETUP);
             http.setHeader("Transport", "RTP/AVP;unicast;client_port=4588-4589");
-            HttpHeader resp = http.send();
 
-            sessionId = resp.getHeader(PARAMETER_SESSION);
-            transport = resp.getHeader("Transport");
-            http.close();
+            ResponseData resp = sendRequest(http);
+            sessionId = resp.header.getHeader(PARAMETER_SESSION);
+            transport = resp.header.getHeader("Transport");
         }
+    }
+
+    /**
+     * Will check what request types are supported by the server
+     *
+     * @return an array of RTSP request types that are supported by the server.
+     */
+    protected RTSPRequestType[] getOptions() throws IOException {
+        HttpClient http = getHttpClient(OPTIONS);
+        ResponseData resp = sendRequest(http);
+
+        String options = resp.header.getHeader(PARAMETER_PUBLIC);
+        if (!ObjectUtil.isEmpty(options)) {
+            String[] arr = options.split(",");
+            RTSPRequestType[] ret = new RTSPRequestType[arr.length];
+
+            // Convert received options to the enum type
+            for (int i=0; i<arr.length; i++) {
+                ret[i] = RTSPRequestType.valueOf(arr[i].trim());
+            }
+
+            logger.fine("Received supported options: " + Arrays.toString(ret));
+            return ret;
+        }
+
+        return new RTSPRequestType[]{};
     }
 
     /**
@@ -179,16 +216,37 @@ public class RTSPClient {
      */
     public void close() throws IOException {
         HttpClient http = getHttpClient(TEARDOWN);
-        http.send();
+        sendRequest(http);
     }
 
 
     private HttpClient getHttpClient(RTSPRequestType type) {
         HttpClient http = new HttpClient(type.toString());
-        http.setURL(url); // TODO: Request line is required to contain the whole URL and not tha path
+        http.setProtocol("RTSP");
+        http.setURL(url);
+        http.setAbsoluteURL(true);
         http.setHeader("Accept", "application/sdp");
-        http.setHeader(PARAMETER_SESSION, sessionId);
+        http.setHeader("CSeq", "" + sequenceId++);
+        if (sessionId != null)
+            http.setHeader(PARAMETER_SESSION, sessionId);
 
         return http;
+    }
+
+    private ResponseData sendRequest(HttpClient http) throws IOException {
+        ResponseData resp = new ResponseData();
+
+        logger.finest("RTSP Request: " + http);
+        resp.header = http.send();
+        logger.finest("RTSP Response: " + resp.header);
+
+        resp.content = IOUtil.readContentAsString(http.getResponseInputStream());
+        http.close();
+        return resp;
+    }
+
+    private static class ResponseData {
+        HttpHeader header;
+        String content;
     }
 }

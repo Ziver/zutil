@@ -24,14 +24,19 @@
 
 package zutil.net.media;
 
+import zutil.log.LogUtil;
+
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.logging.Level;
 
 
 public class RTSPClientTest {
 
     public static void main(String[] args) throws IOException {
+        LogUtil.setGlobalLevel(Level.FINEST);
+
         RTSPClient rtsp = new RTSPClient("rtsp://192.168.10.249:8554/unicast");
         rtsp.play();
 
