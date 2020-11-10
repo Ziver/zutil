@@ -26,6 +26,7 @@ group = 'se.koc'
 version = '1.0.0-SNAPSHOT'
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
+compileJava.options.encoding = 'UTF-8'
 
 java {
     withSourcesJar()

@@ -78,7 +78,20 @@ public class HttpPrintStream extends OutputStream {
      */
     public HttpPrintStream(OutputStream out, HttpMessageType type) {
         this.out = new PrintStream(out);
-        header.setIsRequest(type == HttpMessageType.REQUEST);
+
+        // Set defaults
+
+        header.setProtocol("HTTP");
+        header.setProtocolVersion(1.0f);
+
+        if (type == HttpMessageType.REQUEST) {
+            header.setIsRequest(true);
+            header.setRequestType("GET");
+            header.setRequestURL("/");
+        } else {
+            header.setIsRequest(false);
+            header.setResponseStatusCode(200);
+        }
     }
 
 

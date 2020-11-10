@@ -101,28 +101,34 @@ public class HttpHeaderParser {
      * @param statusLine the status line String
      */
     private static void parseStatusLine(HttpHeader header, String statusLine) {
+        String[] lineArr = statusLine.split(" ", 3);
+
+        if (lineArr.length != 3)
+            return;
+
         // Server Response
-        if (statusLine.startsWith("HTTP/")) {
+        if (lineArr[0].contains("/")) {
             header.setIsRequest(false);
-            header.setProtocolVersion(Float.parseFloat(statusLine.substring(5, 8)));
-            header.setResponseStatusCode(Integer.parseInt(statusLine.substring(9, statusLine.indexOf(' ', 9))));
+            header.setProtocol(lineArr[0].substring(0, lineArr[0].indexOf('/')));
+            header.setProtocolVersion(Float.parseFloat(lineArr[0].substring(lineArr[0].indexOf('/')+1)));
+            header.setResponseStatusCode(Integer.parseInt(lineArr[1]));
+            header.getResponseStatusString(lineArr[2]);
         }
         // Client Request
-        else if (statusLine.contains("HTTP/")) {
+        else {
             header.setIsRequest(true);
-            header.setRequestType(statusLine.substring(0, statusLine.indexOf(" ")).trim());
-            header.setProtocolVersion(Float.parseFloat(statusLine.substring(statusLine.lastIndexOf("HTTP/") + 5).trim()));
-            statusLine = (statusLine.substring(header.getRequestType().length() + 1, statusLine.lastIndexOf("HTTP/")));
+            header.setRequestType(lineArr[0]);
+            header.setProtocol(lineArr[2].substring(0, lineArr[2].indexOf('/')));
+            header.setProtocolVersion(Float.parseFloat(lineArr[2].substring(lineArr[2].indexOf('/')+1)));
+            String url = lineArr[1];
 
             // parse URL and attributes
-            int index = statusLine.indexOf('?');
-            if (index > -1) {
-                header.setRequestURL(statusLine.substring(0, index));
-                statusLine = statusLine.substring(index + 1);
-                parseURLParameters(header.getURLAttributeMap(), statusLine);
-            } else {
-                header.setRequestURL(statusLine);
+            int paramStartIndex = url.indexOf('?');
+            if (paramStartIndex >= 0) {
+                url = statusLine.substring(0, paramStartIndex);
+                parseURLParameters(header.getURLAttributeMap(), statusLine.substring(paramStartIndex + 1));
             }
+            header.setRequestURL(url.trim());
         }
     }
 

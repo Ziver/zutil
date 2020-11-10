@@ -32,9 +32,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
 
-/**
- * Created by ezivkoc on 2015-12-11.
- */
 public class URLDecoderTest {
 
     @Test

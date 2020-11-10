@@ -44,7 +44,7 @@ public class HttpHeaderTest {
     @Test
     public void setProtocol() {
         HttpHeader header = new HttpHeader();
-        assertEquals("HTTP", header.getProtocol());
+        assertEquals(null, header.getProtocol());
 
         header.setProtocol("RTSP");
         assertEquals("RTSP", header.getProtocol());
@@ -54,7 +54,7 @@ public class HttpHeaderTest {
     @Test
     public void setProtocolVersion() {
         HttpHeader header = new HttpHeader();
-        assertEquals(1.0f, header.getProtocolVersion(), 0);
+        assertEquals(-1, header.getProtocolVersion(), 0);
 
         header.setProtocolVersion(1.1f);
         assertEquals(1.1f, header.getProtocolVersion(), 0);
@@ -64,7 +64,7 @@ public class HttpHeaderTest {
     @Test
     public void setRequestType() {
         HttpHeader header = new HttpHeader();
-        assertEquals("GET", header.getRequestType());
+        assertEquals(null, header.getRequestType());
 
         header.setRequestType("POST");
         assertEquals("POST", header.getRequestType());
@@ -74,7 +74,7 @@ public class HttpHeaderTest {
     @Test
     public void setResponseStatusCode() {
         HttpHeader header = new HttpHeader();
-        assertEquals(200, header.getResponseStatusCode());
+        assertEquals(-1, header.getResponseStatusCode());
 
         header.setResponseStatusCode(400);
         assertEquals(400, header.getResponseStatusCode());
@@ -83,16 +83,10 @@ public class HttpHeaderTest {
     @Test
     public void setRequestURL() {
         HttpHeader header = new HttpHeader();
-        assertEquals("/", header.getRequestURL());
+        assertEquals(null, header.getRequestURL());
 
         header.setRequestURL("/page/test");
         assertEquals("/page/test", header.getRequestURL());
-
-        header.setRequestURL(" /page/1test ");
-        assertEquals("/page/1test", header.getRequestURL());
-
-        header.setRequestURL("/page//2test ");
-        assertEquals("/page/2test", header.getRequestURL());
     }
 
     @Test
@@ -150,7 +144,7 @@ public class HttpHeaderTest {
     @Test
     public void getResponseStatusString() {
         HttpHeader header = new HttpHeader();
-        assertEquals("OK", header.getResponseStatusString());
+        assertEquals(null, header.getResponseStatusString());
 
         header.setResponseStatusCode(400);
         assertEquals("Bad Request", header.getResponseStatusString());

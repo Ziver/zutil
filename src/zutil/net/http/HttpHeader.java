@@ -35,31 +35,34 @@ import java.util.TreeMap;
 public class HttpHeader {
     // Constants
 
+    public static final String HEADER_CACHE_CONTROL  = "Cache-Control";
+    public static final String HEADER_COOKIE         = "Cookie";
     public static final String HEADER_CONTENT_TYPE   = "Content-Type";
     public static final String HEADER_CONTENT_LENGTH = "Content-Length";
-    public static final String HEADER_COOKIE         = "Cookie";
     public static final String HEADER_SET_COOKIE     = "Set-Cookie";
     public static final String HEADER_SERVER         = "Server";
     public static final String HEADER_USER_AGENT     = "User-Agent";
+    public static final String HEADER_IF_NONE_MATCH  = "If-None-Match";
 
     // Variables
 
     private boolean isRequest = true;
 
     /** Specifies the protocol that should be used */
-    private String protocol = "HTTP";
+    private String protocol = null;
     /** The protocol version specified in the header */
-    private float protocolVersion = 1.0f;
+    private float protocolVersion = -1;
 
     /** HTTP type specified in a HTTP request, e.g GET POST DELETE PUT etc */
-    private String requestType = "GET";
+    private String requestType = null;
     /** String containing the target URL */
-    private String requestUrl = "/";
+    private String requestUrl = null;
     /** Map containing all the properties from the URL */
     private Map<String, String> requestUrlAttributes = new HashMap<>();
 
     /** Status code specified in a HTTP response message */
-    private int responseStatusCode = 200;
+    private int responseStatusCode = -1;
+    private String responseStatusString = null;
 
     /** An Map of all header fields */
     private Map<String, String> headers = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
@@ -136,8 +139,16 @@ public class HttpHeader {
 
     public void setResponseStatusCode(int code) {
         this.responseStatusCode = code;
+        this.responseStatusString = getResponseStatusString(code);
     }
 
+    public String getResponseStatusString() {
+        return responseStatusString;
+    }
+
+    public void getResponseStatusString(String msg) {
+        this.responseStatusString = msg;
+    }
 
     /**
      * @return the URL that the client sent the server
@@ -302,10 +313,6 @@ public class HttpHeader {
         return Converter.toString(requestUrlAttributes);
     }
 
-
-    public String getResponseStatusString() {
-        return getResponseStatusString(responseStatusCode);
-    }
 
     public static String getResponseStatusString(int type) {
         switch (type) {

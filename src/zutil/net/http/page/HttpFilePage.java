@@ -50,11 +50,12 @@ public class HttpFilePage implements HttpPage{
     private static final Logger log = LogUtil.getLogger();
     private static final int MAX_CACHE_AGE_SECONDS = 120;
 
-    private File resource_root;
+    private final File resource_root;
     private boolean showFolders;
     private boolean redirectToIndex;
 
-    private HashMap<File,FileCache> cache;
+    private final HashMap<File,FileCache> cache;
+
     private static class FileCache{
         public long lastModified;
         public String hash;
@@ -64,6 +65,9 @@ public class HttpFilePage implements HttpPage{
      * @param    file       a reference to a root directory or a file.
      */
     public HttpFilePage(File file){
+        if (file == null)
+            throw new IllegalArgumentException("Root path cannot be null.");;
+
         this.resource_root = file;
         this.showFolders = true;
         this.redirectToIndex = true;
@@ -76,7 +80,7 @@ public class HttpFilePage implements HttpPage{
                         HttpHeader headers,
                         Map<String, Object> session,
                         Map<String, String> cookie,
-                        Map<String, String> request) throws IOException{
+                        Map<String, String> request) {
 
         try {
             // Is the root only one file or a folder
@@ -95,15 +99,21 @@ public class HttpFilePage implements HttpPage{
                         }
                         // Show folder contents
                         else if (showFolders) {
-                            out.println("<HTML><BODY><H1>Directory: " + headers.getRequestURL() + "</H1>");
-                            out.println("<HR><UL>");
-                            for (String f : file.list()) {
+                            out.println("<html>");
+                            out.println("<body>");
+                            out.println("    <h1>Directory: " + headers.getRequestURL() + "</h1>");
+                            out.println("    <hr>");
+                            out.println("    <ul>");
+                            for (String containingFile : file.list()) {
                                 String url = headers.getRequestURL();
-                                out.println("<LI><A href='" +
-                                        url + (url.charAt(url.length()-1)=='/'?"":"/")+ f
-                                        +"'>" + f + "</A></LI>");
+                                out.println("        <li><a href='" +
+                                        url + (url.endsWith("/") ? "" : "/") + containingFile
+                                        +"'>" + containingFile + "</a></li>");
                             }
-                            out.println("</UL><HR></BODY></HTML>");
+                            out.println("    </ul>");
+                            out.println("    <hr>");
+                            out.println("</body>");
+                            out.println("</html>");
                         }
                         else {
                             throw new SecurityException("User not allowed to view folder: root=" + resource_root.getAbsolutePath());
@@ -133,13 +143,13 @@ public class HttpFilePage implements HttpPage{
 
     private void deliverFileWithCache(HttpHeader headers, File file, HttpPrintStream out) throws IOException {
         String eTag = getFileHash(file);
-        out.setHeader("Cache-Control", "max-age=" + MAX_CACHE_AGE_SECONDS);
+        out.setHeader(HttpHeader.HEADER_CACHE_CONTROL, "max-age=" + MAX_CACHE_AGE_SECONDS);
 
         if (eTag != null) {
             out.setHeader("ETag", "\"" + eTag + "\"");
 
-            if (headers.getHeader("If-None-Match") != null &&
-                    eTag.equals(StringUtil.trimQuotes(headers.getHeader("If-None-Match")))) { // File has not changed
+            if (headers.getHeader(HttpHeader.HEADER_IF_NONE_MATCH) != null &&
+                    eTag.equals(StringUtil.trimQuotes(headers.getHeader(HttpHeader.HEADER_IF_NONE_MATCH)))) { // File has not changed
                 out.setResponseStatusCode(304);
             } else {
                 deliverFile(file, out);
@@ -150,8 +160,8 @@ public class HttpFilePage implements HttpPage{
         String fileExt = FileUtil.getFileExtension(file);
 
         if (MimeTypeUtil.getMimeByExtension(fileExt) != null)
-            out.setHeader("Content-Type", MimeTypeUtil.getMimeByExtension(fileExt).toString());
-        out.setHeader("Content-Length", "" + file.length());
+            out.setHeader(HttpHeader.HEADER_CONTENT_TYPE, MimeTypeUtil.getMimeByExtension(fileExt).toString());
+        out.setHeader(HttpHeader.HEADER_CONTENT_LENGTH, "" + file.length());
         out.flush();
 
         InputStream in = new FileInputStream(file);
