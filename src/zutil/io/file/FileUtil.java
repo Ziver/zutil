@@ -33,6 +33,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 
@@ -52,16 +53,16 @@ public class FileUtil {
      * @return 					A String with a relative path
      */
     public static String relativePath(File file, String path){
-        if( file == null || path == null )
+        if(file == null || path == null)
             return null;
+
         String absolute = file.getAbsolutePath();
         String tmpPath = path.replaceAll(
                 "[/\\\\]",
                 Matcher.quoteReplacement(File.separator));
 
         String relative = absolute.substring(
-                absolute.indexOf(tmpPath)+path.length(),
-                absolute.length());
+                absolute.indexOf(tmpPath)+path.length());
         return relative;
     }
 
@@ -77,14 +78,14 @@ public class FileUtil {
     public static File find(String path){
         try {
             File file = new File(path);
-            if(file!=null && file.exists()){
+            if(file.exists())
                 return file;
-            }
+
             URL url = findURL(path);
-            if(url != null)
+            if(url != null && "file".equals(url.getProtocol()))
                 return new File(url.toURI());
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.log(Level.FINE, "Unable to find file: " + path, e);
         }
         return null;
     }
@@ -113,7 +114,7 @@ public class FileUtil {
      */
     public static File getNextFile(File file){
         for(int i = 1; i<10000; ++i){
-            File next = new File(file.getParentFile(), file.getName()+"."+ StringUtil.prefixInt(i, 4));
+            File next = new File(file.getParentFile(), file.getName() + "." + StringUtil.prefixInt(i, 4));
             if(!next.exists())
                 return next;
         }
@@ -139,16 +140,17 @@ public class FileUtil {
     public static InputStream getInputStream(String path){
         try {
             File file = new File(path);
-            if(file!=null && file.exists()){
-                return new BufferedInputStream( new FileInputStream( file ) );
-            }
+            if(file.exists())
+                return new BufferedInputStream(new FileInputStream(file));
+
             return Thread.currentThread().getContextClassLoader()
                     .getResourceAsStream(path);
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.log(Level.FINE, "Unable to find file: " + path, e);
         }
         return null;
     }
+
 
     /**
      * Reads and returns the content of a file as a String.
@@ -185,6 +187,16 @@ public class FileUtil {
      */
     public static String getContent(URL url) throws IOException{
         return new String(IOUtil.readContent(url.openStream(), true));
+    }
+
+    /**
+     * Replaces the contents of a file with the specified String.
+     *
+     * @param	file	the file to write the data to
+     * @param	data	the String to write to the file
+     */
+    public static void setContent(File file, String data) throws IOException{
+        setContent(file, data.getBytes());
     }
 
     /**
