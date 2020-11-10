@@ -24,8 +24,8 @@ dependencies {
 
 group = 'se.koc'
 version = '1.0.0-SNAPSHOT'
-description = 'zutil'
-sourceCompatibility = '1.8'
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
 
 java {
     withSourcesJar()
