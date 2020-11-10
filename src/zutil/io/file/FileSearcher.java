@@ -25,16 +25,22 @@
 package zutil.io.file;
 
 import zutil.io.InputStreamCloser;
+import zutil.log.LogUtil;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
+import java.util.zip.ZipInputStream;
 
 public class FileSearcher implements Iterable<FileSearcher.FileSearchItem>{
+    private static final Logger logger = LogUtil.getLogger();
+
     // Constants
     private static final List<String> compressedFileExtensions = Arrays.asList(
             "jar", "zip");
@@ -143,7 +149,11 @@ public class FileSearcher implements Iterable<FileSearcher.FileSearchItem>{
             // Find the next file
             for(; index <fileList.size(); index++){
                 FileSearchItem file = fileList.get(index);
-                //#### FOLDERS
+                
+                // ----------------------------------------------
+                // Folders
+                // ----------------------------------------------
+                
                 if(recursive && file.isDirectory()){
                     addFiles(file, file.listFiles());
                     if(searchFolders) {
@@ -153,11 +163,22 @@ public class FileSearcher implements Iterable<FileSearcher.FileSearchItem>{
                             break;
                     }
                 }
-                //#### COMPRESSED FILES
+                
+                // ----------------------------------------------
+                // Compressed Files
+                // ----------------------------------------------
+                
                 else if(searchCompressedFiles && file.isFile() &&
                         compressedFileExtensions.contains(
                                 FileUtil.getFileExtension(file.getName()).toLowerCase())){
                     try {
+                        /*ZipInputStream zipInputStream = new ZipInputStream(new FileInputStream(file.getPath()));
+                        ZipEntry entry;
+
+                        while ((entry = zipInputStream.getNextEntry()) != null) {
+                            fileList.add(new FileSearchZipItem(file.getPath(), entry));
+                        }*/
+
                         ZipFile zipFile = new ZipFile(file.getPath());
                         Enumeration<? extends ZipEntry> e = zipFile.entries();
                         while(e.hasMoreElements()){
@@ -166,10 +187,14 @@ public class FileSearcher implements Iterable<FileSearcher.FileSearchItem>{
                         }
                         zipFile.close();
                     } catch (IOException e) {
-                        e.printStackTrace();
+                        logger.log(Level.WARNING, "Unable to traverse file: " + file.getPath(), e);
                     }
                 }
-                //#### REGULAR FILES
+                
+                // ----------------------------------------------
+                // Regular Files
+                // ----------------------------------------------
+                
                 else if(searchFiles && file.isFile()){
                     if(extension == null && fileName == null) // Should we match all files
                         break;
