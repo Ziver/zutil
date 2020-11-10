@@ -103,11 +103,13 @@ public class Templator {
     public Templator(File tmpl) throws IOException {
         if(tmpl == null)
             throw new IOException("File can not be null!");
+
         this.data = new HashMap<>();
         this.file = tmpl;
         parseTemplate(FileUtil.getContent(file));
         this.lastModified = file.lastModified();
     }
+
     public Templator(String tmpl){
         this.data = new HashMap<>();
         parseTemplate(tmpl);
