@@ -172,12 +172,18 @@ public class FileSearcher implements Iterable<FileSearcher.FileSearchItem>{
                         compressedFileExtensions.contains(
                                 FileUtil.getFileExtension(file.getName()).toLowerCase())){
                     try {
-                        /*ZipInputStream zipInputStream = new ZipInputStream(new FileInputStream(file.getPath()));
+                        /* TODO: Implement recursive file search
+                        ZipInputStream zipInputStream = new ZipInputStream(new FileInputStream(file.getPath()));
                         ZipEntry entry;
 
                         while ((entry = zipInputStream.getNextEntry()) != null) {
                             fileList.add(new FileSearchZipItem(file.getPath(), entry));
                         }*/
+
+                        if (file.isCompressed()) {
+                            logger.warning("Recursive compressed file search not supported. File: " + file.getPath());
+                            continue;
+                        }
 
                         ZipFile zipFile = new ZipFile(file.getPath());
                         Enumeration<? extends ZipEntry> e = zipFile.entries();
