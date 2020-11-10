@@ -247,7 +247,7 @@ public class HttpPrintStream extends OutputStream {
 
             if (!header.getCookieMap().isEmpty()) {
                 if (header.isRequest()) {
-                    out.print(HttpHeader.HEADER_COOKIE);
+                    out.print(HttpHeader.HEADER_COOKIE + ":");
                     for (String key : header.getCookieMap().keySet()) {
                         out.print(" " + key + "=" + header.getCookie(key) + ";");
                     }
@@ -260,6 +260,7 @@ public class HttpPrintStream extends OutputStream {
                 }
             }
 
+            out.println();
             header = null;
         }
 
