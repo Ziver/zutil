@@ -77,6 +77,7 @@ public class ThreadedUDPNetwork extends Thread{
      *
      * @param	port			is the port that the server should listen to
      * @param	multicastAddr	is the multicast address that the server will listen on
+     * @throws  IOException     if there is any issue opening the connection
      */
     public ThreadedUDPNetwork(String multicastAddr, int port ) throws IOException{
         this.type = UDPType.MULTICAST;
@@ -109,8 +110,9 @@ public class ThreadedUDPNetwork extends Thread{
      * Sends the given packet
      *
      * @param	packet	is the packet to send
+     * @throws IOException if there is any issue with sending the packet
      */
-    public synchronized void send( DatagramPacket packet ) throws IOException{
+    public synchronized void send(DatagramPacket packet) throws IOException {
         socket.send(packet);
     }
 
@@ -119,7 +121,7 @@ public class ThreadedUDPNetwork extends Thread{
      *
      * @param	thread	is the thread
      */
-    public void setThread(ThreadedUDPNetworkThread thread){
+    public void setThread(ThreadedUDPNetworkThread thread) {
         this.thread = thread;
     }
 

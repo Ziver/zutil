@@ -43,9 +43,9 @@ public interface BinaryStruct {
     @Retention(RetentionPolicy.RUNTIME)
     @Target(ElementType.FIELD)
     @interface BinaryField{
-        /** Will be used to order the fields are read. Lowest index number field will be read first. */
+        /** @return a number indicating the order the fields are read. Lowest index number field will be read first. */
         int index();
-        /** Defines the bit length of the data */
+        /** @return the bit length of the data */
         int length();
     }
 
@@ -57,12 +57,12 @@ public interface BinaryStruct {
     @Retention(RetentionPolicy.RUNTIME)
     @Target(ElementType.FIELD)
     @interface VariableLengthBinaryField{
-        /** Will be used to order the fields are read. Lowest index number field will be read first. */
+        /** @return a number indicating the order the fields are read. Lowest index number field will be read first. */
         int index();
-        /** The name of the field that will contain the length of the data to read. */
+        /** @return a String name of the field that contains the length of the data to be read. */
         String lengthField();
-        /** Defines the multiplier used on the lengthField parameter to convert the length in bits to
-         *  a user defined value. Default value is 8 (which converts length to nr of bytes). */
+        /** @return the multiplier used on the lengthField parameter to convert the length in bits to
+         *  a user defined value. Default value is 8 (which converts length to number of bytes). */
         int multiplier() default 8;
     }
 
@@ -72,9 +72,9 @@ public interface BinaryStruct {
     @Retention(RetentionPolicy.RUNTIME)
     @Target(ElementType.FIELD)
     @interface CustomBinaryField{
-        /** Will be used to order the fields are read. Lowest index number field will be read first. */
+        /** @return a number indicating the order the fields are read. Lowest index number field will be read first. */
         int index();
-        /** Defines the serializer class that will be used. Class needs to be publicly visible. */
+        /** @return the serializer class name that will be used. Class needs to be publicly visible. */
         Class<? extends BinaryFieldSerializer> serializer();
     }
 }

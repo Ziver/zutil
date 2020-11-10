@@ -128,9 +128,10 @@ public abstract class DBBean {
      * Saves the bean and all its sub beans to the DB
      *
      * @param		db				is the DBMS connection
+     * @throws SQLException if there is any issue with the SQL query
      */
     public void save(DBConnection db) throws SQLException{
-        save( db, true );
+        save(db, true);
     }
 
     /**
@@ -138,6 +139,7 @@ public abstract class DBBean {
      *
      * @param		db				the DBMS connection
      * @param		recursive		if all sub beans should be saved also
+     * @throws SQLException if there is any issue with the SQL query
      */
     @SuppressWarnings("unchecked")
     public void save(DBConnection db, boolean recursive) throws SQLException{
@@ -274,6 +276,9 @@ public abstract class DBBean {
 
     /**
      * Deletes the bean from the DB and all its sub beans and links.
+     *
+     * @param		db				the DBMS connection
+     * @throws SQLException if there is any issue with the SQL query
      */
     public void delete(DBConnection db) throws SQLException{
         delete(db, true);
@@ -281,7 +286,9 @@ public abstract class DBBean {
     /**
      * Deletes the bean from the DB and the links to sub beans.
      *
+     * @param		db				the DBMS connection
      * @param		recursive		if all sub beans should be deleted also
+     * @throws SQLException if there is any issue with the SQL query
      */
     public void delete(DBConnection db, boolean recursive) throws SQLException{
         Class<? extends DBBean> c = this.getClass();
@@ -324,9 +331,11 @@ public abstract class DBBean {
     /**
      * Loads all rows from the table into a LinkedList
      *
-     * @param 	<T> 	is the class of the bean
-     * @param 	c 		is the class of the bean
-     * @return			a LinkedList with all the beans in the DB
+     * @param 	<T>    is the class of the bean
+     * @param   db     the DBMS connection
+     * @param 	c      is the class of the bean
+     * @return a LinkedList with all the beans in the DB
+     * @throws SQLException if there is any issue with the SQL query
      */
     public static <T extends DBBean> List<T> load(DBConnection db, Class<T> c) throws SQLException {
         // Initiate a BeanConfig if there is non
@@ -343,9 +352,11 @@ public abstract class DBBean {
      * Loads a specific instance of the bean from the table  with the specific id
      *
      * @param 	<T> 	is the class of the bean
+     * @param	db		the DBMS connection
      * @param 	c 		is the class of the bean
      * @param	id		is the id value of the bean
-     * @return			a DBBean Object with the specific id or null if the id was not found
+     * @return a DBBean Object with the specific id or null if the id was not found
+     * @throws SQLException if there is any issue with the SQL query
      */
     public static <T extends DBBean> T load(DBConnection db, Class<T> c, long id) throws SQLException {
         // Initiate a BeanConfig if there is non
@@ -363,9 +374,13 @@ public abstract class DBBean {
     /**
      * Creates a specific table for the given Bean,
      * WARNING: Experimental
+     *
+     * @param	db		the DBMS connection
+     * @param 	c 		is the class of the bean
+     * @throws SQLException if there is any issue with the SQL query
      */
-    public static void create(DBConnection sql, Class<? extends DBBean> c) throws SQLException{
-        DBBeanConfig config = DBBeanConfig.getBeanConfig( c );
+    public static void create(DBConnection db, Class<? extends DBBean> c) throws SQLException{
+        DBBeanConfig config = DBBeanConfig.getBeanConfig(c);
 
         // Generate the SQL
         StringBuilder query = new StringBuilder();
@@ -373,7 +388,7 @@ public abstract class DBBean {
 
         // ID
         query.append(" ").append(config.getIdColumnName()).append(" ");
-        query.append( classToDBType( Long.class ) );
+        query.append(classToDBType(Long.class));
         query.append(" PRIMARY KEY AUTO_INCREMENT, ");
 
         for( DBBeanFieldConfig field : config.getFields() ){
@@ -385,8 +400,8 @@ public abstract class DBBean {
         query.delete(query.length()-2, query.length());
         query.append(")");
 
-        logger.finest("Create Bean("+c.getName()+") query: "+sql.toString());
-        PreparedStatement stmt = sql.getPreparedStatement( sql.toString() );
+        logger.finest("Create Bean("+c.getName()+") query: " + db.toString());
+        PreparedStatement stmt = db.getPreparedStatement(db.toString());
 
         // Execute the SQL
         DBConnection.exec(stmt);

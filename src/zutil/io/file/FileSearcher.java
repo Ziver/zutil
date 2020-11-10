@@ -72,6 +72,8 @@ public class FileSearcher implements Iterable<FileSearcher.FileSearchItem>{
 
     /**
      * Sets the file extensions to search for (should not include . at the beginning)
+     *
+     * @param ext is a String containing the file extension
      */
     public void setExtension(String ext){
         extension = ext;
