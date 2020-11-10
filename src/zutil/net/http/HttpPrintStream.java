@@ -275,7 +275,7 @@ public class HttpPrintStream extends OutputStream {
     }
 
     /**
-     * @return true if headers has been sent. The setHeader, setStatusCode, setCookie method will throw IllegalStateException
+     * @return true if headers has been sent. The setHeader, setResponseStatusCode, setCookie method will throw IllegalStateException
      */
     public boolean isHeaderSent() {
         return header == null;

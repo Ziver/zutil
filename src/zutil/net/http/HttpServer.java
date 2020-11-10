@@ -93,7 +93,7 @@ public class HttpServer extends ThreadedTCPNetworkServer{
         ScheduledExecutorService exec = Executors.newSingleThreadScheduledExecutor();
         exec.scheduleWithFixedDelay(new SessionGarbageCollector(), 10000, SESSION_TTL / 2, TimeUnit.MILLISECONDS);
 
-        logger.info("HTTP"+(keyStore==null?"":"S")+" Server ready!");
+        logger.info("HTTP"+(keyStore==null ? "" : "S")+" Server ready and listening to port: " + port);
     }
 
     /**
