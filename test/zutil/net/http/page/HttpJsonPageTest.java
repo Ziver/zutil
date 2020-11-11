@@ -3,6 +3,7 @@ package zutil.net.http.page;
 import org.junit.Test;
 import zutil.io.IOUtil;
 import zutil.net.http.HttpHeader;
+import zutil.net.http.HttpPrintStream;
 import zutil.net.http.HttpTestUtil;
 import zutil.parser.DataNode;
 
@@ -18,7 +19,7 @@ public class HttpJsonPageTest {
 
     private HttpJsonPage page = new HttpJsonPage() {
         @Override
-        protected DataNode jsonRespond(HttpHeader headers, Map<String, Object> session, Map<String, String> cookie, Map<String, String> request) {
+        protected DataNode jsonRespond(HttpPrintStream out, HttpHeader headers, Map<String, Object> session, Map<String, String> cookie, Map<String, String> request) {
             return new DataNode(DataNode.DataType.Map);
         }
     };

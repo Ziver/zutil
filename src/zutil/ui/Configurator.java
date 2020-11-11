@@ -197,13 +197,15 @@ public class Configurator<T> {
         for(ConfigurationParam param : params){
             try {
                 param.apply(obj);
+
                 // Logging
                 if(logger.isLoggable(Level.FINE)) {
-                    strParams.append(param.getName());
+                    strParams.append(param.getName()).append(": ");
                     if(param.isTypeString())
-                        strParams.append(": '").append(param.getString()).append("', ");
+                        strParams.append("'").append(param.getString()).append("'");
                     else
-                        strParams.append(": ").append(param.getString()).append(", ");
+                        strParams.append(param.getString());
+                    strParams.append(", ");
                 }
             } catch (IllegalAccessException e) {
                 logger.log(Level.WARNING, null, e);

@@ -29,7 +29,6 @@ import zutil.parser.DataNode;
 import zutil.parser.json.JSONParser;
 
 import java.io.*;
-import java.lang.reflect.Array;
 import java.util.*;
 
 /**
@@ -40,7 +39,7 @@ public class MimeTypeUtil {
     // Static variables
 
     private static final ArrayList<MimeType> mimes = new ArrayList<MimeType>();
-    private static final HashMap<String, MimeType> mimesByExtenion = new HashMap<>();
+    private static final HashMap<String, MimeType> mimesByExtension = new HashMap<>();
 
     // Initialize mime types
     static {
@@ -74,13 +73,13 @@ public class MimeTypeUtil {
         mimes.add(mime);
 
         for (String extension : mime.getExtensions()) {
-            mimesByExtenion.put(extension, mime);
+            mimesByExtension.put(extension, mime);
         }
     }
 
 
     public static MimeType getMimeByExtension(String extension) {
-        return mimesByExtenion.get(extension);
+        return mimesByExtension.get(extension);
     }
 
 

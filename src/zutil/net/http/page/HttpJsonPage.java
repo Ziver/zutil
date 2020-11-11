@@ -6,11 +6,10 @@ import zutil.net.http.HttpPrintStream;
 import zutil.parser.DataNode;
 import zutil.parser.json.JSONWriter;
 
-import java.io.IOException;
 import java.util.Map;
 
 /**
- * @author Ziver on 2016-11-04.
+ * A page handling responses in JSON format.
  */
 public abstract class HttpJsonPage implements HttpPage {
 
@@ -19,16 +18,21 @@ public abstract class HttpJsonPage implements HttpPage {
                         HttpHeader headers,
                         Map<String, Object> session,
                         Map<String, String> cookie,
-                        Map<String, String> request) throws IOException {
+                        Map<String, String> request) {
 
-        out.setHeader("Content-Type", "application/json");
-        JSONWriter writer = new JSONWriter(out);
-        writer.write(jsonRespond(headers, session, cookie, request));
-        writer.close();
+        out.setHeader(HttpHeader.HEADER_CONTENT_TYPE, "application/json");
+        DataNode json = jsonRespond(out, headers, session, cookie, request);
+
+        if (json != null) {
+            JSONWriter writer = new JSONWriter(out);
+            writer.write(json);
+            writer.close();
+        }
     }
 
 
-    protected abstract DataNode jsonRespond(HttpHeader headers,
+    protected abstract DataNode jsonRespond(HttpPrintStream out,
+                                            HttpHeader headers,
                                             Map<String, Object> session,
                                             Map<String, String> cookie,
                                             Map<String, String> request);
