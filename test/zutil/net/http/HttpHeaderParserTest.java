@@ -45,6 +45,12 @@ public class HttpHeaderParserTest {
         assertEquals(-1, header.getResponseStatusCode());
         assertEquals(null, header.getResponseStatusString());
 
+        parser = new HttpHeaderParser("GET /test/page?param=test HTTP/1.1");
+        header = parser.read();
+
+        assertEquals("/test/page", header.getRequestURL());
+        assertEquals("test", header.getURLAttribute("param"));
+
         parser = new HttpHeaderParser("DESCRIBE http://example.com RTSP/1.0");
         header = parser.read();
 

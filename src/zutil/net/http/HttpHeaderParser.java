@@ -125,8 +125,8 @@ public class HttpHeaderParser {
             // parse URL and attributes
             int paramStartIndex = url.indexOf('?');
             if (paramStartIndex >= 0) {
-                url = statusLine.substring(0, paramStartIndex);
-                parseURLParameters(header.getURLAttributeMap(), statusLine.substring(paramStartIndex + 1));
+                parseURLParameters(header.getURLAttributeMap(), url.substring(paramStartIndex + 1));
+                url = url.substring(0, paramStartIndex);
             }
             header.setRequestURL(url.trim());
         }
