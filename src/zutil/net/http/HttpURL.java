@@ -24,7 +24,10 @@
 
 package zutil.net.http;
 
+import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 
 /**
@@ -49,6 +52,10 @@ public class HttpURL {
 
 
     public HttpURL() {}
+
+    public HttpURL(String urlStr) throws MalformedURLException {
+        this(new URL(urlStr));
+    }
 
     public HttpURL(URL url) {
         this.setProtocol(url.getProtocol());
