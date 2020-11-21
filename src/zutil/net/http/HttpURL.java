@@ -62,6 +62,7 @@ public class HttpURL {
         this.setHost(url.getHost());
         this.setPort(url.getPort());
         this.setPath(url.getPath());
+        this.setParameters(url.getQuery());
     }
 
 
@@ -113,6 +114,16 @@ public class HttpURL {
 
     protected void setParameters(HashMap<String, String> pars) {
         this.parameters = pars;
+    }
+
+    protected void setParameters(String query) {
+        if (query == null)
+            return;
+        HttpHeaderParser.parseURLParameters(parameters, query);
+    }
+
+    public String getParameter(String key) {
+        return parameters.get(key);
     }
 
     /**

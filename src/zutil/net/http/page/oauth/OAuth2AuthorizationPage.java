@@ -80,23 +80,23 @@ public class OAuth2AuthorizationPage implements HttpPage {
 
     /** The request is missing a required parameter, includes an invalid parameter value, includes a parameter
      more than once, or is otherwise malformed. **/
-    protected static final String ERROR_INVALID_REQUEST = "invalid_request";
+    private static final String ERROR_INVALID_REQUEST = "invalid_request";
     /** The client is not authorized to request an authorization code using this method. **/
-    protected static final String ERROR_UNAUTHORIZED_CLIENT = "unauthorized_client";
+    private static final String ERROR_UNAUTHORIZED_CLIENT = "unauthorized_client";
     /** The resource owner or authorization server denied the request. **/
-    protected static final String ERROR_ACCESS_DENIED = "access_denied";
+    private static final String ERROR_ACCESS_DENIED = "access_denied";
     /** The authorization server does not support obtaining an authorization code using this method. **/
-    protected static final String ERROR_UNSUPPORTED_RESP_TYPE = "unsupported_response_type";
+    private static final String ERROR_UNSUPPORTED_RESP_TYPE = "unsupported_response_type";
     /** The requested scope is invalid, unknown, or malformed. **/
-    protected static final String ERROR_INVALID_SCOPE = "invalid_scope";
+    private static final String ERROR_INVALID_SCOPE = "invalid_scope";
     /** The authorization server encountered an unexpected condition that prevented it from fulfilling the request.
      (This error code is needed because a 500 Internal Server Error HTTP status code cannot be returned to the client
      via an HTTP redirect.) **/
-    protected static final String ERROR_SERVER_ERROR = "server_error";
+    private static final String ERROR_SERVER_ERROR = "server_error";
     /** The authorization server is currently unable to handle the request due to a temporary overloading or maintenance
      of the server.  (This error code is needed because a 503 Service Unavailable HTTP status code cannot be returned
      to the client via an HTTP redirect.) **/
-    protected static final String ERROR_TEMPORARILY_UNAVAILABLE = "temporarily_unavailable";
+    private static final String ERROR_TEMPORARILY_UNAVAILABLE = "temporarily_unavailable";
 
     private static final String RESPONSE_TYPE_CODE = "code";
     private static final String RESPONSE_TYPE_PASSWORD = "password";
@@ -117,34 +117,64 @@ public class OAuth2AuthorizationPage implements HttpPage {
             HttpHeader headers,
             Map<String, Object> session,
             Map<String, String> cookie,
-            Map<String, String> request) throws MalformedURLException {
+            Map<String, String> request) {
+
+        // -----------------------------------------------
+        // Validate parameters
+        // -----------------------------------------------
+
+        // Validate redirect_uri
 
         if (!request.containsKey("redirect_uri")) {
-            errorResponse(out, "Bad Request, missing property: redirect_uri");
+            errorResponse(out, "Bad Request, missing parameter: redirect_uri");
+            return;
+        }
+
+        HttpURL url = null;
+        try {
+            url = new HttpURL(URLDecoder.decode(request.get("redirect_uri")));
+        } catch(Exception e) {}
+
+        if (url == null || !"HTTPS".equalsIgnoreCase(url.getProtocol())) {
+            errorResponse(out, "Invalid redirect URL: " + request.get("redirect_uri"));
+            return;
+        }
+
+        // Validate client_id
+
+        if (!request.containsKey("client_id")) {
+            errorResponse(out, "Bad Request, missing parameter: client_id");
             return;
         }
 
         String clientId = request.get("client_id");
 
-        if (registry.isClientIdValid(clientId)) {
-            errorResponse(out, "Bad Request, missing or invalid client_id value.");
+        if (!registry.isClientIdValid(clientId)) {
+            errorRedirect(out, url, ERROR_UNAUTHORIZED_CLIENT, request.get("state"),
+                    "Bad Request, invalid client_id value.");
             return;
         }
 
-        HttpURL url = new HttpURL(URLDecoder.decode(request.get("redirect_uri")));
+        // Validate response_type
 
-        if (!"HTTPS".equalsIgnoreCase(url.getProtocol())) {
-            errorResponse(out, "Bad redirect protocol: " + url.getProtocol());
+        if (!request.containsKey("response_type")) {
+            errorRedirect(out, url, ERROR_INVALID_REQUEST, request.get("state"),
+                    "Missing parameter response_type.");
             return;
         }
+
+        // -----------------------------------------------
+        // Handle request
+        // -----------------------------------------------
 
         switch (request.get("response_type")) {
             case RESPONSE_TYPE_CODE:
                 String code = generateCode();
                 registry.registerAuthorizationCode(clientId, code);
 
-                url.setParameter("state", request.get("state"));
                 url.setParameter("code", code);
+                if (request.containsKey("state"))
+                    url.setParameter("state", request.get("state"));
                 break;
             case RESPONSE_TYPE_PASSWORD:
             case RESPONSE_TYPE_CREDENTIALS:
@@ -160,7 +190,7 @@ public class OAuth2AuthorizationPage implements HttpPage {
     }
 
     private String generateCode() {
-        return String.valueOf(random.nextInt());
+        return String.valueOf(Math.abs(random.nextLong()));
     }
 
     // ------------------------------------------------------

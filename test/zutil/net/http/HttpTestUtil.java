@@ -21,7 +21,7 @@ public class HttpTestUtil {
         StringOutputStream buff = new StringOutputStream();
         HttpPrintStream out = new HttpPrintStream(buff);
 
-        page.respond(out, headers, session, new HashMap(), new HashMap());
+        page.respond(out, headers, session, new HashMap(), headers.getURLAttributeMap());
 
         out.flush();
         HttpHeaderParser parser = new HttpHeaderParser(buff.toString());

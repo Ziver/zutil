@@ -155,7 +155,7 @@ public class OAuth2TokenPage extends HttpJsonPage {
     }
 
     private String generateToken() {
-        return String.valueOf(random.nextInt());
+        return String.valueOf(Math.abs(random.nextLong()));
     }
 
     // ------------------------------------------------------

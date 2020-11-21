@@ -61,7 +61,7 @@ public class OAuth2Registry {
     private static final long DEFAULT_TIMEOUT = 24 * 60 * 60 * 1000; // 24h
 
     private Map<String, ClientRegister> clientRegistry = new HashMap<>();
-    private boolean requireWhitelist = false;
+    private boolean requireWhitelist = true;
 
 
     // ------------------------------------------------------
@@ -71,7 +71,7 @@ public class OAuth2Registry {
     /**
      * Set the requirement or non-requirement of pre-registered client-ids.
      * If enabled then any clients starting a OAuth2 process needs to have a
-     * preregistered client-id value in the registry object.
+     * preregistered client-id value in the registry object. (Default is set to true)
      *
      * @param enabled if true then all requests will be required to be in whitelist
      */
