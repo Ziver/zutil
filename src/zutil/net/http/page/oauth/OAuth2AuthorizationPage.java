@@ -212,6 +212,8 @@ public class OAuth2AuthorizationPage implements HttpPage {
      * @param description
      */
     private static void errorRedirect(HttpPrintStream out, HttpURL url, String error, String state, String description) {
+        logger.warning("OAuth2 Authorization Error(" + error + "): " + description);
+
         out.setHeader(HttpHeader.HEADER_CONTENT_TYPE, "application/x-www-form-urlencoded");
         url.setParameter("error", error);
         if (description != null) url.setParameter("error_description", description);
