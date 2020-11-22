@@ -81,20 +81,20 @@ public class OAuth2TokenPage extends HttpJsonPage {
     /** The request is missing a required parameter, includes an unsupported parameter value (other than grant type),
      repeats a parameter, includes multiple credentials, utilizes more than one mechanism for authenticating the
      client, or is otherwise malformed. **/
-    protected static final String ERROR_INVALID_REQUEST = "invalid_request";
+    private static final String ERROR_INVALID_REQUEST = "invalid_request";
     /** Client authentication failed (e.g., unknown client, no client authentication included, or unsupported
-     authentication method).  **/
-    protected static final String ERROR_INVALID_CLIENT = "invalid_client";
+     authentication method). **/
+    private static final String ERROR_INVALID_CLIENT = "invalid_client";
     /** The provided authorization grant (e.g., authorization code, resource owner credentials) or refresh token is
      invalid, expired, revoked, does not match the redirection URI used in the authorization request, or was issued to
      another client. **/
-    protected static final String ERROR_INVALID_GRANT = "invalid_grant";
+    private static final String ERROR_INVALID_GRANT = "invalid_grant";
     /** The authenticated client is not authorized to use this authorization grant type. **/
-    protected static final String ERROR_UNAUTHORIZED_CLIENT = "unauthorized_client";
+    private static final String ERROR_UNAUTHORIZED_CLIENT = "unauthorized_client";
     /** The authorization grant type is not supported by the authorization server. **/
-    protected static final String ERROR_UNSUPPORTED_GRANT_TYPE = "unsupported_grant_type";
+    private static final String ERROR_UNSUPPORTED_GRANT_TYPE = "unsupported_grant_type";
     /** The requested scope is invalid, unknown, malformed, or exceeds the scope granted by the resource owner. **/
-    protected static final String ERROR_INVALID_SCOPE = "invalid_scope";
+    private static final String ERROR_INVALID_SCOPE = "invalid_scope";
 
     private Random random = new Random();
     private OAuth2Registry registry;
@@ -119,18 +119,48 @@ public class OAuth2TokenPage extends HttpJsonPage {
         out.setHeader("Cache-Control", "no-store");
         out.setHeader("Pragma", "no-cache");
 
+        // -----------------------------------------------
+        // Validate parameters
+        // -----------------------------------------------
+
         DataNode jsonRes = new DataNode(DataNode.DataType.Map);
 
+        // Validate client_id
+
         if (!request.containsKey("client_id"))
-            return errorResponse(out, ERROR_INVALID_REQUEST , request.get("state"), "Missing mandatory parameter client_id.");
+            return errorResponse(out, ERROR_INVALID_REQUEST , request.get("state"), "Missing mandatory parameter: client_id");
 
         String clientId = request.get("client_id");
 
-        if (registry.isClientIdValid(clientId))
+        if (!registry.isClientIdValid(clientId))
             return errorResponse(out, ERROR_INVALID_CLIENT , request.get("state"), "Invalid client_id value.");
 
+        // Validate code
+
+        if (!request.containsKey("code"))
+            return errorResponse(out, ERROR_INVALID_REQUEST , request.get("state"), "Missing mandatory parameter: code");
+
         if (!registry.isAuthorizationCodeValid(clientId, request.get("code")))
-            return errorResponse(out, ERROR_INVALID_GRANT, request.get("state"), "Invalid authorization code value provided.");
+            return errorResponse(out, ERROR_INVALID_GRANT, request.get("state"), "Invalid authorization code value.");
+
+        // Validate redirect_uri
+
+        if (!request.containsKey("redirect_uri"))
+            return errorResponse(out, ERROR_INVALID_REQUEST , request.get("state"), "Missing mandatory parameter: redirect_uri");
+
+        // TODO: ensure that the "redirect_uri" parameter is present if the
+        //      "redirect_uri" parameter was included in the initial authorization
+        //      request as described in Section 4.1.1, and if included ensure that
+        //      their values are identical.
+
+        // Validate grant_type
+
+        if (!request.containsKey("grant_type"))
+            return errorResponse(out, ERROR_INVALID_REQUEST , request.get("state"), "Missing mandatory parameter grant_type.");
+
+        // -----------------------------------------------
+        // Handle request
+        // -----------------------------------------------
 
         String grantType = request.get("grant_type");
 

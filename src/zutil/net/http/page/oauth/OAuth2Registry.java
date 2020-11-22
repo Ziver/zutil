@@ -144,6 +144,8 @@ public class OAuth2Registry {
         ClientRegister reg = getClientRegistry(clientId);
 
         if (reg != null) {
+            boolean b1 = reg.accessTokens.containsKey(token);
+            boolean b2 = reg.accessTokens.get(token).hasTimedOut();
             return reg.accessTokens.containsKey(token) &&
                     !reg.accessTokens.get(token).hasTimedOut();
         }
@@ -161,7 +163,7 @@ public class OAuth2Registry {
         ClientRegister reg = getClientRegistry(clientId);
 
         if (reg != null) {
-            reg.authCodes.put(code, new Timer(timeoutMillis));
+            reg.authCodes.put(code, new Timer(timeoutMillis).start());
             return timeoutMillis;
         }
         return -1;
@@ -174,7 +176,7 @@ public class OAuth2Registry {
         ClientRegister reg = getClientRegistry(clientId);
 
         if (reg != null) {
-            reg.accessTokens.put(token, new Timer(timeoutMillis));
+            reg.accessTokens.put(token, new Timer(timeoutMillis).start());
             return timeoutMillis;
         }
         return -1;

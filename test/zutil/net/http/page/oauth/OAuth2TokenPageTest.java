@@ -26,147 +26,154 @@ package zutil.net.http.page.oauth;
 
 import org.junit.Before;
 import org.junit.Test;
+import zutil.io.IOUtil;
 import zutil.net.http.HttpHeader;
 import zutil.net.http.HttpTestUtil;
-import zutil.net.http.HttpURL;
+import zutil.parser.DataNode;
+import zutil.parser.json.JSONParser;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
 
 import static org.junit.Assert.*;
 
 public class OAuth2TokenPageTest {
 
+    private static final String VALID_CLIENT_ID = "12345";
+    private static final String VALID_REDIRECT_URI = "https://example.com";
+    private static final String VALID_AUTH_CODE = "secret_code";
+    private static final String VALID_GRANT_TYPE = "authorization_code";
+
     private OAuth2Registry registry;
-    private OAuth2AuthorizationPage authPage;
+    private OAuth2TokenPage tokenPage;
 
     @Before
     public void init(){
         registry = new OAuth2Registry();
-        authPage = new OAuth2AuthorizationPage(registry);
+        tokenPage = new OAuth2TokenPage(registry);
+
+        registry.addWhitelist(VALID_CLIENT_ID);
+        registry.registerAuthorizationCode(VALID_CLIENT_ID, VALID_AUTH_CODE);
     }
 
-    @Test
-    public void invalidRedirect() throws IOException {
-        registry.addWhitelist("12345");
-        HttpHeader reqHeader = new HttpHeader();
-        HttpHeader rspHeader = HttpTestUtil.makeRequest(authPage, reqHeader);
-
-        // redirect_uri and client_id not provided
-
-        assertEquals(400, rspHeader.getResponseStatusCode());
-        assertNull(rspHeader.getHeader("Location"));
-
-        // redirect_uri not provided
-
-        reqHeader.setURLAttribute("client_id", "12345");
-        rspHeader = HttpTestUtil.makeRequest(authPage, reqHeader);
-
-        assertEquals(400, rspHeader.getResponseStatusCode());
-        assertNull(rspHeader.getHeader("Location"));
-
-        // redirect_uri is not a valid URL
-
-        reqHeader.setURLAttribute("redirect_uri", "incorrect url");
-        rspHeader = HttpTestUtil.makeRequest(authPage, reqHeader);
-
-        assertEquals(400, rspHeader.getResponseStatusCode());
-        assertNull(rspHeader.getHeader("Location"));
-
-        // redirect_uri is not HTTPS
-
-        reqHeader.setURLAttribute("redirect_uri", "http://example.com");
-        rspHeader = HttpTestUtil.makeRequest(authPage, reqHeader);
-
-        assertEquals(400, rspHeader.getResponseStatusCode());
-        assertNull(rspHeader.getHeader("Location"));
-    }
-
-    @Test
-    public void invalidClientId() throws IOException {
-        HttpHeader reqHeader = new HttpHeader();
-        reqHeader.setURLAttribute("redirect_uri", "https://example.com");
-        HttpHeader rspHeader = HttpTestUtil.makeRequest(authPage, reqHeader);
-
-        // client_id not provided
-
-        assertEquals(400, rspHeader.getResponseStatusCode());
-        assertNull(rspHeader.getHeader("Location"));
-
-    }
-
-    /** The request is missing a required parameter, includes an invalid parameter value, includes a parameter
-     more than once, or is otherwise malformed. **/
     @Test
     public void errorInvalidRequest() throws IOException {
-        registry.addWhitelist("12345");
         HttpHeader reqHeader = new HttpHeader();
-        reqHeader.setURLAttribute("client_id", "12345");
-        reqHeader.setURLAttribute("redirect_uri", "https://example.com");
-        HttpHeader rspHeader = HttpTestUtil.makeRequest(authPage, reqHeader);
+        HttpHeader rspHeader = HttpTestUtil.makeRequest(tokenPage, reqHeader);
 
-        // Missing response_type
+        assertEquals(400, rspHeader.getResponseStatusCode());
+        DataNode json = JSONParser.read(IOUtil.readContentAsString(rspHeader.getInputStream()));
+        assertEquals("invalid_request", json.getString("error"));
 
-        assertEquals(302, rspHeader.getResponseStatusCode());
-        HttpURL url = new HttpURL(rspHeader.getHeader("Location"));
-        assertNull(url.getParameter("code"));
-        assertEquals("invalid_request", url.getParameter("error"));
+        // Missing grant_type
 
-        // response_type is not code
+        reqHeader = new HttpHeader();
+        reqHeader.setURLAttribute("client_id", VALID_CLIENT_ID);
+        reqHeader.setURLAttribute("redirect_uri", VALID_REDIRECT_URI);
+        reqHeader.setURLAttribute("code", VALID_AUTH_CODE);
+        rspHeader = HttpTestUtil.makeRequest(tokenPage, reqHeader);
 
-        reqHeader.setURLAttribute("response_type", "not_code");
-        rspHeader = HttpTestUtil.makeRequest(authPage, reqHeader);
+        assertEquals(400, rspHeader.getResponseStatusCode());
+        json = JSONParser.read(IOUtil.readContentAsString(rspHeader.getInputStream()));
+        assertEquals("invalid_request", json.getString("error"));
 
-        assertEquals(302, rspHeader.getResponseStatusCode());
-        assertNull(url.getParameter("code"));
-        assertEquals("invalid_request", url.getParameter("error"));
+        // Missing code
+
+        reqHeader = new HttpHeader();
+        reqHeader.setURLAttribute("client_id", VALID_CLIENT_ID);
+        reqHeader.setURLAttribute("redirect_uri", VALID_REDIRECT_URI);
+        reqHeader.setURLAttribute("grant_type", VALID_GRANT_TYPE);
+        rspHeader = HttpTestUtil.makeRequest(tokenPage, reqHeader);
+
+        assertEquals(400, rspHeader.getResponseStatusCode());
+        json = JSONParser.read(IOUtil.readContentAsString(rspHeader.getInputStream()));
+        assertEquals("invalid_request", json.getString("error"));
+
+        // Missing redirect_uri
+
+        reqHeader = new HttpHeader();
+        reqHeader.setURLAttribute("client_id", VALID_CLIENT_ID);
+        reqHeader.setURLAttribute("grant_type", VALID_GRANT_TYPE);
+        reqHeader.setURLAttribute("code", VALID_AUTH_CODE);
+        rspHeader = HttpTestUtil.makeRequest(tokenPage, reqHeader);
+
+        assertEquals(400, rspHeader.getResponseStatusCode());
+        json = JSONParser.read(IOUtil.readContentAsString(rspHeader.getInputStream()));
+        assertEquals("invalid_request", json.getString("error"));
+
+        // Missing client_id
+
+        reqHeader = new HttpHeader();
+        reqHeader.setURLAttribute("redirect_uri", VALID_REDIRECT_URI);
+        reqHeader.setURLAttribute("grant_type", VALID_GRANT_TYPE);
+        reqHeader.setURLAttribute("code", VALID_AUTH_CODE);
+        rspHeader = HttpTestUtil.makeRequest(tokenPage, reqHeader);
+
+        assertEquals(400, rspHeader.getResponseStatusCode());
+        json = JSONParser.read(IOUtil.readContentAsString(rspHeader.getInputStream()));
+        assertEquals("invalid_request", json.getString("error"));
     }
 
-    /** The client is not authorized to request an authorization code using this method. **/
     @Test
-    public void errorUnauthorizedClient() throws IOException {
-        registry.addWhitelist("12345");
+    public void errorInvalidClient() throws IOException {
         HttpHeader reqHeader = new HttpHeader();
         reqHeader.setURLAttribute("client_id", "67890");
-        reqHeader.setURLAttribute("redirect_uri", "https://example.com");
-        HttpHeader rspHeader = HttpTestUtil.makeRequest(authPage, reqHeader);
+        reqHeader.setURLAttribute("redirect_uri", VALID_REDIRECT_URI);
+        reqHeader.setURLAttribute("grant_type", VALID_GRANT_TYPE);
+        reqHeader.setURLAttribute("code", VALID_AUTH_CODE);
+        HttpHeader rspHeader = HttpTestUtil.makeRequest(tokenPage, reqHeader);
 
-        // Missing response_type
+        assertEquals(400, rspHeader.getResponseStatusCode());
+        DataNode json = JSONParser.read(IOUtil.readContentAsString(rspHeader.getInputStream()));
+        assertEquals("invalid_client", json.getString("error"));
 
-        assertEquals(302, rspHeader.getResponseStatusCode());
-        HttpURL url = new HttpURL(rspHeader.getHeader("Location"));
-        assertNull(url.getParameter("code"));
-        assertEquals("unauthorized_client", url.getParameter("error"));
     }
+
+    @Test
+    public void errorInvalidGrant() throws IOException {
+        HttpHeader reqHeader = new HttpHeader();
+        reqHeader.setURLAttribute("client_id", VALID_CLIENT_ID);
+        reqHeader.setURLAttribute("redirect_uri", VALID_REDIRECT_URI);
+        reqHeader.setURLAttribute("grant_type", VALID_GRANT_TYPE);
+        reqHeader.setURLAttribute("code", "fake_code");
+        HttpHeader rspHeader = HttpTestUtil.makeRequest(tokenPage, reqHeader);
+
+        assertEquals(400, rspHeader.getResponseStatusCode());
+        DataNode json = JSONParser.read(IOUtil.readContentAsString(rspHeader.getInputStream()));
+        assertEquals("invalid_grant", json.getString("error"));
+    }
+
+    @Test
+    public void errorUnsupportedGrantType() throws IOException {
+        HttpHeader reqHeader = new HttpHeader();
+        reqHeader.setURLAttribute("client_id", VALID_CLIENT_ID);
+        reqHeader.setURLAttribute("redirect_uri", VALID_REDIRECT_URI);
+        reqHeader.setURLAttribute("grant_type", "fake_grant_type");
+        reqHeader.setURLAttribute("code", VALID_AUTH_CODE);
+        HttpHeader rspHeader = HttpTestUtil.makeRequest(tokenPage, reqHeader);
+
+        assertEquals(400, rspHeader.getResponseStatusCode());
+        DataNode json = JSONParser.read(IOUtil.readContentAsString(rspHeader.getInputStream()));
+        assertEquals("unsupported_grant_type", json.getString("error"));
+    }
+
 
     @Test
     public void requestBasic() throws IOException {
-        registry.addWhitelist("12345");
         HttpHeader reqHeader = new HttpHeader();
-        reqHeader.setURLAttribute("client_id", "12345");
-        reqHeader.setURLAttribute("redirect_uri", "https://example.com");
-        reqHeader.setURLAttribute("response_type", "code");
-        HttpHeader rspHeader = HttpTestUtil.makeRequest(authPage, reqHeader);
+        reqHeader.setURLAttribute("client_id", VALID_CLIENT_ID);
+        reqHeader.setURLAttribute("redirect_uri", VALID_REDIRECT_URI);
+        reqHeader.setURLAttribute("grant_type", VALID_GRANT_TYPE);
+        reqHeader.setURLAttribute("code", VALID_AUTH_CODE);
+        HttpHeader rspHeader = HttpTestUtil.makeRequest(tokenPage, reqHeader);
 
-        assertEquals(302, rspHeader.getResponseStatusCode());
-        HttpURL url = new HttpURL(rspHeader.getHeader("Location"));
-        assertEquals("example.com", url.getHost());
-        assertNotNull(url.getParameter("code"));
-        assertNull(url.getParameter("state"));
-    }
+        assertEquals(200, rspHeader.getResponseStatusCode());
+        assertEquals("application/json", rspHeader.getHeader("Content-Type"));
+        DataNode json = JSONParser.read(IOUtil.readContentAsString(rspHeader.getInputStream()));
+        assertNotNull(json.getString("refresh_token"));
+        assertNotNull(json.getString("access_token"));
+        assertNotNull(json.getString("expires_in"));
+        assertEquals("bearer", json.getString("token_type"));
 
-    @Test
-    public void requestWithState() throws IOException {
-        registry.addWhitelist("12345");
-        HttpHeader reqHeader = new HttpHeader();
-        reqHeader.setURLAttribute("client_id", "12345");
-        reqHeader.setURLAttribute("redirect_uri", "https://example.com");
-        reqHeader.setURLAttribute("response_type", "code");
-        reqHeader.setURLAttribute("state", "app_state");
-        HttpHeader rspHeader = HttpTestUtil.makeRequest(authPage, reqHeader);
-
-        assertEquals(302, rspHeader.getResponseStatusCode());
-        HttpURL url = new HttpURL(rspHeader.getHeader("Location"));
-        assertEquals("app_state", url.getParameter("state"));
+        assertTrue(registry.isAccessTokenValid(VALID_CLIENT_ID, json.getString("access_token")));
     }
 }

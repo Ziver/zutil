@@ -40,10 +40,12 @@ public class Timer {
 
 
     /**
-     * Creates a new timer that in reset state.
+     * Create a new timer that will timeout in a specified amount of time from now.
+     *
+     * @param millisecond the time in milliseconds that the timeout should happen.
      */
-    public Timer(long milisec){
-        this.period = milisec;
+    public Timer(long millisecond){
+        this.period = millisecond;
         reset();
     }
 
