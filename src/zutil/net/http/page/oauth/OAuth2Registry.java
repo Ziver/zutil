@@ -24,20 +24,26 @@
 
 package zutil.net.http.page.oauth;
 
+import zutil.Hasher;
 import zutil.Timer;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
 
 /**
  * A data class containing authentication information for individual
  * clients going through the OAuth 2 process.
  */
-public class OAuth2Registry {
-    private static final long DEFAULT_TIMEOUT = 24 * 60 * 60 * 1000; // 24h
+public class OAuth2Registry implements Serializable {
+    private static final long DEFAULT_CODE_TIMEOUT  =      10 * 60 * 1000; // 10min
+    private static final long DEFAULT_TOKEN_TIMEOUT = 24 * 60 * 60 * 1000; // 24h
 
-    private Map<String, ClientRegister> clientRegistry = new HashMap<>();
+    private Map<String, ClientRegister> clientRegisters = new HashMap<>();
     private boolean requireWhitelist = true;
+
+    transient private Random random = new Random();
 
 
     // ------------------------------------------------------
@@ -62,8 +68,8 @@ public class OAuth2Registry {
      * @param clientId A String ID that should be whitelisted
      */
     public void addWhitelist(String clientId) {
-        if (!clientRegistry.containsKey(clientId)) {
-            clientRegistry.put(clientId, new ClientRegister());
+        if (!clientRegisters.containsKey(clientId)) {
+            clientRegisters.put(clientId, new ClientRegister());
         }
     }
 
@@ -83,21 +89,17 @@ public class OAuth2Registry {
 
         if (!requireWhitelist)
             return true;
-        return clientRegistry.containsKey(clientId);
+        return clientRegisters.containsKey(clientId);
     }
 
     /**
      * Validates that a authorization code has valid format and has been authorized and not elapsed.
      *
-     * @param clientId the id of the requesting client
      * @param code the code that should be validated
      * @return true if the given code is valid otherwise false.
      */
-    public boolean isAuthorizationCodeValid(String clientId, String code) {
-        if (clientId == null || code == null)
-            return false;
-
-        ClientRegister reg = getClientRegistry(clientId);
+    public boolean isAuthorizationCodeValid(String code) {
+        ClientRegister reg = getClientRegisterForAuthCode(code);
 
         if (reg != null) {
             return reg.authCodes.containsKey(code) &&
@@ -109,19 +111,13 @@ public class OAuth2Registry {
     /**
      * Validates that a access token has valid format and has been authorized and not elapsed.
      *
-     * @param clientId the id of the requesting client
      * @param token the token that should be validated
      * @return true if the given token is valid otherwise false.
      */
-    public boolean isAccessTokenValid(String clientId, String token) {
-        if (clientId == null || token == null)
-            return false;
-
-        ClientRegister reg = getClientRegistry(clientId);
+    public boolean isAccessTokenValid(String token) {
+        ClientRegister reg = getClientRegisterForToken(token);
 
         if (reg != null) {
-            boolean b1 = reg.accessTokens.containsKey(token);
-            boolean b2 = reg.accessTokens.get(token).hasTimedOut();
             return reg.accessTokens.containsKey(token) &&
                     !reg.accessTokens.get(token).hasTimedOut();
         }
@@ -129,14 +125,26 @@ public class OAuth2Registry {
     }
 
     // ------------------------------------------------------
+    // Revocation
+    // ------------------------------------------------------
+
+    public void revokeAuthorizationCode(String code) {
+        ClientRegister reg = getClientRegisterForAuthCode(code);
+
+        if (reg != null) {
+            reg.authCodes.remove(code);
+        }
+    }
+
+    // ------------------------------------------------------
     // OAuth2 process methods
     // ------------------------------------------------------
 
     protected long registerAuthorizationCode(String clientId, String code) {
-        return registerAuthorizationCode(clientId, code, DEFAULT_TIMEOUT);
+        return registerAuthorizationCode(clientId, code, DEFAULT_CODE_TIMEOUT);
     }
     protected long registerAuthorizationCode(String clientId, String code, long timeoutMillis) {
-        ClientRegister reg = getClientRegistry(clientId);
+        ClientRegister reg = getClientRegister(clientId);
 
         if (reg != null) {
             reg.authCodes.put(code, new Timer(timeoutMillis).start());
@@ -146,10 +154,10 @@ public class OAuth2Registry {
     }
 
     protected long registerAccessToken(String clientId, String token) {
-        return registerAccessToken(clientId, token, DEFAULT_TIMEOUT);
+        return registerAccessToken(clientId, token, DEFAULT_TOKEN_TIMEOUT);
     }
     protected long registerAccessToken(String clientId, String token, long timeoutMillis) {
-        ClientRegister reg = getClientRegistry(clientId);
+        ClientRegister reg = getClientRegister(clientId);
 
         if (reg != null) {
             reg.accessTokens.put(token, new Timer(timeoutMillis).start());
@@ -158,16 +166,67 @@ public class OAuth2Registry {
         return -1;
     }
 
-    // --------------------------------------------------------------------
-
-    private ClientRegister getClientRegistry(String clientId) {
-        if (!requireWhitelist && !clientRegistry.containsKey(clientId))
-            clientRegistry.put(clientId, new ClientRegister());
-
-        return clientRegistry.get(clientId);
+    protected String generateCode() {
+        return generateToken();
     }
 
-    private static class ClientRegister {
+    protected String generateToken() {
+        return Hasher.SHA1(Math.abs(random.nextLong()));
+    }
+
+    // ------------------------------------------------------
+    // Data methods
+    // ------------------------------------------------------
+
+    /**
+     * @param code is the authentication code given to the client.
+     * @return The client_id registered for the given code
+     */
+    public String getClientIdForAuthenticationCode(String code) {
+        for (String clientId : clientRegisters.keySet()) {
+            if (clientRegisters.get(clientId).authCodes.containsKey(code))
+                return clientId;
+        }
+
+        return null;
+    }
+
+    /**
+     * @param token is the access token given to the client.
+     * @return The client_id registered for the given token
+     */
+    public String getClientIdForAccessToken(String token) {
+        for (String clientId : clientRegisters.keySet()) {
+            if (clientRegisters.get(clientId).accessTokens.containsKey(token))
+                return clientId;
+        }
+
+        return null;
+    }
+
+    // ------------------------------------------------------
+
+    private ClientRegister getClientRegister(String clientId) {
+        if (!requireWhitelist && !clientRegisters.containsKey(clientId))
+            clientRegisters.put(clientId, new ClientRegister());
+
+        return clientRegisters.get(clientId);
+    }
+
+    private ClientRegister getClientRegisterForAuthCode(String code) {
+        String clientId = getClientIdForAuthenticationCode(code);
+
+        return (clientId == null ? null : clientRegisters.get(clientId));
+    }
+
+    private ClientRegister getClientRegisterForToken(String token) {
+        String clientId = getClientIdForAccessToken(token);
+
+        return (clientId == null ? null : clientRegisters.get(clientId));
+    }
+
+
+    private static class ClientRegister implements Serializable {
         Map<String, Timer> authCodes = new HashMap<>();
         Map<String, Timer> accessTokens = new HashMap<>();
     }

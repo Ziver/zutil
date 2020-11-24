@@ -24,6 +24,7 @@
 
 package zutil.net.http.page.oauth;
 
+import zutil.Hasher;
 import zutil.log.LogUtil;
 import zutil.net.http.HttpHeader;
 import zutil.net.http.HttpPage;
@@ -145,7 +146,7 @@ public class OAuth2AuthorizationPage implements HttpPage {
 
         switch (request.get("response_type")) {
             case RESPONSE_TYPE_CODE:
-                String code = generateCode();
+                String code = registry.generateCode();
                 registry.registerAuthorizationCode(clientId, code);
 
                 url.setParameter("code", code);
@@ -163,10 +164,6 @@ public class OAuth2AuthorizationPage implements HttpPage {
         // Setup the redirect
 
         redirect(out, url);
-    }
-
-    private String generateCode() {
-        return String.valueOf(Math.abs(random.nextLong()));
     }
 
     // ------------------------------------------------------

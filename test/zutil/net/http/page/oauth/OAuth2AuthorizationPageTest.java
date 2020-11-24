@@ -153,7 +153,7 @@ public class OAuth2AuthorizationPageTest {
         assertNotNull(url.getParameter("code"));
         assertNull(url.getParameter("state"));
 
-        assertTrue(registry.isAuthorizationCodeValid("12345", url.getParameter("code")));
+        assertTrue(registry.isAuthorizationCodeValid(url.getParameter("code")));
     }
 
     @Test
@@ -169,6 +169,6 @@ public class OAuth2AuthorizationPageTest {
         HttpURL url = new HttpURL(rspHeader.getHeader("Location"));
         assertEquals("app_state", url.getParameter("state"));
 
-        assertTrue(registry.isAuthorizationCodeValid("12345", url.getParameter("code")));
+        assertTrue(registry.isAuthorizationCodeValid(url.getParameter("code")));
     }
 }

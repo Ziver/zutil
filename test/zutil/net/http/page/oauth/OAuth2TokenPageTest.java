@@ -157,14 +157,20 @@ public class OAuth2TokenPageTest {
     }
 
 
-    @Test
-    public void requestBasic() throws IOException {
+    private HttpHeader doBasicRequest() throws IOException {
         HttpHeader reqHeader = new HttpHeader();
         reqHeader.setURLAttribute("client_id", VALID_CLIENT_ID);
         reqHeader.setURLAttribute("redirect_uri", VALID_REDIRECT_URI);
         reqHeader.setURLAttribute("grant_type", VALID_GRANT_TYPE);
         reqHeader.setURLAttribute("code", VALID_AUTH_CODE);
         HttpHeader rspHeader = HttpTestUtil.makeRequest(tokenPage, reqHeader);
+
+        return rspHeader;
+    }
+
+    @Test
+    public void requestBasic() throws IOException {
+        HttpHeader rspHeader = doBasicRequest();
 
         assertEquals(200, rspHeader.getResponseStatusCode());
         assertEquals("application/json", rspHeader.getHeader("Content-Type"));
@@ -174,6 +180,47 @@ public class OAuth2TokenPageTest {
         assertNotNull(json.getString("expires_in"));
         assertEquals("bearer", json.getString("token_type"));
 
-        assertTrue(registry.isAccessTokenValid(VALID_CLIENT_ID, json.getString("access_token")));
+        assertTrue(registry.isAccessTokenValid(json.getString("access_token")));
+    }
+
+    @Test
+    public void revocationCode() throws IOException {
+        requestBasic();
+
+        HttpHeader reqHeader = new HttpHeader();
+        reqHeader.setURLAttribute("client_id", VALID_CLIENT_ID);
+        reqHeader.setURLAttribute("redirect_uri", VALID_REDIRECT_URI);
+        reqHeader.setURLAttribute("grant_type", VALID_GRANT_TYPE);
+        reqHeader.setURLAttribute("code", VALID_AUTH_CODE);
+        HttpHeader rspHeader = HttpTestUtil.makeRequest(tokenPage, reqHeader);
+
+        assertEquals(400, rspHeader.getResponseStatusCode());
+        DataNode json = JSONParser.read(IOUtil.readContentAsString(rspHeader.getInputStream()));
+        assertEquals("invalid_grant", json.getString("error"));
+    }
+
+    @Test
+    public void requestRefreshToken() throws IOException {
+        HttpHeader rspHeader = doBasicRequest();
+        DataNode json = JSONParser.read(IOUtil.readContentAsString(rspHeader.getInputStream()));
+        String refreshToken = json.getString("refresh_token");
+
+        assertTrue(registry.isAuthorizationCodeValid(refreshToken));
+
+        HttpHeader reqHeader = new HttpHeader();
+        reqHeader.setURLAttribute("grant_type", "refresh_token");
+        reqHeader.setURLAttribute("refresh_token", refreshToken);
+        rspHeader = HttpTestUtil.makeRequest(tokenPage, reqHeader);
+
+        assertEquals(200, rspHeader.getResponseStatusCode());
+        json = JSONParser.read(IOUtil.readContentAsString(rspHeader.getInputStream()));
+        assertNotNull(json.getString("refresh_token"));
+        assertNotNull(json.getString("access_token"));
+        assertNotNull(json.getString("expires_in"));
+        assertEquals("bearer", json.getString("token_type"));
+
+        assertTrue(registry.isAccessTokenValid(json.getString("access_token")));
+        assertTrue(registry.isAuthorizationCodeValid(json.getString("refresh_token")));
+        assertFalse(registry.isAuthorizationCodeValid(refreshToken));
     }
 }

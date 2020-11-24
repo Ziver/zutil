@@ -27,6 +27,7 @@ import java.util.Map;
 import java.util.Random;
 import java.util.logging.Logger;
 
+import zutil.Hasher;
 import zutil.log.LogUtil;
 import zutil.net.http.HttpHeader;
 import zutil.net.http.HttpPrintStream;
@@ -54,6 +55,8 @@ import zutil.parser.DataNode;
 public class OAuth2TokenPage extends HttpJsonPage {
     private static final Logger logger = LogUtil.getLogger();
 
+    private static final long REFRESH_TOKEN_TIMEOUT = 60 * 24 * 60 * 60 * 1000L; // 60 days
+
     /** The request is missing a required parameter, includes an unsupported parameter value (other than grant type),
      repeats a parameter, includes multiple credentials, utilizes more than one mechanism for authenticating the
      client, or is otherwise malformed. **/
@@ -72,7 +75,6 @@ public class OAuth2TokenPage extends HttpJsonPage {
     /** The requested scope is invalid, unknown, malformed, or exceeds the scope granted by the resource owner. **/
     private static final String ERROR_INVALID_SCOPE = "invalid_scope";
 
-    private Random random = new Random();
     private OAuth2Registry registry;
 
 
@@ -101,68 +103,85 @@ public class OAuth2TokenPage extends HttpJsonPage {
 
         DataNode jsonRes = new DataNode(DataNode.DataType.Map);
 
-        // Validate client_id
-
-        if (!request.containsKey("client_id"))
-            return errorResponse(out, ERROR_INVALID_REQUEST , request.get("state"), "Missing mandatory parameter: client_id");
-
-        String clientId = request.get("client_id");
-
-        if (!registry.isClientIdValid(clientId))
-            return errorResponse(out, ERROR_INVALID_CLIENT , request.get("state"), "Invalid client_id value.");
-
-        // Validate code
-
-        if (!request.containsKey("code"))
-            return errorResponse(out, ERROR_INVALID_REQUEST , request.get("state"), "Missing mandatory parameter: code");
-
-        if (!registry.isAuthorizationCodeValid(clientId, request.get("code")))
-            return errorResponse(out, ERROR_INVALID_GRANT, request.get("state"), "Invalid authorization code value.");
-
-        // Validate redirect_uri
-
-        if (!request.containsKey("redirect_uri"))
-            return errorResponse(out, ERROR_INVALID_REQUEST , request.get("state"), "Missing mandatory parameter: redirect_uri");
-
-        // TODO: ensure that the "redirect_uri" parameter is present if the
-        //      "redirect_uri" parameter was included in the initial authorization
-        //      request as described in Section 4.1.1, and if included ensure that
-        //      their values are identical.
-
         // Validate grant_type
 
-        if (!request.containsKey("grant_type"))
+        String grantType = request.get("grant_type");
+        String codeKey;
+        String clientId = null;
+
+        if (grantType == null)
             return errorResponse(out, ERROR_INVALID_REQUEST , request.get("state"), "Missing mandatory parameter grant_type.");
+
+        switch (grantType) {
+            case "authorization_code":
+                codeKey = "code";
+
+                // Validate client_id
+
+                clientId = request.get("client_id");
+
+                if (clientId == null)
+                    return errorResponse(out, ERROR_INVALID_REQUEST , request.get("state"), "Missing mandatory parameter: client_id");
+
+                if (!registry.isClientIdValid(clientId))
+                    return errorResponse(out, ERROR_INVALID_CLIENT , request.get("state"), "Invalid client_id value.");
+
+                // Validate redirect_uri
+
+                if (!request.containsKey("redirect_uri"))
+                    return errorResponse(out, ERROR_INVALID_REQUEST , request.get("state"), "Missing mandatory parameter: redirect_uri");
+
+                // TODO: ensure that the "redirect_uri" parameter is present if the
+                //      "redirect_uri" parameter was included in the initial authorization
+                //      request as described in Section 4.1.1, and if included ensure that
+                //      their values are identical.
+
+                break;
+
+            case "refresh_token":
+                codeKey = "refresh_token";
+                break;
+
+            default:
+                return errorResponse(out, ERROR_UNSUPPORTED_GRANT_TYPE, request.get("state"), "Unsupported grant_type: " + request.containsKey("grant_type"));
+        }
+
+        // Validate code and refresh_token
+
+        String authorizationCode = request.get(codeKey);
+
+        if (authorizationCode == null)
+            return errorResponse(out, ERROR_INVALID_REQUEST , request.get("state"), "Missing mandatory parameter: " + codeKey);
+
+        if (!registry.isAuthorizationCodeValid(authorizationCode))
+            return errorResponse(out, ERROR_INVALID_GRANT, request.get("state"), "Invalid " + codeKey + " value.");
 
         // -----------------------------------------------
         // Handle request
         // -----------------------------------------------
 
-        String grantType = request.get("grant_type");
+        if (clientId == null)
+            clientId = registry.getClientIdForAuthenticationCode(authorizationCode);
 
-        switch (grantType) {
-            case "authorization_code":
-                jsonRes.set("refresh_token", "TODO"); // TODO: implement refresh logic
-                break;
-            default:
-                return errorResponse(out, ERROR_UNSUPPORTED_GRANT_TYPE, request.get("state"), "Unsupported grant_type: " + request.containsKey("grant_type"));
-        }
-
-        String token = generateToken();
+        String token = registry.generateToken();
         long timeoutMillis = registry.registerAccessToken(clientId, token);
+
+        String refreshToken = registry.generateToken();
+        registry.registerAuthorizationCode(clientId, refreshToken, REFRESH_TOKEN_TIMEOUT);
 
         jsonRes.set("access_token", token);
         jsonRes.set("token_type", "bearer");
         jsonRes.set("expires_in", timeoutMillis/1000);
+        jsonRes.set("refresh_token", refreshToken);
         //jsonRes.set("scope", ?);
         if (request.containsKey("state")) jsonRes.set("state", request.get("state"));
+
+        registry.revokeAuthorizationCode(authorizationCode);
 
         return jsonRes;
     }
 
-    private String generateToken() {
-        return String.valueOf(Math.abs(random.nextLong()));
-    }
+
 
     // ------------------------------------------------------
     // Error handling
@@ -178,7 +197,7 @@ public class OAuth2TokenPage extends HttpJsonPage {
      * @return A DataNode containing the error response
      */
     private static DataNode errorResponse(HttpPrintStream out, String error, String state, String description) {
-        logger.warning("OAuth2 Token Error(" + error + "): " + description);
+        logger.warning("OAuth2 Token Error(" + error + ") for client: " + description);
 
         out.setResponseStatusCode(400);
 
