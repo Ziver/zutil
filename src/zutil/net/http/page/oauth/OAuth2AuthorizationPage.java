@@ -100,34 +100,34 @@ public class OAuth2AuthorizationPage implements HttpPage {
         // Validate parameters
         // -----------------------------------------------
 
+        HttpURL url = null;
+        String clientId = request.get("client_id");
+
         // Validate redirect_uri
 
         if (!request.containsKey("redirect_uri")) {
-            errorResponse(out, "Bad Request, missing parameter: redirect_uri");
+            errorResponse(out, clientId, "Bad Request, missing parameter: redirect_uri");
             return;
         }
 
-        HttpURL url = null;
         try {
             url = new HttpURL(URLDecoder.decode(request.get("redirect_uri")));
         } catch(Exception e) {}
 
         if (url == null || !"HTTPS".equalsIgnoreCase(url.getProtocol())) {
-            errorResponse(out, "Invalid redirect URL: " + request.get("redirect_uri"));
+            errorResponse(out, clientId, "Invalid redirect URL: " + request.get("redirect_uri"));
             return;
         }
 
         // Validate client_id
 
         if (!request.containsKey("client_id")) {
-            errorResponse(out, "Bad Request, missing parameter: client_id");
+            errorResponse(out, clientId, "Bad Request, missing parameter: client_id");
             return;
         }
 
-        String clientId = request.get("client_id");
-
         if (!registry.isClientIdValid(clientId)) {
-            errorRedirect(out, url, ERROR_UNAUTHORIZED_CLIENT, request.get("state"),
+            errorRedirect(out, clientId, url, ERROR_UNAUTHORIZED_CLIENT, request.get("state"),
                     "Bad Request, invalid client_id value.");
             return;
         }
@@ -135,7 +135,7 @@ public class OAuth2AuthorizationPage implements HttpPage {
         // Validate response_type
 
         if (!request.containsKey("response_type")) {
-            errorRedirect(out, url, ERROR_INVALID_REQUEST, request.get("state"),
+            errorRedirect(out, clientId, url, ERROR_INVALID_REQUEST, request.get("state"),
                     "Missing parameter response_type.");
             return;
         }
@@ -156,13 +156,14 @@ public class OAuth2AuthorizationPage implements HttpPage {
             case RESPONSE_TYPE_PASSWORD:
             case RESPONSE_TYPE_CREDENTIALS:
             default:
-                errorRedirect(out, url, ERROR_INVALID_REQUEST, request.get("state"),
+                errorRedirect(out, clientId, url, ERROR_INVALID_REQUEST, request.get("state"),
                         "unsupported response_type: " + request.get("response_type"));
                 return;
         }
 
         // Setup the redirect
 
+        logger.warning("OAuth2 successful authorization of client: " + clientId);
         redirect(out, url);
     }
 
@@ -170,7 +171,9 @@ public class OAuth2AuthorizationPage implements HttpPage {
     // Error handling
     // ------------------------------------------------------
 
-    private static void errorResponse(HttpPrintStream out, String description) {
+    private static void errorResponse(HttpPrintStream out, String clientId, String description) {
+        logger.warning("OAuth2 Client" + (clientId!=null ? "(" + clientId + ")" : "") + " Authorization Error: " + description);
+
         out.setResponseStatusCode(400);
         out.println(description);
     }
@@ -184,8 +187,8 @@ public class OAuth2AuthorizationPage implements HttpPage {
      * @param state
      * @param description
      */
-    private static void errorRedirect(HttpPrintStream out, HttpURL url, String error, String state, String description) {
-        logger.warning("OAuth2 Authorization Error(" + error + "): " + description);
+    private static void errorRedirect(HttpPrintStream out, String clientId, HttpURL url, String error, String state, String description) {
+        logger.warning("OAuth2 Client" + (clientId!=null ? "(" + clientId + ")" : "") + " Authorization Error: " + error + " = " + description);
 
         out.setHeader(HttpHeader.HEADER_CONTENT_TYPE, "application/x-www-form-urlencoded");
         url.setParameter("error", error);

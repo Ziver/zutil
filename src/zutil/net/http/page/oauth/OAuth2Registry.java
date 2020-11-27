@@ -44,6 +44,7 @@ public class OAuth2Registry implements Serializable {
     private boolean requireWhitelist = true;
 
     transient private Random random = new Random();
+    transient private TokenRegistrationListener tokenListener;
 
 
     // ------------------------------------------------------
@@ -161,6 +162,9 @@ public class OAuth2Registry implements Serializable {
 
         if (reg != null) {
             reg.accessTokens.put(token, new Timer(timeoutMillis).start());
+
+            if (tokenListener != null)
+                tokenListener.onTokenRegistration(clientId, token, timeoutMillis);
             return timeoutMillis;
         }
         return -1;
@@ -202,6 +206,25 @@ public class OAuth2Registry implements Serializable {
         }
 
         return null;
+    }
+
+    // ------------------------------------------------------
+    // Listeners
+    // ------------------------------------------------------
+
+    public void setTokenListener(TokenRegistrationListener listener) {
+        this.tokenListener = listener;
+    }
+
+    public interface TokenRegistrationListener {
+        /**
+         * Method will be called when a new token is successfully registered on a client
+         *
+         * @param clientId          the client ID that got the specified token
+         * @param token             a String token that has ben generated and provided to the client
+         * @param timeoutMillis     the expiration time of the token
+         */
+        void onTokenRegistration(String clientId, String token, long timeoutMillis);
     }
 
     // ------------------------------------------------------

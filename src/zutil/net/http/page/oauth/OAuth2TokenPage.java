@@ -102,15 +102,14 @@ public class OAuth2TokenPage extends HttpJsonPage {
         // -----------------------------------------------
 
         DataNode jsonRes = new DataNode(DataNode.DataType.Map);
-
-        // Validate grant_type
-
         String grantType = request.get("grant_type");
         String codeKey;
         String clientId = null;
 
+        // Validate grant_type
+
         if (grantType == null)
-            return errorResponse(out, ERROR_INVALID_REQUEST , request.get("state"), "Missing mandatory parameter grant_type.");
+            return errorResponse(out, clientId, ERROR_INVALID_REQUEST , request.get("state"), "Missing mandatory parameter grant_type.");
 
         switch (grantType) {
             case "authorization_code":
@@ -121,15 +120,15 @@ public class OAuth2TokenPage extends HttpJsonPage {
                 clientId = request.get("client_id");
 
                 if (clientId == null)
-                    return errorResponse(out, ERROR_INVALID_REQUEST , request.get("state"), "Missing mandatory parameter: client_id");
+                    return errorResponse(out, clientId, ERROR_INVALID_REQUEST , request.get("state"), "Missing mandatory parameter: client_id");
 
                 if (!registry.isClientIdValid(clientId))
-                    return errorResponse(out, ERROR_INVALID_CLIENT , request.get("state"), "Invalid client_id value.");
+                    return errorResponse(out, clientId, ERROR_INVALID_CLIENT , request.get("state"), "Invalid client_id value.");
 
                 // Validate redirect_uri
 
                 if (!request.containsKey("redirect_uri"))
-                    return errorResponse(out, ERROR_INVALID_REQUEST , request.get("state"), "Missing mandatory parameter: redirect_uri");
+                    return errorResponse(out, clientId, ERROR_INVALID_REQUEST , request.get("state"), "Missing mandatory parameter: redirect_uri");
 
                 // TODO: ensure that the "redirect_uri" parameter is present if the
                 //      "redirect_uri" parameter was included in the initial authorization
@@ -143,7 +142,7 @@ public class OAuth2TokenPage extends HttpJsonPage {
                 break;
 
             default:
-                return errorResponse(out, ERROR_UNSUPPORTED_GRANT_TYPE, request.get("state"), "Unsupported grant_type: " + request.containsKey("grant_type"));
+                return errorResponse(out, clientId, ERROR_UNSUPPORTED_GRANT_TYPE, request.get("state"), "Unsupported grant_type: " + request.containsKey("grant_type"));
         }
 
         // Validate code and refresh_token
@@ -151,10 +150,10 @@ public class OAuth2TokenPage extends HttpJsonPage {
         String authorizationCode = request.get(codeKey);
 
         if (authorizationCode == null)
-            return errorResponse(out, ERROR_INVALID_REQUEST , request.get("state"), "Missing mandatory parameter: " + codeKey);
+            return errorResponse(out, clientId, ERROR_INVALID_REQUEST , request.get("state"), "Missing mandatory parameter: " + codeKey);
 
         if (!registry.isAuthorizationCodeValid(authorizationCode))
-            return errorResponse(out, ERROR_INVALID_GRANT, request.get("state"), "Invalid " + codeKey + " value.");
+            return errorResponse(out, clientId, ERROR_INVALID_GRANT, request.get("state"), "Invalid " + codeKey + " value.");
 
         // -----------------------------------------------
         // Handle request
@@ -162,6 +161,8 @@ public class OAuth2TokenPage extends HttpJsonPage {
 
         if (clientId == null)
             clientId = registry.getClientIdForAuthenticationCode(authorizationCode);
+
+        logger.warning("OAuth2 successful token provisioning for client: " + clientId);
 
         String token = registry.generateToken();
         long timeoutMillis = registry.registerAccessToken(clientId, token);
@@ -182,7 +183,6 @@ public class OAuth2TokenPage extends HttpJsonPage {
     }
 
 
-
     // ------------------------------------------------------
     // Error handling
     // ------------------------------------------------------
@@ -190,14 +190,10 @@ public class OAuth2TokenPage extends HttpJsonPage {
     /**
      * @see <a href="https://tools.ietf.org/html/rfc6749#section-5.2">RFC 6749: Chapter 5.2</a>
      *
-     * @param out
-     * @param error
-     * @param state
-     * @param description
      * @return A DataNode containing the error response
      */
-    private static DataNode errorResponse(HttpPrintStream out, String error, String state, String description) {
-        logger.warning("OAuth2 Token Error(" + error + ") for client: " + description);
+    private static DataNode errorResponse(HttpPrintStream out, String clientId, String error, String state, String description) {
+        logger.warning("OAuth2 Client" + (clientId!=null ? "(" + clientId + ")" : "") + " Token Error: " + error + " = " + description);
 
         out.setResponseStatusCode(400);
 
