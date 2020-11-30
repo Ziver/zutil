@@ -38,23 +38,24 @@ public class IOUtil {
      * Reads and returns all the content of a stream.
      * The InputStream will not be closed
      *
+     * @param stream      the stream to read from
      * @return a byte array with the stream contents
      */
     public static byte[] readContent(InputStream stream) throws IOException{
         return readContent(stream, false);
     }
-
     /**
      * Reads and returns all the content of a stream.
      *
-     * @param       close       true if the stream should be closed at the end
+     * @param stream      the stream to read from
+     * @param close       true if the stream should be closed at the end
      * @return a byte array with the stream contents
      */
     public static byte[] readContent(InputStream stream, boolean close) throws IOException{
         DynamicByteArrayStream dyn_buff = new DynamicByteArrayStream();
         byte[] buff = new byte[8192];
         int len;
-        while((len = stream.read(buff)) != -1){
+        while((len = stream.read(buff)) >= 0){
             dyn_buff.append(buff, 0, len);
         }
 
@@ -62,29 +63,66 @@ public class IOUtil {
         return dyn_buff.getBytes();
     }
 
-    /**
-     * Reads and returns all the content of a stream as a String.
-     * The InputStream will not be closed
-     *
-     * @return a String with the content of the stream
-     */
-    public static String readContentAsString(InputStream stream) throws IOException{
-        return readContentAsString(stream, false);
-    }
-    /**
-     * Reads and returns all the content of a stream as a String.
-     *
-     * @param       close       true if the stream should be closed at the end
-     * @return a String with the content of the stream
-     */
-    public static String readContentAsString(InputStream stream, boolean close) throws IOException{
-        return readContentAsString(new InputStreamReader(stream), close);
-    }
 
     /**
      * Reads and returns all the content of a stream as a String.
-     * The Reader will not be closed
+     * The stream will not be closed.
      *
+     * @param stream      the stream to read from
+     * @return a String with the content of the stream
+     */
+    public static String readContentAsString(InputStream stream) throws IOException{
+        return readContentAsString(stream, -1,false);
+    }
+    /**
+     * Reads and returns all the content of a stream as a String.
+     *
+     * @param stream      the stream to read from
+     * @param close       true if the stream should be closed at the end
+     * @return a String with the content of the stream
+     */
+    public static String readContentAsString(InputStream stream, boolean close) throws IOException{
+        return readContentAsString(stream, -1, close);
+    }
+    /**
+     * Reads and returns the given length from a stream and as String.
+     * The stream will not be closed.
+     *
+     * @param stream      the stream to read from
+     * @param length      the amount of characters to read from the stream
+     * @return a String with the content of the stream
+     */
+    public static String readContentAsString(InputStream stream, int length) throws IOException{
+        return readContentAsString(stream, length, false);
+    }
+    /**
+     * Reads and returns the given length from a stream and as String.
+     * The stream will not be closed.
+     *
+     * @param stream      the stream to read from
+     * @param length      the amount of characters to read from the stream
+     * @return a String with the content of the stream
+     */
+    public static String readContentAsString(InputStream stream, int length, boolean close) throws IOException{
+        StringBuilder str = (length > 0 ? new StringBuilder(length) : new StringBuilder());
+
+        int readLength = 0;
+        int c;
+        while((length < 0 || readLength < length) && (c = stream.read()) >= 0){
+            str.append((char) c);
+            readLength++;
+        }
+
+        if (close) stream.close();
+        return str.toString();
+    }
+
+
+    /**
+     * Reads and returns all the content of a stream as a String.
+     * The stream will not be closed.
+     *
+     * @param reader      the stream to read from
      * @return a String with the content of the stream
      */
     public static String readContentAsString(Reader reader) throws IOException{
@@ -93,33 +131,52 @@ public class IOUtil {
     /**
      * Reads and returns all the content of a stream as a String.
      *
-     * @param       close       true if the stream should be closed at the end
+     * @param reader      the stream to read from
+     * @param close       true if the stream should be closed at the end
      * @return a String with the content of the stream
      */
     public static String readContentAsString(Reader reader, boolean close) throws IOException{
-        StringBuilder str = new StringBuilder();
-        BufferedReader in;
-        if(reader instanceof BufferedReader)
-            in = (BufferedReader) reader;
-        else
-            in = new BufferedReader(reader);
+        return readContentAsString(reader, -1, close);
+    }
+    /**
+     * Reads and returns the given length from a stream and as String.
+     * The stream will not be closed.
+     *
+     * @param reader      the stream to read from
+     * @param length      the amount of characters to read from the stream
+     * @return a String with the content of the stream
+     */
+    public static String readContentAsString(Reader reader, int length) throws IOException{
+        return readContentAsString(reader, length,false);
+    }
+    /**
+     * Reads and returns the given length from a stream and as String.
+     *
+     * @param reader      the stream to read from
+     * @param length      the amount of characters to read from the stream, set negative value to read until end of the stream
+     * @param close       true if the stream should be closed at the end
+     * @return a String with the content of the stream
+     */
+    public static String readContentAsString(Reader reader, int length, boolean close) throws IOException{
+        StringBuilder str = (length > 0 ? new StringBuilder(length) : new StringBuilder());
 
-        String line;
-        while((line = in.readLine()) != null){
-            str.append(line).append("\n");
+        int readLength = 0;
+        int c;
+        while((length < 0 || readLength < length) && (c = reader.read()) >= 0){
+            str.append((char) c);
+            readLength++;
         }
-        if (str.length() > 0)
-            str.delete(str.length()-1, str.length()); // remove last new line
 
         if (close) reader.close();
         return str.toString();
     }
 
+
     /**
      * Reads one line terminated by a new line or carriage return from a stream.
      * Will only read ASCII based char streams.
      *
-     * @param   in      the stream to read from
+     * @param in        the stream to read from
      * @return          a String that contains one line excluding line terminating
      *                  characters, null if it is the end of the stream
      */
@@ -138,7 +195,7 @@ public class IOUtil {
      * Reads one line terminated by a new line or carriage return from a Reader.
      * Will only read ASCII based char streams.
      *
-     * @param   in      the Reader to read from
+     * @param in        the Reader to read from
      * @return          a String that contains one line excluding line terminating
      *                  characters, null if it is the end of the stream
      */
@@ -158,6 +215,9 @@ public class IOUtil {
     /**
      * Copies all data from one InputStream to another OutputStream.
      * The streams will not be closed after method has returned.
+     *
+     * @param in    the source stream
+     * @param out   the target stream
      */
     public static void copyStream(InputStream in, OutputStream out) throws IOException {
         byte[] buff = new byte[8192]; // This is the default BufferedInputStream buffer size
@@ -170,6 +230,9 @@ public class IOUtil {
     /**
      * Copies all data from one Reader to another Writer.
      * The streams will not be closed after method has returned.
+     *
+     * @param in    the source stream
+     * @param out   the target stream
      */
     public static void copyStream(Reader in, Writer out) throws IOException {
         char[] buff = new char[8192]; // This is the default BufferedReader buffer size
