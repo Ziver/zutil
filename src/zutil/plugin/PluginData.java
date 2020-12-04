@@ -40,8 +40,9 @@ import java.util.logging.Logger;
 public class PluginData {
     private static Logger log = LogUtil.getLogger();
 
-    private double pluginVersion;
-    private String pluginName;
+    private final double pluginVersion;
+    private final String pluginName;
+    private final String pluginDescription;
     private boolean enabled = true;
     private HashMap<Class<?>, List<Class<?>>>  classMap;
     private HashMap<Class, Object> objectMap;
@@ -53,6 +54,7 @@ public class PluginData {
 
         pluginVersion = data.getDouble("version");
         pluginName = data.getString("name");
+        pluginDescription = data.getString("description");
         log.fine("Plugin: " + this);
 
         DataNode node = data.get("interfaces");
@@ -108,6 +110,12 @@ public class PluginData {
      */
     public String getName(){
         return pluginName;
+    }
+    /**
+     * @return the name of the plugin
+     */
+    public String getDescription(){
+        return pluginDescription;
     }
     /**
      * @return if this plugin is enabled

@@ -1,6 +1,7 @@
 {
     "version": 1.0,
-    "name": "Nice name of Plugin",
+    "name": "Nice Plugin Name",
+    "description": "This is a example plugin description",
     "interfaces": [
         {"plugin.interface.class": "plugin.implementation.class"},
         {"wa.server.plugin.WAFrontend": "wa.server.plugin.apache.ApacheFrontend"}
