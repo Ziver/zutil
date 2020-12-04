@@ -43,6 +43,7 @@ import java.util.logging.Logger;
  * {
  *     "version": 1.0,
  *     "name": "Nice name of Plugin",
+ *     "description": "This is a example plugin description",
  *     "interfaces": [
  *         {"plugin.interface.class": "plugin.implementation.class"},
  *         {"wa.server.plugin.WAFrontend": "wa.server.plugin.apache.ApacheFrontend"}
