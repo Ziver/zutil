@@ -182,19 +182,25 @@ public class PluginManager<T> implements Iterable<PluginData>{
             this.pluginList = pluginList;
         }
 
-        @Override
-        public boolean hasNext() {
+        public int getNextIndex() {
             for (int i = nextIndex; i < pluginList.size(); i++) {
                 if (pluginList.get(i).isEnabled())
-                    return true;
+                    return i;
             }
-            return false;
+            return -1;
+        }
+
+        @Override
+        public boolean hasNext() {
+            return getNextIndex() >= 0;
         }
 
         @Override
         public PluginData next() {
-            if(!hasNext())
+            nextIndex = getNextIndex();
+            if(nextIndex < 0)
                 throw new NoSuchElementException();
+
             return pluginList.get(nextIndex++);
         }
     }
