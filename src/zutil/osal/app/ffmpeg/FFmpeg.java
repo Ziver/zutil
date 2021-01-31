@@ -25,6 +25,7 @@
 package zutil.osal.app.ffmpeg;
 
 import zutil.osal.app.ffmpeg.FFmpegConstants.*;
+import zutil.osal.app.ffmpeg.FFmpegProgressManager.FFmpegProgressListener;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,6 +41,7 @@ public class FFmpeg {
     private boolean overwriteOutput = false;
     private List<FFmpegInput> inputs = new ArrayList<>();
     private List<FFmpegOutput> outputs = new ArrayList<>();
+    private FFmpegProgressManager progressManager;
 
 
     public FFmpeg() {}
@@ -65,6 +67,16 @@ public class FFmpeg {
     }
 
 
+    public void setProgressListener(FFmpegProgressListener listener) {
+        if (listener == null)
+            throw new IllegalArgumentException("FFmpegProgressListener cannot be NULL.");
+
+        if (progressManager != null)
+            progressManager.close();
+        progressManager = new FFmpegProgressManager(listener);
+    }
+
+
     public String buildCommand() {
         StringBuilder command = new StringBuilder();
         command.append("ffmpeg");
@@ -75,11 +87,14 @@ public class FFmpeg {
             command.append(" -loglevel ").append(logLevel.toString().toLowerCase());
         }
 
+        if (progressManager != null) {
+            command.append(" -progress ").append(progressManager.getAddress());
+        }
+
         if (overwriteOutput) {
             command.append(" -y");
         }
 
-        // TODO: -progress url (global) for progress status
         // TODO: -stdin Enable interaction on standard input
 
         // Inputs
