@@ -51,7 +51,7 @@ public class MultiPlatformBinaryManager {
     /**
      *
      * @param root      The root directory where all the binaries are located
-     * @param binary    The name of the binary.
+     * @param binary    The name of the binary. (Without a file extension)
      * @return the path to the binary for the current hw platform
      */
     public static File getPath(File root, String binary) {
@@ -81,6 +81,10 @@ public class MultiPlatformBinaryManager {
             // ppc64
             // sparc
             default: arch = System.getProperty("os.arch").toLowerCase(); break;
+        }
+
+        switch (OSAbstractionLayer.getInstance().getOSType()) {
+            case Windows: binary += ".exe"; break;
         }
 
         String platform = os + "-" + arch;
