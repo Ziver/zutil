@@ -24,6 +24,12 @@
 
 package zutil.osal.app.ffmpeg;
 
+import zutil.StringUtil;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 /**
  * Class includes data related to a single input into FFmpeg
  */
@@ -34,6 +40,7 @@ public class FFmpegInput {
     private Float duration;
     private Float positionStart;
     private Float positionEnd;
+    private List<String> additionalArgs = new ArrayList<>();
 
     // Audio Options
 
@@ -75,6 +82,13 @@ public class FFmpegInput {
      */
     public void setEndPosition(float position) {
         this.positionEnd = position;
+    }
+
+    /**
+     * Add additional args that may not be supported by the API, these values will be inserted to the command line as is.
+     */
+    public void addAdditionalArg(String... args) {
+        additionalArgs.addAll(Arrays.asList(args));
     }
 
     // ----------------------------------------------------
@@ -135,6 +149,7 @@ public class FFmpegInput {
         if (!subtitleEnabled)
             command.append(" -sn");
 
+        command.append(StringUtil.join(" ", additionalArgs));
         command.append(" -i ").append(input);
         return command.toString().trim();
     }

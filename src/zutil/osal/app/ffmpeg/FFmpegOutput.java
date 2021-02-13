@@ -24,9 +24,14 @@
 
 package zutil.osal.app.ffmpeg;
 
+import zutil.StringUtil;
 import zutil.osal.app.ffmpeg.FFmpegConstants.FFmpegAudioCodec;
 import zutil.osal.app.ffmpeg.FFmpegConstants.FFmpegSubtitleCodec;
 import zutil.osal.app.ffmpeg.FFmpegConstants.FFmpegVideoCodec;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * Class includes data related to a single output from FFmpeg
@@ -40,6 +45,7 @@ public class FFmpegOutput {
     private Float positionEnd;
     private Long fileSize;
     private Integer encodingPass;
+    private List<String> additionalArgs = new ArrayList<>();
 
     // Video Options
 
@@ -113,6 +119,13 @@ public class FFmpegOutput {
      */
     public void setEncodingPass(int pass) {
         this.encodingPass = pass;
+    }
+
+    /**
+     * Add additional args that may not be supported by the API, these values will be inserted to the command line as is.
+     */
+    public void addAdditionalArg(String... args) {
+        additionalArgs.addAll(Arrays.asList(args));
     }
 
     // ----------------------------------------------------
@@ -336,6 +349,7 @@ public class FFmpegOutput {
         if (!subtitleEnabled)
             command.append(" -sn");
 
+        command.append(StringUtil.join(" ", additionalArgs));
         command.append(' ').append(output);
         return command.toString().trim();
     }
