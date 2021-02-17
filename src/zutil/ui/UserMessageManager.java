@@ -38,10 +38,45 @@ public class UserMessageManager implements Iterable<UserMessageManager.UserMessa
     private List<UserMessage> messages = Collections.synchronizedList(new LinkedList<>());
 
 
+    /**
+     * @param id      is the id of the wanted message.
+     * @return a UserMessage object matching the ID or null if no message was found
+     */
+    public UserMessage get(int id) {
+        for(UserMessage msg : messages) {
+            if (msg.getId() == id) {
+                return msg;
+            }
+        }
+        return null;
+    }
+
     public void add(UserMessage message) {
         messages.remove(message); // We don't want to flood the user with duplicate messages
         messages.add(message);
         logger.finer("Added new user message: " + message);
+    }
+
+    /**
+     * Dismiss a specific message, should be connected to a user action.
+     *
+     * @param   id      is the id of the specific message.
+     */
+    public void dismiss(int id) {
+        for (UserMessage message : messages) {
+            if (message.getId() == id)
+                message.dismiss();
+        }
+    }
+
+    /**
+     * This method must be executed when a gui has been generated,
+     * it will decrees TTL of all messages by one.
+     */
+    public void decreaseTTL() {
+        for (UserMessage message : messages) {
+            message.decreaseTTL();
+        }
     }
 
     /**
@@ -67,29 +102,10 @@ public class UserMessageManager implements Iterable<UserMessageManager.UserMessa
         return getMessages().iterator();
     }
 
-    /**
-     * This method must be executed when a gui has been generated,
-     * it will decrees TTL of all messages by one.
-     */
-    public void decrementViewCount() {
-        for (UserMessage message : messages) {
-            message.decreaseTTL();
-        }
-    }
 
     /**
-     * Dismiss a specific message, should be connected to a user action.
-     *
-     * @param   id      is the id of the specific message.
+     * Enum that defines the severity level of the message.
      */
-    public void dismiss(int id) {
-        for (UserMessage message : messages) {
-            if (message.getId() == id)
-                message.dismiss();
-        }
-    }
-
-
     public enum MessageLevel {
         ERROR,
         WARNING,
@@ -97,11 +113,17 @@ public class UserMessageManager implements Iterable<UserMessageManager.UserMessa
         INFO
     }
 
+    /**
+     * Ennum specifying how long a message should be shown to a User.
+     */
     public enum MessageTTL {
         ONE_VIEW,
         DISMISSED
     }
 
+    /**
+     * Data class containing information about a single message.
+     */
     public static class UserMessage {
         private static int nextId = 0;
 
@@ -119,7 +141,10 @@ public class UserMessageManager implements Iterable<UserMessageManager.UserMessa
             this(level, title, null, ttl);
         }
         public UserMessage(MessageLevel level, String title, String description, MessageTTL ttl) {
-            this.id = nextId++;
+            synchronized (this) {
+                this.id = nextId++;
+            }
+
             this.level = level;
             this.title = title;
             this.description = description;

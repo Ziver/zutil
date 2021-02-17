@@ -266,7 +266,7 @@ public final class FFmpegConstants {
         g726le,
         /** ADPCM IMA QuickTime **/
         adpcm_ima_qt,
-        /** ADPCM IMA Simon & Schuster Interactive **/
+        /** ADPCM IMA Simon and Schuster Interactive **/
         adpcm_ima_ssi,
         /** ADPCM IMA WAV **/
         adpcm_ima_wav,
