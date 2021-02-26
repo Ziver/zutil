@@ -51,7 +51,7 @@ public class RESTClientFactory {
      * @return a client Object
      */
     public static <T extends WSInterface> T createClient(URL url, Class<T> intf){
-        T obj = WSClientFactory.createClient( intf,
+        T obj = WSClientFactory.createClient(intf,
                 new RESTClientInvocationHandler(url, new WebServiceDef(intf)));
         return obj;
     }

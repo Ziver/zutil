@@ -41,7 +41,7 @@ import java.lang.annotation.Target;
  *		public Test(){}
  *
  *		&#64;WSDocumentation("This is a description of the method")
- *		&#64;WSDLParamDocumentation("arg1 = variable description?")
+ *		&#64;WSParamDocumentation("arg1 = variable description?")
  *		public void pubZ(
  *				&#64;WSParamName("arg1") int randomName)
  *				throws Exception{
@@ -100,14 +100,14 @@ public interface WSInterface {
      */
     @Retention(RetentionPolicy.RUNTIME)
     @Target(ElementType.METHOD)
-    @interface WSIgnore { }
+    @interface WSIgnore {}
 
     /**
      * Method or Parameter comments for the WSDL.
      * These comments are put in the message part of the WSDL
      */
     @Retention(RetentionPolicy.RUNTIME)
-    @interface WSDocumentation{
+    @interface WSDocumentation {
         String value();
     }
 
@@ -116,7 +116,7 @@ public interface WSInterface {
      * These comments are put in the message part of the WSDL
      */
     @Retention(RetentionPolicy.RUNTIME)
-    @interface WSParamDocumentation{
+    @interface WSParamDocumentation {
         String value();
     }
 
@@ -125,7 +125,7 @@ public interface WSInterface {
      */
     @Retention(RetentionPolicy.RUNTIME)
     @Target(ElementType.METHOD)
-    @interface WSHeader { }
+    @interface WSHeader {}
 
     /**
      * Specifies the name space for the method.
@@ -145,7 +145,7 @@ public interface WSInterface {
     }
 
     /**
-     * Specifies the specific path for the method overriding the auto generated path.
+     * Sets a specific path for the method overriding the auto generated path.
      */
     @Retention(RetentionPolicy.RUNTIME)
     @Target(ElementType.METHOD)

@@ -22,45 +22,33 @@
  * THE SOFTWARE.
  */
 
-package zutil.net.ws;
+package zutil.net.ws.wsdl;
 
-import zutil.log.LogUtil;
+import zutil.net.http.HttpHeader;
+import zutil.net.http.HttpPage;
+import zutil.net.http.HttpPrintStream;
+import zutil.net.ws.WebServiceDef;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Proxy;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.io.IOException;
+import java.util.Map;
 
 /**
- * This is an factory that generates clients for an unspecified web services
- *
- * @author Ziver
+ * User: Ziver
  */
-public class WSClientFactory {
-    private static Logger logger = LogUtil.getLogger();
+public class WSDLHttpPage implements HttpPage {
+    /** The WSDL document **/
+    private WSDLWriter wsdl;
 
-    /**
-     * Generates a Client Object for the web service.
-     *
-     * @param 	<T> 	is the class of the web service definition
-     * @param 	intf 	is the class of the web service definition
-     * @param 	handler is the handler that will execute the calls to the web service
-     * @return a client Object
-     */
-    public static <T extends WSInterface> T createClient(Class<T> intf, InvocationHandler handler){
-        try {
-            T obj = (T) Proxy.newProxyInstance(
-                    WSClientFactory.class.getClassLoader(),
-                    new Class[] { intf },
-                    handler);
-
-            return obj;
-        } catch (Exception e){
-            logger.log(Level.SEVERE, null, e);
-        }
-
-        return null;
+    public WSDLHttpPage( WebServiceDef wsDef ){
+        wsdl = new WSDLWriter( wsDef );
     }
 
+    public void respond(HttpPrintStream out,
+                        HttpHeader headers,
+                        Map<String, Object> session,
+                        Map<String, String> cookie,
+                        Map<String, String> request) throws IOException{
+        out.setHeader("Content-Type", "text/xml");
+        wsdl.write( out );
+    }
 }

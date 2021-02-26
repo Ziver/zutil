@@ -22,33 +22,31 @@
  * THE SOFTWARE.
  */
 
-package zutil.parser.wsdl;
+package zutil.net.ws.wsdl;
 
-import zutil.net.http.HttpHeader;
-import zutil.net.http.HttpPage;
-import zutil.net.http.HttpPrintStream;
-import zutil.net.ws.WebServiceDef;
-
-import java.io.IOException;
-import java.util.Map;
+import org.dom4j.Element;
+import zutil.net.ws.WSMethodDef;
 
 /**
+ * This interface defines a WSDL Service type.
+ *
  * User: Ziver
  */
-public class WSDLHttpPage implements HttpPage {
-    /** The WSDL document **/
-    private WSDLWriter wsdl;
+public abstract class WSDLService {
+    /** The URL of this service **/
+    private String url;
 
-    public WSDLHttpPage( WebServiceDef wsDef ){
-        wsdl = new WSDLWriter( wsDef );
+    public WSDLService(String url){
+        this.url = url;
     }
 
-    public void respond(HttpPrintStream out,
-                        HttpHeader headers,
-                        Map<String, Object> session,
-                        Map<String, String> cookie,
-                        Map<String, String> request) throws IOException{
-        out.setHeader("Content-Type", "text/xml");
-        wsdl.write( out );
+    public String getServiceAddress(){
+        return url;
     }
+
+    public abstract String getServiceType();
+
+    public abstract void generateBinding(Element definitions);
+
+    public abstract void generateOperation(Element definitions, WSMethodDef method);
 }

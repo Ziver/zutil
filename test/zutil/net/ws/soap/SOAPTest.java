@@ -31,7 +31,7 @@ import zutil.net.ws.WSInterface;
 import zutil.net.ws.WSInterface.WSNamespace;
 import zutil.net.ws.WSReturnObject;
 import zutil.net.ws.WebServiceDef;
-import zutil.parser.wsdl.WSDLWriter;
+import zutil.net.ws.wsdl.WSDLWriter;
 
 
 // TODO: Convert to JUnit

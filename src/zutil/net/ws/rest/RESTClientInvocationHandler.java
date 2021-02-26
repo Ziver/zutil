@@ -35,7 +35,10 @@ import zutil.net.ws.WSMethodDef;
 import zutil.net.ws.WSParameterDef;
 import zutil.net.ws.WebServiceDef;
 import zutil.net.ws.soap.SOAPHttpPage;
+import zutil.parser.DataNode;
+import zutil.parser.json.JSONParser;
 
+import javax.naming.OperationNotSupportedException;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.net.MalformedURLException;
@@ -70,38 +73,52 @@ public class RESTClientInvocationHandler implements InvocationHandler {
      */
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-        // Generate XML
-        HttpURL url = generateRESTRequest(method.getName(), args);
+        // Generate request
 
-        // Send request
-        HttpClient request = new HttpClient(HttpClient.HttpRequestType.POST);
-        request.setURL(url);
-        HttpHeader response = request.send();
-        String rspJson = IOUtil.readContentAsString(request.getResponseInputStream());
-        request.close();
+        WSMethodDef methodDef = wsDef.getMethod(method.getName());
+        HttpURL url = generateRESTRequest(methodDef, args);
 
-        // DEBUG
-        if (logger.isLoggable(Level.FINEST)) {
-            System.out.println("********** Request");
-            System.out.println(url);
-            System.out.println("********** Response");
-            System.out.println(rspJson);
+        String requestType = "GET";
+        switch (methodDef.getRequestType()) {
+            case HTTP_GET:    requestType = "GET"; break;
+            case HTTP_PUT:    requestType = "PUT"; break;
+            case HTTP_POST:   requestType = "POST"; break;
+            case HTTP_DELETE: requestType = "DELETE"; break;
         }
 
-        return parseRESTResponse(rspJson);
+        // Send request
+
+        HttpClient request = new HttpClient(HttpClient.HttpRequestType.POST);
+        request.setURL(url);
+        request.setType(requestType);
+
+        logger.fine("Sending request for: " + url);
+        HttpHeader response = request.send();
+        logger.fine("Received response(" + response.getResponseStatusCode() + ")");
+
+        // Parse response
+
+        String rspStr = IOUtil.readContentAsString(request.getResponseInputStream());
+        request.close();
+
+        //if (logger.isLoggable(Level.FINEST)) {
+            System.out.println("********** Response: " + url);
+            System.out.println(rspStr);
+        //}
+
+        Object rspObj = parseRESTResponse(methodDef, rspStr);
+        return rspObj;
     }
 
 
-    private HttpURL generateRESTRequest(String targetMethod, Object[] args) {
-        logger.fine("Sending request for " + targetMethod);
+    private HttpURL generateRESTRequest(WSMethodDef methodDef, Object[] args) {
         HttpURL url = new HttpURL(serviceUrl);
 
-        WSMethodDef methodDef = wsDef.getMethod(targetMethod);
         url.setPath(serviceUrl.getPath()
                 + (serviceUrl.getPath().endsWith("/") ? "" : "/")
-                + methodDef.getName());
+                + methodDef.getPath());
 
-        List<WSParameterDef> params =  methodDef.getOutputs();
+        List<WSParameterDef> params =  methodDef.getInputs();
         for (int i = 0; i < params.size(); i++) {
             WSParameterDef param = params.get(i);
             url.setParameter(param.getName(), args[i].toString());
@@ -110,8 +127,15 @@ public class RESTClientInvocationHandler implements InvocationHandler {
         return url;
     }
 
-    private Object parseRESTResponse(String json) {
+    private Object parseRESTResponse(WSMethodDef methodDef, String str) {
+        DataNode json = JSONParser.read(str);
+        List<WSParameterDef> outputs = methodDef.getOutputs();
 
-        return null;
+        if (outputs.size() == 1) {
+            if (outputs.get(0).getParamClass().isAssignableFrom(DataNode.class))
+                return json;
+        }
+
+        throw new RuntimeException("WS JSON return type currently not supported: " + methodDef);
     }
 }
