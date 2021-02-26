@@ -39,6 +39,7 @@ public class HttpHeader {
     public static final String HEADER_COOKIE         = "Cookie";
     public static final String HEADER_CONTENT_TYPE   = "Content-Type";
     public static final String HEADER_CONTENT_LENGTH = "Content-Length";
+    public static final String HEADER_HOST           = "Host";
     public static final String HEADER_IF_NONE_MATCH  = "If-None-Match";
     public static final String HEADER_LOCATION       = "Location";
     public static final String HEADER_SET_COOKIE     = "Set-Cookie";

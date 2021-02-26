@@ -275,6 +275,11 @@ public class HttpPrintStream extends OutputStream {
 
             out.println();
             header = null;
+
+            // Check for errors
+
+            if (out.checkError())
+                throw new RuntimeException("Underlying stream has thrown a error.");
         }
 
         out.print(s);

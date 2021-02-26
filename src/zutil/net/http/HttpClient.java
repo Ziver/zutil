@@ -27,6 +27,8 @@ package zutil.net.http;
 import zutil.converter.Converter;
 import zutil.net.http.HttpPrintStream.HttpMessageType;
 
+import javax.net.ssl.SSLSocket;
+import javax.net.ssl.SSLSocketFactory;
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -81,6 +83,13 @@ public class HttpClient implements AutoCloseable {
         this.protocol = protocol;
     }
 
+    /**
+     * Set the type of request. Default is GET.
+     */
+    public void setType(String type) {
+        this.type = type;
+    }
+
     public void setURL(URL url) {
         setURL(new HttpURL(url));
     }
@@ -130,7 +139,23 @@ public class HttpClient implements AutoCloseable {
      * NOTE: any previous request connections will be closed
      */
     public HttpHeader send() throws IOException {
-        Socket conn = new Socket(url.getHost(), url.getPort());
+        int port = 80;
+        if (url.getPort() > 0)
+            port = url.getPort();
+        else if ("https".equals(url.getProtocol()))
+            port = 443;
+
+        // ---------------------------------
+        // Create Socket
+        // ---------------------------------
+
+        Socket conn;
+        if ("https".equals(url.getProtocol())) {
+            conn = SSLSocketFactory.getDefault().createSocket(url.getHost(), port);
+            ((SSLSocket )conn).startHandshake();
+        } else {
+            conn = new Socket(url.getHost(), port);
+        }
 
         // ---------------------------------
         // Request
@@ -142,6 +167,12 @@ public class HttpClient implements AutoCloseable {
         request.setRequestURL(absoluteURL ? url.getURL() : url.getHttpURL());
         request.setHeaders(headers);
         request.setCookies(cookies);
+
+        // Set headers
+
+        request.setHeader(HttpHeader.HEADER_HOST, url.getHost() + ":" + port);
+
+        // send payload
 
         if (HttpRequestType.POST.toString().equals(type)) {
             String postData;
