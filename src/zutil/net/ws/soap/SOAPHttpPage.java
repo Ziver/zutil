@@ -31,13 +31,13 @@ import org.dom4j.Element;
 import org.dom4j.io.OutputFormat;
 import org.dom4j.io.XMLWriter;
 import org.xml.sax.SAXException;
+import zutil.ClassUtil;
 import zutil.converter.Converter;
 import zutil.log.LogUtil;
 import zutil.net.http.HttpHeader;
 import zutil.net.http.HttpPage;
 import zutil.net.http.HttpPrintStream;
 import zutil.net.ws.*;
-import zutil.net.ws.WSReturnObject.WSValueName;
 import zutil.parser.Base64Encoder;
 
 import java.io.BufferedReader;
@@ -127,10 +127,12 @@ public class SOAPHttpPage implements HttpPage{
             // Read http body
             StringBuilder data = null;
             String contentType = headers.getHeader("Content-Type");
+
             if (contentType != null &&
                     (contentType.contains("application/soap+xml") ||
                     contentType.contains("text/xml") ||
                     contentType.contains("text/plain"))) {
+
                 int post_data_length = Integer.parseInt(headers.getHeader("Content-Length"));
                 BufferedReader in = new BufferedReader(new InputStreamReader(headers.getInputStream()));
                 data = new StringBuilder(post_data_length);
@@ -140,25 +142,24 @@ public class SOAPHttpPage implements HttpPage{
             }
 
             // Response
-            out.setHeader("Content-Type", "text/xml");
+            out.setHeader(HttpHeader.HEADER_CONTENT_TYPE, "text/xml");
             out.flush();
 
             WSInterface obj;
             if (session_enabled) {
-                if ( session.containsKey("SOAPInterface"))
+                if (session.containsKey("SOAPInterface"))
                     obj = (WSInterface)session.get("SOAPInterface");
                 else {
                     obj = wsDef.newInstance();
                     session.put("SOAPInterface", obj);
                 }
-            }
-            else {
+            } else {
                 if (ws == null)
                     ws = wsDef.newInstance();
                 obj = ws;
             }
 
-            Document document = genSOAPResponse( (data!=null ? data.toString() : ""), obj);
+            Document document = genSOAPResponse((data!=null ? data.toString() : ""), obj);
 
             OutputFormat format = OutputFormat.createPrettyPrint();
             XMLWriter writer = new XMLWriter( out, format );
@@ -187,11 +188,11 @@ public class SOAPHttpPage implements HttpPage{
     public Document genSOAPResponse(String xml) {
         try {
             WSInterface obj;
-            if ( ws == null )
+            if (ws == null)
                 ws = wsDef.newInstance();
             obj = ws;
 
-            return genSOAPResponse(xml, obj );
+            return genSOAPResponse(xml, obj);
         } catch (Exception e) {
             logger.log(Level.WARNING, "Exception in SOAP generation", e);
         }
@@ -290,12 +291,12 @@ public class SOAPHttpPage implements HttpPage{
                 // generate response XML
                 if (outputParamDefs.size() > 0) {
                     Element response = responseRoot.addElement("");
-                    response.addNamespace("m",  methodDef.getNamespace() );
-                    response.setName("m:"+methodDef.getName()+"Response");
+                    response.addNamespace("m", methodDef.getNamespace() );
+                    response.setName("m:" + methodDef.getName() + "Response");
 
                     if (outputParams instanceof WSReturnObject) {
                         Field[] f = outputParams.getClass().getFields();
-                        for(int i=0; i<outputParamDefs.size() ;i++) {
+                        for(int i=0; i<outputParamDefs.size(); i++) {
                             WSParameterDef param = outputParamDefs.get(i);
                             generateSOAPXMLForObj(response,((WSReturnObject)outputParams).getValue(f[i]) , param.getName());
                         }
@@ -312,9 +313,6 @@ public class SOAPHttpPage implements HttpPage{
     }
 
 
-
-
-
     /**
      * Generates a XML Element for a given Object. This method can
      * handle return values as XML Elements, WSReturnObject and
@@ -326,7 +324,7 @@ public class SOAPHttpPage implements HttpPage{
      */
     protected static void generateSOAPXMLForObj(Element root, Object obj, String elementName) throws IllegalArgumentException, IllegalAccessException{
         if (obj == null) return;
-        
+
         // Return binary data
         if (byte[].class.isAssignableFrom(obj.getClass())) {
             Element valueE = root.addElement( elementName );
@@ -337,61 +335,58 @@ public class SOAPHttpPage implements HttpPage{
         }
         // Return an array
         else if (obj.getClass().isArray()) {
-            Element array = root.addElement( (elementName.equals("element") ? "Array" : elementName) );
-            String arrayType = "xsd:"+ getSOAPClassName(obj.getClass());
-            arrayType = arrayType.replaceFirst("\\[\\]", "["+Array.getLength(obj)+"]");
+            Element array = root.addElement((elementName.equals("element") ? "Array" : elementName));
+            String arrayType = "xsd:" + getSOAPClassName(obj.getClass());
+            arrayType = arrayType.replaceFirst("\\[\\]", "[" + Array.getLength(obj) + "]");
 
             array.addAttribute("type", "soap:Array");
-            array.addAttribute("soap:arrayType", arrayType);
+            array.addAttribute("soap:arrayType", "xsd:" + arrayType);
             for(int i=0; i<Array.getLength(obj) ;i++) {
                 generateSOAPXMLForObj(array, Array.get(obj, i), "element");
             }
         }
         else {
-            Element objectE = root.addElement( elementName );
+            Element objectE = root.addElement(elementName);
             if (obj instanceof Element)
-                objectE.add( (Element)obj );
+                objectE.add((Element) obj);
             else if (obj instanceof WSReturnObject) {
                 Field[] fields = obj.getClass().getFields();
-                for(int i=0; i<fields.length ;i++) {
-                    WSValueName tmp = fields[i].getAnnotation( WSValueName.class );
-                    String name;
-                    if (tmp != null) name = tmp.value();
-                    else name = "field"+i;
+                for(int i=0; i<fields.length; i++) {
+                    WSInterface.WSParamName paramNameAnnotation = fields[i].getAnnotation(WSInterface.WSParamName.class);
+                    String name = (paramNameAnnotation != null ? paramNameAnnotation.value() : "field" + i);
+
                     generateSOAPXMLForObj(objectE, fields[i].get(obj), name);
                 }
             }
             else {
-                objectE.addAttribute("type", "xsd:"+ getSOAPClassName(obj.getClass()));
+                objectE.addAttribute("type", "xsd:" + getSOAPClassName(obj.getClass()));
                 objectE.addText("" + obj);
             }
         }
     }
 
-
-    protected static String getSOAPClassName(Class<?> c) {
-        Class<?> cTmp = getClass(c);
+    /**
+     * Will generate a SOAP based class name from a given class.
+     *
+     * @param c
+     * @return a String name that can be used by a SOAP call.
+     */
+    public static String getSOAPClassName(Class<?> c) {
+        Class<?> cTmp = ClassUtil.getArrayClass(c);
         if (byte[].class.isAssignableFrom(c)) {
             return "base64Binary";
-        }
-        else if (WSReturnObject.class.isAssignableFrom(cTmp)) {
+        } else if (WSReturnObject.class.isAssignableFrom(cTmp)) {
             return c.getSimpleName();
-        }
-        else {
+        } else {
             String ret = c.getSimpleName().toLowerCase();
 
-            if (cTmp == Integer.class)        ret = ret.replaceAll("integer", "int");
-            else if(cTmp == Character.class) ret = ret.replaceAll("character", "char");
+            if (cTmp == Integer.class)
+                ret = ret.replaceAll("integer", "int");
+            else if(cTmp == Character.class)
+                ret = ret.replaceAll("character", "char");
 
             return ret;
         }
-    }
-
-    protected static Class<?> getClass(Class<?> c) {
-        if (c!=null && c.isArray()) {
-            return getClass(c.getComponentType());
-        }
-        return c;
     }
 }
 

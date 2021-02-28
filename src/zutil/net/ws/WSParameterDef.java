@@ -26,10 +26,10 @@ package zutil.net.ws;
 
 /**
  * This is a web service parameter definition class
- * 
+ *
  * @author Ziver
  */
-public class WSParameterDef{
+public class WSParameterDef {
     /** The parent method **/
     private WSMethodDef mDef;
     /** The class type of the parameter **/
@@ -37,13 +37,12 @@ public class WSParameterDef{
     /** The web service name of the parameter **/
     private String name;
     /** Developer documentation **/
-    private String doc;
+    private String documentation;
     /** If this parameter is optional **/
     private boolean optional;
-    /** Is it an header parameter **/
-    //boolean header;
 
-    protected WSParameterDef( WSMethodDef mDef ){
+
+    protected WSParameterDef(WSMethodDef mDef){
         this.mDef = mDef;
         this.optional = false;
     }
@@ -63,11 +62,11 @@ public class WSParameterDef{
         this.name = name;
     }
 
-    public String getDoc() {
-        return doc;
+    public String getDocumentation() {
+        return documentation;
     }
-    protected void setDoc(String doc) {
-        this.doc = doc;
+    protected void setDocumentation(String documentation) {
+        this.documentation = documentation;
     }
 
     public boolean isOptional() {

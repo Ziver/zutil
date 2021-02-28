@@ -39,16 +39,19 @@ public class WSDLHttpPage implements HttpPage {
     /** The WSDL document **/
     private WSDLWriter wsdl;
 
-    public WSDLHttpPage( WebServiceDef wsDef ){
-        wsdl = new WSDLWriter( wsDef );
+
+    public WSDLHttpPage(WebServiceDef wsDef) {
+        wsdl = new WSDLWriter(wsDef);
     }
+
 
     public void respond(HttpPrintStream out,
                         HttpHeader headers,
                         Map<String, Object> session,
                         Map<String, String> cookie,
-                        Map<String, String> request) throws IOException{
-        out.setHeader("Content-Type", "text/xml");
-        wsdl.write( out );
+                        Map<String, String> request) throws IOException {
+
+        out.setHeader(HttpHeader.HEADER_CONTENT_TYPE, "text/xml");
+        wsdl.write(out);
     }
 }

@@ -36,6 +36,7 @@ public class WSDLServiceSOAP extends WSDLService{
         super(url);
     }
 
+
     @Override
     public String getServiceType() { return "soap"; }
 
@@ -57,7 +58,10 @@ public class WSDLServiceSOAP extends WSDLService{
         Element soap_operation = operation.addElement("soap:operation");
         soap_operation.addAttribute("soapAction", method.getNamespace());
 
-        //*************************** Input
+        // ------------------------------------------------
+        // Input
+        // ------------------------------------------------
+
         // definitions -> binding -> operation -> input
         Element input = operation.addElement("wsdl:input");
         // definitions -> binding -> operation -> input -> body
@@ -65,7 +69,10 @@ public class WSDLServiceSOAP extends WSDLService{
         input_body.addAttribute("use", "literal");
         input_body.addAttribute("namespace", method.getNamespace());
 
-        //*************************** output
+        // ------------------------------------------------
+        // Output
+        // ------------------------------------------------
+
         if(!method.getOutputs().isEmpty()){
             // definitions -> binding -> operation -> output
             Element output = operation.addElement("wsdl:output");

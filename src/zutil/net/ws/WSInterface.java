@@ -67,10 +67,11 @@ import java.lang.annotation.Target;
 public interface WSInterface {
 
     enum RequestType {
-        HTTP_GET,
-        HTTP_POST,
-        HTTP_PUT,
-        HTTP_DELETE
+        GET,
+        POST,
+        PUT,
+        DELETE,
+        PATCH
     }
 
 
@@ -79,7 +80,7 @@ public interface WSInterface {
      * in an method.
      */
     @Retention(RetentionPolicy.RUNTIME)
-    @Target(ElementType.PARAMETER)
+    @Target({ElementType.PARAMETER, ElementType.FIELD})
     @interface WSParamName {
         String value();
         boolean optional() default false;

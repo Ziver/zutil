@@ -28,23 +28,17 @@ import zutil.io.IOUtil;
 import zutil.log.LogUtil;
 import zutil.net.http.HttpClient;
 import zutil.net.http.HttpHeader;
-import zutil.net.http.HttpHeaderParser;
 import zutil.net.http.HttpURL;
-import zutil.net.ws.WSInterface;
 import zutil.net.ws.WSMethodDef;
 import zutil.net.ws.WSParameterDef;
 import zutil.net.ws.WebServiceDef;
-import zutil.net.ws.soap.SOAPHttpPage;
 import zutil.parser.DataNode;
 import zutil.parser.json.JSONParser;
 
-import javax.naming.OperationNotSupportedException;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.List;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -80,10 +74,10 @@ public class RESTClientInvocationHandler implements InvocationHandler {
 
         String requestType = "GET";
         switch (methodDef.getRequestType()) {
-            case HTTP_GET:    requestType = "GET"; break;
-            case HTTP_PUT:    requestType = "PUT"; break;
-            case HTTP_POST:   requestType = "POST"; break;
-            case HTTP_DELETE: requestType = "DELETE"; break;
+            case GET:    requestType = "GET"; break;
+            case PUT:    requestType = "PUT"; break;
+            case POST:   requestType = "POST"; break;
+            case DELETE: requestType = "DELETE"; break;
         }
 
         // Send request

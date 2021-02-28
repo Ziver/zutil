@@ -147,12 +147,16 @@ public class WSMethodDef {
 
             for (Field field : fields) {
                 WSParameterDef ret_param = new WSParameterDef(this);
-                WSReturnObject.WSValueName retValName = field.getAnnotation(WSReturnObject.WSValueName.class);
 
-                if (retValName != null)
-                    ret_param.setName(retValName.value());
+                WSInterface.WSParamName paramNameAnnotation = field.getAnnotation(WSInterface.WSParamName.class);
+                if (paramNameAnnotation != null)
+                    ret_param.setName(paramNameAnnotation.value());
                 else
                     ret_param.setName(field.getName());
+
+                WSInterface.WSDocumentation documentationAnnotation = field.getAnnotation(WSInterface.WSDocumentation.class);
+                if (documentationAnnotation != null)
+                    ret_param.setDocumentation(documentationAnnotation.value());
 
                 ret_param.setParamClass(field.getType());
                 outputs.add(ret_param);
@@ -178,13 +182,15 @@ public class WSMethodDef {
             // Specific request type was not provided, try to figure it out by the method name
 
             if (name.startsWith("get"))
-                this.requestType = WSInterface.RequestType.HTTP_GET;
+                this.requestType = WSInterface.RequestType.GET;
             if (name.startsWith("post"))
-                this.requestType = WSInterface.RequestType.HTTP_POST;
+                this.requestType = WSInterface.RequestType.POST;
             if (name.startsWith("put"))
-                this.requestType = WSInterface.RequestType.HTTP_PUT;
+                this.requestType = WSInterface.RequestType.PUT;
             if (name.startsWith("delete"))
-                this.requestType = WSInterface.RequestType.HTTP_DELETE;
+                this.requestType = WSInterface.RequestType.DELETE;
+            if (name.startsWith("patch"))
+                this.requestType = WSInterface.RequestType.PATCH;
         }
 
         // Handle endpoint path

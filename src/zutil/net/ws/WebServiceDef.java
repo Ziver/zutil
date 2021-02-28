@@ -36,26 +36,33 @@ import java.util.Set;
  * @author Ziver
  */
 public class WebServiceDef {
-    /** A map of methods in this Service **/
-    private HashMap<String,WSMethodDef> methods;
+    /** This is the WSInterface class **/
+    private Class<? extends WSInterface> intf;
     /** Namespace of the service **/
     private String namespace;
     /** Name of the web service **/
     private String name;
-    /** This is the WSInterface class **/
-    private Class<? extends WSInterface> intf;
+    /** Human readable description of the service **/
+    private String documentation = "";
+    /** A map of methods in this Service **/
+    private HashMap<String,WSMethodDef> methods = new HashMap<>();
+
 
 
     public WebServiceDef(Class<? extends WSInterface> intf){
         this.intf = intf;
-        methods = new HashMap<>();
         name = intf.getSimpleName();
 
-        if (intf.getAnnotation( WSInterface.WSNamespace.class) != null)
-            this.namespace = intf.getAnnotation(WSInterface.WSNamespace.class).value();
+        WSInterface.WSNamespace namespaceAnnotation = intf.getAnnotation(WSInterface.WSNamespace.class);
+        if (namespaceAnnotation != null)
+            this.namespace = namespaceAnnotation.value();
+
+        WSInterface.WSDocumentation documentationAnnotation = intf.getAnnotation(WSInterface.WSDocumentation.class);
+        if (documentationAnnotation != null)
+            this.documentation = documentationAnnotation.value();
 
         for(Method m : intf.getDeclaredMethods()){
-            // check for public methods
+            // Check for public methods
             if ((m.getModifiers() & Modifier.PUBLIC) > 0 &&
                     !m.isAnnotationPresent(WSInterface.WSIgnore.class)){
                 WSMethodDef method = new WSMethodDef(this, m);
@@ -76,6 +83,13 @@ public class WebServiceDef {
      */
     public String getName(){
         return name;
+    }
+
+    /**
+     * @return a human readable description of the service, or a empty String if no documentation has been provided.
+     */
+    public String getDocumentation(){
+        return documentation;
     }
 
     /**

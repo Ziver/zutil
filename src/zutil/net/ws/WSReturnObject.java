@@ -32,15 +32,16 @@ import java.lang.reflect.Field;
 
 /**
  * This class is used as an return Object for a web service.
- * If an class implements this interface then it can return 
- * multiple values through the WSInterface. And the 
- * implementing class will be transparent. Example:
- * 
+ * If a class implements this interface then it implies that multiple
+ * parameters can be returned through the WSInterface. And the
+ * implementing class will be transparent to the requester. Example:
+ *
  * <pre>
  * 	private static class TestObject implements WSReturnObject{
- *		&#64;WSValueName("name")
+ *		&#64;WSParamName("name")
  *		public String name;
- *		&#64;WSValueName("lastname")
+ *		&#64;WSParamName("lastname")
+ *	    &#64;WSDocumentation("The users last name")
  *		public String lastname;
  *
  *		public TestObject(String n, String l){
@@ -49,35 +50,11 @@ import java.lang.reflect.Field;
  *		}
  *	}
  * </pre>
- * 
+ *
  * @author Ziver
  *
  */
-public class WSReturnObject{
-    /**
-     * Method comments for the WSDL.
-     * These comments are put in the operation part of the WSDL
-     *
-     * @author Ziver
-     */
-    @Retention(RetentionPolicy.RUNTIME)
-    public @interface WSDLDocumentation{
-        String value();
-    }
-
-    /**
-     * Annotation that assigns a name to the return value
-     * to the field.
-     *
-     * @author Ziver
-     */
-    @Retention(RetentionPolicy.RUNTIME)
-    @Target(ElementType.FIELD)
-    public @interface WSValueName {
-        String value();
-        boolean optional() default false;
-    }
-
+public abstract class WSReturnObject{
 
     public Object getValue(Field field) throws IllegalArgumentException, IllegalAccessException{
         return field.get(this);

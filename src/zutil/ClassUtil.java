@@ -183,4 +183,15 @@ public class ClassUtil {
         }
         return null;
     }
+
+    /**
+     * @param c     a array class
+     * @return the base class the array is based on, if the input is not an array then the input is returned.
+     */
+    public static Class<?> getArrayClass(Class<?> c) {
+        if (c != null && c.isArray()) {
+            return getArrayClass(c.getComponentType());
+        }
+        return c;
+    }
 }
