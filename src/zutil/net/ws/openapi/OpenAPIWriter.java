@@ -12,7 +12,9 @@ import java.io.OutputStream;
 import java.io.PrintStream;
 import java.io.Writer;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
 
 /**
@@ -58,12 +60,14 @@ public class OpenAPIWriter {
 
     public String write() {
         if (cache == null) {
+            Map<String, List<WSParameterDef>> schemas = new HashMap<>();
+
             DataNode root = new DataNode(DataNode.DataType.Map);
             root.set("openapi", OPENAPI_VERSION);
             root.set("info", generateInfo());
             root.set("servers", generateServers());
-            root.set("paths", generatePaths());
-            root.set("components", generateComponents());
+            root.set("paths", generatePaths(schemas));
+            root.set("components", generateComponents(schemas));
 
             this.cache = JSONWriter.toString(root);
         }
@@ -74,12 +78,12 @@ public class OpenAPIWriter {
         DataNode infoRoot = new DataNode(DataNode.DataType.Map);
         infoRoot.set("title", ws.getName());
         infoRoot.set("description", ws.getDocumentation());
+        infoRoot.set("version", "");
 
         // Not implemented properties
         // "termsOfService": xxx,
         // "contact": {"name": xxx,"url": xxx,"email": xxx},
         // "license": {"name": xxx, "url": xxx},
-        // "version": xxx
         return infoRoot;
     }
 
@@ -87,30 +91,28 @@ public class OpenAPIWriter {
         DataNode serversRoot = new DataNode(DataNode.DataType.List);
 
         for (ServerData data : servers) {
-            DataNode serverNode = new DataNode(DataNode.DataType.Map);
+            DataNode serverNode = serversRoot.add(DataNode.DataType.Map);
             serverNode.set("url", data.url);
             serverNode.set("description", data.description);
-            serversRoot.add(serverNode);
         }
 
         return serversRoot;
     }
 
-    private DataNode generatePaths() {
+    private DataNode generatePaths(Map<String, List<WSParameterDef>> schemas) {
         DataNode pathsRoot = new DataNode(DataNode.DataType.Map);
 
         for (WSMethodDef methodDef : ws.getMethods()) {
-            DataNode pathNode = new DataNode(DataNode.DataType.Map);
+            DataNode pathNode = pathsRoot.set(methodDef.getPath(), DataNode.DataType.Map);
 
-            DataNode typeNode = new DataNode(DataNode.DataType.Map);
+            DataNode typeNode = pathNode.set(methodDef.getRequestType().toString().toLowerCase(), DataNode.DataType.Map);
             typeNode.set("description", methodDef.getDocumentation());
-            pathNode.set(methodDef.getRequestType().toString().toLowerCase(), typeNode);
 
             // --------------------------------------------
             // Inputs
             // --------------------------------------------
 
-            DataNode parameterNode = new DataNode(DataNode.DataType.Map);
+            DataNode parameterNode = typeNode.set("parameters", DataNode.DataType.Map);
             for (WSParameterDef parameterDef : methodDef.getInputs()) {
                 parameterNode.set("name", parameterDef.getName());
                 parameterNode.set("description", parameterDef.getDocumentation());
@@ -119,29 +121,27 @@ public class OpenAPIWriter {
 
                 parameterNode.set("schema", "");
             }
-            typeNode.set("parameters", parameterNode);
 
             // --------------------------------------------
             // Outputs
             // --------------------------------------------
 
-            DataNode responseNode = new DataNode(DataNode.DataType.Map);
-            for (WSParameterDef parameterDef : methodDef.getOutputs()) {
-                parameterNode.set("name", parameterDef.getName());
-                parameterNode.set("description", parameterDef.getDocumentation());
-                parameterNode.set("in", "query");
-                parameterNode.set("required", parameterDef.isOptional());
+            DataNode responseNode = typeNode.set("responses", DataNode.DataType.Map);
+            DataNode schemaNode = responseNode.set("200", DataNode.DataType.Map)
+                    .set("content", DataNode.DataType.Map)
+                    .set("application/json", DataNode.DataType.Map)
+                    .set("schema", DataNode.DataType.Map);
 
-                parameterNode.set("schema", "");
-            }
-            typeNode.set("responses", responseNode);
+            String retName = methodDef.getName() + "Return";
+            schemas.put("retName", methodDef.getOutputs());
+            schemaNode.set("$ref", "#/components/schemas/" + retName);
 
         }
 
         return pathsRoot;
     }
 
-    private DataNode generateComponents() {
+    private DataNode generateComponents(Map<String, List<WSParameterDef>> schemas) {
         DataNode componentsRoot = new DataNode(DataNode.DataType.Map);
         DataNode schemasNode = new DataNode(DataNode.DataType.Map);
         componentsRoot.set("schemas", schemasNode);

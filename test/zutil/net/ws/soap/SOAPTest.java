@@ -29,6 +29,7 @@ import org.dom4j.io.OutputFormat;
 import org.dom4j.io.XMLWriter;
 import zutil.net.ws.WSInterface;
 import zutil.net.ws.WSInterface.WSNamespace;
+import zutil.net.ws.WSInterface.WSParamName;
 import zutil.net.ws.WSReturnObject;
 import zutil.net.ws.WebServiceDef;
 import zutil.net.ws.wsdl.WSDLWriter;
@@ -36,7 +37,11 @@ import zutil.net.ws.wsdl.WSDLWriter;
 
 // TODO: Convert to JUnit
 public class SOAPTest {
-    /************************* TEST CASES ************************/
+
+    // ----------------------------------------------------
+    // TEST CASES
+    // ----------------------------------------------------
+
     public static void main(String[] args){
         WebServiceDef wsDef = new WebServiceDef( MainSOAPClass.class );
         SOAPHttpPage soap = new SOAPHttpPage( wsDef );
@@ -75,12 +80,15 @@ public class SOAPTest {
         }
     }
 
-    /************************* TEST CLASSES ************************/
+    // ----------------------------------------------------
+    // TEST CLASSES
+    // ----------------------------------------------------
+
     @SuppressWarnings("unused")
     public static class SpecialReturnClass extends WSReturnObject{
-        @WSValueName(value="otherValue1")
+        @WSParamName("otherValue1")
         public String param1 = "otherValue1";
-        @WSValueName("otherName2")
+        @WSParamName("otherName2")
         public String param2 = "otherValue2";
         public byte[] b = new byte[]{0x12, 0x23};
         public InnerClass inner = new InnerClass();
@@ -94,7 +102,7 @@ public class SOAPTest {
 
     @SuppressWarnings("unused")
     public static class SimpleReturnClass extends WSReturnObject{
-        @WSValueName("otherParam1")
+        @WSParamName("otherParam1")
         public String param1 = "param1";
         public String param2 = "param2";
     }

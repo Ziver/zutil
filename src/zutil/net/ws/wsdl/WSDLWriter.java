@@ -313,7 +313,9 @@ public class WSDLWriter {
         empty.addAttribute("name", "empty");
         empty.addElement("xsd:sequence");
 
-        for (Class<?> c : types) {
+        for (int i=0; i<types.size(); i++) {
+            Class<?> c = types.get(i);
+
             // Generate Array type
             if (c.isArray()) {
                 Class<?> ctmp = ClassUtil.getArrayClass(c);
@@ -344,26 +346,26 @@ public class WSDLWriter {
                 Element sequence = type.addElement("xsd:sequence");
 
                 Field[] fields = c.getFields();
-                for (int i = 0; i < fields.length; i++) {
-                    WSInterface.WSParamName tmp = fields[i].getAnnotation(WSInterface.WSParamName.class);
+                for (int j=0; j<fields.length; j++) {
+                    WSInterface.WSParamName tmp = fields[j].getAnnotation(WSInterface.WSParamName.class);
 
                     String name;
                     if (tmp != null)
                         name = tmp.value();
                     else
-                        name = "field" + i;
+                        name = "field" + j;
 
                     Element element = sequence.addElement("xsd:element");
                     element.addAttribute("name", name);
 
                     // Check if the object is an SOAPObject
-                    Class<?> cTmp = ClassUtil.getArrayClass(fields[i].getType());
+                    Class<?> cTmp = ClassUtil.getArrayClass(fields[j].getType());
                     if (WSReturnObject.class.isAssignableFrom(cTmp)) {
                         element.addAttribute("type", "tns:" + SOAPHttpPage.getSOAPClassName(cTmp));
                         if (!types.contains(cTmp))
                             types.add(cTmp);
                     } else {
-                        element.addAttribute("type", "xsd:" + SOAPHttpPage.getSOAPClassName(fields[i].getType()));
+                        element.addAttribute("type", "xsd:" + SOAPHttpPage.getSOAPClassName(fields[j].getType()));
                     }
 
                     // Is the Field optional

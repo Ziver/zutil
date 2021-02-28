@@ -181,16 +181,16 @@ public class WSMethodDef {
         } else {
             // Specific request type was not provided, try to figure it out by the method name
 
-            if (name.startsWith("get"))
-                this.requestType = WSInterface.RequestType.GET;
             if (name.startsWith("post"))
                 this.requestType = WSInterface.RequestType.POST;
-            if (name.startsWith("put"))
+            else if (name.startsWith("put"))
                 this.requestType = WSInterface.RequestType.PUT;
-            if (name.startsWith("delete"))
+            else if (name.startsWith("delete"))
                 this.requestType = WSInterface.RequestType.DELETE;
-            if (name.startsWith("patch"))
+            else if (name.startsWith("patch"))
                 this.requestType = WSInterface.RequestType.PATCH;
+            else
+                this.requestType = WSInterface.RequestType.GET;
         }
 
         // Handle endpoint path
@@ -201,8 +201,8 @@ public class WSMethodDef {
         else
             path = this.name;
 
-        if (path.startsWith("/"))
-            path = path.substring(1);
+        if (!path.startsWith("/"))
+            path = '/' + path;
     }
 
     /**

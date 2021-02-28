@@ -182,7 +182,19 @@ public class DataNode implements Iterable<DataNode> {
     }
 
     /**
-     * Adds a node to the Map
+     * Creates a new node and adds it to the list.
+     *
+     * @param type  the type of the new DataNode
+     * @return a newly created DataNode
+     */
+    public DataNode add(DataType type) {
+        DataNode newNode = new DataNode(type);
+        list.add(newNode);
+        return newNode;
+    }
+
+    /**
+     * Adds a node to the Map with the provided value
      */
     public void set(String key, DataNode node) {
         map.put(key, node);
@@ -207,6 +219,20 @@ public class DataNode implements Iterable<DataNode> {
     public void set(String key, String value) {
         map.put(key, new DataNode(value));
     }
+
+    /**
+     * Creates a new node and adds it to the specified key.
+     *
+     * @param key   the key where the new DataNode should be assigned
+     * @param type  the type of the new DataNode
+     * @return a newly created DataNode
+     */
+    public DataNode set(String key, DataType type) {
+        DataNode newNode = new DataNode(type);
+        map.put(key, newNode);
+        return newNode;
+    }
+
 
     /**
      * Sets the value of the node
