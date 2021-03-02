@@ -24,13 +24,10 @@
 
 package zutil.net.ws.rest;
 
-import org.junit.Test;
 import zutil.net.ws.WSInterface;
-import zutil.net.ws.WebServiceDef;
 
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.HashMap;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -42,7 +39,7 @@ public class RESTClientTest {
 
     public interface OpenWeartherMap extends WSInterface {
 
-        @WSNamespace("")
+        @WSPath("")
         int weather(@WSParamName("q") String city);
     }
 

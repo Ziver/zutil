@@ -107,7 +107,7 @@ public class SOAPClientInvocationHandler implements InvocationHandler {
 
             Element body = envelope.addElement("soap:Body");
             Element method = body.addElement("");
-            method.addNamespace("m", methodDef.getNamespace());
+            method.addNamespace("m", methodDef.getPath());
             method.setName("m:" + methodDef.getName() + "Request");
 
             List<WSParameterDef> outputParamDefs = methodDef.getOutputs();

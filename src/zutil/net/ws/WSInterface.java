@@ -129,14 +129,6 @@ public interface WSInterface {
     @interface WSHeader {}
 
     /**
-     * Specifies the name space for the method.
-     */
-    @Retention(RetentionPolicy.RUNTIME)
-    @interface WSNamespace {
-        String value();
-    }
-
-    /**
      * Specifies the request type.
      */
     @Retention(RetentionPolicy.RUNTIME)
@@ -146,10 +138,10 @@ public interface WSInterface {
     }
 
     /**
-     * Sets a specific URL path for the method overriding the auto generated path.
+     * Sets a specific URL path for the method overriding the auto generated path. This will also be used as the namespace.
      */
     @Retention(RetentionPolicy.RUNTIME)
-    @Target(ElementType.METHOD)
+    @Target({ElementType.TYPE, ElementType.METHOD})
     @interface WSPath {
         String value();
     }

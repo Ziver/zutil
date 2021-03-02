@@ -39,9 +39,9 @@ public class WSDLWriterTest {
 
         assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
                 "\n" +
-                "<wsdl:definitions xmlns:wsdl=\"http://schemas.xmlsoap.org/wsdl/\" xmlns:soap=\"http://schemas.xmlsoap.org/wsdl/soap/\" xmlns:http=\"http://schemas.xmlsoap.org/wsdl/http/\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns:soap-enc=\"http://schemas.xmlsoap.org/soap/encoding/\" xmlns:tns=\"http://test.se:8080/?type\" targetNamespace=\"http://test.se:8080/\">\n" +
+                "<wsdl:definitions xmlns:wsdl=\"http://schemas.xmlsoap.org/wsdl/\" xmlns:soap=\"http://schemas.xmlsoap.org/wsdl/soap/\" xmlns:http=\"http://schemas.xmlsoap.org/wsdl/http/\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns:soap-enc=\"http://schemas.xmlsoap.org/soap/encoding/\" xmlns:tns=\"http://test.se:8080/type\" targetNamespace=\"http://test.se:8080\">\n" +
                 "  <wsdl:types>\n" +
-                "    <xsd:schema targetNamespace=\"http://test.se:8080/?type\">\n" +
+                "    <xsd:schema targetNamespace=\"http://test.se:8080/type\">\n" +
                 "      <xsd:complexType name=\"empty\">\n" +
                 "        <xsd:sequence/>\n" +
                 "      </xsd:complexType>\n" +
@@ -125,42 +125,42 @@ public class WSDLWriterTest {
                 "  <wsdl:binding name=\"MainSOAPClassBinding\" type=\"tns:MainSOAPClassPortType\">\n" +
                 "    <soap:binding style=\"rpc\" transport=\"http://schemas.xmlsoap.org/soap/http\"/>\n" +
                 "    <wsdl:operation name=\"stringArrayMethod\">\n" +
-                "      <soap:operation soapAction=\"http://test.se:8080/?#stringArrayMethod\"/>\n" +
+                "      <soap:operation soapAction=\"http://test.se:8080/stringArrayMethod\"/>\n" +
                 "      <wsdl:input>\n" +
-                "        <soap:body use=\"literal\" namespace=\"http://test.se:8080/?#stringArrayMethod\"/>\n" +
+                "        <soap:body use=\"literal\" namespace=\"http://test.se:8080/stringArrayMethod\"/>\n" +
                 "      </wsdl:input>\n" +
                 "      <wsdl:output>\n" +
-                "        <soap:body use=\"literal\" namespace=\"http://test.se:8080/?#stringArrayMethod\"/>\n" +
+                "        <soap:body use=\"literal\" namespace=\"http://test.se:8080/stringArrayMethod\"/>\n" +
                 "      </wsdl:output>\n" +
                 "    </wsdl:operation>\n" +
                 "    <wsdl:operation name=\"simpleReturnClassMethod\">\n" +
-                "      <soap:operation soapAction=\"http://test.se:8080/?#simpleReturnClassMethod\"/>\n" +
+                "      <soap:operation soapAction=\"http://test.se:8080/simpleReturnClassMethod\"/>\n" +
                 "      <wsdl:input>\n" +
-                "        <soap:body use=\"literal\" namespace=\"http://test.se:8080/?#simpleReturnClassMethod\"/>\n" +
+                "        <soap:body use=\"literal\" namespace=\"http://test.se:8080/simpleReturnClassMethod\"/>\n" +
                 "      </wsdl:input>\n" +
                 "      <wsdl:output>\n" +
-                "        <soap:body use=\"literal\" namespace=\"http://test.se:8080/?#simpleReturnClassMethod\"/>\n" +
+                "        <soap:body use=\"literal\" namespace=\"http://test.se:8080/simpleReturnClassMethod\"/>\n" +
                 "      </wsdl:output>\n" +
                 "    </wsdl:operation>\n" +
                 "    <wsdl:operation name=\"exceptionMethod\">\n" +
-                "      <soap:operation soapAction=\"http://test.se:8080/?#exceptionMethod\"/>\n" +
+                "      <soap:operation soapAction=\"http://test.se:8080/exceptionMethod\"/>\n" +
                 "      <wsdl:input>\n" +
-                "        <soap:body use=\"literal\" namespace=\"http://test.se:8080/?#exceptionMethod\"/>\n" +
+                "        <soap:body use=\"literal\" namespace=\"http://test.se:8080/exceptionMethod\"/>\n" +
                 "      </wsdl:input>\n" +
                 "    </wsdl:operation>\n" +
                 "    <wsdl:operation name=\"specialReturnMethod\">\n" +
-                "      <soap:operation soapAction=\"http://test.se:8080/?#specialReturnMethod\"/>\n" +
+                "      <soap:operation soapAction=\"http://test.se:8080/specialReturnMethod\"/>\n" +
                 "      <wsdl:input>\n" +
-                "        <soap:body use=\"literal\" namespace=\"http://test.se:8080/?#specialReturnMethod\"/>\n" +
+                "        <soap:body use=\"literal\" namespace=\"http://test.se:8080/specialReturnMethod\"/>\n" +
                 "      </wsdl:input>\n" +
                 "      <wsdl:output>\n" +
-                "        <soap:body use=\"literal\" namespace=\"http://test.se:8080/?#specialReturnMethod\"/>\n" +
+                "        <soap:body use=\"literal\" namespace=\"http://test.se:8080/specialReturnMethod\"/>\n" +
                 "      </wsdl:output>\n" +
                 "    </wsdl:operation>\n" +
                 "    <wsdl:operation name=\"voidMethod\">\n" +
-                "      <soap:operation soapAction=\"http://test.se:8080/?#voidMethod\"/>\n" +
+                "      <soap:operation soapAction=\"http://test.se:8080/voidMethod\"/>\n" +
                 "      <wsdl:input>\n" +
-                "        <soap:body use=\"literal\" namespace=\"http://test.se:8080/?#voidMethod\"/>\n" +
+                "        <soap:body use=\"literal\" namespace=\"http://test.se:8080/voidMethod\"/>\n" +
                 "      </wsdl:input>\n" +
                 "    </wsdl:operation>\n" +
                 "  </wsdl:binding>\n" +

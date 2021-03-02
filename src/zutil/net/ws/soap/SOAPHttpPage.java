@@ -291,7 +291,7 @@ public class SOAPHttpPage implements HttpPage{
                 // generate response XML
                 if (outputParamDefs.size() > 0) {
                     Element response = responseRoot.addElement("");
-                    response.addNamespace("m", methodDef.getNamespace() );
+                    response.addNamespace("m", methodDef.getPath() );
                     response.setName("m:" + methodDef.getName() + "Response");
 
                     if (outputParams instanceof WSReturnObject) {

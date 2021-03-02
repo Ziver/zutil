@@ -28,7 +28,7 @@ import org.dom4j.Document;
 import org.dom4j.io.OutputFormat;
 import org.dom4j.io.XMLWriter;
 import zutil.net.ws.WSInterface;
-import zutil.net.ws.WSInterface.WSNamespace;
+import zutil.net.ws.WSInterface.WSPath;
 import zutil.net.ws.WSInterface.WSParamName;
 import zutil.net.ws.WSReturnObject;
 import zutil.net.ws.WebServiceDef;
@@ -85,7 +85,7 @@ public class SOAPTest {
     // ----------------------------------------------------
 
     @SuppressWarnings("unused")
-    @WSNamespace("http://test.se:8080/")
+    @WSPath("http://test.se:8080/")
     public static class MainSOAPClass implements WSInterface{
         public MainSOAPClass(){}
 

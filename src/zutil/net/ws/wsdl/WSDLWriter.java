@@ -107,8 +107,8 @@ public class WSDLWriter {
         definitions.addNamespace("http", "http://schemas.xmlsoap.org/wsdl/http/");
         definitions.addNamespace("xsd", "http://www.w3.org/2001/XMLSchema");
         definitions.addNamespace("soap-enc", "http://schemas.xmlsoap.org/soap/encoding/");
-        definitions.addNamespace("tns", ws.getNamespace() + "?type");
-        definitions.addAttribute("targetNamespace", ws.getNamespace());
+        definitions.addNamespace("tns", ws.getPath() + "/type");
+        definitions.addAttribute("targetNamespace", ws.getPath());
 
         generateType(definitions);
         generateMessages(definitions);
@@ -306,7 +306,7 @@ public class WSDLWriter {
         // definitions -> types
         Element typeE = definitions.addElement("wsdl:types");
         Element schema = typeE.addElement("xsd:schema");
-        schema.addAttribute("targetNamespace", ws.getNamespace() + "?type");
+        schema.addAttribute("targetNamespace", ws.getPath() + "/type");
 
         // empty type
         Element empty = schema.addElement("xsd:complexType");
@@ -316,7 +316,10 @@ public class WSDLWriter {
         for (int i=0; i<types.size(); i++) {
             Class<?> c = types.get(i);
 
+            // --------------------------------------------
             // Generate Array type
+            // --------------------------------------------
+
             if (c.isArray()) {
                 Class<?> ctmp = ClassUtil.getArrayClass(c);
 
@@ -338,7 +341,11 @@ public class WSDLWriter {
                 if (!types.contains(ctmp))
                     types.add(ctmp);
             }
+
+            // --------------------------------------------
             // Generate SOAPObject type
+            // --------------------------------------------
+
             else if (WSReturnObject.class.isAssignableFrom(c)) {
                 Element type = schema.addElement("xsd:complexType");
                 type.addAttribute("name", SOAPHttpPage.getSOAPClassName(c));

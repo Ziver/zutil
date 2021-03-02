@@ -25,7 +25,6 @@
 package zutil.net.ws;
 
 import zutil.net.ws.WSInterface.WSDocumentation;
-import zutil.net.ws.WSInterface.WSNamespace;
 import zutil.net.ws.WSInterface.WSPath;
 import zutil.net.ws.WSInterface.WSRequestType;
 
@@ -50,11 +49,11 @@ public class WSMethodDef {
     /**
      * A list of input parameters
      **/
-    private ArrayList<WSParameterDef> inputs;
+    private ArrayList<WSParameterDef> inputs = new ArrayList<>();
     /**
      * A List of return parameters of the method
      **/
-    private ArrayList<WSParameterDef> outputs;
+    private ArrayList<WSParameterDef> outputs = new ArrayList<>();
     /**
      * The object type of output object
      **/
@@ -62,7 +61,7 @@ public class WSMethodDef {
     /**
      * A List of exceptions that this method throws
      **/
-    private ArrayList<Class<?>> exceptions;
+    private ArrayList<Class<?>> exceptions = new ArrayList<>();
     /**
      * The real method that this class represent, can be null if its a remote method
      **/
@@ -72,9 +71,9 @@ public class WSMethodDef {
      **/
     private String doc;
     /**
-     * The namespace of the method
+     * The URL path of the method
      **/
-    private String namespace;
+    private String path;
     /**
      * The type of request required to execute the method
      **/
@@ -83,38 +82,34 @@ public class WSMethodDef {
      * The published name of the method
      **/
     private String name;
-    /**
-     * The endpoint location
-     **/
-    private String path;
 
 
     /**
-     * @param wsDef is the parent web service defining interface
-     * @param me    is a method in a class that implements WSInterface
+     * @param wsDef     is the parent web service defining interface
+     * @param method    is a method in a class that implements WSInterface
      */
-    protected WSMethodDef(WebServiceDef wsDef, Method me) {
-        if (!WSInterface.class.isAssignableFrom(me.getDeclaringClass()))
+    protected WSMethodDef(WebServiceDef wsDef, Method method) {
+        if (!WSInterface.class.isAssignableFrom(method.getDeclaringClass()))
             throw new ClassCastException("Declaring class does not implement WSInterface!");
 
         this.wsDef = wsDef;
-        this.method = me;
-        this.inputs = new ArrayList<>();
-        this.outputs = new ArrayList<>();
-        this.exceptions = new ArrayList<>();
+        this.method = method;
         this.name = method.getName();
 
         // Handle documentation and namespace
 
-        WSDocumentation docAnnotation = method.getAnnotation(WSDocumentation.class);
+        WSDocumentation docAnnotation = this.method.getAnnotation(WSDocumentation.class);
         if (docAnnotation != null)
             doc = docAnnotation.value();
 
-        WSNamespace namespaceAnnotation = method.getAnnotation(WSNamespace.class);
+        WSPath namespaceAnnotation = this.method.getAnnotation(WSPath.class);
         if (namespaceAnnotation != null)
-            namespace = namespaceAnnotation.value();
+            path = namespaceAnnotation.value();
         else
-            namespace = wsDef.getNamespace() + "?#" + name;
+            path = name;
+
+        if (path.startsWith("/"))
+            path = path.substring(1);
 
         // ------------------------------------------------
         // Handle inputs
@@ -137,7 +132,7 @@ public class WSMethodDef {
         // Handle outputs
         // ------------------------------------------------
 
-        this.outputClass = method.getReturnType();
+        this.outputClass = this.method.getReturnType();
         if (WSReturnObject.class.isAssignableFrom(outputClass)) {
             Field[] fields = outputClass.getFields();
 
@@ -150,8 +145,8 @@ public class WSMethodDef {
                 outputs.add(ret_param);
             }
         } else if (outputClass != void.class) {
-            WSInterface.WSReturnName returnNameAnnotation = method.getAnnotation(WSInterface.WSReturnName.class);
-            WSParameterDef ret_param = new WSParameterDef(this, method.getReturnType(), new Annotation[]{returnNameAnnotation});
+            WSInterface.WSReturnName returnNameAnnotation = this.method.getAnnotation(WSInterface.WSReturnName.class);
+            WSParameterDef ret_param = new WSParameterDef(this, this.method.getReturnType(), new Annotation[]{returnNameAnnotation});
 
             if (ret_param.getName() == null)
                 ret_param.setName("return");
@@ -163,13 +158,13 @@ public class WSMethodDef {
         // Handle Exceptions
         // ------------------------------------------------
 
-        Collections.addAll(exceptions, method.getExceptionTypes());
+        Collections.addAll(exceptions, this.method.getExceptionTypes());
 
         // ------------------------------------------------
         // Handle the request type
         // ------------------------------------------------
 
-        WSRequestType requestTypeAnnotation = method.getAnnotation(WSRequestType.class);
+        WSRequestType requestTypeAnnotation = this.method.getAnnotation(WSRequestType.class);
         if (requestTypeAnnotation != null) {
             this.requestType = requestTypeAnnotation.value();
         } else {
@@ -186,19 +181,6 @@ public class WSMethodDef {
             else
                 this.requestType = WSInterface.RequestType.GET;
         }
-
-        // ------------------------------------------------
-        // Handle endpoint path
-        // ------------------------------------------------
-
-        WSPath pathAnnotation = method.getAnnotation(WSPath.class);
-        if (pathAnnotation != null)
-            path = pathAnnotation.value();
-        else
-            path = this.name;
-
-        if (!path.startsWith("/"))
-            path = '/' + path;
     }
 
     /**
@@ -212,7 +194,7 @@ public class WSMethodDef {
      * @return the path to the WS method endpoint
      */
     public String getPath() {
-        return path;
+        return wsDef.getPath() + "/" + path;
     }
 
     /**
@@ -257,19 +239,12 @@ public class WSMethodDef {
         return requestType;
     }
 
-    /**
-     * @return the namespace or endpoint url of the method
-     */
-    public String getNamespace() {
-        return namespace;
-    }
-
 
     /**
      * Invokes a specified method
      *
-     * @param params a vector with arguments
-     * @param        obj the object the method will called on
+     * @param params    a vector with arguments
+     * @param obj       the object the method will called on
      */
     public Object invoke(Object obj, Object[] params) throws Exception {
         return this.method.invoke(obj, params);

@@ -38,24 +38,27 @@ import java.util.Set;
 public class WebServiceDef {
     /** This is the WSInterface class **/
     private Class<? extends WSInterface> intf;
-    /** Namespace of the service **/
-    private String namespace;
     /** Name of the web service **/
     private String name;
+    /** Path or namespace of the service **/
+    private String path = "";
     /** Human readable description of the service **/
     private String documentation = "";
     /** A map of methods in this Service **/
     private HashMap<String,WSMethodDef> methods = new HashMap<>();
 
 
-
     public WebServiceDef(Class<? extends WSInterface> intf){
         this.intf = intf;
         name = intf.getSimpleName();
 
-        WSInterface.WSNamespace namespaceAnnotation = intf.getAnnotation(WSInterface.WSNamespace.class);
-        if (namespaceAnnotation != null)
-            this.namespace = namespaceAnnotation.value();
+        WSInterface.WSPath pathAnnotation = intf.getAnnotation(WSInterface.WSPath.class);
+        if (pathAnnotation != null) {
+            this.path = pathAnnotation.value();
+
+            if (path.endsWith("/")) // remove last backslash
+                path = path.substring(0, path.length()-1);
+        }
 
         WSInterface.WSDocumentation documentationAnnotation = intf.getAnnotation(WSInterface.WSDocumentation.class);
         if (documentationAnnotation != null)
@@ -63,13 +66,13 @@ public class WebServiceDef {
 
         for(Method m : intf.getDeclaredMethods()){
             // Check for public methods
-            if ((m.getModifiers() & Modifier.PUBLIC) > 0 &&
-                    !m.isAnnotationPresent(WSInterface.WSIgnore.class)){
+            if ((m.getModifiers() & Modifier.PUBLIC) > 0 && !m.isAnnotationPresent(WSInterface.WSIgnore.class)){
                 WSMethodDef method = new WSMethodDef(this, m);
                 methods.put(method.getName(), method);
             }
         }
     }
+
 
     /**
      * @return the class that defines this web service
@@ -93,16 +96,16 @@ public class WebServiceDef {
     }
 
     /**
-     * @param 		name		is the name of the method
-     * @return					if there is a method by the given name
+     * @param name  is the name of the method
+     * @return if there is a method by the given name
      */
     public boolean hasMethod( String name ){
         return methods.containsKey( name );
     }
 
     /**
-     * @param 		name		is the name of the method
-     * @return					the method or null if there is no such method
+     * @param name  is the name of the method
+     * @return the method or null if there is no such method
      */
     public WSMethodDef getMethod( String name ){
         return methods.get( name );
@@ -125,8 +128,8 @@ public class WebServiceDef {
     /**
      * @return the namespace of this web service ( usually the URL of the service )
      */
-    public String getNamespace(){
-        return namespace;
+    public String getPath(){
+        return path;
     }
 
     public WSInterface newInstance() throws InstantiationException, IllegalAccessException {
