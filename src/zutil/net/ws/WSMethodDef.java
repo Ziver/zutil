@@ -108,8 +108,8 @@ public class WSMethodDef {
         else
             path = name;
 
-        if (path.startsWith("/"))
-            path = path.substring(1);
+        if (!path.startsWith("/"))
+            path = '/' + path;
 
         // ------------------------------------------------
         // Handle inputs
@@ -191,10 +191,17 @@ public class WSMethodDef {
     }
 
     /**
-     * @return the path to the WS method endpoint
+     * @return the relative path to the WS method endpoint
      */
     public String getPath() {
-        return wsDef.getPath() + "/" + path;
+        return path;
+    }
+
+    /**
+     * @return the path to the WS method endpoint
+     */
+    public String getAbsolutePath() {
+        return wsDef.getPath() + path;
     }
 
     /**

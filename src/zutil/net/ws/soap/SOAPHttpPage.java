@@ -291,7 +291,7 @@ public class SOAPHttpPage implements HttpPage{
                 // generate response XML
                 if (outputParamDefs.size() > 0) {
                     Element response = responseRoot.addElement("");
-                    response.addNamespace("m", methodDef.getPath() );
+                    response.addNamespace("m", methodDef.getAbsolutePath() );
                     response.setName("m:" + methodDef.getName() + "Response");
 
                     if (outputParams instanceof WSReturnObject) {
@@ -307,7 +307,7 @@ public class SOAPHttpPage implements HttpPage{
                 }
             }
             else {
-                throw new NoSuchMethodException("Unable to find method: "+e.getQName().getName()+"!");
+                throw new NoSuchMethodException("Unable to find method: " + e.getQName().getName() + "!");
             }
         }
     }

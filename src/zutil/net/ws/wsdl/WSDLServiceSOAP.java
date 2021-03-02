@@ -28,7 +28,7 @@ import org.dom4j.Element;
 import zutil.net.ws.WSMethodDef;
 
 /**
- * User: Ziver
+ * A SOAP service generator for WSDL specification
  */
 public class WSDLServiceSOAP extends WSDLService{
 
@@ -56,7 +56,7 @@ public class WSDLServiceSOAP extends WSDLService{
 
         // definitions -> binding -> operation -> soap:operation
         Element soap_operation = operation.addElement("soap:operation");
-        soap_operation.addAttribute("soapAction", method.getPath());
+        soap_operation.addAttribute("soapAction", method.getAbsolutePath());
 
         // ------------------------------------------------
         // Input
@@ -67,7 +67,7 @@ public class WSDLServiceSOAP extends WSDLService{
         // definitions -> binding -> operation -> input -> body
         Element input_body = input.addElement("soap:body");
         input_body.addAttribute("use", "literal");
-        input_body.addAttribute("namespace", method.getPath());
+        input_body.addAttribute("namespace", method.getAbsolutePath());
 
         // ------------------------------------------------
         // Output
@@ -79,7 +79,7 @@ public class WSDLServiceSOAP extends WSDLService{
             // definitions -> binding -> operation -> input -> body
             Element output_body = output.addElement("soap:body");
             output_body.addAttribute("use", "literal");
-            output_body.addAttribute("namespace", method.getPath());
+            output_body.addAttribute("namespace", method.getAbsolutePath());
         }
     }
 }
