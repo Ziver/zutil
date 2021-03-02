@@ -56,6 +56,10 @@ public class WSMethodDef {
      **/
     private ArrayList<WSParameterDef> outputs;
     /**
+     * The object type of output object
+     **/
+    private Class<?> outputClass;
+    /**
      * A List of exceptions that this method throws
      **/
     private ArrayList<Class<?>> exceptions;
@@ -112,68 +116,58 @@ public class WSMethodDef {
         else
             namespace = wsDef.getNamespace() + "?#" + name;
 
-        // Hnadle Exceptions
-
-        Collections.addAll(exceptions, method.getExceptionTypes());
-
-        // Handle input parameter names
+        // ------------------------------------------------
+        // Handle inputs
+        // ------------------------------------------------
 
         Annotation[][] paramAnnotation = method.getParameterAnnotations();
         Class<?>[] inputTypes = method.getParameterTypes();
 
         for (int i = 0; i < paramAnnotation.length; i++) {
-            WSParameterDef param = new WSParameterDef(this);
-            for (Annotation annotation : paramAnnotation[i]) {
-                if (annotation instanceof WSInterface.WSParamName) {
-                    WSInterface.WSParamName paramName = (WSInterface.WSParamName) annotation;
-                    param.setName(paramName.value());
-                    param.setOptional(paramName.optional());
-                }
-            }
-            param.setParamClass(inputTypes[i]);
-            // if no name was found then use default
+            WSParameterDef param = new WSParameterDef(this, inputTypes[i], paramAnnotation[i]);
+
+            // if no name was found then generate one
             if (param.getName() == null)
                 param.setName("args" + i);
 
             inputs.add(param);
         }
 
-        // Handle return parameter names
+        // ------------------------------------------------
+        // Handle outputs
+        // ------------------------------------------------
 
-        WSInterface.WSReturnName returnNameAnnotation = method.getAnnotation(WSInterface.WSReturnName.class);
-        if (WSReturnObject.class.isAssignableFrom(method.getReturnType())) {
-            Class<?> retClass = method.getReturnType();
-            Field[] fields = retClass.getFields();
+        this.outputClass = method.getReturnType();
+        if (WSReturnObject.class.isAssignableFrom(outputClass)) {
+            Field[] fields = outputClass.getFields();
 
             for (Field field : fields) {
-                WSParameterDef ret_param = new WSParameterDef(this);
+                WSParameterDef ret_param = new WSParameterDef(this, field.getType(), field.getAnnotations());
 
-                WSInterface.WSParamName paramNameAnnotation = field.getAnnotation(WSInterface.WSParamName.class);
-                if (paramNameAnnotation != null)
-                    ret_param.setName(paramNameAnnotation.value());
-                else
+                if (ret_param.getName() == null)
                     ret_param.setName(field.getName());
 
-                WSInterface.WSDocumentation documentationAnnotation = field.getAnnotation(WSInterface.WSDocumentation.class);
-                if (documentationAnnotation != null)
-                    ret_param.setDocumentation(documentationAnnotation.value());
-
-                ret_param.setParamClass(field.getType());
                 outputs.add(ret_param);
             }
-        } else if (method.getReturnType() != void.class) {
-            WSParameterDef ret_param = new WSParameterDef(this);
+        } else if (outputClass != void.class) {
+            WSInterface.WSReturnName returnNameAnnotation = method.getAnnotation(WSInterface.WSReturnName.class);
+            WSParameterDef ret_param = new WSParameterDef(this, method.getReturnType(), new Annotation[]{returnNameAnnotation});
 
-            if (returnNameAnnotation != null)
-                ret_param.setName(returnNameAnnotation.value());
-            else
+            if (ret_param.getName() == null)
                 ret_param.setName("return");
 
-            ret_param.setParamClass(method.getReturnType());
             outputs.add(ret_param);
         }
 
+        // ------------------------------------------------
+        // Handle Exceptions
+        // ------------------------------------------------
+
+        Collections.addAll(exceptions, method.getExceptionTypes());
+
+        // ------------------------------------------------
         // Handle the request type
+        // ------------------------------------------------
 
         WSRequestType requestTypeAnnotation = method.getAnnotation(WSRequestType.class);
         if (requestTypeAnnotation != null) {
@@ -193,7 +187,9 @@ public class WSMethodDef {
                 this.requestType = WSInterface.RequestType.GET;
         }
 
+        // ------------------------------------------------
         // Handle endpoint path
+        // ------------------------------------------------
 
         WSPath pathAnnotation = method.getAnnotation(WSPath.class);
         if (pathAnnotation != null)
@@ -238,6 +234,13 @@ public class WSMethodDef {
      */
     public List<WSParameterDef> getOutputs() {
         return outputs;
+    }
+
+    /**
+     * @return the class of the output object
+     */
+    public Class<?> getOutputClass() {
+        return outputClass;
     }
 
     /**

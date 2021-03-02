@@ -85,29 +85,6 @@ public class SOAPTest {
     // ----------------------------------------------------
 
     @SuppressWarnings("unused")
-    public static class SpecialReturnClass extends WSReturnObject{
-        @WSParamName("otherValue1")
-        public String param1 = "otherValue1";
-        @WSParamName("otherName2")
-        public String param2 = "otherValue2";
-        public byte[] b = new byte[]{0x12, 0x23};
-        public InnerClass inner = new InnerClass();
-    }
-
-    @SuppressWarnings("unused")
-    public static class InnerClass extends WSReturnObject{
-        public String innerClassParam1 = "innerClass1";
-        public String innerClassParam2 = "innerClass2";
-    }
-
-    @SuppressWarnings("unused")
-    public static class SimpleReturnClass extends WSReturnObject{
-        @WSParamName("otherParam1")
-        public String param1 = "param1";
-        public String param2 = "param2";
-    }
-
-    @SuppressWarnings("unused")
     @WSNamespace("http://test.se:8080/")
     public static class MainSOAPClass implements WSInterface{
         public MainSOAPClass(){}
@@ -156,5 +133,31 @@ public class SOAPTest {
         protected void protectedMethod(){ }
 
         private void privateMethod(){ }
+    }
+
+
+    @SuppressWarnings("unused")
+    public static class SpecialReturnClass extends WSReturnObject{
+        @WSParamName("otherValue1")
+        public String param1 = "otherValue1";
+        @WSParamName("otherName2")
+        public String param2 = "otherValue2";
+        public byte[] b = new byte[]{0x12, 0x23};
+        public InnerClass inner = new InnerClass();
+    }
+
+
+    @SuppressWarnings("unused")
+    public static class InnerClass extends WSReturnObject{
+        public String innerClassParam1 = "innerClass1";
+        public String innerClassParam2 = "innerClass2";
+    }
+
+
+    @SuppressWarnings("unused")
+    public static class SimpleReturnClass extends WSReturnObject{
+        @WSParamName("otherParam1")
+        public String param1 = "param1";
+        public String param2 = "param2";
     }
 }

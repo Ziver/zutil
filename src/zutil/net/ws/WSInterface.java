@@ -122,7 +122,7 @@ public interface WSInterface {
     }
 
     /**
-     * This method will be used in the header.
+     * This method will be used in the SOAP header.
      */
     @Retention(RetentionPolicy.RUNTIME)
     @Target(ElementType.METHOD)
@@ -146,7 +146,7 @@ public interface WSInterface {
     }
 
     /**
-     * Sets a specific path for the method overriding the auto generated path.
+     * Sets a specific URL path for the method overriding the auto generated path.
      */
     @Retention(RetentionPolicy.RUNTIME)
     @Target(ElementType.METHOD)

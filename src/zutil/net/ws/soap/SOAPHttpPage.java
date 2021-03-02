@@ -373,6 +373,7 @@ public class SOAPHttpPage implements HttpPage{
      */
     public static String getSOAPClassName(Class<?> c) {
         Class<?> cTmp = ClassUtil.getArrayClass(c);
+
         if (byte[].class.isAssignableFrom(c)) {
             return "base64Binary";
         } else if (WSReturnObject.class.isAssignableFrom(cTmp)) {

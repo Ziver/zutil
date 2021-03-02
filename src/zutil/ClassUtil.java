@@ -72,14 +72,14 @@ public class ClassUtil {
      * @return if the given class is a wrapper for a primitive
      */
     public static boolean isWrapper(Class<?> type){
-        return wrappers.contains( type );
+        return wrappers.contains(type);
     }
 
     /**
      * @return if the given class is a primitive including String
      */
     public static boolean isPrimitive(Class<?> type){
-        return primitives.contains( type );
+        return primitives.contains(type);
     }
 
     /**
@@ -184,13 +184,26 @@ public class ClassUtil {
         return null;
     }
 
+
     /**
      * @param c     a array class
      * @return the base class the array is based on, if the input is not an array then the input is returned.
      */
     public static Class<?> getArrayClass(Class<?> c) {
+        return getArrayClass(c, Integer.MAX_VALUE);
+    }
+
+    /**
+     * @param c     a array class
+     * @param depth the number of times the method should recurse into array. Value of zero will return the input value.
+     * @return the base class the array is based on, if the input is not an array then the input is returned.
+     */
+    public static Class<?> getArrayClass(Class<?> c, int depth) {
+        if (depth <= 0) // Stop recursion
+            return c;
+
         if (c != null && c.isArray()) {
-            return getArrayClass(c.getComponentType());
+            return getArrayClass(c.getComponentType(), depth-1);
         }
         return c;
     }

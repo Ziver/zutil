@@ -24,6 +24,8 @@
 
 package zutil.net.ws;
 
+import java.lang.annotation.Annotation;
+
 /**
  * This is a web service parameter definition class
  *
@@ -39,20 +41,34 @@ public class WSParameterDef {
     /** Developer documentation **/
     private String documentation;
     /** If this parameter is optional **/
-    private boolean optional;
+    private boolean optional = false;
 
 
-    protected WSParameterDef(WSMethodDef mDef){
+    protected WSParameterDef(WSMethodDef mDef, Class<?> paramClass, Annotation[] annotations){
         this.mDef = mDef;
-        this.optional = false;
+        this.paramClass = paramClass;
+
+        for (Annotation annotation : annotations) {
+            if (annotation == null)
+                continue;
+
+            if (annotation instanceof WSInterface.WSParamName) {
+                WSInterface.WSParamName paramNameAnnotation = (WSInterface.WSParamName) annotation;
+                this.name = paramNameAnnotation.value();
+                this.optional = paramNameAnnotation.optional();
+            } else if (annotation instanceof WSInterface.WSReturnName) {
+                WSInterface.WSReturnName returnAnnotation = (WSInterface.WSReturnName) annotation;
+                this.name = returnAnnotation.value();
+            } else if (annotation instanceof WSInterface.WSDocumentation) {
+                WSInterface.WSDocumentation documentationAnnotation = (WSInterface.WSDocumentation) annotation;
+                this.documentation = documentationAnnotation.value();
+            }
+        }
     }
 
 
     public Class<?> getParamClass() {
         return paramClass;
-    }
-    protected void setParamClass(Class<?> paramClass) {
-        this.paramClass = paramClass;
     }
 
     public String getName() {

@@ -141,13 +141,9 @@ public class UPnPContentDirectory implements UPnPService, HttpPage, WSInterface 
         return ret;
     }
     public class BrowseRetObj extends WSReturnObject{
-        @WSParamName("Result")
         public String Result;
-        @WSParamName("NumberReturned")
         public int NumberReturned;
-        @WSParamName("TotalMatches")
         public int TotalMatches;
-        @WSParamName("UpdateID")
         public int UpdateID;
     }
 
