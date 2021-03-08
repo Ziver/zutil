@@ -2,7 +2,7 @@
 // Jenkinsfile (Pipeline Script)
 
 mavenConfiguration = [
-    jdk: "jdk8",
+    jdk: "jdk-11",
     maven: "m3.5",
     mavenLocalRepo: ".repository",
     mavenSettingsConfig: "639c4560-87b7-4502-bb3d-2c44845cd2b5"
