@@ -122,13 +122,23 @@ public class ClassUtil {
         }
     }
 
+
     /**
-     * @param   field       is the field to return the generics from
-     * @return the generics assigned to a specific field or a empty list
+     * @param field     is the field to fetch the generics classes from.
+     * @return the generics class assigned to the specific field or a empty list if there are no generics.
      */
     public static Class<?>[] getGenericClasses(Field field){
         return getGenericClasses(field.getGenericType());
     }
+
+    /**
+     * @param c         is the class to fetch the generics classes from.
+     * @return the generics class assigned to the specific class or a empty list if there are no generics.
+     */
+    public static Class<?>[] getGenericClasses(Class<?> c) {
+        return getGenericClasses(c.getGenericSuperclass());
+    }
+
     /**
      * Traverses the class hierarchy and searches for the given super class or interface
      * and returns the assigned generic types.
