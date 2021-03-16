@@ -73,12 +73,8 @@ public class RESTClientInvocationHandler implements InvocationHandler {
         HttpURL url = generateRESTRequest(methodDef, args);
 
         String requestType = "GET";
-        switch (methodDef.getRequestType()) {
-            case GET:    requestType = "GET"; break;
-            case PUT:    requestType = "PUT"; break;
-            case POST:   requestType = "POST"; break;
-            case DELETE: requestType = "DELETE"; break;
-        }
+        if (methodDef.getRequestType() != null)
+            requestType = methodDef.getRequestType().toString();
 
         // Send request
 
