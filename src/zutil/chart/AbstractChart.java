@@ -43,15 +43,15 @@ public abstract class AbstractChart extends JPanel{
 
 
 
-    protected void paintComponent(Graphics g){
+    protected void paintComponent(Graphics g) {
         Graphics2D g2 = (Graphics2D) g;
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
                 RenderingHints.VALUE_ANTIALIAS_ON);
         g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION,
                 RenderingHints.VALUE_INTERPOLATION_BILINEAR);
 
-        Rectangle bound = drawAxis( g2, new Rectangle(0, 0, getWidth(), getHeight()));
-        drawChart( g2, bound );
+        Rectangle bound = drawAxis(g2, new Rectangle(0, 0, getWidth(), getHeight()));
+        drawChart(g2, bound);
     }
 
 
@@ -79,7 +79,7 @@ public abstract class AbstractChart extends JPanel{
      *
      * @param 		data		is the data to draw
      */
-    public void setChartData(ChartData data){
+    public void setChartData(ChartData data) {
         this.data = data;
     }
 
@@ -91,7 +91,7 @@ public abstract class AbstractChart extends JPanel{
      * @param   bound   is the drawing bounds
      * @return a x pixel coordinate
      */
-    static protected double getXCoordinate(double x, double scale, Rectangle bound){
+    static protected double getXCoordinate(double x, double scale, Rectangle bound) {
         return bound.x + x * scale;
     }
 
@@ -103,15 +103,15 @@ public abstract class AbstractChart extends JPanel{
      * @param   bound   is the drawing bounds
      * @return a y pixel coordinate
      */
-    static protected double getYCoordinate(double y, double scale, Rectangle bound){
-        return bound.y + bound.height - ( y * scale );
+    static protected double getYCoordinate(double y, double scale, Rectangle bound) {
+        return bound.y + bound.height - (y * scale);
     }
 
-    static protected double getXScale(ChartData data, Rectangle bound){
+    static protected double getXScale(ChartData data, Rectangle bound) {
         return (double) bound.width / (Math.abs(data.getMaxX()) + Math.abs(data.getMinX()));
     }
 
-    static protected double getYScale(ChartData data, Rectangle bound){
+    static protected double getYScale(ChartData data, Rectangle bound) {
         return (double) bound.height / (Math.abs(data.getMaxY()) + Math.abs(data.getMinY()));
     }
 }

@@ -44,17 +44,17 @@ public abstract class OSAbstractionLayer {
     // Variables
     private static OSAbstractionLayer instance;
 
-    public static OSAbstractionLayer getInstance(){
-        if(instance == null)
+    public static OSAbstractionLayer getInstance() {
+        if (instance == null)
             instance = getAbstractionLayer();
         return instance;
     }
 
-    private static OSAbstractionLayer getAbstractionLayer(){
+    private static OSAbstractionLayer getAbstractionLayer() {
         String os = System.getProperty("os.name");
-        if     (os.contains("Linux"))   return new OsalLinuxImpl();
-        else if(os.contains("Windows")) return new OsalWindowsImpl();
-        else if(os.contains("Mac"))     return new OsalMacOSImpl();
+        if      (os.contains("Linux"))   return new OsalLinuxImpl();
+        else if (os.contains("Windows")) return new OsalWindowsImpl();
+        else if (os.contains("Mac"))     return new OsalMacOSImpl();
         else                            return new OsalDummyImpl();
     }
 
@@ -66,7 +66,7 @@ public abstract class OSAbstractionLayer {
      */
     protected static String getFirstLineFromExec(String cmd) {
         String[] tmp = exec(cmd);
-        if(tmp.length > 1)
+        if (tmp.length > 1)
             return tmp[0];
         return null;
     }

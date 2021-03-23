@@ -42,10 +42,10 @@ public class DepthFirstSearch {
      * @param stop Stop Node
      * @return A list with the path
      */
-    public LinkedList<PathNode> find(PathNode start, PathNode stop){
+    public LinkedList<PathNode> find(PathNode start, PathNode stop) {
         visited.clear();
         PathNode node = dfs(start, stop);
-        return node.traversTo( start );
+        return node.traversTo(start);
     }
 
     /**
@@ -53,17 +53,17 @@ public class DepthFirstSearch {
      * @param node The node to search from
      * @return The stop PathNode if a path was found else null
      */
-    private PathNode dfs(PathNode node, PathNode stop){
-        visited.add( node );
-        if(node.equals(stop)){
+    private PathNode dfs(PathNode node, PathNode stop) {
+        visited.add(node);
+        if (node.equals(stop)) {
             return node;
         }
 
-        for(PathNode next : node.getNeighbors()){
-            if(!visited.contains( next ) && node.getNeighborCost(next) > 0){
+        for (PathNode next : node.getNeighbors()) {
+            if (!visited.contains(next) && node.getNeighborCost(next) > 0) {
                 next.setParentNeighbor(node);
                 PathNode tmp = dfs(next, stop);
-                if(tmp != null){
+                if (tmp != null) {
                     return tmp;
                 }
             }

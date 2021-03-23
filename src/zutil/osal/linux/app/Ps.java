@@ -31,8 +31,8 @@ import zutil.osal.OSAbstractionLayer;
  */
 public class Ps {
 
-    public static boolean isRunning(int pid){
-        String[] output = OSAbstractionLayer.exec("ps -p "+pid);
+    public static boolean isRunning(int pid) {
+        String[] output = OSAbstractionLayer.exec("ps -p " +pid);
         return output.length > 1;
     }
 }

@@ -42,7 +42,7 @@ public abstract class WizardPage extends JPanel{
     /** if this is the last page in the wizard */
     private boolean lastPage = false;
 
-    public WizardPage(){
+    public WizardPage() {
         components = new LinkedList<>();
     }
 
@@ -53,22 +53,22 @@ public abstract class WizardPage extends JPanel{
      *
      * @param c is the component
      */
-    public void registerComponent(Component c){
-        components.add( c );
+    public void registerComponent(Component c) {
+        components.add(c);
     }
 
     /**
      * Sets if this is the last page in the wizard,
      * Should be called as early as possible.
      */
-    public void setFinalPage(boolean b){
+    public void setFinalPage(boolean b) {
         lastPage = b;
     }
 
     /**
      * @return is this is the last page in the wizard
      */
-    public boolean isFinalPage(){
+    public boolean isFinalPage() {
         return lastPage;
     }
 
@@ -92,7 +92,7 @@ public abstract class WizardPage extends JPanel{
      * @param values is the values until now
      * @return a ValidateFail object or null if the validation passed
      */
-    public ValidationFail validate(HashMap<String, Object> values){
+    public ValidationFail validate(HashMap<String, Object> values) {
         return null;
     }
 
@@ -102,9 +102,9 @@ public abstract class WizardPage extends JPanel{
      *
      * @param listener is the object that handles the save process
      */
-    public void registerValues(WizardActionHandler listener){
-        for(Component c : components){
-            listener.registerValue( c );
+    public void registerValues(WizardActionHandler listener) {
+        for (Component c : components) {
+            listener.registerValue(c);
         }
     }
 }
@@ -125,7 +125,7 @@ class ValidationFail{
      *
      * @param msg is a message to the user about the fault
      */
-    public ValidationFail(String msg){
+    public ValidationFail(String msg) {
         this(null, msg);
     }
 
@@ -135,16 +135,16 @@ class ValidationFail{
      * @param c is the component that failed the validation
      * @param msg is a message to the user about the fault
      */
-    public ValidationFail(JComponent c, String msg){
+    public ValidationFail(JComponent c, String msg) {
         this.source = c;
         this.msg = msg;
     }
 
-    public JComponent getSource(){
+    public JComponent getSource() {
         return source;
     }
 
-    public String getMessage(){
+    public String getMessage() {
         return msg;
     }
 }

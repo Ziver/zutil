@@ -27,21 +27,21 @@ package zutil.parser;
 
 public class Base64Encoder {
 
-    public static String encode( byte[] data ){
-        return write( data );
+    public static String encode(byte[] data) {
+        return write(data);
     }
-    public static String encode( String data ){
-        return write( data.getBytes() );
+    public static String encode(String data) {
+        return write(data.getBytes());
     }
 
-    private static String write( byte[] data ){
+    private static String write(byte[] data) {
         char[] buffer = new char[getBufferLength(data.length)];
         int buffIndex = 0;
 
         int rest = 0; // how much rest we have
-        for( int i=0; i<data.length; i++){
+        for (int i=0; i<data.length; i++) {
             byte b = 0;
-            switch(rest){
+            switch(rest) {
                 case 0:
                     b  = (byte)((data[i] >> 2)    & 0b0011_1111);
                     break;
@@ -63,15 +63,15 @@ public class Base64Encoder {
             buffer[buffIndex++] = getChar(b);
         }
         // Any rest left?
-        if(rest == 2)
+        if (rest == 2)
             buffer[buffIndex++] = getChar((byte) ((data[data.length-1] << 4) & 0b0011_0000));
-        else if(rest == 4)
+        else if (rest == 4)
             buffer[buffIndex++] = getChar((byte) ((data[data.length-1] << 2) & 0b0011_1100));
-        else if(rest == 6)
+        else if (rest == 6)
             buffer[buffIndex++] = getChar((byte) (data[data.length-1]        & 0b0011_1111));
 
         // Add padding
-        for(; buffIndex<buffer.length; ++buffIndex)
+        for (; buffIndex<buffer.length; ++buffIndex)
             buffer[buffIndex] = '=';
 
         return new String(buffer);
@@ -80,15 +80,15 @@ public class Base64Encoder {
     private static int getBufferLength(int length) {
         int buffLength = (int) Math.ceil(length*8/6.0);
         // Padding
-        if(buffLength%4 != 0)
+        if (buffLength%4 != 0)
             buffLength += 4 - buffLength%4;
         return buffLength;
     }
 
 
     @SuppressWarnings("PointlessBitwiseExpression")
-    private static char getChar(byte b ){
-        switch(b){
+    private static char getChar(byte b) {
+        switch(b) {
             case (byte)( 0 & 0xff): return 'A';
             case (byte)( 1 & 0xff): return 'B';
             case (byte)( 2 & 0xff): return 'C';

@@ -59,7 +59,7 @@ public abstract class ThreadedTCPNetworkServer extends Thread{
      *
      * @param 	port 		The port that the server should listen to
      */
-    public ThreadedTCPNetworkServer(int port){
+    public ThreadedTCPNetworkServer(int port) {
         this(port, null, null);
     }
     /**
@@ -69,7 +69,7 @@ public abstract class ThreadedTCPNetworkServer extends Thread{
      * @param 	keyStore 	    If this is not null then the server will use SSL connection with this keyStore file path
      * @param 	keyStorePass 	If this is not null then the server will use a SSL connection with the given certificate
      */
-    public ThreadedTCPNetworkServer(int port, File keyStore, String keyStorePass){
+    public ThreadedTCPNetworkServer(int port, File keyStore, String keyStorePass) {
         this.port = port;
         executor = Executors.newCachedThreadPool();
         this.keyStorePass = keyStorePass;
@@ -77,25 +77,25 @@ public abstract class ThreadedTCPNetworkServer extends Thread{
     }
 
 
-    public void run(){
+    public void run() {
         ServerSocket serverSocket = null;
-        try{
-            if(keyStorePass != null && keyStore != null){
+        try {
+            if (keyStorePass != null && keyStore != null) {
                 registerCertificate(keyStore, keyStorePass);
-                serverSocket = initSSL( port );
+                serverSocket = initSSL(port);
             }
-            else{
-                serverSocket = new ServerSocket( port );
+            else {
+                serverSocket = new ServerSocket(port);
             }
-            logger.info("Listening for TCP Connections on port: "+port);
+            logger.info("Listening for TCP Connections on port: " +port);
 
-            while(true){
+            while (true) {
                 Socket connectionSocket = serverSocket.accept();
-                ThreadedTCPNetworkServerThread thread = getThreadInstance( connectionSocket );
-                if( thread!=null ) {
+                ThreadedTCPNetworkServerThread thread = getThreadInstance(connectionSocket);
+
+                if (thread != null) {
                     executor.execute(thread);
-                }
-                else{
+                } else {
                     logger.severe("Unable to instantiate ThreadedTCPNetworkServerThread, closing connection!");
                     connectionSocket.close();
                 }
@@ -103,10 +103,10 @@ public abstract class ThreadedTCPNetworkServer extends Thread{
         } catch(Exception e) {
             logger.log(Level.SEVERE, null, e);
         } finally {
-            if( serverSocket!=null ){
-                try{
+            if (serverSocket != null) {
+                try {
                     serverSocket.close();
-                }catch(IOException e){ logger.log(Level.SEVERE, null, e); }
+                } catch(IOException e) { logger.log(Level.SEVERE, null, e); }
             }
         }
     }
@@ -119,7 +119,7 @@ public abstract class ThreadedTCPNetworkServer extends Thread{
      * @param 		s 		is an new connection to an host
      * @return 				a new instance of an thread or null
      */
-    protected abstract ThreadedTCPNetworkServerThread getThreadInstance( Socket s ) throws IOException;
+    protected abstract ThreadedTCPNetworkServerThread getThreadInstance(Socket s) throws IOException;
 
     /**
      * Initiates a SSLServerSocket
@@ -148,7 +148,7 @@ public abstract class ThreadedTCPNetworkServer extends Thread{
      * Stops the server and interrupts its internal thread.
      * This is a permanent action that will not be able to recover from
      */
-    public void close(){
+    public void close() {
         this.interrupt();
     }
 }

@@ -39,7 +39,7 @@ public class OpenAPIWriter {
     }
 
 
-    public void addServer(String url, String description){
+    public void addServer(String url, String description) {
         servers.add(new ServerData(url, description));
         cache = null;
     }

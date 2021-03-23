@@ -58,7 +58,7 @@ public class FileSearcher implements Iterable<FileSearcher.FileSearchItem>{
     private boolean searchCompressedFiles = false;
 
 
-    public FileSearcher(File root){
+    public FileSearcher(File root) {
         this.root = root;
     }
 
@@ -66,7 +66,7 @@ public class FileSearcher implements Iterable<FileSearcher.FileSearchItem>{
     /**
      * @param 	file	Sets the exact file name to search for (includes extension)
      */
-    public void setFileName(String file){
+    public void setFileName(String file) {
         fileName = file;
     }
 
@@ -75,14 +75,14 @@ public class FileSearcher implements Iterable<FileSearcher.FileSearchItem>{
      *
      * @param ext is a String containing the file extension
      */
-    public void setExtension(String ext){
+    public void setExtension(String ext) {
         extension = ext;
     }
 
     /**
      * Defines if the search should go into sub-folders
      */
-    public void setRecursive(boolean recursive){
+    public void setRecursive(boolean recursive) {
         this.recursive = recursive;
     }
 
@@ -90,26 +90,26 @@ public class FileSearcher implements Iterable<FileSearcher.FileSearchItem>{
      * Sets how deep into folders the search should go
      * (Recursion needs to be enabled for this attribute to be used)
      */
-    //public void setDepth(int depth){
+    //public void setDepth(int depth) {
     //	this.depth = depth;
     //}
 
     /**
      * Sets if the searcher should match to files.
      */
-    public void searchFiles(boolean searchFiles){
+    public void searchFiles(boolean searchFiles) {
         this.searchFiles = searchFiles;
     }
     /**
      * Sets if the searcher should match to folders.
      */
-    public void searchFolders(boolean searchFolders){
+    public void searchFolders(boolean searchFolders) {
         this.searchFolders = searchFolders;
     }
     /**
      * Sets if the searcher should go into compressed files.
      */
-    public void searchCompressedFiles(boolean searchCompressedFiles){
+    public void searchCompressedFiles(boolean searchCompressedFiles) {
         this.searchCompressedFiles = searchCompressedFiles;
     }
 
@@ -125,7 +125,7 @@ public class FileSearcher implements Iterable<FileSearcher.FileSearchItem>{
         private int index;
         private FileSearchItem nextItem;
 
-        public FileSearchIterator(){
+        public FileSearchIterator() {
             fileList = new ArrayList<>();
             index = 0;
 
@@ -149,30 +149,30 @@ public class FileSearcher implements Iterable<FileSearcher.FileSearchItem>{
             FileSearchItem ret = nextItem;
 
             // Find the next file
-            for(; index <fileList.size(); index++){
+            for (; index <fileList.size(); index++) {
                 FileSearchItem file = fileList.get(index);
-                
+
                 // ----------------------------------------------
                 // Folders
                 // ----------------------------------------------
-                
-                if(recursive && file.isDirectory()){
+
+                if (recursive && file.isDirectory()) {
                     addFiles(file, file.listFiles());
-                    if(searchFolders) {
-                        if(fileName == null) // Match all folders
+                    if (searchFolders) {
+                        if (fileName == null) // Match all folders
                             break;
-                        else if(file.getName().equalsIgnoreCase(fileName))
+                        else if (file.getName().equalsIgnoreCase(fileName))
                             break;
                     }
                 }
-                
+
                 // ----------------------------------------------
                 // Compressed Files
                 // ----------------------------------------------
-                
-                else if(searchCompressedFiles && file.isFile() &&
+
+                else if (searchCompressedFiles && file.isFile() &&
                         compressedFileExtensions.contains(
-                                FileUtil.getFileExtension(file.getName()).toLowerCase())){
+                                FileUtil.getFileExtension(file.getName()).toLowerCase())) {
                     try {
                         /* TODO: Implement recursive file search
                         ZipInputStream zipInputStream = new ZipInputStream(new FileInputStream(file.getPath()));
@@ -189,7 +189,7 @@ public class FileSearcher implements Iterable<FileSearcher.FileSearchItem>{
 
                         ZipFile zipFile = new ZipFile(file.getPath());
                         Enumeration<? extends ZipEntry> e = zipFile.entries();
-                        while(e.hasMoreElements()){
+                        while (e.hasMoreElements()) {
                             ZipEntry entry = e.nextElement();
                             fileList.add(new FileSearchZipItem(file.getPath(), entry));
                         }
@@ -198,24 +198,24 @@ public class FileSearcher implements Iterable<FileSearcher.FileSearchItem>{
                         logger.log(Level.WARNING, "Unable to traverse file: " + file.getPath(), e);
                     }
                 }
-                
+
                 // ----------------------------------------------
                 // Regular Files
                 // ----------------------------------------------
-                
-                else if(searchFiles && file.isFile()){
-                    if(extension == null && fileName == null) // Should we match all files
+
+                else if (searchFiles && file.isFile()) {
+                    if (extension == null && fileName == null) // Should we match all files
                         break;
-                    else if(extension != null &&
+                    else if (extension != null &&
                             FileUtil.getFileExtension(file.getName()).equalsIgnoreCase(extension))
                         break;
-                    else if(fileName != null &&
+                    else if (fileName != null &&
                             file.getName().equalsIgnoreCase(fileName))
                         break;
                 }
             }
 
-            if(index <fileList.size()) {
+            if (index <fileList.size()) {
                 nextItem = fileList.get(index);
                 ++index;
             }
@@ -225,8 +225,8 @@ public class FileSearcher implements Iterable<FileSearcher.FileSearchItem>{
             return ret;
         }
 
-        private void addFiles(FileSearchItem root, String[] list){
-            if(root instanceof FileSearchFileItem) {
+        private void addFiles(FileSearchItem root, String[] list) {
+            if (root instanceof FileSearchFileItem) {
                 for (String file : list) {
                     fileList.add(new FileSearchFileItem(
                             new File(((FileSearchFileItem)root).file, file)));
@@ -258,7 +258,7 @@ public class FileSearcher implements Iterable<FileSearcher.FileSearchItem>{
     protected static class FileSearchFileItem implements FileSearchItem{
         private File file;
 
-        protected FileSearchFileItem(File file){
+        protected FileSearchFileItem(File file) {
             this.file = file;
         }
 
@@ -281,14 +281,14 @@ public class FileSearcher implements Iterable<FileSearcher.FileSearchItem>{
         private ZipEntry entry;
         private String fileName;
 
-        protected FileSearchZipItem(String file, ZipEntry entry){
+        protected FileSearchZipItem(String file, ZipEntry entry) {
             this.zipFile = file;
             this.entry = entry;
             this.fileName = new File(entry.getName()).getName();
         }
 
         public String getName()                           { return fileName; }
-        public String getPath()                           { return "zip://"+zipFile+":"+entry.getName(); }
+        public String getPath()                           { return "zip://" + zipFile + ":" + entry.getName(); }
 
         public boolean isCompressed()                     { return true; }
         public boolean isFile()                           { return !entry.isDirectory(); }

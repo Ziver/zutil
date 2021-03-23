@@ -91,7 +91,7 @@ public abstract class DBBeanObjectDSO<T> extends DBBean{
 
 
 
-    public T getObject(){
+    public T getObject() {
         return cachedObj;
     }
 
@@ -100,8 +100,8 @@ public abstract class DBBeanObjectDSO<T> extends DBBean{
      *
      * @param obj is the object to set or null to reset the DSO
      */
-    public void setObject(T obj){
-        if(obj != null) {
+    public void setObject(T obj) {
+        if (obj != null) {
             type = obj.getClass().getName();
             config = null;
             cachedObj = obj;
@@ -112,15 +112,15 @@ public abstract class DBBeanObjectDSO<T> extends DBBean{
         }
     }
 
-    public String getObjectClass(){
+    public String getObjectClass() {
         return type;
     }
 
-    public void setObjectClass(Class<? extends T> clazz){
+    public void setObjectClass(Class<? extends T> clazz) {
         setObjectClass(clazz.getName());
     }
 
-    public void setObjectClass(String clazz){
+    public void setObjectClass(String clazz) {
         if (this.type == null || !this.type.equals(type)) {
             // TODO: check if clazz is subclass of T
             setObject(null);
@@ -129,15 +129,15 @@ public abstract class DBBeanObjectDSO<T> extends DBBean{
         }
     }
 
-    public Configurator<T> getObjectConfigurator(){
+    public Configurator<T> getObjectConfigurator() {
         return new Configurator<>(cachedObj);
     }
 
 
-    public String toString(){
+    public String toString() {
         Object obj = getObject();
         if (obj != null)
             return obj.toString();
-        return "null (DSO: "+ super.toString() +")";
+        return "null (DSO: " + super.toString() + ")";
     }
 }

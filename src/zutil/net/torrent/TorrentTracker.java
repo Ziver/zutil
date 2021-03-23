@@ -45,7 +45,7 @@ public class TorrentTracker {
     // TODO: incomplete
     public void update() throws IOException {
         HttpClient request = new HttpClient(HttpClient.HttpRequestType.GET);
-        request.setURL( trackerURL );
+        request.setURL(trackerURL);
         HttpHeader response = request.send();
     }
 }

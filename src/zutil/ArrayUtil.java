@@ -34,7 +34,7 @@ public class ArrayUtil {
     /**
      * Converts a List with Integer objects to a primary type int array
      */
-    public static int[] toIntArray(List<Integer> list){
+    public static int[] toIntArray(List<Integer> list) {
         if (list == null)
             return null;
         int[] arr = new int[list.size()];

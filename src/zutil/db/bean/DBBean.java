@@ -116,7 +116,7 @@ public abstract class DBBean {
     protected ReentrantLock readLock;
 
 
-    protected DBBean(){
+    protected DBBean() {
         DBBeanConfig.getBeanConfig(this.getClass());
         saveLock = new ReentrantLock();
         readLock = new ReentrantLock();
@@ -221,7 +221,7 @@ public abstract class DBBean {
                 DBBeanCache.add(this);
 
                 // Save sub beans, after we get the parent beans id
-                if (recursive){
+                if (recursive) {
                     for (DBBeanSubBeanConfig subBeanField : config.getSubBeans()) {
                         if (this.id == null)
                             throw new SQLException("Unknown parent bean id");
@@ -242,7 +242,7 @@ public abstract class DBBean {
                                 // Save links in link table
                                 String sql;
                                 if (!subBeanField.isStandaloneLinkTable()) // Sub Bean and link table is the same table
-                                    sql = "UPDATE "+ subBeanField.getLinkTableName() +" SET "+ subBeanField.getParentIdColumnName() +"=? WHERE "+ subIdCol +"=?";
+                                    sql = "UPDATE " + subBeanField.getLinkTableName() + " SET " + subBeanField.getParentIdColumnName() + "=? WHERE " + subIdCol + "=?";
                                 else
                                     sql = "INSERT INTO " + subBeanField.getLinkTableName() + " (" + subBeanField.getParentIdColumnName() + ", " + subIdCol + ") SELECT ?,? " +
                                             "WHERE NOT EXISTS(SELECT 1 FROM " + subBeanField.getLinkTableName() + " WHERE " + subBeanField.getParentIdColumnName() + "=? AND " + subIdCol + "=?);";
@@ -292,8 +292,8 @@ public abstract class DBBean {
      */
     public void delete(DBConnection db, boolean recursive) throws SQLException{
         Class<? extends DBBean> c = this.getClass();
-        DBBeanConfig config = DBBeanConfig.getBeanConfig( c );
-        if( this.getId() == null )
+        DBBeanConfig config = DBBeanConfig.getBeanConfig(c);
+        if (this.getId() == null)
             throw new NullPointerException("ID field is null! (Has the bean been saved?)");
 
         // Delete sub beans
@@ -303,10 +303,10 @@ public abstract class DBBean {
                 for (DBBean subObj : list) {
                     // Delete links
                     if (subBeanField.isStandaloneLinkTable()) {
-                        String sql = "DELETE FROM "+subBeanField.getLinkTableName()+" WHERE "+subBeanField.getParentIdColumnName()+"=?";
-                        logger.finest("Delete link, query: "+sql);
-                        PreparedStatement stmt = db.getPreparedStatement( sql );
-                        stmt.setLong(1, this.getId() );
+                        String sql = "DELETE FROM " + subBeanField.getLinkTableName() + " WHERE " + subBeanField.getParentIdColumnName() + "=?";
+                        logger.finest("Delete link, query: " + sql);
+                        PreparedStatement stmt = db.getPreparedStatement(sql);
+                        stmt.setLong(1, this.getId());
                         DBConnection.exec(stmt);
                     }
                     // Delete sub beans
@@ -317,10 +317,10 @@ public abstract class DBBean {
         }
 
         // Delete this bean from DB
-        String sql = "DELETE FROM "+config.getTableName()+" WHERE "+config.getIdColumnName()+"=?";
-        logger.finest("Delete Bean("+c.getName()+", id: "+this.getId()+") query: "+sql);
-        PreparedStatement stmt = db.getPreparedStatement( sql );
-        stmt.setLong(1, this.getId() );
+        String sql = "DELETE FROM " + config.getTableName() + " WHERE " + config.getIdColumnName() + "=?";
+        logger.finest("Delete Bean(" + c.getName() + ", id: " + this.getId() + ") query: " + sql);
+        PreparedStatement stmt = db.getPreparedStatement(sql);
+        stmt.setLong(1, this.getId());
         DBConnection.exec(stmt);
 
         // Clear cache and reset id
@@ -339,13 +339,13 @@ public abstract class DBBean {
      */
     public static <T extends DBBean> List<T> load(DBConnection db, Class<T> c) throws SQLException {
         // Initiate a BeanConfig if there is non
-        DBBeanConfig config = DBBeanConfig.getBeanConfig( c );
+        DBBeanConfig config = DBBeanConfig.getBeanConfig(c);
         // Generate query
-        String sql = "SELECT * FROM "+config.getTableName();
-        logger.finest("Load all Beans("+c.getName()+") query: "+sql);
-        PreparedStatement stmt = db.getPreparedStatement( sql );
+        String sql = "SELECT * FROM " +config.getTableName();
+        logger.finest("Load all Beans(" + c.getName() + ") query: " + sql);
+        PreparedStatement stmt = db.getPreparedStatement(sql);
         // Run query
-        return DBConnection.exec(stmt, DBBeanSQLResultHandler.createList(c, db) );
+        return DBConnection.exec(stmt, DBBeanSQLResultHandler.createList(c, db));
     }
 
     /**
@@ -360,14 +360,14 @@ public abstract class DBBean {
      */
     public static <T extends DBBean> T load(DBConnection db, Class<T> c, long id) throws SQLException {
         // Initiate a BeanConfig if there is non
-        DBBeanConfig config = DBBeanConfig.getBeanConfig( c );
+        DBBeanConfig config = DBBeanConfig.getBeanConfig(c);
         // Generate query
-        String sql = "SELECT * FROM "+config.getTableName()+" WHERE "+config.getIdColumnName()+"=? LIMIT 1";
-        logger.finest("Load Bean("+c.getName()+", id: "+id+") query: "+sql);
-        PreparedStatement stmt = db.getPreparedStatement( sql );
-        stmt.setObject(1, id );
+        String sql = "SELECT * FROM " + config.getTableName() + " WHERE " + config.getIdColumnName() + "=? LIMIT 1";
+        logger.finest("Load Bean(" + c.getName() + ", id: " + id + ") query: " + sql);
+        PreparedStatement stmt = db.getPreparedStatement(sql);
+        stmt.setObject(1, id);
         // Run query
-        T obj = DBConnection.exec(stmt, DBBeanSQLResultHandler.create(c, db) );
+        T obj = DBConnection.exec(stmt, DBBeanSQLResultHandler.create(c, db));
         return obj;
     }
 
@@ -391,7 +391,7 @@ public abstract class DBBean {
         query.append(classToDBType(Long.class));
         query.append(" PRIMARY KEY AUTO_INCREMENT, ");
 
-        for( DBBeanFieldConfig field : config.getFields() ){
+        for (DBBeanFieldConfig field : config.getFields()) {
             query.append(" ");
             query.append(field.getName());
             query.append(classToDBType(c));
@@ -400,33 +400,33 @@ public abstract class DBBean {
         query.delete(query.length()-2, query.length());
         query.append(")");
 
-        logger.finest("Create Bean("+c.getName()+") query: " + db.toString());
+        logger.finest("Create Bean(" + c.getName() + ") query: " + db.toString());
         PreparedStatement stmt = db.getPreparedStatement(db.toString());
 
         // Execute the SQL
         DBConnection.exec(stmt);
     }
 
-    private static String classToDBType(Class<?> c){
-        if(     c == String.class) 		return "CLOB"; // TEXT
-        else if(c == Short.class) 		return "SMALLINT";
-        else if(c == short.class) 		return "SMALLINT";
-        else if(c == Integer.class) 	return "INTEGER";
-        else if(c == int.class) 		return "INTEGER";
-        else if(c == BigInteger.class)	return "BIGINT";
-        else if(c == Long.class) 		return "DECIMAL";
-        else if(c == long.class) 		return "DECIMAL";
-        else if(c == Float.class) 		return "DOUBLE";
-        else if(c == float.class) 		return "DOUBLE";
-        else if(c == Double.class) 		return "DOUBLE";
-        else if(c == double.class) 		return "DOUBLE";
-        else if(c == BigDecimal.class) 	return "DECIMAL";
-        else if(c == Boolean.class) 	return "BOOLEAN";
-        else if(c == boolean.class) 	return "BOOLEAN";
-        else if(c == Byte.class) 		return "BINARY(1)";
-        else if(c == byte.class) 		return "BINARY(1)";
-        else if(c == Timestamp.class)	return "DATETIME";
-        else if(DBBean.class.isAssignableFrom(c))
+    private static String classToDBType(Class<?> c) {
+        if (     c == String.class) 	return "CLOB"; // TEXT
+        else if (c == Short.class) 		return "SMALLINT";
+        else if (c == short.class) 		return "SMALLINT";
+        else if (c == Integer.class) 	return "INTEGER";
+        else if (c == int.class) 		return "INTEGER";
+        else if (c == BigInteger.class)	return "BIGINT";
+        else if (c == Long.class) 		return "DECIMAL";
+        else if (c == long.class) 		return "DECIMAL";
+        else if (c == Float.class) 		return "DOUBLE";
+        else if (c == float.class) 		return "DOUBLE";
+        else if (c == Double.class) 	return "DOUBLE";
+        else if (c == double.class) 	return "DOUBLE";
+        else if (c == BigDecimal.class) return "DECIMAL";
+        else if (c == Boolean.class) 	return "BOOLEAN";
+        else if (c == boolean.class) 	return "BOOLEAN";
+        else if (c == Byte.class) 		return "BINARY(1)";
+        else if (c == byte.class) 		return "BINARY(1)";
+        else if (c == Timestamp.class)	return "DATETIME";
+        else if (DBBean.class.isAssignableFrom(c))
             return classToDBType(Long.class);
         return null;
     }
@@ -434,11 +434,11 @@ public abstract class DBBean {
     /**
      * @return the bean id or null if the bean has not bean saved yet
      */
-    public final Long getId(){
+    public final Long getId() {
         return id;
     }
 
-    final void setId(Long id){
+    final void setId(Long id) {
         this.id = id;
     }
 
@@ -449,5 +449,5 @@ public abstract class DBBean {
     /**
      * Will be called whenever the bean has been updated from the database.
      */
-    protected void postUpdateAction(){}
+    protected void postUpdateAction() {}
 }

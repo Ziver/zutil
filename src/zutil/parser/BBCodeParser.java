@@ -41,7 +41,7 @@ public class BBCodeParser {
     /**
      * Initiates a instance of the parser with the most used BBCodes.
      */
-    public BBCodeParser(){
+    public BBCodeParser() {
         bbcodes = new HashMap<>();
         addBBCode("b", "<b>%2</b>");
         addBBCode("i", "<i>%2</i>");
@@ -63,7 +63,7 @@ public class BBCodeParser {
      * @param 	html 		is the corresponding HTML e.g. {@code <a href='%1'>%2</a>}
      * 						where the %x corresponds to BBCode like this: [url=%1]%2[/url]
      */
-    public void addBBCode(String bbcode, String html){
+    public void addBBCode(String bbcode, String html) {
         bbcodes.put(bbcode, html);
     }
 
@@ -72,7 +72,7 @@ public class BBCodeParser {
      *
      * @param 	bbcode 		is the bbcode to remove
      */
-    public void removeBBCode(String bbcode){
+    public void removeBBCode(String bbcode) {
         bbcodes.remove(bbcode);
     }
 
@@ -82,7 +82,7 @@ public class BBCodeParser {
      * @param 	text 		is a String with BBCode
      * @return a String where all BBCode has been replaced by HTML
      */
-    public String read(String text){
+    public String read(String text) {
         StringBuilder out = new StringBuilder();
         StringBuilder t = new StringBuilder(text);
 
@@ -91,40 +91,40 @@ public class BBCodeParser {
         return out.toString();
     }
 
-    private void read(MutableInt index, StringBuilder text, StringBuilder out, String rootBBC){
+    private void read(MutableInt index, StringBuilder text, StringBuilder out, String rootBBC) {
         StringBuilder bbcode = null;
         boolean closeTag = false;
-        while(index.i < text.length()){
+        while (index.i < text.length()) {
             char c = text.charAt(index.i);
-            if(c == '['){
+            if (c == '[') {
                 bbcode = new StringBuilder();
             }
-            else if(bbcode!=null && c == '/'){
+            else if (bbcode != null && c == '/') {
                 closeTag = true;
             }
-            else if(bbcode!=null){
+            else if (bbcode != null) {
                 String param = "";
-                switch(c){
+                switch(c) {
                     case '=':
                         param = parseParam(index, text);
                     case ']':
                         String bbcode_cache = bbcode.toString();
-                        if(closeTag){
-                            if(!rootBBC.equals(bbcode_cache)){
+                        if (closeTag) {
+                            if (!rootBBC.equals(bbcode_cache)) {
                                 out.append("[/").append(bbcode).append("]");
                             }
                             return;
                         }
                         String value = parseValue(index, text, bbcode_cache);
-                        if(bbcodes.containsKey( bbcode_cache )){
-                            String html = bbcodes.get( bbcode_cache );
+                        if (bbcodes.containsKey(bbcode_cache)) {
+                            String html = bbcodes.get(bbcode_cache);
                             html = html.replaceAll("%1", param);
                             html = html.replaceAll("%2", value);
                             out.append(html);
                         }
-                        else{
+                        else {
                             out.append('[').append(bbcode);
-                            if(!param.isEmpty())
+                            if (!param.isEmpty())
                                 out.append('=').append(param);
                             out.append(']').append(value);
                             out.append("[/").append(bbcode).append("]");
@@ -141,9 +141,9 @@ public class BBCodeParser {
 
             index.i++;
         }
-        if(bbcode!=null)
-            if(closeTag)out.append("[/").append(bbcode);
-            else 		out.append('[').append(bbcode);
+        if (bbcode != null)
+            if (closeTag) out.append("[/").append(bbcode);
+            else 		 out.append('[').append(bbcode);
     }
 
     /**
@@ -152,13 +152,13 @@ public class BBCodeParser {
      * @param	text	is the text to parse from
      * @return only the parameter string
      */
-    private String parseParam(MutableInt index, StringBuilder text){
+    private String parseParam(MutableInt index, StringBuilder text) {
         StringBuilder param = new StringBuilder();
-        while(index.i < text.length()){
+        while (index.i < text.length()) {
             char c = text.charAt(index.i);
-            if(c == ']')
+            if (c == ']')
                 break;
-            else if(c != '=')
+            else if (c != '=')
                 param.append(c);
             index.i++;
         }
@@ -170,15 +170,15 @@ public class BBCodeParser {
      *
      * @param	text	is the text to parse the value from
      */
-    private String parseValue(MutableInt index, StringBuilder text, String bbcode){
+    private String parseValue(MutableInt index, StringBuilder text, String bbcode) {
         StringBuilder value = new StringBuilder();
-        while(index.i < text.length()){
+        while (index.i < text.length()) {
             char c = text.charAt(index.i);
-            if(c == '['){
+            if (c == '[') {
                 read(index, text, value, bbcode);
                 break;
             }
-            else if(c != ']')
+            else if (c != ']')
                 value.append(c);
             index.i++;
         }

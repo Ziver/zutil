@@ -52,11 +52,11 @@ public class BinaryFieldData {
     private BinaryFieldSerializer serializer;
 
 
-    protected static List<BinaryFieldData> getStructFieldList(Class<? extends BinaryStruct> clazz){
+    protected static List<BinaryFieldData> getStructFieldList(Class<? extends BinaryStruct> clazz) {
         if (!cache.containsKey(clazz)) {
             try {
                 ArrayList<BinaryFieldData> list = new ArrayList<>();
-                for(Class<?> cc = clazz; cc != Object.class ;cc = cc.getSuperclass()) { // iterate through all super classes
+                for (Class<?> cc = clazz; cc != Object.class; cc = cc.getSuperclass()) { // iterate through all super classes
                     for (Field field : cc.getDeclaredFields()) {
                         if (field.isAnnotationPresent(BinaryField.class) ||
                                 field.isAnnotationPresent(CustomBinaryField.class) ||
@@ -86,7 +86,7 @@ public class BinaryFieldData {
         this.lengthField = null;
         this.lengthMultiplier = 1;
         this.serializer = null;
-        if (field.isAnnotationPresent(CustomBinaryField.class)){
+        if (field.isAnnotationPresent(CustomBinaryField.class)) {
             CustomBinaryField fieldData = field.getAnnotation(CustomBinaryField.class);
             this.index = fieldData.index();
             this.serializer = fieldData.serializer().newInstance();
@@ -97,7 +97,7 @@ public class BinaryFieldData {
             this.lengthMultiplier = fieldData.multiplier();
             this.lengthField = new BinaryFieldData(
                     field.getDeclaringClass().getDeclaredField(fieldData.lengthField()));
-            if ( !ClassUtil.isNumber(lengthField.getType()))
+            if (!ClassUtil.isNumber(lengthField.getType()))
                 throw new IllegalArgumentException("Length variable for VariableLengthBinaryStruct needs to be of a number type.");
         }
         else {
@@ -108,14 +108,14 @@ public class BinaryFieldData {
     }
 
 
-    public String getName(){
+    public String getName() {
         return field.getName();
     }
-    public Class<?> getType(){
+    public Class<?> getType() {
         return field.getType();
     }
 
-    public void setByteValue(Object obj, byte[] data){
+    public void setByteValue(Object obj, byte[] data) {
         try {
             field.setAccessible(true);
             if (field.getType() == Boolean.class || field.getType() == boolean.class)
@@ -127,21 +127,21 @@ public class BinaryFieldData {
             else if (field.getType() == String.class)
                 field.set(obj, new String(ByteUtil.getReverseByteOrder(data), StandardCharsets.ISO_8859_1));
             else
-                throw new UnsupportedOperationException("Unsupported BinaryStruct field class: "+ field.getType());
-        } catch (IllegalAccessException e){
+                throw new UnsupportedOperationException("Unsupported BinaryStruct field class: " + field.getType());
+        } catch (IllegalAccessException e) {
             e.printStackTrace();
         }
     }
-    public void setValue(Object obj, Object value){
+    public void setValue(Object obj, Object value) {
         try {
             field.setAccessible(true);
             field.set(obj, value);
-        } catch (IllegalAccessException e){
+        } catch (IllegalAccessException e) {
             e.printStackTrace();
         }
     }
 
-    public byte[] getByteValue(Object obj){
+    public byte[] getByteValue(Object obj) {
         try {
             field.setAccessible(true);
             if (field.getType() == Boolean.class || field.getType() == boolean.class)
@@ -162,13 +162,13 @@ public class BinaryFieldData {
                                 ((String)(field.get(obj))).getBytes(StandardCharsets.ISO_8859_1),
                                 getBitLength(obj)));
             else
-                throw new UnsupportedOperationException("Unsupported BinaryStruct field type: "+ getType());
-        } catch (IllegalAccessException e){
+                throw new UnsupportedOperationException("Unsupported BinaryStruct field type: " + getType());
+        } catch (IllegalAccessException e) {
             e.printStackTrace();
         }
         return null;
     }
-    public Object getValue(Object obj){
+    public Object getValue(Object obj) {
         try {
             field.setAccessible(true);
             return field.get(obj);
@@ -179,24 +179,24 @@ public class BinaryFieldData {
     }
 
 
-    public int getBitLength(Object obj){
-        if(lengthField != null)
+    public int getBitLength(Object obj) {
+        if (lengthField != null)
             return (int) lengthField.getValue(obj) * lengthMultiplier;
         return length;
     }
 
-    public BinaryFieldSerializer getSerializer(){
+    public BinaryFieldSerializer getSerializer() {
         return serializer;
     }
 
 
     @Override
-    public String toString(){
+    public String toString() {
         return field.getDeclaringClass().getSimpleName() + "::" + field.getName() +
                 " (" +
                 (lengthField != null ?
-                    "LengthField: " + lengthField +", LengthMultiplier: "+lengthMultiplier :
-                    length+" bits") +
+                    "LengthField: " + lengthField + ", LengthMultiplier: " + lengthMultiplier :
+                    length + " bits") +
                 (serializer != null ?
                     ", Serializer: " + serializer.getClass().getName() : "") +
                 ")";

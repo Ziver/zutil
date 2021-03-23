@@ -69,7 +69,7 @@ public class ThreadedUDPNetwork extends Thread{
         this.type = UDPType.UNICAST;
         this.port = port;
 
-        socket = new DatagramSocket( port );
+        socket = new DatagramSocket(port);
     }
 
     /**
@@ -79,27 +79,27 @@ public class ThreadedUDPNetwork extends Thread{
      * @param	multicastAddr	is the multicast address that the server will listen on
      * @throws  IOException     if there is any issue opening the connection
      */
-    public ThreadedUDPNetwork(String multicastAddr, int port ) throws IOException{
+    public ThreadedUDPNetwork(String multicastAddr, int port) throws IOException{
         this.type = UDPType.MULTICAST;
         this.port = port;
 
         // init udp socket
-        MulticastSocket msocket = new MulticastSocket( port );
-        InetAddress group = InetAddress.getByName( multicastAddr );
-        msocket.joinGroup( group );
+        MulticastSocket msocket = new MulticastSocket(port);
+        InetAddress group = InetAddress.getByName(multicastAddr);
+        msocket.joinGroup(group);
 
         socket = msocket;
     }
 
 
-    public void run(){
-        try{
-            while(true){
+    public void run() {
+        try {
+            while (true) {
                 byte[] buf = new byte[BUFFER_SIZE];
                 DatagramPacket packet = new DatagramPacket(buf, buf.length);
-                socket.receive( packet );
-                if( thread!=null )
-                    thread.receivedPacket( packet, this );
+                socket.receive(packet);
+                if (thread != null)
+                    thread.receivedPacket(packet, this);
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -129,7 +129,7 @@ public class ThreadedUDPNetwork extends Thread{
      * Stops the server and interrupts its internal thread.
      * This is a permanent action that will not be able to recover from
      */
-    public void close(){
+    public void close() {
         this.interrupt();
         socket.close();
     }

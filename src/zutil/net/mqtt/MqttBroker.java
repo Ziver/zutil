@@ -131,7 +131,7 @@ public class MqttBroker extends ThreadedTCPNetworkServer {
         if (listener == null)
             return;
 
-        for (String topic : subscriptionListeners.keySet()){
+        for (String topic : subscriptionListeners.keySet()) {
             unsubscribe(topic, listener);
         }
     }
@@ -148,7 +148,7 @@ public class MqttBroker extends ThreadedTCPNetworkServer {
 
         List<MqttSubscriptionListener> topicSubscriptions = subscriptionListeners.get(topic);
 
-        if (topicSubscriptions.remove(listener)){
+        if (topicSubscriptions.remove(listener)) {
             logger.finer("Subscriber unsubscribed from topic (" + topic + "), subscriber count: " + topicSubscriptions.size());
 
             if (topicSubscriptions.isEmpty()) {

@@ -43,7 +43,7 @@ public class InetScanner {
     private boolean canceled;
 
 
-    public void setListener(InetScanListener listener){
+    public void setListener(InetScanListener listener) {
         this.listener = listener;
     }
 
@@ -53,7 +53,7 @@ public class InetScanner {
      *
      * @param   ip      the network ip address
      */
-    public synchronized void scan(InetAddress ip){
+    public synchronized void scan(InetAddress ip) {
         canceled = false;
         String netAddr = ip.getHostAddress().substring(0, ip.getHostAddress().lastIndexOf('.')+1);
 
@@ -76,7 +76,7 @@ public class InetScanner {
     /**
      * Cancels the ongoing ip scan
      */
-    public void cancel(){
+    public void cancel() {
         canceled = true;
     }
 
@@ -84,7 +84,7 @@ public class InetScanner {
     /**
      * Will check if the given IP is reachable (Pingable)
      */
-    public static boolean isReachable(String host){
+    public static boolean isReachable(String host) {
         String[] output = OSAbstractionLayer.exec(platformPingCmd(host));
 
         for (String line : output) {
@@ -108,18 +108,18 @@ public class InetScanner {
     }
 
 
-    private static String platformPingCmd(String ip){
-        switch (OSAbstractionLayer.getInstance().getOSType()){
+    private static String platformPingCmd(String ip) {
+        switch (OSAbstractionLayer.getInstance().getOSType()) {
             case Windows:
-                return "ping -n 1 -w "+ TIMEOUT_SEC*1000 +" " + ip;
+                return "ping -n 1 -w " + (TIMEOUT_SEC*1000) + " " + ip;
             case Linux:
             case MacOS:
-                return "ping -c 1 -W "+ TIMEOUT_SEC +" " + ip;
+                return "ping -c 1 -W " + TIMEOUT_SEC + " " + ip;
             default:
                 return null;
         }
     }
-    private static boolean platformPingCheck(String line){
+    private static boolean platformPingCheck(String line) {
         return line.contains("TTL=") || line.contains("ttl=");
     }
 

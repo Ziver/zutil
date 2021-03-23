@@ -93,7 +93,7 @@ public abstract class NioNetwork implements Runnable {
      *
      * @param   worker  the worker that should handle incoming messages
      */
-    public void setDefaultWorker(Worker worker){
+    public void setDefaultWorker(Worker worker) {
         this.worker = worker;
     }
 
@@ -102,7 +102,7 @@ public abstract class NioNetwork implements Runnable {
      * Connect to a remote Server.
      */
     protected void connect(SocketAddress address) throws IOException {
-        logger.fine("Connecting to: "+address);
+        logger.fine("Connecting to: " +address);
         // Create a non-blocking socket channel
         SocketChannel socketChannel = SocketChannel.open();
         socketChannel.socket().setReuseAddress(true);
@@ -128,7 +128,7 @@ public abstract class NioNetwork implements Runnable {
      * @param   address the target address where the message should be sent
      * @param   data    the data to send
      */
-    public void send(SocketAddress address, byte[] data){
+    public void send(SocketAddress address, byte[] data) {
         logger.finest("Sending Queue...");
         SocketChannel socket = getSocketChannel(address);
 
@@ -231,13 +231,13 @@ public abstract class NioNetwork implements Runnable {
 
         // adds the client to the clients list
         registerSocketChannel(socketChannel);
-        logger.fine("New Connection("+socketChannel.getRemoteAddress()+")!!! Count: "+clients.size());
+        logger.fine("New Connection(" + socketChannel.getRemoteAddress() + ")!!! Count: " + clients.size());
     }
 
     /**
      * Finnish an ongoing remote connection establishment procedure
      */
-    private void establishConnection(SelectionKey key){
+    private void establishConnection(SelectionKey key) {
         SocketChannel socketChannel = (SocketChannel) key.channel();
 
         try {
@@ -248,7 +248,7 @@ public abstract class NioNetwork implements Runnable {
             key.interestOps(SelectionKey.OP_WRITE);
 
             registerSocketChannel(socketChannel);
-            logger.fine("Connection established("+socketChannel.getRemoteAddress()+")");
+            logger.fine("Connection established(" + socketChannel.getRemoteAddress() + ")");
         } catch (IOException e) {
             // Cancel the channel's registration with our selector
             e.printStackTrace();
@@ -265,7 +265,7 @@ public abstract class NioNetwork implements Runnable {
 
         synchronized (pendingWriteData) {
             List<ByteBuffer> queue = pendingWriteData.get(socketChannel);
-            if(queue == null){
+            if (queue == null) {
                 queue = new ArrayList<>();
                 pendingWriteData.put(socketChannel, queue);
             }
@@ -310,7 +310,7 @@ public abstract class NioNetwork implements Runnable {
             socketChannel.close();
             clients.remove(remoteAdr);
             pendingWriteData.remove(socketChannel);
-            logger.fine("Connection forcibly closed("+remoteAdr+")! Remaining connections: "+clients.size());
+            logger.fine("Connection forcibly closed(" + remoteAdr + ")! Remaining connections: " + clients.size());
             throw new IOException("Remote forcibly closed the connection");
         }
 
@@ -321,7 +321,7 @@ public abstract class NioNetwork implements Runnable {
             key.cancel();
             clients.remove(remoteAdr);
             pendingWriteData.remove(socketChannel);
-            logger.fine("Connection Closed("+remoteAdr+")! Remaining connections: "+clients.size());
+            logger.fine("Connection Closed(" + remoteAdr + ")! Remaining connections: " + clients.size());
             throw new IOException("Remote closed the connection");
         }
 
@@ -329,7 +329,7 @@ public abstract class NioNetwork implements Runnable {
         //byte[] rspByteData = new byte[numRead];
         //System.arraycopy(readBuffer.array(), 0, rspByteData, 0, numRead);
 
-        try{
+        try {
             Object rspData = Converter.toObject(readBuffer.array());
 
             // Hand the data off to our worker thread
@@ -339,14 +339,14 @@ public abstract class NioNetwork implements Runnable {
             } else {
                 logger.fine("No worker set, message unhandled!");
             }
-        }catch(Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
 
 
-    private ClientData registerSocketChannel(SocketChannel socket){
+    private ClientData registerSocketChannel(SocketChannel socket) {
         InetSocketAddress remoteAdr = (InetSocketAddress) socket.socket().getRemoteSocketAddress();
         if (!clients.containsKey(remoteAdr)) {
             ClientData clientData = new ClientData(socket);
@@ -354,7 +354,7 @@ public abstract class NioNetwork implements Runnable {
         }
         return clients.get(remoteAdr);
     }
-    private SocketChannel getSocketChannel(SocketAddress address){
+    private SocketChannel getSocketChannel(SocketAddress address) {
         return clients.get(address).getSocketChannel();
     }
 
@@ -377,7 +377,7 @@ public abstract class NioNetwork implements Runnable {
      * Close all connections
      */
     public void close() throws IOException{
-        if(serverChannel != null){
+        if (serverChannel != null) {
             serverChannel.close();
             serverChannel.keyFor(selector).cancel();
         }

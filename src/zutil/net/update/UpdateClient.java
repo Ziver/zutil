@@ -65,7 +65,7 @@ public class UpdateClient{
         this.path = path;
     }
 
-    public void setProgressListener(ProgressListener<UpdateClient,FileInfo> p){
+    public void setProgressListener(ProgressListener<UpdateClient,FileInfo> p) {
         progress = p;
     }
 
@@ -73,12 +73,12 @@ public class UpdateClient{
      * Updates the files
      */
     public void update() throws IOException{
-        try{
-            ObjectOutputStream out = new ObjectOutputStream( socket.getOutputStream());
-            ObjectInputStream  in  = new ObjectInputStream ( socket.getInputStream() );
+        try {
+            ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
+            ObjectInputStream  in  = new ObjectInputStream (socket.getInputStream());
 
             // send client file list
-            out.writeObject( fileList );
+            out.writeObject(fileList);
             out.flush();
             // get update list
             FileListMessage updateList = (FileListMessage) in.readObject();
@@ -87,12 +87,12 @@ public class UpdateClient{
             // receive file updates
             File tmpPath = FileUtil.find(path);
             totalReceived = 0;
-            for(FileInfo info : updateList.getFileList() ){
+            for (FileInfo info : updateList.getFileList()) {
                 // reading new file data
-                File file = new File( tmpPath, info.getPath() );
-                logger.fine("Updating file: "+file);
-                if( !file.getParentFile().exists() && !file.getParentFile().mkdirs() ){
-                    throw new IOException("Unable to create folder: "+file.getParentFile());
+                File file = new File(tmpPath, info.getPath());
+                logger.fine("Updating file: " +file);
+                if (!file.getParentFile().exists() && !file.getParentFile().mkdirs()) {
+                    throw new IOException("Unable to create folder: " +file.getParentFile());
                 }
                 File tmpFile = File.createTempFile(file.getName(), ".tmp", tmpPath);
                 tmpFile.deleteOnExit();
@@ -105,30 +105,30 @@ public class UpdateClient{
                 long time = System.currentTimeMillis();
                 long timeTotalReceived = 0;
 
-                while( bytesReceived < info.getSize() ) {
+                while (bytesReceived < info.getSize()) {
                     byteRead = in.read(buffer);
                     fileOut.write(buffer, 0, byteRead);
                     bytesReceived += byteRead;
 
-                    if(time+1000 < System.currentTimeMillis()){
+                    if (time+1000 < System.currentTimeMillis()) {
                         time = System.currentTimeMillis();
                         speed = (int)(totalReceived - timeTotalReceived);
                         timeTotalReceived = totalReceived;
                     }
 
                     totalReceived += byteRead;
-                    if(progress != null) progress.progressUpdate(this, info, ((double)totalReceived/updateList.getTotalSize())*100);
+                    if (progress != null) progress.progressUpdate(this, info, ((double)totalReceived/updateList.getTotalSize())*100);
                 }
                 fileOut.close();
                 speed = 0;
 
                 // delete old file and replace whit new
                 file.delete();
-                if( !tmpFile.renameTo(file) ){
-                    throw new IOException("Can not move downloaded file: "+tmpFile.getAbsolutePath()+" to: "+file);
+                if (!tmpFile.renameTo(file)) {
+                    throw new IOException("Can not move downloaded file: " + tmpFile.getAbsolutePath() + " to: " + file);
                 }
             }
-        }catch(ClassNotFoundException e){
+        } catch (ClassNotFoundException e) {
             logger.log(Level.SEVERE, null, e);
         }
 
@@ -140,7 +140,7 @@ public class UpdateClient{
      *
      * @return The speed in bytes/s
      */
-    public long getSpeed(){
+    public long getSpeed() {
         return speed;
     }
 
@@ -149,7 +149,7 @@ public class UpdateClient{
      *
      * @return a long that represents bytes
      */
-    public long getTotalReceived(){
+    public long getTotalReceived() {
         return totalReceived;
     }
 
@@ -158,7 +158,7 @@ public class UpdateClient{
      *
      * @return a long that represents bytes
      */
-    public long getTotalSize(){
+    public long getTotalSize() {
         return expectedSize;
     }
 

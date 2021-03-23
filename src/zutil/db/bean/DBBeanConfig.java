@@ -50,27 +50,27 @@ class DBBeanConfig{
     private ArrayList<DBBeanSubBeanConfig> subBeanFields = new ArrayList<>();
 
 
-    private DBBeanConfig(){ }
+    private DBBeanConfig() { }
 
 
 
     /**
      * @return the configuration object for the specified class
      */
-    public static DBBeanConfig getBeanConfig(Class<? extends DBBean> c){
-        if( !beanConfigs.containsKey( c.getName() ) )
-            initBeanConfig( c );
-        return beanConfigs.get( c.getName() );
+    public static DBBeanConfig getBeanConfig(Class<? extends DBBean> c) {
+        if (!beanConfigs.containsKey(c.getName()))
+            initBeanConfig(c);
+        return beanConfigs.get(c.getName());
     }
 
     /**
      * Caches the fields
      */
-    private static void initBeanConfig(Class<? extends DBBean> c){
+    private static void initBeanConfig(Class<? extends DBBean> c) {
         DBBeanConfig config = new DBBeanConfig();
         // Find the table name
         DBBean.DBTable tableAnn = c.getAnnotation(DBBean.DBTable.class);
-        if( tableAnn != null ){
+        if (tableAnn != null) {
             config.tableName = tableAnn.value();
             config.idColumnName = tableAnn.idColumn();
         } else {
@@ -79,14 +79,14 @@ class DBBeanConfig{
         }
 
         // Add the fields in the bean and all the super classes fields
-        for(Class<?> cc = c; cc != DBBean.class ;cc = cc.getSuperclass()){
+        for (Class<?> cc = c; cc != DBBean.class; cc = cc.getSuperclass()) {
             Field[] fields = cc.getDeclaredFields();
-            for( Field field : fields ){
+            for (Field field : fields) {
                 int mod = field.getModifiers();
-                if( !Modifier.isTransient( mod ) &&
-                        !Modifier.isFinal( mod ) &&
-                        !Modifier.isStatic( mod ) &&
-                        !config.fields.contains( field )){
+                if (!Modifier.isTransient(mod) &&
+                        !Modifier.isFinal(mod) &&
+                        !Modifier.isStatic(mod) &&
+                        !config.fields.contains(field)) {
                     if (List.class.isAssignableFrom(field.getType()) &&
                             field.getAnnotation(DBBean.DBLinkTable.class) != null)
                         config.subBeanFields.add(new DBBeanSubBeanConfig(field));
@@ -94,7 +94,7 @@ class DBBeanConfig{
                         config.fields.add(new DBBeanFieldConfig(field));
                 }
             }
-            if( tableAnn == null || !tableAnn.superBean() )
+            if (tableAnn == null || !tableAnn.superBean())
                 break;
         }
 
@@ -102,19 +102,19 @@ class DBBeanConfig{
     }
 
 
-    public String getTableName(){
+    public String getTableName() {
         return tableName;
     }
 
-    public String getIdColumnName(){
+    public String getIdColumnName() {
         return idColumnName;
     }
 
-    public List<DBBeanFieldConfig> getFields(){
+    public List<DBBeanFieldConfig> getFields() {
         return fields;
     }
 
-    public List<DBBeanSubBeanConfig> getSubBeans(){
+    public List<DBBeanSubBeanConfig> getSubBeans() {
         return subBeanFields;
     }
 
@@ -123,31 +123,31 @@ class DBBeanConfig{
         private Field field;
         private String fieldName;
 
-        private DBBeanFieldConfig(Field field){
+        private DBBeanFieldConfig(Field field) {
             this.field = field;
-            if( !Modifier.isPublic( field.getModifiers()))
+            if (!Modifier.isPublic(field.getModifiers()))
                 field.setAccessible(true);
 
             DBBean.DBColumn colAnnotation = field.getAnnotation(DBBean.DBColumn.class);
-            if(colAnnotation != null)
+            if (colAnnotation != null)
                 fieldName = colAnnotation.value();
             else
                 fieldName = field.getName();
         }
 
 
-        public String getName(){
+        public String getName() {
             return fieldName;
         }
 
-        public Class<?> getType(){
+        public Class<?> getType() {
             return field.getType();
         }
 
         public Object getValue(Object obj) {
             try {
                 return field.get(obj);
-            } catch (Exception e){
+            } catch (Exception e) {
                 e.printStackTrace();
             }
             return null;
@@ -175,7 +175,7 @@ class DBBeanConfig{
                     else
                         field.set(obj, fieldValue);
                 }
-            } catch (Exception e){
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         }
@@ -188,7 +188,7 @@ class DBBeanConfig{
         private DBBeanConfig subBeanConfig;
         private String parentIdCol;
 
-        private DBBeanSubBeanConfig(Field field){
+        private DBBeanSubBeanConfig(Field field) {
             super(field);
 
             DBBean.DBLinkTable linkAnnotation = field.getAnnotation(DBBean.DBLinkTable.class);
@@ -203,7 +203,7 @@ class DBBeanConfig{
             return linkTableName;
         }
 
-        public boolean isStandaloneLinkTable(){
+        public boolean isStandaloneLinkTable() {
             return !linkTableName.equals(subBeanConfig.tableName);
         }
 

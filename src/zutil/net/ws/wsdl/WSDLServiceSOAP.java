@@ -32,7 +32,7 @@ import zutil.net.ws.WSMethodDef;
  */
 public class WSDLServiceSOAP extends WSDLService{
 
-    public WSDLServiceSOAP(String url){
+    public WSDLServiceSOAP(String url) {
         super(url);
     }
 
@@ -73,7 +73,7 @@ public class WSDLServiceSOAP extends WSDLService{
         // Output
         // ------------------------------------------------
 
-        if(!method.getOutputs().isEmpty()){
+        if (!method.getOutputs().isEmpty()) {
             // definitions -> binding -> operation -> output
             Element output = operation.addElement("wsdl:output");
             // definitions -> binding -> operation -> input -> body

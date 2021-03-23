@@ -50,7 +50,7 @@ public class JImagePanel extends JPanel {
     /** If the aspect ratio is to be kept */
     private boolean keep_aspect = true;
 
-    public JImagePanel(){}
+    public JImagePanel() {}
 
     /**
      * Creates a new instance of this class
@@ -58,7 +58,7 @@ public class JImagePanel extends JPanel {
      * @param img is the path to the image
      */
     public JImagePanel(String img) throws IOException {
-        this(ImageIO.read( FileUtil.find( img ) ));
+        this(ImageIO.read(FileUtil.find(img)));
     }
 
     /**
@@ -74,7 +74,7 @@ public class JImagePanel extends JPanel {
      * Sets if the image should be scaled to the size of the panel
      * @param b true of false
      */
-    public void scale(boolean b){
+    public void scale(boolean b) {
         scale = b;
     }
 
@@ -83,7 +83,7 @@ public class JImagePanel extends JPanel {
      *
      * @param img is the image that will be used
      */
-    public void setImage(BufferedImage img){
+    public void setImage(BufferedImage img) {
         this.org_img = img;
         this.resized_img = null;
     }
@@ -91,22 +91,22 @@ public class JImagePanel extends JPanel {
     /**
      * If the panel should keep the aspect ratio in the image when resizing
      */
-    public void keepAspect(boolean b){
+    public void keepAspect(boolean b) {
         keep_aspect = b;
     }
 
     public void paintComponent(Graphics g) {
-        if(org_img == null)
+        if (org_img == null)
             super.paintComponent(g);
-        else if(scale){
-            if(resized_img == null ||
+        else if (scale) {
+            if (resized_img == null ||
                     this.getWidth() != resized_img.getWidth() ||
-                    this.getHeight() != resized_img.getHeight()){
+                    this.getHeight() != resized_img.getHeight()) {
                 resized_img = ImageUtil.scale(org_img, this.getWidth(), this.getHeight(), keep_aspect);
             }
             g.drawImage(resized_img, 0, 0, null);
         }
-        else{
+        else {
             g.drawImage(org_img, 0, 0, null);
         }
 

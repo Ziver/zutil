@@ -41,19 +41,19 @@ public class InputStreamLogger extends InputStream implements StreamLogger.LogCa
     private InputStream in;
     private StreamLogger log;
 
-    public InputStreamLogger(InputStream in){
+    public InputStreamLogger(InputStream in) {
         this(null, in);
     }
-    public InputStreamLogger(String prefix, InputStream in){
+    public InputStreamLogger(String prefix, InputStream in) {
         this.in = in;
         this.log = new StreamLogger(prefix, this);
     }
 
 
-    public boolean isLoggable(){
+    public boolean isLoggable() {
         return logger.isLoggable(Level.FINEST);
     }
-    public void log(String msg){
+    public void log(String msg) {
         logger.finest(msg);
     }
 

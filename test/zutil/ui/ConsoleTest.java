@@ -35,7 +35,7 @@ public class ConsoleTest {
         terminal.enableTray(true);
         BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
 
-        while(true){
+        while (true){
             System.out.println("hello= "+in.readLine());
             for(int i=0; i<2 ;i++){
                 System.out.println(i+"Hello World!!!sssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss");

@@ -40,7 +40,7 @@ public abstract class ImageFilterProcessor {
     private BufferedImage img;
     private ProgressListener<ImageFilterProcessor,?> progress;
 
-    public ImageFilterProcessor(BufferedImage img){
+    public ImageFilterProcessor(BufferedImage img) {
         this.img = img;
     }
 
@@ -48,22 +48,23 @@ public abstract class ImageFilterProcessor {
      * Sets the listener
      * @param 		listener 		is the listener, null to disable the progress
      */
-    public void setProgressListener(ProgressListener<ImageFilterProcessor,?> listener){
+    public void setProgressListener(ProgressListener<ImageFilterProcessor,?> listener) {
         this.progress = listener;
     }
 
     /**
      * Returns the listener
      */
-    public ProgressListener<?,?> getProgressListener(){
+    public ProgressListener<?,?> getProgressListener() {
         return this.progress;
     }
 
     /**
      * Sets the progress in percent
      */
-    protected void setProgress(double percent){
-        if(progress != null) progress.progressUpdate(this, null, percent);
+    protected void setProgress(double percent) {
+        if (progress != null)
+            progress.progressUpdate(this, null, percent);
     }
 
     /**
@@ -88,7 +89,7 @@ public abstract class ImageFilterProcessor {
         int cols = img.getWidth();
         int rows = img.getHeight();
 
-        if(cols < 0 || rows < 0){
+        if (cols < 0 || rows < 0) {
             throw new InterruptedException("Image not Loaded!!!");
         }
 
@@ -119,16 +120,16 @@ public abstract class ImageFilterProcessor {
         int[] pixels = img.getRGB(0, 0, cols, rows, null, 0, cols);
 
         // Read the pixel data and put it in the data array
-        for(int y=0; y<rows ;y++){
+        for (int y=0; y<rows; y++) {
             // reading a row
             int[] aRow = new int[cols];
-            for(int x=0; x<cols ;x++){
+            for (int x=0; x<cols; x++) {
                 int element = y * cols + x;
                 aRow[x] = pixels[element];
             }
 
             // Reading in the color data
-            for(int x=0; x<cols ;x++){
+            for (int x=0; x<cols; x++) {
                 //Alpha data
                 data[y][x][0] = ((aRow[x] >> 24) & 0xFF);
                 //Red data
@@ -151,7 +152,7 @@ public abstract class ImageFilterProcessor {
      * @param 		rows 		is the rows of the image
      * @return 					A Image
      */
-    public static BufferedImage convertToImage(int[][][] pixels, int cols, int rows){
+    public static BufferedImage convertToImage(int[][][] pixels, int cols, int rows) {
         int[] data = new int[cols * rows * 4];
 
         //Move the data into the 1D array.  Note the
@@ -159,8 +160,8 @@ public abstract class ImageFilterProcessor {
         // bitwise left-shift operators to put the
         // four 8-bit bytes into each int.
         int index = 0;
-        for(int y=0; y<rows ;y++){
-            for(int x=0; x< cols ;x++){
+        for (int y=0; y<rows; y++) {
+            for (int x=0; x< cols; x++) {
                 data[index] = ((pixels[y][x][0] << 24) & 0xFF000000)
                 | ((pixels[y][x][1] << 16) & 0x00FF0000)
                 | ((pixels[y][x][2] << 8) & 0x0000FF00)
@@ -181,7 +182,7 @@ public abstract class ImageFilterProcessor {
      *
      * @param 	data 		is the raw image to apply the effect to. This will NOT be altered
      */
-    public int[][][] process(int[][][] data){
+    public int[][][] process(int[][][] data) {
         return process(data, 0, 0, data[0].length, data.length);
     }
 

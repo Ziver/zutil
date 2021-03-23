@@ -65,7 +65,7 @@ public class EncrypterTest {
 
 
 
-    public static String encryptDecrypt(Encrypter encrypter, Encrypter decrypter, String data){
+    public static String encryptDecrypt(Encrypter encrypter, Encrypter decrypter, String data) {
         byte[] encrypted = encrypter.encrypt(data.getBytes());
         byte[] decrypted = decrypter.decrypt(encrypted);
         return new String(decrypted);

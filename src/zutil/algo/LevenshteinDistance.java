@@ -55,8 +55,8 @@ public class LevenshteinDistance {
     public static int getDistance(String str1, String str2, int[][] matrix) {
         int len1 = str1.length()+1;
         int len2 = str2.length()+1;
-        if(matrix.length < len1 || matrix[0].length < len2)
-            throw new IndexOutOfBoundsException("matrix["+matrix.length+"]["+matrix[0].length+"] must be of size ["+len1+"]["+len2+"] or larger");
+        if (matrix.length < len1 || matrix[0].length < len2)
+            throw new IndexOutOfBoundsException("matrix[" + matrix.length + "][" + matrix[0].length + "] must be of size [" + len1 + "][" + len2 + "] or larger");
 
         // source prefixes can be transformed into empty string by
         // dropping all characters
@@ -82,19 +82,19 @@ public class LevenshteinDistance {
         /*
         System.out.println();
         for (int j=0; j < len2+1; j++) {
-            if(j>1)
-                System.out.print(str2.charAt(j-2)+" ");
+            if (j>1)
+                System.out.print(str2.charAt(j-2) + " ");
             else
                 System.out.print("_ ");
             for (int i=0; i < len1+1; i++) {
-                if(j==0) {
+                if (j==0) {
                     if (i > 1)
                         System.out.print(str1.charAt(i - 2) + " ");
                     else if (i != 0)
                         System.out.print("_ ");
                 }
                 else if (i != 0)
-                    System.out.print(matrix[i-1][j-1]+" ");
+                    System.out.print(matrix[i-1][j-1] + " ");
             }
             System.out.println();
         }
@@ -102,7 +102,7 @@ public class LevenshteinDistance {
         return matrix[len1 - 1][len2 - 1];
     }
 
-    private static int min(int a, int b, int c){
+    private static int min(int a, int b, int c) {
         int i = (a < b) ? a : b;
         return (i < c) ? i : c;
         //return Math.min(i, Math.min(j, k));

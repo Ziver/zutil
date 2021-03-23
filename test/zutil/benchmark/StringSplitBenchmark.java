@@ -49,20 +49,20 @@ public class StringSplitBenchmark {
 
     @Test
     public void stringSplit(){
-        for(int i=0; i<TEST_EXECUTIONS; i++)
+        for (int i=0; i<TEST_EXECUTIONS; i++)
             assertSplit(str.split(delimiter));
     }
 
     public static Pattern pattern = Pattern.compile(delimiter);
     @Test
     public void patternSplit(){
-        for(int i=0; i<TEST_EXECUTIONS; i++)
+        for (int i=0; i<TEST_EXECUTIONS; i++)
             assertSplit(pattern.split(str));
     }
 
     @Test
     public void substring(){
-        for(int i=0; i<TEST_EXECUTIONS; i++) {
+        for (int i=0; i<TEST_EXECUTIONS; i++) {
             List<String> splitList = StringUtil.split(str, delimiter.charAt(0));
             assertSplit(splitList.toArray(new String[0]));
         }

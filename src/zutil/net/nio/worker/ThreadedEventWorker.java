@@ -27,14 +27,14 @@ package zutil.net.nio.worker;
 public abstract class ThreadedEventWorker extends Worker implements Runnable{
     private Thread thread;
 
-    public ThreadedEventWorker(){
+    public ThreadedEventWorker() {
         thread = new Thread(this);
         thread.start();
     }
 
     public void run() {
-        while(true) {
-            try{
+        while (true) {
+            try {
                 // Wait for data to become available
                 messageEvent(pollEvent());
             } catch (Exception e) {

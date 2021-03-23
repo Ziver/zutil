@@ -53,7 +53,7 @@ public class BloomFilter<T extends Serializable> implements Set<T>, Serializable
      * @param	expected_data_count The estimated amount of data to
      * 			be inserted(a bigger number is better than a smaller)
      */
-    public BloomFilter(int size, int expected_data_count){
+    public BloomFilter(int size, int expected_data_count) {
         bits = new BitSet(size);
         k = (int)((size/expected_data_count) * Math.log(2));
         content_size = 0;
@@ -68,7 +68,7 @@ public class BloomFilter<T extends Serializable> implements Set<T>, Serializable
         try {
             content_size++;
             int hash = 0;
-            for(int i=0; i<k ;i++){
+            for (int i=0; i<k; i++) {
                 hash = Hasher.MurmurHash(e, hash);
                 hash = Math.abs(hash) % bits.size();
                 bits.set(hash, true);
@@ -85,7 +85,7 @@ public class BloomFilter<T extends Serializable> implements Set<T>, Serializable
      * @return If the optimal size has been reached
      */
     public boolean addAll(Collection<? extends T> c) {
-        for(T t : c){
+        for (T t : c) {
             add(t);
         }
         return isFull();
@@ -106,12 +106,14 @@ public class BloomFilter<T extends Serializable> implements Set<T>, Serializable
      */
     public boolean contains(Object o) {
         try {
-            if(!(o instanceof Serializable))return false;
+            if (!(o instanceof Serializable))
+                return false;
+
             int hash = 0;
-            for(int i=0; i<k ;i++){
+            for (int i=0; i<k; i++) {
                 hash = Hasher.MurmurHash((Serializable)o, hash);
                 hash = Math.abs(hash) % bits.size();
-                if(!bits.get(hash))
+                if (!bits.get(hash))
                     return false;
             }
         } catch (Exception e) {
@@ -127,8 +129,8 @@ public class BloomFilter<T extends Serializable> implements Set<T>, Serializable
      * @param	c	The collection
      */
     public boolean containsAll(Collection<?> c) {
-        for(Object o : c){
-            if(!contains(o)) return false;
+        for (Object o : c) {
+            if (!contains(o)) return false;
         }
         return true;
     }
@@ -157,7 +159,7 @@ public class BloomFilter<T extends Serializable> implements Set<T>, Serializable
     /**
      * @return The false positive probability of the current state of the filter
      */
-    public double falsePositiveProbability(){
+    public double falsePositiveProbability() {
         return Math.pow(0.6185, bits.size()/content_size);
     }
 
@@ -167,7 +169,7 @@ public class BloomFilter<T extends Serializable> implements Set<T>, Serializable
      *
      * @param	k	The hash count
      */
-    public void setHashCount(int k){
+    public void setHashCount(int k) {
         this.k = k;
     }
 

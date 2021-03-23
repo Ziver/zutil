@@ -36,15 +36,15 @@ public class SerializableBufferedImage implements Serializable{
 
     private BufferedImage image;
 
-    public SerializableBufferedImage(BufferedImage image){
+    public SerializableBufferedImage(BufferedImage image) {
         this.image = image;
     }
 
-    public BufferedImage getImage(){
+    public BufferedImage getImage() {
         return image;
     }
 
-    public void setImage(BufferedImage image){
+    public void setImage(BufferedImage image) {
         this.image=image;
     }
 

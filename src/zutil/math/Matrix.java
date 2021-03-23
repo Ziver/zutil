@@ -39,11 +39,11 @@ public class Matrix {
      *
      * @return a new matrix with the result
      */
-    public static double[][] add(double[][] matrix, double num){
+    public static double[][] add(double[][] matrix, double num) {
         double[][] result = new double[matrix.length][matrix[0].length];
 
         for (int y=0; y < matrix.length; ++y) {
-            for (int x=0; x < matrix[y].length; ++x){
+            for (int x=0; x < matrix[y].length; ++x) {
                 result[y][x] = matrix[y][x] + num;
             }
         }
@@ -56,11 +56,11 @@ public class Matrix {
      *
      * @return a new matrix with the result
      */
-    public static double[][] subtract(double[][] matrix, double num){
+    public static double[][] subtract(double[][] matrix, double num) {
         double[][] result = new double[matrix.length][matrix[0].length];
 
         for (int y=0; y < matrix.length; ++y) {
-            for (int x=0; x < matrix[y].length; ++x){
+            for (int x=0; x < matrix[y].length; ++x) {
                 result[y][x] = matrix[y][x] - num;
             }
         }
@@ -73,11 +73,11 @@ public class Matrix {
      *
      * @return a new matrix with the result
      */
-    public static double[][] multiply(double[][] matrix, double num){
+    public static double[][] multiply(double[][] matrix, double num) {
         double[][] result = new double[matrix.length][matrix[0].length];
 
         for (int y=0; y < matrix.length; ++y) {
-            for (int x=0; x < matrix[y].length; ++x){
+            for (int x=0; x < matrix[y].length; ++x) {
                 result[y][x] = matrix[y][x] * num;
             }
         }
@@ -90,7 +90,7 @@ public class Matrix {
      *
      * @return a new matrix with the result
      */
-    public static double[][] divide(double[][] matrix, double num){
+    public static double[][] divide(double[][] matrix, double num) {
         return multiply(matrix, 1/num);
     }
 
@@ -176,7 +176,7 @@ public class Matrix {
          *
          * @return a new matrix with the result
          */
-        public static double[][] multiply(double[][] matrix, double[] vector){
+        public static double[][] multiply(double[][] matrix, double[] vector) {
             vectorPreCheck(matrix, vector);
             double[][] result = new double[matrix.length][matrix[0].length];
 
@@ -194,7 +194,7 @@ public class Matrix {
          *
          * @return a new matrix with the result
          */
-        public static double[][] divide(double[][] matrix, double[] vector){
+        public static double[][] divide(double[][] matrix, double[] vector) {
             vectorPreCheck(matrix, vector);
             double[][] result = new double[matrix.length][matrix[0].length];
 
@@ -255,7 +255,7 @@ public class Matrix {
      *
      * @return a new vector with subtracted elements
      */
-    public static double[] add(double[] vector1, double[] vector2){
+    public static double[] add(double[] vector1, double[] vector2) {
         vectorPreCheck(vector1, vector2);
         double[] result = new double[vector1.length];
 
@@ -271,7 +271,7 @@ public class Matrix {
      *
      * @return a new matrix with subtracted elements
      */
-    public static double[][] add(double[][] matrix, double[] vector){
+    public static double[][] add(double[][] matrix, double[] vector) {
         vectorPreCheck(matrix, vector);
         double[][] result = new double[matrix.length][matrix[0].length];
 
@@ -289,7 +289,7 @@ public class Matrix {
      *
      * @return a new vector with subtracted elements
      */
-    public static double[] subtract(double[] vector1, double[] vector2){
+    public static double[] subtract(double[] vector1, double[] vector2) {
         vectorPreCheck(vector1, vector2);
         double[] result = new double[vector1.length];
 
@@ -305,7 +305,7 @@ public class Matrix {
      *
      * @return a new matrix with subtracted elements
      */
-    public static double[][] subtract(double[][] matrix, double[] vector){
+    public static double[][] subtract(double[][] matrix, double[] vector) {
         vectorPreCheck(matrix, vector);
         double[][] result = new double[matrix.length][matrix[0].length];
 
@@ -324,7 +324,7 @@ public class Matrix {
      *
      * @return a new vector with the result
      */
-    public static double[] multiply(double[][] matrix, double[] vector){
+    public static double[] multiply(double[][] matrix, double[] vector) {
         vectorPreCheck(matrix, vector);
         double[] result = new double[matrix.length];
 
@@ -342,12 +342,12 @@ public class Matrix {
      *
      * @return a new vector with the result
      */
-    public static double[] divide(double[][] matrix, double[] vector){
+    public static double[] divide(double[][] matrix, double[] vector) {
         vectorPreCheck(matrix, vector);
         double[] result = new double[matrix.length];
 
         for (int y=0; y < matrix.length; ++y) {
-            for (int x=0; x < matrix[y].length; ++x){
+            for (int x=0; x < matrix[y].length; ++x) {
                 result[y] += matrix[y][x] / vector[x];
             }
         }
@@ -389,13 +389,13 @@ public class Matrix {
      *
      * @return a new matrix with the result
      */
-    public static double[][] multiply(double[][] matrix1, double[][] matrix2){
+    public static double[][] multiply(double[][] matrix1, double[][] matrix2) {
         matrixPreCheck(matrix1, matrix2);
         double[][] result = new double[matrix1.length][matrix2[0].length];
 
         for (int y=0; y < result.length; ++y) {
             for (int x=0; x<matrix1[0].length; ++x) {
-                for (int i=0; i < result[y].length; ++i){
+                for (int i=0; i < result[y].length; ++i) {
                     result[y][i] += matrix1[y][x] * matrix2[x][i];
                 }
             }
@@ -406,11 +406,11 @@ public class Matrix {
     /**
      * @return a new matrix with the transpose of the input matrix.
      */
-    public static double[][] transpose(double[][] matrix){
+    public static double[][] transpose(double[][] matrix) {
         double[][] result = new double[matrix[0].length][matrix.length];
 
         for (int y=0; y < result.length; ++y) {
-            for (int x=0; x < result[y].length; ++x){
+            for (int x=0; x < result[y].length; ++x) {
                 result[y][x] = matrix[x][y];
             }
         }
@@ -444,7 +444,7 @@ public class Matrix {
     /**
      * @return a identity matrix (n x n) where the diagonal elements have the value 1
      */
-    public static double[][] identity(int n){
+    public static double[][] identity(int n) {
         double[][] result = new double[n][n];
 
         for (int i=0; i < n; ++i) {

@@ -59,18 +59,18 @@ public class MultipartFileField implements MultipartField{
     /**
      * @return the amount of data received for this field
      */
-    public long getLength(){
+    public long getLength() {
         return 0; //TODO:
     }
 
     /**
      * @return the field name
      */
-    public String getName(){
+    public String getName() {
         return fieldname;
     }
 
-    public String getFilename(){
+    public String getFilename() {
         return filename;
     }
 

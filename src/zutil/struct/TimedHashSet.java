@@ -41,7 +41,7 @@ public class TimedHashSet<T> {
     /**
      * @param   ttl     milliseconds the entries will live
      */
-    public TimedHashSet(long ttl){
+    public TimedHashSet(long ttl) {
         this.ttl = ttl;
         this.map = new HashMap<>();
     }
@@ -50,13 +50,13 @@ public class TimedHashSet<T> {
     /**
      * @return true if the object already existed in the set which will reset the TTL.
      */
-    public boolean add(T o){
+    public boolean add(T o) {
         return map.put(o, new Timer(ttl).start()) != null;
     }
 
-    public boolean contains(Object o){
-        if(map.containsKey(o)){
-            if(map.get(o).hasTimedOut()) // entry to old
+    public boolean contains(Object o) {
+        if (map.containsKey(o)) {
+            if (map.get(o).hasTimedOut()) // entry to old
                 map.remove(o);
             else
                 return true;
@@ -78,9 +78,9 @@ public class TimedHashSet<T> {
      *
      * @return the number of objects removed from the Set
      */
-    public int garbageCollect(){
+    public int garbageCollect() {
         int count = 0;
-        for(Iterator<Map.Entry<T, Timer>> it = map.entrySet().iterator(); it.hasNext(); ) {
+        for (Iterator<Map.Entry<T, Timer>> it = map.entrySet().iterator(); it.hasNext();) {
             Map.Entry<T, Timer> entry = it.next();
             if (entry.getValue().hasTimedOut()) { // entry to old
                 it.remove();

@@ -91,7 +91,7 @@ public class SOAPHttpPage implements HttpPage{
     /** Session enabled **/
     private boolean session_enabled;
 
-    public SOAPHttpPage( WebServiceDef wsDef ) {
+    public SOAPHttpPage(WebServiceDef wsDef) {
         this.wsDef = wsDef;
         this.session_enabled = false;
     }
@@ -162,8 +162,8 @@ public class SOAPHttpPage implements HttpPage{
             Document document = genSOAPResponse((data!=null ? data.toString() : ""), obj);
 
             OutputFormat format = OutputFormat.createPrettyPrint();
-            XMLWriter writer = new XMLWriter( out, format );
-            writer.write( document );
+            XMLWriter writer = new XMLWriter(out, format);
+            writer.write(document);
 
 
             // DEBUG
@@ -171,8 +171,8 @@ public class SOAPHttpPage implements HttpPage{
                 System.out.println("********** Request");
                 System.out.println(request);
                 System.out.println("********** Response");
-                writer = new XMLWriter( System.out, format );
-                writer.write( document );
+                writer = new XMLWriter(System.out, format);
+                writer.write(document);
             }
         } catch (Exception e) {
             logger.log(Level.WARNING, "Unhandled request", e);
@@ -207,33 +207,33 @@ public class SOAPHttpPage implements HttpPage{
             envelope.addNamespace("xsi", "http://www.w3.org/2001/XMLSchema-instance");
             envelope.addNamespace("xsd", "http://www.w3.org/2001/XMLSchema");
 
-            Element body = envelope.addElement( "soap:Body" );
+            Element body = envelope.addElement("soap:Body");
             try {
                 Element request = getXMLRoot(xml);
                 if (request == null) return document;
                 // Header
-                if ( request.element("Header") != null) {
-                    Element header = envelope.addElement( "soap:Header" );
-                    prepareInvoke( obj, request.element("Header"), header );
+                if (request.element("Header") != null) {
+                    Element header = envelope.addElement("soap:Header");
+                    prepareInvoke(obj, request.element("Header"), header);
                 }
 
                 // Body
-                if ( request.element("Body") != null) {
-                    prepareInvoke( obj, request.element("Body"), body );
+                if (request.element("Body") != null) {
+                    prepareInvoke(obj, request.element("Body"), body);
                 }
             } catch(Throwable e) {
                 body.clearContent();
                 Element fault = body.addElement("soap:Fault");
                 // The fault source
                 if (e instanceof SOAPException || e instanceof SAXException || e instanceof DocumentException)
-                    fault.addElement("faultcode").setText( "soap:Client" );
+                    fault.addElement("faultcode").setText("soap:Client");
                 else
-                    fault.addElement("faultcode").setText( "soap:Server" );
+                    fault.addElement("faultcode").setText("soap:Server");
                 // The fault message
-                if ( e.getMessage() == null || e.getMessage().isEmpty())
-                    fault.addElement("faultstring").setText( ""+e.getClass().getSimpleName() );
+                if (e.getMessage() == null || e.getMessage().isEmpty())
+                    fault.addElement("faultstring").setText("" +e.getClass().getSimpleName());
                 else
-                    fault.addElement("faultstring").setText( ""+e.getMessage() );
+                    fault.addElement("faultstring").setText("" +e.getMessage());
                 logger.log(Level.WARNING, "Caught exception from SOAP Class", e);
             }
         } catch (Exception e) {
@@ -267,17 +267,17 @@ public class SOAPHttpPage implements HttpPage{
     @SuppressWarnings("unchecked")
     private void prepareInvoke(WSInterface obj, Element requestRoot, Element responseRoot) throws Throwable{
         Iterator<Element> it = requestRoot.elementIterator();
-        while(it.hasNext()) {
+        while (it.hasNext()) {
             Element e = it.next();
-            if (wsDef.hasMethod( e.getQName().getName())) {
+            if (wsDef.hasMethod(e.getQName().getName())) {
                 WSMethodDef methodDef = wsDef.getMethod(e.getQName().getName());
                 List<WSParameterDef> inputParamDefs = methodDef.getInputs();
                 Object[] inputParams = new Object[inputParamDefs.size()];
 
                 // Get the parameter values
-                for(int i=0; i<inputParamDefs.size() ;i++) {
+                for (int i=0; i<inputParamDefs.size(); i++) {
                     WSParameterDef param = inputParamDefs.get(i);
-                    if ( e.element(param.getName()) != null ) {
+                    if (e.element(param.getName()) != null) {
                         inputParams[i] = Converter.fromString(
                                 e.element(param.getName()).getTextTrim(),
                                 param.getParamClass());
@@ -291,12 +291,12 @@ public class SOAPHttpPage implements HttpPage{
                 // generate response XML
                 if (outputParamDefs.size() > 0) {
                     Element response = responseRoot.addElement("");
-                    response.addNamespace("m", methodDef.getAbsolutePath() );
+                    response.addNamespace("m", methodDef.getAbsolutePath());
                     response.setName("m:" + methodDef.getName() + "Response");
 
                     if (outputParams instanceof WSReturnObject) {
                         Field[] f = outputParams.getClass().getFields();
-                        for(int i=0; i<outputParamDefs.size(); i++) {
+                        for (int i=0; i<outputParamDefs.size(); i++) {
                             WSParameterDef param = outputParamDefs.get(i);
                             generateSOAPXMLForObj(response,((WSReturnObject)outputParams).getValue(f[i]) , param.getName());
                         }
@@ -327,8 +327,8 @@ public class SOAPHttpPage implements HttpPage{
 
         // Return binary data
         if (byte[].class.isAssignableFrom(obj.getClass())) {
-            Element valueE = root.addElement( elementName );
-            valueE.addAttribute("type", "xsd:"+ getSOAPClassName(obj.getClass()));
+            Element valueE = root.addElement(elementName);
+            valueE.addAttribute("type", "xsd:" + getSOAPClassName(obj.getClass()));
             String tmp = Base64Encoder.encode((byte[])obj);
             tmp = tmp.replaceAll("\\s", "");
             valueE.setText(tmp);
@@ -341,7 +341,7 @@ public class SOAPHttpPage implements HttpPage{
 
             array.addAttribute("type", "soap:Array");
             array.addAttribute("soap:arrayType", "xsd:" + arrayType);
-            for(int i=0; i<Array.getLength(obj) ;i++) {
+            for (int i=0; i<Array.getLength(obj); i++) {
                 generateSOAPXMLForObj(array, Array.get(obj, i), "element");
             }
         }
@@ -351,7 +351,7 @@ public class SOAPHttpPage implements HttpPage{
                 objectE.add((Element) obj);
             else if (obj instanceof WSReturnObject) {
                 Field[] fields = obj.getClass().getFields();
-                for(int i=0; i<fields.length; i++) {
+                for (int i=0; i<fields.length; i++) {
                     WSInterface.WSParamName paramNameAnnotation = fields[i].getAnnotation(WSInterface.WSParamName.class);
                     String name = (paramNameAnnotation != null ? paramNameAnnotation.value() : "field" + i);
 
@@ -383,7 +383,7 @@ public class SOAPHttpPage implements HttpPage{
 
             if (cTmp == Integer.class)
                 ret = ret.replaceAll("integer", "int");
-            else if(cTmp == Character.class)
+            else if (cTmp == Character.class)
                 ret = ret.replaceAll("character", "char");
 
             return ret;

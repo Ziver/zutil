@@ -46,7 +46,7 @@ public class MultiCommandExecutor implements AutoCloseable{
     private boolean eol = true;
 
 
-    public MultiCommandExecutor(){
+    public MultiCommandExecutor() {
         try {
             // Generate delimiter
             byte[] tmp = new byte[16];
@@ -55,7 +55,7 @@ public class MultiCommandExecutor implements AutoCloseable{
 
             //init shell
             String shellCmd;
-            switch (OSAbstractionLayer.getInstance().getOSType()){
+            switch (OSAbstractionLayer.getInstance().getOSType()) {
                 case Windows:
                     shellCmd = SHELL_WINDOWS; break;
                 case Linux:
@@ -70,9 +70,9 @@ public class MultiCommandExecutor implements AutoCloseable{
             stdin = new BufferedWriter(new OutputStreamWriter(process.getOutputStream()));
             stdout = new BufferedReader(new InputStreamReader(process.getInputStream()));
 
-        } catch (RuntimeException e){
+        } catch (RuntimeException e) {
             throw e;
-        } catch (Exception e){
+        } catch (Exception e) {
             throw new RuntimeException("Unable to initiate shell",e);
         }
     }
@@ -83,7 +83,7 @@ public class MultiCommandExecutor implements AutoCloseable{
         eol = false;
 
         stdin.write(cmd);
-        switch (OSAbstractionLayer.getInstance().getOSType()){
+        switch (OSAbstractionLayer.getInstance().getOSType()) {
             case Windows:
                 stdin.write(" & echo & echo " + delimiter); break;
             case Linux:
@@ -111,7 +111,7 @@ public class MultiCommandExecutor implements AutoCloseable{
 
 
     @Override
-    public void close(){
+    public void close() {
         try {
             // finally close the shell by execution exit command
             stdin.write("exit");
@@ -121,7 +121,7 @@ public class MultiCommandExecutor implements AutoCloseable{
             process = null;
             stdin = null;
             stdout = null;
-        } catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }

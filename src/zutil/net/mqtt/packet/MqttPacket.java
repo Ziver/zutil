@@ -47,7 +47,7 @@ public class MqttPacket {
         in.reset();
 
         // Resolve the correct header class
-        switch (packet.type){
+        switch (packet.type) {
             case PACKET_TYPE_CONN:        packet = new MqttPacketConnect(); break;
             case PACKET_TYPE_CONNACK:     packet = new MqttPacketConnectAck(); break;
             case PACKET_TYPE_PUBLISH:     packet = new MqttPacketPublish(); break;
@@ -63,7 +63,7 @@ public class MqttPacket {
             case PACKET_TYPE_PINGRESP:    packet = new MqttPacketPingResp(); break;
             case PACKET_TYPE_DISCONNECT:  packet = new MqttPacketDisconnect(); break;
             default:
-                throw new IOException("Unknown header type: "+ packet.type);
+                throw new IOException("Unknown header type: " + packet.type);
         }
         in.read(packet);
         // TODO: payload

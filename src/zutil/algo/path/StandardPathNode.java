@@ -36,7 +36,7 @@ public class StandardPathNode implements PathNode{
     private HashMap<PathNode,Integer> neighbors;
     private PathNode parent;
 
-    public StandardPathNode(){
+    public StandardPathNode() {
         neighbors = new HashMap<>();
     }
 
@@ -59,11 +59,11 @@ public class StandardPathNode implements PathNode{
     public LinkedList<PathNode> traversTo(PathNode goal) {
         LinkedList<PathNode> path = new LinkedList<>();
         PathNode current = this;
-        while(current != null){
+        while (current != null) {
                 path.addFirst(current);
                 current = current.getParentNeighbor();
-                if(goal.equals( current )){
-                        path.addFirst( goal );
+                if (goal.equals(current)) {
+                        path.addFirst(goal);
                         return path;
                 }
         }

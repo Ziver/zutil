@@ -34,9 +34,9 @@ import java.util.List;
 
 /**
  * Adds the result of the query to a List.
- * 
+ *
  * The handler will add the first column of every row to a list.
- * 
+ *
  * @author Ziver
  */
 public class ListSQLResult<T> implements SQLResultHandler<List<T>> {
@@ -46,21 +46,21 @@ public class ListSQLResult<T> implements SQLResultHandler<List<T>> {
     /**
      * Creates a new List.
      */
-    public ListSQLResult(){
+    public ListSQLResult() {
         this.list = new ArrayList<>();
     }
 
     /**
      * Uses a existing list that items will be appended on.
      */
-    public ListSQLResult(List l){
+    public ListSQLResult(List l) {
         this.list = l;
     }
 
 
 
     public List<T> handleQueryResult(Statement stmt, ResultSet result) throws SQLException{
-        while( result.next() )
+        while (result.next())
             list.add((T)result.getObject(1));
         return list;
     }

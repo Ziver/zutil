@@ -40,11 +40,11 @@ public class HttpRedirectPage implements HttpPage{
     private String redirectUrl;
 
 
-    public HttpRedirectPage(String redirectUrl){
+    public HttpRedirectPage(String redirectUrl) {
         this.redirectUrl = redirectUrl;
     }
 
-    public void setPermanentRedirect(boolean permanent){
+    public void setPermanentRedirect(boolean permanent) {
         this.permanent = permanent;
     }
 
@@ -63,14 +63,14 @@ public class HttpRedirectPage implements HttpPage{
                 "<html lang='en-US'>\n" +
                 "    <head>\n" +
                 "        <meta charset='UTF-8'>\n" +
-                "        <meta http-equiv='refresh' content='0;url="+ redirectUrl +"'>\n" +
+                "        <meta http-equiv='refresh' content='0;url=" + redirectUrl + "'>\n" +
                 "        <script type='text/javascript'>\n" +
-                "            window.location.href = '"+ redirectUrl +"'\n" +
+                "            window.location.href = '" + redirectUrl + "'\n" +
                 "        </script>\n" +
                 "        <title>Page Redirection</title>\n" +
                 "    </head>\n" +
                 "    <body>\n" +
-                "        If you are not redirected automatically, follow the <a href='"+ redirectUrl +"'>link to "+ redirectUrl +"</a>\n" +
+                "        If you are not redirected automatically, follow the <a href='" + redirectUrl + "'>link to " + redirectUrl + "</a>\n" +
                 "    </body>\n" +
                 "</html>"
         );

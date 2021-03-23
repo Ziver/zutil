@@ -31,5 +31,5 @@ import zutil.osal.HardwareAbstractionLayer;
  */
 public class HalLinuxImpl implements HardwareAbstractionLayer {
 
-    protected HalLinuxImpl(){}
+    protected HalLinuxImpl() {}
 }

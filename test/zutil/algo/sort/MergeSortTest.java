@@ -32,14 +32,14 @@ public class MergeSortTest {
     public static final int SIZE = 10000;
     public static final int MAX_INT = 10000;
 
-    public static void main(String[] args){
+    public static void main(String[] args) {
         int[] array = new int[SIZE];
 
-        for(int i=0; i<array.length ;i++){
+        for(int i=0; i<array.length ;i++) {
             array[i] = (int)(Math.random()*MAX_INT);
         }
 
-        for(int i=0; i<array.length ;i++){
+        for(int i=0; i<array.length ;i++) {
             System.out.print(array[i]+", ");
         }
 
@@ -53,18 +53,18 @@ public class MergeSortTest {
         time = System.currentTimeMillis() - time;
 
         System.out.println("\n--------------------------------------------");
-        System.out.print(array[0]+", ");
+        System.out.print(array[0] + ", ");
         int error = -1;
-        for(int i=1; i<array.length ;i++){
-            System.out.print(array[i]+", ");
-            if(array[i-1] > array[i]){
+        for(int i=1; i<array.length; i++) {
+            System.out.print(array[i] + ", ");
+            if (array[i-1] > array[i]) {
                 error = i;
             }
         }
 
-        if(error >= 0){
-            System.out.println("\nArray not sorted!! ("+array[error-1]+" > "+array[error]+")");
+        if (error >= 0) {
+            System.out.println("\nArray not sorted!! (" + array[error-1] + " > " + array[error] + ")");
         }
-        System.out.println("\nTime: "+time+" ms");
+        System.out.println("\nTime: " + time + " ms");
     }
-} 
+}

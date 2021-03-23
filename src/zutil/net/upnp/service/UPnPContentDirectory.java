@@ -49,9 +49,9 @@ public class UPnPContentDirectory implements UPnPService, HttpPage, WSInterface 
 
     private static List<File> file_list;
 
-    public UPnPContentDirectory(){}
+    public UPnPContentDirectory() {}
 
-    public UPnPContentDirectory(File dir){
+    public UPnPContentDirectory(File dir) {
         file_list = FileUtil.search(dir, new LinkedList<>(), true, Integer.MAX_VALUE);
     }
 
@@ -61,7 +61,7 @@ public class UPnPContentDirectory implements UPnPService, HttpPage, WSInterface 
      *
      */
     @WSReturnName("SortCaps")
-    public String GetSearchCapabilities(){
+    public String GetSearchCapabilities() {
         // "dc:title,res@size"
         return "";
     }
@@ -72,7 +72,7 @@ public class UPnPContentDirectory implements UPnPService, HttpPage, WSInterface 
      *
      */
     @WSReturnName("SortCaps")
-    public String GetSortCapabilities(){
+    public String GetSortCapabilities() {
         return "dc:title";
     }
 
@@ -84,7 +84,7 @@ public class UPnPContentDirectory implements UPnPService, HttpPage, WSInterface 
      *
      */
     @WSReturnName("Id")
-    public int GetSystemUpdateID(){
+    public int GetSystemUpdateID() {
         return 0;
     }
 
@@ -106,23 +106,23 @@ public class UPnPContentDirectory implements UPnPService, HttpPage, WSInterface 
             @WSParamName("SortCriteria") String SortCriteria) {
 
         BrowseRetObj ret = new BrowseRetObj();
-        if( BrowseFlag.equals("BrowseMetadata") ){
+        if (BrowseFlag.equals("BrowseMetadata")) {
 
         }
-        else if( BrowseFlag.equals("BrowseDirectChildren") ){
+        else if (BrowseFlag.equals("BrowseDirectChildren")) {
             StringBuilder xml = new StringBuilder();
-            xml.append( "<DIDL-Lite xmlns:dc=\"http://purl.org/dc/elements/1.1/\" " +
+            xml.append("<DIDL-Lite xmlns:dc=\"http://purl.org/dc/elements/1.1/\" " +
                     "xmlns:upnp=\"urn:schemas-upnp-org:metadata-1-0/upnp/\" " +
-                    "xmlns=\"urn:schemas-upnp-org:metadata-1-0/DIDL-Lite/\">" );
-            List<File> tmp = FileUtil.search( file_list.get(Integer.parseInt(ObjectID)), new LinkedList<>(), false );
-            for(File file : tmp){
+                    "xmlns=\"urn:schemas-upnp-org:metadata-1-0/DIDL-Lite/\">");
+            List<File> tmp = FileUtil.search(file_list.get(Integer.parseInt(ObjectID)), new LinkedList<>(), false);
+            for (File file : tmp) {
                 xml.append("	<container id=\"").append(file_list.indexOf(file)).append("\" ");
-                if(tmp.get(0) != file) xml.append("parentID=\"").append(file_list.indexOf(file.getParent())).append("\" ");
-                if(file.isDirectory()) xml.append("childCount=\"").append(file.list().length).append("\" ");
+                if (tmp.get(0) != file) xml.append("parentID=\"").append(file_list.indexOf(file.getParent())).append("\" ");
+                if (file.isDirectory()) xml.append("childCount=\"").append(file.list().length).append("\" ");
                 xml.append("restricted=\"1\" searchable=\"0\" >");
 
                 xml.append("		<dc:title>").append(file.getName()).append("</dc:title> ");
-                if( file.isDirectory() )
+                if (file.isDirectory())
                     xml.append("		<upnp:class>object.container.storageFolder</upnp:class> ");
                 else
                     xml.append("		<upnp:class>object.container</upnp:class> ");
@@ -132,10 +132,10 @@ public class UPnPContentDirectory implements UPnPService, HttpPage, WSInterface 
                 ret.NumberReturned++;
                 ret.TotalMatches++;
             }
-            xml.append( "</DIDL-Lite>" );
+            xml.append("</DIDL-Lite>");
 
             ret.Result = xml.toString();
-            //Document document = DocumentHelper.parseText( xml.toString() );
+            //Document document = DocumentHelper.parseText(xml.toString());
             //ret.Result =  document.getRootElement();
         }
         return ret;

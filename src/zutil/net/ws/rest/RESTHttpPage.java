@@ -50,7 +50,7 @@ public class RESTHttpPage implements HttpPage {
     private WSInterface ws;
 
 
-    public RESTHttpPage(WSInterface wsObject ){
+    public RESTHttpPage(WSInterface wsObject) {
         this.ws = wsObject;
         this.wsDef = new WebServiceDef(ws.getClass());
     }
@@ -88,17 +88,17 @@ public class RESTHttpPage implements HttpPage {
             out.close();
             return strBuffer.toString();
         }
-        return "{error: \"Unknown target: "+targetMethod+"\"}";
+        return "{error: \"Unknown target: " + targetMethod + "\"}";
     }
 
-    private Object[] prepareInputParams(WSMethodDef methodDef, Map<String, String> input){
+    private Object[] prepareInputParams(WSMethodDef methodDef, Map<String, String> input) {
         List<WSParameterDef> inputParamDefs = methodDef.getInputs();
         Object[] inputParams = new Object[inputParamDefs.size()];
 
         // Get the parameter values
-        for (int i=0; i<inputParamDefs.size(); i++){
+        for (int i=0; i<inputParamDefs.size(); i++) {
             WSParameterDef param = inputParamDefs.get(i);
-            if (input.containsKey(param.getName())){
+            if (input.containsKey(param.getName())) {
                 inputParams[i] = Converter.fromString(
                         input.get(param.getName()),
                         param.getParamClass());

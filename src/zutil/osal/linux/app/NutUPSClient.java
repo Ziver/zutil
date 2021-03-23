@@ -66,7 +66,7 @@ public class NutUPSClient {
     private Timer pollTimer;
 
 
-    public NutUPSClient(String host, int port){
+    public NutUPSClient(String host, int port) {
         this.upsDevices = new ArrayList<>();
         this.host = host;
         this.port = port;
@@ -74,27 +74,27 @@ public class NutUPSClient {
     }
 
 
-    public UPSDevice getUPS(String id){
+    public UPSDevice getUPS(String id) {
         update();
         return __getUPS(id);
     }
-    private UPSDevice __getUPS(String id){
-        for (UPSDevice ups : upsDevices){
+    private UPSDevice __getUPS(String id) {
+        for (UPSDevice ups : upsDevices) {
             if (ups.equals(id))
                 return ups;
         }
         return null;
     }
 
-    public UPSDevice[] getUPSList(){
+    public UPSDevice[] getUPSList() {
         update();
         return upsDevices.toArray(new UPSDevice[0]);
     }
 
 
-    protected synchronized void update(){
-        if(pollTimer.hasTimedOut()){
-            logger.fine("Starting UPS data refresh ("+host+":"+port+")");
+    protected synchronized void update() {
+        if (pollTimer.hasTimedOut()) {
+            logger.fine("Starting UPS data refresh (" + host + ":" + port + ")");
             try(Socket s = new Socket(host, port)) {
                 Writer out = new OutputStreamWriter(s.getOutputStream());
                 BufferedReader in = new BufferedReader(new InputStreamReader(s.getInputStream()));
@@ -102,19 +102,19 @@ public class NutUPSClient {
                 // Refresh device list
                 HashMap<String,String> tmp = new HashMap<>();
                 sendListCommand(out, in, "UPS", tmp);
-                for (String upsId : tmp.keySet()){
-                    if(__getUPS(upsId) == null) {
-                        logger.fine("Registering new UPS device: "+upsId);
+                for (String upsId : tmp.keySet()) {
+                    if (__getUPS(upsId) == null) {
+                        logger.fine("Registering new UPS device: " +upsId);
                         upsDevices.add(new UPSDevice(upsId));
                     }
                 }
 
                 // Refresh device data
-                for (UPSDevice ups : upsDevices){
+                for (UPSDevice ups : upsDevices) {
                     ups.update(out, in);
                 }
 
-            } catch (Exception e){
+            } catch (Exception e) {
                 logger.log(Level.WARNING, null, e);
             }
             // reset timer
@@ -131,11 +131,11 @@ public class NutUPSClient {
         out.flush();
 
         String line = in.readLine();
-        if ( ! line.startsWith("BEGIN LIST"))
-            throw new IOException("Unexpected response from upsd: Request: '"+request+"' Response: '"+line+"'");
+        if (! line.startsWith("BEGIN LIST"))
+            throw new IOException("Unexpected response from upsd: Request: '" + request + "' Response: '" + line + "'");
 
-        Pattern listKeyValuePatter = Pattern.compile("\\w* (?:\\w* )?([\\w.]+) \"(.*)\"");
-        while ((line=in.readLine()) != null){
+        Pattern listKeyValuePatter = Pattern.compile("\\w* (?:\\w*)?([\\w.]+) \"(.*)\"");
+        while ((line=in.readLine()) != null) {
             if (line.startsWith("END"))
                 break;
             Matcher m = listKeyValuePatter.matcher(line);
@@ -153,19 +153,19 @@ public class NutUPSClient {
         private HashMap<String, String> parameters = new HashMap<>();
 
 
-        protected UPSDevice(String id){
+        protected UPSDevice(String id) {
             this.id = id;
         }
 
         protected synchronized void update(Writer out, BufferedReader in) throws IOException {
-            if(pollTimer == null || pollTimer.hasTimedOut()){
+            if (pollTimer == null || pollTimer.hasTimedOut()) {
                 parameters.clear();
-                logger.fine("Updating UPS parameters for: "+id);
-                sendListCommand(out, in, "VAR "+id, parameters);
+                logger.fine("Updating UPS parameters for: " +id);
+                sendListCommand(out, in, "VAR " +id, parameters);
             }
         }
 
-        public boolean equals(Object o){
+        public boolean equals(Object o) {
             if (o instanceof String)
                 return id.equals(o);
             else if (o instanceof UPSDevice)
@@ -174,25 +174,25 @@ public class NutUPSClient {
         }
 
 
-        public String getId(){
+        public String getId() {
             return id;
         }
-        public String getModelName(){
+        public String getModelName() {
             return parameters.get(PARAMETER_MANUFACTURER) + " " + parameters.get(PARAMETER_MODEL);
         }
         public String getDescription() {
             return parameters.get(PARAMETER_DESCRIPTION);
         }
-        public int getPowerLoad(){
+        public int getPowerLoad() {
             return Integer.parseInt(parameters.get(PARAMETER_POWER_LOAD));
         }
-        public int getPowerUsage(){
+        public int getPowerUsage() {
             return Integer.parseInt(parameters.get(PARAMETER_POWER_USAGE));
         }
-        public int getBatteryCharge(){
+        public int getBatteryCharge() {
             return Integer.parseInt(parameters.get(PARAMETER_BATTERY_CHARGE));
         }
-        public double getBatteryVoltage(){
+        public double getBatteryVoltage() {
             return Double.parseDouble(parameters.get(PARAMETER_BATTERY_VOLTAGE));
         }
 

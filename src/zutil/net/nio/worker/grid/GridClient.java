@@ -53,7 +53,7 @@ public class GridClient extends ThreadedEventWorker {
      * @param	thread	the Thread interface to run for the jobs
      * @param	network	the NioClient to use to communicate to the server
      */
-    public GridClient(GridThread thread, NioClient network){
+    public GridClient(GridThread thread, NioClient network) {
         jobQueue = new LinkedList<>();
         GridClient.thread = thread;
         GridClient.network = network;
@@ -68,7 +68,7 @@ public class GridClient extends ThreadedEventWorker {
         network.setDefaultWorker(this);
         network.send(new GridMessage(GridMessage.REGISTER));
 
-        for(int i=0; i<Runtime.getRuntime().availableProcessors() ;i++){
+        for (int i=0; i<Runtime.getRuntime().availableProcessors(); i++) {
             Thread t = new Thread(thread);
             t.start();
         }
@@ -77,9 +77,9 @@ public class GridClient extends ThreadedEventWorker {
     @Override
     public void messageEvent(WorkerEventData e) {
         // ignores other messages than GridMessage
-        if(e.data instanceof GridMessage){
+        if (e.data instanceof GridMessage) {
             GridMessage msg = (GridMessage)e.data;
-            switch(msg.messageType()){
+            switch(msg.messageType()) {
             // Receive data from Server
             case GridMessage.INIT_DATA:
                 thread.setInitData(msg.getData());
@@ -99,7 +99,7 @@ public class GridClient extends ThreadedEventWorker {
      * @param	result	the result of the computation
      */
     public static void jobDone(int jobID, boolean correct, Object result) throws IOException{
-        if(correct)
+        if (correct)
             network.send(new GridMessage(GridMessage.COMP_SUCCESSFUL, jobID, result));
         else
             network.send(new GridMessage(GridMessage.COMP_INCORRECT, jobID, result));
@@ -111,20 +111,20 @@ public class GridClient extends ThreadedEventWorker {
      *
      * @param	jobId	is the job id
      */
-    public static void jobError(int jobId){
-        try{
+    public static void jobError(int jobId) {
+        try {
             network.send(new GridMessage(GridMessage.COMP_SUCCESSFUL, jobId));
-        }catch(Exception e){e.printStackTrace();}
+        } catch (Exception e) {e.printStackTrace();}
     }
 
     /**
      * @return a new job to compute
      */
     public static synchronized GridJob getNextJob() throws IOException{
-        if(jobQueue.isEmpty()){
+        if (jobQueue.isEmpty()) {
             network.send(new GridMessage(GridMessage.NEW_DATA));
-            while(jobQueue.isEmpty()){
-                try{Thread.sleep(100);}catch(Exception e){}
+            while (jobQueue.isEmpty()) {
+                try {Thread.sleep(100);} catch(Exception e) {}
             }
         }
         MultiPrintStream.out.println("Starting job");

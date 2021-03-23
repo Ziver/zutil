@@ -46,7 +46,7 @@ public class DnsPacket {
     private ArrayList<DnsPacketResource> additionalRecords;
 
 
-    public DnsPacket(){
+    public DnsPacket() {
         header = new DnsPacketHeader();
         questions = new ArrayList<>();
         answerRecords = new ArrayList<>();
@@ -55,40 +55,40 @@ public class DnsPacket {
     }
 
 
-    public DnsPacketHeader getHeader(){
+    public DnsPacketHeader getHeader() {
         return header;
     }
-    public List<DnsPacketQuestion> getQuestions(){
+    public List<DnsPacketQuestion> getQuestions() {
         return Collections.unmodifiableList(questions);
     }
-    public List<DnsPacketResource> getAnswerRecords(){
+    public List<DnsPacketResource> getAnswerRecords() {
         return Collections.unmodifiableList(answerRecords);
     }
-    public List<DnsPacketResource> getNameServers(){
+    public List<DnsPacketResource> getNameServers() {
         return Collections.unmodifiableList(nameServers);
     }
-    public List<DnsPacketResource> getAdditionalRecords(){
+    public List<DnsPacketResource> getAdditionalRecords() {
         return Collections.unmodifiableList(additionalRecords);
     }
 
 
-    public void addQuestion(DnsPacketQuestion question){
+    public void addQuestion(DnsPacketQuestion question) {
         questions.add(question);
         header.countQuestion = questions.size();
     }
-    public void addAnswerRecord(DnsPacketResource resource){
+    public void addAnswerRecord(DnsPacketResource resource) {
         answerRecords.add(resource);
         header.countAnswerRecord = answerRecords.size();
     }
-    public void addAnswerRecord(List<DnsPacketResource> resources){
+    public void addAnswerRecord(List<DnsPacketResource> resources) {
         answerRecords.addAll(resources);
         header.countAnswerRecord = answerRecords.size();
     }
-    public void addNameServer(DnsPacketResource resource){
+    public void addNameServer(DnsPacketResource resource) {
         nameServers.add(resource);
         header.countNameServer = nameServers.size();
     }
-    public void addAdditionalRecord(DnsPacketResource resource){
+    public void addAdditionalRecord(DnsPacketResource resource) {
         additionalRecords.add(resource);
         header.countAdditionalRecord = additionalRecords.size();
     }
@@ -109,7 +109,7 @@ public class DnsPacket {
         return packet;
     }
     private static void readResource(BinaryStructInputStream structIn, int count, ArrayList<DnsPacketResource> list) throws IOException {
-        for (int i=0; i<count; ++i){
+        for (int i=0; i<count; ++i) {
             DnsPacketResource resource = new DnsPacketResource();
             structIn.read(resource);
             list.add(resource);

@@ -51,7 +51,7 @@ public class Hasher {
         byte[] buffer = new byte[8192];
         int read;
         try {
-            while( (read = is.read(buffer)) > 0) {
+            while ((read = is.read(buffer)) > 0) {
                 digest.update(buffer, 0, read);
             }
             byte[] md5sum = digest.digest();
@@ -59,7 +59,7 @@ public class Hasher {
             output = bigInt.toString(16);
         }
         catch(IOException e) {
-            throw new RuntimeException("Unable to process file for "+hashType+" hash", e);
+            throw new RuntimeException("Unable to process file for " + hashType + " hash", e);
         }
         is.close();
 
@@ -72,7 +72,7 @@ public class Hasher {
      * @param 		str 		is the String to hash
      * @return 					an String containing the hash
      */
-    public static String MD5(String str){
+    public static String MD5(String str) {
         try {
             return hash(str, "MD5");
         } catch (Exception e) {
@@ -87,7 +87,7 @@ public class Hasher {
      * @param 		object 		is the object to hash
      * @return 					an String containing the hash
      */
-    public static String MD5(Serializable object){
+    public static String MD5(Serializable object) {
         try {
             return hash(object, "MD5");
         } catch (Exception e) {
@@ -118,7 +118,7 @@ public class Hasher {
      * @param 		str 		is the String to hash
      * @return 					an String containing the hash
      */
-    public static String SHA1(String str){
+    public static String SHA1(String str) {
         try {
             return hash(str, "SHA-1");
         } catch (Exception e) {
@@ -133,7 +133,7 @@ public class Hasher {
      * @param 		object 		is the object to hash
      * @return 					an String containing the hash
      */
-    public static String SHA1(Serializable object){
+    public static String SHA1(Serializable object) {
         try {
             return hash(object, "SHA-1");
         } catch (Exception e) {
@@ -149,7 +149,7 @@ public class Hasher {
      * @param		key			is the key to use with the hash
      * @return 					an String containing the hash
      */
-    public static String HMAC_SHA256(String str, String key){
+    public static String HMAC_SHA256(String str, String key) {
         return HMAC("HmacSHA256", str.getBytes(), key.getBytes());
     }
 
@@ -161,7 +161,7 @@ public class Hasher {
      * @param		key			is the key to use with the hash
      * @return 					an String containing the hash
      */
-    public static String HMAC(String algo, byte[] data, byte[] key){
+    public static String HMAC(String algo, byte[] data, byte[] key) {
         try {
             // Get an hmac_sha1 key from the raw key bytes
             SecretKeySpec signingKey = new SecretKeySpec(key, algo);
@@ -171,7 +171,7 @@ public class Hasher {
             mac.init(signingKey);
 
             // Compute the HMAC on input data bytes
-            byte[] raw = mac.doFinal( data );
+            byte[] raw = mac.doFinal(data);
 
             return Converter.toHexString(raw);
         } catch (Exception e) {
@@ -180,7 +180,7 @@ public class Hasher {
         return null;
     }
 
-    public static String PBKDF2(String data, String salt, int iterations){
+    public static String PBKDF2(String data, String salt, int iterations) {
         try {
             PBEKeySpec spec = new PBEKeySpec(
                     data.toCharArray(),
@@ -254,7 +254,7 @@ public class Hasher {
         int h = seed ^ length;
 
         int i=0;
-        for(; i+4<length ;i+=4){
+        for (; i+4<length; i+=4) {
             // get the first 4 bytes
             int k = data[i+3] & 0xff;
             k <<= 8;
@@ -275,7 +275,7 @@ public class Hasher {
         // Handle the last few bytes of the input
         i = length % 4;
 
-        switch(i){
+        switch(i) {
         case 3: h ^= data[length-3] << 16;
         case 2: h ^= data[length-2] << 8;
         case 1: h ^= data[length-1];

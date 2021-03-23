@@ -45,7 +45,7 @@ public abstract class Worker {
     /**
      * @return true if there is a event in the queue
      */
-    protected boolean hasEvent(){
+    protected boolean hasEvent() {
         return !queue.isEmpty();
     }
 
@@ -54,7 +54,7 @@ public abstract class Worker {
      *
      * @return the next event
      */
-    protected WorkerEventData pollEvent(){
+    protected WorkerEventData pollEvent() {
         synchronized(queue) {
             while (queue.isEmpty()) {
                 try {

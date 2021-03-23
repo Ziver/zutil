@@ -49,7 +49,7 @@ public class NetworkClientTest {
             client.setDefaultWorker(worker);
 
             Thread.sleep(1000);
-            while(time > System.currentTimeMillis()){
+            while (time > System.currentTimeMillis()){
                 PrintResponseHandler handler = new PrintResponseHandler();
                 worker.send(client.getRemoteAddress(),
                         new StringResponseMessage("StringResponseMessage: "+count),

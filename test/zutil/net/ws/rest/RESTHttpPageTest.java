@@ -37,7 +37,7 @@ import static org.junit.Assert.assertEquals;
 public class RESTHttpPageTest {
 
     public static class TestClass implements WSInterface{
-        public String hello(){
+        public String hello() {
             return "hello world";
         }
     }
@@ -53,7 +53,7 @@ public class RESTHttpPageTest {
 
 
     public static class TestEchoClass implements WSInterface{
-        public String echo(@WSParamName("input") String input){
+        public String echo(@WSParamName("input") String input) {
             return "echo: "+input;
         }
     }

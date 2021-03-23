@@ -53,11 +53,11 @@ public class RAWImageUtil {
      */
     public static int getPeakValue(int[][][] data, int startX, int startY, int stopX, int stopY) {
         int peak = 0;
-        for(int y=startY; y<stopY ;y++){
-            for(int x=startX; x<stopX ;x++){
-                if(data[y][x][1] > peak) peak = data[y][x][1];
-                if(data[y][x][2] > peak) peak = data[y][x][2];
-                if(data[y][x][3] > peak) peak = data[y][x][3];
+        for (int y=startY; y<stopY; y++) {
+            for (int x=startX; x<stopX; x++) {
+                if (data[y][x][1] > peak) peak = data[y][x][1];
+                if (data[y][x][2] > peak) peak = data[y][x][2];
+                if (data[y][x][3] > peak) peak = data[y][x][3];
             }
         }
         return peak;
@@ -74,8 +74,8 @@ public class RAWImageUtil {
      * @param	scale	The scale to normalize the image by
      */
     public static void normalize(int[][][] data, int startX, int startY, int stopX, int stopY, double scale) {
-        for(int y=startY; y<stopY ;y++){
-            for(int x=startX; x<stopX ;x++){
+        for (int y=startY; y<stopY; y++) {
+            for (int x=startX; x<stopX; x++) {
                 data[y][x][1] = (int)(data[y][x][1] * scale);
                 data[y][x][2] = (int)(data[y][x][2] * scale);
                 data[y][x][3] = (int)(data[y][x][3] * scale);
@@ -95,8 +95,8 @@ public class RAWImageUtil {
      * @param	scale	the scale to normalize the image by
      */
     public static void normalize(int[][][] output, int[][][] data, int startX, int startY, int stopX, int stopY, double scale) {
-        for(int y=startY; y<stopY ;y++){
-            for(int x=startX; x<stopX ;x++){
+        for (int y=startY; y<stopY; y++) {
+            for (int x=startX; x<stopX; x++) {
                 output[y][x][1] = (int)(data[y][x][1] * scale);
                 output[y][x][2] = (int)(data[y][x][2] * scale);
                 output[y][x][3] = (int)(data[y][x][3] * scale);
@@ -115,11 +115,11 @@ public class RAWImageUtil {
      * @param	stopY	is the y pixel of the image to stop
      * @return the RMS value for the image
      */
-    public static int getRMS(int[][][] data, int startX, int startY, int stopX, int stopY){
+    public static int getRMS(int[][][] data, int startX, int startY, int stopX, int stopY) {
         int pixelCount = 0;
         long accum = 0;
-        for(int y=startY; y <stopY ;y++){
-            for(int x=startX; x<stopX ;x++){
+        for (int y=startY; y <stopY; y++) {
+            for (int x=startX; x<stopX; x++) {
                 accum += data[y][x][1] * data[y][x][1];
                 accum += data[y][x][2] * data[y][x][2];
                 accum += data[y][x][3] * data[y][x][3];
@@ -140,9 +140,9 @@ public class RAWImageUtil {
      * @param	stopY	is the y pixel of the image to stop
      * @param	scale	is the number to scale the image color by
      */
-    public static void scale(int[][][] data, int startX, int startY, int stopX, int stopY, double scale){
-        for(int y=startY; y<stopY ;y++){
-            for(int x=startX; x<stopX ;x++){
+    public static void scale(int[][][] data, int startX, int startY, int stopX, int stopY, double scale) {
+        for (int y=startY; y<stopY; y++) {
+            for (int x=startX; x<stopX; x++) {
                 data[y][x][1] *= scale;
                 data[y][x][2] *= scale;
                 data[y][x][3] *= scale;
@@ -156,7 +156,7 @@ public class RAWImageUtil {
      * @param	data	is the image data
      * @return the mean value of the image
      */
-    public static int getMeanValue(int[][][] data){
+    public static int getMeanValue(int[][][] data) {
         return getMeanValue(data, 0, 0, data[0].length, data.length);
     }
 
@@ -170,7 +170,7 @@ public class RAWImageUtil {
      * @param	stopY	is the y pixel of the image to stop
      * @return the mean value of the image
      */
-    public static int getMeanValue(int[][][] data, int startX, int startY, int stopX, int stopY){
+    public static int getMeanValue(int[][][] data, int startX, int startY, int stopX, int stopY) {
         int[] tmp = getMeanArray(data, startX, startY, stopX, stopY);
         return (tmp[0] + tmp[1] + tmp[2])/3;
     }
@@ -185,17 +185,17 @@ public class RAWImageUtil {
      * @param	stopY	is the y pixel of the image to stop
      * @return the mean value of the image
      */
-    public static int[] getMeanArray(int[][][] data, int startX, int startY, int stopX, int stopY){
+    public static int[] getMeanArray(int[][][] data, int startX, int startY, int stopX, int stopY) {
         int mean[] = new int[3];
-        for(int y=startY; y<stopY ;y++){
-            for(int x=startX; x<stopX ;x++){
+        for (int y=startY; y<stopY; y++) {
+            for (int x=startX; x<stopX; x++) {
                 mean[0] += data[y][x][1];
                 mean[1] += data[y][x][2];
                 mean[2] += data[y][x][3];
             }
         }
         // calculate the mean value
-        int pixelCount = (stopY-startY)*(stopX-startX);
+        int pixelCount = (stopY - startY) * (stopX - startX);
         mean[0] /= pixelCount;
         mean[1] /= pixelCount;
         mean[2] /= pixelCount;
@@ -213,7 +213,7 @@ public class RAWImageUtil {
      * @param	stopY	is the y pixel of the image to stop
      * @param	mean	is the mean value
      */
-    public static void remMeanValue(int[][][] data, int startX, int startY, int stopX, int stopY, int mean){
+    public static void remMeanValue(int[][][] data, int startX, int startY, int stopX, int stopY, int mean) {
         addMeanValue(data, startX, startY, stopX, stopY, -mean);
     }
 
@@ -227,7 +227,7 @@ public class RAWImageUtil {
      * @param	stopY	is the y pixel of the image to stop
      * @param	mean	is the mean value
      */
-    public static void addMeanValue(int[][][] data, int startX, int startY, int stopX, int stopY, int mean){
+    public static void addMeanValue(int[][][] data, int startX, int startY, int stopX, int stopY, int mean) {
         addMeanArray(data, startX, startY, stopX, stopY, new int[]{mean, mean, mean});
     }
 
@@ -241,7 +241,7 @@ public class RAWImageUtil {
      * @param	stopY	is the y pixel of the image to stop
      * @param	mean	is an array of length 3 containing a mean value for each color RGB
      */
-    public static void remMeanArray(int[][][] data, int startX, int startY, int stopX, int stopY, int[] mean){
+    public static void remMeanArray(int[][][] data, int startX, int startY, int stopX, int stopY, int[] mean) {
         addMeanArray(data, startX, startY, stopX, stopY, new int[]{-mean[0], -mean[1], -mean[2]});
     }
 
@@ -255,9 +255,9 @@ public class RAWImageUtil {
      * @param	stopY	is the y pixel of the image to stop
      * @param	mean	is an array of length 3 containing a mean value for each color RGB
      */
-    public static void addMeanArray(int[][][] data, int startX, int startY, int stopX, int stopY, int[] mean){
-        for(int y=startY; y<stopY ;y++){
-            for(int x=startX; x<stopX ;x++){
+    public static void addMeanArray(int[][][] data, int startX, int startY, int stopX, int stopY, int[] mean) {
+        for (int y=startY; y<stopY; y++) {
+            for (int x=startX; x<stopX; x++) {
                 data[y][x][1] += mean[0];
                 data[y][x][2] += mean[1];
                 data[y][x][3] += mean[2];
@@ -275,7 +275,7 @@ public class RAWImageUtil {
      * @param	height	The amount of pixels to copy
      * @return A copy of the data array
      */
-    public static int[][][] crop(int[][][] data, int xStart, int yStart, int width, int height){
+    public static int[][][] crop(int[][][] data, int xStart, int yStart, int width, int height) {
         return crop(data, xStart, yStart, null, 0, 0, width, height);
     }
 
@@ -292,10 +292,12 @@ public class RAWImageUtil {
      * @param	height	The amount of pixels to copy
      * @return A copy of the data array
      */
-    public static int[][][] crop(int[][][] data, int xData, int yData, int[][][] crop, int xCrop, int yCrop, int width, int height){
-        if(crop==null) crop = new int[width][height][4];
-        for(int y=0; y<width ;y++){
-            for(int x=0; x<height ;x++){
+    public static int[][][] crop(int[][][] data, int xData, int yData, int[][][] crop, int xCrop, int yCrop, int width, int height) {
+        if (crop == null)
+            crop = new int[width][height][4];
+
+        for (int y=0; y<width; y++) {
+            for (int x=0; x<height; x++) {
                 crop[y+yData][x+xData][0] = data[y+yCrop][x+xCrop][0];
                 crop[y+yData][x+xData][1] = data[y+yCrop][x+xCrop][1];
                 crop[y+yData][x+xData][2] = data[y+yCrop][x+xCrop][2];
@@ -311,7 +313,7 @@ public class RAWImageUtil {
      * @param   data    The data to duplicate
      * @return an copy of the array
      */
-    public static int[][][] copyArray(int[][][] data){
+    public static int[][][] copyArray(int[][][] data) {
         return copyArray(data, 0, 0, data[0].length, data.length);
     }
 
@@ -325,7 +327,7 @@ public class RAWImageUtil {
      * @param   stopY   is the y pixel of the image to stop
      * @return The array copy
      */
-    public static int[][][] copyArray(int[][][] data, int startX, int startY, int stopX, int stopY){
+    public static int[][][] copyArray(int[][][] data, int startX, int startY, int stopX, int stopY) {
         int[][][] copy = new int[data.length][data[0].length][4];
         return copyArray(data, copy, startX, startY, stopX, stopY);
     }
@@ -341,9 +343,9 @@ public class RAWImageUtil {
      * @param   stopY   is the y pixel of the image to stop
      * @return the dest array
      */
-    public static int[][][] copyArray(int[][][] data, int[][][] dest, int startX, int startY, int stopX, int stopY){
-        for(int y=startY; y<stopY ;y++){
-            for(int x=startX; x<stopX ;x++){
+    public static int[][][] copyArray(int[][][] data, int[][][] dest, int startX, int startY, int stopX, int stopY) {
+        for (int y=startY; y<stopY; y++) {
+            for (int x=startX; x<stopX; x++) {
                 dest[y][x][0] = data[y][x][0];
                 dest[y][x][1] = data[y][x][1];
                 dest[y][x][2] = data[y][x][2];
@@ -363,9 +365,9 @@ public class RAWImageUtil {
      * @param   stopX   is the x pixel of the image to stop
      * @param   stopY   is the y pixel of the image to stop
      */
-    public static void clip(int[][][] data, int startX, int startY, int stopX, int stopY){
-        for(int y=startY; y<stopY ;y++){
-            for(int x=startX; x<stopX ;x++){
+    public static void clip(int[][][] data, int startX, int startY, int stopX, int stopY) {
+        for (int y=startY; y<stopY; y++) {
+            for (int x=startX; x<stopX; x++) {
                 data[y][x][1] = clip(data[y][x][1]);
                 data[y][x][2] = clip(data[y][x][2]);
                 data[y][x][3] = clip(data[y][x][3]);
@@ -377,10 +379,10 @@ public class RAWImageUtil {
      * This method clips the values of a color so that it
      * is in the range 0-255
      */
-    public static int clip(int color){
-        if(color < 0)
+    public static int clip(int color) {
+        if (color < 0)
             return 0;
-        else if(color > 255)
+        else if (color > 255)
             return 255;
         else
             return color;

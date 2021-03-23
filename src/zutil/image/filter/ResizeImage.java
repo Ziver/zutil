@@ -40,7 +40,7 @@ public class ResizeImage extends ImageFilterProcessor{
      * @param img The image to resize
      * @param w The new width
      */
-    public ResizeImage(BufferedImage img, int w){
+    public ResizeImage(BufferedImage img, int w) {
         this(img, w, -1);
     }
 
@@ -51,7 +51,7 @@ public class ResizeImage extends ImageFilterProcessor{
      * @param w The new width if -1 then it will be scaled whit aspect of the hight
      * @param h The new height if -1 then it will be scaled whit aspect of the width
      */
-    public ResizeImage(BufferedImage img, int w, int h){
+    public ResizeImage(BufferedImage img, int w, int h) {
         super(img);
         width = w;
         height = h;
@@ -59,10 +59,10 @@ public class ResizeImage extends ImageFilterProcessor{
 
     @Override
     public int[][][] process(final int[][][] data, int startX, int startY, int stopX, int stopY) {
-        if(width < 1){
+        if (width < 1) {
             height = (int)(((double)width/(stopX-startX))*(stopY-startY));
         }
-        else if(height < 1){
+        else if (height < 1) {
             width = (int)(((double)height/(stopY-startY))*(stopX-startY));
         }
 
@@ -70,9 +70,9 @@ public class ResizeImage extends ImageFilterProcessor{
         double xScale = ((double)(stopX-startX)/width);
         double yScale = ((double)(stopY-startY)/height);
 
-        for(int y=0; y<width ;y++){
+        for (int y=0; y<width; y++) {
             setProgress(ZMath.percent(0, width-1, y));
-            for(int x=0; x<height ;x++){
+            for (int x=0; x<height; x++) {
                 newData[y][x][0] = data[(int)(y*yScale)][(int)(x*xScale)][0];
                 newData[y][x][1] = data[(int)(y*yScale)][(int)(x*xScale)][1];
                 newData[y][x][2] = data[(int)(y*yScale)][(int)(x*xScale)][2];

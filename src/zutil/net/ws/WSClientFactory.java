@@ -48,7 +48,7 @@ public class WSClientFactory {
      * @param 	handler is the handler that will execute the calls to the web service
      * @return a client Object
      */
-    public static <T extends WSInterface> T createClient(Class<T> intf, InvocationHandler handler){
+    public static <T extends WSInterface> T createClient(Class<T> intf, InvocationHandler handler) {
         try {
             T obj = (T) Proxy.newProxyInstance(
                     WSClientFactory.class.getClassLoader(),
@@ -56,7 +56,7 @@ public class WSClientFactory {
                     handler);
 
             return obj;
-        } catch (Exception e){
+        } catch (Exception e) {
             logger.log(Level.SEVERE, null, e);
         }
 

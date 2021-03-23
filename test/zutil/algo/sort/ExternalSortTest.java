@@ -28,7 +28,7 @@ import java.io.File;
 
 
 public class ExternalSortTest {
-    public static void main(String[] args){
+    public static void main(String[] args) {
         try {
             File file = new File("C:\\Users\\Ziver\\Desktop\\IndexFile.txt");
             File sortedFile = new File("C:\\Users\\Ziver\\Desktop\\SortedIndexFile.txt");

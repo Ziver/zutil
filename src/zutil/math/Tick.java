@@ -33,23 +33,23 @@ public class Tick {
      * @param   maxChar is the maximum number of characters in the string
      * @return the ticked string
      */
-    public static String tick(String ts, int maxChar){
+    public static String tick(String ts, int maxChar) {
         StringBuffer ret = new StringBuffer(ts.trim());
         int index = ret.length()-1;
 
-        if(ret.length() < maxChar){
+        if (ret.length() < maxChar) {
             ret.append('a');
         }
-        else{
-            while(index >= 0){
+        else {
+            while (index >= 0) {
                 char c = increment(ret.charAt(index));
-                if(c != 0){
-                    if(index == 0 && ret.length() < maxChar) ret.append('a');
-                    if(index == 0) ret = new StringBuffer(""+c);
+                if (c != 0) {
+                    if (index == 0 && ret.length() < maxChar) ret.append('a');
+                    if (index == 0) ret = new StringBuffer("" +c);
                     else ret.setCharAt(index,c);
                     break;
                 }
-                else{
+                else {
                     //ret.setCharAt(index,'a');
                     ret.deleteCharAt(index);
                     index--;
@@ -66,14 +66,14 @@ public class Tick {
      * @param   c   is the char to increment
      * @return the incremented char in lowercase 0 if it reached the end
      */
-    public static char increment(char c){
-        switch(Character.toLowerCase(c)){
+    public static char increment(char c) {
+        switch(Character.toLowerCase(c)) {
         case 'z':       return (char)134;
         case (char)134: return (char)132;
         case (char)132: return (char)148;
         }
         c = (char)(Character.toLowerCase(c) + 1);
-        if(isAlphabetic(c)){
+        if (isAlphabetic(c)) {
             return c;
         }
         return 0;
@@ -86,8 +86,8 @@ public class Tick {
      * @param   c   is the char to check
      * @return true if the char is a valid letter
      */
-    public static boolean isAlphabetic(char c){
-        switch(Character.toLowerCase(c)){
+    public static boolean isAlphabetic(char c) {
+        switch(Character.toLowerCase(c)) {
         case 'a':
         case 'b':
         case 'c':

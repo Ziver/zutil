@@ -62,13 +62,13 @@ public class PluginManager<T> implements Iterable<PluginData>{
     /**
      * Constructor that will look for plugins in the working directory.
      */
-    public PluginManager(){
+    public PluginManager() {
         this("./");
     }
     /**
      * Constructor that will look for plugins in the specified directory.
      */
-    public PluginManager(String path){
+    public PluginManager(String path) {
         plugins = new HashMap<>();
 
         FileSearcher search = new FileSearcher(new File(path));
@@ -78,20 +78,20 @@ public class PluginManager<T> implements Iterable<PluginData>{
         search.setFileName("plugin.json");
 
         log.fine("Searching for plugins...");
-        for(FileSearcher.FileSearchItem file : search){
+        for (FileSearcher.FileSearchItem file : search) {
             try {
                 DataNode node = JSONParser.read(IOUtil.readContentAsString(file.getInputStream(), true));
                 log.fine("Found plugin: " + file.getPath());
                 PluginData plugin = new PluginData(node);
 
-                if (!plugins.containsKey(plugin.getName())){
+                if (!plugins.containsKey(plugin.getName())) {
                     plugins.put(plugin.getName(), plugin);
                 }
                 else {
                     double version = plugins.get(plugin.getName()).getVersion();
-                    if(version < plugin.getVersion())
+                    if (version < plugin.getVersion())
                         plugins.put(plugin.getName(), plugin);
-                    else if(version == plugin.getVersion())
+                    else if (version == plugin.getVersion())
                         log.fine("Ignoring duplicate plugin: " + plugin);
                     else
                         log.fine("Ignoring outdated plugin: " + plugin);
@@ -157,7 +157,7 @@ public class PluginManager<T> implements Iterable<PluginData>{
 
     private <K> List<K> toList(Iterator<K> it) {
         ArrayList<K> list = new ArrayList<>();
-        while(it.hasNext())
+        while (it.hasNext())
             list.add(it.next());
         return list;
     }
@@ -198,7 +198,7 @@ public class PluginManager<T> implements Iterable<PluginData>{
         @Override
         public PluginData next() {
             nextIndex = getNextIndex();
-            if(nextIndex < 0)
+            if (nextIndex < 0)
                 throw new NoSuchElementException();
 
             return pluginList.get(nextIndex++);
@@ -211,21 +211,21 @@ public class PluginManager<T> implements Iterable<PluginData>{
         private Iterator<PluginData> pluginIt;
         private Iterator<Class<?>> classIt;
 
-        PluginClassIterator(Iterator<PluginData> it, Class<T> intf){
+        PluginClassIterator(Iterator<PluginData> it, Class<T> intf) {
             this.intf = intf;
             this.pluginIt = it;
         }
 
         @Override
         public boolean hasNext() {
-            if(pluginIt == null)
+            if (pluginIt == null)
                 return false;
-            if(classIt != null && classIt.hasNext())
+            if (classIt != null && classIt.hasNext())
                 return true;
 
-            while(pluginIt.hasNext()) {
+            while (pluginIt.hasNext()) {
                 classIt = pluginIt.next().getClassIterator(intf);
-                if(classIt.hasNext())
+                if (classIt.hasNext())
                     return true;
             }
             classIt = null;
@@ -234,7 +234,7 @@ public class PluginManager<T> implements Iterable<PluginData>{
 
         @Override
         public Class<? extends T> next() {
-            if(!hasNext())
+            if (!hasNext())
                 throw new NoSuchElementException();
             return (Class<? extends T>) classIt.next();
         }
@@ -246,21 +246,21 @@ public class PluginManager<T> implements Iterable<PluginData>{
         private Iterator<PluginData> pluginIt;
         private Iterator<T> objectIt;
 
-        PluginSingletonIterator(Iterator<PluginData> it, Class<T> intf){
+        PluginSingletonIterator(Iterator<PluginData> it, Class<T> intf) {
             this.intf = intf;
             this.pluginIt = it;
         }
 
         @Override
         public boolean hasNext() {
-            if(pluginIt == null)
+            if (pluginIt == null)
                 return false;
-            if(objectIt != null && objectIt.hasNext())
+            if (objectIt != null && objectIt.hasNext())
                 return true;
 
-            while(pluginIt.hasNext()) {
+            while (pluginIt.hasNext()) {
                 objectIt = pluginIt.next().getObjectIterator(intf);
-                if(objectIt.hasNext())
+                if (objectIt.hasNext())
                     return true;
             }
             objectIt = null;
@@ -269,7 +269,7 @@ public class PluginManager<T> implements Iterable<PluginData>{
 
         @Override
         public T next() {
-            if(!hasNext())
+            if (!hasNext())
                 throw new NoSuchElementException();
             return objectIt.next();
         }

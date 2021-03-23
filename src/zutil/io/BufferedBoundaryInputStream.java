@@ -62,7 +62,7 @@ public class BufferedBoundaryInputStream extends FilterInputStream{
      *
      * @param 	in			is the InputStream that the buffer will use
      */
-    public BufferedBoundaryInputStream(InputStream in){
+    public BufferedBoundaryInputStream(InputStream in) {
         this(in, DEFAULT_BUF_SIZE);
     }
 
@@ -72,7 +72,7 @@ public class BufferedBoundaryInputStream extends FilterInputStream{
      * @param 	in			is the InputStream that the buffer will use
      * @param	buf_size	speifies the buffer size
      */
-    public BufferedBoundaryInputStream(InputStream in, int buf_size){
+    public BufferedBoundaryInputStream(InputStream in, int buf_size) {
         super(in);
         buffer = new byte[buf_size];
     }
@@ -85,7 +85,7 @@ public class BufferedBoundaryInputStream extends FilterInputStream{
         if (fillBuffer() < 0)
             return -1;
 
-        if(isOnBoundary())
+        if (isOnBoundary())
             return -1; // boundary
         return buffer[buf_pos++];
     }
@@ -132,7 +132,7 @@ public class BufferedBoundaryInputStream extends FilterInputStream{
     /**
      * @return if the current position in the buffer is a boundary
      */
-    public boolean isOnBoundary(){
+    public boolean isOnBoundary() {
         return buf_bound_pos == buf_pos;
     }
 
@@ -163,7 +163,7 @@ public class BufferedBoundaryInputStream extends FilterInputStream{
                 buf_pos = buf_end;
         }
 
-        if (buf_bound_pos >= 0){ // is boundary in buffer?
+        if (buf_bound_pos >= 0) { // is boundary in buffer?
             buf_pos += boundary.length;
             findNextBoundary();
         }
@@ -181,7 +181,7 @@ public class BufferedBoundaryInputStream extends FilterInputStream{
      */
     public long skip(long n) throws IOException {
         int leftover = available();
-        if(n > leftover){
+        if (n > leftover) {
             buf_pos = buf_end;
             return leftover;
         }
@@ -192,7 +192,7 @@ public class BufferedBoundaryInputStream extends FilterInputStream{
     /**
      * Sets the boundary for the stream
      */
-    public void setBoundary(String b){
+    public void setBoundary(String b) {
         this.boundary = b.getBytes();
         findNextBoundary(); // redo the search with the new boundary
     }
@@ -200,7 +200,7 @@ public class BufferedBoundaryInputStream extends FilterInputStream{
     /**
      * Sets the boundary for the stream
      */
-    public void setBoundary(byte[] b){
+    public void setBoundary(byte[] b) {
         boundary = new byte[b.length];
         System.arraycopy(b, 0, boundary, 0, b.length);
         findNextBoundary(); // redo the search with the new boundary
@@ -223,7 +223,7 @@ public class BufferedBoundaryInputStream extends FilterInputStream{
     /**
      * @return true for BufferedBoundaryInputStream
      */
-    public boolean markSupported(){
+    public boolean markSupported() {
         return true;
     }
 
@@ -267,7 +267,7 @@ public class BufferedBoundaryInputStream extends FilterInputStream{
      */
     private int fillBuffer() throws IOException {
         // Do we need to fill the buffer
-        if(buf_pos < buf_end-boundary.length)
+        if (buf_pos < buf_end-boundary.length)
             return 0;
 
         int leftover = buf_end - buf_pos;
@@ -288,7 +288,7 @@ public class BufferedBoundaryInputStream extends FilterInputStream{
         if (leftover > 0 && buf_pos != 0)
             System.arraycopy(buffer, buf_pos, buffer, 0, leftover);
         // Set new positions
-        if (buf_mark >= 0){
+        if (buf_mark >= 0) {
             buf_pos = tmp_pos - buf_mark;
             buf_mark = 0;
         } else
@@ -311,7 +311,7 @@ public class BufferedBoundaryInputStream extends FilterInputStream{
     /**
      * Searches for the nearest boundary from the current buffer position
      */
-    private void findNextBoundary(){
+    private void findNextBoundary() {
         // No need to check for boundary if buffer is smaller than the boundary length
         for (int i = buf_pos; i <= buf_end-boundary.length; i++) {
             for (int b = 0; b < boundary.length; b++) {

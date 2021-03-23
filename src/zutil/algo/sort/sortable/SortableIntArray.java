@@ -27,7 +27,7 @@ package zutil.algo.sort.sortable;
 public class SortableIntArray implements SortableDataList<Integer>{
     private int[] list;
 
-    public SortableIntArray(int[] list){
+    public SortableIntArray(int[] list) {
         this.list = list;
     }
 
@@ -35,7 +35,7 @@ public class SortableIntArray implements SortableDataList<Integer>{
         return list[i];
     }
 
-    public void set(int i, Integer o){
+    public void set(int i, Integer o) {
         list[i] = o;
     }
 
@@ -50,20 +50,20 @@ public class SortableIntArray implements SortableDataList<Integer>{
     }
 
     public int compare(int a, int b) {
-        if(list[a] < list[b]){
+        if (list[a] < list[b]) {
             return -1;
         }
-        else if(list[a] > list[b]){
+        else if (list[a] > list[b]) {
             return 1;
         }
         return 0;
     }
 
     public int compare(int a, Integer b) {
-        if(list[a] < b){
+        if (list[a] < b) {
             return -1;
         }
-        else if(list[a] > b){
+        else if (list[a] > b) {
             return 1;
         }
         return 0;

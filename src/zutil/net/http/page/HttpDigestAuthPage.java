@@ -67,12 +67,12 @@ public class HttpDigestAuthPage implements HttpPage{
 
 
 
-    public HttpDigestAuthPage(HttpPage page){
+    public HttpDigestAuthPage(HttpPage page) {
         targetPage = page;
     }
 
 
-    public void setRealm(String realm){
+    public void setRealm(String realm) {
         this.realm = realm;
     }
 
@@ -97,11 +97,11 @@ public class HttpDigestAuthPage implements HttpPage{
             out.setHeader(HTTP_AUTH_HEADER, generateAuthHeader((String) session.get(AUTH_NONCE)));
             out.println("401 Unauthorized");
         }
-        else if ( ! headers.getHeader(HTTP_CLIENT_HEADER).startsWith(AUTH_TYPE)){
+        else if (! headers.getHeader(HTTP_CLIENT_HEADER).startsWith(AUTH_TYPE)) {
             out.setResponseStatusCode(501);
             out.println("501 Not Implemented");
         }
-        else{
+        else {
             HashMap<String,String> authMap = HttpHeaderParser.parseHeaderValues(
                     headers.getHeader(HTTP_CLIENT_HEADER).substring(AUTH_TYPE.length()+1), // Skip auth type
                     AUTH_DELIMITER);
@@ -111,10 +111,10 @@ public class HttpDigestAuthPage implements HttpPage{
                     (String)session.get(AUTH_NONCE),
                     authMap.get(AUTH_RESPONSE))) {
                 // Safe area, user authenticated
-                logger.fine("User '"+authMap.get(AUTH_USERNAME)+"' has been authenticated for realm '"+realm+"'");
+                logger.fine("User '" +authMap.get(AUTH_USERNAME) + "' has been authenticated for realm '" + realm + "'");
                 targetPage.respond(out, headers, session, cookie, request);
             }
-            else{
+            else {
                 out.setResponseStatusCode(403);
                 out.println("403 Forbidden");
             }
@@ -122,7 +122,7 @@ public class HttpDigestAuthPage implements HttpPage{
     }
 
 
-    private boolean authenticate(String username, String uri, String nonce, String clientResponse){
+    private boolean authenticate(String username, String uri, String nonce, String clientResponse) {
         if (!userMap.containsKey(username)) // do user exist?
             return false;
 
@@ -130,13 +130,13 @@ public class HttpDigestAuthPage implements HttpPage{
                 generateH1(username, userMap.get(username), realm),
                 generateH2(uri),
                 nonce);
-        if (generatedResponse.equals(clientResponse)){
+        if (generatedResponse.equals(clientResponse)) {
             return true;
         }
         return false;
     }
 
-    private String generateAuthHeader(String nonce){
+    private String generateAuthHeader(String nonce) {
         StringBuilder str = new StringBuilder();
         str.append(AUTH_TYPE).append(' ');
         str.append(AUTH_REALM).append("=\"").append(realm).append("\", ");
@@ -145,7 +145,7 @@ public class HttpDigestAuthPage implements HttpPage{
         return str.toString();
     }
 
-    private String generateNonce(){
+    private String generateNonce() {
         byte[] buff = new byte[128/8];
         secRandom.nextBytes(buff);
         return Hasher.SHA1(buff);
@@ -155,7 +155,7 @@ public class HttpDigestAuthPage implements HttpPage{
         String ha1;
         // If the algorithm directive's value is "MD5" or unspecified, then HA1 is
         //    HA1=MD5(username:realm:password)
-        ha1 = Hasher.MD5(username +":"+ realm +":"+ password);
+        ha1 = Hasher.MD5(username + ":" + realm + ":" + password);
         // If the algorithm directive's value is "MD5-sess", then HA1 is
         //    HA1=MD5(MD5(username:realm:password):nonce:cnonce)
         return ha1;
@@ -165,19 +165,19 @@ public class HttpDigestAuthPage implements HttpPage{
         String ha2;
         // If the qop directive's value is "auth" or is unspecified, then HA2 is
         //     HA2=MD5(method:digestURI)
-        ha2 = Hasher.MD5("MD5:"+ uri);
+        ha2 = Hasher.MD5("MD5:" + uri);
         // If the qop directive's value is "auth-int", then HA2 is
         //     HA2=MD5(method:digestURI:MD5(entityBody))
         return ha2;
     }
 
-    private static String generateResponseHash(String ha1, String ha2, String nonce){
+    private static String generateResponseHash(String ha1, String ha2, String nonce) {
         String response;
         // If the qop directive's value is "auth" or "auth-int", then compute the response as follows:
         //     response=MD5(HA1:nonce:nonceCount:cnonce:qop:HA2)
         // If the qop directive is unspecified, then compute the response as follows:
         //     response=MD5(HA1:nonce:HA2)
-        response = Hasher.MD5(ha1 +":"+ nonce +":"+ ha2);
+        response = Hasher.MD5(ha1 + ":" + nonce + ":" + ha2);
         return response;
     }
 

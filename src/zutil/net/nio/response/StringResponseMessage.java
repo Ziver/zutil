@@ -34,7 +34,7 @@ public class StringResponseMessage extends EchoMessage implements RequestRespons
     private String msg;
 
 
-    public StringResponseMessage(String msg){
+    public StringResponseMessage(String msg) {
         this.msg = msg;
         responseId = (long)(Math.random()*Long.MAX_VALUE);
     }
@@ -44,11 +44,11 @@ public class StringResponseMessage extends EchoMessage implements RequestRespons
         return responseId;
     }
 
-    public void setString(String msg){
+    public void setString(String msg) {
         this.msg = msg;
     }
 
-    public String toString(){
+    public String toString() {
         return msg;
     }
 }

@@ -38,7 +38,7 @@ import java.util.HashMap;
 public class WizardActionHandler implements ActionListener, FocusListener, ListSelectionListener{
     private HashMap<String, Object> values;
 
-    public WizardActionHandler(HashMap<String, Object> values){
+    public WizardActionHandler(HashMap<String, Object> values) {
         this.values = values;
     }
 
@@ -51,40 +51,40 @@ public class WizardActionHandler implements ActionListener, FocusListener, ListS
     public void focusLost(FocusEvent e) {
         event(e);
     }
-    public void event(AWTEvent e){
-        if(e.getSource() instanceof Component)
-            registerValue( (Component)e.getSource() );
+    public void event(AWTEvent e) {
+        if (e.getSource() instanceof Component)
+            registerValue((Component) e.getSource());
     }
     public void valueChanged(ListSelectionEvent e) {
-        if(e.getSource() instanceof Component)
-            registerValue( (Component)e.getSource() );
+        if (e.getSource() instanceof Component)
+            registerValue((Component) e.getSource());
     }
 
-    public void registerListener(Component c){
+    public void registerListener(Component c) {
         /*
          * JToggleButton
          * JCheckBox
          * JRadioButton
          */
-        if(c instanceof JToggleButton){
+        if (c instanceof JToggleButton) {
             JToggleButton o = (JToggleButton) c;
-            o.addActionListener( this );
+            o.addActionListener(this);
         }
         /*
          * JEditorPane
          * JTextArea
          * JTextField
          */
-        else if(c instanceof JTextComponent){
+        else if (c instanceof JTextComponent) {
             JTextComponent o = (JTextComponent) c;
-            o.addFocusListener( this );
+            o.addFocusListener(this);
         }
         /*
          * JList
          */
-        else if(c instanceof JList){
+        else if (c instanceof JList) {
             JList<?> o = (JList<?>) c;
-            o.addListSelectionListener( this );
+            o.addListSelectionListener(this);
         }
     }
 
@@ -98,25 +98,25 @@ public class WizardActionHandler implements ActionListener, FocusListener, ListS
          * JCheckBox
          * JRadioButton
          */
-        if(c instanceof JToggleButton){
+        if (c instanceof JToggleButton) {
             JToggleButton o = (JToggleButton) c;
-            values.put( o.getName() , o.isSelected() );
+            values.put(o.getName(), o.isSelected());
         }
         /*
          * JEditorPane
          * JTextArea
          * JTextField
          */
-        else if(c instanceof JTextComponent){
+        else if (c instanceof JTextComponent) {
             JTextComponent o = (JTextComponent) c;
-            values.put( o.getName() , o.getText() );
+            values.put(o.getName(), o.getText());
         }
         /*
          * JList
          */
-        else if(c instanceof JList){
+        else if (c instanceof JList) {
             JList<?> o = (JList<?>) c;
-            values.put( o.getName() , o.getSelectedValue() );
+            values.put(o.getName(), o.getSelectedValue());
         }
     }
 }

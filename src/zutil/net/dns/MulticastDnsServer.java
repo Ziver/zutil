@@ -66,7 +66,7 @@ public class MulticastDnsServer extends ThreadedUDPNetwork implements ThreadedUD
 
     public MulticastDnsServer() throws IOException {
         super(MDNS_MULTICAST_ADDR, MDNS_MULTICAST_PORT);
-        setThread( this );
+        setThread(this);
     }
 
 
@@ -76,7 +76,7 @@ public class MulticastDnsServer extends ThreadedUDPNetwork implements ThreadedUD
      * @param   name    is the domain name to add the entry under
      * @param   ip      the IPv4 address to respond with
      */
-    public void addEntry(String name, InetAddress ip){
+    public void addEntry(String name, InetAddress ip) {
         addEntry(name, DnsConstants.TYPE.A, DnsConstants.CLASS.IN, ip.getAddress());
     }
     /**
@@ -87,7 +87,7 @@ public class MulticastDnsServer extends ThreadedUDPNetwork implements ThreadedUD
      * @param   clazz   {@link zutil.net.dns.packet.DnsConstants.CLASS}
      * @param   data    is the payload to include in client response
      */
-    public void addEntry(String name, int type, int clazz, byte[] data){
+    public void addEntry(String name, int type, int clazz, byte[] data) {
         DnsPacketResource resource = new DnsPacketResource();
         resource.name = name;
         resource.type = type;
@@ -100,7 +100,7 @@ public class MulticastDnsServer extends ThreadedUDPNetwork implements ThreadedUD
     }
 
     private void addEntry(DnsPacketResource resource) {
-        if ( ! entries.containsKey(resource.name))
+        if (! entries.containsKey(resource.name))
             entries.put(resource.name, new ArrayList<>());
         entries.get(resource.name).add(resource);
     }
@@ -116,9 +116,9 @@ public class MulticastDnsServer extends ThreadedUDPNetwork implements ThreadedUD
             DnsPacket dnsPacket = DnsPacket.read(in);
 
             // Just handle queries and no responses
-            if ( ! dnsPacket.getHeader().flagQueryResponse) {
+            if (! dnsPacket.getHeader().flagQueryResponse) {
                 DnsPacket response = handleReceivedPacket(packet.getAddress(), dnsPacket);
-                if (response != null){
+                if (response != null) {
                     ByteArrayOutputStream outBuffer = new ByteArrayOutputStream();
                     BinaryStructOutputStream out = new BinaryStructOutputStream(outBuffer);
                     response.write(out);
@@ -126,29 +126,29 @@ public class MulticastDnsServer extends ThreadedUDPNetwork implements ThreadedUD
 
                     DatagramPacket outPacket = new DatagramPacket(
                             outBuffer.toByteArray(), outBuffer.size(),
-                            InetAddress.getByName( MDNS_MULTICAST_ADDR ),
-                            MDNS_MULTICAST_PORT );
+                            InetAddress.getByName(MDNS_MULTICAST_ADDR),
+                            MDNS_MULTICAST_PORT);
                     send(outPacket);
                 }
             }
-        } catch (IOException e){
+        } catch (IOException e) {
             logger.log(Level.WARNING, null, e);
         }
     }
 
-    protected DnsPacket handleReceivedPacket(InetAddress address, DnsPacket request){
+    protected DnsPacket handleReceivedPacket(InetAddress address, DnsPacket request) {
         DnsPacket response = new DnsPacket();
         response.getHeader().setDefaultResponseData();
-        for (DnsPacketQuestion question : request.getQuestions()){
+        for (DnsPacketQuestion question : request.getQuestions()) {
             if (question.name == null) continue;
 
-            switch (question.type){
+            switch (question.type) {
                 // ------------------------------------------
                 // Normal Domain Name Resolution
                 // ------------------------------------------
 
                 case DnsConstants.TYPE.A:
-                    if (entries.containsKey(question.name)){
+                    if (entries.containsKey(question.name)) {
                         logger.finer("Received request for domain: '" + question.name + "' from source: " + address);
                         response.addAnswerRecord(entries.get(question.name));
                     } else {
@@ -163,7 +163,7 @@ public class MulticastDnsServer extends ThreadedUDPNetwork implements ThreadedUD
                 case DnsConstants.TYPE.PTR:
                     if (question.name.startsWith("_service.")) {
                         String postFix = question.name.substring(9);
-                        for (String domain : entries.keySet()){
+                        for (String domain : entries.keySet()) {
                             if (domain.endsWith(postFix)) {
                                 logger.finer("Received request for service: '" + question.name + "' from source: " + address);
                                 response.addAnswerRecord(entries.get(domain));
@@ -171,7 +171,7 @@ public class MulticastDnsServer extends ThreadedUDPNetwork implements ThreadedUD
                                 logger.finest("Received request for unknown service: '" + question.name + "' from source: " + address);
                             }
                         }
-                    } else if (entries.containsKey(question.name)){
+                    } else if (entries.containsKey(question.name)) {
                         logger.finer("Received request for service: '" + question.name + "' from source: " + address);
                         response.addAnswerRecord(entries.get(question.name));
                     } else {

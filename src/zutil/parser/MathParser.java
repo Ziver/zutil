@@ -145,7 +145,7 @@ public class MathParser {
         }
 
         public String toString() {
-            return "( " + math.toString() + " )";
+            return "( " + math.toString() + ")";
         }
     }
 

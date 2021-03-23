@@ -69,7 +69,7 @@ public class HttpGuessTheNumber implements HttpPage {
         String low = cookie.get(COOKIE_KEY_LOW);
         String high = cookie.get(COOKIE_KEY_HIGH);
 
-        if(session.containsKey(SESSION_KEY_NUMBER)){
+        if (session.containsKey(SESSION_KEY_NUMBER)){
             if (request.containsKey(REQUEST_KEY_GUESS)) {
                 int guess = Integer.parseInt(request.get(REQUEST_KEY_GUESS));
                 int number = (Integer) session.get(SESSION_KEY_NUMBER);
@@ -94,7 +94,7 @@ public class HttpGuessTheNumber implements HttpPage {
                 }
             }
         }
-        else{
+        else {
             session.put(SESSION_KEY_NUMBER, (int)(Math.random()*99+1));
             low = "0";
             high = "100";

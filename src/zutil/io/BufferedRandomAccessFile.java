@@ -101,8 +101,8 @@ public class BufferedRandomAccessFile extends RandomAccessFile{
      * @return the buffer
      */
     private int fillBuffer() throws IOException {
-        int n = super.read(buffer, 0, BUF_SIZE );
-        if(n >= 0) {
+        int n = super.read(buffer, 0, BUF_SIZE);
+        if (n >= 0) {
             file_pos +=n;
             buf_end = n;
             buf_pos = 0;
@@ -123,11 +123,11 @@ public class BufferedRandomAccessFile extends RandomAccessFile{
      * @return the next byte in the buffer
      */
     public final int read() throws IOException{
-        if(buf_pos >= buf_end) {
-            if(fillBuffer() < 0)
+        if (buf_pos >= buf_end) {
+            if (fillBuffer() < 0)
                 return -1;
         }
-        if(buf_end == 0) {
+        if (buf_end == 0) {
             return -1;
         } else {
             buf_pos++;
@@ -154,28 +154,28 @@ public class BufferedRandomAccessFile extends RandomAccessFile{
      * @return the amount of bytes read or -1 if eof
      */
     public int read(byte b[], int off, int len) throws IOException {
-        if(buf_pos >= buf_end) {
-            if(fillBuffer() < 0)
+        if (buf_pos >= buf_end) {
+            if (fillBuffer() < 0)
                 return -1; // EOF
         }
 
         // Copy from buffer
         int leftover = buf_end - buf_pos;
-        if(len <= leftover) {
+        if (len <= leftover) {
             System.arraycopy(buffer, buf_pos, b, off, len);
             buf_pos += len;
             return len;
         }
 
         System.arraycopy(buffer, buf_pos, b, off, leftover);
-        int n = super.read(b, off+leftover, len-leftover );
+        int n = super.read(b, off+leftover, len-leftover);
         fillBuffer();
-        if( n >= 0 )
+        if (n >= 0)
             return leftover + n;
         return leftover;
-        /*for(int i = 0; i < len; i++) {
+        /*for (int i = 0; i < len; i++) {
             int c = this.read();
-            if(c != -1)
+            if (c != -1)
                 b[off+i] = (byte)c;
             else {
                 return i;
@@ -189,7 +189,7 @@ public class BufferedRandomAccessFile extends RandomAccessFile{
      */
     public long getFilePointer() {
         long l = file_pos;
-        return (l - buf_end + buf_pos) ;
+        return (l - buf_end + buf_pos);
     }
 
     /**
@@ -199,7 +199,7 @@ public class BufferedRandomAccessFile extends RandomAccessFile{
      */
     public void seek(long pos) throws IOException {
         int n = (int)(file_pos - pos);
-        if(n >= 0 && n <= buf_end) {
+        if (n >= 0 && n <= buf_end) {
             buf_pos = buf_end - n;
         } else {
             super.seek(pos);
@@ -214,19 +214,19 @@ public class BufferedRandomAccessFile extends RandomAccessFile{
      */
      public final String readNextLine() throws IOException {
         String str;
-        if(buf_end-buf_pos <= 0) {
-            if(fillBuffer() < 0) {
+        if (buf_end-buf_pos <= 0) {
+            if (fillBuffer() < 0) {
                 throw new IOException("Error filling buffer!");
             }
         }
         int lineEnd = -1;
-        for(int i = buf_pos; i < buf_end; i++) {
-            if(buffer[i] == '\n') {
+        for (int i = buf_pos; i < buf_end; i++) {
+            if (buffer[i] == '\n') {
                 lineEnd = i;
                 break;
             }
         }
-        if(lineEnd < 0) {
+        if (lineEnd < 0) {
             StringBuilder input = new StringBuilder(256);
             int c;
             while (((c = read()) != -1) && (c != '\n')) {
@@ -238,7 +238,7 @@ public class BufferedRandomAccessFile extends RandomAccessFile{
             return input.toString();
         }
 
-        if(lineEnd > 0 && buffer[lineEnd-1] == '\r'){
+        if (lineEnd > 0 && buffer[lineEnd-1] == '\r') {
             str = new String(buffer, buf_pos, lineEnd - buf_pos -1);
         }
         else {

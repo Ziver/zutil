@@ -43,74 +43,74 @@ public class StringUtil {
      * @param   bytes   size (in bytes)
      * @return string
      */
-    public static String formatByteSizeToString(long bytes){
+    public static String formatByteSizeToString(long bytes) {
         int total = sizes.length-1;
         double value = bytes;
 
-        for(; value > 1024 ;total--) {
+        for (; value > 1024; total--) {
             value /= 1024;
         }
 
-        value = (double)( (int)(value*10) )/10;
-        return value+" "+sizes[total];
+        value = (double)((int)(value * 10)) / 10;
+        return value + " " + sizes[total];
     }
 
     /**
      * @return a human readable String with year/month/day/hour/min/sec/milisec delimitation.
      */
-    public static String formatTimeToString(long milisec){
+    public static String formatTimeToString(long milisec) {
         StringBuilder str = new StringBuilder();
         long tmp;
 
         // Years
-        if( milisec >= 31557032762.3361d ){
+        if (milisec >= 31557032762.3361d) {
             tmp = (long) (milisec / 31557032762.3361d);
             milisec -= tmp * 31557032762.3361d;
-            if( tmp > 1 )
+            if (tmp > 1)
                 str.append(tmp).append(" years ");
             else
                 str.append(tmp).append(" year ");
         }
         // Months
-        if( milisec >= 2629743830L){
+        if (milisec >= 2629743830L) {
             tmp = milisec / 2629743830L;
             milisec -= tmp * 2629743830L;
-            if( tmp > 1 )
+            if (tmp > 1)
                 str.append(tmp).append(" months ");
             else
                 str.append(tmp).append(" month ");
         }
         // Days
-        if( milisec >= 86400000 ){
+        if (milisec >= 86400000) {
             tmp = milisec / 86400000;
             milisec -= tmp * 86400000;
-            if( tmp > 1 )
+            if (tmp > 1)
                 str.append(tmp).append(" days ");
             else
                 str.append(tmp).append(" day ");
         }
         // Hours
-        if( milisec >= 3600000 ){
+        if (milisec >= 3600000) {
             tmp = milisec / 3600000;
             milisec -= tmp * 3600000;
-            if( tmp > 1 )
+            if (tmp > 1)
                 str.append(tmp).append(" hours ");
             else
                 str.append(tmp).append(" hour ");
         }
         // Minutes
-        if( milisec >= 60000 ){
+        if (milisec >= 60000) {
             tmp = milisec / 60000;
             milisec -= tmp * 60000;
             str.append(tmp).append(" min ");
         }
         // sec
-        if( milisec >= 1000 ){
+        if (milisec >= 1000) {
             tmp = milisec / 1000;
             milisec -= tmp * 1000;
             str.append(tmp).append(" sec ");
         }
-        if( milisec > 0 ){
+        if (milisec > 0) {
             str.append(milisec).append(" milisec ");
         }
 
@@ -123,7 +123,7 @@ public class StringUtil {
      *
      * @return a new String with the given length or longer if the number has more characters.
      */
-    public static String prefixInt(int number, int length){
+    public static String prefixInt(int number, int length) {
         StringBuilder str = new StringBuilder().append(number).reverse();
         while (str.length() < length)
             str.append('0');
@@ -137,7 +137,7 @@ public class StringUtil {
      * @return a String containing all entries in the list with the specified delimiter in between entries
      */
     @SafeVarargs
-    public static <T> String join(String delimiter, T... array){
+    public static <T> String join(String delimiter, T... array) {
         return join(delimiter, Arrays.asList(array));
     }
     /**
@@ -145,10 +145,10 @@ public class StringUtil {
      * @param   list        a list of object that toString() will be called on
      * @return a String containing all entries in the list with the specified delimiter in between entries
      */
-    public static String join(String delimiter, Iterable<?> list){
+    public static String join(String delimiter, Iterable<?> list) {
         StringBuilder str = new StringBuilder();
         Iterator<?> it = list.iterator();
-        if(it.hasNext()) {
+        if (it.hasNext()) {
             str.append(it.next().toString());
             while (it.hasNext()) {
                 str.append(delimiter).append(it.next().toString());
@@ -164,30 +164,30 @@ public class StringUtil {
      * @param		trim	is the char to trim
      * @return				a trimmed String
      */
-    public static String trim(String str, char trim){
-        if( str == null || str.isEmpty() )
+    public static String trim(String str, char trim) {
+        if (str == null || str.isEmpty())
             return str;
         int start=0, stop=str.length();
 
         // The beginning
-        for(int i=0; i<str.length() ;i++){
+        for (int i=0; i<str.length(); i++) {
             char c = str.charAt(i);
-            if(c <= ' ' || c == trim)
-                start = i+1;
+            if (c <= ' ' || c == trim)
+                start = i + 1;
             else
                 break;
         }
 
         // The end
-        for(int i=str.length()-1; i>start ;i--){
+        for (int i=str.length()-1; i>start; i--) {
             char c = str.charAt(i);
-            if(c <= ' ' || c == trim)
+            if (c <= ' ' || c == trim)
                 stop = i;
             else
                 break;
         }
 
-        if(start >= str.length())
+        if (start >= str.length())
             return "";
 
         return str.substring(start, stop);
@@ -198,12 +198,12 @@ public class StringUtil {
      *
      * @param	str		is the string to trim
      */
-    public static String trimQuotes(String str){
-        if( str == null )
+    public static String trimQuotes(String str) {
+        if (str == null)
             return null;
 
         str = str.trim();
-        if( str.length() >= 2 && str.charAt(0)=='\"' && str.charAt(str.length()-1)=='\"'){
+        if (str.length() >= 2 && str.charAt(0)=='\"' && str.charAt(str.length()-1)=='\"') {
             str = str.substring(1, str.length()-1);
         }
 
@@ -216,10 +216,10 @@ public class StringUtil {
     /**
      * @return A string containing a specific amount of spaces
      */
-    public static String getSpaces(int i){
-        if(SPACES.size() <= i){ // Do we need to generate more spaces?
+    public static String getSpaces(int i) {
+        if (SPACES.size() <= i) { // Do we need to generate more spaces?
             synchronized (SPACES) { // Make sure no one else updates the list at the same time
-                if(SPACES.size() <= i) { // Make sure the previous synchronized thread hasn't already generated strings
+                if (SPACES.size() <= i) { // Make sure the previous synchronized thread hasn't already generated strings
                     if (SPACES.isEmpty())
                         SPACES.add("");
                     for (int j = SPACES.size(); j <= i; j++) {
@@ -242,7 +242,7 @@ public class StringUtil {
      * @param   delimiter   a single character delimiter
      * @return              a List with all data between the delimiter
      */
-    public static List<String> split(String str, char delimiter){
+    public static List<String> split(String str, char delimiter) {
         ArrayList<String> splitList = new ArrayList<>();
         int from = 0, to = 0;
 

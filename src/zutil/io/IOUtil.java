@@ -55,7 +55,7 @@ public class IOUtil {
         DynamicByteArrayStream dyn_buff = new DynamicByteArrayStream();
         byte[] buff = new byte[8192];
         int len;
-        while((len = stream.read(buff)) >= 0){
+        while ((len = stream.read(buff)) >= 0) {
             dyn_buff.append(buff, 0, len);
         }
 
@@ -108,7 +108,7 @@ public class IOUtil {
 
         int readLength = 0;
         int c;
-        while((length < 0 || readLength < length) && (c = stream.read()) >= 0){
+        while ((length < 0 || readLength < length) && (c = stream.read()) >= 0) {
             str.append((char) c);
             readLength++;
         }
@@ -162,7 +162,7 @@ public class IOUtil {
 
         int readLength = 0;
         int c;
-        while((length < 0 || readLength < length) && (c = reader.read()) >= 0){
+        while ((length < 0 || readLength < length) && (c = reader.read()) >= 0) {
             str.append((char) c);
             readLength++;
         }
@@ -222,7 +222,7 @@ public class IOUtil {
     public static void copyStream(InputStream in, OutputStream out) throws IOException {
         byte[] buff = new byte[8192]; // This is the default BufferedInputStream buffer size
         int len;
-        while((len = in.read(buff)) > 0){
+        while ((len = in.read(buff)) > 0) {
             out.write(buff, 0, len);
         }
     }
@@ -237,7 +237,7 @@ public class IOUtil {
     public static void copyStream(Reader in, Writer out) throws IOException {
         char[] buff = new char[8192]; // This is the default BufferedReader buffer size
         int len;
-        while((len = in.read(buff)) > 0){
+        while ((len = in.read(buff)) > 0) {
             out.write(buff, 0, len);
         }
     }

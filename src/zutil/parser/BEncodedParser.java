@@ -70,7 +70,7 @@ public class BEncodedParser {
                     throw new ParseException("Corrupt bEncoding", index.i);
                 tmp = data.substring(index.i, end);
                 index.i += tmp.length() + 1;
-                return new DataNode( new Long(tmp));
+                return new DataNode(new Long(tmp));
             /*
              * Lists are prefixed with a l and terminated by an e. The list
              * should contain a series of bEncoded elements. For example, the
@@ -80,14 +80,14 @@ public class BEncodedParser {
              */
             case 'l':
                 index.i++;
-                DataNode list = new DataNode( DataType.List );
+                DataNode list = new DataNode(DataType.List);
                 c = data.charAt(index.i);
-                while(c != 'e'){
-                    list.add( decode_BEncoded(index, data) );
+                while (c != 'e') {
+                    list.add(decode_BEncoded(index, data));
                     c = data.charAt(index.i);
                 }
                 index.i++;
-                if(list.size() == 1) return list.get(0);
+                if (list.size() == 1) return list.get(0);
                 else return list;
                 /*
                  * Dictionaries are prefixed with a d and terminated by an e. They
@@ -97,9 +97,9 @@ public class BEncodedParser {
                  */
             case 'd':
                 index.i++;
-                DataNode map = new DataNode( DataType.Map );
+                DataNode map = new DataNode(DataType.Map);
                 c = data.charAt(index.i);
-                while(c != 'e'){
+                while (c != 'e') {
                     DataNode tmp2 = decode_BEncoded(index, data);
                     map.set(tmp2.getString(), decode_BEncoded(index, data));
                     if (index.i >= data.length())
@@ -122,7 +122,7 @@ public class BEncodedParser {
                 index.i += tmp.length() + 1;
                 String ret = data.substring(index.i, index.i+length);
                 index.i += length;
-                return new DataNode( ret );
+                return new DataNode(ret);
         }
     }
 }

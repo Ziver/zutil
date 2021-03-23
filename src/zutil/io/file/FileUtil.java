@@ -52,8 +52,8 @@ public class FileUtil {
      * @param 		path 		is the path
      * @return 					A String with a relative path
      */
-    public static String relativePath(File file, String path){
-        if(file == null || path == null)
+    public static String relativePath(File file, String path) {
+        if (file == null || path == null)
             return null;
 
         String absolute = file.getAbsolutePath();
@@ -75,14 +75,14 @@ public class FileUtil {
      * @param 		path 		is the path to the file (no / if not absolute path)
      * @return 					A File object for the file
      */
-    public static File find(String path){
+    public static File find(String path) {
         try {
             File file = new File(path);
-            if(file.exists())
+            if (file.exists())
                 return file;
 
             URL url = findURL(path);
-            if(url != null && "file".equals(url.getProtocol()))
+            if (url != null && "file".equals(url.getProtocol()))
                 return new File(url.toURI());
         } catch (Exception e) {
             logger.log(Level.FINE, "Unable to find file: " + path, e);
@@ -96,7 +96,7 @@ public class FileUtil {
      */
     public static void copy(File source, File destination) throws IOException{
         try (BufferedInputStream in = new BufferedInputStream(new FileInputStream(source));
-             BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(destination));){
+             BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(destination));) {
 
             IOUtil.copyStream(in, out);
         }
@@ -112,10 +112,10 @@ public class FileUtil {
      *          subsequent call will return a incremented the number
      *          if the previous file was created.
      */
-    public static File getNextFile(File file){
-        for(int i = 1; i<10000; ++i){
+    public static File getNextFile(File file) {
+        for (int i = 1; i<10000; ++i) {
             File next = new File(file.getParentFile(), file.getName() + "." + StringUtil.prefixInt(i, 4));
-            if(!next.exists())
+            if (!next.exists())
                 return next;
         }
         return null;
@@ -127,7 +127,7 @@ public class FileUtil {
      * @param 		path 		is the path to the file (no / if not absolute path)
      * @return					A URL object for the file
      */
-    public static URL findURL(String path){
+    public static URL findURL(String path) {
         return Thread.currentThread().getContextClassLoader().getResource(path);
     }
 
@@ -137,10 +137,10 @@ public class FileUtil {
      * @param 		path 		is the path to the file (no / if not absolute path)
      * @return 					A InputStream object for the file
      */
-    public static InputStream getInputStream(String path){
+    public static InputStream getInputStream(String path) {
         try {
             File file = new File(path);
-            if(file.exists())
+            if (file.exists())
                 return new BufferedInputStream(new FileInputStream(file));
 
             return Thread.currentThread().getContextClassLoader()
@@ -217,7 +217,7 @@ public class FileUtil {
      * @param 		dir 		is the directory to search in
      * @return a List of files
      */
-    public static List<File> search(File dir){
+    public static List<File> search(File dir) {
         return search(dir, new LinkedList<>(), true);
     }
 
@@ -229,7 +229,7 @@ public class FileUtil {
      * @param 		recursive 	if the search should go into subdirectories
      * @return A List of files
      */
-    public static List<File> search(File dir, List<File> fileList, boolean recursive){
+    public static List<File> search(File dir, List<File> fileList, boolean recursive) {
         return search(dir, new LinkedList<>(), false, (recursive ? Integer.MAX_VALUE : 0));
     }
 
@@ -242,25 +242,25 @@ public class FileUtil {
      * @param 		recurse 	if the search should go into subdirectories
      * @return A List with the files and/or folders
      */
-    public static List<File> search(File dir, List<File> fileList, boolean folders, int recurse){
-        if(recurse<0)
+    public static List<File> search(File dir, List<File> fileList, boolean folders, int recurse) {
+        if (recurse<0)
             return fileList;
         --recurse;
-        if(folders){
-            fileList.add( dir );
+        if (folders) {
+            fileList.add(dir);
         }
 
         File file;
         String[] temp = dir.list();
-        if(temp != null){
-            for(int i=0; i<temp.length ;i++){
+        if (temp != null) {
+            for (int i=0; i<temp.length; i++) {
                 file = new File(dir.getPath()+File.separator+temp[i]);
-                if(file.isDirectory()){
-                    logger.finer("Found Folder: "+file);
+                if (file.isDirectory()) {
+                    logger.finer("Found Folder: " +file);
                     search(new File(dir.getPath()+File.separator+temp[i]+File.separator), fileList, folders, recurse);
                 }
-                else if(file.isFile()){
-                    logger.finer("Found File: "+file);
+                else if (file.isFile()) {
+                    logger.finer("Found File: " +file);
                     fileList.add(file);
                 }
             }
@@ -275,7 +275,7 @@ public class FileUtil {
      * @param 		file 		is the file
      * @return 					The extension
      */
-    public static String getFileExtension(File file){
+    public static String getFileExtension(File file) {
         return getFileExtension(file.getName());
     }
 
@@ -285,10 +285,10 @@ public class FileUtil {
      * @param 		file 		is the file
      * @return 					The extension
      */
-    public static String getFileExtension(String file){
-        if( file == null || file.lastIndexOf(".") == -1 )
+    public static String getFileExtension(String file) {
+        if (file == null || file.lastIndexOf(".") == -1)
             return "";
-        return file.substring(file.lastIndexOf(".")+1, file.length());
+        return file.substring(file.lastIndexOf(".")+1);
     }
 
     /**
@@ -298,11 +298,11 @@ public class FileUtil {
      * @param 		ext			is the new extension, without the dot
      */
     public static String replaceExtension(String file, String ext) {
-        if( file == null )
+        if (file == null)
             return null;
-        if( file.lastIndexOf(".") == -1 )
-            return file+"."+ext;
-        return file.substring(0, file.lastIndexOf(".")+1)+ext;
+        if (file.lastIndexOf(".") == -1)
+            return file + "." + ext;
+        return file.substring(0, file.lastIndexOf(".") + 1) + ext;
     }
 
     /**
@@ -318,14 +318,14 @@ public class FileUtil {
         StringBuilder output = new StringBuilder();
 
         String line;
-        while((line = in.readLine()) != null){
+        while ((line = in.readLine()) != null) {
             // Found starting boundary
-            if(line.equals(boundary)){
-                while((line = in.readLine()) != null)
+            if (line.equals(boundary)) {
+                while ((line = in.readLine()) != null)
                     // Find ending boundary
-                    if(line.equals(boundary)) break;
+                    if (line.equals(boundary)) break;
                 // EOF and no ending boundary found
-                if(line == null){
+                if (line == null) {
                     in.close();
                     throw new EOFException("No ending boundary found");
                 }

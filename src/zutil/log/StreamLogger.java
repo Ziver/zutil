@@ -37,8 +37,8 @@ public class StreamLogger {
     private StringBuilder buffer;
 
 
-    protected StreamLogger(String prefix, LogCallback logger){
-        if(logger == null)
+    protected StreamLogger(String prefix, LogCallback logger) {
+        if (logger == null)
             throw new NullPointerException("LogCallback can not be NULL");
         this.prefix = prefix;
         this.logger = logger;
@@ -46,29 +46,29 @@ public class StreamLogger {
     }
 
 
-    protected void log(int n){
-        if(n < 0 || n == DELIMETER)
+    protected void log(int n) {
+        if (n < 0 || n == DELIMETER)
             flushLog();
         else
             buffer.append((char)n);
-        if(buffer.length() > MAX_BUFFER_SIZE)
+        if (buffer.length() > MAX_BUFFER_SIZE)
             flushLog();
     }
-    protected void log(byte[] b, int off, int len){
+    protected void log(byte[] b, int off, int len) {
         if (logger.isLoggable()) {
-            for(int i=0; i<len; ++i){
-                if(b[off+i] == DELIMETER)
+            for (int i=0; i<len; ++i) {
+                if (b[off+i] == DELIMETER)
                     flushLog();
                 else
                     buffer.append((char)b[off+i]);
             }
-            if(buffer.length() > MAX_BUFFER_SIZE)
+            if (buffer.length() > MAX_BUFFER_SIZE)
                 flushLog();
         }
     }
 
-    protected void flushLog(){
-        if(buffer.length() > 0) {
+    protected void flushLog() {
+        if (buffer.length() > 0) {
             if (prefix != null)
                 logger.log(prefix + ": " + buffer.toString());
             else
@@ -76,7 +76,7 @@ public class StreamLogger {
             clearLog();
         }
     }
-    protected void clearLog(){
+    protected void clearLog() {
         buffer.delete(0, buffer.length());
     }
 

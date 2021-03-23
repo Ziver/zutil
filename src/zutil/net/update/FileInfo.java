@@ -34,7 +34,7 @@ import java.io.Serializable;
 /**
  * This class is used to store the files
  * and there hashes
- * 
+ *
  * @author Ziver
  */
 public class FileInfo implements Serializable{
@@ -62,20 +62,20 @@ public class FileInfo implements Serializable{
     public long getSize() {
         return size;
     }
-    public File getFile(){
+    public File getFile() {
         return file;
     }
 
 
-    public boolean equals(Object comp){
-        if(comp instanceof FileInfo){
+    public boolean equals(Object comp) {
+        if (comp instanceof FileInfo) {
             FileInfo tmp = (FileInfo)comp;
             return path.equals(tmp.path) && hash.equals(tmp.hash);
         }
         return false;
     }
 
-    public String toString(){
+    public String toString() {
         return path;
     }
 }

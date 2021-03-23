@@ -71,14 +71,14 @@ public class ClassUtil {
     /**
      * @return if the given class is a wrapper for a primitive
      */
-    public static boolean isWrapper(Class<?> type){
+    public static boolean isWrapper(Class<?> type) {
         return wrappers.contains(type);
     }
 
     /**
      * @return if the given class is a primitive including String
      */
-    public static boolean isPrimitive(Class<?> type){
+    public static boolean isPrimitive(Class<?> type) {
         return primitives.contains(type);
     }
 
@@ -86,7 +86,7 @@ public class ClassUtil {
      * @return true if the given class is a type representing a number without any decimals.
      * E.g. long, int, short, char, byte and corresponding wrapper.
      */
-    public static boolean isNumber(Class<?> type){
+    public static boolean isNumber(Class<?> type) {
         return Long.class.isAssignableFrom(type) ||
                 long.class.isAssignableFrom(type) ||
                 Integer.class.isAssignableFrom(type) ||
@@ -103,7 +103,7 @@ public class ClassUtil {
      * @return true if the given class is a type representing a number with decimals.
      * E.g. double, float and corresponding wrapper.
      */
-    public static boolean isDecimal(Class<?> type){
+    public static boolean isDecimal(Class<?> type) {
         return Double.class.isAssignableFrom(type) ||
                 double.class.isAssignableFrom(type) ||
                 Float.class.isAssignableFrom(type) ||
@@ -113,8 +113,8 @@ public class ClassUtil {
     /**
      * @return a bool value depending on if the given class is available in the classpath
      */
-    public boolean isAvailable(String clazz){
-        try{
+    public boolean isAvailable(String clazz) {
+        try {
             Class.forName(clazz);
             return true;
         } catch (ClassNotFoundException e) {
@@ -127,7 +127,7 @@ public class ClassUtil {
      * @param field     is the field to fetch the generics classes from.
      * @return the generics class assigned to the specific field or a empty list if there are no generics.
      */
-    public static Class<?>[] getGenericClasses(Field field){
+    public static Class<?>[] getGenericClasses(Field field) {
         return getGenericClasses(field.getGenericType());
     }
 
@@ -148,8 +148,8 @@ public class ClassUtil {
      * @return the generics for a specific super class or a empty list if
      *         there is no generics or the super class is not found
      */
-    public static Class<?>[] getGenericClasses(Class<?> c, Class<?> superClass){
-        if(superClass != null) {
+    public static Class<?>[] getGenericClasses(Class<?> c, Class<?> superClass) {
+        if (superClass != null) {
             // Search for the super class
             while (c.getSuperclass() != null && c.getSuperclass() != Object.class) {
                 // Did we find the super class?
@@ -160,13 +160,13 @@ public class ClassUtil {
         }
         return new Class[0];
     }
-    private static Class<?>[] getGenericClasses(Type genericType){
-        if(genericType instanceof ParameterizedType){
+    private static Class<?>[] getGenericClasses(Type genericType) {
+        if (genericType instanceof ParameterizedType) {
             ParameterizedType aType = (ParameterizedType) genericType;
             Type[] argTypes = aType.getActualTypeArguments();
             Class<?>[] classArray = new Class<?>[argTypes.length];
-            for(int i=0; i<classArray.length; ++i) {
-                if(argTypes[i] instanceof Class)
+            for (int i=0; i<classArray.length; ++i) {
+                if (argTypes[i] instanceof Class)
                     classArray[i] = (Class<?>) argTypes[i];
             }
             return classArray;
@@ -178,16 +178,16 @@ public class ClassUtil {
     /**
      * @return the first class in the stack that do not match the filter
      */
-    public static String getCallingClass(Class... filter){
+    public static String getCallingClass(Class... filter) {
         ArrayList filterStr = new ArrayList(filter.length + 1);
         filterStr.add(ClassUtil.class.getName());
         for (Class clazz : filter)
             filterStr.add(clazz.getName());
 
         StackTraceElement[] stackTraceElements = Thread.currentThread().getStackTrace();
-        for(int i=1; i<stackTraceElements.length ;++i){
+        for (int i=1; i<stackTraceElements.length; ++i) {
             String className = stackTraceElements[i].getClassName();
-            if( !filterStr.contains(className) ){
+            if (!filterStr.contains(className)) {
                 return className;
             }
         }

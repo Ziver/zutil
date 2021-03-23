@@ -53,15 +53,15 @@ public class Console{
     private TrayIcon trayIcon;
     private int bufferSize;
 
-    public Console(String title){
+    public Console(String title) {
         this(title, 680, 340, 50000, false);
     }
 
-    public Console(String title, boolean tray){
+    public Console(String title, boolean tray) {
         this(title, 680, 340, 50000, tray);
     }
 
-    public Console(String title, int width, int height, int buffer, boolean tray){
+    public Console(String title, int width, int height, int buffer, boolean tray) {
         ConsoleInputStream in = new ConsoleInputStream();
         DEFAULT_ICON = FileUtil.find(DEFAULT_ICON).getAbsolutePath();
         initUI(title, in);
@@ -80,7 +80,7 @@ public class Console{
     /**
      * initiates the ui
      */
-    private void initUI(String title, KeyListener listener){
+    private void initUI(String title, KeyListener listener) {
         frame = new JFrame(title);
 
         console = new JTextPane();
@@ -99,14 +99,14 @@ public class Console{
         frame.add(scroll, BorderLayout.CENTER);
     }
 
-    public void setIcon(){
+    public void setIcon() {
 
     }
 
-    public void appendConsole(String s, Style style){
+    public void appendConsole(String s, Style style) {
         try {
             doc.insertString(doc.getLength(), s, style);
-            if(doc.getLength() > bufferSize){
+            if (doc.getLength() > bufferSize) {
                 doc.remove(0, doc.getLength() - bufferSize);
             }
         } catch (BadLocationException e) {
@@ -118,7 +118,7 @@ public class Console{
      * Enables the tray icon and sets the icon
      * @param img The image to use as the icon
      */
-    public void setTrayIcon(Image img){
+    public void setTrayIcon(Image img) {
         enableTray(true);
         trayIcon.setImage(img);
     }
@@ -128,7 +128,7 @@ public class Console{
      *
      * @param img The image to use as a icon
      */
-    public void setFrameIcon(Image img){
+    public void setFrameIcon(Image img) {
         frame.setIconImage(img);
     }
 
@@ -137,12 +137,12 @@ public class Console{
      *
      * @param 	enable	if tray icon is enabled
      */
-    public void enableTray(boolean enable){
-        if(enable && SystemTray.isSupported()){
+    public void enableTray(boolean enable) {
+        if (enable && SystemTray.isSupported()) {
             frame.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
             SystemTray tray = SystemTray.getSystemTray();
 
-            if(trayIcon == null){
+            if (trayIcon == null) {
                 // Menu
                 PopupMenu menu = new PopupMenu();
                 MenuItem item = new MenuItem("Open");
@@ -166,9 +166,9 @@ public class Console{
                         Toolkit.getDefaultToolkit().getImage(DEFAULT_ICON),
                         "Console", menu);
                 trayIcon.setImageAutoSize(true);
-                trayIcon.addMouseListener(new MouseListener(){
+                trayIcon.addMouseListener(new MouseListener() {
                     public void mouseClicked(MouseEvent e) {
-                        if(e.getClickCount() == 2)
+                        if (e.getClickCount() == 2)
                             frame.setVisible(true);
                     }
                     public void mouseEntered(MouseEvent e) {}
@@ -184,7 +184,7 @@ public class Console{
                 System.err.println("TrayIcon could not be added.");
             }
         }
-        else{
+        else {
             frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
             SystemTray.getSystemTray().remove(trayIcon);
         }
@@ -216,39 +216,39 @@ public class Console{
             trayMessageType = type;
         }
 
-        public void print(String s){
+        public void print(String s) {
             appendConsole(s, style);
             console.setCaretPosition(console.getDocument().getLength());
-            if(trayMessageType != null && trayIcon != null){
+            if (trayMessageType != null && trayIcon != null) {
                 trayIcon.displayMessage(
-                        s.substring(0, (s.length() > 25 ? 25 : s.length()))+"...",
+                        s.substring(0, (s.length() > 25 ? 25 : s.length())) + "...",
                         s, trayMessageType);
 
             }
         }
 
-        public void println(String s){
-            print(s+"\n");
+        public void println(String s) {
+            print(s + "\n");
         }
 
-        public void println(){			println("");}
-        public void println(boolean x){	println(""+x);}
-        public void println(char x){	println(""+x);}
-        public void println(char[] x){	println(new String(x));}
-        public void println(double x){	println(""+x);}
-        public void println(float x){	println(""+x);}
-        public void println(int x){		println(""+x);}
-        public void println(long x){	println(""+x);}
-        public void println(Object x){	println(""+x);}
+        public void println() {			 println("");}
+        public void println(boolean x) { println("" +x);}
+        public void println(char x) {	 println("" +x);}
+        public void println(char[] x) {	 println(new String(x));}
+        public void println(double x) {	 println("" +x);}
+        public void println(float x) {	 println("" +x);}
+        public void println(int x) {     println("" +x);}
+        public void println(long x) {	 println("" +x);}
+        public void println(Object x) {	 println("" +x);}
 
-        public void print(boolean x){	print(""+x);}
-        public void print(char x){		print(""+x);}
-        public void print(char[] x){	print(new String(x));}
-        public void print(double x){	print(""+x);}
-        public void print(float x){		print(""+x);}
-        public void print(int x){		print(""+x);}
-        public void print(long x){		print(""+x);}
-        public void print(Object x){	print(""+x);}
+        public void print(boolean x) {   print("" +x);}
+        public void print(char x) {	     print("" +x);}
+        public void print(char[] x) {    print(new String(x));}
+        public void print(double x) {    print("" +x);}
+        public void print(float x) {     print("" +x);}
+        public void print(int x) {       print("" +x);}
+        public void print(long x) {      print("" +x);}
+        public void print(Object x) {     print("" +x);}
     }
 
     private class ConsoleInputStream extends InputStream implements KeyListener{
@@ -257,20 +257,20 @@ public class Console{
 
         @Override
         public int read() {
-            if(input < 0) {
+            if (input < 0) {
                 input = 0;
                 return -1;
             }
 
             read = true;
             input = 0;
-            while(input == 0){
+            while (input == 0) {
                 try {Thread.sleep(10);} catch (InterruptedException e) {}
             }
             read = false;
 
             System.out.print((char)input);
-            if(input == KeyEvent.VK_ENTER){
+            if (input == KeyEvent.VK_ENTER) {
                 input = -1;
                 return '\n';
             }
@@ -284,11 +284,11 @@ public class Console{
 
         @Override
         public int read(byte[] b, int off, int len) throws IOException {
-            System.out.println(off+"-"+len);
+            System.out.println(off + "-" + len);
             int i;
-            for(i=-1; i<len-1 ;i++){
+            for (i=-1; i<len-1; i++) {
                 int tmp = read();
-                if(tmp < 0) {
+                if (tmp < 0) {
                     break;
                 }
                 else {
@@ -306,7 +306,7 @@ public class Console{
         public void keyReleased(KeyEvent arg0) {}
 
         public void keyTyped(KeyEvent arg) {
-            if(read){
+            if (read) {
                 input = arg.getKeyChar();
             }
         }

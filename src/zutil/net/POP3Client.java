@@ -275,7 +275,7 @@ public class POP3Client {
      */
     private boolean parseReturnCode(String msg) {
         int endPos = (msg.indexOf(' ') < 0 ? msg.length() : msg.indexOf(' '));
-        return msg.substring(0, endPos).equals("+OK");
+        return msg.substring(0, endPos).equals(" +OK");
     }
 
 //*********************************************************************************

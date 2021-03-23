@@ -27,7 +27,7 @@ package zutil.net.nio.worker.sync;
 public abstract class ObjectSync {
     public String id;
 
-    public ObjectSync(String id){
+    public ObjectSync(String id) {
         this.id = id;
     }
 

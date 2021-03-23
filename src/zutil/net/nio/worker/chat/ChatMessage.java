@@ -38,7 +38,7 @@ public class ChatMessage implements Message {
     /**
      * Registers the user to the main chat
      */
-    public ChatMessage(){
+    public ChatMessage() {
         this("", "", ChatMessageType.REGISTER);
     }
 
@@ -47,7 +47,7 @@ public class ChatMessage implements Message {
      *
      * @param room The room to register to
      */
-    public ChatMessage(String room){
+    public ChatMessage(String room) {
         this("", room, ChatMessageType.REGISTER);
     }
 
@@ -57,11 +57,11 @@ public class ChatMessage implements Message {
      * @param msg The message
      * @param room The room
      */
-    public ChatMessage(String msg, String room){
+    public ChatMessage(String msg, String room) {
         this(msg, room, ChatMessageType.MESSAGE);
     }
 
-    public ChatMessage(String msg, String room, ChatMessageType type){
+    public ChatMessage(String msg, String room, ChatMessageType type) {
         this.msg = msg;
         this.room = room;
         this.type = type;

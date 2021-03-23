@@ -25,9 +25,9 @@
 package zutil.net.nio.worker.grid;
 
 /**
- * This interface is the thread that will do 
+ * This interface is the thread that will do
  * all the computation in the grid
- * 
+ *
  * @author Ziver
  */
 public abstract class GridThread implements Runnable{
@@ -38,15 +38,15 @@ public abstract class GridThread implements Runnable{
      */
     public abstract void setInitData(Object data);
 
-    public void run(){
-        while(true){
+    public void run() {
+        while (true) {
             GridJob tmp = null;
             try {
                 tmp = GridClient.getNextJob();
                 compute(tmp);
             } catch (Exception e) {
                 e.printStackTrace();
-                if(tmp != null){
+                if (tmp != null) {
                     GridClient.jobError(tmp.jobID);
                 }
             }

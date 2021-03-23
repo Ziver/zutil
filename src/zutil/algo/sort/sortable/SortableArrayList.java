@@ -30,7 +30,7 @@ import java.util.ArrayList;
 public class SortableArrayList<T> implements SortableDataList<T>{
     private ArrayList<T> list;
 
-    public SortableArrayList(ArrayList<T> list){
+    public SortableArrayList(ArrayList<T> list) {
         this.list = list;
     }
 
@@ -38,7 +38,7 @@ public class SortableArrayList<T> implements SortableDataList<T>{
         return list.get(i);
     }
 
-    public void set(int i, T o){
+    public void set(int i, T o) {
         list.set(i, o);
     }
 

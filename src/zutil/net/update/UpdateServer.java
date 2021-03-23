@@ -76,34 +76,34 @@ public class UpdateServer extends ThreadedTCPNetworkServer{
          *
          * @param 		c 		is the socket to the client
          */
-        public UpdateServerThread(Socket c){
+        public UpdateServerThread(Socket c) {
             socket = c;
             try {
-                out = new ObjectOutputStream( socket.getOutputStream());
-                in  = new ObjectInputStream ( socket.getInputStream() );
+                out = new ObjectOutputStream(socket.getOutputStream());
+                in  = new ObjectInputStream (socket.getInputStream());
             } catch (IOException e) {
                 logger.log(Level.SEVERE, null, e);
             }
 
         }
 
-        public void run(){
+        public void run() {
             try {
-                logger.info("Client["+socket.getInetAddress()+"] connectiong...");
+                logger.info("Client[" + socket.getInetAddress() + "] connectiong...");
                 // receive the clients file list
                 FileListMessage clientFileList = (FileListMessage)in.readObject();
                 MultiPrintStream.out.dump(clientFileList);
-                FileListMessage diff = fileList.getDiff( clientFileList );
+                FileListMessage diff = fileList.getDiff(clientFileList);
                 MultiPrintStream.out.dump(diff);
-                out.writeObject( diff );
+                out.writeObject(diff);
 
-                logger.info("Updating client["+socket.getInetAddress()+"]...");
-                for(FileInfo info : diff.getFileList()){
+                logger.info("Updating client[" + socket.getInetAddress() + "]...");
+                for (FileInfo info : diff.getFileList()) {
                     // send file data
-                    FileInputStream input = new FileInputStream( info.getFile() );
-                    byte[] nextBytes = new byte[ socket.getSendBufferSize() ];
+                    FileInputStream input = new FileInputStream(info.getFile());
+                    byte[] nextBytes = new byte[socket.getSendBufferSize()];
                     int bytesRead;
-                    while((bytesRead = input.read(nextBytes)) > 0){
+                    while ((bytesRead = input.read(nextBytes)) > 0) {
                         out.write(nextBytes,0,bytesRead);
                     }
                     out.flush();
@@ -112,11 +112,11 @@ public class UpdateServer extends ThreadedTCPNetworkServer{
 
                 out.flush();
                 socket.close();
-                logger.info("Client["+socket.getInetAddress()+"] update done.");
+                logger.info("Client[" + socket.getInetAddress() + "] update done.");
             } catch (Exception e) {
-                logger.log(Level.SEVERE, "Update error Client["+socket.getInetAddress()+"].", e);
+                logger.log(Level.SEVERE, "Update error Client[" + socket.getInetAddress() + "].", e);
             } finally {
-                logger.info("Client["+socket.getInetAddress()+"] disconnected.");
+                logger.info("Client[" + socket.getInetAddress() + "] disconnected.");
             }
         }
     }

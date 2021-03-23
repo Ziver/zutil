@@ -82,13 +82,13 @@ public class SSDPServer extends ThreadedUDPNetwork implements ThreadedUDPNetwork
 
 
     public SSDPServer() throws IOException{
-        super( SSDP_MULTICAST_ADDR, SSDP_PORT );
-        super.setThread( this );
+        super(SSDP_MULTICAST_ADDR, SSDP_PORT);
+        super.setThread(this);
 
         services = new HashMap<>();
 
-        setCacheTime( DEFAULT_CACHE_TIME );
-        enableNotify( true );
+        setCacheTime(DEFAULT_CACHE_TIME);
+        enableNotify(true);
     }
 
     /**
@@ -96,8 +96,8 @@ public class SSDPServer extends ThreadedUDPNetwork implements ThreadedUDPNetwork
      *
      * @param service add a new service to be announced
      */
-    public void addService(SSDPServiceInfo service){
-        services.put( service.getSearchTarget(), service );
+    public void addService(SSDPServiceInfo service) {
+        services.put(service.getSearchTarget(), service);
     }
     /**
      * Remove a service from being announced. This function will
@@ -105,9 +105,9 @@ public class SSDPServer extends ThreadedUDPNetwork implements ThreadedUDPNetwork
      *
      * @param searchTarget is the ST value in SSDP
      */
-    public void removeService(String searchTarget){
-        sendByeBye( searchTarget );
-        services.remove( searchTarget );
+    public void removeService(String searchTarget) {
+        sendByeBye(searchTarget);
+        services.remove(searchTarget);
     }
 
     /**
@@ -117,9 +117,9 @@ public class SSDPServer extends ThreadedUDPNetwork implements ThreadedUDPNetwork
      *
      * @param time is the time in seconds
      */
-    public void setCacheTime(int time){
+    public void setCacheTime(int time) {
         cache_time = time;
-        if( isNotifyEnabled() ){
+        if (isNotifyEnabled()) {
             enableNotify(false);
             enableNotify(true);
         }
@@ -129,12 +129,12 @@ public class SSDPServer extends ThreadedUDPNetwork implements ThreadedUDPNetwork
      * Enable or disable notification messages to clients
      * every cache_time/2 seconds
      */
-    public void enableNotify(boolean enable){
-        if( enable && notifyTimer==null ){
+    public void enableNotify(boolean enable) {
+        if (enable && notifyTimer == null) {
             notifyTimer = new NotifyTimer();
             Timer timer = new Timer();
             timer.schedule(new NotifyTimer(), 0, cache_time*1000/2);
-        }else if( !enable && notifyTimer!=null ){
+        } else if (!enable && notifyTimer != null) {
             notifyTimer.cancel();
             notifyTimer = null;
         }
@@ -142,7 +142,7 @@ public class SSDPServer extends ThreadedUDPNetwork implements ThreadedUDPNetwork
     /**
      * @return if notification messages is enabled
      */
-    public boolean isNotifyEnabled(){
+    public boolean isNotifyEnabled() {
         return notifyTimer != null;
     }
 
@@ -167,36 +167,36 @@ public class SSDPServer extends ThreadedUDPNetwork implements ThreadedUDPNetwork
      */
     public void receivedPacket(DatagramPacket packet, ThreadedUDPNetwork network) {
         try {
-            String msg = new String( packet.getData(), packet.getOffset(), packet.getLength() );
-            HttpHeaderParser headerParser = new HttpHeaderParser( msg );
+            String msg = new String(packet.getData(), packet.getOffset(), packet.getLength());
+            HttpHeaderParser headerParser = new HttpHeaderParser(msg);
             HttpHeader header = headerParser.read();
 
             // ******* Respond
             // Check that the message is an ssdp discovery message
-            if( header.getRequestType() != null && header.getRequestType().equalsIgnoreCase("M-SEARCH") ){
+            if (header.getRequestType() != null && header.getRequestType().equalsIgnoreCase("M-SEARCH")) {
                 String man = header.getHeader("Man");
-                if(man != null)
+                if (man != null)
                     man = StringUtil.trim(man, '\"');
                 String st = header.getHeader("ST");
                 // Check that its the correct URL and that its an ssdp:discover message
-                if( header.getRequestURL().equals("*") && "ssdp:discover".equalsIgnoreCase(man) ){
+                if (header.getRequestURL().equals("*") && "ssdp:discover".equalsIgnoreCase(man)) {
                     // Check if the requested service exists
-                    if( services.containsKey( st ) ){
-                        logger.log(Level.FINEST, "Received Multicast(from: "+packet.getAddress()+"): "+ header);
+                    if (services.containsKey(st)) {
+                        logger.log(Level.FINEST, "Received Multicast(from: " + packet.getAddress() + "): " + header);
 
                         // Generate the SSDP response
                         ByteArrayOutputStream buffer = new ByteArrayOutputStream();
-                        HttpPrintStream http = new HttpPrintStream( buffer );
+                        HttpPrintStream http = new HttpPrintStream(buffer);
                         http.setResponseStatusCode(200);
-                        http.setHeader("Location", services.get(st).getLocation() );
-                        http.setHeader("USN", services.get(st).getUSN() );
-                        http.setHeader("Server", SERVER_INFO );
-                        http.setHeader("ST", st );
-                        http.setHeader("EXT", "" );
-                        http.setHeader("Cache-Control", "max-age = "+ cache_time );
-                        if(services.get(st) instanceof SSDPCustomInfo)
+                        http.setHeader("Location", services.get(st).getLocation());
+                        http.setHeader("USN", services.get(st).getUSN());
+                        http.setHeader("Server", SERVER_INFO);
+                        http.setHeader("ST", st);
+                        http.setHeader("EXT", "");
+                        http.setHeader("Cache-Control", "max-age = " + cache_time);
+                        if (services.get(st) instanceof SSDPCustomInfo)
                             ((SSDPCustomInfo)services.get(st)).writeHeaders(http);
-                        logger.log(Level.FINEST, "Sending Response: "+ http);
+                        logger.log(Level.FINEST, "Sending Response: " + http);
                         http.flush();
 
                         byte[] data = buffer.toByteArray();
@@ -204,7 +204,7 @@ public class SSDPServer extends ThreadedUDPNetwork implements ThreadedUDPNetwork
                                 data, data.length,
                                 packet.getAddress(),
                                 packet.getPort());
-                        network.send( packet );
+                        network.send(packet);
                         http.close();
                     }
                 }
@@ -223,16 +223,16 @@ public class SSDPServer extends ThreadedUDPNetwork implements ThreadedUDPNetwork
      * @author Ziver
      */
     private class NotifyTimer extends TimerTask {
-        public void run(){
+        public void run() {
             sendNotify();
         }
     }
     /**
      * Sends keep-alive messages to update the cache of the clients
      */
-    public void sendNotify(){
-        for(String st : services.keySet()){
-            sendNotify( st );
+    public void sendNotify() {
+        for (String st : services.keySet()) {
+            sendNotify(st);
         }
     }
     /**
@@ -249,22 +249,22 @@ public class SSDPServer extends ThreadedUDPNetwork implements ThreadedUDPNetwork
      * Location: http://localhost:80
      * Cache-Control: max-age = 7393
      */
-    public void sendNotify(String searchTarget){
+    public void sendNotify(String searchTarget) {
         try {
             SSDPServiceInfo service = services.get(searchTarget);
             // Generate the SSDP response
             ByteArrayOutputStream buffer = new ByteArrayOutputStream();
-            HttpPrintStream http = new HttpPrintStream( buffer, HttpPrintStream.HttpMessageType.REQUEST );
+            HttpPrintStream http = new HttpPrintStream(buffer, HttpPrintStream.HttpMessageType.REQUEST);
             http.setRequestType("NOTIFY");
             http.setRequestURL("*");
-            http.setHeader("Server", SERVER_INFO );
-            http.setHeader("Host", SSDP_MULTICAST_ADDR+":"+SSDP_PORT );
-            http.setHeader("NT", searchTarget );
-            http.setHeader("NTS", "ssdp:alive" );
-            http.setHeader("Location", service.getLocation() );
-            http.setHeader("Cache-Control", "max-age = "+cache_time );
-            http.setHeader("USN", service.getUSN() );
-            if(service instanceof SSDPCustomInfo)
+            http.setHeader("Server", SERVER_INFO);
+            http.setHeader("Host", SSDP_MULTICAST_ADDR + ":" + SSDP_PORT);
+            http.setHeader("NT", searchTarget);
+            http.setHeader("NTS", "ssdp:alive");
+            http.setHeader("Location", service.getLocation());
+            http.setHeader("Cache-Control", "max-age = " + cache_time);
+            http.setHeader("USN", service.getUSN());
+            if (service instanceof SSDPCustomInfo)
                 ((SSDPCustomInfo) service).writeHeaders(http);
             logger.log(Level.FINEST, "Sending Notification: " + http);
             http.flush();
@@ -272,9 +272,9 @@ public class SSDPServer extends ThreadedUDPNetwork implements ThreadedUDPNetwork
             byte[] data = buffer.toByteArray();
             DatagramPacket packet = new DatagramPacket(
                     data, data.length,
-                    InetAddress.getByName( SSDP_MULTICAST_ADDR ),
-                    SSDP_PORT );
-            super.send( packet );
+                    InetAddress.getByName(SSDP_MULTICAST_ADDR),
+                    SSDP_PORT);
+            super.send(packet);
             http.close();
 
         } catch (Exception e) {
@@ -287,9 +287,9 @@ public class SSDPServer extends ThreadedUDPNetwork implements ThreadedUDPNetwork
      * Shutdown message is sent to the clients that all
      * the service is shutting down.
      */
-    public void sendByeBye(){
-        for(String st : services.keySet()){
-            sendByeBye( st );
+    public void sendByeBye() {
+        for (String st : services.keySet()) {
+            sendByeBye(st);
         }
     }
     /**
@@ -304,27 +304,27 @@ public class SSDPServer extends ThreadedUDPNetwork implements ThreadedUDPNetwork
      * NTS: ssdp:byebye
      * USN: someunique:idscheme3
      */
-    public void sendByeBye(String searchTarget){
+    public void sendByeBye(String searchTarget) {
         try {
             // Generate the SSDP response
             ByteArrayOutputStream buffer = new ByteArrayOutputStream();
-            HttpPrintStream http = new HttpPrintStream( buffer, HttpPrintStream.HttpMessageType.REQUEST );
+            HttpPrintStream http = new HttpPrintStream(buffer, HttpPrintStream.HttpMessageType.REQUEST);
             http.setRequestType("NOTIFY");
             http.setRequestURL("*");
-            http.setHeader("Server", SERVER_INFO );
-            http.setHeader("Host", SSDP_MULTICAST_ADDR+":"+SSDP_PORT );
-            http.setHeader("NT", searchTarget );
-            http.setHeader("NTS", "ssdp:byebye" );
-            http.setHeader("USN", services.get(searchTarget).getUSN() );
+            http.setHeader("Server", SERVER_INFO);
+            http.setHeader("Host", SSDP_MULTICAST_ADDR + ":" + SSDP_PORT);
+            http.setHeader("NT", searchTarget);
+            http.setHeader("NTS", "ssdp:byebye");
+            http.setHeader("USN", services.get(searchTarget).getUSN());
             logger.log(Level.FINEST, "Sending ByeBye: " + http);
             http.flush();
 
             byte[] data = buffer.toByteArray();
             DatagramPacket packet = new DatagramPacket(
                     data, data.length,
-                    InetAddress.getByName( SSDP_MULTICAST_ADDR ),
-                    SSDP_PORT );
-            super.send( packet );
+                    InetAddress.getByName(SSDP_MULTICAST_ADDR),
+                    SSDP_PORT);
+            super.send(packet);
             http.close();
 
         } catch (Exception e) {

@@ -37,7 +37,7 @@ public class ByteUtilTest {
 
 
     @Test
-    public void getShiftedBits(){
+    public void getShiftedBits() {
         assertEquals(1, ByteUtil.getShiftedBits((byte)0b1000_0000, 7, 1));
         assertEquals(1, ByteUtil.getShiftedBits((byte)0b0001_0000, 4, 1));
         assertEquals(1, ByteUtil.getShiftedBits((byte)0b0000_0001, 0, 1));
@@ -49,14 +49,14 @@ public class ByteUtilTest {
 
 
     @Test
-    public void getBits(){
+    public void getBits() {
         assertEquals(0x01, ByteUtil.getBits((byte)0x11, 1));
         assertEquals(0x03, ByteUtil.getBits((byte)0x13, 4));
         assertEquals((byte)0x55, ByteUtil.getBits((byte)0x55, 8));
     }
 
     @Test
-    public void getBitsMSB(){
+    public void getBitsMSB() {
         assertEquals(0x01, ByteUtil.getBitsMSB((byte)0x80, 1));
         assertEquals(0x05, ByteUtil.getBitsMSB((byte)0x52, 4));
         assertEquals((byte)0x55, ByteUtil.getBitsMSB((byte)0x55, 8));
@@ -65,7 +65,7 @@ public class ByteUtilTest {
     }
 
     @Test
-    public void getBitsArray(){
+    public void getBitsArray() {
         assertArrayEquals(new byte[]{}, ByteUtil.getBits(new byte[]{0x00}, 0));
         assertArrayEquals(new byte[]{0x00}, ByteUtil.getBits(new byte[]{}, 1));
         assertArrayEquals(new byte[]{0x00,0x00,0x00,0x00}, ByteUtil.getBits(new byte[]{0x00}, 32));
@@ -76,7 +76,7 @@ public class ByteUtilTest {
     }
 
     @Test
-    public void getReverseByteOrder(){
+    public void getReverseByteOrder() {
         assertArrayEquals(new byte[]{}, ByteUtil.getReverseByteOrder(new byte[]{}));
         assertArrayEquals(new byte[]{0x11}, ByteUtil.getReverseByteOrder(new byte[]{0x11}));
         assertArrayEquals(new byte[]{0x22,0x11}, ByteUtil.getReverseByteOrder(new byte[]{0x11,0x22}));
@@ -85,7 +85,7 @@ public class ByteUtilTest {
 
 
     @Test
-    public void toFormattedString(){
+    public void toFormattedString() {
         byte[] data = new byte[1];
         assertEquals("000  00                       '.       '",
                 ByteUtil.toFormattedString(data));
@@ -110,7 +110,7 @@ public class ByteUtilTest {
 
 
     @Test
-    public void shiftLeft(){
+    public void shiftLeft() {
         assertArrayEquals(         new byte[]{},
                 ByteUtil.shiftLeft(new byte[]{}, 4));
         assertArrayEquals(         new byte[]{0b0000_0001},
@@ -128,7 +128,7 @@ public class ByteUtilTest {
     }
 
     @Test
-    public void shiftRight(){
+    public void shiftRight() {
         assertArrayEquals(         new byte[]{},
                 ByteUtil.shiftRight(new byte[]{}, 4));
         assertArrayEquals(         new byte[]{0b0000_0001},

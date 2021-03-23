@@ -78,9 +78,9 @@ public class NioServer extends NioNetwork{
      *
      * @param	data	the data to broadcast
      */
-    public void broadcast(byte[] data){
-        synchronized(clients){
-            for(InetSocketAddress target : clients.keySet()){
+    public void broadcast(byte[] data) {
+        synchronized(clients) {
+            for (InetSocketAddress target : clients.keySet()) {
                 send(target, data);
             }
         }

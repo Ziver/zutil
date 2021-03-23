@@ -42,24 +42,24 @@ public class BreadthFirstSearch implements PathFinder{
      * @param stop is the goal Node
      * @return A list with the path
      */
-    public LinkedList<PathNode> find(PathNode start, PathNode stop){
+    public LinkedList<PathNode> find(PathNode start, PathNode stop) {
         Queue<PathNode> queue = new LinkedList<>();
         HashSet<PathNode> visited = new HashSet<>();
 
         queue.add(start);
-        visited.add( start );
+        visited.add(start);
 
         PathNode tmp;
-        while(!queue.isEmpty()){
+        while (!queue.isEmpty()) {
             tmp = queue.poll();
 
-            for(PathNode next : tmp.getNeighbors()){
-                if(!visited.contains( next ) && tmp.getNeighborCost(next) > 0){
+            for (PathNode next : tmp.getNeighbors()) {
+                if (!visited.contains(next) && tmp.getNeighborCost(next) > 0) {
                     queue.add(next);
-                    visited.add( next );
+                    visited.add(next);
                     next.setParentNeighbor(tmp);
 
-                    if(next.equals(stop)){
+                    if (next.equals(stop)) {
                         return stop.traversTo(start);
                     }
                 }

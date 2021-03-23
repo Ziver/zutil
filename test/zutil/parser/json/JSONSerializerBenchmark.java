@@ -40,7 +40,7 @@ public class JSONSerializerBenchmark {
 
     @Test
     public void testJavaLegacySerialize() throws IOException, ClassNotFoundException{
-        for(int i=0; i<TEST_EXECUTIONS; i++){
+        for (int i=0; i<TEST_EXECUTIONS; i++){
             TestClass sourceObj = new TestClass().init();
 
             ByteArrayOutputStream bout = new ByteArrayOutputStream();
@@ -61,7 +61,7 @@ public class JSONSerializerBenchmark {
 
     @Test
     public void testJavaJSONSerialize() throws IOException {
-        for(int i=0; i<TEST_EXECUTIONS; i++){
+        for (int i=0; i<TEST_EXECUTIONS; i++){
             TestClass sourceObj = new TestClass().init();
 
             TestClass targetObj = JSONSerializerTest.sendReceiveObject(sourceObj);
@@ -72,7 +72,7 @@ public class JSONSerializerBenchmark {
 
     @Test
     public void testOutputJavaLegacySerialize() throws IOException {
-        for(int i=0; i<TEST_EXECUTIONS; i++){
+        for (int i=0; i<TEST_EXECUTIONS; i++){
             TestClass sourceObj = new TestClass().init();
 
             ByteArrayOutputStream bout = new ByteArrayOutputStream();
@@ -86,7 +86,7 @@ public class JSONSerializerBenchmark {
 
     @Test
     public void testOutputJavaJSONSerialize() throws IOException {
-        for(int i=0; i<TEST_EXECUTIONS; i++){
+        for (int i=0; i<TEST_EXECUTIONS; i++){
             TestClass sourceObj = new TestClass().init();
 
             String targetObj = JSONSerializerTest.writeObjectToJson(sourceObj);
@@ -104,7 +104,7 @@ public class JSONSerializerBenchmark {
         out.close();
         byte[] data = bout.toByteArray();
 
-        for(int i=0; i<TEST_EXECUTIONS; i++){
+        for (int i=0; i<TEST_EXECUTIONS; i++){
             ByteArrayInputStream bin = new ByteArrayInputStream(data);
             ObjectInputStream in = new ObjectInputStream(bin);
             TestClass targetObj = (TestClass) in.readObject();

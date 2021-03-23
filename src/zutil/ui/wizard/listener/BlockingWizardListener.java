@@ -45,11 +45,11 @@ public class BlockingWizardListener implements WizardListener{
      * 			as a boolean if the wizard was canceled and "canceledPage"
      * 			witch is the page where the cancel button was pressed
      */
-    public HashMap<String, Object> getValues(){
-        while(values == null){
-            try{
+    public HashMap<String, Object> getValues() {
+        while (values == null) {
+            try {
                 Thread.sleep(100);
-            }catch(Exception e){}
+            } catch(Exception e) {}
         }
         return values;
     }

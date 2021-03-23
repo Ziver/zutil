@@ -101,7 +101,7 @@ public class Templator {
      * be regenerated if the file changes.
      */
     public Templator(File tmpl) throws IOException {
-        if(tmpl == null)
+        if (tmpl == null)
             throw new IOException("File can not be null!");
 
         this.data = new HashMap<>();
@@ -110,33 +110,33 @@ public class Templator {
         this.lastModified = file.lastModified();
     }
 
-    public Templator(String tmpl){
+    public Templator(String tmpl) {
         this.data = new HashMap<>();
         parseTemplate(tmpl);
     }
 
 
-    public void set(String key, Object data){
+    public void set(String key, Object data) {
         this.data.put(key, data);
     }
-    public Object get(String key){
+    public Object get(String key) {
         return this.data.get(key);
     }
-    public void remove(String key){
+    public void remove(String key) {
         this.data.remove(key);
     }
 
     /**
      * Will clear all data attributes
      */
-    public void clear(){
+    public void clear() {
         data.clear();
     }
 
-    public String compile(){
-        if(file != null && lastModified != file.lastModified()){
+    public String compile() {
+        if (file != null && lastModified != file.lastModified()) {
             try {
-                log.info("Template file("+file.getName()+") changed. Regenerating template...");
+                log.info("Template file(" + file.getName() + ") changed. Regenerating template...");
                 parseTemplate(FileUtil.getContent(file));
                 this.lastModified = file.lastModified();
             } catch(IOException e) {
@@ -145,7 +145,7 @@ public class Templator {
         }
 
         StringBuilder str = new StringBuilder();
-        if(tmplRoot != null)
+        if (tmplRoot != null)
             tmplRoot.compile(str);
         return str.toString();
     }
@@ -153,17 +153,17 @@ public class Templator {
     /**
      * Will parse or re-parse the source template.
      */
-    private void parseTemplate(String tmpl){
+    private void parseTemplate(String tmpl) {
         tmplRoot = parseTemplate(new TemplateNode(), tmpl, new MutableInt(), null);
     }
-    private TemplateNode parseTemplate(TemplateNode root, String tmpl, MutableInt m, String parentTag){
+    private TemplateNode parseTemplate(TemplateNode root, String tmpl, MutableInt m, String parentTag) {
         StringBuilder data = new StringBuilder();
         boolean tagOpen = false;
 
-        for(; m.i<tmpl.length(); ++m.i){
+        for (; m.i<tmpl.length(); ++m.i) {
             char c = tmpl.charAt(m.i);
-            String d = ""+ c + (m.i+1<tmpl.length() ? tmpl.charAt(m.i+1) : ' ');
-            switch( d ){
+            String d = "" + c + (m.i+1<tmpl.length() ? tmpl.charAt(m.i+1) : ' ');
+            switch(d) {
                 case "{{":
                     root.add(new TemplateStaticString(data.toString()));
                     data.delete(0, data.length());
@@ -171,7 +171,7 @@ public class Templator {
                     ++m.i;
                     break;
                 case "}}":
-                    if(!tagOpen){ // Tag not opened, incorrect enclosure
+                    if (!tagOpen) { // Tag not opened, incorrect enclosure
                         data.append(c);
                         continue;
                     }
@@ -192,10 +192,10 @@ public class Templator {
                             break;
                         case '/': // End tag
                             // Is this tag closing the parent?
-                            if(parentTag != null && tagName.endsWith(parentTag.substring(1)))
+                            if (parentTag != null && tagName.endsWith(parentTag.substring(1)))
                                 return root;
                             log.severe("Closing non-opened tag: {{" + tagName + "}}");
-                            root.add(new TemplateStaticString("{{"+tagName+"}}"));
+                            root.add(new TemplateStaticString("{{" + tagName + "}}"));
                             break;
                         case '!': // Comment
                             break;
@@ -208,16 +208,16 @@ public class Templator {
                     break;
             }
         }
-        if(tagOpen) // Incomplete tag, insert it as normal text
+        if (tagOpen) // Incomplete tag, insert it as normal text
             data.insert(0, "{{");
-        if(data.length() > 0) // Still some text left, add to node
+        if (data.length() > 0) // Still some text left, add to node
             root.add(new TemplateStaticString(data.toString()));
 
         // If we get to this point means that this node is incorrectly close
         // or this is the end of the file, so we convert it to a normal node
-        if(parentTag != null) {
+        if (parentTag != null) {
             root = new TemplateNode(root);
-            String tagName = "{{"+parentTag+"}}";
+            String tagName = "{{" + parentTag + "}}";
             log.severe("Missing closure of tag: " + tagName);
             root.addFirst(new TemplateStaticString(tagName));
         }
@@ -234,22 +234,22 @@ public class Templator {
     protected class TemplateNode implements TemplateEntity {
         private List<TemplateEntity> entities;
 
-        public TemplateNode(){
+        public TemplateNode() {
             this.entities = new ArrayList<>();
         }
-        public TemplateNode(TemplateNode node){
+        public TemplateNode(TemplateNode node) {
             this.entities = node.entities;
         }
 
-        public void addFirst(TemplateEntity s){
+        public void addFirst(TemplateEntity s) {
             entities.add(0, s);
         }
-        public void add(TemplateEntity s){
+        public void add(TemplateEntity s) {
             entities.add(s);
         }
 
         public void compile(StringBuilder str) {
-            for(TemplateEntity sec : entities)
+            for (TemplateEntity sec : entities)
                 sec.compile(str);
         }
     }
@@ -257,38 +257,38 @@ public class Templator {
     protected class TemplateCondition extends TemplateNode {
         private TemplateDataAttribute attrib;
 
-        public TemplateCondition(String key){
+        public TemplateCondition(String key) {
             this.attrib = new TemplateDataAttribute(key);
         }
 
         public void compile(StringBuilder str) {
             Object obj = attrib.getObject();
-            if(obj != null) {
-                if(obj instanceof Boolean){
+            if (obj != null) {
+                if (obj instanceof Boolean) {
                     if ((Boolean) obj)
                         super.compile(str);
                 }
-                else if(obj instanceof Short){
+                else if (obj instanceof Short) {
                     if ((Short) obj != 0)
                         super.compile(str);
                 }
-                else if(obj instanceof Integer){
+                else if (obj instanceof Integer) {
                     if ((Integer) obj != 0)
                         super.compile(str);
                 }
-                else if(obj instanceof Long){
+                else if (obj instanceof Long) {
                     if ((Long) obj != 0L)
                         super.compile(str);
                 }
-                else if(obj instanceof Float){
+                else if (obj instanceof Float) {
                     if ((Float) obj != 0f)
                         super.compile(str);
                 }
-                else if(obj instanceof Double){
+                else if (obj instanceof Double) {
                     if ((Double) obj != 0d)
                         super.compile(str);
                 }
-                else if(obj instanceof Iterable || obj.getClass().isArray()) {
+                else if (obj instanceof Iterable || obj.getClass().isArray()) {
                     Object prevObj = get(".");
                     set(".", obj);
 
@@ -306,7 +306,7 @@ public class Templator {
                     }
 
                     // Reset map to parent object
-                    if(prevObj != null)
+                    if (prevObj != null)
                         set(".", prevObj);
                     else
                         remove(".");
@@ -321,28 +321,28 @@ public class Templator {
     protected class TemplateNegativeCondition extends TemplateNode {
         private TemplateDataAttribute attrib;
 
-        public TemplateNegativeCondition(String key){
+        public TemplateNegativeCondition(String key) {
             this.attrib = new TemplateDataAttribute(key);
         }
 
         public void compile(StringBuilder str) {
             Object obj = attrib.getObject();
-            if(obj == null)
+            if (obj == null)
                 super.compile(str);
             else {
-                if(obj instanceof Boolean) {
-                    if ( ! (Boolean) obj)
+                if (obj instanceof Boolean) {
+                    if (! (Boolean) obj)
                         super.compile(str);
                 }
-                else if(obj instanceof Integer){
+                else if (obj instanceof Integer) {
                     if ((Integer) obj == 0)
                         super.compile(str);
                 }
-                else if(obj instanceof Collection) {
+                else if (obj instanceof Collection) {
                     if (((Collection) obj).isEmpty())
                         super.compile(str);
                 }
-                else if(obj.getClass().isArray()) {
+                else if (obj.getClass().isArray()) {
                     if (((Object[]) obj).length <= 0)
                         super.compile(str);
                 }
@@ -353,7 +353,7 @@ public class Templator {
     protected class TemplateStaticString implements TemplateEntity {
         private String text;
 
-        public TemplateStaticString(String text){
+        public TemplateStaticString(String text) {
             this.text = text;
         }
 
@@ -366,34 +366,34 @@ public class Templator {
         private String tag;
         private String[] keys;
 
-        public TemplateDataAttribute(String tag){
+        public TemplateDataAttribute(String tag) {
             this.tag = tag;
             this.keys = tag.trim().split("\\.");
-            if(this.keys.length == 0)
+            if (this.keys.length == 0)
                 this.keys = new String[]{"."};
-            if(this.keys[0].isEmpty()) // if tag starts with "."
+            if (this.keys[0].isEmpty()) // if tag starts with "."
                 this.keys[0] = ".";
         }
 
 
-        public Object getObject(){
+        public Object getObject() {
             if (data.containsKey(tag))
                 return data.get(tag);
             else if (data.containsKey(keys[0]) && data.get(keys[0]) != null) {
                 Object obj = data.get(keys[0]);
-                for(int i=1; i<keys.length; ++i){
+                for (int i=1; i<keys.length; ++i) {
                     obj = getFieldValue(obj, keys[i]);
-                    if(obj == null)
+                    if (obj == null)
                         return null;
                 }
                 return obj;
             }
             return null;
         }
-        protected Object getFieldValue(Object obj, String attrib){
+        protected Object getFieldValue(Object obj, String attrib) {
             try {
-                if(attrib.endsWith("()")){ // Is this a function call?
-                    if(attrib.length() > 2) {
+                if (attrib.endsWith("()")) { // Is this a function call?
+                    if (attrib.length() > 2) {
                         String funcName = attrib.substring(0, attrib.length()-2);
                         // Using a loop as the direct lookup throws a exception if no field was found
                         // So this is probably a bit faster
@@ -405,9 +405,9 @@ public class Templator {
                         }
                     }
                 }
-                else if(obj.getClass().isArray() && "length".equals(attrib))
+                else if (obj.getClass().isArray() && "length".equals(attrib))
                     return Array.getLength(obj);
-                else if(obj instanceof Collection && "length".equals(attrib))
+                else if (obj instanceof Collection && "length".equals(attrib))
                     return ((Collection) obj).size();
                 else {
                     // Using a loop as the direct lookup throws a exception if no field was found
@@ -419,7 +419,7 @@ public class Templator {
                         }
                     }
                 }
-            }catch (IllegalAccessException | InvocationTargetException e){
+            } catch (IllegalAccessException | InvocationTargetException e) {
                 log.log(Level.WARNING, null, e);
             }
             return null;
@@ -428,8 +428,8 @@ public class Templator {
 
         public void compile(StringBuilder str) {
             Object obj = getObject();
-            if(obj != null)
-                if(obj instanceof Templator)
+            if (obj != null)
+                if (obj instanceof Templator)
                     str.append(((Templator) obj).compile());
                 else
                     str.append(obj.toString());

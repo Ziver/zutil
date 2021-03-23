@@ -52,8 +52,8 @@ public class ProcStat {
     private static Timer updateTimer = new Timer(TTL);
 
 
-    private synchronized static void update(){
-        if(!updateTimer.hasTimedOut())
+    private synchronized static void update() {
+        if (!updateTimer.hasTimedOut())
             return;
 
         try {
@@ -67,21 +67,21 @@ public class ProcStat {
     protected static void parse(BufferedReader in) throws IOException {
         updateTimer.start();
         String line;
-        while((line=in.readLine()) != null){
+        while ((line=in.readLine()) != null) {
             String[] str = line.split("\\s+");
-            if(str[0].equals("cpu")) {
+            if (str[0].equals("cpu")) {
                 cpuTotal.update(str);
             }
-            else if(str[0].startsWith("cpu")){
+            else if (str[0].startsWith("cpu")) {
                 int cpuId = Integer.parseInt(str[0].substring(3));
-                if(cpus.size() <= cpuId)
+                if (cpus.size() <= cpuId)
                     cpus.add(new CpuStats());
                 cpus.get(cpuId).update(str);
             }
-            else if(str[0].startsWith("btime")){
+            else if (str[0].startsWith("btime")) {
                 uptime = Long.parseLong(str[1]);
             }
-            else if(str[0].startsWith("processes")){
+            else if (str[0].startsWith("processes")) {
                 processes = Long.parseLong(str[1]);
             }
         }
@@ -89,25 +89,25 @@ public class ProcStat {
 
 
 
-    public static CpuStats getTotalCpuStats(){
+    public static CpuStats getTotalCpuStats() {
         update();
         return cpuTotal;
     }
-    public static Iterator<CpuStats> getCpuStats(){
+    public static Iterator<CpuStats> getCpuStats() {
         update();
         return cpus.iterator();
     }
     /**
      * @return the time at which the system booted, in seconds since the Unix epoch.
      */
-    public static long getUptime(){
+    public static long getUptime() {
         update();
         return uptime;
     }
     /**
      * @return the number of processes and threads created, which includes (but is not limited to) those created by calls to the fork() and clone() system calls.
      */
-    public static long getProcesses(){
+    public static long getProcesses() {
         update();
         return processes;
     }
@@ -135,10 +135,10 @@ public class ProcStat {
         private float load_iowait;
         private float load_virtual;
 
-        protected CpuStats(){}
-        protected void update(String[] stats){
+        protected CpuStats() {}
+        protected void update(String[] stats) {
             long newUser, newNice, newSystem, newIdle, newIowait, newIrq, newSoftirq, newSteal=0, newGuest=0, newGuestNice=0;
-            if(stats.length >= 1+8){
+            if (stats.length >= 1+8) {
                 newUser =    Long.parseLong(stats[1]);
                 newNice =    Long.parseLong(stats[2]);
                 newSystem =  Long.parseLong(stats[3]);
@@ -146,7 +146,7 @@ public class ProcStat {
                 newIowait =  Long.parseLong(stats[5]);
                 newIrq =     Long.parseLong(stats[6]);
                 newSoftirq = Long.parseLong(stats[7]);
-                if(stats.length >= 1+8+3){
+                if (stats.length >= 1+8+3) {
                     newSteal =     Long.parseLong(stats[8]);
                     newGuest =     Long.parseLong(stats[9]);
                     newGuestNice = Long.parseLong(stats[10]);
@@ -200,15 +200,15 @@ public class ProcStat {
 
     }
 
-    public static void main(String[] args){
-        while(true){
+    public static void main(String[] args) {
+        while (true) {
             Iterator<CpuStats> it = ProcStat.getCpuStats();
-            for(int i=0; it.hasNext(); ++i){
+            for (int i=0; it.hasNext(); ++i) {
                 CpuStats cpu = it.next();
-                System.out.print("CPU"+i+": " + cpu.getTotalLoad()+ " ");
+                System.out.print("CPU" + i + ": " + cpu.getTotalLoad() + " ");
             }
             System.out.println("Total Load: " + ProcStat.getTotalCpuStats().getTotalLoad());
-            try{Thread.sleep(1000);}catch (Exception e){}
+            try {Thread.sleep(1000);} catch (Exception e) {}
         }
     }
 }

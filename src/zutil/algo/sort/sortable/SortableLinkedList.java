@@ -30,7 +30,7 @@ import java.util.LinkedList;
 public class SortableLinkedList<T> implements SortableDataList<T>{
     private LinkedList<T> list;
 
-    public SortableLinkedList(LinkedList<T> list){
+    public SortableLinkedList(LinkedList<T> list) {
         this.list = list;
     }
 
@@ -38,7 +38,7 @@ public class SortableLinkedList<T> implements SortableDataList<T>{
         return list.get(i);
     }
 
-    public void set(int i, T o){
+    public void set(int i, T o) {
         list.set(i, o);
     }
 

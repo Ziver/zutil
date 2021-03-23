@@ -32,24 +32,24 @@ public class ClientData {
     private long lastMessageReceived;
 
 
-    public ClientData(SocketChannel socketChannel){
+    public ClientData(SocketChannel socketChannel) {
         this.socketChannel = socketChannel;
     }
 
 
-    public SocketChannel getSocketChannel(){
+    public SocketChannel getSocketChannel() {
         return socketChannel;
     }
 
-    public InetSocketAddress getAddress(){
+    public InetSocketAddress getAddress() {
         return (InetSocketAddress) socketChannel.socket().getRemoteSocketAddress();
     }
 
-    public void setLastMessageReceived(long time){
+    public void setLastMessageReceived(long time) {
         lastMessageReceived = time;
     }
 
-    public long getLastMessageReceived(){
+    public long getLastMessageReceived() {
         return lastMessageReceived;
     }
 }

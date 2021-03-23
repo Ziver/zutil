@@ -40,7 +40,7 @@ import java.lang.reflect.Field;
  *	    &#64;WSDocumentation("The users last name")
  *		public String lastname;
  *
- *		public TestObject(String n, String l){
+ *		public TestObject(String n, String l) {
  *			name = n;
  *			lastname = l;
  *		}

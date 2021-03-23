@@ -47,7 +47,7 @@ public class AptGet {
         packageTimer.reset();
     }
 
-    public static void upgrade(){
+    public static void upgrade() {
         update();
         OSAbstractionLayer.exec("apt-get -y " +
                 // Dont display configuration conflicts
@@ -56,9 +56,9 @@ public class AptGet {
         packageTimer.reset();
     }
 
-    public static void update(){
+    public static void update() {
         // Only run every 5 min
-        if(updateTimer.hasTimedOut()){
+        if (updateTimer.hasTimedOut()) {
             OSAbstractionLayer.exec("apt-get update");
             updateTimer.start();
         }
@@ -70,15 +70,15 @@ public class AptGet {
     }
 
 
-    public static Package getPackage(String pkg){
+    public static Package getPackage(String pkg) {
         updatePackages();
         return packages.get(pkg);
     }
-    public static synchronized void updatePackages(){
+    public static synchronized void updatePackages() {
         // Only run every 5 min
-        if(packageTimer.hasTimedOut()){
+        if (packageTimer.hasTimedOut()) {
             String[] output = OSAbstractionLayer.exec("dpkg --list");
-            for(int i=5; i<output.length; ++i) {
+            for (int i=5; i<output.length; ++i) {
                 packages.put(output[i], new Package(output[5]));
             }
             packageTimer.start();
@@ -123,15 +123,15 @@ public class AptGet {
         private String description;
 
 
-        protected Package(String dpkgStr){
-            switch (dpkgStr.charAt(0)){
+        protected Package(String dpkgStr) {
+            switch (dpkgStr.charAt(0)) {
                 case 'u': expectedState = PackageState.Unknown; break;
                 case 'i': expectedState = PackageState.Installed; break;
                 case 'r': expectedState = PackageState.Removed; break;
                 case 'p': expectedState = PackageState.Purged; break;
                 case 'h': expectedState = PackageState.Holding; break;
             }
-            switch (dpkgStr.charAt(0)){
+            switch (dpkgStr.charAt(0)) {
                 case 'n': currentState = PackageState.NotInstalled; break;
                 case 'i': currentState = PackageState.Installed; break;
                 case 'c': currentState = PackageState.ConfigFiles; break;
@@ -141,7 +141,7 @@ public class AptGet {
                 case 'w': currentState = PackageState.TriggersAwaited; break;
                 case 't': currentState = PackageState.TriggersPending; break;
             }
-            if(dpkgStr.charAt(2) == 'r')
+            if (dpkgStr.charAt(2) == 'r')
                 errorState = PackageState.ReinstallRequired;
 
             String[] tmp = dpkgStr.split("[ \\t]*", 4);

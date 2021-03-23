@@ -43,7 +43,7 @@ public class LinearRegression {
      *     h(x) = theta0 * x0 + theta1 * x1 + ... + thetan * xn =&gt; transpose(theta) * x
      * </i>
      */
-    protected static double[] calculateHypothesis(double[][] x, double[] theta){
+    protected static double[] calculateHypothesis(double[][] x, double[] theta) {
         return Matrix.multiply(x, theta);
     }
 
@@ -56,7 +56,7 @@ public class LinearRegression {
      * m = learning data size (rows)
      * @return a number indicating the error rate
      */
-    protected static double calculateCost(double[][] x, double[] y, double[] theta){
+    protected static double calculateCost(double[][] x, double[] y, double[] theta) {
         double[] hypothesis = calculateHypothesis(x, theta);
         double[] normalized = Matrix.subtract(hypothesis, y);
 
@@ -64,14 +64,14 @@ public class LinearRegression {
                 Matrix.Elemental.pow(normalized,2));
     }
 
-    private static double calculateDiff(double[] vector1, double[] vector2){
+    private static double calculateDiff(double[] vector1, double[] vector2) {
         return Math.abs(Matrix.sum(vector1) - Matrix.sum(vector2));
     }
 
     /**
      * Will try to find the best theta value.
      */
-    public static double[] gradientDescent(double[][] x, double[] y, double[] theta, double alpha){
+    public static double[] gradientDescent(double[][] x, double[] y, double[] theta, double alpha) {
         double[] newTheta = theta.clone();
         double[] prevTheta = new double[newTheta.length];
         double thetaDiff = 0;
@@ -96,7 +96,7 @@ public class LinearRegression {
      * <br>
      * @return the theta that was found to minimize the cost function
      */
-    public static double[] gradientDescentIteration(double[][] x, double[] y, double[] theta, double alpha){
+    public static double[] gradientDescentIteration(double[][] x, double[] y, double[] theta, double alpha) {
         double[] newTheta = new double[theta.length];
         double m = y.length;
         double[] hypothesis = calculateHypothesis(x, theta);

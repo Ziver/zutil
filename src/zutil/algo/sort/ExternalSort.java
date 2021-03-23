@@ -89,7 +89,7 @@ public class ExternalSort {
      *
      * @param   files   a list of files to be merged
      */
-    private void mergeFiles(LinkedList<File> files){
+    private void mergeFiles(LinkedList<File> files) {
         try	{
             BufferedReader[] chunkReader = new BufferedReader[files.size()];
             String[] rows = new String[files.size()];
@@ -97,23 +97,23 @@ public class ExternalSort {
 
             boolean someFileStillHasRows = false;
 
-            for (int i=0; i<files.size(); i++){
+            for (int i=0; i<files.size(); i++) {
                 chunkReader[i] = new BufferedReader(new FileReader(files.get(i)));
 
                 // get the first row
                 String line = chunkReader[i].readLine();
-                if (line != null){
+                if (line != null) {
                     rows[i] = line;
                     someFileStillHasRows = true;
                 }
-                else{
+                else {
                     rows[i] = null;
                 }
 
             }
 
             String row;
-            while (someFileStillHasRows){
+            while (someFileStillHasRows) {
                 String min;
                 int minIndex;
 
@@ -128,16 +128,16 @@ public class ExternalSort {
                 }
 
                 // check which one is minimum
-                for(int i=1; i<rows.length ;i++){
+                for (int i=1; i<rows.length; i++) {
                     row = rows[i];
-                    if (min!=null) {
-                        if(row!=null && row.compareTo(min) < 0){
+                    if (min != null) {
+                        if (row != null && row.compareTo(min) < 0) {
                             minIndex = i;
                             min = row;
                         }
                     }
-                    else{
-                        if(row!=null){
+                    else {
+                        if (row != null) {
                             min = row;
                             minIndex = i;
                         }
@@ -147,27 +147,27 @@ public class ExternalSort {
                 if (minIndex < 0) {
                     someFileStillHasRows = false;
                 }
-                else{
+                else {
                     // write to the sorted file
                     out.append(rows[minIndex]);
                     out.newLine();
 
                     // get another row from the file that had the min
                     String line = chunkReader[minIndex].readLine();
-                    if (line != null){
+                    if (line != null) {
                         rows[minIndex] = line;
                     }
-                    else{
+                    else {
                         rows[minIndex] = null;
                     }
                 }
 
                 // check if one still has rows
                 someFileStillHasRows = false;
-                for(int i=0; i<rows.length ; i++){
-                    if(rows[i] != null){
-                        if (minIndex < 0){
-                            throw(new IOException("Error sorting!!!"));
+                for (int i=0; i<rows.length; i++) {
+                    if (rows[i] != null) {
+                        if (minIndex < 0) {
+                            throw new IOException("Error sorting!!!");
                         }
                         someFileStillHasRows = true;
                         break;
@@ -175,13 +175,13 @@ public class ExternalSort {
                 }
 
                 // check the actual files one more time
-                if (!someFileStillHasRows){
+                if (!someFileStillHasRows) {
                     //write the last one not covered above
-                    for(int i=0; i<rows.length ; i++){
-                        if (rows[i] == null){
+                    for (int i=0; i<rows.length; i++) {
+                        if (rows[i] == null) {
                             String line = chunkReader[i].readLine();
-                            if (line != null){
-                                someFileStillHasRows=true;
+                            if (line != null) {
+                                someFileStillHasRows = true;
                                 rows[i] = line;
                             }
                         }
@@ -190,11 +190,11 @@ public class ExternalSort {
             }
             // close all the files
             out.close();
-            for(int i=0; i<chunkReader.length ; i++){
+            for (int i=0; i<chunkReader.length; i++) {
                 chunkReader[i].close();
             }
         }
-        catch (Exception ex){
+        catch (Exception ex) {
             ex.printStackTrace();
             System.exit(-1);
         }
@@ -215,10 +215,10 @@ public class ExternalSort {
             //QuickSort.sort(new SortableLinkedList(chunk));
             Collections.sort(chunk);
 
-            File file = new File("extsort"+chunkFiles.size()+".txt");
+            File file = new File("extsort" + chunkFiles.size() + ".txt");
             chunkFiles.add(file);
             writeChunk(chunk,file);
-        }while(!chunk.isEmpty());
+        }while (!chunk.isEmpty());
 
         return chunkFiles;
     }
@@ -232,9 +232,9 @@ public class ExternalSort {
     private LinkedList<String> readChunk(BufferedReader in) throws IOException{
         LinkedList<String> list = new LinkedList<>();
         String tmp;
-        for(int i=0; i<CHUNK_SIZE ;i++){
+        for (int i=0; i<CHUNK_SIZE; i++) {
             tmp = in.readLine();
-            if(tmp == null) break;
+            if (tmp == null) break;
             list.add(tmp);
         }
         return list;
@@ -256,7 +256,7 @@ public class ExternalSort {
         out.close();
     }
 
-    private void removeFiles(LinkedList<File> list){
+    private void removeFiles(LinkedList<File> list) {
         for (File file : list) {
             file.delete();
         }

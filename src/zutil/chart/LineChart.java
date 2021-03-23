@@ -43,7 +43,7 @@ public class LineChart extends LineAxis{
         // Draw lines
 
         Point prevP = null;
-        for(Point p : data.getData()){
+        for (Point p : data.getData()) {
             if (prevP != null)
                 drawLine(g2, bound, xScale, yScale, prevP.x, prevP.y, p.x, p.y);
             prevP = p;
@@ -51,7 +51,7 @@ public class LineChart extends LineAxis{
     }
 
     private void drawLine(Graphics2D g2, Rectangle bound, double xScale, double yScale,
-                          double x1, double y1, double x2, double y2){
+                          double x1, double y1, double x2, double y2) {
         // Line
         g2.draw(new Line2D.Double(
                 getXCoordinate(x1, xScale, bound),

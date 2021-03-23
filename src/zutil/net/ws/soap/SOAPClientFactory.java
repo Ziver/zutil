@@ -49,8 +49,8 @@ public class SOAPClientFactory {
      * @param 	intf 	is the class of the web service definition
      * @return a client Object
      */
-    public static <T extends WSInterface> T createClient(URL url, Class<T> intf){
-        T obj = WSClientFactory.createClient( intf,
+    public static <T extends WSInterface> T createClient(URL url, Class<T> intf) {
+        T obj = WSClientFactory.createClient(intf,
                 new SOAPClientInvocationHandler(url, new WebServiceDef(intf)));
         return obj;
     }

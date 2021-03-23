@@ -57,7 +57,7 @@ public class CounterManager {
     }
     private static synchronized Counter getCounter(String clazz, String name) {
         Counter counter;
-        if ( ! counters.containsKey(clazz) || ! counters.get(clazz).containsKey(name)) {
+        if (! counters.containsKey(clazz) || ! counters.get(clazz).containsKey(name)) {
             // Get the platform MBeanServer
             MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
             // Unique identification of MBeans
@@ -68,7 +68,7 @@ public class CounterManager {
                 ObjectName objectName = new ObjectName(clazz + ":name=" + counter.getName());
                 mbs.registerMBean(counter, objectName);
                 // Register the singleton
-                if ( ! counters.containsKey(clazz))
+                if (! counters.containsKey(clazz))
                     counters.put(clazz, new HashMap<>());
                 counters.get(clazz).put(name, counter);
             } catch (Exception e) {
@@ -103,28 +103,28 @@ public class CounterManager {
         private AtomicInteger counter = new AtomicInteger();
 
 
-        protected Counter(String name){
+        protected Counter(String name) {
             this.name = name;
         }
 
 
-        public void add(int i){
+        public void add(int i) {
             int prev = counter.getAndAdd(i);
             updateMetaData(prev + i);
         }
-        public void set(int i){
+        public void set(int i) {
             counter.getAndSet(i);
             updateMetaData(i);
         }
-        public void increment(){
+        public void increment() {
             int i = counter.incrementAndGet();
             updateMetaData(i);
         }
-        public void decrement(){
+        public void decrement() {
             int i = counter.decrementAndGet();
             updateMetaData(i);
         }
-        private void updateMetaData(int i){
+        private void updateMetaData(int i) {
             if (max < i)
                 max = i;
             if (min > i)
@@ -142,7 +142,7 @@ public class CounterManager {
          * @return current value of the counter
          */
         @Override
-        public int getValue(){
+        public int getValue() {
             return counter.intValue();
         }
         /**

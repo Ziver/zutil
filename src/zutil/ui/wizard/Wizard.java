@@ -66,14 +66,14 @@ public class Wizard implements ActionListener{
     private ValidationFail oldFail;
 
 
-    private Wizard(WizardListener listener){
+    private Wizard(WizardListener listener) {
         this(listener, null);
     }
 
     /**
      * Creates a new Wizard
      */
-    public Wizard(WizardListener listener, WizardPage start){
+    public Wizard(WizardListener listener, WizardPage start) {
         this(listener, start, BACKGROUND_1);
     }
 
@@ -83,30 +83,30 @@ public class Wizard implements ActionListener{
      * @param start is the first page in the wizard
      * @param bg is the background image to use
      */
-    public Wizard(WizardListener listener, final WizardPage start, final String bg){
+    public Wizard(WizardListener listener, final WizardPage start, final String bg) {
         try {
             this.listener = listener;
             pages = new HistoryList<>();
             values = new HashMap<>();
-            handler = new WizardActionHandler( values );
+            handler = new WizardActionHandler(values);
 
             // GUI
             frame = new JFrame();
             initComponents();
-            sidebar.scale( false );
+            sidebar.scale(false);
 
             // add action listener to the buttons
-            back.addActionListener( this );
-            next.addActionListener( this );
-            cancel.addActionListener( this );
-            finish.addActionListener( this );
+            back.addActionListener(this);
+            next.addActionListener(this);
+            cancel.addActionListener(this);
+            finish.addActionListener(this);
 
             // Set the image in the sidebar
-            sidebar.setImage(ImageIO.read( FileUtil.getInputStream( bg ) ));
+            sidebar.setImage(ImageIO.read(FileUtil.getInputStream(bg)));
 
             // add the first page
-            pages.add( start );
-            displayWizardPage( start );
+            pages.add(start);
+            displayWizardPage(start);
 
         } catch (Exception e) {
             e.printStackTrace(MultiPrintStream.out);
@@ -116,7 +116,7 @@ public class Wizard implements ActionListener{
     /**
      * Sets the title of the Wizard
      */
-    public void setTitle(String s){
+    public void setTitle(String s) {
         frame.setTitle(s);
     }
 
@@ -126,21 +126,21 @@ public class Wizard implements ActionListener{
      * @param w is the width
      * @param h is the height
      */
-    public void setSize(int w, int h){
+    public void setSize(int w, int h) {
         frame.setSize(w, h);
     }
 
     /**
      * Displays the wizard
      */
-    public void start(){
+    public void start() {
         frame.setVisible(true);
     }
 
     /**
      * @return the JFrame used for the wizard
      */
-    public JFrame getFrame(){
+    public JFrame getFrame() {
         return frame;
     }
 
@@ -149,58 +149,60 @@ public class Wizard implements ActionListener{
      *
      * @param page is the page to be displayed
      */
-    protected void displayWizardPage(WizardPage page){
+    protected void displayWizardPage(WizardPage page) {
         pageContainer.getViewport().setView(page);
-        pageTitle.setText( page.getPageDescription() );
+        pageTitle.setText(page.getPageDescription());
     }
 
     public void actionPerformed(ActionEvent e) {
         // Back Button
-        if(e.getSource() == back){
+        if (e.getSource() == back) {
             WizardPage page = pages.getPrevious();
-            displayWizardPage( page );
-            if(pages.get(0) == page){
-                back.setEnabled( false );
+            displayWizardPage(page);
+            if (pages.get(0) == page) {
+                back.setEnabled(false);
             }
         }
         // Next Button and Finish Button
-        else if(e.getSource() == next || e.getSource() == finish){
+        else if (e.getSource() == next || e.getSource() == finish) {
             WizardPage page = pages.getCurrent();
-            page.registerValues( handler );
-            if(DEBUG) MultiPrintStream.out.println(values);
+            page.registerValues(handler);
+            if (DEBUG) MultiPrintStream.out.println(values);
 
-            ValidationFail fail = page.validate( values );
-            if(fail != null){
+            ValidationFail fail = page.validate(values);
+            if (fail != null) {
                 // reset old fail
-                if(oldFail != null) oldFail.getSource().setBorder( BorderFactory.createEmptyBorder() );
-                if(fail.getSource() != null)
-                    fail.getSource().setBorder( BorderFactory.createLineBorder(Color.RED) );
-                //pageStatus.setText( fail.getMessage() );
+                if (oldFail != null) oldFail.getSource().setBorder(BorderFactory.createEmptyBorder());
+                if (fail.getSource() != null)
+                    fail.getSource().setBorder(BorderFactory.createLineBorder(Color.RED));
+                //pageStatus.setText(fail.getMessage());
             }
-            else if(e.getSource() == finish){
+            else if (e.getSource() == finish) {
                 frame.dispose();
-                listener.onFinished( values );
+                listener.onFinished(values);
             }
-            else if(e.getSource() == next){
-                WizardPage nextPage = page.getNextPage( values );
-                if(nextPage == null){
+            else if (e.getSource() == next) {
+                WizardPage nextPage = page.getNextPage(values);
+                if (nextPage == null) {
                     frame.dispose();
-                    listener.onCancel(page, values );
+                    listener.onCancel(page, values);
                     return;
                 }
-                pages.add( nextPage );
-                displayWizardPage( nextPage );
-                back.setEnabled( true );
-                if( nextPage.isFinalPage() ){
-                    next.setEnabled( false );
-                    finish.setEnabled( true );
+
+                pages.add(nextPage);
+                displayWizardPage(nextPage);
+                back.setEnabled(true);
+
+                if (nextPage.isFinalPage()) {
+                    next.setEnabled(false);
+                    finish.setEnabled(true);
                 }
             }
         }
         // Cancel Button
-        else if(e.getSource() == cancel){
+        else if (e.getSource() == cancel) {
             frame.dispose();
-            listener.onCancel(pages.getCurrent(), values );
+            listener.onCancel(pages.getCurrent(), values);
         }
     }
 

@@ -65,19 +65,19 @@ public class CronTimerTest {
         try{
             CronTimer.getRange("50", 1,12);
             fail("Did not receive Exception");
-        } catch (IllegalArgumentException e){e.printStackTrace();} // We expect exception
+        } catch (IllegalArgumentException e) {e.printStackTrace();} // We expect exception
         try{
             CronTimer.getRange("0", 1,12);
             fail("Did not receive Exception");
-        } catch (IllegalArgumentException e){e.printStackTrace();} // We expect exception
+        } catch (IllegalArgumentException e) {e.printStackTrace();} // We expect exception
         try{
             CronTimer.getRange("1-50", 1,12);
             fail("Did not receive Exception");
-        } catch (IllegalArgumentException e){e.printStackTrace();} // We expect exception
+        } catch (IllegalArgumentException e) {e.printStackTrace();} // We expect exception
         try{
             CronTimer.getRange("0-5", 3,12);
             fail("Did not receive Exception");
-        } catch (IllegalArgumentException e){e.printStackTrace();} // We expect exception
+        } catch (IllegalArgumentException e) {e.printStackTrace();} // We expect exception
     }
 
     @Test
@@ -89,14 +89,14 @@ public class CronTimerTest {
     }
 
     @Test
-    public void minuteWildcard(){
+    public void minuteWildcard() {
         CronTimer cron = getCronTimer("0 * * * * *");
         assertEquals(1041382800000L, (long)cron.next(1041379200000L));
         assertEquals(1041382800000L, (long)cron.next(1041379260000L));
     }
 
     @Test
-    public void hourWildcard(){
+    public void hourWildcard() {
         CronTimer cron = getCronTimer("* 0 * * * *");
         assertEquals(1041379260000L, (long)cron.next(1041379200000L));
         assertEquals(1041379320000L, (long)cron.next(1041379260000L)); // minute change
@@ -105,7 +105,7 @@ public class CronTimerTest {
     }
 
     @Test
-    public void dayWildcard(){
+    public void dayWildcard() {
         CronTimer cron = getCronTimer("* * 1 * * *");
         assertEquals(1041379260000L, (long)cron.next(1041379200000L));
         assertEquals(1041379320000L, (long)cron.next(1041379260000L)); // minute change
@@ -113,7 +113,7 @@ public class CronTimerTest {
     }
 
     @Test
-    public void monthWildcard(){
+    public void monthWildcard() {
         CronTimer cron = getCronTimer("* * * 1 * *");
         assertEquals(1041379260000L, (long)cron.next(1041379200000L));
         assertEquals(1041382860000L, (long)cron.next(1041382800000L)); // hour change
@@ -122,14 +122,14 @@ public class CronTimerTest {
     }
 
     @Test
-    public void weekDayWildcard(){
+    public void weekDayWildcard() {
         CronTimer cron = getCronTimer("* * * * 3 *");
         assertEquals(1041379260000L, (long)cron.next(1041379200000L));
         assertEquals(1041984000000L, (long)cron.next(1041465600000L)); // day change
     }
 
     @Test
-    public void yearWildcard(){
+    public void yearWildcard() {
         CronTimer cron = getCronTimer("* * * * * 2003");
         assertEquals(1041379260000L, (long)cron.next(1041379200000L));
         assertEquals(1041379320000L, (long)cron.next(1041379260000L)); // min change

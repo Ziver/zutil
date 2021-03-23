@@ -43,7 +43,7 @@ public class MultiPrintStream extends PrintStream {
     //a instance of this class
     public static MultiPrintStream out = new MultiPrintStream();
 
-    public MultiPrintStream(){
+    public MultiPrintStream() {
         super(new PrintStream(System.out));
         streams = new ArrayList<>();
         streams.add(new PrintStream(System.out));
@@ -53,7 +53,7 @@ public class MultiPrintStream extends PrintStream {
      * This constructor makes a simple PrintStream that prints to the console and to a file
      * @param file is the file name to output to
      */
-    public MultiPrintStream(String file){
+    public MultiPrintStream(String file) {
         super(new PrintStream(System.out));
         try {
             streams = new ArrayList<>();
@@ -69,7 +69,7 @@ public class MultiPrintStream extends PrintStream {
      * This constructor takes a array of PrintStreams to be used
      * @param   streams         is a array of the streams that will be used
      */
-    public MultiPrintStream(PrintStream[] streams){
+    public MultiPrintStream(PrintStream[] streams) {
         super(streams[0]);
         this.streams = new ArrayList<>();
         Collections.addAll(this.streams, streams);
@@ -79,7 +79,7 @@ public class MultiPrintStream extends PrintStream {
      * This constructor takes a array of PrintStreams to be used
      * @param   instanceStream      is a array of the streams that will be used
      */
-    public static void makeInstance(MultiPrintStream instanceStream){
+    public static void makeInstance(MultiPrintStream instanceStream) {
         out = instanceStream;
     }
 
@@ -87,7 +87,7 @@ public class MultiPrintStream extends PrintStream {
      * Adds a PrintStream to the list of streams
      * @param p is the PrintStream to add
      */
-    public void addPrintStream(PrintStream p){
+    public void addPrintStream(PrintStream p) {
         streams.add(p);
     }
 
@@ -95,7 +95,7 @@ public class MultiPrintStream extends PrintStream {
      * Remove a PrintStream from the list
      * @param   p   is the PrintStream to remove
      */
-    public void removePrintStream(PrintStream p){
+    public void removePrintStream(PrintStream p) {
         streams.remove(p);
     }
 
@@ -103,7 +103,7 @@ public class MultiPrintStream extends PrintStream {
      * Remove a PrintStream from the list
      * @param   p   is the index of the PrintStream to remove
      */
-    public void removePrintStream(int p){
+    public void removePrintStream(int p) {
         streams.remove(p);
     }
 
@@ -111,58 +111,58 @@ public class MultiPrintStream extends PrintStream {
      * writes to all the PrintStreams
      */
     public void write(int b) {
-        for(int i=0; i<streams.size() ;i++)
+        for (int i=0; i<streams.size(); i++)
             streams.get(i).write(b);
     }
 
     /**
      * writes to all the PrintStreams
      */
-     public void write(byte buf[], int off, int len){
-        for(int i=0; i<streams.size() ;i++)
+     public void write(byte buf[], int off, int len) {
+        for (int i=0; i<streams.size(); i++)
             streams.get(i).write(buf, off, len);
     }
 
     /**
      * Prints with a new line to all the PrintStreams
      */
-    public void println(String s){
-        for(int i=0; i<streams.size() ;i++)
+    public void println(String s) {
+        for (int i=0; i<streams.size(); i++)
             streams.get(i).println(s);
     }
 
     /**
      * Prints to all the PrintStreams
      */
-    public void print(String s){
-        for(int i=0; i<streams.size() ;i++)
+    public void print(String s) {
+        for (int i=0; i<streams.size(); i++)
             streams.get(i).print(s);
     }
 
-    public void println(){			println("");}
-    public void println(boolean x){	println(String.valueOf(x));}
-    public void println(char x){	println(String.valueOf(x));}
-    public void println(char[] x){	println(new String(x));}
-    public void println(double x){	println(String.valueOf(x));}
-    public void println(float x){	println(String.valueOf(x));}
-    public void println(int x){		println(String.valueOf(x));}
-    public void println(long x){	println(String.valueOf(x));}
-    public void println(Object x){	println(String.valueOf(x));}
+    public void println() {			println("");}
+    public void println(boolean x) {println(String.valueOf(x));}
+    public void println(char x) {	println(String.valueOf(x));}
+    public void println(char[] x) {	println(new String(x));}
+    public void println(double x) {	println(String.valueOf(x));}
+    public void println(float x) {	println(String.valueOf(x));}
+    public void println(int x) {	println(String.valueOf(x));}
+    public void println(long x) {	println(String.valueOf(x));}
+    public void println(Object x) {	println(String.valueOf(x));}
 
-    public void print(boolean x){	print(String.valueOf(x));}
-    public void print(char x){		print(String.valueOf(x));}
-    public void print(char[] x){	print(new String(x));}
-    public void print(double x){	print(String.valueOf(x));}
-    public void print(float x){		print(String.valueOf(x));}
-    public void print(int x){		print(String.valueOf(x));}
-    public void print(long x){		print(String.valueOf(x));}
-    public void print(Object x){	print(String.valueOf(x));}
+    public void print(boolean x) {	print(String.valueOf(x));}
+    public void print(char x) {		print(String.valueOf(x));}
+    public void print(char[] x) {	print(new String(x));}
+    public void print(double x) {	print(String.valueOf(x));}
+    public void print(float x) {	print(String.valueOf(x));}
+    public void print(int x) {		print(String.valueOf(x));}
+    public void print(long x) {		print(String.valueOf(x));}
+    public void print(Object x) {	print(String.valueOf(x));}
 
 
 
-    public boolean checkError(){
-        for(int i=0; i<streams.size() ;i++)
-            if(streams.get(i).checkError())
+    public boolean checkError() {
+        for (int i=0; i<streams.size(); i++)
+            if (streams.get(i).checkError())
                 return true;
         return false;
     }
@@ -171,8 +171,8 @@ public class MultiPrintStream extends PrintStream {
     /**
      * closes all the PrintStreams
      */
-    public void close(){
-        for(int i=0; i<streams.size() ;i++)
+    public void close() {
+        for (int i=0; i<streams.size(); i++)
             streams.get(i).close();
     }
 
@@ -181,8 +181,8 @@ public class MultiPrintStream extends PrintStream {
      *
      * @param 	o 	is the Object to dump
      */
-    public void dump(Object o){
-        println(dumpToString( o, 1));
+    public void dump(Object o) {
+        println(dumpToString(o, 1));
     }
 
     /**
@@ -191,8 +191,8 @@ public class MultiPrintStream extends PrintStream {
      * @param 	o 	    is the Object to dump
      * @param 	depth	sets the object dump depth, the object recursion depth
      */
-    public void dump(Object o, int depth){
-        println(dumpToString( o, depth));
+    public void dump(Object o, int depth) {
+        println(dumpToString(o, depth));
     }
 
     /**
@@ -231,131 +231,131 @@ public class MultiPrintStream extends PrintStream {
      */
 
     private static String dumpToString(Object o , String head, int depth) {
-        if(o == null)
+        if (o == null)
             return "NULL";
         StringBuilder buffer = new StringBuilder();
         Class<?> oClass = o.getClass();
-        buffer.append( oClass.getName() );
+        buffer.append(oClass.getName());
         String nextHead = head + "\t";
         // Prints out Arrays
-        if ( oClass.isArray() ) {
-            buffer.append( "[" );
-            for ( int i=0; i<Array.getLength(o) ;i++ ) {
+        if (oClass.isArray()) {
+            buffer.append("[");
+            for (int i=0; i<Array.getLength(o); i++) {
                 Object value = Array.get(o,i);
                 buffer.append("\n");
                 buffer.append(nextHead);
-                buffer.append( (dumbCapable(value, depth-1) ?
-                        dumpToString(value, nextHead, depth-1) : value) );
-                if ( i+1<Array.getLength(o) )
-                    buffer.append( "," );
+                buffer.append((dumbCapable(value, depth-1) ?
+                        dumpToString(value, nextHead, depth-1) : value));
+                if (i+1 < Array.getLength(o))
+                    buffer.append(",");
             }
-            buffer.append( "\n" );
+            buffer.append("\n");
             buffer.append(head);
-            buffer.append( "]" );
+            buffer.append("]");
         }
         // Prints out a list
-        else if(o instanceof Collection){
+        else if (o instanceof Collection) {
             Iterator<?> it = ((Collection<?>)o).iterator();
-            buffer.append( "[" );
-            while(it.hasNext()){
+            buffer.append("[");
+            while (it.hasNext()) {
                 Object value = it.next();
                 buffer.append("\n");
                 buffer.append(nextHead);
-                buffer.append( (dumbCapable(value, depth-1) ?
-                        dumpToString(value, nextHead, depth-1) : value) );
-                if(it.hasNext())
-                    buffer.append( "," );
+                buffer.append((dumbCapable(value, depth-1) ?
+                        dumpToString(value, nextHead, depth-1) : value));
+                if (it.hasNext())
+                    buffer.append(",");
             }
-            buffer.append( "\n" );
+            buffer.append("\n");
             buffer.append(head);
-            buffer.append( "]" );
+            buffer.append("]");
         }
         // Prints out a Map
-        else if(o instanceof Map){
+        else if (o instanceof Map) {
             Iterator<?> it = ((Map<?,?>)o).keySet().iterator();
-            buffer.append( "{" );
-            while(it.hasNext()){
+            buffer.append("{");
+            while (it.hasNext()) {
                 Object key = it.next();
                 Object value = ((Map<?,?>)o).get(key);
                 buffer.append("\n");
                 buffer.append(nextHead);
-                buffer.append( key );
-                buffer.append( "=>" );
-                buffer.append( (dumbCapable(value, depth-1) ?
-                        dumpToString(value, nextHead, depth-1) : value) );
-                if(it.hasNext())
-                    buffer.append( "," );
+                buffer.append(key);
+                buffer.append("=>");
+                buffer.append((dumbCapable(value, depth-1) ?
+                        dumpToString(value, nextHead, depth-1) : value));
+                if (it.hasNext())
+                    buffer.append(",");
             }
-            buffer.append( "\n" );
+            buffer.append("\n");
             buffer.append(head);
-            buffer.append( "}" );
+            buffer.append("}");
         }
         // Prints out data from InputStream
-        else if(o instanceof InputStream){
-            buffer.append( " =>{\n" );
+        else if (o instanceof InputStream) {
+            buffer.append(" =>{\n");
             try {
                 InputStream in = (InputStream)o;
                 int tmp;
-                while((tmp = in.read()) != -1){
+                while ((tmp = in.read()) != -1) {
                     buffer.append(nextHead);
-                    buffer.append( (char)tmp );
+                    buffer.append((char)tmp);
                 }
                 in.close();
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            buffer.append( "\n" );
+            buffer.append("\n");
             buffer.append(head);
-            buffer.append( "}" );
+            buffer.append("}");
         }
         // Prints out data from InputStream
-        else if(o instanceof Reader){
-            buffer.append( " =>{\n" );
+        else if (o instanceof Reader) {
+            buffer.append(" =>{\n");
             try {
                 Reader in = (Reader)o;
                 int tmp;
-                while((tmp = in.read()) != -1){
+                while ((tmp = in.read()) != -1) {
                     buffer.append(nextHead);
-                    buffer.append( (char)tmp );
+                    buffer.append((char)tmp);
                 }
                 in.close();
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            buffer.append( "\n" );
+            buffer.append("\n");
             buffer.append(head);
-            buffer.append( "}" );
+            buffer.append("}");
         }
         // Prints out Object properties
-        else{
-            buffer.append( "{" );
-            while ( oClass != null ) {
+        else {
+            buffer.append("{");
+            while (oClass != null) {
                 Field[] fields = oClass.getDeclaredFields();
-                for ( int i=0; i<fields.length; i++ ) {
+                for (int i=0; i<fields.length; i++) {
                     if (Modifier.isFinal(fields[i].getModifiers())) // Skip constants
                         continue;
-                    fields[i].setAccessible( true );
+                    fields[i].setAccessible(true);
                     buffer.append("\n");
                     buffer.append(nextHead);
-                    //buffer.append( fields[i].getType().getSimpleName() );
-                    //buffer.append( " " );
-                    buffer.append( fields[i].getName() );
-                    buffer.append( " = " );
+                    //buffer.append(fields[i].getType().getSimpleName());
+                    //buffer.append(" ");
+                    buffer.append(fields[i].getName());
+                    buffer.append(" = ");
                     try {
                         Object value = fields[i].get(o);
                         if (value != null) {
-                            buffer.append( (dumbCapable(value, depth-1) ?
-                                    dumpToString(value, nextHead, depth-1) : value) );
+                            buffer.append((dumbCapable(value, depth-1) ?
+                                    dumpToString(value, nextHead, depth-1) : value));
                         }
-                    } catch ( IllegalAccessException e ) {}
-                    if ( i+1<fields.length )
-                        buffer.append( "," );
+                    } catch (IllegalAccessException e) {}
+                    if (i + 1 < fields.length)
+                        buffer.append(",");
                 }
                 oClass = oClass.getSuperclass();
             }
-            buffer.append( "\n" );
+            buffer.append("\n");
             buffer.append(head);
-            buffer.append( "}" );
+            buffer.append("}");
         }
 
         return buffer.toString();
@@ -364,7 +364,7 @@ public class MultiPrintStream extends PrintStream {
     /**
      * An helper function for the dump function.
      */
-    private static boolean dumbCapable(Object o, int depth){
+    private static boolean dumbCapable(Object o, int depth) {
         if (depth <= 0)
             return false;
         if (o == null)

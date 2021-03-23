@@ -59,7 +59,7 @@ public class GridMessage<T> implements Message {
      *
      * @param type is the type of message
      */
-    public GridMessage(int type){
+    public GridMessage(int type) {
         this(type, 0, null);
     }
 
@@ -69,7 +69,7 @@ public class GridMessage<T> implements Message {
      * @param type is the type of message
      * @param jobId is the id of the job
      */
-    public GridMessage(int type, int jobId){
+    public GridMessage(int type, int jobId) {
         this(type, jobId, null);
     }
 
@@ -80,7 +80,7 @@ public class GridMessage<T> implements Message {
      * @param jobId is the id of the job
      * @param data is the data to send with this message
      */
-    public GridMessage(int type, int jobId, T data){
+    public GridMessage(int type, int jobId, T data) {
         this.type = type;
         this.jobId = jobId;
         this.data = data;
@@ -89,21 +89,21 @@ public class GridMessage<T> implements Message {
     /**
      * @return the type of message
      */
-    public int messageType(){
+    public int messageType() {
         return type;
     }
 
     /**
      * @return the job id for this message
      */
-    public int getJobQueueID(){
+    public int getJobQueueID() {
         return jobId;
     }
 
     /**
      * @return the data in this message, may not always carry any data.
      */
-    public T getData(){
+    public T getData() {
         return data;
     }
 }

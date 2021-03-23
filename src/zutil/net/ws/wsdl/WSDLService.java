@@ -37,12 +37,12 @@ public abstract class WSDLService {
     private String url;
 
 
-    public WSDLService(String url){
+    public WSDLService(String url) {
         this.url = url;
     }
 
 
-    public String getServiceAddress(){
+    public String getServiceAddress() {
         return url;
     }
 

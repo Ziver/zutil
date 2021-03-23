@@ -58,13 +58,13 @@ public class CompactLogFormatter extends Formatter{
     public String format(LogRecord record) {
         StringBuilder prefix = new StringBuilder();
 
-        if( timeStamp ){
-            date.setTime( record.getMillis() );
+        if (timeStamp) {
+            date.setTime(record.getMillis());
             prefix.append(dateFormatter.format(date));
             prefix.append(' ');
         }
 
-        switch( record.getLevel().intValue() ){
+        switch(record.getLevel().intValue()) {
         case /* SEVERE  */	1000: prefix.append("[SEVERE] "); break;
         case /* WARNING */	900 : prefix.append("[WARNING]"); break;
         case /* INFO    */	800 : prefix.append("[INFO]   "); break;
@@ -75,39 +75,39 @@ public class CompactLogFormatter extends Formatter{
         }
         prefix.append(' ');
 
-        if( className ){
+        if (className) {
             prefix.append(paddClassName(record.getSourceClassName()));
         }
-        if(methodName){
+        if (methodName) {
             prefix.append(record.getSourceMethodName());
         }
         prefix.append(": ");
 
         StringBuilder ret = new StringBuilder();
-        if( record.getMessage() != null ){
-            String[] array = splitter.split( record.getMessage() );
-            for( int i=0; i<array.length ;++i ){
-                if( i!=0 )
-                    ret.append( '\n' );
-                if( prefix.length() > 0 )
-                    ret.append( prefix );
-                ret.append( array[i] );
+        if (record.getMessage() != null) {
+            String[] array = splitter.split(record.getMessage());
+            for (int i=0; i<array.length; ++i) {
+                if (i != 0)
+                    ret.append('\n');
+                if (prefix.length() > 0)
+                    ret.append(prefix);
+                ret.append(array[i]);
             }
-            ret.append( '\n' );
+            ret.append('\n');
         }
 
-        if( record.getThrown() != null ){
+        if (record.getThrown() != null) {
             StringOutputStream out = new StringOutputStream();
             record.getThrown().printStackTrace(new PrintStream(out));
-            String[] array = splitter.split( out.toString() );
-            for( int i=0; i<array.length ;++i ){
-                if( i!=0 )
-                    ret.append( '\n' );
-                if( prefix.length() > 0 )
-                    ret.append( prefix );
-                ret.append( array[i] );
+            String[] array = splitter.split(out.toString());
+            for (int i=0; i<array.length; ++i) {
+                if (i != 0)
+                    ret.append('\n');
+                if (prefix.length() > 0)
+                    ret.append(prefix);
+                ret.append(array[i]);
             }
-            ret.append( '\n' );
+            ret.append('\n');
         }
         return ret.toString();
     }
@@ -117,7 +117,7 @@ public class CompactLogFormatter extends Formatter{
      *
      * @param enable set to True to activate time stamp
      */
-    public void enableTimeStamp(boolean enable){
+    public void enableTimeStamp(boolean enable) {
         timeStamp = enable;
     }
 
@@ -126,7 +126,7 @@ public class CompactLogFormatter extends Formatter{
      *
      * @param ts is the String to send to SimpleDateFormat
      */
-    public void setTimeStamp(String ts){
+    public void setTimeStamp(String ts) {
         dateFormatter = new SimpleDateFormat(ts);
     }
 
@@ -135,7 +135,7 @@ public class CompactLogFormatter extends Formatter{
      *
      * @param enable set to True to activate class/source name
      */
-    public void enableClassName(boolean enable){
+    public void enableClassName(boolean enable) {
         className = enable;
     }
 
@@ -144,14 +144,14 @@ public class CompactLogFormatter extends Formatter{
      *
      * @param enable set to True to activate class/source name
      */
-    public void enableMethodName(boolean enable){
+    public void enableMethodName(boolean enable) {
         methodName = enable;
     }
 
     /**
      * @return the Class name
      */
-    private String paddClassName(String source){
+    private String paddClassName(String source) {
         String cStr = padd_cache.get(source);
         if (cStr == null || cStr.length() != max_class_name) {
             cStr = source.substring(source.lastIndexOf('.') + 1); // Remove packages

@@ -88,24 +88,24 @@ public class NumberToWordsConverter {
 
         long tmpNum = num;
         StringBuilder buffer = new StringBuilder();
-        if (tmpNum < 0){ // Negative number
+        if (tmpNum < 0) { // Negative number
             tmpNum *= -1;
             buffer.append("minus ");
         }
 
-        for(int i : NUMERIC_INDEXES){
+        for (int i : NUMERIC_INDEXES) {
             long pow = (int)Math.pow(10, i);
-            if (tmpNum >= pow){
+            if (tmpNum >= pow) {
                 long numberAtIndex = tmpNum/pow; // The number at position 3
                 tmpNum -= numberAtIndex*pow;
-                buffer.append( convert((int)numberAtIndex) ).append(" ");
-                buffer.append( NUMERIC_STRINGS.get( pow ) ).append(" ");
+                buffer.append(convert((int)numberAtIndex)).append(" ");
+                buffer.append(NUMERIC_STRINGS.get(pow)).append(" ");
             }
         }
-        if (tmpNum >= 20){ // second number in the integer
+        if (tmpNum >= 20) { // second number in the integer
             long numberAtIndex = ((tmpNum % 100)/10)*10; // The number at position 2
             tmpNum -= numberAtIndex;
-            buffer.append( NUMERIC_STRINGS.get(numberAtIndex) ).append(" ");
+            buffer.append(NUMERIC_STRINGS.get(numberAtIndex)).append(" ");
         }
         if (NUMERIC_STRINGS.containsKey(tmpNum))
             buffer.append(NUMERIC_STRINGS.get(tmpNum));

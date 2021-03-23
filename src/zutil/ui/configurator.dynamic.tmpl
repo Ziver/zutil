@@ -29,7 +29,7 @@
             selector.change(); // Update dynamic inputs
             // set dynamic form data
             $.each(button.attr(), function(fieldName, value) {
-                if(fieldName.startsWith("data-")) {
+                if (fieldName.startsWith("data-")) {
                     fieldName = fieldName.substring(5);
                     // case insensitive search
                     input = modal.find("input").filter(function() {

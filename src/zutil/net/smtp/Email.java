@@ -36,7 +36,7 @@ import static zutil.net.smtp.SmtpClient.NEWLINE;
 
 /**
  * Simplifies sending of a email
- * 
+ *
  * @author Ziver
  */
 public class Email {
@@ -60,68 +60,68 @@ public class Email {
 
 
 
-    public Email(){	}
+    public Email() {	}
 
 
-    public void setFrom(String address){
+    public void setFrom(String address) {
         this.fromAddress = sanitizeParam(address);
     }
-    public void setFrom(String address, String niceName){
+    public void setFrom(String address, String niceName) {
         fromAddress = sanitizeParam(address);
         fromName = sanitizeParam(niceName);
     }
-    public String getFromAddress(){
+    public String getFromAddress() {
         return fromAddress;
     }
     public String getFromName() {
         return fromName;
     }
 
-    public void setReplyTo(String address){
+    public void setReplyTo(String address) {
         this.replyToAddress = sanitizeParam(address);
     }
     public String getReplyToAddress() {
         return replyToAddress;
     }
 
-    public void setTo(String address){
+    public void setTo(String address) {
         this.toAddress = sanitizeParam(address);
     }
-    public void setTo(String address, String niceName){
+    public void setTo(String address, String niceName) {
         this.toAddress = sanitizeParam(address);
         this.toName = sanitizeParam(niceName);
     }
-    public String getToAddress(){
+    public String getToAddress() {
         return toAddress;
     }
     public String getToName() {
         return toName;
     }
 
-    public void setDate(Date date){
+    public void setDate(Date date) {
         this.date = date;
     }
-    public void setContentType(ContentType t){
+    public void setContentType(ContentType t) {
         type = t;
     }
 
-    public void setSubject(String subject){
+    public void setSubject(String subject) {
         this.subject = sanitizeParam(subject);
     }
-    public String getSubject(){
+    public String getSubject() {
         return subject;
     }
 
-    public void setMessage(String msg){
+    public void setMessage(String msg) {
         message = msg.replaceAll("(\\r\\n|\\n)", NEWLINE);
-        message = message.replaceAll(NEWLINE+"\\.", NEWLINE +"..");
+        message = message.replaceAll(NEWLINE + "\\.", NEWLINE + "..");
     }
-    public String getMessage(){
+    public String getMessage() {
         return message;
     }
 
 
-    private String sanitizeParam(String param){
+    private String sanitizeParam(String param) {
         return PATTERN_NEWLINE.matcher(param).replaceAll("");
     }
 
@@ -132,47 +132,47 @@ public class Email {
      * @throws IllegalArgumentException if from address and to address has not been set
      */
     public void write(Writer out) throws IOException{
-        if(fromAddress == null)
+        if (fromAddress == null)
             throw new IllegalArgumentException("From value cannot be null!");
-        if(toAddress == null)
+        if (toAddress == null)
             throw new IllegalArgumentException("To value cannot be null!");
 
         //************ Headers
         // From
         if (fromName !=null)
-            out.write("From: "+ fromName +" <"+ fromAddress +">"+ NEWLINE);
+            out.write("From: " + fromName + " <" + fromAddress + ">" + NEWLINE);
         else
-            out.write("From: "+ fromAddress + NEWLINE);
+            out.write("From: " + fromAddress + NEWLINE);
 
         // Reply-To
-        if ( replyToAddress != null )
-            out.write("Reply-To: <"+ replyToAddress +">"+ NEWLINE);
+        if (replyToAddress != null)
+            out.write("Reply-To: <" + replyToAddress + ">" + NEWLINE);
 
         // To
         if (toName !=null)
-            out.write("To: "+ toName +" <"+ toAddress +">"+ NEWLINE);
+            out.write("To: " + toName + " <" + toAddress + ">" + NEWLINE);
         else
-            out.write("To: "+ toAddress + NEWLINE);
+            out.write("To: " + toAddress + NEWLINE);
 
         // Date
         if (date != null)
-            out.write("Date: "+dateFormatter.format(date) + NEWLINE);
+            out.write("Date: " +dateFormatter.format(date) + NEWLINE);
         else
-            out.write("Date: "+dateFormatter.format(new Date(System.currentTimeMillis())) + NEWLINE);
+            out.write("Date: " +dateFormatter.format(new Date(System.currentTimeMillis())) + NEWLINE);
 
         // Content type
-        switch( type ){
+        switch(type) {
         case HTML:
-            out.write("Content-Type: text/html;"+ NEWLINE); break;
+            out.write("Content-Type: text/html;" + NEWLINE); break;
         default:
-            out.write("Content-Type: text/plain;"+ NEWLINE); break;
+            out.write("Content-Type: text/plain;" + NEWLINE); break;
         }
 
         // Subject
-        out.write("Subject: "+(subject!=null ? subject : "") + NEWLINE);
+        out.write("Subject: " +(subject!=null ? subject : "") + NEWLINE);
 
         out.write(NEWLINE);
         //*********** Mesasge
-        out.write( message );
+        out.write(message);
     }
 }

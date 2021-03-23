@@ -33,7 +33,7 @@ public class FileChangedTest implements FileWatcher.FileChangeListener {
         FileWatcher watcher = new FileWatcher(FileUtil.find("test.txt"));
         watcher.setListener(new FileChangedTest());
 
-        while(true){
+        while (true) {
             try {
                 Thread.sleep(10);
             } catch (InterruptedException e) {

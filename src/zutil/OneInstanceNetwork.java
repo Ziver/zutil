@@ -44,7 +44,7 @@ public class OneInstanceNetwork extends Thread implements OneInstance{
      *
      * @param port The port to lock
      */
-    public OneInstanceNetwork(int port){
+    public OneInstanceNetwork(int port) {
         this.port = port;
     }
 
@@ -53,7 +53,7 @@ public class OneInstanceNetwork extends Thread implements OneInstance{
      *
      * @return Always true
      */
-    public boolean lockApp(){
+    public boolean lockApp() {
         this.start();
         return true;
     }

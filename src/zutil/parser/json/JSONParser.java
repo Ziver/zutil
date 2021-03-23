@@ -50,10 +50,10 @@ public class JSONParser extends Parser {
     private Reader in;
 
 
-    public JSONParser(Reader in){
+    public JSONParser(Reader in) {
        this.in = in;
     }
-    public JSONParser(InputStream in){
+    public JSONParser(InputStream in) {
         this.in = new InputStreamReader(in);
     }
 
@@ -74,12 +74,12 @@ public class JSONParser extends Parser {
      * @param 	json	is the JSON String to parse
      * @return a DataNode object representing the JSON in the input String
      */
-    public static DataNode read(String json){
-        try{
+    public static DataNode read(String json) {
+        try {
             return parse(new StringReader(json), new MutableInt());
-        }catch (IOException e){
+        } catch (IOException e) {
             e.printStackTrace();
-        }catch (NullPointerException e){}
+        } catch (NullPointerException e) {}
         return null;
     }
 
@@ -93,10 +93,10 @@ public class JSONParser extends Parser {
         end.i = CONTINUE;
 
         int c;
-        while((c=in.read()) >= 0 &&
+        while ((c=in.read()) >= 0 &&
                 (Character.isWhitespace(c) || c == ',' || c == ':'));
 
-        switch( c ){
+        switch(c) {
             // End of stream
             case -1:
             // This is the end of an Map or List
@@ -108,23 +108,23 @@ public class JSONParser extends Parser {
             // Parse Map
             case '{':
                 root = new DataNode(DataType.Map);
-                while(end.i == CONTINUE) {
+                while (end.i == CONTINUE) {
                     key = parse(in, end);
-                    if(end.i == END_WITH_NULL) // Break if there is no more data
+                    if (end.i == END_WITH_NULL) // Break if there is no more data
                         break;
                     node = parse(in, end);
-                    if(end.i != END_WITH_NULL) // Only add the entry if it is a value
-                        root.set( key.toString(), node );
+                    if (end.i != END_WITH_NULL) // Only add the entry if it is a value
+                        root.set(key.toString(), node);
                 }
                 end.i = CONTINUE;
                 break;
             // Parse List
             case '[':
                 root = new DataNode(DataType.List);
-                while(end.i == CONTINUE){
+                while (end.i == CONTINUE) {
                     node = parse(in, end);
-                    if(end.i != END_WITH_NULL)
-                        root.add( node );
+                    if (end.i != END_WITH_NULL)
+                        root.add(node);
                 }
                 end.i = CONTINUE;
                 break;
@@ -133,15 +133,15 @@ public class JSONParser extends Parser {
             case '\"':
                 root = new DataNode(DataType.String);
                 StringBuilder str = new StringBuilder();
-                while((c=in.read()) >= 0 && c != '\"')
+                while ((c=in.read()) >= 0 && c != '\"')
                     str.append((char)c);
                 root.set(str.toString());
                 break;
             // Parse unknown type
             default:
                 StringBuilder tmp = new StringBuilder().append((char)c);
-                while((c=in.read()) >= 0 && c != ',' && c != ':'){
-                    if(c == ']' || c == '}'){
+                while ((c=in.read()) >= 0 && c != ',' && c != ':') {
+                    if (c == ']' || c == '}') {
                         end.i = END_WITH_VALUE;
                         break;
                     }
@@ -149,17 +149,17 @@ public class JSONParser extends Parser {
                 }
                 // Check what type of type the data is
                 String data = tmp.toString().trim();
-                if( NULL_PATTERN.matcher(data).matches() )
+                if (NULL_PATTERN.matcher(data).matches())
                     root = null;
-                else if( BOOLEAN_PATTERN.matcher(data).matches() )
+                else if (BOOLEAN_PATTERN.matcher(data).matches())
                     root = new DataNode(DataType.Boolean);
-                else if( NUMBER_PATTERN.matcher(data).matches() )
+                else if (NUMBER_PATTERN.matcher(data).matches())
                     root = new DataNode(DataType.Number);
                 else {
                     root = new DataNode(DataType.String);
                     data = unEscapeString(data);
                 }
-                if(root != null)
+                if (root != null)
                     root.set(data);
                 break;
         }
@@ -167,7 +167,7 @@ public class JSONParser extends Parser {
         return root;
     }
 
-    private static String unEscapeString(String str){
+    private static String unEscapeString(String str) {
         // Replace two backslash with one
         return str.replaceAll("\\\\\\\\", "\\\\");
     }

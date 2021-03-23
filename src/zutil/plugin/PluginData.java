@@ -58,15 +58,15 @@ public class PluginData {
         log.fine("Plugin: " + this);
 
         DataNode node = data.get("interfaces");
-        if(node.isMap())
+        if (node.isMap())
             addInterfaces(node);
-        else if(node.isList()) {
+        else if (node.isList()) {
             for (DataNode childNode : node) {
                 addInterfaces(childNode);
             }
         }
     }
-    private void addInterfaces(DataNode node){
+    private void addInterfaces(DataNode node) {
         Iterator<String> intf_it = node.keyIterator();
         while (intf_it.hasNext()) {
             String pluginIntf = intf_it.next();
@@ -79,7 +79,7 @@ public class PluginData {
                         (intfClass==null ? "(Not Available) " : "") + pluginIntf + " --> " +
                         (pluginClass==null ? "(Not Available) " : "") + className);
             else
-                log.finer("Plugin interface: "+ pluginIntf +" --> "+ className);
+                log.finer("Plugin interface: " + pluginIntf + " --> " + className);
 
             if (intfClass == null || pluginClass == null)
                 continue;
@@ -92,7 +92,7 @@ public class PluginData {
     private static Class getClassByName(String name) {
         try {
             return Class.forName(name);
-        }catch (Exception e){
+        } catch (Exception e) {
             //log.log(Level.WARNING, null, e); // No need to log, we are handling it
         }
         return null;
@@ -102,32 +102,32 @@ public class PluginData {
     /**
      * @return a version number for the plugin (specified in the plugin.json file
      */
-    public double getVersion(){
+    public double getVersion() {
         return pluginVersion;
     }
     /**
      * @return the name of the plugin
      */
-    public String getName(){
+    public String getName() {
         return pluginName;
     }
     /**
      * @return the name of the plugin
      */
-    public String getDescription(){
+    public String getDescription() {
         return pluginDescription;
     }
     /**
      * @return if this plugin is enabled
      */
-    public boolean isEnabled(){
+    public boolean isEnabled() {
         return enabled;
     }
 
     /**
      * Enables or disables this plugin
      */
-    public void setEnabled(boolean enabled){
+    public void setEnabled(boolean enabled) {
         this.enabled = enabled;
     }
 
@@ -135,16 +135,16 @@ public class PluginData {
     /**
      * @return a Iterator for all singleton Object instance that implement the specified interface
      */
-    public <T> Iterator<T> getObjectIterator(Class<T> intf){
-        if(!classMap.containsKey(intf))
+    public <T> Iterator<T> getObjectIterator(Class<T> intf) {
+        if (!classMap.containsKey(intf))
             return Collections.emptyIterator();
         return new PluginSingletonIterator<>(classMap.get(intf).iterator());
     }
     /**
      * @return a Iterator for all classes implementing the interface by the plugin
      */
-    public Iterator<Class<?>> getClassIterator(Class<?> intf){
-        if(!classMap.containsKey(intf))
+    public Iterator<Class<?>> getClassIterator(Class<?> intf) {
+        if (!classMap.containsKey(intf))
             return Collections.emptyIterator();
         return classMap.get(intf).iterator();
     }
@@ -163,12 +163,12 @@ public class PluginData {
     /**
      * @return true if the specified interface is defined by the plugin
      */
-    public boolean contains(Class<?> intf){
+    public boolean contains(Class<?> intf) {
         return classMap.containsKey(intf);
     }
 
-    public String toString(){
-        return getName()+"(version: "+getVersion()+")";
+    public String toString() {
+        return getName() + "(version: " + getVersion() + ")";
     }
 
 
@@ -186,11 +186,11 @@ public class PluginData {
 
         @Override
         public boolean hasNext() {
-            if(currentObj != null)
+            if (currentObj != null)
                 return true;
-            while (classIt.hasNext()){
+            while (classIt.hasNext()) {
                 currentObj = (T)getObject(classIt.next());
-                if(currentObj != null)
+                if (currentObj != null)
                     return true;
             }
             return false;
@@ -198,7 +198,7 @@ public class PluginData {
 
         @Override
         public T next() {
-            if(!hasNext())
+            if (!hasNext())
                 throw new NoSuchElementException();
             T tmp = currentObj;
             currentObj = null;

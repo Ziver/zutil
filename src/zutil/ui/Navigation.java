@@ -49,7 +49,7 @@ public class Navigation implements Iterable{
 
 
     private Navigation(String id, String name) {
-        if (id == null) this.id = ""+navMap.size();
+        if (id == null) this.id = "" +navMap.size();
         else            this.id = id;
 
         this.name = name;
@@ -75,7 +75,7 @@ public class Navigation implements Iterable{
      */
     public Navigation createSubNav(String id, String name) {
         Navigation nav = getSubNav(id, name);
-        if(nav != null)
+        if (nav != null)
             return nav;
 
         nav = new Navigation(id, name);
@@ -84,7 +84,7 @@ public class Navigation implements Iterable{
         sortSubNavs();
         return nav;
     }
-    private void sortSubNavs(){
+    private void sortSubNavs() {
         subNav.sort(new Comparator<Navigation>() {
             @Override
             public int compare(Navigation o1, Navigation o2) {
@@ -99,8 +99,8 @@ public class Navigation implements Iterable{
      * Returns null if no navigation object found.
      */
     private Navigation getSubNav(String id, String name) {
-        for(Navigation nav : subNav) {
-            if(nav.equals(id) || nav.equals(name))
+        for (Navigation nav : subNav) {
+            if (nav.equals(id) || nav.equals(name))
                 return nav;
         }
         return null;
@@ -113,23 +113,23 @@ public class Navigation implements Iterable{
 
 
 
-    public String getName(){
+    public String getName() {
         return name;
     }
-    public Object getResource(){
+    public Object getResource() {
         return resource;
     }
 
 
 
-    private void setParentNav(Navigation nav){
+    private void setParentNav(Navigation nav) {
         this.parentNav = nav;
     }
     /**
      * Assign a resource object specific to this navigation object.
      * This can be used if target page needs some additional information.
      */
-    public Navigation setResource(Object obj){
+    public Navigation setResource(Object obj) {
         resource = obj;
         return this;
     }
@@ -138,9 +138,9 @@ public class Navigation implements Iterable{
      * used for deciding the order the parent will sort all sub navigation.
      * Lower values will be at the top of sub-nav list.
      */
-    public Navigation setWeight(int weightOrder){
+    public Navigation setWeight(int weightOrder) {
         this.weight = weightOrder;
-        if(parentNav != null)
+        if (parentNav != null)
             parentNav.sortSubNavs();
         return this;
     }
@@ -148,8 +148,8 @@ public class Navigation implements Iterable{
 
 
     @Override
-    public boolean equals(Object o){
-        if(o instanceof String)
+    public boolean equals(Object o) {
+        if (o instanceof String)
             return this.name.equals(o);
         return this == o || o != null && Objects.equals(this.id, ((Navigation) o).id);
     }
@@ -157,7 +157,7 @@ public class Navigation implements Iterable{
 
 
 
-    public static Navigation createRootNav(){
+    public static Navigation createRootNav() {
         return new Navigation(null, null);
     }
     public static Navigation getRootNav(Map<String, String> request) {
@@ -172,13 +172,13 @@ public class Navigation implements Iterable{
     /**
      * Will create a clone of the navigation tree with some request instance specific information
      */
-    public NavInstance createParameterizedNavInstance(Map<String, String> request){
+    public NavInstance createParameterizedNavInstance(Map<String, String> request) {
         Navigation nav = getParameterizedNavigation(request);
         if (nav != null)
             return createParameterizedNavInstance(getBreadcrumb(nav));
         return createParameterizedNavInstance(Collections.EMPTY_LIST);
     }
-    private NavInstance createParameterizedNavInstance(List<Navigation> activeList){
+    private NavInstance createParameterizedNavInstance(List<Navigation> activeList) {
         NavInstance instance = new ParameterizedNavInstance(this);
         instance.setActive(activeList.contains(this));
         for (Navigation nav : subNav)
@@ -189,20 +189,20 @@ public class Navigation implements Iterable{
      * @return the specific Navigation object requested by client
      */
     public static Navigation getParameterizedNavigation(Map<String, String> request) {
-        if(request.containsKey(NAVIGATION_URL_KEY))
+        if (request.containsKey(NAVIGATION_URL_KEY))
             return navMap.get(request.get(NAVIGATION_URL_KEY));
         return null;
     }
 
 
 
-    public NavInstance createPagedNavInstance(HttpHeader header){
+    public NavInstance createPagedNavInstance(HttpHeader header) {
         Navigation nav = getPagedNavigation(header);
         if (nav != null)
             return createPagedNavInstance(getBreadcrumb(nav));
         return createPagedNavInstance(Collections.EMPTY_LIST);
     }
-    private NavInstance createPagedNavInstance(List<Navigation> activeList){
+    private NavInstance createPagedNavInstance(List<Navigation> activeList) {
         NavInstance instance = new PagedNavInstance(this);
         instance.setActive(activeList.contains(this));
         for (Navigation nav : subNav)
@@ -226,8 +226,8 @@ public class Navigation implements Iterable{
      */
     public static List<Navigation> getBreadcrumb(Navigation nav) {
         LinkedList list = new LinkedList();
-        if (nav != null){
-            while(nav != null){
+        if (nav != null) {
+            while (nav != null) {
                 list.addFirst(nav);
                 nav = nav.parentNav;
             }
@@ -243,31 +243,31 @@ public class Navigation implements Iterable{
         protected boolean active;
         protected ArrayList<NavInstance> subNavInstance;
 
-        protected NavInstance(Navigation nav){
+        protected NavInstance(Navigation nav) {
             this.nav = nav;
             this.subNavInstance = new ArrayList<>();
         }
 
-        protected void setActive(boolean active){
+        protected void setActive(boolean active) {
             this.active = active;
         }
-        protected void addSubNav(NavInstance subNav){
+        protected void addSubNav(NavInstance subNav) {
             subNavInstance.add(subNav);
         }
 
-        public boolean isActive(){
+        public boolean isActive() {
             return active;
         }
         public List<NavInstance> getSubNavs() { return subNavInstance; }
 
         // Mirror getters from Navigation
-        public String getName(){                 return nav.getName(); }
-        public Object getResource(){             return nav.getResource(); }
+        public String getName() {                 return nav.getName(); }
+        public Object getResource() {             return nav.getResource(); }
 
         public abstract String getURL();
 
 
-        public boolean equals(Object o){
+        public boolean equals(Object o) {
             if (o instanceof Navigation)
                 return nav.equals(o);
             else if (o instanceof NavInstance)
@@ -279,15 +279,15 @@ public class Navigation implements Iterable{
     public static class ParameterizedNavInstance extends NavInstance{
         protected ParameterizedNavInstance(Navigation nav) { super(nav); }
 
-        public String getURL(){
-            return "?"+NAVIGATION_URL_KEY+"="+nav.id;
+        public String getURL() {
+            return "?" + NAVIGATION_URL_KEY + "=" + nav.id;
         }
     }
 
     public static class PagedNavInstance extends NavInstance{
         protected PagedNavInstance(Navigation nav) { super(nav); }
 
-        public String getURL(){
+        public String getURL() {
             return "/" + nav.id;
         }
     }

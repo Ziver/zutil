@@ -42,7 +42,7 @@ public class NetworkServerTest {
             NioServer server = new NioServer(6056);
             server.setDefaultWorker(new StandardWorker(server));
 
-            while(true){
+            while (true){
                 Thread.sleep(1000);
             }
         } catch (IOException e) {

@@ -26,14 +26,14 @@ package zutil.net.torrent;
 
 /**
  * This class represents a File for download
- * 
+ *
  * @author Ziver
  */
 public class TorrentFile{
     private String filename;
     private long size;
 
-    public TorrentFile(String filename, long size){
+    public TorrentFile(String filename, long size) {
         this.filename = filename;
         this.size = size;
     }

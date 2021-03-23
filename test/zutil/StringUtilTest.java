@@ -72,7 +72,7 @@ public class StringUtilTest {
     }
 
     @Test
-    public void joinTest(){
+    public void joinTest() {
         assertEquals("", StringUtil.join(",", Collections.emptyList()));
         assertEquals("1,2,3,4,5", StringUtil.join(",", 1,2,3,4,5));
         assertEquals("1,2,3,4,5", StringUtil.join(",", Arrays.asList(1,2,3,4,5)));

@@ -105,11 +105,11 @@ public class SmtpClient {
      * @param   email   a email object containing message specific data
      */
     public synchronized void send(Email email) {
-        if(email.getFromAddress() == null)
+        if (email.getFromAddress() == null)
             throw new IllegalArgumentException("From value cannot be null!");
-        if(email.getToAddress() == null)
+        if (email.getToAddress() == null)
             throw new IllegalArgumentException("To value cannot be null!");
-        try{
+        try {
             // Pre metadata
             sendCommand(CMD_FROM + ":" + email.getFromAddress());
             sendCommand(CMD_TO + ":" + email.getToAddress());
@@ -119,8 +119,8 @@ public class SmtpClient {
             out.write(NEWLINE);
             sendCommand(CMD_DATA_END);
             reset();
-        }catch(IOException e){
-            logger.log(Level.SEVERE, null,e );
+        } catch (IOException e) {
+            logger.log(Level.SEVERE, null, e);
         }
     }
 
@@ -133,7 +133,7 @@ public class SmtpClient {
      * @return the server response code
      */
     public synchronized int sendCommand(String cmd) throws IOException{
-        logger.finest(">> "+cmd);
+        logger.finest(">> " +cmd);
         out.write(cmd + NEWLINE);
         out.flush();
         String reply = readCommand();
@@ -147,14 +147,14 @@ public class SmtpClient {
      */
     public synchronized String readCommand() throws IOException{
         String tmp = in.readLine();
-        logger.finest(">> "+tmp);
-        if(parseReturnCode(tmp) >= 400 )
+        logger.finest(">> " +tmp);
+        if (parseReturnCode(tmp) >= 400)
             throw new IOException(tmp);
 
         return tmp;
     }
 
-    private static int parseReturnCode(String msg){
+    private static int parseReturnCode(String msg) {
         return Integer.parseInt(msg.substring(0, 3));
     }
 

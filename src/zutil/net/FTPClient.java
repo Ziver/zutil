@@ -66,17 +66,17 @@ public class FTPClient extends Thread{
         PATH_CREATED     ( 257 );
 
         private int code;
-        FTPReturnCode(int code){
+        FTPReturnCode(int code) {
             this.code = code;
         }
 
-        public boolean isError(){
+        public boolean isError() {
             return code >= 400;
         }
 
-        public static FTPReturnCode fromCode(int code){
-            for(FTPReturnCode type : FTPReturnCode.values()){
-                if(code == type.code) return type;
+        public static FTPReturnCode fromCode(int code) {
+            for (FTPReturnCode type : FTPReturnCode.values()) {
+                if (code == type.code) return type;
             }
             return UNKNOWN;
         }
@@ -105,10 +105,10 @@ public class FTPClient extends Thread{
         connectionType = conn_type;
 
         readCommand();
-        sendCommand("USER "+user);
-        sendNoReplyCommand("PASS "+pass);
+        sendCommand("USER " +user);
+        sendNoReplyCommand("PASS " +pass);
         String tmp = readCommand();
-        if(parseReturnCode(tmp) == FTPReturnCode.LOGIN_NO){
+        if (parseReturnCode(tmp) == FTPReturnCode.LOGIN_NO) {
             close();
             throw new AccountException(tmp);
         }
@@ -126,7 +126,7 @@ public class FTPClient extends Thread{
      */
     private FTPReturnCode sendCommand(String cmd) throws IOException{
         sendNoReplyCommand(cmd);
-        return parseReturnCode( readCommand( ) );
+        return parseReturnCode(readCommand());
     }
 
     /**
@@ -145,9 +145,9 @@ public class FTPClient extends Thread{
      */
     private String readCommand() throws IOException{
         String tmp = in.readLine();
-        while(!Character.isWhitespace(tmp.charAt(3))){
+        while (!Character.isWhitespace(tmp.charAt(3))) {
             tmp = in.readLine();
-            if(parseReturnCode(tmp).isError()) throw new IOException(tmp);
+            if (parseReturnCode(tmp).isError()) throw new IOException(tmp);
         }
         return tmp;
     }
@@ -158,7 +158,7 @@ public class FTPClient extends Thread{
      * @param   msg     message String from the server
      * @return a status code response
      */
-    private FTPReturnCode parseReturnCode(String msg){
+    private FTPReturnCode parseReturnCode(String msg) {
         return FTPReturnCode.fromCode(Integer.parseInt(msg.substring(0, 3)));
     }
 
@@ -173,7 +173,7 @@ public class FTPClient extends Thread{
      */
     public String[] getFileList(String path) throws IOException{
         BufferedInputStream data_in = getDataInputStream();
-        sendCommand("NLST "+path);
+        sendCommand("NLST " +path);
 
         String data = new String(IOUtil.readContent(data_in));
 
@@ -192,7 +192,7 @@ public class FTPClient extends Thread{
         Pattern regex = Pattern.compile("\\s+");
 
         BufferedInputStream data_in = getDataInputStream();
-        sendCommand("LIST "+path);
+        sendCommand("LIST " +path);
 
         String data = new String(IOUtil.readContent(data_in));
 
@@ -209,7 +209,7 @@ public class FTPClient extends Thread{
      */
     public void sendFile(String path, String data) throws IOException{
         BufferedOutputStream data_out = getDataOutputStream();
-        sendCommand("STOR "+path);
+        sendCommand("STOR " +path);
 
         byte[] byte_data = data.getBytes();
         data_out.write(byte_data, 0, byte_data.length);
@@ -224,7 +224,7 @@ public class FTPClient extends Thread{
      * @param path The path to the directory
      */
     public boolean createDir(String path) throws IOException{
-        if(sendCommand("MKD "+path) == FTPReturnCode.PATH_CREATED)
+        if (sendCommand("MKD " +path) == FTPReturnCode.PATH_CREATED)
             return true;
         return false;
     }
@@ -237,7 +237,7 @@ public class FTPClient extends Thread{
      */
     private BufferedInputStream getFileInputStream(String path) throws IOException{
         BufferedInputStream input = getDataInputStream();
-        sendCommand("RETR "+path);
+        sendCommand("RETR " +path);
         return input;
     }
 
@@ -261,7 +261,7 @@ public class FTPClient extends Thread{
      * @return true if the command was successful, false otherwise
      */
     public boolean removeFile(String path) throws IOException{
-        if(sendCommand("DELE "+path) == FTPReturnCode.FILE_ACTION_OK)
+        if (sendCommand("DELE " +path) == FTPReturnCode.FILE_ACTION_OK)
             return true;
         return false;
     }
@@ -272,7 +272,7 @@ public class FTPClient extends Thread{
      * @return True if the command was successful or false otherwise
      */
     public boolean removeDir(String path) throws IOException{
-        if(sendCommand("RMD "+path) == FTPReturnCode.FILE_ACTION_OK)
+        if (sendCommand("RMD " + path) == FTPReturnCode.FILE_ACTION_OK)
             return true;
         return false;
     }
@@ -286,12 +286,12 @@ public class FTPClient extends Thread{
      * @return a PrintStream for the channel
      */
     public BufferedOutputStream getDataOutputStream() throws IOException{
-        if(connectionType == FTPConnectionType.PASSIVE){ // Passive Mode
+        if (connectionType == FTPConnectionType.PASSIVE) { // Passive Mode
             int port = setPassiveMode();
             Socket data_socket = new Socket(socket.getInetAddress().getHostAddress(), port);
             return new BufferedOutputStream(data_socket.getOutputStream());
         }
-        else{ // Active Mode
+        else { // Active Mode
             return null;
         }
     }
@@ -302,12 +302,12 @@ public class FTPClient extends Thread{
      * @return a BufferedReader for the data channel
      */
     public BufferedInputStream getDataInputStream() throws IOException{
-        if(connectionType == FTPConnectionType.PASSIVE){ // Passive Mode
+        if (connectionType == FTPConnectionType.PASSIVE) { // Passive Mode
             int port = setPassiveMode();
             Socket data_socket = new Socket(socket.getInetAddress().getHostAddress(), port);
             return new BufferedInputStream(data_socket.getInputStream());
         }
-        else{ // Active Mode
+        else { // Active Mode
             return null;
         }
     }
@@ -321,13 +321,13 @@ public class FTPClient extends Thread{
     private int setPassiveMode() throws IOException{
         sendNoReplyCommand("PASV");
         String ret_msg = readCommand();
-        if(parseReturnCode(ret_msg) != FTPReturnCode.ENTERING_PASSIVE){
-            throw new IOException("Passive mode rejected by server: "+ret_msg);
+        if (parseReturnCode(ret_msg) != FTPReturnCode.ENTERING_PASSIVE) {
+            throw new IOException("Passive mode rejected by server: " +ret_msg);
         }
         ret_msg = ret_msg.substring(ret_msg.indexOf('(')+1, ret_msg.indexOf(')'));
         String[] tmpArray = ret_msg.split("[,]");
 
-        if(tmpArray.length <= 1)
+        if (tmpArray.length <= 1)
             return Integer.parseInt(tmpArray[0]);
         else
             return Integer.parseInt(tmpArray[4])*256 + Integer.parseInt(tmpArray[5]);
@@ -339,13 +339,13 @@ public class FTPClient extends Thread{
     /**
      * Keep the connection alive
      */
-    public void run(){
+    public void run() {
         try {
-            while(true){
-                if(last_sent > System.currentTimeMillis() + FTP_NOOP_INT*1000){
+            while (true) {
+                if (last_sent > System.currentTimeMillis() + FTP_NOOP_INT * 1000) {
                     sendCommand("NOOP");
                 }
-                try{ Thread.sleep(5000); }catch(Exception e){}
+                try { Thread.sleep(5000); } catch (Exception e) {}
             }
         } catch (IOException e1) {
             e1.printStackTrace();

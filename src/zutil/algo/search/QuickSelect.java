@@ -27,17 +27,17 @@ package zutil.algo.search;
 import zutil.algo.sort.sortable.SortableDataList;
 
 /**
- * This algorithm is a modified QuickSort 
+ * This algorithm is a modified QuickSort
  * to find the k smallest or biggest value
  * http://en.wikipedia.org/wiki/Selection_algorithm
- * 
+ *
  * @author Ziver
  *
  */
 @SuppressWarnings({ "unchecked", "rawtypes" })
 public class QuickSelect {
 
-    public static Object find(SortableDataList list, int k){
+    public static Object find(SortableDataList list, int k) {
         return find(list, k, 0, list.size()-1);
     }
 
@@ -52,13 +52,13 @@ public class QuickSelect {
          else
              return select(list, k, pivotNewIndex+1, right)
      */
-    public static Object find(SortableDataList list, int k, int left, int right){
+    public static Object find(SortableDataList list, int k, int left, int right) {
         // select a pivot
         int pivot = right/2;
         int newPivot = partition(list, left, right, pivot);
-        if(k == newPivot)
+        if (k == newPivot)
             return list.get(k);
-        else if(k < newPivot)
+        else if (k < newPivot)
             return find(list, k, left, newPivot-1);
         else
             return find(list, k, newPivot+1, right);
@@ -76,14 +76,14 @@ public class QuickSelect {
          swap list[right] and list[storeIndex]  // Move pivot to its final place
          return storeIndex
      */
-    private static int partition(SortableDataList list, int left, int right, int pivot){
+    private static int partition(SortableDataList list, int left, int right, int pivot) {
         Object pivotValue = list.get(pivot);
         list.swap(pivot, right);
         int storeIndex = left;
-        for(int i=left; i<right ;i++){
-            if(list.compare(i, pivotValue) < 0){
+        for (int i=left; i<right; i++) {
+            if (list.compare(i, pivotValue) < 0) {
                 list.swap(storeIndex, i);
-                storeIndex = storeIndex+1;
+                storeIndex = storeIndex + 1;
             }
         }
         list.swap(right, storeIndex);

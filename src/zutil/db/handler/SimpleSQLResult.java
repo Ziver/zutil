@@ -32,7 +32,7 @@ import java.sql.Statement;
 
 /**
  * Returns the first column of the first row from the query
- * 
+ *
  * @author Ziver
  */
 public class SimpleSQLResult<T> implements SQLResultHandler<T> {
@@ -44,7 +44,7 @@ public class SimpleSQLResult<T> implements SQLResultHandler<T> {
      */
     @SuppressWarnings("unchecked")
     public T handleQueryResult(Statement stmt, ResultSet result) throws SQLException{
-        if( result.next() )
+        if (result.next())
             return (T) result.getObject(1);
         return null;
     }

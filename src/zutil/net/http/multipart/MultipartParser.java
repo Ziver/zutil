@@ -61,24 +61,24 @@ public class MultipartParser implements Iterable<MultipartField>{
     private MultiPartIterator iterator;
 
 
-    public MultipartParser(InputStream in, String delimiter, long length){
+    public MultipartParser(InputStream in, String delimiter, long length) {
         this.in = in;
         this.delimiter = delimiter;
         this.contentLength = length;
     }
-    public MultipartParser(HttpHeader header){
+    public MultipartParser(HttpHeader header) {
         this(header.getInputStream(),
                 parseDelimiter(header.getHeader("Content-type")),
                 Long.parseLong(header.getHeader("Content-Length")));
     }
 
-    private static String parseDelimiter(String contentTypeHeader){
+    private static String parseDelimiter(String contentTypeHeader) {
         String delimiter = contentTypeHeader.split(" *; *")[1];
         delimiter = delimiter.split(" *= *")[1];
         return delimiter;
     }
 
-    public long getContentLength(){
+    public long getContentLength() {
         return contentLength;
     }
 
@@ -97,10 +97,10 @@ public class MultipartParser implements Iterable<MultipartField>{
         private boolean firstIteration;
 
 
-        protected MultiPartIterator(){
+        protected MultiPartIterator() {
             this.boundaryIn = new BufferedBoundaryInputStream(in);
 
-            this.boundaryIn.setBoundary("--"+delimiter);
+            this.boundaryIn.setBoundary("--" +delimiter);
             firstIteration = true;
         }
 
@@ -136,8 +136,8 @@ public class MultipartParser implements Iterable<MultipartField>{
         public MultipartField next() {
             try {
                 boundaryIn.next();
-                if (firstIteration){
-                    this.boundaryIn.setBoundary("\n--"+delimiter); // Add new-line to boundary after the first iteration
+                if (firstIteration) {
+                    this.boundaryIn.setBoundary("\n--" +delimiter); // Add new-line to boundary after the first iteration
                     firstIteration = false;
                 }
                 String tmp = IOUtil.readLine(boundaryIn); // read the new line after the delimiter
@@ -151,13 +151,13 @@ public class MultipartParser implements Iterable<MultipartField>{
 
                 // Parse
                 String disposition = headers.get(HEADER_CONTENT_DISPOSITION);
-                if (disposition != null){
+                if (disposition != null) {
                     HttpHeaderParser.parseCookieValues(headers, disposition);
-                    if (headers.containsKey("form-data")){
-                        if (headers.containsKey("filename")){
+                    if (headers.containsKey("form-data")) {
+                        if (headers.containsKey("filename")) {
                             return new MultipartFileField(headers, boundaryIn);
                         }
-                        else{
+                        else {
                             MultipartStringField field = new MultipartStringField(headers, boundaryIn);
                             return field;
                         }

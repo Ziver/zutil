@@ -41,7 +41,7 @@ public class LoopBenchmark {
 
     @Test
     public void writeArrayOneLoop() {
-        for(int k=0; k<TEST_EXECUTIONS; k++) {
+        for (int k=0; k<TEST_EXECUTIONS; k++) {
             for (int i = 0; i < Math.max(array1.length, array1.length); i++) {
                 if (i < array1.length)
                     array1[i] = i;
@@ -53,7 +53,7 @@ public class LoopBenchmark {
 
     @Test
     public void writeArraySeparateLoops(){
-        for(int k=0; k<TEST_EXECUTIONS; k++) {
+        for (int k=0; k<TEST_EXECUTIONS; k++) {
             for (int i = 0; i < array1.length; i++) {
                 array1[i] = i;
             }
@@ -67,7 +67,7 @@ public class LoopBenchmark {
     @Test
     public void readArrayLoop() {
         int sum = 0;
-        for(int k=0; k<TEST_EXECUTIONS; k++) {
+        for (int k=0; k<TEST_EXECUTIONS; k++) {
             for (int i = 0; i < array1.length; i++) {
                 sum += array1[i];
             }
@@ -77,7 +77,7 @@ public class LoopBenchmark {
     @Test
     public void readArrayForeach() {
         int sum = 0;
-        for(int k=0; k<TEST_EXECUTIONS; k++) {
+        for (int k=0; k<TEST_EXECUTIONS; k++) {
             for (int i : array1) {
                 sum += array1[i];
             }

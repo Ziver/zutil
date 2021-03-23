@@ -41,55 +41,55 @@ public class ChartData {
     private ArrayList<Point> points;
 
 
-    public ChartData(){
+    public ChartData() {
         xStrings = new HashMap<>();
         yStrings = new HashMap<>();
 
         points = new ArrayList<>();
     }
 
-    public void setXValueString(int x, String name){
+    public void setXValueString(int x, String name) {
         xStrings.put(x, name);
     }
-    public void setYValueString(int y, String name){
+    public void setYValueString(int y, String name) {
         yStrings.put(y, name);
     }
 
 
-    public void addPoint(int x, int y){
-        points.add( new Point( x, y));
+    public void addPoint(int x, int y) {
+        points.add(new Point(x, y));
         setMaxMin(x, y);
     }
 
 
-    private void setMaxMin(int x, int y){
-        if( x > maxX) maxX = x;
-        if( x < minX) minX = x;
+    private void setMaxMin(int x, int y) {
+        if (x > maxX) maxX = x;
+        if (x < minX) minX = x;
 
-        if( y > maxY) maxY = y;
-        if( y < minY) minY = y;
+        if (y > maxY) maxY = y;
+        if (y < minY) minY = y;
     }
 
-    public int getMaxX(){
+    public int getMaxX() {
         return maxX;
     }
-    public int getMinX(){
+    public int getMinX() {
         return minX;
     }
-    public int getMaxY(){
+    public int getMaxY() {
         return maxY;
     }
-    public int getMinY(){
+    public int getMinY() {
         return minY;
     }
-    public String getXString(int x){
+    public String getXString(int x) {
         return xStrings.get(x);
     }
-    public String getYString(int y){
+    public String getYString(int y) {
         return yStrings.get(y);
     }
 
-    protected List<Point> getData(){
+    protected List<Point> getData() {
         return points;
     }
 }

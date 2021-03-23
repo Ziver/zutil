@@ -32,7 +32,7 @@ import static org.junit.Assert.assertEquals;
 public class HasherTest {
 
     @Test
-    public void MD5Test(){
+    public void MD5Test() {
         assertEquals(Hasher.MD5("AAAABBBB"),   "9da4fc50e09e5eeb8ae8149ef4f23792");
         assertEquals(Hasher.MD5("qwerty12345"),"85064efb60a9601805dcea56ec5402f7");
         assertEquals(Hasher.MD5("123456789"),  "25f9e794323b453885f5181f1b624d0b");
@@ -40,7 +40,7 @@ public class HasherTest {
     }
 
     @Test
-    public void SHA1Test(){
+    public void SHA1Test() {
         assertEquals(Hasher.SHA1("AAAABBBB"),   "7cd188ef3a9ea7fa0ee9c62c168709695460f5c0");
         assertEquals(Hasher.SHA1("qwerty12345"),"4e17a448e043206801b95de317e07c839770c8b8");
         assertEquals(Hasher.SHA1("123456789"),  "f7c3bc1d808e04732adf679965ccc34ca7ae3441");
@@ -48,7 +48,7 @@ public class HasherTest {
     }
 
     @Test
-    public void PBKDF2(){
+    public void PBKDF2() {
         assertEquals(Hasher.PBKDF2("AAAABBBB", "s", 1000),
                 "8da1853fe2a2efc82aa444e7274b74cf25190e580898bbaac83c502099506dd7");
         assertEquals(Hasher.PBKDF2("AAAABBBB", "salt", 1000),

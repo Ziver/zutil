@@ -71,7 +71,7 @@ public class NioClient extends NioNetwork{
         send(remoteAddress, data);
     }
 
-    public SocketAddress getRemoteAddress(){
+    public SocketAddress getRemoteAddress() {
         return remoteAddress;
     }
 }

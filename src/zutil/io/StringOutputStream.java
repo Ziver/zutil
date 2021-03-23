@@ -28,7 +28,7 @@ import java.io.OutputStream;
 
 /**
  * This class saves all the input data in to an StringBuffer
- * 
+ *
  * @author Ziver
  *
  */
@@ -39,23 +39,23 @@ public class StringOutputStream extends OutputStream{
     /**
      * Creates an new instance of this class
      */
-    public StringOutputStream(){
+    public StringOutputStream() {
         clear();
     }
 
     @Override
     public void write(int b) {
-        buffer.append( b );
+        buffer.append(b);
     }
 
     @Override
     public void write(byte[] b) {
-        buffer.append( new String(b) );
+        buffer.append(new String(b));
     }
 
     @Override
     public void write(byte[] b, int off, int len) {
-        buffer.append( new String(b, off, len) );
+        buffer.append(new String(b, off, len));
     }
 
     /**
@@ -67,7 +67,7 @@ public class StringOutputStream extends OutputStream{
     /**
      * Clears the String buffer
      */
-    public void clear(){
+    public void clear() {
         buffer = new StringBuilder();
     }
 

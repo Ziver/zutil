@@ -62,12 +62,12 @@ public class Zupdater extends JFrame implements ProgressListener<UpdateClient, F
 
 
     public void progressUpdate(UpdateClient source, FileInfo info, double percent) {
-            lblFile.setText( info.getPath() );
-            progressBar.setValue( (int)percent );
-            progressBar.setString( StringUtil.formatByteSizeToString(source.getTotalReceived()) +
-                    " / "+StringUtil.formatByteSizeToString(source.getTotalSize()));
+            lblFile.setText(info.getPath());
+            progressBar.setValue((int) percent);
+            progressBar.setString(StringUtil.formatByteSizeToString(source.getTotalReceived()) +
+                    " / " +StringUtil.formatByteSizeToString(source.getTotalSize()));
 
-            lblSpeed.setText( StringUtil.formatByteSizeToString(source.getSpeed()) + "/s" );
+            lblSpeed.setText(StringUtil.formatByteSizeToString(source.getSpeed()) + "/s");
     }
 
 

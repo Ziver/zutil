@@ -46,7 +46,7 @@ public class ServerFindClient{
      *
      * @param port The port to contact the server on
      */
-    public ServerFindClient(int port){
+    public ServerFindClient(int port) {
         this.port = port;
     }
 

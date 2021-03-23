@@ -32,14 +32,14 @@ import java.io.InputStream;
  * A simple Class that mirrors a InputStream but
  * also has an additional Closeable objects that
  * will be closed when the this object is closed.
- * 
+ *
  * @author Ziver
  */
 public class InputStreamCloser extends InputStream{
     private Closeable[] c;
     private InputStream in;
 
-    public InputStreamCloser(InputStream in, Closeable... c){
+    public InputStreamCloser(InputStream in, Closeable... c) {
         this.c = c;
         this.in = in;
     }

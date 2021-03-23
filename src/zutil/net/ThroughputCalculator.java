@@ -38,14 +38,14 @@ public class ThroughputCalculator {
     private long total_data_amount;
     private float frequency = UPDATES_PER_SEC;
 
-    public void setTotalHandledData(long bytes){
+    public void setTotalHandledData(long bytes) {
         setHandledData(bytes - total_data_amount);
         total_data_amount = bytes;
     }
-    public void setHandledData(long bytes){
+    public void setHandledData(long bytes) {
         long currentTimeStamp = System.nanoTime();
         data_amount += bytes;
-        if(currentTimeStamp - (NANOSEC_PER_SECOND/frequency) > previousTimeStamp) {
+        if (currentTimeStamp - (NANOSEC_PER_SECOND/frequency) > previousTimeStamp) {
             throughput = data_amount / ((currentTimeStamp - previousTimeStamp) / NANOSEC_PER_SECOND);
             previousTimeStamp = currentTimeStamp;
             data_amount = 0;
@@ -53,21 +53,21 @@ public class ThroughputCalculator {
         }
     }
 
-    public double getByteThroughput(){
+    public double getByteThroughput() {
         setHandledData(0); // Update throughput
         updated = false;
         return throughput;
     }
-    public double getBitThroughput(){
+    public double getBitThroughput() {
         return getByteThroughput()*8;
     }
 
-    public boolean isUpdated(){
+    public boolean isUpdated() {
         return updated;
     }
 
     public void setFrequency(float frequency) {
-        if(frequency < 0)
+        if (frequency < 0)
             this.frequency = UPDATES_PER_SEC;
         else
             this.frequency = frequency;

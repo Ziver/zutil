@@ -65,8 +65,8 @@ public class FileWatcher extends TimerTask{
      * @param 		interval 		is the interval
      */
     public FileWatcher(File file, int interval) throws FileNotFoundException{
-        if(file==null || !file.exists())
-            throw new FileNotFoundException("File not found: "+file);
+        if (file==null || !file.exists())
+            throw new FileNotFoundException("File not found: " +file);
         this.file = file;
         lastChanged = file.lastModified();
 
@@ -74,7 +74,7 @@ public class FileWatcher extends TimerTask{
         t.schedule(this, 0, interval);
     }
 
-    public void setListener(FileChangeListener listener){
+    public void setListener(FileChangeListener listener) {
         this.listener = listener;
     }
 
@@ -82,11 +82,11 @@ public class FileWatcher extends TimerTask{
     public void run() {
         if (lastChanged != file.lastModified()) {
             lastChanged = file.lastModified();
-            if(listener != null){
+            if (listener != null) {
                 listener.fileChangedEvent(file);
             }
-            else{
-                logger.fine("File was modified ("+file+") but no listeners was registered.");
+            else {
+                logger.fine("File was modified (" + file + ") but no listeners was registered.");
             }
         }
     }

@@ -63,12 +63,12 @@ public class ServerFind extends Thread {
         start();
     }
 
-    public void run (){
+    public void run() {
         byte[] buf = new byte[256];
         DatagramPacket packet;
         DatagramSocket lan_socket;
 
-        while (!shutdown){
+        while (!shutdown) {
             try {
                 packet = new DatagramPacket(buf, buf.length);
                 mSocket.receive(packet);
@@ -89,7 +89,7 @@ public class ServerFind extends Thread {
     /**
      * Closes the broadcast socket
      */
-    public void close(){
+    public void close() {
         shutdown = true;
         mSocket.close();
     }

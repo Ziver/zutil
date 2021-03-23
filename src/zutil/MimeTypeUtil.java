@@ -53,10 +53,10 @@ public class MimeTypeUtil {
     private static void readMimeFile(String path) throws IOException {
         DataNode json = JSONParser.read(FileUtil.getContent(path));
 
-        for (Iterator<String> it = json.keyIterator(); it.hasNext(); ) {
+        for (Iterator<String> it = json.keyIterator(); it.hasNext();) {
             String primaryType = it.next();
 
-            for (Iterator<String> it2 = json.get(primaryType).keyIterator(); it2.hasNext(); ) {
+            for (Iterator<String> it2 = json.get(primaryType).keyIterator(); it2.hasNext();) {
                 String subType = it2.next();
                 DataNode mimeJson = json.get(primaryType).get(subType);
 
@@ -69,7 +69,7 @@ public class MimeTypeUtil {
         }
     }
 
-    private static void addMimeType(MimeType mime){
+    private static void addMimeType(MimeType mime) {
         mimes.add(mime);
 
         for (String extension : mime.getExtensions()) {

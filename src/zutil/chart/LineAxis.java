@@ -33,8 +33,8 @@ import java.awt.geom.Line2D;
 public abstract class LineAxis extends AbstractChart{
 
     @Override
-    protected Rectangle drawAxis(Graphics2D g2, Rectangle bound){
-        if( data == null )
+    protected Rectangle drawAxis(Graphics2D g2, Rectangle bound) {
+        if (data == null)
             return null;
 
         width = bound.width;
@@ -42,24 +42,24 @@ public abstract class LineAxis extends AbstractChart{
         chartBound = new Rectangle();
         int stepLength = 7;
 
-        // **********************************
+        // ------------------------------------------------
         // Calculate Font sizes
-        // **********************************
+        // ------------------------------------------------
 
         FontMetrics metric = g2.getFontMetrics();
         int fontHeight = metric.getHeight();
         int fontXWidth = 0;
         int fontYWidth = 0;
-        for( Point p : data.getData() ){
+        for (Point p : data.getData()) {
             int length;
-            String tmp = data.getXString( p.x );
-            if( tmp != null ) 	length = metric.stringWidth( tmp );
-            else				length = metric.stringWidth( ""+p.x );
+            String tmp = data.getXString(p.x);
+            if (tmp != null) 	length = metric.stringWidth(tmp);
+            else				length = metric.stringWidth("" + p.x);
             fontXWidth = Math.max(length, fontXWidth);
 
-            tmp = data.getXString( p.y );
-            if( tmp != null ) 	length = metric.stringWidth( tmp );
-            else				length = metric.stringWidth( ""+p.y );
+            tmp = data.getXString(p.y);
+            if (tmp != null) 	length = metric.stringWidth(tmp);
+            else				length = metric.stringWidth("" + p.y);
             fontYWidth = Math.max(length, fontYWidth);
         }
 
@@ -67,7 +67,7 @@ public abstract class LineAxis extends AbstractChart{
 
         Point origo = new Point(
                 PADDING + fontYWidth + stepLength,
-                height - PADDING - fontHeight - stepLength );
+                height - PADDING - fontHeight - stepLength);
         chartBound.x = (int) (origo.getX() + 1);
         chartBound.y = PADDING;
         chartBound.width = width - chartBound.x - PADDING;
@@ -81,9 +81,9 @@ public abstract class LineAxis extends AbstractChart{
         g2.setStroke(new BasicStroke(1.5f, BasicStroke.CAP_SQUARE, BasicStroke.JOIN_ROUND));
 
         // Y Axis
-        g2.draw( new Line2D.Double( origo.getX(), PADDING, origo.getX(), origo.getY()+PADDING/2 ));
+        g2.draw(new Line2D.Double(origo.getX(), PADDING, origo.getX(), origo.getY()+PADDING/2));
         // X Axis
-        g2.draw( new Line2D.Double( origo.getX()-PADDING/2, origo.getY(), width-PADDING, origo.getY() ));
+        g2.draw(new Line2D.Double(origo.getX()-PADDING/2, origo.getY(), width-PADDING, origo.getY()));
         // Y Axis steps and labels
 
         // X Axis steps and labels

@@ -43,7 +43,7 @@ public class UserMessageManager implements Iterable<UserMessageManager.UserMessa
      * @return a UserMessage object matching the ID or null if no message was found
      */
     public UserMessage get(int id) {
-        for(UserMessage msg : messages) {
+        for (UserMessage msg : messages) {
             if (msg.getId() == id) {
                 return msg;
             }
@@ -84,7 +84,7 @@ public class UserMessageManager implements Iterable<UserMessageManager.UserMessa
      */
     public List<UserMessage> getMessages() {
         List<UserMessage> messagesClone = new ArrayList<>(messages.size());
-        for (Iterator<UserMessage> it = messages.iterator(); it.hasNext(); ) {
+        for (Iterator<UserMessage> it = messages.iterator(); it.hasNext();) {
             UserMessage alert = it.next();
             if (alert.ttl <= 0) { // if alert is to old, remove it
                 logger.fine("Message dismissed with end of life, alert id: " + alert.id);

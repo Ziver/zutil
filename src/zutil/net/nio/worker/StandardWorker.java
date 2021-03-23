@@ -52,7 +52,7 @@ public class StandardWorker extends ThreadedEventWorker {
     /**
      * Creates a new StandardWorker
      */
-    public StandardWorker(NioNetwork nio){
+    public StandardWorker(NioNetwork nio) {
         this.nio = nio;
     }
 
@@ -61,27 +61,27 @@ public class StandardWorker extends ThreadedEventWorker {
     @Override
     public void messageEvent(WorkerEventData event) {
         try {
-            logger.finer("Message: "+event.data.getClass().getName());
+            logger.finer("Message: " +event.data.getClass().getName());
 
-            if(event.data instanceof EchoMessage && !((EchoMessage)event.data).echo()){
+            if (event.data instanceof EchoMessage && !((EchoMessage)event.data).echo()) {
                 // Echo back the received message
                 ((EchoMessage)event.data).received();
-                logger.finer("Echoing Message: "+event.data);
+                logger.finer("Echoing Message: " +event.data);
                 nio.send(event.remoteAddress, event.data);
             }
-            else if(event.data instanceof RequestResponseMessage &&
-                    rspEvents.get(((RequestResponseMessage)event.data).getResponseId()) != null){
+            else if (event.data instanceof RequestResponseMessage &&
+                    rspEvents.get(((RequestResponseMessage)event.data).getResponseId()) != null) {
                 long responseId = ((RequestResponseMessage)event.data).getResponseId();
                 // Look up the handler for this channel
                 ResponseHandler handler = rspEvents.get(responseId);
                 // And pass the response to it
                 handler.handleResponse(event.data);
                 rspEvents.remove(responseId);
-                logger.finer("Response Request Message: "+event.data);
+                logger.finer("Response Request Message: " +event.data);
             }
-            else{
+            else {
                 // Check mapped workers
-                if(services.containsKey(event.data.getClass())){
+                if (services.containsKey(event.data.getClass())) {
                     services.get(event.data.getClass()).messageEvent(event);
                 }
             }
@@ -96,7 +96,7 @@ public class StandardWorker extends ThreadedEventWorker {
      * @param   messageClass    the received message class
      * @param   worker          the worker that should handle the specified message type
      */
-    public void registerWorker(Class<?> messageClass, ThreadedEventWorker worker){
+    public void registerWorker(Class<?> messageClass, ThreadedEventWorker worker) {
         services.put(messageClass, worker);
     }
 
@@ -105,7 +105,7 @@ public class StandardWorker extends ThreadedEventWorker {
      *
      * @param   messageClass    the received message class
      */
-    public void unregisterWorker(Class<?> messageClass){
+    public void unregisterWorker(Class<?> messageClass) {
         services.remove(messageClass);
     }
 

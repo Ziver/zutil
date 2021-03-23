@@ -81,27 +81,27 @@ public class TorrentMetainfo {
         created_by 	= metainfo.getString("created by");
         comment 	= metainfo.getString("comment");
         encoding 	= metainfo.getString("encoding");
-        if( metainfo.get("creation date") != null )
+        if (metainfo.get("creation date") != null)
             creation_date = metainfo.getLong("creation date");
-        if( metainfo.get("announce-list") != null ){
+        if (metainfo.get("announce-list") != null) {
             DataNode tmp = metainfo.get("announce-list");
             announce_list = new ArrayList<>();
-            for( DataNode tracker : tmp )
-                announce_list.add( tracker.getString() );
+            for (DataNode tracker : tmp)
+                announce_list.add(tracker.getString());
         }
 
         // info data
         DataNode info 	= metainfo.get("info");
         name        	= info.getString("name");
         piece_length 	= info.getLong("piece length");
-        if( info.get("private") != null )
+        if (info.get("private") != null)
             is_private = (info.getInt("private") != 0);
         // Split the hashes
         String hashes = info.getString("pieces");
         piece_hashes = new ArrayList<>();
-        for(int i=0; i<hashes.length(); ){
+        for (int i=0; i<hashes.length();) {
             StringBuilder hash = new StringBuilder(20);
-            for(int k=0; k<20; ++i, ++k)
+            for (int k=0; k<20; ++i, ++k)
                 hash.append(hashes.charAt(i));
             piece_hashes.add(hash.toString());
         }
@@ -109,22 +109,22 @@ public class TorrentMetainfo {
         // File data
         file_list = new ArrayList<>();
         // Single-file torrent
-        if( info.get("files") == null ){
+        if (info.get("files") == null) {
             Long fileSize = size = info.getLong("length");
-            file_list.add( new TorrentFile(name, fileSize) );
+            file_list.add(new TorrentFile(name, fileSize));
         }
         // Multi-file torrent
-        else{
+        else {
             DataNode files = info.get("files");
-            for( DataNode file : files ){
+            for (DataNode file : files) {
                 StringBuilder filename = new StringBuilder();
                 DataNode tmp = file.get("path");
                 // File in subdir
-                if( tmp.isList() ){
+                if (tmp.isList()) {
                     Iterator<DataNode> it = tmp.iterator();
-                    while( it.hasNext() ){
+                    while (it.hasNext()) {
                         filename.append(it.next().getString());
-                        if(it.hasNext())
+                        if (it.hasNext())
                             filename.append(File.separator);
                     }
                 }
@@ -133,7 +133,7 @@ public class TorrentMetainfo {
                     filename.append(tmp.getString());
                 Long fileSize = file.getLong("length");
                 size += fileSize;
-                file_list.add( new TorrentFile(filename.toString(), fileSize) );
+                file_list.add(new TorrentFile(filename.toString(), fileSize));
             }
         }
     }

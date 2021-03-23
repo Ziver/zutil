@@ -37,7 +37,7 @@ public class ContrastBrightnessFilter extends ImageFilterProcessor{
      * Creates a ContrastBrightnessEffect object with the given values
      * @param img The image to apply the effect to
      */
-    public ContrastBrightnessFilter(BufferedImage img){
+    public ContrastBrightnessFilter(BufferedImage img) {
         this(img, 3, 1.2);
     }
 
@@ -47,7 +47,7 @@ public class ContrastBrightnessFilter extends ImageFilterProcessor{
      * @param con The contrast to apply
      * @param brig The brightness to apply
      */
-    public ContrastBrightnessFilter(BufferedImage img, double con, double brig){
+    public ContrastBrightnessFilter(BufferedImage img, double con, double brig) {
         super(img);
         contrast = con;
         brightness = brig;

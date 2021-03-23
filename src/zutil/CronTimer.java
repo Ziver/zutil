@@ -75,27 +75,27 @@ public class CronTimer implements Iterator<Long>, Iterable<Long>{
     /**
      * A Constructor that takes a String containing 5 (or 6 for extended) individual fields in Cron format
      */
-    public CronTimer(String cron){
+    public CronTimer(String cron) {
         String[] arr = cron.split("\\s");
         if (arr.length < 5 || arr.length > 6)
             throw new IllegalArgumentException(
-                    "String must contain between 5-6 fields, but got("+arr.length+" fields): "+cron);
+                    "String must contain between 5-6 fields, but got(" + arr.length + " fields): " + cron);
         init(arr[0], arr[1], arr[2], arr[3], arr[4], (arr.length>5 ? arr[5]: "*"));
     }
     /**
      * A Constructor that takes separate Strings for each field
      */
-    public CronTimer(String minute, String hour, String dayOfMonth, String monthOfYear, String dayOfWeek){
+    public CronTimer(String minute, String hour, String dayOfMonth, String monthOfYear, String dayOfWeek) {
         this(minute, hour, dayOfMonth, monthOfYear, dayOfWeek, "*");
     }
     /**
      * A Constructor that takes separate Strings for each field with an extended year field
      */
-    public CronTimer(String minute, String hour, String dayOfMonth, String monthOfYear, String dayOfWeek, String year){
+    public CronTimer(String minute, String hour, String dayOfMonth, String monthOfYear, String dayOfWeek, String year) {
         init(minute, hour, dayOfMonth, monthOfYear, dayOfWeek, year);
     }
 
-    private void init(String minute, String hour, String dayOfMonth, String monthOfYear, String dayOfWeek, String year){
+    private void init(String minute, String hour, String dayOfMonth, String monthOfYear, String dayOfWeek, String year) {
         minutes = ArrayUtil.toIntArray(getRange(minute, 0, 59));
         hours = ArrayUtil.toIntArray(getRange(hour, 0, 23));
         dayOfMonths = ArrayUtil.toIntArray(getRange(dayOfMonth, 1, 31));
@@ -105,14 +105,14 @@ public class CronTimer implements Iterator<Long>, Iterable<Long>{
                 1970,
                 Calendar.getInstance().get(Calendar.YEAR)+30));
     }
-    protected static List<Integer> getRange(String str, int from, int to){
+    protected static List<Integer> getRange(String str, int from, int to) {
         if (str == null || str.isEmpty())
             return Collections.emptyList();
 
         List<Integer> list = new LinkedList<>();
 
         String[] commaArr = str.split(",");
-        if (commaArr.length > 1){
+        if (commaArr.length > 1) {
             for (String section : commaArr)
                 list.addAll(getRange(section, from, to));
         }
@@ -128,20 +128,20 @@ public class CronTimer implements Iterator<Long>, Iterable<Long>{
             else {
                 String[] rangeArr;
                 if (str.equals("*"))
-                    rangeArr = new String[]{""+from, ""+to};
+                    rangeArr = new String[]{"" +from, "" +to};
                 else
                     rangeArr = str.split("-", 2);
                 if (rangeArr.length == 2) {
                     int rangeFrom = Integer.parseInt(rangeArr[0]);
                     int rangeTo = Integer.parseInt(rangeArr[1]);
                     if (from > rangeFrom || rangeTo > to)
-                        throw new IllegalArgumentException("Invalid range "+rangeFrom+"-"+rangeTo+" must be between: "+from+"-"+to);
+                        throw new IllegalArgumentException("Invalid range " + rangeFrom + "-" + rangeTo + " must be between: " + from + "-" + to);
                     for (int i = rangeFrom; i <= rangeTo; ++i)
                         list.add(i);
                 } else {
                     int value = Integer.parseInt(str);
                     if (from > value || value > to)
-                        throw new IllegalArgumentException("Valid values are between "+from+"-"+to+" but got: "+value);
+                        throw new IllegalArgumentException("Valid values are between " + from + "-" + to + " but got: " + value);
                     list.add(value);
                 }
             }
@@ -153,7 +153,7 @@ public class CronTimer implements Iterator<Long>, Iterable<Long>{
     /**
      * Set the TimeZone that should be used by the cron algorithm
      */
-    public void setTimeZone(TimeZone timeZone){
+    public void setTimeZone(TimeZone timeZone) {
         this.timeZone = timeZone;
     }
 
@@ -279,7 +279,7 @@ public class CronTimer implements Iterator<Long>, Iterable<Long>{
         return cal.getTimeInMillis();
     }
 
-    protected Calendar getCalendar(long timestamp){
+    protected Calendar getCalendar(long timestamp) {
         Calendar cal = Calendar.getInstance();
         if (timeZone != null)
             cal.setTimeZone(timeZone);
@@ -290,8 +290,8 @@ public class CronTimer implements Iterator<Long>, Iterable<Long>{
     /**
      * Converts Calendar DAY_OF_WEEK enum to id starting from 1 (Monday) to 7 (Sunday)
      */
-    private int getDayOfWeekID(int calDayOfWeek){
-        switch (calDayOfWeek){
+    private int getDayOfWeekID(int calDayOfWeek) {
+        switch (calDayOfWeek) {
             case Calendar.MONDAY:    return 1;
             case Calendar.TUESDAY:   return 2;
             case Calendar.WEDNESDAY: return 3;
@@ -302,8 +302,8 @@ public class CronTimer implements Iterator<Long>, Iterable<Long>{
         }
         return -1;
     }
-    private int getDayOfWeekEnum(int dayId){
-        switch (dayId){
+    private int getDayOfWeekEnum(int dayId) {
+        switch (dayId) {
             case 1: return Calendar.MONDAY;
             case 2: return Calendar.TUESDAY;
             case 3: return Calendar.WEDNESDAY;

@@ -197,8 +197,8 @@ public class BufferedBoundaryInputStreamTest {
 
         int out;
         StringBuilder output = new StringBuilder();
-        while((out = in.read()) != -1){
-            output.append((char)out);
+        while ((out = in.read()) != -1){
+            output.append((char) out);
         }
         assertEquals(data, output.toString());
     }

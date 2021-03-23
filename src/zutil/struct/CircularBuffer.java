@@ -44,28 +44,28 @@ public class CircularBuffer<T> implements Iterable<T>{
     /**
      * Initiates the buffer with a maximum size of maxSize.
      */
-    public CircularBuffer(int maxSize){
+    public CircularBuffer(int maxSize) {
         buffer = new Object[maxSize];
         buffSize = 0;
         buffPos  = 0;
     }
 
-    public void add(T obj){
-        if(buffPos+1 >= buffer.length)
+    public void add(T obj) {
+        if (buffPos+1 >= buffer.length)
             buffPos = 0;
         else
             ++buffPos;
-        if(buffSize < buffer.length)
+        if (buffSize < buffer.length)
             ++buffSize;
         buffer[buffPos] = obj;
         ++addCount;
     }
 
     public T get(int index) {
-        if(index >= buffSize)
-            throw new IndexOutOfBoundsException("Index "+ index +" is larger than actual buffer size "+ buffSize);
+        if (index >= buffSize)
+            throw new IndexOutOfBoundsException("Index " + index + " is larger than actual buffer size " + buffSize);
         int buffIndex = buffPos - index;
-        if(buffIndex < 0)
+        if (buffIndex < 0)
             buffIndex = buffer.length - Math.abs(buffIndex);
         return (T)buffer[buffIndex];
     }
@@ -97,7 +97,7 @@ public class CircularBuffer<T> implements Iterable<T>{
 
         @Override
         public T next() {
-            if(iteratorPos >= buffSize)
+            if (iteratorPos >= buffSize)
                 throw new NoSuchElementException();
             return get(iteratorPos++);
         }

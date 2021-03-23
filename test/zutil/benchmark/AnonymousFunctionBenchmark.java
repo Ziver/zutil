@@ -40,7 +40,7 @@ public class AnonymousFunctionBenchmark {
 
     @Test
     public void functionLoop() {
-        for(int k=0; k<TEST_EXECUTIONS; k++) {
+        for (int k=0; k<TEST_EXECUTIONS; k++) {
             for (int i = 0; i < array.length; i++) {
                 array[i] = new CalcFunc(){
                     public int calc(int i){
@@ -59,7 +59,7 @@ public class AnonymousFunctionBenchmark {
             }
         };
 
-        for(int k=0; k<TEST_EXECUTIONS; k++) {
+        for (int k=0; k<TEST_EXECUTIONS; k++) {
             for (int i = 0; i < array.length; i++) {
                 array[i] = func.calc(i);
             }
@@ -68,7 +68,7 @@ public class AnonymousFunctionBenchmark {
 
     @Test
     public void rawLoops(){
-        for(int k=0; k<TEST_EXECUTIONS; k++) {
+        for (int k=0; k<TEST_EXECUTIONS; k++) {
             for (int i = 0; i < array.length; i++) {
                 array[i] = i;
             }

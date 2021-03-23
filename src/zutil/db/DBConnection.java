@@ -56,7 +56,7 @@ public class DBConnection implements Closeable{
      */
     public DBConnection(String jndi) throws NamingException, SQLException{
         InitialContext ctx = new InitialContext();
-        DataSource ds = (DataSource)ctx.lookup("java:comp/env/"+jndi);
+        DataSource ds = (DataSource)ctx.lookup("java:comp/env/" + jndi);
         this.conn = ds.getConnection();
     }
 
@@ -83,7 +83,7 @@ public class DBConnection implements Closeable{
      */
     public DBConnection(DBMS dbms, String url, String db, String user, String password) throws Exception{
         String dbms_name = initDriver(dbms);
-        conn = DriverManager.getConnection ("jdbc:"+dbms_name+"://"+url+"/"+db, user, password);
+        conn = DriverManager.getConnection ("jdbc:" + dbms_name + "://" + url + "/" + db, user, password);
     }
 
     /**
@@ -94,13 +94,13 @@ public class DBConnection implements Closeable{
      */
     public DBConnection(DBMS dbms, String db) throws Exception{
         String dbms_name = initDriver(dbms);
-        conn = DriverManager.getConnection ("jdbc:"+dbms_name+":"+db);
+        conn = DriverManager.getConnection ("jdbc:" + dbms_name + ":" + db);
     }
 
     /**
      * @return the underlying connection
      */
-    public Connection getConnection(){
+    public Connection getConnection() {
         return conn;
     }
 
@@ -111,7 +111,7 @@ public class DBConnection implements Closeable{
      * @return the protocol name of the DBMS
      */
     public static String initDriver(DBMS db) throws InstantiationException, IllegalAccessException, ClassNotFoundException{
-        switch(db){
+        switch(db) {
         case MySQL:
             Class.forName("com.mysql.jdbc.Driver").newInstance();
             DriverManager.setLoginTimeout(10);
@@ -127,10 +127,10 @@ public class DBConnection implements Closeable{
     /**
      * @return the last inserted id or -1 if there was an error
      */
-    public long getLastInsertID(){
-        try{
+    public long getLastInsertID() {
+        try {
             return exec("SELECT LAST_INSERT_ID()", new SimpleSQLResult<>());
-        }catch(SQLException e){
+        } catch (SQLException e) {
             logger.log(Level.WARNING, null, e);
         }
         return -1;
@@ -138,17 +138,17 @@ public class DBConnection implements Closeable{
     /**
      * @return the last inserted id or -1 if there was an error
      */
-    public long getLastInsertID(Statement stmt){
+    public long getLastInsertID(Statement stmt) {
         ResultSet result = null;
-        try{
+        try {
             result = stmt.getGeneratedKeys();
-            if(result != null){
+            if (result != null) {
                 return new SimpleSQLResult<Integer>().handleQueryResult(stmt, result);
             }
-        }catch(SQLException e){
+        } catch (SQLException e) {
             logger.log(Level.WARNING, null, e);
         } finally {
-            if(result != null) {
+            if (result != null) {
                 try {
                     result.close();
                 } catch (SQLException e) {
@@ -179,7 +179,7 @@ public class DBConnection implements Closeable{
      * @return update count or -1 if the query is not an update query
      */
     public int exec(String query) throws SQLException {
-        PreparedStatement stmt = getPreparedStatement( query );
+        PreparedStatement stmt = getPreparedStatement(query);
         return exec(stmt);
     }
 
@@ -190,10 +190,10 @@ public class DBConnection implements Closeable{
      * @return update count or -1 if the query is not an update query
      */
     public static int exec(PreparedStatement stmt) throws SQLException {
-        Integer ret = exec(stmt, new SQLResultHandler<Integer>(){
+        Integer ret = exec(stmt, new SQLResultHandler<Integer>() {
             public Integer handleQueryResult(Statement stmt, ResultSet result) {
                 try {
-                    if(stmt != null)
+                    if (stmt != null)
                         return stmt.getUpdateCount();
                     else
                         return -1;
@@ -204,7 +204,7 @@ public class DBConnection implements Closeable{
             }
         });
 
-        if(ret != null)
+        if (ret != null)
             return ret;
         return -1;
     }
@@ -217,7 +217,7 @@ public class DBConnection implements Closeable{
      * @return update count or -1 if the query is not an update query
      */
     public <T> T exec(String query, SQLResultHandler<T> handler) throws SQLException {
-        PreparedStatement stmt = getPreparedStatement( query );
+        PreparedStatement stmt = getPreparedStatement(query);
         return exec(stmt, handler);
     }
 
@@ -229,24 +229,24 @@ public class DBConnection implements Closeable{
      * @return the object from the handler
      */
     public static <T> T exec(PreparedStatement stmt, SQLResultHandler<T> handler) {
-        try{
+        try {
             // Execute
             boolean isResultSet = stmt.execute();
 
             // Handle result
-            if( handler != null ){
+            if (handler != null) {
                 ResultSet result = null;
-                try{
-                    if(isResultSet){
+                try {
+                    if (isResultSet) {
                         result = stmt.getResultSet();
                         return handler.handleQueryResult(stmt, result);
                     }
                     else
                         return null;
-                }catch(SQLException e){
+                } catch(SQLException e) {
                     logger.log(Level.WARNING, null, e);
-                }finally{
-                    if(result != null){
+                } finally {
+                    if (result != null) {
                         try {
                             result.close();
                         } catch (SQLException e) {
@@ -255,7 +255,7 @@ public class DBConnection implements Closeable{
                     }
                 }
             }
-        }catch(SQLException e){
+        } catch (SQLException e) {
             logger.log(Level.WARNING, null, e);
         // Cleanup
         } finally {
@@ -277,10 +277,10 @@ public class DBConnection implements Closeable{
      * @return a array of ints representing the number of updates for each batch statements
      */
     public static int[] execBatch(PreparedStatement stmt) throws SQLException{
-        try{
+        try {
             // Execute
             return stmt.executeBatch();
-        }catch(SQLException e){
+        } catch (SQLException e) {
             logger.log(Level.WARNING, null, e);
             // Cleanup
         } finally {
@@ -300,8 +300,8 @@ public class DBConnection implements Closeable{
      *
      * @param	pool	is the pool
      */
-    protected void setPool(DBConnectionPool pool){
-        if( pool != null )
+    protected void setPool(DBConnectionPool pool) {
+        if (pool != null)
             pool.removeConnection(this);
         this.pool = pool;
     }
@@ -311,11 +311,11 @@ public class DBConnection implements Closeable{
      *
      * @return true or false depending on the validity of the connection
      */
-    public boolean valid(){
+    public boolean valid() {
         try {
             conn.getMetaData();
             return !conn.isClosed();
-        }catch (Exception e) {
+        } catch (Exception e) {
             return false;
         }
     }
@@ -323,12 +323,12 @@ public class DBConnection implements Closeable{
     /**
      * Disconnects from the database or releases the connection back to the pool
      */
-    public void close(){
-        if(pool != null){
+    public void close() {
+        if (pool != null) {
             pool.releaseConnection(this);
             conn = null;
         }
-        else{
+        else {
             forceClose();
         }
     }
@@ -336,10 +336,10 @@ public class DBConnection implements Closeable{
     /**
      * Disconnects from the database
      */
-    public void forceClose(){
+    public void forceClose() {
         if (conn != null) {
             try {
-                if( !conn.isClosed() )
+                if (!conn.isClosed())
                     conn.close();
             } catch (SQLException e) {
                 logger.log(Level.WARNING, null, e);
@@ -348,7 +348,7 @@ public class DBConnection implements Closeable{
         }
     }
 
-    public boolean equals(Object o){
+    public boolean equals(Object o) {
         return conn.equals(o);
     }
 }

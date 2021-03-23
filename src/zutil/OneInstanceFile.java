@@ -33,7 +33,7 @@ import java.nio.channels.OverlappingFileLockException;
 /**
  * This class checks if the application is already running
  * by Locking a file
- * 
+ *
  * @author Ziver Koc
  */
 public class OneInstanceFile implements OneInstance{
@@ -46,7 +46,7 @@ public class OneInstanceFile implements OneInstance{
      *
      * @param filename The name of the file to be locked
      */
-    public OneInstanceFile(String filename){
+    public OneInstanceFile(String filename) {
         this.file = new File(System.getProperty("user.home"), filename);
     }
 
@@ -57,7 +57,7 @@ public class OneInstanceFile implements OneInstance{
      */
     public boolean check() {
         boolean tmp = lockApp();
-        if( tmp ) closeLock();
+        if (tmp) closeLock();
         return !tmp;
     }
 

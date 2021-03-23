@@ -44,7 +44,7 @@ public class DynamicByteArrayStream extends InputStream{
     /**
      * Create a new instance of DynamicByteArrayStream
      */
-    public DynamicByteArrayStream(){
+    public DynamicByteArrayStream() {
         bytes = new ArrayList<>();
         globalPos = 0;
         globalSize = 0;
@@ -57,7 +57,7 @@ public class DynamicByteArrayStream extends InputStream{
      *
      * @param 		b 			is the byte array to add.
      */
-    public synchronized void append(byte[] b){
+    public synchronized void append(byte[] b) {
         bytes.add(b);
         globalSize += b.length;
     }
@@ -70,7 +70,7 @@ public class DynamicByteArrayStream extends InputStream{
      * @param 		offset		is the offset in the byte array
      * @param 		length		is the amount of data to add
      */
-    public synchronized void append(byte[] b, int offset, int length){
+    public synchronized void append(byte[] b, int offset, int length) {
         byte[] new_b = new byte[length];
         System.arraycopy(b, offset, new_b, 0, length);
         bytes.add(new_b);
@@ -79,12 +79,12 @@ public class DynamicByteArrayStream extends InputStream{
 
     @Override
     public synchronized int read() {
-        if(globalPos >= globalSize)	return -1;
+        if (globalPos >= globalSize)	return -1;
 
         int ret = bytes.get(globalArrayIndex)[localArrayOffset] & 0xff;
         globalPos++;
         localArrayOffset++;
-        if(localArrayOffset >= bytes.get(globalArrayIndex).length){
+        if (localArrayOffset >= bytes.get(globalArrayIndex).length) {
             globalArrayIndex++;
             localArrayOffset = 0;
         }
@@ -92,15 +92,15 @@ public class DynamicByteArrayStream extends InputStream{
     }
 
     public synchronized int read(byte b[], int off, int len) {
-        if(len <= 0) return 0;
-        if(globalPos >= globalSize)	return -1;
+        if (len <= 0) return 0;
+        if (globalPos >= globalSize)	return -1;
 
         int bytes_read=0;
-        if(globalPos+len >= globalSize) len = globalSize - globalPos;
-        while(bytes_read<len){
+        if (globalPos+len >= globalSize) len = globalSize - globalPos;
+        while (bytes_read<len) {
             byte[] src = bytes.get(globalArrayIndex);
             // Read length is LONGER than local array
-            if(localArrayOffset +len-bytes_read > src.length){
+            if (localArrayOffset +len-bytes_read > src.length) {
                 int length = src.length- localArrayOffset;
                 System.arraycopy(src, localArrayOffset, b, off+bytes_read, length);
 
@@ -109,7 +109,7 @@ public class DynamicByteArrayStream extends InputStream{
                 bytes_read += length;
             }
             // Read length is SHORTER than local array
-            else{
+            else {
                 int length = len-bytes_read;
                 System.arraycopy(src, localArrayOffset, b, off+bytes_read, length);
 
@@ -128,7 +128,7 @@ public class DynamicByteArrayStream extends InputStream{
     /**
      * Clears this stream from the byte arrays
      */
-    public synchronized void clear(){
+    public synchronized void clear() {
         globalSize = 0;
         reset();
         bytes.clear();
@@ -147,7 +147,7 @@ public class DynamicByteArrayStream extends InputStream{
     /**
      * @return 		all of the buffers content as a byte array.
      */
-    public byte[] getBytes(){
+    public byte[] getBytes() {
         byte[] data = new byte[globalSize];
         this.read(data, 0, globalSize);
         return data;
@@ -159,7 +159,7 @@ public class DynamicByteArrayStream extends InputStream{
      *
      * @return all the contents of the buffers as a String.
      */
-    public String toString(){
-        return new String( this.getBytes() );
+    public String toString() {
+        return new String(this.getBytes());
     }
 }

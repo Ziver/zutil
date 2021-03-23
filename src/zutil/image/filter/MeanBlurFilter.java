@@ -28,7 +28,7 @@ import java.awt.image.BufferedImage;
 
 /**
  * The MedianFilter is used for noise reduction and things
- * 
+ *
  * @author Ziver
  */
 public class MeanBlurFilter extends ConvolutionFilter{
@@ -54,12 +54,12 @@ public class MeanBlurFilter extends ConvolutionFilter{
         this.windowSize = pixels;
     }
 
-    protected double[][] generateKernel(){
+    protected double[][] generateKernel() {
         double[][] kernel = new double[windowSize][windowSize];
 
         double mean = 1.0/(windowSize*windowSize);
-        for(int y=0; y<windowSize ;y++){
-            for(int x=0; x<windowSize ;x++){
+        for (int y=0; y<windowSize; y++) {
+            for (int x=0; x<windowSize; x++) {
                 kernel[y][x] = mean;
             }
         }

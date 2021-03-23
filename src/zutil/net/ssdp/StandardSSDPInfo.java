@@ -80,38 +80,38 @@ public class StandardSSDPInfo implements SSDPServiceInfo, SSDPCustomInfo{
     /**
      * @return The URL to the Service, e.g. "http://192.168.0.1:80/index.html"
      */
-    public String getLocation(){
+    public String getLocation() {
         return location;
     }
 
     /**
      * @return the Search Target, e.g. "upnp:rootdevice"
      */
-    public String getSearchTarget(){
+    public String getSearchTarget() {
         return st;
     }
 
     /**
      * @return the expiration time for the values in this object
      */
-    public long getExpirationTime(){
+    public long getExpirationTime() {
         return expiration_time;
     }
 
     /**
      * @return the USN value, e.g. "uuid:abcdefgh-7dec-11d0-a765-00a0c91e6bf6 "
      */
-    public String getUSN(){
-        if( usn==null )
+    public String getUSN() {
+        if (usn == null)
             usn = genUSN();
-        return usn+"::"+st;
+        return usn + "::" + st;
     }
 
     /**
      * @return only the USN UUID String
      */
-    public String getUUID(){
-        if( usn==null )
+    public String getUUID() {
+        if (usn == null)
             usn = genUSN();
         return usn;
     }
@@ -121,19 +121,19 @@ public class StandardSSDPInfo implements SSDPServiceInfo, SSDPCustomInfo{
      *
      * @return an unique string that corresponds to the service
      */
-    private String genUSN(){
-        return "uuid:" + UUID.nameUUIDFromBytes( (st+location+Math.random()).getBytes() );
+    private String genUSN() {
+        return "uuid:" + UUID.nameUUIDFromBytes((st+location+Math.random()).getBytes());
     }
 
-    public String toString(){
-        return "USN: "+usn+"\nLocation: "+location+"\nST: "+st+"\nExpiration-Time: "+new Date(expiration_time);
+    public String toString() {
+        return "USN: " + usn + "\nLocation: " + location + "\nST: " + st + "\nExpiration-Time: " + new Date(expiration_time);
     }
 
 
     public void setHeader(String key, String value) {
         headers.put(key, value);
     }
-    public String getHeader(String header){
+    public String getHeader(String header) {
         return headers.get(header);
     }
     @Override
@@ -151,7 +151,7 @@ public class StandardSSDPInfo implements SSDPServiceInfo, SSDPCustomInfo{
         }
     }
 
-    public InetAddress getInetAddress(){
+    public InetAddress getInetAddress() {
         return inetAddress;
     }
 

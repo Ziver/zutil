@@ -64,12 +64,12 @@ public class MulticastDnsClient extends ThreadedUDPNetwork implements ThreadedUD
 
     public MulticastDnsClient() throws IOException {
         super(MDNS_MULTICAST_ADDR, MDNS_MULTICAST_PORT);
-        setThread( this );
+        setThread(this);
 
         this.activeProbes = new HashSet<>();
     }
 
-    public void setListener(DnsResolutionListener listener){
+    public void setListener(DnsResolutionListener listener) {
         this.listener = listener;
     }
 
@@ -91,11 +91,11 @@ public class MulticastDnsClient extends ThreadedUDPNetwork implements ThreadedUD
 
         DatagramPacket udpPacket = new DatagramPacket(
                 buffer.toByteArray(), buffer.size(),
-                InetAddress.getByName( MDNS_MULTICAST_ADDR ),
-                MDNS_MULTICAST_PORT );
+                InetAddress.getByName(MDNS_MULTICAST_ADDR),
+                MDNS_MULTICAST_PORT);
 
-        logger.fine("Sending MDSN probe id: "+id+", for domain: " + domain);
-        //System.out.println("Sending:\n"+ByteUtil.toFormattedString(udpPacket.getData(), udpPacket.getOffset(), udpPacket.getLength()));
+        logger.fine("Sending MDSN probe id: " + id + ", for domain: " + domain);
+        //System.out.println("Sending:\n" +ByteUtil.toFormattedString(udpPacket.getData(), udpPacket.getOffset(), udpPacket.getLength()));
         //MultiPrintStream.out.dump(dnsPacket,3);
 
         send(udpPacket);
@@ -109,19 +109,19 @@ public class MulticastDnsClient extends ThreadedUDPNetwork implements ThreadedUD
             BinaryStructInputStream in = new BinaryStructInputStream(buffer);
             DnsPacket dnsPacket = DnsPacket.read(in);
 
-            //System.out.println("Received:\n"+ByteUtil.toFormattedString(packet.getData(), packet.getOffset(), packet.getLength()));
+            //System.out.println("Received:\n" +ByteUtil.toFormattedString(packet.getData(), packet.getOffset(), packet.getLength()));
             MultiPrintStream.out.dump(dnsPacket,3);
 
             if (dnsPacket.getHeader().flagQueryResponse) {
-                if (activeProbes.contains(dnsPacket.getHeader().id)){
-                    logger.fine("Received MDNS response from: "+packet.getAddress()+", msg id: " + dnsPacket.getHeader().id);
+                if (activeProbes.contains(dnsPacket.getHeader().id)) {
+                    logger.fine("Received MDNS response from: " + packet.getAddress() + ", msg id: " + dnsPacket.getHeader().id);
                     if (listener != null)
                         listener.receivedResponse(dnsPacket);
                 } else {
-                    logger.fine("Received MDNS packet: "+packet.getAddress()+", msg id: " + dnsPacket.getHeader().id);
+                    logger.fine("Received MDNS packet: " + packet.getAddress() + ", msg id: " + dnsPacket.getHeader().id);
                 }
             }
-        } catch (IOException e){
+        } catch (IOException e) {
             logger.log(Level.WARNING, null, e);
         }
     }

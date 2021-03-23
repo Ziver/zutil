@@ -28,7 +28,7 @@ package zutil.algo.sort.sortable;
 public class SortableComparableArray implements SortableDataList<Comparable>{
     private Comparable[] list;
 
-    public SortableComparableArray(Comparable[] list){
+    public SortableComparableArray(Comparable[] list) {
         this.list = list;
     }
 
@@ -36,7 +36,7 @@ public class SortableComparableArray implements SortableDataList<Comparable>{
         return list[i];
     }
 
-    public void set(int i, Comparable o){
+    public void set(int i, Comparable o) {
         list[i] = o;
     }
 
@@ -51,20 +51,20 @@ public class SortableComparableArray implements SortableDataList<Comparable>{
     }
 
     public int compare(int a, int b) {
-        if(list[a].compareTo(list[b]) < 0){
+        if (list[a].compareTo(list[b]) < 0) {
             return -1;
         }
-        else if(list[a].compareTo(list[b]) > 0){
+        else if (list[a].compareTo(list[b]) > 0) {
             return 1;
         }
         return 0;
     }
 
     public int compare(int a, Comparable b) {
-        if(list[a].compareTo(b) < 0){
+        if (list[a].compareTo(b) < 0) {
             return -1;
         }
-        else if(list[a].compareTo(b) > 0){
+        else if (list[a].compareTo(b) > 0) {
             return 1;
         }
         return 0;

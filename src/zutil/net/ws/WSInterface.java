@@ -38,7 +38,7 @@ import java.lang.annotation.Target;
  * Example:
  * <pre>
  *	private static class Test implements WSInterface{
- *		public Test(){}
+ *		public Test() {}
  *
  *		&#64;WSDocumentation("This is a description of the method")
  *		&#64;WSParamDocumentation("arg1 = variable description?")
@@ -56,7 +56,7 @@ import java.lang.annotation.Target;
  *		}
  *
  *		&#64;WSIgnore()
- *		public void privatZ(....){
+ *		public void privatZ(....) {
  *			...
  *		}
  *	}

@@ -35,25 +35,25 @@ import static org.junit.Assert.assertEquals;
 public class MatrixTest {
 
     @Test
-    public void scalarAdd(){
+    public void scalarAdd() {
         assertArrayEquals(new double[][]{{4,5},{-2,11}},
                 Matrix.add(new double[][]{{2,3},{-4,9}}, 2));
     }
 
     @Test
-    public void scalarSubtraction(){
+    public void scalarSubtraction() {
         assertArrayEquals(new double[][]{{0,1},{-6,7}},
                 Matrix.subtract(new double[][]{{2,3},{-4,9}}, 2));
     }
 
     @Test
-    public void scalarMultiply(){
+    public void scalarMultiply() {
         assertArrayEquals(new double[][]{{4,6},{-8,18}},
                 Matrix.multiply(new double[][]{{2,3},{-4,9}}, 2));
     }
 
     @Test
-    public void scalarDivision(){
+    public void scalarDivision() {
         assertArrayEquals(new double[][]{{1,2},{-2,5}},
                 Matrix.divide(new double[][]{{2,4},{-4,10}}, 2));
     }
@@ -61,25 +61,25 @@ public class MatrixTest {
 
 
     @Test
-    public void elementalAdd(){
+    public void elementalAdd() {
         assertArrayEquals(new double[][]{{3,5},{-1,13}},
                 Matrix.Elemental.add(new double[][]{{2,3},{-4,9}}, new double[][]{{1,2},{3,4}}));
     }
 
     @Test
-    public void elementalSubtract(){
+    public void elementalSubtract() {
         assertArrayEquals(new double[][]{{1,1},{-7,5}},
                 Matrix.Elemental.subtract(new double[][]{{2,3},{-4,9}}, new double[][]{{1,2},{3,4}}));
     }
 
     @Test
-    public void elementalMultiply(){
+    public void elementalMultiply() {
         assertArrayEquals(new double[][]{{2,6},{-12,36}},
                 Matrix.Elemental.multiply(new double[][]{{2,3},{-4,9}}, new double[][]{{1,2},{3,4}}));
     }
 
     @Test
-    public void elementalVectorPow(){
+    public void elementalVectorPow() {
         assertArrayEquals(
                 new double[]{4,9,16,81},
                 Matrix.Elemental.pow(new double[]{2,3,-4,9}, 2),
@@ -87,7 +87,7 @@ public class MatrixTest {
     }
 
     @Test
-    public void elementalMatrixPow(){
+    public void elementalMatrixPow() {
         assertArrayEquals(new double[][]{{4,9},{16,81}},
                 Matrix.Elemental.pow(new double[][]{{2,3},{-4,9}}, 2));
     }
@@ -95,7 +95,7 @@ public class MatrixTest {
 
 
     @Test
-    public void vectorAddition(){
+    public void vectorAddition() {
         assertArrayEquals(
                 new double[]{3,5,-1,13},
                 Matrix.add(new double[]{2,3,-4,9}, new double[]{1,2,3,4}),
@@ -104,7 +104,7 @@ public class MatrixTest {
     }
 
     @Test
-    public void vectorMatrixAddition(){
+    public void vectorMatrixAddition() {
         assertArrayEquals(
                 new double[][]{{2,3,4,5},{2,3,4,5},{2,3,4,5},{2,3,4,5}},
                 Matrix.add(new double[][]{{1,2,3,4},{1,2,3,4},{1,2,3,4},{1,2,3,4}}, new double[]{1,1,1,1})
@@ -112,7 +112,7 @@ public class MatrixTest {
     }
 
     @Test
-    public void vectorSubtraction(){
+    public void vectorSubtraction() {
         assertArrayEquals(
                 new double[]{1,1,-7,5},
                 Matrix.subtract(new double[]{2,3,-4,9}, new double[]{1,2,3,4}),
@@ -121,7 +121,7 @@ public class MatrixTest {
     }
 
     @Test
-    public void vectorMatrixSubtraction(){
+    public void vectorMatrixSubtraction() {
         assertArrayEquals(
                 new double[][]{{0,1,2,3},{0,1,2,3},{0,1,2,3},{0,1,2,3}},
                 Matrix.subtract(new double[][]{{1,2,3,4},{1,2,3,4},{1,2,3,4},{1,2,3,4}}, new double[]{1,1,1,1})
@@ -129,7 +129,7 @@ public class MatrixTest {
     }
 
     @Test
-    public void vectorMultiply(){
+    public void vectorMultiply() {
         assertArrayEquals(
                 new double[]{0.1, 0.4, 0.9, 1.6},
                 Matrix.Elemental.multiply(
@@ -139,7 +139,7 @@ public class MatrixTest {
     }
 
     @Test
-    public void vectorMatrixMultiply(){
+    public void vectorMatrixMultiply() {
         assertArrayEquals(
                 new double[]{1.4, 1.9, 2.4, 2.9},
                 Matrix.multiply(
@@ -149,7 +149,7 @@ public class MatrixTest {
     }
 
     @Test
-    public void vectorMatrixDivision(){
+    public void vectorMatrixDivision() {
         assertArrayEquals(
                 new double[]{4,1},
                 Matrix.divide(new double[][]{{2,4},{-4,10}}, new double[]{1,2}),
@@ -158,7 +158,7 @@ public class MatrixTest {
     }
 
     @Test
-    public void vectorMatrixElementalMultiply(){
+    public void vectorMatrixElementalMultiply() {
         assertArrayEquals(
                 new double[][]{{1, 4, 9}, {1, 6, 12}, {1, 8, 15}, {1, 10, 18}},
                 Matrix.Elemental.multiply(
@@ -167,7 +167,7 @@ public class MatrixTest {
     }
 
     @Test
-    public void vectorMatrixElementalDivision(){
+    public void vectorMatrixElementalDivision() {
         assertArrayEquals(
                 new double[][]{{2,2},{-4,5}},
                 Matrix.Elemental.divide(
@@ -176,7 +176,7 @@ public class MatrixTest {
     }
 
     @Test
-    public void vectorSum(){
+    public void vectorSum() {
         assertEquals(
                 20.0,
                 Matrix.sum(new double[]{1,2,0,3,5,9}),
@@ -187,7 +187,7 @@ public class MatrixTest {
 
 
     @Test
-    public void matrixMultiply(){
+    public void matrixMultiply() {
         assertArrayEquals(
                 new double[][]{{486,410.4,691.6},{314,341.6,416.4},{343.5,353.4,463.6},{173,285.2,190.8}},
                 Matrix.multiply(
@@ -197,7 +197,7 @@ public class MatrixTest {
     }
 
     @Test
-    public void matrixTranspose(){
+    public void matrixTranspose() {
         assertArrayEquals(
                 new double[][]{{1,3},{2,5},{0,9}},
                 Matrix.transpose(
@@ -206,7 +206,7 @@ public class MatrixTest {
     }
 
     @Test
-    public void matrixSum(){
+    public void matrixSum() {
         assertEquals(
                 20.0,
                 Matrix.sum(new double[][]{{1,2,0},{3,5,9}}),
@@ -217,7 +217,7 @@ public class MatrixTest {
 
 
     @Test
-    public void identity(){
+    public void identity() {
         assertArrayEquals(
                 new double[][]{{1}},
                 Matrix.identity(1));
@@ -228,7 +228,7 @@ public class MatrixTest {
     }
 
     @Test
-    public void getColumn(){
+    public void getColumn() {
         assertArrayEquals(
                 new double[]{2,3,4,1},
                 Matrix.getColumn(new double[][]{{1,2,3,4},{2,3,4,1},{3,4,1,2},{4,1,2,3}}, 1),

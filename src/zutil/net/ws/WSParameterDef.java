@@ -44,7 +44,7 @@ public class WSParameterDef {
     private boolean optional = false;
 
 
-    protected WSParameterDef(WSMethodDef mDef, Class<?> paramClass, Annotation[] annotations){
+    protected WSParameterDef(WSMethodDef mDef, Class<?> paramClass, Annotation[] annotations) {
         this.mDef = mDef;
         this.paramClass = paramClass;
 
@@ -92,7 +92,7 @@ public class WSParameterDef {
         this.optional = optional;
     }
 
-    public WSMethodDef getMethod(){
+    public WSMethodDef getMethod() {
         return mDef;
     }
 }

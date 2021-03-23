@@ -35,7 +35,7 @@ import static org.junit.Assert.assertNull;
 public class URLDecoderTest {
 
     @Test
-    public void simpleTest(){
+    public void simpleTest() {
         assertNull(URLDecoder.decode(null));
         assertEquals("", URLDecoder.decode(""));
         assertEquals("space space", URLDecoder.decode("space space"));
@@ -44,7 +44,7 @@ public class URLDecoderTest {
     }
 
     @Test
-    public void percentTest(){
+    public void percentTest() {
         assertEquals("test+", URLDecoder.decode("test%2B"));
         assertEquals("test%2", URLDecoder.decode("test%2"));
         assertEquals("test+test", URLDecoder.decode("test%2Btest"));

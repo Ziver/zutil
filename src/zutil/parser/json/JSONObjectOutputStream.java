@@ -67,7 +67,7 @@ public class JSONObjectOutputStream extends OutputStream implements ObjectOutput
     /**
      * @return a String containing the JSON representation of the Object
      */
-    public static String toString(Object obj){
+    public static String toString(Object obj) {
         try {
             StringOutputStream out = new StringOutputStream();
             JSONObjectOutputStream writer = new JSONObjectOutputStream(out);
@@ -81,7 +81,7 @@ public class JSONObjectOutputStream extends OutputStream implements ObjectOutput
     }
 
     public synchronized void writeObject(Object obj) throws IOException{
-        try{
+        try {
             out.write(getDataNode(obj));
         } catch (IllegalAccessException e) {
             throw new IOException("Unable to serialize object", e);
@@ -91,20 +91,20 @@ public class JSONObjectOutputStream extends OutputStream implements ObjectOutput
     }
 
     protected DataNode getDataNode(Object obj) throws IOException, IllegalArgumentException, IllegalAccessException {
-        if(obj == null)
+        if (obj == null)
             return null;
         Class objClass = obj.getClass();
         DataNode root;
 
         // Check if the object is a primitive
-        if(ClassUtil.isPrimitive(obj.getClass()) ||
-                ClassUtil.isWrapper(obj.getClass())){
+        if (ClassUtil.isPrimitive(obj.getClass()) ||
+                ClassUtil.isWrapper(obj.getClass())) {
             root = getPrimitiveDataNode(obj.getClass(), obj);
         }
         // Add an array
-        else if(objClass.isArray()){
+        else if (objClass.isArray()) {
             // Special case for byte arrays
-            if(objClass.getComponentType() == byte.class) {
+            if (objClass.getComponentType() == byte.class) {
                 root = new DataNode(DataType.String);
                 root.set(Base64Encoder.encode((byte[])obj));
             }
@@ -117,18 +117,18 @@ public class JSONObjectOutputStream extends OutputStream implements ObjectOutput
             }
         }
         // List
-        else if(List.class.isAssignableFrom(objClass)){
+        else if (List.class.isAssignableFrom(objClass)) {
             root = new DataNode(DataNode.DataType.List);
             List list = (List)obj;
-            for(Object item : list){
+            for (Object item : list) {
                 root.add(getDataNode(item));
             }
         }
         // Map
-        else if(Map.class.isAssignableFrom(objClass)){
+        else if (Map.class.isAssignableFrom(objClass)) {
             root = new DataNode(DataNode.DataType.Map);
             Map map = (Map)obj;
-            for(Object key : map.keySet()){
+            for (Object key : map.keySet()) {
                 root.set(
                         getDataNode(key).getString(),
                         getDataNode(map.get(key)));
@@ -138,27 +138,27 @@ public class JSONObjectOutputStream extends OutputStream implements ObjectOutput
         else {
             root = new DataNode(DataNode.DataType.Map);
             // Generate meta data
-            if(generateMetaData){
+            if (generateMetaData) {
                 // Cache
-                if(objectCache.containsKey(obj)){ // Hit
+                if (objectCache.containsKey(obj)) { // Hit
                     root.set(MD_OBJECT_ID, objectCache.get(obj));
                     return root;
                 }
-                else{ // Miss
+                else { // Miss
                     objectCache.put(obj, objectCache.size()+1);
                     root.set(MD_OBJECT_ID, objectCache.size());
                 }
                 root.set(MD_CLASS, obj.getClass().getName());
             }
             // Add all the fields to the DataNode
-            for(Field field : obj.getClass().getDeclaredFields()){
-                if( ! Modifier.isStatic(field.getModifiers()) &&
-                        ! Modifier.isTransient(field.getModifiers())){
+            for (Field field : obj.getClass().getDeclaredFields()) {
+                if (! Modifier.isStatic(field.getModifiers()) &&
+                        ! Modifier.isTransient(field.getModifiers())) {
                     field.setAccessible(true);
                     Object fieldObj = field.get(obj);
 
                     // has object a value?
-                    if(ignoreNullFields && fieldObj == null)
+                    if (ignoreNullFields && fieldObj == null)
                         continue;
                     else
                         root.set(field.getName(), getDataNode(fieldObj));
@@ -178,18 +178,18 @@ public class JSONObjectOutputStream extends OutputStream implements ObjectOutput
                 type == Double.class)
             node = new DataNode(DataType.Number);
 
-        else if(type == boolean.class ||
+        else if (type == boolean.class ||
                 type == Boolean.class)
             node = new DataNode(DataType.Boolean);
 
-        else if(type == String.class ||
+        else if (type == String.class ||
                 type == char.class ||
                 type == Character.class)
             node = new DataNode(DataType.String);
         else
-            throw new IllegalArgumentException("Unsupported primitive data type: "+type.getName());
+            throw new IllegalArgumentException("Unsupported primitive data type: " +type.getName());
 
-        if(value != null)
+        if (value != null)
             node.set(value.toString());
         return node;
     }
@@ -202,7 +202,7 @@ public class JSONObjectOutputStream extends OutputStream implements ObjectOutput
      *
      * All the meta-data tags will start with a '@'
      */
-    public void enableMetaData(boolean generate){
+    public void enableMetaData(boolean generate) {
         generateMetaData = generate;
     }
 

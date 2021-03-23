@@ -33,10 +33,10 @@ import java.util.Properties;
 
 /**
  * Adds the result of the query to a Properties object,
- * 
- * The handler sets the first column of the result as 
+ *
+ * The handler sets the first column of the result as
  * the key and the second column as the value
- * 
+ *
  * @author Ziver
  */
 public class PropertiesSQLResult implements SQLResultHandler<Properties> {
@@ -46,14 +46,14 @@ public class PropertiesSQLResult implements SQLResultHandler<Properties> {
     /**
      * Creates a new Properties object to be filled
      */
-    public PropertiesSQLResult(){
+    public PropertiesSQLResult() {
         this.prop = new Properties();
     }
 
     /**
      * Adds data to a existing Properties object
      */
-    public PropertiesSQLResult(Properties p){
+    public PropertiesSQLResult(Properties p) {
         this.prop = p;
     }
 
@@ -62,7 +62,7 @@ public class PropertiesSQLResult implements SQLResultHandler<Properties> {
      * Is called to handle an result from an query.
      */
     public Properties handleQueryResult(Statement stmt, ResultSet result) throws SQLException{
-        while( result.next() )
+        while (result.next())
             prop.setProperty(result.getString(1), result.getString(2));
         return prop;
     }

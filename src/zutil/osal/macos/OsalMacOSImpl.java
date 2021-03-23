@@ -57,7 +57,7 @@ public class OsalMacOSImpl extends OSAbstractionLayer {
 
     @Override
     public File getUserConfigPath() {
-        return new File("/home/"+getUsername());
+        return new File("/home/" +getUsername());
     }
 
     @Override

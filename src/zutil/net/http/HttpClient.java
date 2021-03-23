@@ -152,7 +152,7 @@ public class HttpClient implements AutoCloseable {
         Socket conn;
         if ("https".equals(url.getProtocol())) {
             conn = SSLSocketFactory.getDefault().createSocket(url.getHost(), port);
-            ((SSLSocket )conn).startHandshake();
+            ((SSLSocket)conn).startHandshake();
         } else {
             conn = new Socket(url.getHost(), port);
         }

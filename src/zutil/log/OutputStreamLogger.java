@@ -42,19 +42,19 @@ public class OutputStreamLogger extends OutputStream implements StreamLogger.Log
     private StreamLogger log;
 
 
-    public OutputStreamLogger(OutputStream out){
+    public OutputStreamLogger(OutputStream out) {
         this(null, out);
     }
-    public OutputStreamLogger(String prefix, OutputStream out){
+    public OutputStreamLogger(String prefix, OutputStream out) {
         this.out = out;
         this.log = new StreamLogger(prefix, this);
     }
 
 
-    public boolean isLoggable(){
+    public boolean isLoggable() {
         return logger.isLoggable(Level.FINEST);
     }
-    public void log(String msg){
+    public void log(String msg) {
         logger.finest(msg);
     }
 

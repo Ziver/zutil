@@ -45,7 +45,7 @@ public class BinaryStructOutputStream {
     private int restBitLength; // length from Most Significant Bit
 
 
-    public BinaryStructOutputStream(OutputStream out){
+    public BinaryStructOutputStream(OutputStream out) {
         this.out = out;
 
         rest = 0;
@@ -85,12 +85,12 @@ public class BinaryStructOutputStream {
     public void write(BinaryStruct struct) throws IOException {
         List<BinaryFieldData> structDataList = BinaryFieldData.getStructFieldList(struct.getClass());
 
-        for (BinaryFieldData field : structDataList){
-            if (field.getSerializer() != null){
+        for (BinaryFieldData field : structDataList) {
+            if (field.getSerializer() != null) {
                 localFlush();
                 field.getSerializer().write(out, field.getValue(struct), field);
             }
-            else{
+            else {
                 int fieldBitLength = field.getBitLength(struct);
                 byte[] data = field.getByteValue(struct);
                 data = ByteUtil.shiftRight(data, ((8 - fieldBitLength % 8) % 8));
@@ -122,7 +122,7 @@ public class BinaryStructOutputStream {
         out.flush();
     }
     private void localFlush() throws IOException {
-        if(restBitLength > 0){
+        if (restBitLength > 0) {
             out.write(0xFF & rest);
             rest = 0;
             restBitLength = 0;

@@ -48,7 +48,7 @@ public class WebServiceDef {
     private HashMap<String,WSMethodDef> methods = new HashMap<>();
 
 
-    public WebServiceDef(Class<? extends WSInterface> intf){
+    public WebServiceDef(Class<? extends WSInterface> intf) {
         this.intf = intf;
         name = intf.getSimpleName();
 
@@ -64,9 +64,9 @@ public class WebServiceDef {
         if (documentationAnnotation != null)
             this.documentation = documentationAnnotation.value();
 
-        for(Method m : intf.getDeclaredMethods()){
+        for (Method m : intf.getDeclaredMethods()) {
             // Check for public methods
-            if ((m.getModifiers() & Modifier.PUBLIC) > 0 && !m.isAnnotationPresent(WSInterface.WSIgnore.class)){
+            if ((m.getModifiers() & Modifier.PUBLIC) > 0 && !m.isAnnotationPresent(WSInterface.WSIgnore.class)) {
                 WSMethodDef method = new WSMethodDef(this, m);
                 methods.put(method.getName(), method);
             }
@@ -77,21 +77,21 @@ public class WebServiceDef {
     /**
      * @return the class that defines this web service
      */
-    public Class<? extends WSInterface> getWSClass(){
+    public Class<? extends WSInterface> getWSClass() {
         return intf;
     }
 
     /**
      * @return the name of the Service (usually the class name of the WSInterface)
      */
-    public String getName(){
+    public String getName() {
         return name;
     }
 
     /**
      * @return a human readable description of the service, or a empty String if no documentation has been provided.
      */
-    public String getDocumentation(){
+    public String getDocumentation() {
         return documentation;
     }
 
@@ -99,36 +99,36 @@ public class WebServiceDef {
      * @param name  is the name of the method
      * @return if there is a method by the given name
      */
-    public boolean hasMethod( String name ){
-        return methods.containsKey( name );
+    public boolean hasMethod(String name) {
+        return methods.containsKey(name);
     }
 
     /**
      * @param name  is the name of the method
      * @return the method or null if there is no such method
      */
-    public WSMethodDef getMethod( String name ){
-        return methods.get( name );
+    public WSMethodDef getMethod(String name) {
+        return methods.get(name);
     }
 
     /**
      * @return a Set of all the method names
      */
-    public Set<String> getMethodNames(){
+    public Set<String> getMethodNames() {
         return methods.keySet();
     }
 
     /**
      * @return all the methods
      */
-    public Collection<WSMethodDef> getMethods(){
+    public Collection<WSMethodDef> getMethods() {
         return methods.values();
     }
 
     /**
-     * @return the namespace of this web service ( usually the URL of the service )
+     * @return the namespace of this web service (usually the URL of the service )
      */
-    public String getPath(){
+    public String getPath() {
         return path;
     }
 

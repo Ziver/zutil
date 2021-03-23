@@ -58,12 +58,12 @@ public class DBQueue<E> implements Queue<E>{
      * @param   db      is the connection to the DB
      * @param   table   is the name of the table
      */
-    public DBQueue(DBConnection db, String table){
+    public DBQueue(DBConnection db, String table) {
         this.db = db;
         this.table = table;
     }
 
-    public boolean add(Object arg0){
+    public boolean add(Object arg0) {
         try {
             PreparedStatement sql = db.getPreparedStatement("INSERT INTO ? (data) VALUES(?)");
             sql.setObject(1, table);
@@ -86,7 +86,7 @@ public class DBQueue<E> implements Queue<E>{
 
     public synchronized E peek() {
         try {
-            return db.exec("SELECT * FROM "+table+" LIMIT 1", new SQLResultHandler<E>(){
+            return db.exec("SELECT * FROM " + table + " LIMIT 1", new SQLResultHandler<E>() {
                 public E handleQueryResult(Statement stmt, ResultSet rs) throws SQLException{
                     if (rs.next())
                         try {
@@ -105,14 +105,14 @@ public class DBQueue<E> implements Queue<E>{
 
     public synchronized E poll() {
         try {
-            return db.exec("SELECT * FROM "+table+" LIMIT 1", new SQLResultHandler<E>(){
+            return db.exec("SELECT * FROM " + table + " LIMIT 1", new SQLResultHandler<E>() {
                 public E handleQueryResult(Statement stmt, ResultSet rs) {
-                    try{
-                    if (rs.next()) {
-                        db.exec("DELETE FROM "+table+" WHERE id="+rs.getInt("id")+" LIMIT 1");
-                        return (E) Converter.toObject(rs.getBytes("data"));
-                    }
-                    }catch(Exception e){
+                    try {
+                        if (rs.next()) {
+                            db.exec("DELETE FROM " + table + " WHERE id=" + rs.getInt("id") + " LIMIT 1");
+                            return (E) Converter.toObject(rs.getBytes("data"));
+                        }
+                    } catch (Exception e) {
                         e.printStackTrace(MultiPrintStream.out);
                     }
                     return null;
@@ -135,7 +135,7 @@ public class DBQueue<E> implements Queue<E>{
 
     public void clear() {
         try {
-            db.exec("TRUNCATE TABLE `"+table+"`");
+            db.exec("TRUNCATE TABLE `" + table + "`");
         } catch (SQLException e) {
             e.printStackTrace(MultiPrintStream.out);
         }
@@ -143,7 +143,7 @@ public class DBQueue<E> implements Queue<E>{
 
     public boolean contains(Object arg0) {
         try {
-            return db.exec("SELECT data FROM "+table+" WHERE data='"+Converter.toBytes(arg0)+"' LIMIT 1", new SQLResultHandler<Boolean>(){
+            return db.exec("SELECT data FROM " + table + " WHERE data='" + Converter.toBytes(arg0) + "' LIMIT 1", new SQLResultHandler<Boolean>() {
                 public Boolean handleQueryResult(Statement stmt, ResultSet rs) throws SQLException{
                     return rs.next();
                 }
@@ -170,7 +170,7 @@ public class DBQueue<E> implements Queue<E>{
 
     public synchronized boolean remove(Object arg0) {
         try {
-            db.exec("DELETE FROM "+table+" WHERE data='"+Converter.toBytes(arg0)+"' LIMIT 1");
+            db.exec("DELETE FROM " + table + " WHERE data='" + Converter.toBytes(arg0) + "' LIMIT 1");
             return true;
         } catch (Exception e) {
             e.printStackTrace(MultiPrintStream.out);
@@ -190,7 +190,7 @@ public class DBQueue<E> implements Queue<E>{
 
     public int size() {
         try {
-            return db.exec("SELECT count(*) FROM "+table, new SQLResultHandler<Integer>(){
+            return db.exec("SELECT count(*) FROM " +table, new SQLResultHandler<Integer>() {
                 public Integer handleQueryResult(Statement stmt, ResultSet rs) throws SQLException{
                     if (rs.next())
                         return rs.getInt(1);

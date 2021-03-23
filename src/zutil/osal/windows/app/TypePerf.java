@@ -67,7 +67,7 @@ public class TypePerf {
     private static DataNode[] execute(String path) throws IOException {
         DataNode[] ret = new DataNode[2];
 
-        String[] output = OSAbstractionLayer.exec("typeperf \""+ path +"\"  -SC 0 -y");
+        String[] output = OSAbstractionLayer.exec("typeperf \"" + path + "\"  -SC 0 -y");
         CSVParser parser = new CSVParser(new StringReader(output[1] + "\n" + output[2]));
 
         ret[0] = parser.getHeaders();

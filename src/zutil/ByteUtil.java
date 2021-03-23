@@ -53,7 +53,7 @@ public class ByteUtil {
      * @param   length  is the length of bits to return, valid values 1-8
      * @return a new byte containing a sub byte defined by the index and length
      */
-    public static byte getBits(byte data, int index, int length){
+    public static byte getBits(byte data, int index, int length) {
         return (byte) (data & getBitMask(index, length));
     }
 
@@ -65,7 +65,7 @@ public class ByteUtil {
      * @param   length  is the length of bits to return, valid values 1-8
      * @return a new byte containing a sub byte defined by the index and length
      */
-    public static byte getShiftedBits(byte data, int index, int length){
+    public static byte getShiftedBits(byte data, int index, int length) {
         int ret = 0xFF & getBits(data, index, length);
         ret = ret >>> index+1-length;
         return (byte) ret;
@@ -78,7 +78,7 @@ public class ByteUtil {
      * @param   length  is the length of bits to return, valid values 1-8
      * @return a new byte containing a sub byte defined by the index and length
      */
-    public static byte getBits(byte data, int length){
+    public static byte getBits(byte data, int length) {
         return getBits(data, length-1, length);
     }
 
@@ -89,10 +89,10 @@ public class ByteUtil {
      * @param   length  is the length of bits to return
      * @return a new byte array of te given length containing the given data.
      */
-    public static byte[] getBits(byte[] data, int length){
+    public static byte[] getBits(byte[] data, int length) {
         byte[] dest = new byte[(int) Math.ceil(length/8.0)];
         System.arraycopy(data, 0, dest, 0, Math.min(data.length, dest.length));
-        if(length % 8 != 0)
+        if (length % 8 != 0)
             dest[dest.length-1] = getBits(dest[dest.length-1], length % 8);
         return dest;
     }
@@ -104,7 +104,7 @@ public class ByteUtil {
      * @param   length  is the length of bits to return, valid values 1-8
      * @return a new byte containing a sub byte defined by the index and length
      */
-    public static byte getBitsMSB(byte data, int length){
+    public static byte getBitsMSB(byte data, int length) {
         return getShiftedBits(data, 7, length);
     }
 
@@ -115,7 +115,7 @@ public class ByteUtil {
      * @param   data    is the byte array that will be reversed.
      * @return a new byte array that will have the same data but in reverse byte order
      */
-    public static byte[] getReverseByteOrder(byte[] data){
+    public static byte[] getReverseByteOrder(byte[] data) {
         byte[] dest = new byte[data.length];
         if (data.length > 0)
             for (int i=0; i<data.length; ++i)
@@ -131,10 +131,10 @@ public class ByteUtil {
      */
     public static byte getBitMask(int index, int length) {
         --length;
-        if(0 > index || index > 7)
+        if (0 > index || index > 7)
             throw new IllegalArgumentException("Invalid index argument, allowed values: 0-7");
-        if(length < 0 || index-length < 0)
-            throw new IllegalArgumentException("Invalid length argument: "+length+", allowed values: 1 to "+(index+1)+" for index "+index);
+        if (length < 0 || index-length < 0)
+            throw new IllegalArgumentException("Invalid length argument: " + length + ", allowed values: 1 to " + (index+1) + " for index " + index);
         return (byte) BYTE_MASK[index][length];
     }
 
@@ -147,16 +147,16 @@ public class ByteUtil {
      * @return same data reference as the data input
      */
     public static byte[] shiftLeft(byte[] data, int shiftBy) {
-        if(0 > shiftBy || shiftBy > 8)
-            throw new IllegalArgumentException("Invalid shiftBy("+shiftBy+") argument, allowed values: 0-8");
+        if (0 > shiftBy || shiftBy > 8)
+            throw new IllegalArgumentException("Invalid shiftBy(" + shiftBy + ") argument, allowed values: 0-8");
         if (shiftBy == 0)
             return data;
 
         byte rest;
-        for (int i=0; i<data.length; ++i){
+        for (int i=0; i<data.length; ++i) {
             rest = (byte)(getBits(data[i], shiftBy-1, shiftBy) << 8 - shiftBy);
             data[i] = (byte)((data[i]&0xFF) >>> shiftBy);
-            if(i != 0)
+            if (i != 0)
                 data[i-1] |= rest;
         }
 
@@ -171,16 +171,16 @@ public class ByteUtil {
      * @return same data reference as the data input
      */
     public static byte[] shiftRight(byte[] data, int shiftBy) {
-        if(0 > shiftBy || shiftBy > 8)
-            throw new IllegalArgumentException("Invalid shiftBy("+shiftBy+") argument, allowed values: 0-8");
+        if (0 > shiftBy || shiftBy > 8)
+            throw new IllegalArgumentException("Invalid shiftBy(" + shiftBy + ") argument, allowed values: 0-8");
         if (shiftBy == 0)
             return data;
 
         byte rest = 0;
-        for (int i=0; i<data.length; ++i){
+        for (int i=0; i<data.length; ++i) {
             byte preRest = getBitsMSB(data[i], shiftBy);
             data[i] = (byte)(data[i] << shiftBy);
-            if(i != 0)
+            if (i != 0)
                 data[i] |= rest;
             rest = preRest;
         }
@@ -195,7 +195,7 @@ public class ByteUtil {
      * @param       data     The source binary data to format
      * @return A multiline String with human readable HEX and ASCII
      */
-    public static String toFormattedString(byte[] data){
+    public static String toFormattedString(byte[] data) {
         return toFormattedString(data, 0, data.length);
     }
 
@@ -205,26 +205,26 @@ public class ByteUtil {
      * @param       data     The source binary data to format
      * @return A multiline String with human readable HEX and ASCII
      */
-    public static String toFormattedString(byte[] data, int offset, int length){
+    public static String toFormattedString(byte[] data, int offset, int length) {
         StringBuilder output = new StringBuilder();
 
         //000  XX XX XX XX XX XX XX XX  '........'
-        int maxOffset = (""+length).length();
-        for(; offset<length; offset+=8){
-            if(offset != 0)
+        int maxOffset = ("" +length).length();
+        for (; offset<length; offset+=8) {
+            if (offset != 0)
                 output.append('\n');
 
             // Offset
-            String offsetStr = ""+offset;
-            for(int i=offsetStr.length(); i<3 || i<maxOffset; ++i){
+            String offsetStr = "" +offset;
+            for (int i=offsetStr.length(); i<3 || i<maxOffset; ++i) {
                 output.append('0');
             }
             output.append(offsetStr);
             output.append("  ");
 
             // HEX
-            for(int i=0; i<8; ++i){
-                if(offset+i < length)
+            for (int i=0; i<8; ++i) {
+                if (offset+i < length)
                     output.append(Converter.toHexString(data[offset+i]));
                 else
                     output.append("  ");
@@ -234,9 +234,9 @@ public class ByteUtil {
 
             // ACII
             output.append('\'');
-            for(int i=0; i<8; ++i){
-                if(offset+i < length)
-                    if( 32 <= data[offset+i] && data[offset+i] <= 126 )
+            for (int i=0; i<8; ++i) {
+                if (offset+i < length)
+                    if (32 <= data[offset+i] && data[offset+i] <= 126)
                         output.append((char)data[offset+i]);
                     else
                         output.append('.');

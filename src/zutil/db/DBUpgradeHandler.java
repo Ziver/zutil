@@ -55,13 +55,13 @@ public class DBUpgradeHandler {
     private HashSet<String> ignoredTablesSet;
 
 
-    public DBUpgradeHandler(DBConnection reference){
+    public DBUpgradeHandler(DBConnection reference) {
         this.tableRenameMap = new HashMap<>();
         this.ignoredTablesSet = new HashSet<>();
         this.reference = reference;
     }
 
-    public void setTargetDB(DBConnection db){
+    public void setTargetDB(DBConnection db) {
         this.target = db;
     }
 
@@ -71,14 +71,14 @@ public class DBUpgradeHandler {
      * @param   oldTableName    current name of the table
      * @param   newTableName    new name that old table will be renamed to.
      */
-    public void addTableRenameMapping(String oldTableName, String newTableName){
+    public void addTableRenameMapping(String oldTableName, String newTableName) {
         this.tableRenameMap.put(oldTableName, newTableName);
     }
 
     /**
      * @param   table           a table name that will be ignored from the upgrade procedure
      */
-    public void addIgnoredTable(String table){
+    public void addIgnoredTable(String table) {
         ignoredTablesSet.add(table);
     }
 
@@ -89,7 +89,7 @@ public class DBUpgradeHandler {
      *
      * @param   enable  true to enable forced upgrade
      */
-    public void setForcedDBUpgrade(boolean enable){
+    public void setForcedDBUpgrade(boolean enable) {
         this.forceUpgradeEnabled = enable;
     }
 
@@ -106,7 +106,7 @@ public class DBUpgradeHandler {
 
             logger.fine("Committing upgrade transaction...");
             target.getConnection().commit();
-        } catch(SQLException e){
+        } catch(SQLException e) {
             target.getConnection().rollback();
             throw e;
         } finally {
@@ -115,7 +115,7 @@ public class DBUpgradeHandler {
     }
 
     private void upgradeRenameTables() throws SQLException {
-        if(tableRenameMap.size() > 0) {
+        if (tableRenameMap.size() > 0) {
             List<String> targetTables = getTableList(target);
 
             for (String oldTableName : tableRenameMap.keySet()) {
@@ -133,8 +133,8 @@ public class DBUpgradeHandler {
         List<String> refTables = getTableList(reference);
         List<String> targetTables = getTableList(target);
 
-        for(String table : refTables){
-            if(!targetTables.contains(table)){
+        for (String table : refTables) {
+            if (!targetTables.contains(table)) {
                 logger.fine(String.format("Creating new table: '%s'", table));
                 // Get reference create sql
                 String sql = getTableSql(reference, table);
@@ -148,8 +148,8 @@ public class DBUpgradeHandler {
         List<String> refTables = getTableList(reference);
         List<String> targetTables = getTableList(target);
 
-        for(String table : targetTables){
-            if(!refTables.contains(table)){
+        for (String table : targetTables) {
+            if (!refTables.contains(table)) {
                 logger.fine(String.format("Dropping table: '%s'", table));
                 target.exec("DROP TABLE " + table);
             }
@@ -160,8 +160,8 @@ public class DBUpgradeHandler {
         List<String> refTables = getTableList(reference);
         List<String> targetTables = getTableList(target);
 
-        for(String table : targetTables){
-            if(refTables.contains(table)){
+        for (String table : targetTables) {
+            if (refTables.contains(table)) {
                 // Get reference structure
                 List<DBColumn> refStruct = getColumnList(reference, table);
                 // Get target structure
@@ -169,12 +169,12 @@ public class DBUpgradeHandler {
 
                 // Check unnecessary columns
                 boolean execForcedUpgrade = false;
-                for(DBColumn column : targetStruct) {
-                    if(refStruct.contains(column)) {
+                for (DBColumn column : targetStruct) {
+                    if (refStruct.contains(column)) {
                         DBColumn refColumn = refStruct.get(refStruct.indexOf(column));
                         // Check if the columns have the same type
-                        if(!column.type.equals(refColumn.type)){
-                            if(forceUpgradeEnabled)
+                        if (!column.type.equals(refColumn.type)) {
+                            if (forceUpgradeEnabled)
                                 execForcedUpgrade = true;
                             else
                                 logger.warning(String.format(
@@ -193,9 +193,9 @@ public class DBUpgradeHandler {
                 }
 
                 // Do a forced upgrade where we create a new table and migrate the old data
-                if(execForcedUpgrade){
+                if (execForcedUpgrade) {
                     // Backup table
-                    String backupTable = table+"_temp";
+                    String backupTable = table + "_temp";
                     logger.fine(String.format("Forced Upgrade: Backing up table: '%s' to: '%s'", table, backupTable));
                     target.exec(String.format("ALTER TABLE %s RENAME TO %s", table, backupTable));
 
@@ -216,17 +216,17 @@ public class DBUpgradeHandler {
                     target.exec("DROP TABLE " + backupTable);
                 }
                 // Do a soft upgrade, add missing columns
-                else{
+                else {
                     // Add new columns
-                    for(DBColumn column : refStruct) {
-                        if(!targetStruct.contains(column)) {
+                    for (DBColumn column : refStruct) {
+                        if (!targetStruct.contains(column)) {
                             logger.fine(String.format("Adding column '%s.%s'", table, column.name));
                             target.exec(
                                     String.format("ALTER TABLE %s ADD COLUMN %s %s %s%s%s",
                                             table,
                                             column.name,
                                             column.type,
-                                            (column.defaultValue != null ? " DEFAULT '"+column.defaultValue+"'" : ""),
+                                            (column.defaultValue != null ? " DEFAULT '" +column.defaultValue + "'" : ""),
                                             (column.notNull ? " NOT NULL" : ""),
                                             (column.publicKey ? " PRIMARY KEY" : "")));
                         }
@@ -241,9 +241,9 @@ public class DBUpgradeHandler {
         return db.exec("SELECT name FROM sqlite_master WHERE type='table';", new SQLResultHandler<List<String>>() {
             public List<String> handleQueryResult(Statement stmt, ResultSet result) throws SQLException {
                 ArrayList<String> list = new ArrayList<>();
-                while( result.next() ) {
+                while (result.next()) {
                     String table = result.getString(1);
-                    if(!ignoredTablesSet.contains(table))
+                    if (!ignoredTablesSet.contains(table))
                         list.add(result.getString(1));
                 }
                 return list;
@@ -268,12 +268,12 @@ public class DBUpgradeHandler {
         String defaultValue;
         boolean publicKey;
 
-        public boolean equals(Object obj){
+        public boolean equals(Object obj) {
             return obj instanceof DBColumn &&
                     name.equals(((DBColumn)obj).name);
         }
 
-        public String toString(){
+        public String toString() {
             return name;
         }
     }
@@ -283,7 +283,7 @@ public class DBUpgradeHandler {
         @Override
         public List<DBColumn> handleQueryResult(Statement stmt, ResultSet result) throws SQLException {
             ArrayList<DBColumn> list = new ArrayList<>();
-            while (result.next()){
+            while (result.next()) {
                 DBColumn column = new DBColumn();
                 column.name = result.getString("name");
                 column.type = result.getString("type");

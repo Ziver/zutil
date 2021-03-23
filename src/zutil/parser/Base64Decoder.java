@@ -45,44 +45,44 @@ public class Base64Decoder {
     private byte rest_data;
     private int rest = 0;
 
-    public Base64Decoder(){
+    public Base64Decoder() {
         output = new DynamicByteArrayStream();
     }
 
 
-    public static String decode( String data ){
+    public static String decode(String data) {
         Base64Decoder base64 = new Base64Decoder();
-        base64.read( data );
+        base64.read(data);
         return base64.toString();
     }
 
-    public static String decodeToHex( String data ){
+    public static String decodeToHex(String data) {
         Base64Decoder base64 = new Base64Decoder();
-        base64.read( data );
-        return Converter.toHexString( base64.getByte() );
+        base64.read(data);
+        return Converter.toHexString(base64.getByte());
     }
 
-    public static byte[] decodeToByte( String data ){
+    public static byte[] decodeToByte(String data) {
         Base64Decoder base64 = new Base64Decoder();
-        base64.read( data );
+        base64.read(data);
         return base64.getByte();
     }
 
-    public void read( String data ){
-        byte[] buffer = new byte[ (data.length()*6/8) + 1 ];
+    public void read(String data) {
+        byte[] buffer = new byte[(data.length()*6/8) + 1];
         int buffi = 0;
-        if( rest != 0 )
+        if (rest != 0)
             buffer[0] = rest_data;
 
-        for( int i=0; i<data.length(); i++){
+        for (int i=0; i<data.length(); i++) {
             char c = data.charAt(i);
-            if( c == '='){
+            if (c == '=') {
                 rest = (rest + 2) % 8;
                 continue;
             }
             byte b = getByte(c);
 
-            switch(rest){
+            switch(rest) {
                 case 0:
                     buffer[buffi] = (byte) ((b << 2) & 0xFC);
                     break;
@@ -102,20 +102,20 @@ public class Base64Decoder {
             rest = (rest + 2) % 8;
         }
 
-        if( rest != 0 )
+        if (rest != 0)
             rest_data = buffer[buffi--];
-        output.append( buffer, 0, buffi );
+        output.append(buffer, 0, buffi);
     }
 
-    public String toString(){
+    public String toString() {
         return output.toString();
     }
 
-    public byte[] getByte(){
+    public byte[] getByte() {
         return output.getBytes();
     }
 
-    public void clear(){
+    public void clear() {
         output.clear();
         rest = 0;
         rest_data = 0;
@@ -123,8 +123,8 @@ public class Base64Decoder {
 
 
     @SuppressWarnings("PointlessBitwiseExpression")
-    private static byte getByte(char c ){
-        switch(c){
+    private static byte getByte(char c) {
+        switch(c) {
             case 'A': return (byte)( 0 & 0xff);
             case 'B': return (byte)( 1 & 0xff);
             case 'C': return (byte)( 2 & 0xff);

@@ -38,7 +38,7 @@ public abstract class ResponseHandler {
      * Blocks the calling thread until there is a response
      */
     public void waitForResponse() {
-        while(!gotResponse()) {
+        while (!gotResponse()) {
             try {
                 synchronized (this) {
                     this.wait();
@@ -50,7 +50,7 @@ public abstract class ResponseHandler {
     /**
      * @return true if a response has been received
      */
-    public boolean gotResponse(){
+    public boolean gotResponse() {
         return (rsp != null);
     }
 

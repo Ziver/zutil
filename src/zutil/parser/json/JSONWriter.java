@@ -46,8 +46,8 @@ public class JSONWriter{
      *
      * @param out the OutputStream that the Nodes will be sent to
      */
-    public JSONWriter(OutputStream out){
-        this( new PrintWriter(out) );
+    public JSONWriter(OutputStream out) {
+        this(new PrintWriter(out));
     }
 
     /**
@@ -55,8 +55,8 @@ public class JSONWriter{
      *
      * @param out the OutputStream that the Nodes will be sent to
      */
-    public JSONWriter(Writer out){
-        this( new PrintWriter(out) );
+    public JSONWriter(Writer out) {
+        this(new PrintWriter(out));
     }
 
     /**
@@ -64,7 +64,7 @@ public class JSONWriter{
      *
      * @param out the OutputStream that the Nodes will be sent to
      */
-    public JSONWriter(PrintWriter out){
+    public JSONWriter(PrintWriter out) {
         this.out = out;
     }
 
@@ -73,20 +73,20 @@ public class JSONWriter{
      *
      * @param root is the root node
      */
-    public void write(DataNode root){
-        if(root == null){
+    public void write(DataNode root) {
+        if (root == null) {
             out.print("null");
             return;
         }
 
         boolean first = true;
-        switch(root.getType()){
+        switch(root.getType()) {
             // Write Map
             case Map:
                 out.append('{');
                 Iterator<String> it = root.keyIterator();
-                while(it.hasNext()){
-                    if(!first)
+                while (it.hasNext()) {
+                    if (!first)
                         out.append(", ");
                     String key = it.next();
                     out.append('\"');
@@ -100,8 +100,8 @@ public class JSONWriter{
             // Write List
             case List:
                 out.append('[');
-                for(DataNode node : root){
-                    if(!first)
+                for (DataNode node : root) {
+                    if (!first)
                         out.append(", ");
                     write(node);
                     first = false;
@@ -109,7 +109,7 @@ public class JSONWriter{
                 out.append(']');
                 break;
             default:
-                if(root.getString() != null && root.getType() == DataType.String){
+                if (root.getString() != null && root.getType() == DataType.String) {
                     out.append('\"');
                     out.append(escapeString(root.toString()));
                     out.append('\"');
@@ -119,7 +119,7 @@ public class JSONWriter{
         }
     }
 
-    private static String escapeString(String str){
+    private static String escapeString(String str) {
         // Replace one backslash with two
         return str.replaceAll("\\\\", "\\\\\\\\");
     }
@@ -127,14 +127,14 @@ public class JSONWriter{
     /**
      * Closes the internal stream
      */
-    public void close(){
+    public void close() {
         out.close();
     }
 
     /**
      * @return a String containing the JSON representation of the input DataNode graph
      */
-    public static String toString(DataNode root){
+    public static String toString(DataNode root) {
         StringOutputStream out = new StringOutputStream();
         JSONWriter writer = new JSONWriter(out);
         writer.write(root);
@@ -142,7 +142,7 @@ public class JSONWriter{
         return out.toString();
     }
 
-    public void flush(){
+    public void flush() {
         out.flush();
     }
 }

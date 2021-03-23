@@ -32,7 +32,7 @@ import java.util.Iterator;
 import java.util.Map;
 
 public class Converter {
-    private Converter(){}
+    private Converter() {}
 
     /**
      * Converts an object to an array of bytes.
@@ -57,7 +57,7 @@ public class Converter {
      * @param 	num 	is the number to convert
      * @return a byte array of four bytes
      */
-    public static byte[] toBytes(int num){
+    public static byte[] toBytes(int num) {
         return new byte[]{
                 (byte)(num & 0xff),
                 (byte)((num >> 8)& 0xff),
@@ -70,7 +70,7 @@ public class Converter {
      *
      * @return a byte array with the same binary value as the char.
      */
-    public static byte[] toBytes(char[] arr){
+    public static byte[] toBytes(char[] arr) {
         byte[] ret = new byte[arr.length];
         for (int i=0; i<arr.length; ++i)
             ret[i] = (byte) (arr[i] & 0xFF);
@@ -84,7 +84,7 @@ public class Converter {
      * @param 	num 	is the number to convert
      * @return a byte value of the integer
      */
-    public static byte toByte(int num){
+    public static byte toByte(int num) {
         return (byte)(num & 0xff);
     }
 
@@ -94,14 +94,14 @@ public class Converter {
      * @param   hex   a String containing data coded in hex
      * @return a byte array
      */
-    public static byte[] hexToByte(String hex){
-        if(hex == null)
+    public static byte[] hexToByte(String hex) {
+        if (hex == null)
             return null;
-        if(hex.startsWith("0x"))
+        if (hex.startsWith("0x"))
             hex = hex.substring(2);
         byte[] b = new byte[(int)Math.ceil(hex.length()/2.0)];
-        for(int i=0; i<hex.length(); i+=2){
-            if(i+1 >= hex.length())
+        for (int i=0; i<hex.length(); i+=2) {
+            if (i+1 >= hex.length())
                 b[(i+1)/2] = hexToByte(hex.charAt(i), '0');
             else
                 b[(i+1)/2] = hexToByte(hex.charAt(i), hex.charAt(i+1));
@@ -116,9 +116,9 @@ public class Converter {
      * @param   quad2   is the second hex value
      * @return a byte that corresponds to the hex
      */
-    public static byte hexToByte( char quad1, char quad2){
-        byte b = hexToByte( quad2 );
-        b |= hexToByte( quad1 ) << 4;
+    public static byte hexToByte(char quad1, char quad2) {
+        byte b = hexToByte(quad2);
+        b |= hexToByte(quad1) << 4;
         return b;
     }
 
@@ -129,8 +129,8 @@ public class Converter {
      * @return a byte that corresponds to the hex
      * @throws IllegalArgumentException if hex is not a valid hex character
      */
-    public static byte hexToByte( char hex ) throws IllegalArgumentException{
-        switch( Character.toLowerCase(hex) ){
+    public static byte hexToByte(char hex) throws IllegalArgumentException{
+        switch(Character.toLowerCase(hex)) {
         case '0': return 0x00;
         case '1': return 0x01;
         case '2': return 0x02;
@@ -148,7 +148,7 @@ public class Converter {
         case 'e': return 0x0e;
         case 'f': return 0x0f;
         default:
-            throw new IllegalArgumentException("'"+hex+"' is an illegal hex character only 0-9 and a-f characters allowed");
+            throw new IllegalArgumentException("'" + hex + "' is an illegal hex character only 0-9 and a-f characters allowed");
         }
     }
 
@@ -187,7 +187,7 @@ public class Converter {
      * @param   raw     the byte array to convert
      * @return a bit String
      */
-    public static String toBitString(byte raw){
+    public static String toBitString(byte raw) {
         StringBuilder str = new StringBuilder(8);
         for (int i=0; i<8; ++i) {
             str.append(raw & 0x01);
@@ -204,11 +204,11 @@ public class Converter {
      * @param   raw     the byte array to convert
      * @return a hex String
      */
-    public static String toHexString(byte[][] raw){
+    public static String toHexString(byte[][] raw) {
         StringBuilder ret = new StringBuilder();
 
-        for(byte[] a : raw){
-            for(byte b : a){
+        for (byte[] a : raw) {
+            for (byte b : a) {
                 ret.append(HEX_CHARS[(int) (b >>> 0x04)& 0x0F ]);
                 ret.append(HEX_CHARS[(int) b & 0x0F ]);
             }
@@ -217,11 +217,11 @@ public class Converter {
         return ret.toString();
     }
 
-    public static String toHexStringByColumn(byte[][] raw){
+    public static String toHexStringByColumn(byte[][] raw) {
         StringBuilder ret = new StringBuilder();
 
-        for(int col=0; col<raw[0].length ;col++){
-            for(int row=0; row<raw.length ;row++){
+        for (int col=0; col<raw[0].length; col++) {
+            for (int row=0; row<raw.length; row++) {
                 ret.append(HEX_CHARS[(int) (raw[row][col] >>> 0x04)& 0x0F ]);
                 ret.append(HEX_CHARS[(int) raw[row][col] & 0x0F ]);
             }
@@ -236,12 +236,12 @@ public class Converter {
      * @param   raw     the byte array to convert
      * @return a hex String
      */
-    public static String toHexString(byte[] raw){
+    public static String toHexString(byte[] raw) {
         StringBuilder ret = new StringBuilder();
 
-        for(byte b : raw){
-            ret.append(HEX_CHARS[(int) (b >>> 0x04)& 0x0F ]);
-            ret.append(HEX_CHARS[(int) b & 0x0F ]);
+        for (byte b : raw) {
+            ret.append(HEX_CHARS[(int) (b >>> 0x04) & 0x0F]);
+            ret.append(HEX_CHARS[(int) b & 0x0F]);
         }
 
         return ret.toString();
@@ -253,9 +253,9 @@ public class Converter {
      * @param   raw     the byte to convert
      * @return a hex String
      */
-    public static String toHexString(byte raw){
-        String ret = ""+HEX_CHARS[(int) (raw >>> 0x04)& 0x0F ];
-        ret += ""+HEX_CHARS[(int) raw & 0x0F ];
+    public static String toHexString(byte raw) {
+        String ret = "" +HEX_CHARS[(int) (raw >>> 0x04)& 0x0F ];
+        ret += "" +HEX_CHARS[(int) raw & 0x0F ];
 
         return ret;
     }
@@ -266,10 +266,10 @@ public class Converter {
      * @param   raw     the byte to convert
      * @return a String with 1's and 0's
      */
-    public static String toString(byte raw){
+    public static String toString(byte raw) {
         StringBuilder ret = new StringBuilder();
-        for(int i=128; i>0 ;i=( i<1 ? 0 : i/2 ) ){
-            ret.append(( (raw & i) == 0 ? '0' : '1'));
+        for (int i=128; i>0; i=(i<1 ? 0 : i/2)) {
+            ret.append(((raw & i) == 0 ? '0' : '1'));
         }
         return ret.toString();
     }
@@ -280,11 +280,11 @@ public class Converter {
      * @param   raw     the byte array to convert
      * @return a String with 1's and 0's
      */
-    public static String toString(byte[] raw){
+    public static String toString(byte[] raw) {
         StringBuilder ret = new StringBuilder();
-        for(byte b : raw){
-            for(int i=128; i>0 ;i=( i<1 ? 0 : i/2 ) ){
-                ret.append(( (b & i) == 0 ? '0' : '1'));
+        for (byte b : raw) {
+            for (int i=128; i>0; i=(i<1 ? 0 : i/2)) {
+                ret.append(((b & i) == 0 ? '0' : '1'));
             }
         }
         return ret.toString();
@@ -295,11 +295,11 @@ public class Converter {
      *
      * @return a comma separated String
      */
-    public static String toString(Map map){
+    public static String toString(Map map) {
         StringBuilder tmp = new StringBuilder();
         tmp.append("{");
         Iterator<Object> it = map.keySet().iterator();
-        while(it.hasNext()){
+        while (it.hasNext()) {
             Object key = it.next();
             Object value = map.get(key);
             tmp.append(key);
@@ -312,7 +312,7 @@ public class Converter {
             else
                 tmp.append("null");
 
-            if(it.hasNext())
+            if (it.hasNext())
                 tmp.append(", ");
         }
         tmp.append('}');
@@ -325,7 +325,7 @@ public class Converter {
      * @param   bits    the BitSet to convert
      * @return a Integer
      */
-    public static int toInt(BitSet bits){
+    public static int toInt(BitSet bits) {
         int ret = 0;
 
         for (int i = bits.nextSetBit(0); i >= 0; i = bits.nextSetBit(i+1)) {
@@ -341,11 +341,11 @@ public class Converter {
      * @param   bits    the boolean array to convert
      * @return a Integer
      */
-    public static int toInt(boolean[] bits){
+    public static int toInt(boolean[] bits) {
         int ret = 0;
 
         for (int i = bits.length-1; i >= 0; i--) {
-            if(bits[i])ret += Math.pow(2, bits.length-i-1);
+            if (bits[i])ret += Math.pow(2, bits.length-i-1);
         }
 
         return ret;
@@ -357,7 +357,7 @@ public class Converter {
      * @param   b   is the byte to convert
      * @return the integer value of the byte
      */
-    public static int toInt(byte b){
+    public static int toInt(byte b) {
         return (int)(b & 0xff);
     }
 
@@ -367,9 +367,9 @@ public class Converter {
      * @param   b   is the byte array of size 1-4
      * @return the int value of the byte array
      */
-    public static int toInt(byte[] b){
+    public static int toInt(byte[] b) {
         int i = 0;
-        switch (b.length){
+        switch (b.length) {
             default:
             case 4:	i |= 0xFF000000 & (b[3] << 24);
             case 3: i |= 0x00FF0000 & (b[2] << 16);
@@ -386,11 +386,11 @@ public class Converter {
      * @param   num     the Integer to convert
      * @return a BitSet object
      */
-    public static BitSet toBitSet(int num){
+    public static BitSet toBitSet(int num) {
         BitSet ret = new BitSet();
         String tmp = Integer.toBinaryString(num);
 
-        for(int i=0; i<tmp.length() ;i++){
+        for (int i=0; i<tmp.length(); i++) {
             ret.set(i , tmp.charAt(tmp.length()-i-1) != '0');
         }
         return ret;
@@ -406,26 +406,26 @@ public class Converter {
      * @return a instance of the class with the value in the string or null if there was an problem
      */
     @SuppressWarnings("unchecked")
-    public static <T> T fromString(String data, Class<T> c){
-        if(data == null || data.isEmpty())
+    public static <T> T fromString(String data, Class<T> c) {
+        if (data == null || data.isEmpty())
             return null;
-        try{
-            if(     c == String.class) 		return (T) data;
-            else if(c == Integer.class) 	return (T) new Integer(data);
-            else if(c == int.class) 		return (T) new Integer(data);
-            else if(c == Long.class) 		return (T) new Long(data);
-            else if(c == long.class) 		return (T) new Long(data);
-            else if(c == Float.class) 		return (T) new Float(data);
-            else if(c == float.class) 		return (T) new Float(data);
-            else if(c == Double.class) 		return (T) new Double(data);
-            else if(c == double.class) 		return (T) new Double(data);
-            else if(c == Boolean.class) 	return (T) Boolean.valueOf(data);
-            else if(c == boolean.class) 	return (T) Boolean.valueOf(data);
-            else if(c == Byte.class) 		return (T) new Byte(data);
-            else if(c == byte.class) 		return (T) new Byte(data);
-            else if(byte[].class.isAssignableFrom(c))
+        try {
+            if (     c == String.class) 	return (T) data;
+            else if (c == Integer.class) 	return (T) new Integer(data);
+            else if (c == int.class) 		return (T) new Integer(data);
+            else if (c == Long.class) 		return (T) new Long(data);
+            else if (c == long.class) 		return (T) new Long(data);
+            else if (c == Float.class) 		return (T) new Float(data);
+            else if (c == float.class) 		return (T) new Float(data);
+            else if (c == Double.class) 	return (T) new Double(data);
+            else if (c == double.class) 	return (T) new Double(data);
+            else if (c == Boolean.class) 	return (T) Boolean.valueOf(data);
+            else if (c == boolean.class) 	return (T) Boolean.valueOf(data);
+            else if (c == Byte.class) 		return (T) new Byte(data);
+            else if (c == byte.class) 		return (T) new Byte(data);
+            else if (byte[].class.isAssignableFrom(c))
                                             return (T) Base64Decoder.decode(data);
-        }catch(Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return null;
@@ -434,15 +434,15 @@ public class Converter {
     /**
      * Replaces reserved and unsafe characters in URLs with hex values
      */
-    public static String urlEncode( String str ){
+    public static String urlEncode(String str) {
         StringBuilder out = new StringBuilder();
-        for( char c : str.toCharArray() ){
-            if( c>='0' && c<='9' || c>='A' && c<='Z' || c>='a' && c<='z' ||
+        for (char c : str.toCharArray()) {
+            if (c>='0' && c<='9' || c>='A' && c<='Z' || c>='a' && c<='z' ||
                     c=='$' || c=='-' || c=='_' || c=='.' || c=='+' || c=='!' ||
-                    c=='*' || c=='\'' || c=='(' || c==')' || c==',' )
-                out.append( c );
-            else{
-                out.append( '%' ).append( toHexString((byte)c) );
+                    c=='*' || c=='\'' || c=='(' || c==')' || c==',')
+                out.append(c);
+            else {
+                out.append('%').append(toHexString((byte)c));
             }
         }
 
@@ -452,16 +452,16 @@ public class Converter {
     /**
      * Replaces hex values from a URL with the proper characters
      */
-    public static String urlDecode( String str ){
+    public static String urlDecode(String str) {
         StringBuilder out = new StringBuilder();
         char[] array = str.toCharArray();
-        for( int i=0; i<array.length ;i++ ){
+        for (int i=0; i<array.length; i++) {
             char c = array[i];
-            if( c == '%' && i+2<array.length ){
-                out.append( (char)hexToByte( array[++i], array[++i]) );
+            if (c == '%' && i+2<array.length) {
+                out.append((char) hexToByte(array[++i], array[++i]));
             }
             else
-                out.append( c );
+                out.append(c);
         }
 
         return out.toString();

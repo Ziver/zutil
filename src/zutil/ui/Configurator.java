@@ -87,29 +87,29 @@ public class Configurator<T> {
     private PostConfigurationActionListener<T> postListener;
 
 
-    public Configurator(T obj){
+    public Configurator(T obj) {
         this.obj = obj;
         this.params = getConfiguration(obj.getClass(), obj);
     }
 
 
-    public T getObject(){
+    public T getObject() {
         return obj;
     }
 
-    public ConfigurationParam[] getConfiguration(){
+    public ConfigurationParam[] getConfiguration() {
         return params;
     }
 
-    public static ConfigurationParam[] getConfiguration(Class c){
-        if(!classConf.containsKey(c))
+    public static ConfigurationParam[] getConfiguration(Class c) {
+        if (!classConf.containsKey(c))
             classConf.put(c, getConfiguration(c, null));
         return classConf.get(c);
     }
-    protected static ConfigurationParam[] getConfiguration(Class c, Object obj){
+    protected static ConfigurationParam[] getConfiguration(Class c, Object obj) {
         ArrayList<ConfigurationParam> conf = new ArrayList<>();
 
-        for(Class<?> cc = c; cc != Object.class ;cc = cc.getSuperclass()) { // iterate through all super classes
+        for (Class<?> cc = c; cc != Object.class; cc = cc.getSuperclass()) { // iterate through all super classes
             for (Field f : cc.getDeclaredFields()) {
                 if (f.isAnnotationPresent(Configurable.class)) {
                     try {
@@ -131,9 +131,9 @@ public class Configurator<T> {
      *
      * @return a reference to itself so that method calls can be chained.
      */
-    public Configurator<T> setValues(Map<String,String> parameters){
-        for(ConfigurationParam param : this.params){
-            if(parameters.containsKey(param.getName()))
+    public Configurator<T> setValues(Map<String,String> parameters) {
+        for (ConfigurationParam param : this.params) {
+            if (parameters.containsKey(param.getName()))
                 param.setValue(parameters.get(param.getName()));
         }
         return this;
@@ -145,19 +145,20 @@ public class Configurator<T> {
      *
      * @return a reference to itself so that method calls can be chained.
      */
-    public Configurator<T> setValues(DataNode node){
-        if(!node.isMap())
+    public Configurator<T> setValues(DataNode node) {
+        if (!node.isMap())
             return this;
-        for(ConfigurationParam param : this.params){
-            if(node.get(param.getName()) != null)
+
+        for (ConfigurationParam param : this.params) {
+            if (node.get(param.getName()) != null)
                 param.setValue(node.getString(param.getName()));
         }
         return this;
     }
 
-    public DataNode getValuesAsNode(){
+    public DataNode getValuesAsNode() {
         DataNode node = new DataNode(DataNode.DataType.Map);
-        for(ConfigurationParam param : this.params){
+        for (ConfigurationParam param : this.params) {
             node.set(param.getName(), param.getString());
         }
         return node;
@@ -167,14 +168,14 @@ public class Configurator<T> {
     /**
      * Set a listener that will be called just before the configuration has been applied
      */
-    public void setPreConfigurationListener(PreConfigurationActionListener<T> listener){
+    public void setPreConfigurationListener(PreConfigurationActionListener<T> listener) {
         preListener = listener;
     }
 
     /**
      * Set a listener that will be called after the configuration has been applied
      */
-    public void setPostConfigurationListener(PostConfigurationActionListener<T> listener){
+    public void setPostConfigurationListener(PostConfigurationActionListener<T> listener) {
         postListener = listener;
     }
 
@@ -187,21 +188,21 @@ public class Configurator<T> {
      * The postConfigurationAction() method will be called after the target object is
      * configured if it implements the PostConfigurationActionListener interface.
      */
-    public void applyConfiguration(){
-        if(preListener != null)
+    public void applyConfiguration() {
+        if (preListener != null)
             preListener.preConfigurationAction(this, obj);
-        if(obj instanceof PreConfigurationActionListener)
+        if (obj instanceof PreConfigurationActionListener)
             ((PreConfigurationActionListener<T>) obj).preConfigurationAction(this, obj);
 
         StringBuilder strParams = new StringBuilder();
-        for(ConfigurationParam param : params){
+        for (ConfigurationParam param : params) {
             try {
                 param.apply(obj);
 
                 // Logging
-                if(logger.isLoggable(Level.FINE)) {
+                if (logger.isLoggable(Level.FINE)) {
                     strParams.append(param.getName()).append(": ");
-                    if(param.isTypeString())
+                    if (param.isTypeString())
                         strParams.append("'").append(param.getString()).append("'");
                     else
                         strParams.append(param.getString());
@@ -211,12 +212,12 @@ public class Configurator<T> {
                 logger.log(Level.WARNING, null, e);
             }
         }
-        if(logger.isLoggable(Level.FINE))
-            logger.fine("Configured object: " + obj.getClass().getName() + " ("+ strParams +")");
+        if (logger.isLoggable(Level.FINE))
+            logger.fine("Configured object: " + obj.getClass().getName() + " (" + strParams + ")");
 
-        if(obj instanceof PostConfigurationActionListener)
+        if (obj instanceof PostConfigurationActionListener)
             ((PostConfigurationActionListener<T>) obj).postConfigurationAction(this, obj);
-        if(postListener != null)
+        if (postListener != null)
             postListener.postConfigurationAction(this, obj);
     }
 
@@ -242,42 +243,42 @@ public class Configurator<T> {
             field = f;
             field.setAccessible(true);
             name = field.getName();
-            if(obj != null)
+            if (obj != null)
                 value = field.get(obj);
-            if(field.isAnnotationPresent(Configurable.class)) {
+            if (field.isAnnotationPresent(Configurable.class)) {
                 niceName = field.getAnnotation(Configurable.class).value();
                 order = field.getAnnotation(Configurable.class).order();
             }
-            else{
+            else {
                 niceName = name;
                 order = Integer.MAX_VALUE;
             }
 
-            if     (f.getType() == String.class)    type = ConfigType.STRING;
-            else if(f.getType() == int.class)       type = ConfigType.INT;
-            else if(f.getType() == double.class)    type = ConfigType.INT;
-            else if(f.getType() == boolean.class)   type = ConfigType.BOOLEAN;
-            else if(f.getType().isEnum())           type = ConfigType.ENUM;
+            if      (f.getType() == String.class)    type = ConfigType.STRING;
+            else if (f.getType() == int.class)       type = ConfigType.INT;
+            else if (f.getType() == double.class)    type = ConfigType.INT;
+            else if (f.getType() == boolean.class)   type = ConfigType.BOOLEAN;
+            else if (f.getType().isEnum())           type = ConfigType.ENUM;
             else
-                throw new IllegalArgumentException(f.getType()+" is not a supported configurable type");
+                throw new IllegalArgumentException(f.getType() + " is not a supported configurable type");
 
         }
 
-        public String getName(){       return name;}
-        public String getNiceName(){   return niceName;}
-        public ConfigType getType(){   return type;}
-        public boolean isTypeString(){ return type == ConfigType.STRING;}
-        public boolean isTypeInt(){    return type == ConfigType.INT;}
-        public boolean isTypeBoolean(){return type == ConfigType.BOOLEAN;}
-        public boolean isTypeEnum(){   return type == ConfigType.ENUM;}
+        public String getName() {       return name;}
+        public String getNiceName() {   return niceName;}
+        public ConfigType getType() {   return type;}
+        public boolean isTypeString() { return type == ConfigType.STRING;}
+        public boolean isTypeInt() {    return type == ConfigType.INT;}
+        public boolean isTypeBoolean() {return type == ConfigType.BOOLEAN;}
+        public boolean isTypeEnum() {   return type == ConfigType.ENUM;}
 
-        public String getString(){
-            if(value == null)
+        public String getString() {
+            if (value == null)
                 return null;
             return value.toString();
         }
-        public boolean getBoolean(){
-            if(value == null || type != ConfigType.BOOLEAN)
+        public boolean getBoolean() {
+            if (value == null || type != ConfigType.BOOLEAN)
                 return false;
             return (boolean)value;
         }
@@ -285,7 +286,7 @@ public class Configurator<T> {
         /**
          * @return a String array with all enum possibilities or empty array if the type is not an enum
          */
-        public String[] getPossibleValues(){
+        public String[] getPossibleValues() {
             if (type == ConfigType.ENUM) {
                 Object[] constants = field.getType().getEnumConstants();
                 String[] values = new String[constants.length];
@@ -301,8 +302,8 @@ public class Configurator<T> {
          * to apply the change to the source object the method
          * {@link #applyConfiguration()} needs to be called
          */
-        public void setValue(String v){
-            switch(type){
+        public void setValue(String v) {
+            switch(type) {
                 case STRING:
                     value = v; break;
                 case INT:
@@ -319,7 +320,7 @@ public class Configurator<T> {
         }
 
         protected void apply(Object obj) throws IllegalAccessException {
-            if(obj != null)
+            if (obj != null)
                 field.set(obj, value);
         }
 

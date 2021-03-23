@@ -34,8 +34,8 @@ public class MergeSort{
      *
      * @param list is the list to sort
      */
-    public static void sort(int[] list){
-        if(list == null)
+    public static void sort(int[] list) {
+        if (list == null)
             return;
 
         sort(list, 0, list.length);
@@ -49,10 +49,10 @@ public class MergeSort{
      * @param start is the starting index of the sub list
      * @param stop is the end index of the sub list
      */
-    protected static void sort(int[] list, int start, int stop){
-        if(stop-start <= 1) return;
+    protected static void sort(int[] list, int start, int stop) {
+        if (stop-start <= 1) return;
 
-        int pivot = start+(stop-start)/2;
+        int pivot = start + (stop - start) / 2;
         sort(list, start, pivot);
         sort(list, pivot, stop);
 
@@ -69,7 +69,7 @@ public class MergeSort{
      * @param stop is the end of the second sublist
      * @param pivot is the end index for the first list and the beginning of the second.
      */
-    protected static void merge(int[] list, int start, int stop, int pivot){
+    protected static void merge(int[] list, int start, int stop, int pivot) {
         int length = pivot-start;
         int[] tmp = new int[stop-start];
 
@@ -77,12 +77,11 @@ public class MergeSort{
 
         int index1 = 0;
         int index2 = length;
-        for(int i=start; i<stop ;++i){
-            if( index2 < stop-start && (index1 >= length || tmp[index1] > tmp[index2]) ){
+        for (int i=start; i<stop; ++i) {
+            if (index2 < stop-start && (index1 >= length || tmp[index1] > tmp[index2])) {
                 list[i] = tmp[index2];
                 ++index2;
-            }
-            else {
+            } else {
                 list[i] = tmp[index1];
                 ++index1;
             }
@@ -96,8 +95,8 @@ public class MergeSort{
      *
      * @param list is the list to sort
      */
-    public static void sort(SortableDataList<?> list){
-        if(list == null)
+    public static void sort(SortableDataList<?> list) {
+        if (list == null)
             return;
 
         sort(list, 0, list.size());
@@ -111,8 +110,8 @@ public class MergeSort{
      * @param start is the starting index of the sub list
      * @param stop is the end index of the sub list
      */
-    protected static void sort(SortableDataList<?> list, int start, int stop){
-        if(stop-start <= 1) return;
+    protected static void sort(SortableDataList<?> list, int start, int stop) {
+        if (stop-start <= 1) return;
 
         int pivot = start+(stop-start)/2;
         sort(list, start, pivot);
@@ -132,23 +131,22 @@ public class MergeSort{
      * @param pivot is the end index for the first list and the beginning of the second.
      */
     @SuppressWarnings({ "unchecked", "rawtypes" })
-    protected static <T> void merge(SortableDataList<T> list, int start, int stop, int pivot){
+    protected static <T> void merge(SortableDataList<T> list, int start, int stop, int pivot) {
         int length = pivot-start;
         Object[] tmp = new Object[stop-start];
 
-        for(int i=0; i<tmp.length ;++i){
-            tmp[i] = list.get( start+i );
+        for (int i=0; i<tmp.length; ++i) {
+            tmp[i] = list.get(start + i);
         }
 
         int index1 = 0;
         int index2 = length;
-        for(int i=start; i<stop ;++i){
-            if( index2 < stop-start && (index1 >= length || ((Comparable)tmp[index1]).compareTo(tmp[index2]) > 0 )){
-                list.set(i, (T)tmp[index2]);
+        for (int i=start; i<stop; ++i) {
+            if (index2 < stop-start && (index1 >= length || ((Comparable)tmp[index1]).compareTo(tmp[index2]) > 0)) {
+                list.set(i, (T) tmp[index2]);
                 ++index2;
-            }
-            else {
-                list.set(i, (T)tmp[index1]);
+            } else {
+                list.set(i, (T) tmp[index1]);
                 ++index1;
             }
         }

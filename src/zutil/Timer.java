@@ -44,7 +44,7 @@ public class Timer {
      *
      * @param millisecond the time in milliseconds that the timeout should happen.
      */
-    public Timer(long millisecond){
+    public Timer(long millisecond) {
         this.period = millisecond;
         reset();
     }
@@ -54,7 +54,7 @@ public class Timer {
      *
      * @return a reference of itself
      */
-    public Timer start(){
+    public Timer start() {
         timestamp = System.currentTimeMillis();
         return this;
     }
@@ -62,21 +62,21 @@ public class Timer {
     /**
      * Will reset the timer so that {@link #hasTimedOut()} returns true
      */
-    public void reset(){
+    public void reset() {
         timestamp = -1;
     }
 
     /**
      * @return true if the timer has timed out or has been reset, false if timer is running
      */
-    public boolean hasTimedOut(){
+    public boolean hasTimedOut() {
         return timestamp + period < System.currentTimeMillis();
     }
 
-    public String toString(){
+    public String toString() {
         if (hasTimedOut())
             return "Timed out";
         else
-            return "Timeout in "+StringUtil.formatTimeToString((timestamp+period)-System.currentTimeMillis());
+            return "Timeout in " +StringUtil.formatTimeToString((timestamp+period)-System.currentTimeMillis());
     }
 }

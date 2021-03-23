@@ -71,7 +71,7 @@ public class HttpServer extends ThreadedTCPNetworkServer{
      *
      * @param   port    The port that the server should listen to
      */
-    public HttpServer(int port){
+    public HttpServer(int port) {
         this(port, null, null);
     }
 
@@ -83,8 +83,8 @@ public class HttpServer extends ThreadedTCPNetworkServer{
      * @param   keyStore        If this is not null then the server will use SSL connection with this keyStore file path
      * @param   keyStorePass    If this is not null then the server will use a SSL connection with the given certificate
      */
-    public HttpServer(int port, File keyStore, String keyStorePass){
-        super( port, keyStore, keyStorePass );
+    public HttpServer(int port, File keyStore, String keyStorePass) {
+        super(port, keyStore, keyStorePass);
 
         pages = new ConcurrentHashMap<>();
         sessions = new ConcurrentHashMap<>();
@@ -93,7 +93,7 @@ public class HttpServer extends ThreadedTCPNetworkServer{
         ScheduledExecutorService exec = Executors.newSingleThreadScheduledExecutor();
         exec.scheduleWithFixedDelay(new SessionGarbageCollector(), 10000, SESSION_TTL / 2, TimeUnit.MILLISECONDS);
 
-        logger.info("HTTP"+(keyStore==null ? "" : "S")+" Server ready and listening to port: " + port);
+        logger.info("HTTP" + (keyStore==null ? "" : "S") + " Server ready and listening to port: " + port);
     }
 
     /**
@@ -101,20 +101,20 @@ public class HttpServer extends ThreadedTCPNetworkServer{
      * removes old sessions from the session HashMap
      */
     private class SessionGarbageCollector implements Runnable {
-        public void run(){
+        public void run() {
             Object[] keys = sessions.keySet().toArray();
             int count = 0;
-            for(Object key : keys){
+            for (Object key : keys) {
                 Map<String,Object> session = sessions.get(key);
 
                 // Check if session is still valid
-                if(((Timer) session.get(SESSION_KEY_TTL)).hasTimedOut()){
+                if (((Timer) session.get(SESSION_KEY_TTL)).hasTimedOut()) {
                     sessions.remove(key);
                     ++count;
                 }
             }
             if (count > 0)
-                logger.fine("Removed "+count+" old sessions");
+                logger.fine("Removed " + count + " old sessions");
         }
     }
 
@@ -124,9 +124,9 @@ public class HttpServer extends ThreadedTCPNetworkServer{
      * @param   name    The URL or name of the page
      * @param   page    The page itself
      */
-    public void setPage(String name, HttpPage page){
-        if(name.charAt(0) != '/')
-            name = "/"+name;
+    public void setPage(String name, HttpPage page) {
+        if (name.charAt(0) != '/')
+            name = "/" +name;
         pages.put(name, page);
     }
 
@@ -136,13 +136,13 @@ public class HttpServer extends ThreadedTCPNetworkServer{
      *
      * @param   page    The HttpPage that will be shown
      */
-    public void setDefaultPage(HttpPage page){
+    public void setDefaultPage(HttpPage page) {
         defaultPage = page;
     }
 
-    protected ThreadedTCPNetworkServerThread getThreadInstance( Socket s ){
+    protected ThreadedTCPNetworkServerThread getThreadInstance(Socket s) {
         try {
-            return new HttpServerThread( s );
+            return new HttpServerThread(s);
         } catch (IOException e) {
             logger.log(Level.SEVERE, "Could not start new Thread", e);
         }
@@ -163,7 +163,7 @@ public class HttpServer extends ThreadedTCPNetworkServer{
             this.socket = socket;
         }
 
-        public void run(){
+        public void run() {
             long time = System.currentTimeMillis();
             HttpHeaderParser headerParser;
             HttpHeader header = null;
@@ -261,11 +261,11 @@ public class HttpServer extends ThreadedTCPNetworkServer{
                 }
             }
             finally {
-                try{
+                try {
                     out.close();
                     in.close();
                     socket.close();
-                } catch( Exception e ) {
+                } catch(Exception e) {
                     logger.log(Level.WARNING, "Could not close connection", e);
                 }
             }
@@ -275,9 +275,9 @@ public class HttpServer extends ThreadedTCPNetworkServer{
 
     protected static void logRequest(HttpHeader header,
                                    Map<String,Object> session,
-                                   long time){
+                                   long time) {
         // Debug
-        if(logger.isLoggable(Level.FINEST) ){
+        if (logger.isLoggable(Level.FINEST)) {
             StringBuilder buff = new StringBuilder();
             buff.append("Received request: ").append(header==null ? null : header.getRequestURL());
             buff.append(", (");
@@ -288,10 +288,10 @@ public class HttpServer extends ThreadedTCPNetworkServer{
             buff.append(", time: ").append(StringUtil.formatTimeToString(System.currentTimeMillis() - time));
 
             logger.finer(buff.toString());
-        } else if(logger.isLoggable(Level.FINER)){
+        } else if (logger.isLoggable(Level.FINER)) {
             logger.finer(
                     "Received request: " + (header==null ? null : header.getRequestURL())
-                            + ", time: "+ StringUtil.formatTimeToString(System.currentTimeMillis() - time));
+                            + ", time: " + StringUtil.formatTimeToString(System.currentTimeMillis() - time));
         }
     }
 }

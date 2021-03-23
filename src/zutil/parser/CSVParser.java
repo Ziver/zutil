@@ -40,24 +40,24 @@ public class CSVParser extends Parser{
     private DataNode headers;
 
 
-    public CSVParser(Reader in){
+    public CSVParser(Reader in) {
         this(in, false, ',');
     }
-    public CSVParser(Reader in, boolean includedHeader){
+    public CSVParser(Reader in, boolean includedHeader) {
         this(in, includedHeader, ',');
     }
-    public CSVParser(Reader in, boolean includesHeader, char delimiter){
+    public CSVParser(Reader in, boolean includesHeader, char delimiter) {
         this.in = in;
         this.delimiter = delimiter;
         this.parseHeader = includesHeader;
     }
 
     public DataNode getHeaders() {
-        if(parseHeader) {
+        if (parseHeader) {
             try {
                 parseHeader = false;
                 headers = read();
-            }catch (IOException e){
+            } catch (IOException e) {
                 e.printStackTrace();
             }
         }
@@ -70,10 +70,10 @@ public class CSVParser extends Parser{
      * @param 	csv	is the JSON String to parse
      * @return a DataNode object representing the JSON in the input String
      */
-    public static DataNode read(String csv){
-        try{
+    public static DataNode read(String csv) {
+        try {
             return new CSVParser(new StringReader(csv)).read();
-        }catch (IOException e){
+        } catch (IOException e) {
             e.printStackTrace();
         }
         return null;
@@ -89,7 +89,7 @@ public class CSVParser extends Parser{
     @Override
     public DataNode read() throws IOException {
         // Make sure we have parsed headers
-        if(parseHeader) {
+        if (parseHeader) {
             getHeaders();
         }
 
@@ -97,21 +97,21 @@ public class CSVParser extends Parser{
         StringBuilder value = new StringBuilder();
         boolean quoteStarted = false;
         int c;
-        while((c=in.read()) >= 0 && c != '\n'){
-            if(c == delimiter && !quoteStarted){
+        while ((c=in.read()) >= 0 && c != '\n') {
+            if (c == delimiter && !quoteStarted) {
                 data.add(value.toString());
                 value.delete(0, value.length()); // Reset StringBuilder
             }
-            else if(c == '\"' &&  // Ignored quotes
-                    (value.length() == 0 || quoteStarted)){
+            else if (c == '\"' &&  // Ignored quotes
+                    (value.length() == 0 || quoteStarted)) {
                 quoteStarted = !quoteStarted;
             }
             else
                 value.append((char)c);
         }
-        if(value.length() > 0)
+        if (value.length() > 0)
             data.add(value.toString());
-        if(data.size() == 0)
+        if (data.size() == 0)
             return null;
         return data;
     }

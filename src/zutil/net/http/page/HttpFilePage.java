@@ -64,7 +64,7 @@ public class HttpFilePage implements HttpPage{
     /**
      * @param    file       a reference to a root directory or a file.
      */
-    public HttpFilePage(File file){
+    public HttpFilePage(File file) {
         if (file == null)
             throw new IllegalArgumentException("Root path cannot be null.");;
 
@@ -108,7 +108,7 @@ public class HttpFilePage implements HttpPage{
                                 String url = headers.getRequestURL();
                                 out.println("        <li><a href='" +
                                         url + (url.endsWith("/") ? "" : "/") + containingFile
-                                        +"'>" + containingFile + "</a></li>");
+                                        + "'>" + containingFile + "</a></li>");
                             }
                             out.println("    </ul>");
                             out.println("    <hr>");
@@ -137,7 +137,7 @@ public class HttpFilePage implements HttpPage{
             if (!out.isHeaderSent())
                 out.setResponseStatusCode(500);
             log.log(Level.WARNING, null, e);
-            out.println("500 Internal Server Error: "+e.getMessage() );
+            out.println("500 Internal Server Error: " +e.getMessage());
         }
     }
 
@@ -189,14 +189,14 @@ public class HttpFilePage implements HttpPage{
     /**
      * Enable or disable showing of folder contents
      */
-    public void showFolders(boolean enabled){
+    public void showFolders(boolean enabled) {
         this.showFolders = enabled;
     }
 
     /**
      * If directory links should be redirected to index files
      */
-    public void redirectToIndexFile(boolean enabled){
+    public void redirectToIndexFile(boolean enabled) {
         this.redirectToIndex = enabled;
     }
 }

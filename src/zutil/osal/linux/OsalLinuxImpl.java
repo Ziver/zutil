@@ -48,9 +48,9 @@ public class OsalLinuxImpl extends OSAbstractionLayer {
 
     @Override
     public String getKernelVersion() {
-        try{
+        try {
             return getFirstLineFromExec("uname -r");
-        } catch(Exception e){
+        } catch(Exception e) {
             e.printStackTrace();
         }
         return null;
@@ -58,9 +58,9 @@ public class OsalLinuxImpl extends OSAbstractionLayer {
 
     @Override
     public String getUsername() {
-        try{
+        try {
             return getFirstLineFromExec("whoami");
-        } catch(Exception e){
+        } catch(Exception e) {
             e.printStackTrace();
         }
         return null;
@@ -68,7 +68,7 @@ public class OsalLinuxImpl extends OSAbstractionLayer {
 
     @Override
     public File getUserConfigPath() {
-        return new File("/home/"+getUsername());
+        return new File("/home/" +getUsername());
     }
 
     @Override
@@ -78,7 +78,7 @@ public class OsalLinuxImpl extends OSAbstractionLayer {
 
     @Override
     public HardwareAbstractionLayer getHAL() {
-        if(hal == null)
+        if (hal == null)
             hal = new HalLinuxImpl();
         return hal;
     }

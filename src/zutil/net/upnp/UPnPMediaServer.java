@@ -34,7 +34,7 @@ import java.util.UUID;
 /**
  * This class is a UPnP AV Media Server that handles all the
  * other UPnP services
- * 
+ *
  * @author Ziver
  */
 public class UPnPMediaServer extends UPnPRootDevice{
@@ -43,7 +43,7 @@ public class UPnPMediaServer extends UPnPRootDevice{
     private String url;
     private String uuid;
 
-    public UPnPMediaServer(String location){
+    public UPnPMediaServer(String location) {
         url = location;
     }
 
@@ -62,7 +62,7 @@ public class UPnPMediaServer extends UPnPRootDevice{
         out.println("		<major>1</major>");
         out.println("		<minor>0</minor>");
         out.println("	</specVersion>");
-        out.println("	<URLBase>"+url+"</URLBase>");//"+ssdp.getLocation()+"
+        out.println("	<URLBase>" + url + "</URLBase>");//" + ssdp.getLocation() + "
         out.println("	<device>");
         out.println("		<deviceType>urn:schemas-upnp-org:device:MediaServer:1</deviceType>");
         out.println("		<friendlyName>ZupNP AV Media Server</friendlyName>");
@@ -72,7 +72,7 @@ public class UPnPMediaServer extends UPnPRootDevice{
         out.println("		<modelName>ZupNP Server</modelName>");
         out.println("		<modelDescription>UPnP AV Media Server</modelDescription>");
         out.println("		<modelNumber>0.1</modelNumber>");
-        out.println("		<UDN>"+getUUID()+"</UDN>");
+        out.println("		<UDN>" + getUUID() + "</UDN>");
         out.println("		<serviceList>");
         out.println("		<service>");
         out.println("			<serviceType>urn:schemas-upnp-org:service:ConnectionManager:1</serviceType>");
@@ -96,20 +96,20 @@ public class UPnPMediaServer extends UPnPRootDevice{
 
 
     public long getExpirationTime() {
-        return 60*30; // 30min
+        return 60 * 30; // 30min
     }
     public String getLocation() {
-        return url+"RootDesc";
+        return url + "RootDesc";
     }
     public String getSearchTarget() {
         return "upnp:rootdevice";
     }
     public String getUSN() {
-        return getUUID()+"::upnp:rootdevice";
+        return getUUID() + "::upnp:rootdevice";
     }
     public String getUUID() {
-        if(uuid==null){
-            uuid = "uuid:"+UUID.nameUUIDFromBytes( this.getClass().toString().getBytes() ); //(url+Math.random()).getBytes()
+        if (uuid == null) {
+            uuid = "uuid:" + UUID.nameUUIDFromBytes(this.getClass().toString().getBytes()); //(url+Math.random()).getBytes()
         }
         return uuid;
     }

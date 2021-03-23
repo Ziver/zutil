@@ -40,13 +40,13 @@ public class CSVParserTest {
 
 
     @Test
-    public void emptyTest(){
+    public void emptyTest() {
         DataNode node = CSVParser.read("");
         assertNull(node);
     }
 
     @Test
-    public void simpleTest(){
+    public void simpleTest() {
         DataNode node = CSVParser.read("hello,world,you");
         assertEquals(3, node.size());
         assertEquals("hello", node.get(0).getString());
@@ -83,7 +83,7 @@ public class CSVParserTest {
     }
 
     @Test
-    public void quotedTest(){
+    public void quotedTest() {
         DataNode node = CSVParser.read("\"hello\",\"world\",\"you\"");
         assertEquals(3, node.size());
         assertEquals("hello", node.get(0).getString());
@@ -92,7 +92,7 @@ public class CSVParserTest {
     }
 
     @Test
-    public void quotedIncorrectlyTest(){
+    public void quotedIncorrectlyTest() {
         DataNode node = CSVParser.read("hello\",wo\"rl\"d,\"you\"");
         assertEquals(3, node.size());
         assertEquals("hello\"", node.get(0).getString());

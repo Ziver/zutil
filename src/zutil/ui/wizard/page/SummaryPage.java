@@ -39,22 +39,22 @@ import java.util.HashMap;
 public class SummaryPage extends WizardPage{
     private static final long serialVersionUID = 1L;
 
-    public SummaryPage(HashMap<String, Object> values){
-        this.setFinalPage( true );
+    public SummaryPage(HashMap<String, Object> values) {
+        this.setFinalPage(true);
 
         JTextArea summary = new JTextArea();
         summary.setEditable(false);
         summary.setEnabled(false);
-        this.add( summary );
+        this.add(summary);
 
         StringBuilder tmp = new StringBuilder();
-        for(String key : values.keySet()){
+        for (String key : values.keySet()) {
             tmp.append(key);
             tmp.append(": ");
-            tmp.append(values.get( key ));
+            tmp.append(values.get(key));
             tmp.append("\n");
         }
-        summary.setText( tmp.toString() );
+        summary.setText(tmp.toString());
     }
 
     @Override

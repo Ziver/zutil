@@ -30,7 +30,7 @@ import java.awt.image.BufferedImage;
 
 /**
  * This is a static class containing image utility methods
- * 
+ *
  * @author Ziver
  */
 public class ImageUtil {
@@ -44,15 +44,15 @@ public class ImageUtil {
      * @param 		keep_aspect is if the aspect ratio of the image should be kept
      * @return 		the 		resized image
      */
-    public static BufferedImage scale(BufferedImage source, int width, int height, boolean keep_aspect){
+    public static BufferedImage scale(BufferedImage source, int width, int height, boolean keep_aspect) {
         double scale_width = (double)width / source.getWidth();
         double scale_height = (double)height / source.getHeight();
 
         // aspect calculation
-        if(keep_aspect){
-            if(scale_width * source.getHeight() > height){
+        if (keep_aspect) {
+            if (scale_width * source.getHeight() > height) {
                 scale_width = scale_height;
-            }else{
+            } else {
                 scale_height = scale_width;
             }
         }
@@ -78,17 +78,17 @@ public class ImageUtil {
      * @param		aspect		is the aspect ratio to convert the image to
      * @return					a new image with the specified aspect ratio
      */
-    public static BufferedImage cropToAspectRatio(BufferedImage image, float aspect){
+    public static BufferedImage cropToAspectRatio(BufferedImage image, float aspect) {
         int x = 0, y = 0;
         int width = image.getWidth();
         int height = image.getHeight();
 
         // Check if the width is larger than the heigth
-        if( width > height ){
+        if (width > height) {
             width = (int) (height * aspect);
             x = image.getWidth()/2 - width/2;
         }
-        else{
+        else {
             height = (int) (width * aspect);
             y = image.getHeight()/2 - height/2;
         }
@@ -106,7 +106,7 @@ public class ImageUtil {
      * @param               height          is the wanted height
      * @return								a new image with the specified width and height
      */
-    public static BufferedImage cropScale(BufferedImage source, int width, int height){
+    public static BufferedImage cropScale(BufferedImage source, int width, int height) {
         float aspect = width/height;
         BufferedImage tmp = cropToAspectRatio(source, aspect);
         tmp = scale(tmp, width, height, false);

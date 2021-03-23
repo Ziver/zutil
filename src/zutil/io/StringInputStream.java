@@ -29,7 +29,7 @@ import java.nio.charset.StandardCharsets;
 
 /**
  * This class saves all the input data in to an StringBuffer
- * 
+ *
  * @author Ziver
  *
  */
@@ -40,7 +40,7 @@ public class StringInputStream extends InputStream{
     /**
      * Creates an new instance of this class
      */
-    public StringInputStream(){
+    public StringInputStream() {
         clear();
     }
 
@@ -55,7 +55,7 @@ public class StringInputStream extends InputStream{
      * input stream without blocking by the next
      * invocation of a method for this input stream.
      */
-    public int available(){
+    public int available() {
         return buffer.length();
     }
 
@@ -63,32 +63,32 @@ public class StringInputStream extends InputStream{
     /**
      * Reads the next byte of data from the input stream.
      */
-    public int read(){
-        if(buffer.length() == 0)
+    public int read() {
+        if (buffer.length() == 0)
             return -1;
 
-        int ret = buffer.charAt( 0 );
-        buffer.deleteCharAt( 0 );
+        int ret = buffer.charAt(0);
+        buffer.deleteCharAt(0);
         return ret;
     }
 
     /**
-     * Reads some number of bytes from the input stream 
+     * Reads some number of bytes from the input stream
      * and stores them into the buffer array b.
      */
-    public int read(byte[] b){
-        return read( b, 0, b.length );
+    public int read(byte[] b) {
+        return read(b, 0, b.length);
     }
 
     /**
-     * Reads up to len bytes of data from the input stream 
+     * Reads up to len bytes of data from the input stream
      * into an array of bytes.
      */
-    public int read(byte[] b, int off, int len){
-        if(buffer.length() == 0)
+    public int read(byte[] b, int off, int len) {
+        if (buffer.length() == 0)
             return -1;
 
-        if( buffer.length() < len ){
+        if (buffer.length() < len) {
             len = buffer.length();
         }
         byte[] btmp = buffer.substring(0, len).getBytes(StandardCharsets.ISO_8859_1);
@@ -96,48 +96,48 @@ public class StringInputStream extends InputStream{
         buffer.delete(0, len);
         return len;
     }
-    
-    
+
+
     /**
-     * Skips over and discards n bytes of data from this 
+     * Skips over and discards n bytes of data from this
      * input stream.
-     * 
+     *
      * @param	n		is the amount characters to skip
      */
-    public long skip(long n){
-        if( buffer.length() < n ){
+    public long skip(long n) {
+        if (buffer.length() < n) {
             int len = buffer.length();
             buffer.delete(0, len);
             return len;
         }
-        else{
+        else {
             buffer.delete(0, (int) n);
             return n;
         }
     }
-    
+
     /**
-     * Tests if this input stream supports the mark and 
+     * Tests if this input stream supports the mark and
      * reset methods.
      */
-    public boolean markSupported(){
+    public boolean markSupported() {
         return false;
     }
 
 
     /**
-     * Closes this input stream and releases any system 
+     * Closes this input stream and releases any system
      * resources associated with the stream.
      */
-    public void close(){
+    public void close() {
         clear();
     }
 
-    public void clear(){
+    public void clear() {
         buffer = new StringBuilder();
     }
 
-    public void add( String data ){
-        buffer.append( data );
+    public void add(String data) {
+        buffer.append(data);
     }
 }

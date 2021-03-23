@@ -43,7 +43,7 @@ public class BinaryStructInputStream {
     private byte data;
     private int dataBitIndex = -1;
 
-    public BinaryStructInputStream(InputStream in){
+    public BinaryStructInputStream(InputStream in) {
         this.in = in;
     }
 
@@ -63,7 +63,7 @@ public class BinaryStructInputStream {
             ByteArrayInputStream buffer = new ByteArrayInputStream(data, offset, length);
             BinaryStructInputStream in = new BinaryStructInputStream(buffer);
             read = in.read(struct);
-        } catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return read;
@@ -76,8 +76,8 @@ public class BinaryStructInputStream {
         List<BinaryFieldData> structDataList = BinaryFieldData.getStructFieldList(struct.getClass());
 
         int totalReadLength = 0;
-        for (BinaryFieldData field : structDataList){
-            if (field.getSerializer() != null){
+        for (BinaryFieldData field : structDataList) {
+            if (field.getSerializer() != null) {
                 Object value = field.getSerializer().read(in, field);
                 field.setValue(struct, value);
             }
@@ -87,7 +87,7 @@ public class BinaryStructInputStream {
                 int shiftBy = shiftLeftBy(dataBitIndex, field.getBitLength(struct));
 
                 // Parse value
-                for (int valueDataIndex=valueData.length-1; valueDataIndex >= 0 ; --valueDataIndex) {
+                for (int valueDataIndex=valueData.length-1; valueDataIndex >= 0; --valueDataIndex) {
                     if (dataBitIndex < 0) { // Read new data?
                         data = (byte) in.read();
                         dataBitIndex = 7;
@@ -110,13 +110,13 @@ public class BinaryStructInputStream {
     /**
      * @see InputStream#markSupported()
      */
-    public boolean markSupported(){
+    public boolean markSupported() {
         return in.markSupported();
     }
     /**
      * @see InputStream#mark(int)
      */
-    public void mark(int limit){
+    public void mark(int limit) {
         in.mark(limit);
     }
     /**
@@ -128,7 +128,7 @@ public class BinaryStructInputStream {
 
 
 
-    protected static int shiftLeftBy(int bitIndex, int bitLength){
+    protected static int shiftLeftBy(int bitIndex, int bitLength) {
         return (8 - ((7-bitIndex) + bitLength) % 8) % 8;
     }
 }

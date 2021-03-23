@@ -37,13 +37,13 @@ public class GraphicsSyncMessage extends SyncMessage{
     public float rotZ;
     public float rotW;
 
-    public GraphicsSyncMessage(String id){
+    public GraphicsSyncMessage(String id) {
         this.type = MessageType.SYNC;
         this.id = id;
     }
 
-    public boolean equals(Object obj){
-        if(obj instanceof GraphicsSyncMessage){
+    public boolean equals(Object obj) {
+        if (obj instanceof GraphicsSyncMessage) {
             GraphicsSyncMessage tmp = (GraphicsSyncMessage)obj;
             return (tmp.locX == locX &&	tmp.locY == locY &&
                     tmp.locZ == locZ &&	tmp.rotX == rotX &&

@@ -47,7 +47,7 @@ public class OAuth2TokenPageTest {
     private OAuth2TokenPage tokenPage;
 
     @Before
-    public void init(){
+    public void init() {
         registry = new OAuth2Registry();
         tokenPage = new OAuth2TokenPage(registry);
 

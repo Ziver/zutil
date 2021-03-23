@@ -50,8 +50,8 @@ public class ProcDiskstats {
     private static Timer updateTimer = new Timer(TTL);
 
 
-    private synchronized static void update(){
-        if(!updateTimer.hasTimedOut())
+    private synchronized static void update() {
+        if (!updateTimer.hasTimedOut())
             return;
 
         try {
@@ -65,11 +65,11 @@ public class ProcDiskstats {
     protected static void parse(BufferedReader in) throws IOException {
         updateTimer.start();
         String line;
-        while((line=in.readLine()) != null){
+        while ((line=in.readLine()) != null) {
             String[] str = line.trim().split("\\s+", 4);
-            if(str.length >= 4) {
+            if (str.length >= 4) {
                 String devName = str[2];
-                if(!hdds.containsKey(devName)){
+                if (!hdds.containsKey(devName)) {
                     HddStats hdd = new HddStats(devName);
                     hdds.put(hdd.getDevName(), hdd);
                 }
@@ -80,7 +80,7 @@ public class ProcDiskstats {
 
 
 
-    public static HddStats getStats(String devName){
+    public static HddStats getStats(String devName) {
         update();
         return hdds.get(devName);
     }
@@ -120,9 +120,9 @@ public class ProcDiskstats {
             readThroughput = new ThroughputCalculator();
             writeThroughput = new ThroughputCalculator();
         }
-        protected void update(String line){
+        protected void update(String line) {
             String[] stats = line.split("\\s+");
-            if(stats.length >= 11){
+            if (stats.length >= 11) {
                 readIO =       Long.parseLong(stats[0]);
                 readMerges =   Long.parseLong(stats[1]);
                 readSectors =  Long.parseLong(stats[2]);
@@ -233,25 +233,25 @@ public class ProcDiskstats {
         /**
          * @return the average byte/second read throughput from the disk
          */
-        public double getReadThroughput(){
+        public double getReadThroughput() {
             return readThroughput.getByteThroughput();
         }
         /**
          * @return the average byte/second write throughput to the disk
          */
-        public double getWriteThroughput(){
+        public double getWriteThroughput() {
             return writeThroughput.getByteThroughput();
         }
     }
 
 
-    public static void main(String[] args){
-        while(true){
+    public static void main(String[] args) {
+        while (true) {
             HddStats hdd = ProcDiskstats.getStats("sda");
             System.out.println("sda= " +
-                    "read: "  + StringUtil.formatByteSizeToString((long)hdd.getReadThroughput()) + "/s "+
+                    "read: "  + StringUtil.formatByteSizeToString((long)hdd.getReadThroughput()) + "/s " +
                     "write: " + StringUtil.formatByteSizeToString((long)hdd.getWriteThroughput()) + "/s");
-            try{Thread.sleep(1000);}catch (Exception e){}
+            try {Thread.sleep(1000);} catch (Exception e) {}
         }
     }
 }

@@ -77,7 +77,7 @@ public class MultiMap<K,V> implements Map<K,V> {
     @Override
     public boolean containsValue(Object value) {
         for (K key : internalMap.keySet()) {
-            for (V keyValue : internalMap.get(key)){
+            for (V keyValue : internalMap.get(key)) {
                 if (Objects.equals(value, keyValue))
                     return true;
             }
@@ -111,7 +111,7 @@ public class MultiMap<K,V> implements Map<K,V> {
     public void putAll(Map<? extends K, ? extends V> m) {
         if (m instanceof MultiMap) {
             for (K key : m.keySet()) {
-                for (V value : ((MultiMap<? extends K, ? extends V>) m).getAll(key)){
+                for (V value : ((MultiMap<? extends K, ? extends V>) m).getAll(key)) {
                     put(key, value);
                 }
             }
@@ -173,7 +173,7 @@ public class MultiMap<K,V> implements Map<K,V> {
     public Collection<V> values() {
         LinkedList<V> list = new LinkedList<>();
 
-        for(List<V> valueList : internalMap.values()) {
+        for (List<V> valueList : internalMap.values()) {
             list.addAll(valueList);
         }
 

@@ -34,7 +34,7 @@ import java.util.Queue;
 
 /**
  * Implements a simple network computing server
- * 
+ *
  * @author Ziver
  */
 @SuppressWarnings({ "unchecked", "rawtypes" })
@@ -48,7 +48,7 @@ public class GridServerWorker extends ThreadedEventWorker{
     private int nextJobID;
 
 
-    public GridServerWorker(GridResultHandler resHandler, GridJobGenerator jobGenerator){
+    public GridServerWorker(GridResultHandler resHandler, GridJobGenerator jobGenerator) {
         this.resHandler = resHandler;
         this.jobGenerator = jobGenerator;
         nextJobID = 0;
@@ -64,21 +64,21 @@ public class GridServerWorker extends ThreadedEventWorker{
     public void messageEvent(WorkerEventData e) {
         try {
             // ignores other messages than GridMessage
-            if(e.data instanceof GridMessage){
+            if (e.data instanceof GridMessage) {
                 GridMessage msg = (GridMessage)e.data;
                 GridJob job;
 
-                switch(msg.messageType()){
+                switch(msg.messageType()) {
                 case GridMessage.REGISTER:
                     e.network.send(e.remoteAddress, new GridMessage(GridMessage.INIT_DATA, 0, jobGenerator.initValues()));
                     break;
                 // Sending new data to compute to the client
                 case GridMessage.NEW_DATA:
-                    if(!resendJobQueue.isEmpty()){ // checks first if there is a job for recalculation
+                    if (!resendJobQueue.isEmpty()) { // checks first if there is a job for recalculation
                         job = resendJobQueue.poll();
                         job.renewTimeStamp();
                     }
-                    else{ // generates new job
+                    else { // generates new job
                         job = new GridJob(nextJobID,
                                 jobGenerator.generateJob());
                         jobs.put(job.jobID, job);
@@ -111,7 +111,7 @@ public class GridServerWorker extends ThreadedEventWorker{
      *
      * @param	timeout		is the timeout in minutes
      */
-    public void setJobTimeout(int timeout){
+    public void setJobTimeout(int timeout) {
         jobTimeout = 1000*60*timeout;
     }
 
@@ -120,15 +120,15 @@ public class GridServerWorker extends ThreadedEventWorker{
          * Runs some behind the scenes stuff
          * like job garbage collection.
          */
-        public void run(){
-            while(true){
+        public void run() {
+            while (true) {
                 long time = System.currentTimeMillis();
-                for(int jobID : jobs.keySet()){
-                    if(time-jobs.get(jobID).timestamp > jobTimeout){
+                for (int jobID : jobs.keySet()) {
+                    if (time-jobs.get(jobID).timestamp > jobTimeout) {
                         resendJobQueue.add(jobs.get(jobID));
                     }
                 }
-                try{Thread.sleep(1000*60*1);}catch(Exception e){};
+                try {Thread.sleep(1000*60*1);} catch (Exception e) {};
             }
         }
     }

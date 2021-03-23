@@ -55,7 +55,7 @@ public class Perceptron {
     private OutputConnection[] outputs;
 
 
-    public Perceptron(int inputCount, int outputCount){
+    public Perceptron(int inputCount, int outputCount) {
         inputs = new InputConnection[inputCount];
         outputs = new OutputConnection[outputCount];
     }

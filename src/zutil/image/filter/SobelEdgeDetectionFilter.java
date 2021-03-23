@@ -31,7 +31,7 @@ import java.awt.image.BufferedImage;
 
 /**
  * Generates an image that contains the edges of the source image
- * 
+ *
  * @author Ziver
  * INFO: http://en.wikipedia.org/wiki/Sobel_operator
  */
@@ -63,23 +63,23 @@ public class SobelEdgeDetectionFilter extends ImageFilterProcessor{
         setProgress(66);
 
         int[][][] output = new int[data.length][data[0].length][4];
-        for(int y=startY; y<stopY ;y++){
+        for (int y=startY; y<stopY; y++) {
             setProgress(66+ZMath.percent(0, (stopY-startY), y+1)/100*34);
-            for(int x=startX; x<stopX ;x++){
+            for (int x=startX; x<stopX; x++) {
                 output[y][x][0] = data[y][x][0];
-                output[y][x][1] = (int)Math.sqrt( xG[y][x][1]*xG[y][x][1] + yG[y][x][1]*yG[y][x][1] );
-                output[y][x][2] = (int)Math.sqrt( xG[y][x][2]*xG[y][x][2] + yG[y][x][2]*yG[y][x][2] );
-                output[y][x][3] = (int)Math.sqrt( xG[y][x][3]*xG[y][x][3] + yG[y][x][3]*yG[y][x][3] );
+                output[y][x][1] = (int)Math.sqrt(xG[y][x][1]*xG[y][x][1] + yG[y][x][1]*yG[y][x][1]);
+                output[y][x][2] = (int)Math.sqrt(xG[y][x][2]*xG[y][x][2] + yG[y][x][2]*yG[y][x][2]);
+                output[y][x][3] = (int)Math.sqrt(xG[y][x][3]*xG[y][x][3] + yG[y][x][3]*yG[y][x][3]);
                 /*
-                output[y][x][1] = Math.abs( xG[y][x][1] ) + Math.abs(yG[y][x][1] );
-                output[y][x][2] = Math.abs( xG[y][x][2] ) + Math.abs(yG[y][x][2] );
-                output[y][x][3] = Math.abs( xG[y][x][3] ) + Math.abs(yG[y][x][3] );
+                output[y][x][1] = Math.abs(xG[y][x][1]) + Math.abs(yG[y][x][1]);
+                output[y][x][2] = Math.abs(xG[y][x][2]) + Math.abs(yG[y][x][2]);
+                output[y][x][3] = Math.abs(xG[y][x][3]) + Math.abs(yG[y][x][3]);
                 */
             }
         }
 
         // gradient's direction:
-        // 0 = arctan( yG/xG )
+        // 0 = arctan(yG/xG)
 
         return output;
     }

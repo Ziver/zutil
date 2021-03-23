@@ -33,19 +33,19 @@ import java.util.logging.*;
 
 /**
  * Utility functions for the standard Java Logger
- * 
+ *
  * @author Ziver
  */
 public class LogUtil {
-    private static final Logger logger = Logger.getLogger( LogUtil.class.getName() );
+    private static final Logger logger = Logger.getLogger(LogUtil.class.getName());
 
 
-    private LogUtil(){}
+    private LogUtil() {}
 
     /**
      * @return a new Logger for the calling class
      */
-    public static Logger getLogger(){
+    public static Logger getLogger() {
         return Logger.getLogger(ClassUtil.getCallingClass(LogUtil.class));
     }
 
@@ -54,7 +54,7 @@ public class LogUtil {
      *
      * @param 		f 		is the formatter class
      */
-    public static void setGlobalFormatter(Formatter f){
+    public static void setGlobalFormatter(Formatter f) {
         Logger root = Logger.getLogger("");
         for (Handler handler : root.getHandlers()) {
             handler.setFormatter(f);
@@ -66,7 +66,7 @@ public class LogUtil {
      *
      * @param 		f 		is the formatter class
      */
-    public static void setFormatter(String name, Formatter f){
+    public static void setFormatter(String name, Formatter f) {
         Logger root = Logger.getLogger(name);
         for (Handler handler : root.getHandlers()) {
             handler.setFormatter(f);
@@ -76,14 +76,14 @@ public class LogUtil {
     /**
      * Sets the global log level
      */
-    public static void setGlobalLevel(Level level){
+    public static void setGlobalLevel(Level level) {
         setLevel("", level);
     }
 
     /**
      * Adds a Handler to the root namespace
      */
-    public static void addGlobalHandler(Handler handler){
+    public static void addGlobalHandler(Handler handler) {
         Logger root = Logger.getLogger("");
         root.addHandler(handler);
     }
@@ -91,33 +91,33 @@ public class LogUtil {
     /**
      * Sets the log level for a specified class
      */
-    public static void setLevel(Class<?> c, Level level){
+    public static void setLevel(Class<?> c, Level level) {
         setLevel(c.getName(), level);
     }
 
     /**
      * Sets the log level for a specified logger
      */
-    public static void setLevel(String name, Level level){
-        logger.fine("Changing log level of \""+name+"\" to \""+level.getLocalizedName()+"\"");
+    public static void setLevel(String name, Level level) {
+        logger.fine("Changing log level of \"" + name + "\" to \"" + level.getLocalizedName() + "\"");
         Logger newLogger = Logger.getLogger(name);
         newLogger.setLevel(level);
         // Check if the logger has a handler
-        if( newLogger.getHandlers().length > 0 ){
+        if (newLogger.getHandlers().length > 0) {
             // Set the level on the handlers if its level is higher
             for (Handler handler : newLogger.getHandlers()) {
-                if(handler.getLevel().intValue() > level.intValue())
+                if (handler.getLevel().intValue() > level.intValue())
                     handler.setLevel(level);
             }
         }
     }
 
-    public static boolean isLoggable(Class clazz, Level level){
+    public static boolean isLoggable(Class clazz, Level level) {
         return Logger.getLogger(clazz.getName()).isLoggable(level);
     }
 
-    public static void readConfiguration(String file){
-        try{
+    public static void readConfiguration(String file) {
+        try {
             File confFile = FileUtil.find(file);
             if (confFile != null) {
                 FileInputStream in = new FileInputStream(confFile);
@@ -125,9 +125,9 @@ public class LogUtil {
                 in.close();
             }
             else
-                logger.warning("Unable to find logging configuration file: "+file);
-        } catch (Exception e){
-            logger.log(Level.SEVERE, "Unable to load logging configuration: "+file, e);
+                logger.warning("Unable to find logging configuration file: " +file);
+        } catch (Exception e) {
+            logger.log(Level.SEVERE, "Unable to load logging configuration: " +file, e);
         }
     }
 }

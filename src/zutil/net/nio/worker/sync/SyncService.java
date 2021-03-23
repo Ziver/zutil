@@ -42,23 +42,23 @@ public class SyncService extends ThreadedEventWorker{
     /**
      * Adds a object to be synced
      */
-    public void addSyncObject(ObjectSync os){
+    public void addSyncObject(ObjectSync os) {
         sync.put(os.id, os);
-        logger.fine("New Sync object: "+os);
+        logger.fine("New Sync object: " + os);
     }
 
     @Override
-    public void messageEvent(WorkerEventData event){
-        if(event.data instanceof SyncMessage){
+    public void messageEvent(WorkerEventData event) {
+        if (event.data instanceof SyncMessage) {
             SyncMessage syncMessage = (SyncMessage)event.data;
-            if(syncMessage.type == SyncMessage.MessageType.SYNC){
+            if (syncMessage.type == SyncMessage.MessageType.SYNC) {
                 ObjectSync obj = sync.get(syncMessage.id);
-                if(obj != null){
+                if (obj != null) {
                     logger.finer("Syncing Message...");
                     obj.syncObject(syncMessage);
                 }
             }
-            else if(syncMessage.type == SyncMessage.MessageType.REMOVE){
+            else if (syncMessage.type == SyncMessage.MessageType.REMOVE) {
                 sync.remove(syncMessage.id).remove();
             }
         }
@@ -67,8 +67,8 @@ public class SyncService extends ThreadedEventWorker{
     /**
      * Syncs all the objects whit the server
      */
-    public void sync(){
-        for(String id : sync.keySet()){
+    public void sync() {
+        for (String id : sync.keySet()) {
             sync.get(id).sendSync();
         }
     }

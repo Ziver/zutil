@@ -137,7 +137,7 @@ public class Encrypter {
 
     public Encrypter(String stringKey, Digest digest, Algorithm crypto, int iteration, int keyBitSize) throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchPaddingException, InvalidKeyException {
         // Generate the secret key specs.
-        String instance = "PBKDF2With"+ digest;
+        String instance = "PBKDF2With" + digest;
         SecretKeyFactory factory = SecretKeyFactory.getInstance(instance);
         KeySpec keySpec = new PBEKeySpec(stringKey.toCharArray(), salt, iteration, keyBitSize);
         SecretKey tmp = factory.generateSecret(keySpec);
@@ -157,7 +157,7 @@ public class Encrypter {
      * @param   data    is the data to encrypt
      * @return The encrypted data
      */
-    public byte[] encrypt(byte[] data){
+    public byte[] encrypt(byte[] data) {
         try {
             byte[] encryption = new byte[encipher.getOutputSize(data.length)];
 
@@ -186,7 +186,7 @@ public class Encrypter {
      * @param   encrypted   is the encrypted data
      * @return The decrypted data
      */
-    public byte[] decrypt(byte[] encrypted){
+    public byte[] decrypt(byte[] encrypted) {
         try {
             byte[] dataTmp = new byte[encrypted.length];
             int ptLength = decipher.update(encrypted, 0, encrypted.length, dataTmp, 0);
@@ -215,21 +215,21 @@ public class Encrypter {
     /**
      * @return The key for this encrypter
      */
-    public Key getKey(){
+    public Key getKey() {
         return key;
     }
 
     /**
      * @return the algorithm used by this encrypter
      */
-    public String getAlgorithm(){
+    public String getAlgorithm() {
         return key.getAlgorithm();
     }
 
     /**
      * Randomizes the salt for the key
      */
-    public static void randomizeSalt(){
+    public static void randomizeSalt() {
         Random random = new Random();
         random.nextBytes(salt);
     }
