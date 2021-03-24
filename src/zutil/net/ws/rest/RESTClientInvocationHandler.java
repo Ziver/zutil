@@ -104,9 +104,11 @@ public class RESTClientInvocationHandler implements InvocationHandler {
     private HttpURL generateRESTRequest(WSMethodDef methodDef, Object[] args) {
         HttpURL url = new HttpURL(serviceUrl);
 
-        url.setPath(serviceUrl.getPath()
-                + (serviceUrl.getPath().endsWith("/") ? "" : "/")
-                + methodDef.getPath());
+        String host = serviceUrl.getPath();
+        if (host.endsWith("/"))
+            host = host.substring(0, host.length() - 1);
+
+        url.setPath(host + methodDef.getPath());
 
         List<WSParameterDef> params =  methodDef.getInputs();
         for (int i = 0; i < params.size(); i++) {
