@@ -34,10 +34,7 @@ import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -118,6 +115,9 @@ public class Templator {
 
     public void set(String key, Object data) {
         this.data.put(key, data);
+    }
+    public void setAll(Map<String,Object> source) {
+        this.data.putAll(source);
     }
     public Object get(String key) {
         return this.data.get(key);
