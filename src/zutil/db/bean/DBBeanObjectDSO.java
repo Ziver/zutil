@@ -45,7 +45,7 @@ import java.util.logging.Logger;
  *     <li>Text config: the object configuration is stored as JSON</li>
  * </ul>
  */
-public abstract class DBBeanObjectDSO<T> extends DBBean{
+public abstract class DBBeanObjectDSO<T> extends DBBean {
     private static final Logger logger = LogUtil.getLogger();
 
     // DB parameters
@@ -55,7 +55,6 @@ public abstract class DBBeanObjectDSO<T> extends DBBean{
 
     // Local parameters
     private transient T cachedObj;
-
 
 
     @Override
@@ -90,7 +89,6 @@ public abstract class DBBeanObjectDSO<T> extends DBBean{
     }
 
 
-
     public T getObject() {
         return cachedObj;
     }
@@ -112,6 +110,7 @@ public abstract class DBBeanObjectDSO<T> extends DBBean{
         }
     }
 
+
     public String getObjectClass() {
         return type;
     }
@@ -128,6 +127,7 @@ public abstract class DBBeanObjectDSO<T> extends DBBean{
             postUpdateAction(); // instantiate cached object
         }
     }
+
 
     public Configurator<T> getObjectConfigurator() {
         return new Configurator<>(cachedObj);
