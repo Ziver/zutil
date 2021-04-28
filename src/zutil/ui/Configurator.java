@@ -69,6 +69,8 @@ public class Configurator<T> {
     public @interface Configurable{
         /** Nice name of this parameter **/
         String value();
+        /** A longer human friendly description of the parameter **/
+        String description();
         /** Defines the order the parameters, in ascending order **/
         int order() default Integer.MAX_VALUE;
     }
@@ -234,6 +236,7 @@ public class Configurator<T> {
         protected Field field;
         protected String name;
         protected String niceName;
+        protected String description;
         protected ConfigType type;
         protected Object value;
         protected int order;
@@ -247,6 +250,7 @@ public class Configurator<T> {
                 value = field.get(obj);
             if (field.isAnnotationPresent(Configurable.class)) {
                 niceName = field.getAnnotation(Configurable.class).value();
+                description = field.getAnnotation(Configurable.class).description();
                 order = field.getAnnotation(Configurable.class).order();
             }
             else {
@@ -264,13 +268,14 @@ public class Configurator<T> {
 
         }
 
-        public String getName() {       return name;}
-        public String getNiceName() {   return niceName;}
-        public ConfigType getType() {   return type;}
-        public boolean isTypeString() { return type == ConfigType.STRING;}
-        public boolean isTypeInt() {    return type == ConfigType.INT;}
-        public boolean isTypeBoolean() {return type == ConfigType.BOOLEAN;}
-        public boolean isTypeEnum() {   return type == ConfigType.ENUM;}
+        public String getName() {        return name;}
+        public String getNiceName() {    return niceName;}
+        public String getDescription() { return description;}
+        public ConfigType getType() {    return type;}
+        public boolean isTypeString() {  return type == ConfigType.STRING;}
+        public boolean isTypeInt() {     return type == ConfigType.INT;}
+        public boolean isTypeBoolean() { return type == ConfigType.BOOLEAN;}
+        public boolean isTypeEnum() {    return type == ConfigType.ENUM;}
 
         public String getString() {
             if (value == null)

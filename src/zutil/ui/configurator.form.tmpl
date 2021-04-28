@@ -2,18 +2,20 @@
 <div id="{{.clazz.getName()}}">
     {{#.params}}
     <div class="form-group">
-        <label class="control-label">{{.getNiceName()}}:</label>
-        {{#.isTypeString()}}<input type="text" class="form-control" name="{{.getName()}}">{{/#.isTypeString()}}
-        {{#.isTypeInt()}}<input type="number" class="form-control" name="{{.getName()}}">{{/#.isTypeInt()}}
-        {{#.isTypeBoolean()}}
-        <input type="hidden" name="{{.getName()}}" value="false">
-        <input type="checkbox" name="{{.getName()}}" value="true">
-        {{/#.isTypeBoolean()}}
+        <label for="input-{{.getName()}}" class="form-label">{{.getNiceName()}}:</label>
+
+        {{#.isTypeString()}}<input type="text" class="form-control" id="input-{{.getName()}}" name="{{.getName()}}">{{/#.isTypeString()}}
+        {{#.isTypeInt()}}<input type="number" class="form-control" id="input-{{.getName()}}" name="{{.getName()}}">{{/#.isTypeInt()}}
+        {{#.isTypeBoolean()}}<input type="checkbox" id="input-{{.getName()}}" name="{{.getName()}}" value="true">{{/#.isTypeBoolean()}}
         {{#.isTypeEnum()}}
-        <select class="form-control" name="{{.getName()}}">
+        <select class="form-control" id="input-{{.getName()}}" name="{{.getName()}}">
             {{#.getPossibleValues()}}<option>{{.}}</option>{{/.getPossibleValues()}}
         </select>
         {{/#.isTypeEnum()}}
+
+        {{#.getDescription()}}
+        <div class="form-text">{{.getDescription()}}</div>
+        {{/#.getDescription()}}
     </div>
     {{/.params}}
 </div>
