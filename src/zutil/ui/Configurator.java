@@ -75,11 +75,11 @@ public class Configurator<T> {
         /** Nice name of this parameter **/
         String value();
         /** A longer human friendly description of the parameter **/
-        String description();
+        String description() default "";
         /** Defines the order the parameter, parameter with lowest order value will be shown first **/
         int order() default Integer.MAX_VALUE;
         /** Provide a custom set of values through a value provider that will be the choice the user will have. **/
-        Class<? extends ConfigValueProvider> valueProvider();
+        Class<? extends ConfigValueProvider> valueProvider() default DummyValueProvider.class;
     }
 
     /**
@@ -316,6 +316,9 @@ public class Configurator<T> {
         }
 
         private ConfigValueProvider getValueProviderInstance(Class<? extends ConfigValueProvider> valueProviderClass) throws ReflectiveOperationException {
+            if (DummyValueProvider.class.equals(valueProviderClass))
+                return null;
+
             for (Constructor constructor : valueProviderClass.getConstructors()) {
                 switch (constructor.getParameterCount()) {
                     case 0: return valueProviderClass.getDeclaredConstructor().newInstance();
@@ -391,5 +394,15 @@ public class Configurator<T> {
         public int compareTo(ConfigurationParam configurationParam) {
             return this.order - configurationParam.order;
         }
+    }
+
+    /**
+     * This is a default class that only indicates that no ValueProvider has been given in the {@link Configurable} annotation.
+     */
+    private static class DummyValueProvider implements ConfigValueProvider {
+        @Override
+        public String[] getPossibleValues() {return new String[0];}
+        @Override
+        public Object getValueObject(String value) {return null;}
     }
 }
