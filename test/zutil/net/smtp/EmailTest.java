@@ -29,8 +29,13 @@ import zutil.io.StringOutputStream;
 
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.time.OffsetDateTime;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.TimeZone;
 
 import static org.junit.Assert.assertEquals;
 import static zutil.net.smtp.SmtpClient.NEWLINE;
@@ -110,7 +115,7 @@ public class EmailTest {
         assertEquals(
                 "From: test@example.com" + NEWLINE +
                         "To: to@example.com" + NEWLINE +
-                        "Date: Wed, 22 Nov 2000 15:20:55 +0100" + NEWLINE +
+                        "Date: Sun, 22 Oct 2000 15:20:55 GMT" + NEWLINE +
                         "Content-Type: text/plain;" + NEWLINE +
                         "Subject: " + NEWLINE +
                         NEWLINE +
@@ -133,7 +138,7 @@ public class EmailTest {
                 "From: Test Tester <test@example.com>" + NEWLINE +
                         "Reply-To: <mokey@example.org>" + NEWLINE +
                         "To: To Totter <to@example.com>" + NEWLINE +
-                        "Date: Wed, 22 Nov 2000 15:20:55 +0100" + NEWLINE +
+                        "Date: Sun, 22 Oct 2000 15:20:55 GMT" + NEWLINE +
                         "Content-Type: text/html;" + NEWLINE +
                         "Subject: Title" + NEWLINE +
                         NEWLINE +
@@ -141,8 +146,9 @@ public class EmailTest {
                 getEmailString(email));
     }
 
-
-
+    // ---------------------------------------------
+    // Utility functions
+    // ---------------------------------------------
 
     private String getEmailString(Email email) throws IOException {
         StringOutputStream buff = new StringOutputStream();
@@ -152,8 +158,8 @@ public class EmailTest {
         return buff.toString();
     }
 
-    private Date getDate(){
-        GregorianCalendar date = new GregorianCalendar(2000,10,22, 15,20,55);
-        return date.getTime();
+    private OffsetDateTime getDate(){
+        OffsetDateTime dateTime = OffsetDateTime.of(2000,10,22, 15,20,55, 0, ZoneOffset.UTC);
+        return dateTime;
     }
 }

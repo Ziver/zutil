@@ -27,6 +27,8 @@ package zutil.net.smtp;
 import java.io.IOException;
 import java.io.Writer;
 import java.text.SimpleDateFormat;
+import java.time.OffsetDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.Locale;
 import java.util.regex.Pattern;
@@ -44,8 +46,7 @@ public class Email {
     public enum ContentType{
         PLAIN, HTML
     }
-    private static final SimpleDateFormat dateFormatter =
-        new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss Z", Locale.ENGLISH);
+    private static final SimpleDateFormat dateFormatter = new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss Z", Locale.ENGLISH);
     private static final Pattern PATTERN_NEWLINE = Pattern.compile("(\\r\\n|\\n)");
 
     private String fromAddress;
@@ -53,14 +54,14 @@ public class Email {
     private String toAddress;
     private String toName = null;
     private String replyToAddress = null;
-    private Date date = null;
+    private String dateStr = dateFormatter.format(new Date(System.currentTimeMillis()));
     private ContentType type = ContentType.PLAIN;
     private String subject;
     private String message;
 
 
 
-    public Email() {	}
+    public Email() {}
 
 
     public void setFrom(String address) {
@@ -99,8 +100,12 @@ public class Email {
     }
 
     public void setDate(Date date) {
-        this.date = date;
+        this.dateStr = dateFormatter.format(date);
     }
+    public void setDate(OffsetDateTime date) {
+        this.dateStr = date.format(DateTimeFormatter.RFC_1123_DATE_TIME);;
+    }
+
     public void setContentType(ContentType t) {
         type = t;
     }
@@ -138,6 +143,7 @@ public class Email {
             throw new IllegalArgumentException("To value cannot be null!");
 
         //************ Headers
+
         // From
         if (fromName !=null)
             out.write("From: " + fromName + " <" + fromAddress + ">" + NEWLINE);
@@ -155,10 +161,7 @@ public class Email {
             out.write("To: " + toAddress + NEWLINE);
 
         // Date
-        if (date != null)
-            out.write("Date: " +dateFormatter.format(date) + NEWLINE);
-        else
-            out.write("Date: " +dateFormatter.format(new Date(System.currentTimeMillis())) + NEWLINE);
+        out.write("Date: " + dateStr + NEWLINE);
 
         // Content type
         switch(type) {
@@ -169,10 +172,12 @@ public class Email {
         }
 
         // Subject
-        out.write("Subject: " +(subject!=null ? subject : "") + NEWLINE);
+        out.write("Subject: " + (subject!=null ? subject : "") + NEWLINE);
 
         out.write(NEWLINE);
+
         //*********** Mesasge
+
         out.write(message);
     }
 }
