@@ -31,6 +31,7 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -50,7 +51,7 @@ import java.util.logging.Logger;
  * <p>
  * External listener can be registered to be called before or after configuration changes
  * by implementing {@link PreConfigurationActionListener} or {@link PostConfigurationActionListener}.
- * The configured object will autmatically be registered as a listener if it also implements
+ * The configured object will automatically be registered as a listener if it also implements
  * these interfaces.
  *
  * <p>
@@ -61,25 +62,64 @@ import java.util.logging.Logger;
 public class Configurator<T> {
     private static final Logger logger = LogUtil.getLogger();
 
+    // ----------------------------------------------------
+    // Public interfaces
+    // ----------------------------------------------------
+
     /**
      * Sets a field in a class as externally configurable.
      */
     @Retention(RetentionPolicy.RUNTIME) // Make this annotation accessible at runtime via reflection.
     @Target({ElementType.FIELD})        // This annotation can only be applied to class fields.
-    public @interface Configurable{
+    public @interface Configurable {
         /** Nice name of this parameter **/
         String value();
         /** A longer human friendly description of the parameter **/
         String description();
-        /** Defines the order the parameters, in ascending order **/
+        /** Defines the order the parameter, parameter with lowest order value will be shown first **/
         int order() default Integer.MAX_VALUE;
+        /** Provide a custom set of values through a value provider that will be the choice the user will have. **/
+        Class<? extends ConfigValueProvider> valueProvider();
+    }
+
+    /**
+     * Interface for providing a specific selection of values that a user is allowed to pick from for assignment to a object field.
+     * The class implementing this interface is required to have one of the below constructors for instantiation:
+     * <pre>
+     *     ** no constructors **
+     *     public XXX() {}
+     *     public XXX(Class fieldType) {}
+     *     public XXX(Class fieldType, Object fieldValue) {}
+     * </pre>
+     *
+     * @param <V> represents the value type that will be assigned to the target field.
+     */
+    public interface ConfigValueProvider<V> {
+        /**
+         * @return a array of all possible values that the user can select from.
+         */
+        String[] getPossibleValues();
+
+        /**
+         * Convert the user selected value into the actual Object that should be assigned to the target field.
+         *
+         * @param value the string value that was selected by the user.
+         * @return a Object that will be assigned to the target field, note a exception will be thrown if the return type does not match the field.
+         */
+        V getValueObject(String value);
+    }
+
+    /**
+     * Defines supported configurable types
+     */
+    public enum ConfigType {
+        STRING, NUMBER, BOOLEAN, SELECTION
     }
 
 
-    public enum ConfigType{
-        STRING, INT, BOOLEAN, ENUM
-    }
-
+    // ----------------------------------------------------
+    // Configurator data and logic
+    // ----------------------------------------------------
 
     private static HashMap<Class, ConfigurationParam[]> classConf = new HashMap<>();
 
@@ -116,7 +156,7 @@ public class Configurator<T> {
                 if (f.isAnnotationPresent(Configurable.class)) {
                     try {
                         conf.add(new ConfigurationParam(f, obj));
-                    } catch (IllegalAccessException e) {
+                    } catch (ReflectiveOperationException e) {
                         logger.log(Level.SEVERE, null, e);
                     }
                 }
@@ -233,49 +273,68 @@ public class Configurator<T> {
 
 
     public static class ConfigurationParam implements Comparable<ConfigurationParam>{
-        protected Field field;
-        protected String name;
         protected String niceName;
         protected String description;
-        protected ConfigType type;
-        protected Object value;
         protected int order;
 
+        protected Field field;
+        protected String name;
+        protected ConfigType type;
+        protected Object value;
+        protected ConfigValueProvider valueProvider;
 
-        protected ConfigurationParam(Field f, Object obj) throws IllegalAccessException {
+
+        protected ConfigurationParam(Field f, Object obj) throws ReflectiveOperationException {
             field = f;
             field.setAccessible(true);
             name = field.getName();
+
             if (obj != null)
                 value = field.get(obj);
+
             if (field.isAnnotationPresent(Configurable.class)) {
                 niceName = field.getAnnotation(Configurable.class).value();
                 description = field.getAnnotation(Configurable.class).description();
                 order = field.getAnnotation(Configurable.class).order();
-            }
-            else {
+                valueProvider = getValueProviderInstance(field.getAnnotation(Configurable.class).valueProvider());
+            } else {
                 niceName = name;
                 order = Integer.MAX_VALUE;
             }
 
-            if      (f.getType() == String.class)    type = ConfigType.STRING;
-            else if (f.getType() == int.class)       type = ConfigType.INT;
-            else if (f.getType() == double.class)    type = ConfigType.INT;
-            else if (f.getType() == boolean.class)   type = ConfigType.BOOLEAN;
-            else if (f.getType().isEnum())           type = ConfigType.ENUM;
-            else
-                throw new IllegalArgumentException(f.getType() + " is not a supported configurable type");
+            if (valueProvider != null)             type = ConfigType.SELECTION;
+            else if (f.getType() == String.class)  type = ConfigType.STRING;
+            else if (f.getType() == int.class)     type = ConfigType.NUMBER;
+            else if (f.getType() == double.class)  type = ConfigType.NUMBER;
+            else if (f.getType() == boolean.class) type = ConfigType.BOOLEAN;
+            else if (f.getType().isEnum()) {
+                type = ConfigType.SELECTION;
+                valueProvider = new ConfigEnumValueProvider((Class<Enum>) f.getType());
+            } else
+                throw new IllegalArgumentException(f.getType() + " is not a supported native configurable type, a value provided is required for arbitrary objects.");
 
         }
 
-        public String getName() {        return name;}
-        public String getNiceName() {    return niceName;}
-        public String getDescription() { return description;}
-        public ConfigType getType() {    return type;}
-        public boolean isTypeString() {  return type == ConfigType.STRING;}
-        public boolean isTypeInt() {     return type == ConfigType.INT;}
-        public boolean isTypeBoolean() { return type == ConfigType.BOOLEAN;}
-        public boolean isTypeEnum() {    return type == ConfigType.ENUM;}
+        private ConfigValueProvider getValueProviderInstance(Class<? extends ConfigValueProvider> valueProviderClass) throws ReflectiveOperationException {
+            for (Constructor constructor : valueProviderClass.getConstructors()) {
+                switch (constructor.getParameterCount()) {
+                    case 0: return valueProviderClass.getDeclaredConstructor().newInstance();
+                    case 1: return valueProviderClass.getDeclaredConstructor(Class.class).newInstance(field.getType());
+                    case 2: return valueProviderClass.getDeclaredConstructor(Class.class, Object.class).newInstance(field.getType(), value);
+                }
+            }
+
+            throw new NoSuchMethodException("Unable to find proper constructor inside " + valueProviderClass.getSimpleName());
+        }
+
+        public String getName()          { return name; }
+        public String getNiceName()      { return niceName; }
+        public String getDescription()   { return description; }
+        public ConfigType getType()      { return type; }
+        public boolean isTypeString()    { return type == ConfigType.STRING; }
+        public boolean isTypeNumber()    { return type == ConfigType.NUMBER; }
+        public boolean isTypeBoolean()   { return type == ConfigType.BOOLEAN; }
+        public boolean isTypeSelection() { return type == ConfigType.SELECTION; }
 
         public String getString() {
             if (value == null)
@@ -285,19 +344,15 @@ public class Configurator<T> {
         public boolean getBoolean() {
             if (value == null || type != ConfigType.BOOLEAN)
                 return false;
-            return (boolean)value;
+            return (boolean) value;
         }
 
         /**
-         * @return a String array with all enum possibilities or empty array if the type is not an enum
+         * @return a String array with all possible values that can be assigned or an empty array if any value within the type definition can be set.
          */
         public String[] getPossibleValues() {
-            if (type == ConfigType.ENUM) {
-                Object[] constants = field.getType().getEnumConstants();
-                String[] values = new String[constants.length];
-                for (int i = 0; i < constants.length; ++i)
-                    values[i] = ((Enum<?>)constants[i]).name();
-                return values;
+            if (valueProvider != null) {
+                return valueProvider.getPossibleValues();
             }
             return new String[0];
         }
@@ -306,21 +361,23 @@ public class Configurator<T> {
          * This method will set a value for the represented field,
          * to apply the change to the source object the method
          * {@link #applyConfiguration()} needs to be called
+         *
+         * @param selectedValue the value that was selected by user.
          */
-        public void setValue(String v) {
+        public void setValue(String selectedValue) {
             switch(type) {
                 case STRING:
-                    value = v; break;
-                case INT:
+                    value = selectedValue; break;
+                case NUMBER:
                     if (field.getType() == double.class)
-                        value = Double.parseDouble(v);
+                        value = Double.parseDouble(selectedValue);
                     else
-                        value = Integer.parseInt(v);
+                        value = Integer.parseInt(selectedValue);
                     break;
                 case BOOLEAN:
-                    value = Boolean.parseBoolean(v); break;
-                case ENUM:
-                    value = Enum.valueOf((Class<? extends Enum>)field.getType(), v); break;
+                    value = Boolean.parseBoolean(selectedValue); break;
+                case SELECTION:
+                    value = valueProvider.getValueObject(selectedValue); break;
             }
         }
 

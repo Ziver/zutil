@@ -95,13 +95,13 @@
             <label for="input-{{.getName()}}" class="form-label">{{.getNiceName()}}:</label>
 
             {{#.isTypeString()}}<input type="text" class="form-control" id="input-{{.getName()}}" name="{{.getName()}}">{{/#.isTypeString()}}
-            {{#.isTypeInt()}}<input type="number" class="form-control" id="input-{{.getName()}}" name="{{.getName()}}">{{/#.isTypeInt()}}
+            {{#.isTypeNumber()}}<input type="number" class="form-control" id="input-{{.getName()}}" name="{{.getName()}}">{{/#.isTypeNumber()}}
             {{#.isTypeBoolean()}}<input type="checkbox" id="input-{{.getName()}}" name="{{.getName()}}" value="true">{{/#.isTypeBoolean()}}
-            {{#.isTypeEnum()}}
+            {{#.isTypeSelection()}}
             <select class="form-control" id="input-{{.getName()}}" name="{{.getName()}}">
                 {{#.getPossibleValues()}}<option>{{.}}</option>{{/.getPossibleValues()}}
             </select>
-            {{/#.isTypeEnum()}}
+            {{/#.isTypeSelection()}}
 
             {{#.getDescription()}}
             <div class="form-text">{{.getDescription()}}</div>
