@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  */
 
-package zutil.ui;
+package zutil.ui.conf;
 
 import zutil.log.LogUtil;
 import zutil.parser.DataNode;
@@ -33,10 +33,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -96,9 +93,14 @@ public class Configurator<T> {
      */
     public interface ConfigValueProvider<V> {
         /**
+         * @return a String representing the given obj.
+         */
+        String getValue(V obj);
+
+        /**
          * @return a array of all possible values that the user can select from.
          */
-        String[] getPossibleValues();
+        List<String> getPossibleValues();
 
         /**
          * Convert the user selected value into the actual Object that should be assigned to the target field.
@@ -106,7 +108,7 @@ public class Configurator<T> {
          * @param value the string value that was selected by the user.
          * @return a Object that will be assigned to the target field, note a exception will be thrown if the return type does not match the field.
          */
-        V getValueObject(String value);
+        V getObject(String value);
     }
 
     /**
@@ -310,9 +312,9 @@ public class Configurator<T> {
             else if (f.getType().isEnum()) {
                 type = ConfigType.SELECTION;
                 valueProvider = new ConfigEnumValueProvider((Class<Enum>) f.getType());
-            } else
+            } else {
                 throw new IllegalArgumentException(f.getType() + " is not a supported native configurable type, a value provided is required for arbitrary objects.");
-
+            }
         }
 
         private ConfigValueProvider getValueProviderInstance(Class<? extends ConfigValueProvider> valueProviderClass) throws ReflectiveOperationException {
@@ -340,6 +342,8 @@ public class Configurator<T> {
         public boolean isTypeSelection() { return type == ConfigType.SELECTION; }
 
         public String getString() {
+            if (valueProvider != null)
+                return valueProvider.getValue(value);
             if (value == null)
                 return null;
             return value.toString();
@@ -353,11 +357,11 @@ public class Configurator<T> {
         /**
          * @return a String array with all possible values that can be assigned or an empty array if any value within the type definition can be set.
          */
-        public String[] getPossibleValues() {
+        public List<String> getPossibleValues() {
             if (valueProvider != null) {
                 return valueProvider.getPossibleValues();
             }
-            return new String[0];
+            return Collections.EMPTY_LIST;
         }
 
         /**
@@ -380,7 +384,7 @@ public class Configurator<T> {
                 case BOOLEAN:
                     value = Boolean.parseBoolean(selectedValue); break;
                 case SELECTION:
-                    value = valueProvider.getValueObject(selectedValue); break;
+                    value = valueProvider.getObject(selectedValue); break;
             }
         }
 
@@ -401,8 +405,10 @@ public class Configurator<T> {
      */
     private static class DummyValueProvider implements ConfigValueProvider {
         @Override
-        public String[] getPossibleValues() {return new String[0];}
+        public String getValue(Object obj) {return null;}
         @Override
-        public Object getValueObject(String value) {return null;}
+        public List<String> getPossibleValues() {return Collections.EMPTY_LIST;}
+        @Override
+        public Object getObject(String value) {return null;}
     }
 }

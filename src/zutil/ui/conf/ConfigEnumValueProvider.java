@@ -1,4 +1,7 @@
-package zutil.ui;
+package zutil.ui.conf;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A value provider that will give all Enum values
@@ -12,19 +15,23 @@ public class ConfigEnumValueProvider implements Configurator.ConfigValueProvider
     }
 
 
+    public String getValue(Enum obj) {
+        return (obj == null ? "null" : obj.name());
+    }
+
     @Override
-    public String[] getPossibleValues() {
+    public List<String> getPossibleValues() {
         Object[] constants = enumCLass.getEnumConstants();
-        String[] values = new String[constants.length];
+        List<String> values = new ArrayList<>(constants.length);
 
         for (int i = 0; i < constants.length; ++i)
-            values[i] = ((Enum<?>) constants[i]).name();
+            values.add(((Enum<?>) constants[i]).name());
 
         return values;
     }
 
     @Override
-    public Enum getValueObject(String value) {
+    public Enum getObject(String value) {
         return Enum.valueOf(enumCLass, value);
     }
 }
