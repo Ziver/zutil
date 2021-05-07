@@ -28,7 +28,7 @@ import zutil.db.DBConnection;
 import zutil.log.LogUtil;
 import zutil.parser.json.JSONParser;
 import zutil.parser.json.JSONWriter;
-import zutil.ui.Configurator;
+import zutil.ui.conf.Configurator;
 
 import java.sql.SQLException;
 import java.util.logging.Level;
@@ -57,13 +57,14 @@ public abstract class DBBeanObjectDSO<T> extends DBBean {
     private transient T cachedObj;
 
 
+    @SuppressWarnings("unchecked")
     @Override
     protected void postUpdateAction() {
         if (type != null && !type.isEmpty()) {
             if (cachedObj == null) {
                 try {
                     Class clazz = Class.forName(type);
-                    cachedObj = (T) clazz.newInstance();
+                    cachedObj = (T) clazz.getDeclaredConstructor().newInstance();
                 } catch (Exception e) {
                     logger.log(Level.SEVERE, "Unable instantiate class: " + type, e);
                 }
