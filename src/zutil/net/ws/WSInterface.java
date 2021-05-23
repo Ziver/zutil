@@ -113,15 +113,6 @@ public interface WSInterface {
     }
 
     /**
-     * Parameter comments for the WSDL.
-     * These comments are put in the message part of the WSDL
-     */
-    @Retention(RetentionPolicy.RUNTIME)
-    @interface WSParamDocumentation {
-        String value();
-    }
-
-    /**
      * This method will be used in the SOAP header.
      */
     @Retention(RetentionPolicy.RUNTIME)

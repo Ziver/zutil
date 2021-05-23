@@ -99,7 +99,7 @@ public class SOAPTest {
         }
 
         @WSReturnName("stringArray")
-        @WSParamDocumentation("Documentation of stringArrayMethod()")
+        @WSDocumentation("Documentation of stringArrayMethod()")
         public String[][] stringArrayMethod (
                 @WSParamName("StringName") String str) {
             System.out.println("Executing method: stringArrayMethod(String str='"+str+"')");
@@ -107,7 +107,7 @@ public class SOAPTest {
         }
 
         @WSReturnName("specialReturnClass")
-        @WSParamDocumentation("Documentation of specialReturnMethod()")
+        @WSDocumentation("Documentation of specialReturnMethod()")
         public SpecialReturnClass[] specialReturnMethod (
                 @WSParamName("StringName2") String str) {
             System.out.println("Executing method: specialReturnMethod(String str='"+str+"')");
@@ -115,7 +115,7 @@ public class SOAPTest {
         }
 
         @WSReturnName("SimpleReturnClass")
-        @WSParamDocumentation("null is the kala")
+        @WSDocumentation("null is the kala")
         public SimpleReturnClass simpleReturnClassMethod (
                 @WSParamName("byte") String lol) {
             System.out.println("Executing method: simpleReturnClassMethod()");
@@ -125,7 +125,7 @@ public class SOAPTest {
             return tmp;
         }
 
-        @WSParamDocumentation("void method documentation")
+        @WSDocumentation("void method documentation")
         public void voidMethod (){ }
 
         @WSIgnore()
