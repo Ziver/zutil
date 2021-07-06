@@ -84,7 +84,7 @@ import java.util.logging.Logger;
  * @author Ziver koc
  */
 public class Templator {
-    private static final Logger log = LogUtil.getLogger();
+    private static final Logger logger = LogUtil.getLogger();
 
     private HashMap<String,Object> data;
     private TemplateEntity tmplRoot;
@@ -136,11 +136,11 @@ public class Templator {
     public String compile() {
         if (file != null && lastModified != file.lastModified()) {
             try {
-                log.info("Template file(" + file.getName() + ") changed. Regenerating template...");
+                logger.info("Template file(" + file.getName() + ") changed. Regenerating template...");
                 parseTemplate(FileUtil.getContent(file));
                 this.lastModified = file.lastModified();
             } catch(IOException e) {
-                log.log(Level.WARNING, "Unable to regenerate template", e);
+                logger.log(Level.WARNING, "Unable to regenerate template", e);
             }
         }
 
@@ -194,7 +194,7 @@ public class Templator {
                             // Is this tag closing the parent?
                             if (parentTag != null && tagName.endsWith(parentTag.substring(1)))
                                 return root;
-                            log.severe("Closing non-opened tag: {{" + tagName + "}}");
+                            logger.severe("Closing non-opened tag: {{" + tagName + "}}");
                             root.add(new TemplateStaticString("{{" + tagName + "}}"));
                             break;
                         case '!': // Comment
@@ -218,7 +218,7 @@ public class Templator {
         if (parentTag != null) {
             root = new TemplateNode(root);
             String tagName = "{{" + parentTag + "}}";
-            log.severe("Missing closure of tag: " + tagName);
+            logger.severe("Missing closure of tag: " + tagName);
             root.addFirst(new TemplateStaticString(tagName));
         }
         return root;
@@ -412,7 +412,7 @@ public class Templator {
                 else {
                     // Using a loop as the direct lookup throws a exception if no field was found
                     // So this is probably a bit faster
-                    for (Field field : obj.getClass().getFields()) { // Only look for public fields
+                    for (Field field : obj.getClass().getDeclaredFields()) { // Only look for public fields
                         if (field.getName().equals(attrib)) {
                             field.setAccessible(true);
                             return field.get(obj);
@@ -420,7 +420,7 @@ public class Templator {
                     }
                 }
             } catch (IllegalAccessException | InvocationTargetException e) {
-                log.log(Level.WARNING, null, e);
+                logger.log(Level.WARNING, null, e);
             }
             return null;
         }
