@@ -66,7 +66,7 @@ public class DBUpgradeHandler {
     }
 
     /**
-     * Will create a rename mapping where an existing table will be renamed.
+     * Will create a rename mapping where an existing table will be renamed to the given new name.
      *
      * @param   oldTableName    current name of the table
      * @param   newTableName    new name that old table will be renamed to.
@@ -83,9 +83,11 @@ public class DBUpgradeHandler {
     }
 
     /**
-     * With the default behaviour unnecessary columns will not be removed.
-     * But if forced upgrade is set to true then the upgrade handler will
-     * create a new table and migrate the data from the old one to the new table.
+     * With the default behaviour no longer existing columns and tables will
+     * not be removed.
+     * If forced upgrade is set to true then the upgrade handler will
+     * create a new table and migrate over the data from the old to the
+     * new table and finally remove the old table.
      *
      * @param   enable  true to enable forced upgrade
      */
@@ -101,8 +103,10 @@ public class DBUpgradeHandler {
 
             upgradeRenameTables();
             upgradeCreateTables();
-            upgradeDropTables();
             upgradeAlterTables();
+
+            if (forceUpgradeEnabled)
+                upgradeDropTables();
 
             logger.fine("Committing upgrade transaction...");
             target.getConnection().commit();
@@ -261,7 +265,7 @@ public class DBUpgradeHandler {
                 new TableStructureResultHandler());
     }
 
-    private static class DBColumn{
+    private static class DBColumn {
         String name;
         String type;
         boolean notNull;
