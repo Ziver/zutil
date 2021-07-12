@@ -106,7 +106,7 @@ public class JSONObjectInputStream extends InputStream implements ObjectInput, C
                 return (T) readObject(c, null, root);
             }
         } catch (Exception e) {
-            logger.log(Level.WARNING, null, e);
+            logger.log(Level.SEVERE, null, e);
         } finally {
             objectCache.clear();
         }
@@ -115,11 +115,12 @@ public class JSONObjectInputStream extends InputStream implements ObjectInput, C
 
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
-    protected Object readType(Class<?> type, Class<?>[] genericType, String key, DataNode json) throws IllegalAccessException, ClassNotFoundException, InstantiationException, NoSuchFieldException, NoSuchMethodException, InvocationTargetException {
-        // TODO: Don't replace the existing object if it exists
+    protected Object readType(Class<?> type, Class<?>[] genericType, Object currentValue, String key, DataNode json)
+            throws IllegalAccessException, ClassNotFoundException, InstantiationException, NoSuchFieldException, NoSuchMethodException, InvocationTargetException {
 
         if (json == null || type == null)
             return null;
+
         // Field type is a primitive?
         if (ClassUtil.isPrimitive(type) ||
                 ClassUtil.isWrapper(type)) {
@@ -134,7 +135,12 @@ public class JSONObjectInputStream extends InputStream implements ObjectInput, C
             else {
                 Object array = Array.newInstance(type.getComponentType(), json.size());
                 for (int i=0; i<json.size(); i++) {
-                    Array.set(array, i, readType(type.getComponentType(), null, key, json.get(i)));
+                    Array.set(array, i, readType(
+                            type.getComponentType(),
+                            null,
+                            null,
+                            key,
+                            json.get(i)));
                 }
                 return array;
             }
@@ -142,24 +148,48 @@ public class JSONObjectInputStream extends InputStream implements ObjectInput, C
         else if (Collection.class.isAssignableFrom(type)) {
             if (genericType == null || genericType.length < 1)
                 genericType = ClassUtil.getGenericClasses(type, List.class);
-            Collection list = (Collection) type.getDeclaredConstructor().newInstance();
+
+            Collection list = (Collection) currentValue;
+            if (list == null) {
+                if (type == Set.class)
+                    list = new HashSet();
+                else if (type == List.class)
+                    list = new ArrayList();
+                else
+                    list = (Collection) type.getDeclaredConstructor().newInstance();
+            }
 
             for (int i=0; i<json.size(); i++) {
-                list.add(readType((genericType.length>=1? genericType[0] : null), null, key, json.get(i)));
+                list.add(readType(
+                        (genericType.length>=1? genericType[0] : null),
+                        null,
+                        null,
+                        key,
+                        json.get(i)));
             }
             return list;
         }
         else if (Map.class.isAssignableFrom(type)) {
             if (genericType == null || genericType.length < 2)
                 genericType = ClassUtil.getGenericClasses(type, Map.class);
-            Map map = (Map) type.getDeclaredConstructor().newInstance();
+
+            Map map = (Map) currentValue;
+            if (map == null) {
+                if (type == Map.class)
+                    map = new HashMap();
+                else
+                    map = (Map) type.getDeclaredConstructor().newInstance();
+            }
 
             for (Iterator<String> it=json.keyIterator(); it.hasNext();) {
                 String subKey = it.next();
                 if (json.get(subKey) != null) {
-                    map.put(
+                    map.put(subKey, readType(
+                            (genericType.length >= 2 ? genericType[1] : null),
+                            null,
+                            null,
                             subKey,
-                            readType((genericType.length >= 2 ? genericType[1] : null), null, subKey, json.get(subKey)));
+                            json.get(subKey)));
                 }
             }
             return map;
@@ -208,10 +238,10 @@ public class JSONObjectInputStream extends InputStream implements ObjectInput, C
                     json.get(field.getName()) != null) {
                 // Parse field
                 field.setAccessible(true);
-                field.set(obj,
-                        readType(
+                field.set(obj, readType(
                                 field.getType(),
                                 ClassUtil.getGenericClasses(field),
+                                field.get(obj),
                                 field.getName(),
                                 json.get(field.getName())));
             }
