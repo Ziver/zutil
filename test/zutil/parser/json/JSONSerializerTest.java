@@ -38,7 +38,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 
 
-public class JSONSerializerTest{
+public class JSONSerializerTest {
 
     @Test
     public void testOutputSerializerWithPrimitives() throws IOException {
@@ -50,6 +50,7 @@ public class JSONSerializerTest{
         assertThat(data, containsString("'str': 'abcd'"));
         assertThat(data, containsString("'value': 42"));
         assertThat(data, containsString("'decimal': 1.1"));
+        assertThat(data, containsString("'testEnum': 'ENUM2'"));
     }
 
     @Test
@@ -175,13 +176,13 @@ public class JSONSerializerTest{
 
     /******************* Utility Functions ************************************/
 
-    static <T> T sendReceiveObject(T sourceObj) throws IOException{
+    static <T> T sendReceiveObject(T sourceObj) throws IOException {
         return readObjectFromJson(
                 writeObjectToJson(sourceObj));
     }
 
     @SuppressWarnings("unchecked")
-    static <T> T readObjectFromJson(String json) throws IOException{
+    static <T> T readObjectFromJson(String json) throws IOException {
         StringReader bin = new StringReader(json);
         JSONObjectInputStream in = new JSONObjectInputStream(bin);
         T targetObj = (T) in.readObject();
@@ -190,10 +191,10 @@ public class JSONSerializerTest{
         return targetObj;
     }
 
-    static <T> String writeObjectToJson(T sourceObj) throws IOException{
+    static <T> String writeObjectToJson(T sourceObj) throws IOException {
         return writeObjectToJson(sourceObj, true);
     }
-    private static <T> String writeObjectToJson(T sourceObj, boolean metadata) throws IOException{
+    private static <T> String writeObjectToJson(T sourceObj, boolean metadata) throws IOException {
         StringOutputStream bout = new StringOutputStream();
         JSONObjectOutputStream out = new JSONObjectOutputStream(bout);
         out.enableMetaData(metadata);
@@ -207,39 +208,46 @@ public class JSONSerializerTest{
 
     /******************** Test Classes ************************************/
 
-    public static class TestClass implements Serializable{
+    public enum TestEnum {
+        ENUM1, ENUM2, ENUM3
+    }
+
+    public static class TestClass implements Serializable {
         private static final long serialVersionUID = 1L;
         String str;
         double decimal;
         TestObj obj1;
         TestObj obj2;
+        TestEnum testEnum;
 
-        public TestClass init(){
+        public TestClass init() {
             this.str = "abcd";
             this.decimal = 1.1;
             this.obj1 = new TestObj().init();
             this.obj2 = new TestObj().init();
+            this.testEnum = TestEnum.ENUM2;
             return this;
         }
 
-        public static void assertEquals(TestClass obj1, TestClass obj2){
+        public static void assertEquals(TestClass obj1, TestClass obj2) {
             Assert.assertEquals(obj1.str, obj2.str);
             Assert.assertEquals(obj1.decimal, obj2.decimal, 0.001);
             Assert.assertEquals(obj1.obj1, obj2.obj1);
             Assert.assertEquals(obj1.obj2, obj2.obj2);
+            Assert.assertEquals(obj1.testEnum, obj2.testEnum);
         }
     }
 
-    public static class TestClassObjClone{
+    public static class TestClassObjClone {
         TestObj obj1;
         TestObj obj2;
 
-        public TestClassObjClone init(){
+        public TestClassObjClone init() {
             this.obj1 = this.obj2 = new TestObj().init();
             return this;
         }
 
-        public boolean equals(Object obj){
+        public boolean equals(Object obj) {
             return obj instanceof TestClassObjClone &&
                     this.obj1.equals(((TestClassObjClone)obj).obj1) &&
                     this.obj1 == this.obj2 &&
@@ -247,50 +255,50 @@ public class JSONSerializerTest{
         }
     }
 
-    public static class TestObj implements Serializable{
+    public static class TestObj implements Serializable {
         private static final long serialVersionUID = 1L;
         int value;
 
-        public TestObj init(){
+        public TestObj init() {
             this.value = 42;
             return this;
         }
 
-        public boolean equals(Object obj){
+        public boolean equals(Object obj) {
             return obj instanceof TestObj &&
                     this.value == ((TestObj)obj).value;
         }
     }
 
-    public static class TestClassArray{
+    public static class TestClassArray {
         private int[] array;
 
-        public TestClassArray init(){
+        public TestClassArray init() {
             array = new int[]{1,2,3,4};
             return this;
         }
 
-        public boolean equals(Object obj){
+        public boolean equals(Object obj) {
             return obj instanceof TestClassArray &&
                     Arrays.equals(this.array ,((TestClassArray)obj).array);
         }
     }
 
-    public static class TestClassStringArray{
+    public static class TestClassStringArray {
         private String[] array;
 
-        public TestClassStringArray init(){
+        public TestClassStringArray init() {
             array = new String[]{"test","string","array"};
             return this;
         }
 
-        public boolean equals(Object obj){
+        public boolean equals(Object obj) {
             return obj instanceof TestClassStringArray &&
                     Arrays.equals(this.array ,((TestClassStringArray)obj).array);
         }
     }
 
-    public static class TestClassMap{
+    public static class TestClassMap {
         private HashMap<String,String> map;
 
         public TestClassMap init(){
@@ -300,22 +308,22 @@ public class JSONSerializerTest{
             return this;
         }
 
-        public static void assertEquals(TestClassMap obj1, TestClassMap obj2){
+        public static void assertEquals(TestClassMap obj1, TestClassMap obj2) {
             Assert.assertEquals(obj1.map, obj2.map);
         }
     }
 
-    public static class TestClassList{
+    public static class TestClassList {
         private ArrayList<String> list;
 
-        public TestClassList init(){
+        public TestClassList init() {
             list = new ArrayList<>();
             list.add("value1");
             list.add("value2");
             return this;
         }
 
-        public static void assertEquals(TestClassList obj1, TestClassList obj2){
+        public static void assertEquals(TestClassList obj1, TestClassList obj2) {
             Assert.assertEquals(obj1.list, obj2.list);
         }
     }

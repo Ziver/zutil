@@ -149,7 +149,7 @@ public class DBBeanSQLResultHandler<T> implements SQLResultHandler<T> {
             if (obj == null) {
                 // Cache miss create a new bean
                 logger.fine("Creating new Bean(" + beanClass.getName() + ") with id: " + id);
-                obj = beanClass.newInstance();
+                obj = beanClass.getDeclaredConstructor().newInstance();
                 obj.setId(id);
                 updateBean(result, obj);
             } else if (DBBeanCache.isOutDated(obj)) {

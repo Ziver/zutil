@@ -34,8 +34,8 @@ import java.io.*;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
+import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import static zutil.parser.json.JSONObjectInputStream.MD_CLASS;
@@ -101,6 +101,9 @@ public class JSONObjectOutputStream extends OutputStream implements ObjectOutput
                 ClassUtil.isWrapper(obj.getClass())) {
             root = getPrimitiveDataNode(obj.getClass(), obj);
         }
+        else if (obj.getClass().isEnum()) {
+            root = getPrimitiveDataNode(String.class, obj.toString());
+        }
         // Add an array
         else if (objClass.isArray()) {
             // Special case for byte arrays
@@ -117,9 +120,9 @@ public class JSONObjectOutputStream extends OutputStream implements ObjectOutput
             }
         }
         // List
-        else if (List.class.isAssignableFrom(objClass)) {
+        else if (Collection.class.isAssignableFrom(objClass)) {
             root = new DataNode(DataNode.DataType.List);
-            List list = (List)obj;
+            Collection<?> list = (Collection<?>) obj;
             for (Object item : list) {
                 root.add(getDataNode(item));
             }
@@ -127,7 +130,7 @@ public class JSONObjectOutputStream extends OutputStream implements ObjectOutput
         // Map
         else if (Map.class.isAssignableFrom(objClass)) {
             root = new DataNode(DataNode.DataType.Map);
-            Map map = (Map)obj;
+            Map<?, ?> map = (Map<?, ?>) obj;
             for (Object key : map.keySet()) {
                 root.set(
                         getDataNode(key).getString(),
@@ -170,7 +173,7 @@ public class JSONObjectOutputStream extends OutputStream implements ObjectOutput
 
     private DataNode getPrimitiveDataNode(Class<?> type, Object value) throws IllegalArgumentException {
         DataNode node;
-        if     (type == int.class ||
+        if (type == int.class ||
                 type == Integer.class ||
                 type == long.class ||
                 type == Long.class ||

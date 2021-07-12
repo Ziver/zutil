@@ -32,11 +32,9 @@ import zutil.parser.DataNode;
 import java.io.*;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -47,20 +45,15 @@ public class JSONObjectInputStream extends InputStream implements ObjectInput, C
     protected static final String MD_CLASS = "@class";
 
     private JSONParser parser;
-    private HashMap<String, Class> registeredClasses;
-    private HashMap<Integer, Object> objectCache;
+    private HashMap<String, Class> registeredClasses = new HashMap<>();
+    private HashMap<Integer, Object> objectCache = new HashMap<>();
 
 
-    private JSONObjectInputStream() {
-        this.registeredClasses = new HashMap<>();
-        this.objectCache = new HashMap<>();
-    }
+    private JSONObjectInputStream() {}
     public JSONObjectInputStream(Reader in) {
-        this();
         this.parser = new JSONParser(in);
     }
     public JSONObjectInputStream(InputStream in) {
-        this();
         this.parser = new JSONParser(in);
     }
 
@@ -110,7 +103,7 @@ public class JSONObjectInputStream extends InputStream implements ObjectInput, C
         try {
             DataNode root = parser.read();
             if (root != null) {
-                return (T)readObject(c, null, root);
+                return (T) readObject(c, null, root);
             }
         } catch (Exception e) {
             logger.log(Level.WARNING, null, e);
@@ -122,12 +115,18 @@ public class JSONObjectInputStream extends InputStream implements ObjectInput, C
 
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
-    protected Object readType(Class<?> type, Class<?>[] genType, String key, DataNode json) throws IllegalAccessException, ClassNotFoundException, InstantiationException, NoSuchFieldException {
+    protected Object readType(Class<?> type, Class<?>[] genericType, String key, DataNode json) throws IllegalAccessException, ClassNotFoundException, InstantiationException, NoSuchFieldException, NoSuchMethodException, InvocationTargetException {
+        // TODO: Don't replace the existing object if it exists
+
         if (json == null || type == null)
             return null;
         // Field type is a primitive?
-        if (type.isPrimitive() || String.class.isAssignableFrom(type)) {
+        if (ClassUtil.isPrimitive(type) ||
+                ClassUtil.isWrapper(type)) {
             return readPrimitive(type, json);
+        }
+        else if (type.isEnum()) {
+            return Enum.valueOf((Class<? extends Enum>)type, (String) readPrimitive(String.class, json));
         }
         else if (type.isArray()) {
             if (type.getComponentType() == byte.class)
@@ -140,25 +139,27 @@ public class JSONObjectInputStream extends InputStream implements ObjectInput, C
                 return array;
             }
         }
-        else if (List.class.isAssignableFrom(type)) {
-            if (genType == null || genType.length < 1)
-                genType = ClassUtil.getGenericClasses(type, List.class);
-            List list = (List)type.newInstance();
+        else if (Collection.class.isAssignableFrom(type)) {
+            if (genericType == null || genericType.length < 1)
+                genericType = ClassUtil.getGenericClasses(type, List.class);
+            Collection list = (Collection) type.getDeclaredConstructor().newInstance();
+
             for (int i=0; i<json.size(); i++) {
-                list.add(readType((genType.length>=1? genType[0] : null), null, key, json.get(i)));
+                list.add(readType((genericType.length>=1? genericType[0] : null), null, key, json.get(i)));
             }
             return list;
         }
         else if (Map.class.isAssignableFrom(type)) {
-            if (genType == null || genType.length < 2)
-                genType = ClassUtil.getGenericClasses(type, Map.class);
-            Map map = (Map)type.newInstance();
+            if (genericType == null || genericType.length < 2)
+                genericType = ClassUtil.getGenericClasses(type, Map.class);
+            Map map = (Map) type.getDeclaredConstructor().newInstance();
+
             for (Iterator<String> it=json.keyIterator(); it.hasNext();) {
                 String subKey = it.next();
                 if (json.get(subKey) != null) {
                     map.put(
                             subKey,
-                            readType((genType.length >= 2 ? genType[1] : null), null, subKey, json.get(subKey)));
+                            readType((genericType.length >= 2 ? genericType[1] : null), null, subKey, json.get(subKey)));
                 }
             }
             return map;
@@ -170,7 +171,7 @@ public class JSONObjectInputStream extends InputStream implements ObjectInput, C
     }
 
 
-    protected Object readObject(Class<?> type, String key, DataNode json) throws IllegalAccessException, InstantiationException, ClassNotFoundException, IllegalArgumentException, NoSuchFieldException {
+    protected Object readObject(Class<?> type, String key, DataNode json) throws IllegalAccessException, InstantiationException, ClassNotFoundException, IllegalArgumentException, NoSuchFieldException, NoSuchMethodException, InvocationTargetException {
         // Only parse if json is a map
         if (json == null || !json.isMap())
             return null;
@@ -182,17 +183,17 @@ public class JSONObjectInputStream extends InputStream implements ObjectInput, C
         Object obj;
         // Try using explicit class
         if (type != null) {
-            obj = type.newInstance();
+            obj = type.getDeclaredConstructor().newInstance();
         }
         // Try using metadata
         else if (json.getString(MD_CLASS) != null) {
             Class<?> objClass = Class.forName(json.getString(MD_CLASS));
-            obj = objClass.newInstance();
+            obj = objClass.getDeclaredConstructor().newInstance();
         }
         // Search for registered classes
         else if (registeredClasses.containsKey(key)) {
             Class<?> objClass = registeredClasses.get(key);
-            obj = objClass.newInstance();
+            obj = objClass.getDeclaredConstructor().newInstance();
         }
         // Unknown class
         else {
