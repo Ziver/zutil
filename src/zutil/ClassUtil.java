@@ -28,12 +28,12 @@ import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 
 /**
  * This class include some utility functions for classes
- *
- * User: Ziver
  */
 public class ClassUtil {
     /** A Set that contains possible wrapper objects for primitives **/
@@ -216,5 +216,32 @@ public class ClassUtil {
             return getArrayClass(c.getComponentType(), depth-1);
         }
         return c;
+    }
+
+
+    /**
+     * Traverses the class hierarchy and collects all fields.
+     *
+     * @param clazz is the class to return fields from.
+     * @return a List including all fields contained from the class and its super classes.
+     */
+    public static List<Field> getAllDeclaredFields(Class<?> clazz) {
+        return getAllDeclaredFields(clazz, Object.class);
+    }
+    /**
+     * Traverses the class hierarchy and collects all fields.
+     *
+     * @param clazz is the class to return fields from.
+     * @param upToClass a top limit class where traversal will end not including fields from this class.
+     * @return a List including all fields contained from the class and its super classes.
+     */
+    public static List<Field> getAllDeclaredFields(Class<?> clazz, Class<?> upToClass) {
+        List<Field> fields = new ArrayList<>();
+
+        for (Class<?> currentClass = clazz; currentClass != upToClass; currentClass = currentClass.getSuperclass()) {
+            Collections.addAll(fields, currentClass.getDeclaredFields());
+        }
+
+        return fields;
     }
 }

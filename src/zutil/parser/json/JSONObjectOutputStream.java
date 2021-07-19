@@ -34,12 +34,11 @@ import java.io.*;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 import static zutil.parser.json.JSONObjectInputStream.MD_CLASS;
 import static zutil.parser.json.JSONObjectInputStream.MD_OBJECT_ID;
+
 
 public class JSONObjectOutputStream extends OutputStream implements ObjectOutput, Closeable{
     /** If the generated JSON should contain class def meta-data **/
@@ -148,23 +147,32 @@ public class JSONObjectOutputStream extends OutputStream implements ObjectOutput
                     return root;
                 }
                 else { // Miss
-                    objectCache.put(obj, objectCache.size()+1);
+                    objectCache.put(obj, objectCache.size() + 1);
                     root.set(MD_OBJECT_ID, objectCache.size());
                 }
                 root.set(MD_CLASS, obj.getClass().getName());
             }
-            // Add all the fields to the DataNode
-            for (Field field : obj.getClass().getDeclaredFields()) {
-                if (! Modifier.isStatic(field.getModifiers()) &&
-                        ! Modifier.isTransient(field.getModifiers())) {
-                    field.setAccessible(true);
-                    Object fieldObj = field.get(obj);
 
-                    // has object a value?
-                    if (ignoreNullFields && fieldObj == null)
-                        continue;
-                    else
-                        root.set(field.getName(), getDataNode(fieldObj));
+            // Date and time objects
+            if (Date.class.isAssignableFrom(objClass)) {
+                root.set("timestamp", ((Date) obj).getTime());
+            }
+            else if (Calendar.class.isAssignableFrom(objClass)) {
+                root.set("timestamp", ((Calendar) obj).getTimeInMillis());
+            }
+            else { // Generic class, Add all the fields to the DataNode
+                for (Field field : ClassUtil.getAllDeclaredFields(obj.getClass())) {
+                    if (!Modifier.isStatic(field.getModifiers()) &&
+                            !Modifier.isTransient(field.getModifiers())) {
+                        field.setAccessible(true);
+                        Object fieldObj = field.get(obj);
+
+                        // has object a value?
+                        if (ignoreNullFields && fieldObj == null)
+                            continue;
+                        else
+                            root.set(field.getName(), getDataNode(fieldObj));
+                    }
                 }
             }
         }

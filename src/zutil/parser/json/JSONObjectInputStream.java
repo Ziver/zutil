@@ -209,21 +209,23 @@ public class JSONObjectInputStream extends InputStream implements ObjectInput, C
         if (json.getString("@object_id") != null && objectCache.containsKey(json.getInt(MD_OBJECT_ID)))
             return objectCache.get(json.getInt(MD_OBJECT_ID));
 
+        // ------------------------------------------------
         // Resolve the class
-        Object obj;
-        // Try using explicit class
+        // ------------------------------------------------
+
+        Class<?> objClass;
+
+        // Try using explicit class from target
         if (type != null) {
-            obj = type.getDeclaredConstructor().newInstance();
+            objClass = type;
         }
-        // Try using metadata
+        // Try using JSON metadata
         else if (json.getString(MD_CLASS) != null) {
-            Class<?> objClass = Class.forName(json.getString(MD_CLASS));
-            obj = objClass.getDeclaredConstructor().newInstance();
+            objClass = Class.forName(json.getString(MD_CLASS));
         }
         // Search for registered classes
         else if (registeredClasses.containsKey(key)) {
-            Class<?> objClass = registeredClasses.get(key);
-            obj = objClass.getDeclaredConstructor().newInstance();
+            objClass = registeredClasses.get(key);
         }
         // Unknown class
         else {
@@ -231,19 +233,38 @@ public class JSONObjectInputStream extends InputStream implements ObjectInput, C
             return null;
         }
 
-        // Read all fields from the new object instance
-        for (Field field : obj.getClass().getDeclaredFields()) {
-            if ((field.getModifiers() & Modifier.STATIC) == 0 &&
-                    (field.getModifiers() & Modifier.TRANSIENT) == 0 &&
-                    json.get(field.getName()) != null) {
-                // Parse field
-                field.setAccessible(true);
-                field.set(obj, readType(
-                                field.getType(),
-                                ClassUtil.getGenericClasses(field),
-                                field.get(obj),
-                                field.getName(),
-                                json.get(field.getName())));
+        // ------------------------------------------------
+        // Instantiate object
+        // ------------------------------------------------
+
+        Object obj = null;
+
+        // Date and time objects
+        if (Date.class.isAssignableFrom(objClass)) {
+            obj = new Date(json.getLong("timestamp"));
+        }
+        else if (Calendar.class.isAssignableFrom(objClass)) {
+            obj = Calendar.getInstance();
+            ((Calendar) obj).setTimeInMillis(json.getLong("timestamp"));
+        }
+        // Instantiate generic object
+        else{
+            obj = objClass.getDeclaredConstructor().newInstance();
+
+            // Read all fields from the new object instance
+            for (Field field : ClassUtil.getAllDeclaredFields(obj.getClass())) {
+                if ((field.getModifiers() & Modifier.STATIC) == 0 &&
+                        (field.getModifiers() & Modifier.TRANSIENT) == 0 &&
+                        json.get(field.getName()) != null) {
+                    // Parse field
+                    field.setAccessible(true);
+                    field.set(obj, readType(
+                            field.getType(),
+                            ClassUtil.getGenericClasses(field),
+                            field.get(obj),
+                            field.getName(),
+                            json.get(field.getName())));
+                }
             }
         }
         // Add object to the cache

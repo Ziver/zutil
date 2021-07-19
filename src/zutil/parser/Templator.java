@@ -24,6 +24,7 @@
 
 package zutil.parser;
 
+import zutil.ClassUtil;
 import zutil.io.file.FileUtil;
 import zutil.log.LogUtil;
 import zutil.struct.MutableInt;
@@ -412,7 +413,7 @@ public class Templator {
                 else {
                     // Using a loop as the direct lookup throws a exception if no field was found
                     // So this is probably a bit faster
-                    for (Field field : obj.getClass().getDeclaredFields()) { // Only look for public fields
+                    for (Field field : ClassUtil.getAllDeclaredFields(obj.getClass())) { // Only look for public fields
                         if (field.getName().equals(attrib)) {
                             field.setAccessible(true);
                             return field.get(obj);

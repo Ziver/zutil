@@ -29,6 +29,7 @@ import zutil.ClassUtil;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
@@ -53,7 +54,6 @@ class DBBeanConfig{
     private DBBeanConfig() { }
 
 
-
     /**
      * @return the configuration object for the specified class
      */
@@ -66,39 +66,44 @@ class DBBeanConfig{
     /**
      * Caches the fields
      */
-    private static void initBeanConfig(Class<? extends DBBean> c) {
+    private static void initBeanConfig(Class<? extends DBBean> clazz) {
         DBBeanConfig config = new DBBeanConfig();
+
         // Find the table name
-        DBBean.DBTable tableAnn = c.getAnnotation(DBBean.DBTable.class);
+
+        DBBean.DBTable tableAnn = clazz.getAnnotation(DBBean.DBTable.class);
         if (tableAnn != null) {
             config.tableName = tableAnn.value();
             config.idColumnName = tableAnn.idColumn();
         } else {
-            config.tableName = c.getSimpleName();
+            config.tableName = clazz.getSimpleName();
             config.idColumnName = "id";
         }
 
+        // Get fields
+
+        List<Field> fields;
+        if (tableAnn != null && tableAnn.superBean())
+            fields = ClassUtil.getAllDeclaredFields(clazz, DBBean.class);
+        else
+            fields = Arrays.asList(clazz.getDeclaredFields());
+
         // Add the fields in the bean and all the super classes fields
-        for (Class<?> cc = c; cc != DBBean.class; cc = cc.getSuperclass()) {
-            Field[] fields = cc.getDeclaredFields();
-            for (Field field : fields) {
-                int mod = field.getModifiers();
-                if (!Modifier.isTransient(mod) &&
-                        !Modifier.isFinal(mod) &&
-                        !Modifier.isStatic(mod) &&
-                        !config.fields.contains(field)) {
-                    if (List.class.isAssignableFrom(field.getType()) &&
-                            field.getAnnotation(DBBean.DBLinkTable.class) != null)
-                        config.subBeanFields.add(new DBBeanSubBeanConfig(field));
-                    else
-                        config.fields.add(new DBBeanFieldConfig(field));
-                }
+        for (Field field : fields) {
+            int mod = field.getModifiers();
+            if (!Modifier.isTransient(mod) &&
+                    !Modifier.isFinal(mod) &&
+                    !Modifier.isStatic(mod) &&
+                    !config.fields.contains(field)) {
+                if (List.class.isAssignableFrom(field.getType()) &&
+                        field.getAnnotation(DBBean.DBLinkTable.class) != null)
+                    config.subBeanFields.add(new DBBeanSubBeanConfig(field));
+                else
+                    config.fields.add(new DBBeanFieldConfig(field));
             }
-            if (tableAnn == null || !tableAnn.superBean())
-                break;
         }
 
-        beanConfigs.put(c.getName(), config);
+        beanConfigs.put(clazz.getName(), config);
     }
 
 
