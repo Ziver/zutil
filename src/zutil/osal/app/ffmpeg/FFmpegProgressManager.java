@@ -91,10 +91,10 @@ public class FFmpegProgressManager extends ThreadedTCPNetworkServer {
     private FFmpegProgressListener listener;
     private String address;
 
-    public FFmpegProgressManager(FFmpegProgressListener listener) {
+    public FFmpegProgressManager(FFmpegProgressListener listener) throws IOException {
         this(listener, PROGRESS_DEFAULT_PORT);
     }
-    public FFmpegProgressManager(FFmpegProgressListener listener, int port) {
+    public FFmpegProgressManager(FFmpegProgressListener listener, int port) throws IOException {
         super(port);
         this.listener = listener;
         this.address = "tcp://" + InetAddress.getLoopbackAddress() + ":" + port;

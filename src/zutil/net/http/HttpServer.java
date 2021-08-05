@@ -61,21 +61,22 @@ public class HttpServer extends ThreadedTCPNetworkServer{
     public static final int SESSION_TTL = 10*60*1000; // in milliseconds
 
 
-    private Map<String,HttpPage> pages;
-    private HttpPage defaultPage;
-    private Map<String,Map<String,Object>> sessions;
-    private int nextSessionId;
+    private Map<String,HttpPage> pages = new ConcurrentHashMap<>();;
+    private Map<String,Map<String,Object>> sessions = new ConcurrentHashMap<>();;
+    private int nextSessionId = 0;
+    private HttpPage defaultPage = null;
 
     /**
      * Creates a new instance of the sever
      *
      * @param   port    The port that the server should listen to
      */
-    public HttpServer(int port) {
-        this(port, null, null);
+    public HttpServer(int port) throws IOException {
+        super(port);
+        initGarbageCollector();
+
+        logger.info("HTTP Server ready and listening to port: " + port);
     }
-
-
     /**
      * Creates a new instance of the sever
      *
@@ -83,19 +84,17 @@ public class HttpServer extends ThreadedTCPNetworkServer{
      * @param   keyStore        If this is not null then the server will use SSL connection with this keyStore file path
      * @param   keyStorePass    If this is not null then the server will use a SSL connection with the given certificate
      */
-    public HttpServer(int port, File keyStore, String keyStorePass) {
+    public HttpServer(int port, File keyStore, char[] keyStorePass) throws IOException {
         super(port, keyStore, keyStorePass);
+        initGarbageCollector();
 
-        pages = new ConcurrentHashMap<>();
-        sessions = new ConcurrentHashMap<>();
-        nextSessionId = 0;
-
-        ScheduledExecutorService exec = Executors.newSingleThreadScheduledExecutor();
-        exec.scheduleWithFixedDelay(new SessionGarbageCollector(), 10000, SESSION_TTL / 2, TimeUnit.MILLISECONDS);
-
-        logger.info("HTTP" + (keyStore==null ? "" : "S") + " Server ready and listening to port: " + port);
+        logger.info("HTTPS Server ready and listening to port: " + port);
     }
 
+    private void initGarbageCollector() {
+        ScheduledExecutorService exec = Executors.newSingleThreadScheduledExecutor();
+        exec.scheduleWithFixedDelay(new SessionGarbageCollector(), 10000, SESSION_TTL / 2, TimeUnit.MILLISECONDS);
+    }
     /**
      * This class acts as an garbage collector that
      * removes old sessions from the session HashMap
@@ -118,16 +117,37 @@ public class HttpServer extends ThreadedTCPNetworkServer{
         }
     }
 
+
     /**
-     * Add a HttpPage to a specific URL
+     * Add a HttpPage to a specific URL.
      *
-     * @param   name    The URL or name of the page
+     * @param   url    The URL or name of the page
      * @param   page    The page itself
      */
-    public void setPage(String name, HttpPage page) {
-        if (name.charAt(0) != '/')
-            name = "/" +name;
-        pages.put(name, page);
+    public void setPage(String url, HttpPage page) {
+        if (url.charAt(0) != '/')
+            url = "/" + url;
+        pages.put(url, page);
+    }
+
+    /**
+     * Add all pages to this server from the given server object.
+     *
+     * @param   server  is the HttpServer object that pages will be copied from.
+     */
+    public void setPages(HttpServer server) {
+        pages.putAll(server.pages);
+    }
+
+    /**
+     * Removes a page based on the URL.
+     *
+     * @param   url    The URL or name of the page
+     */
+    public void removePage(String url) {
+        if (url.charAt(0) != '/')
+            url = "/" + url;
+        pages.remove(url);
     }
 
     /**

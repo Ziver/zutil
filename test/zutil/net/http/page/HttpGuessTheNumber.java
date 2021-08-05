@@ -46,7 +46,7 @@ public class HttpGuessTheNumber implements HttpPage {
     private static final String COOKIE_KEY_HIGH    = "high";
 
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
         LogUtil.setGlobalLevel(Level.ALL);
         LogUtil.setGlobalFormatter(new CompactLogFormatter());
 

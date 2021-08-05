@@ -27,6 +27,7 @@ package zutil.osal.app.ffmpeg;
 import zutil.osal.app.ffmpeg.FFmpegConstants.*;
 import zutil.osal.app.ffmpeg.FFmpegProgressManager.FFmpegProgressListener;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -36,7 +37,6 @@ import java.util.List;
  * @see <a href="https://ffmpeg.org/ffmpeg.html">FFmpeg Commandline Documentation</a>
  */
 public class FFmpeg {
-
     private FFmpegLogLevel logLevel;
     private boolean overwriteOutput = false;
     private List<FFmpegInput> inputs = new ArrayList<>();
@@ -71,9 +71,13 @@ public class FFmpeg {
         if (listener == null)
             throw new IllegalArgumentException("FFmpegProgressListener cannot be NULL.");
 
-        if (progressManager != null)
-            progressManager.close();
-        progressManager = new FFmpegProgressManager(listener);
+        try {
+            if (progressManager != null)
+                progressManager.close();
+            progressManager = new FFmpegProgressManager(listener);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
 

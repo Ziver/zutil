@@ -55,7 +55,7 @@ public class MqttBroker extends ThreadedTCPNetworkServer {
     private MqttSubscriptionListener globalListener;
     private Map<String, List<MqttSubscriptionListener>> subscriptionListeners = new HashMap<>();
 
-    public MqttBroker() {
+    public MqttBroker() throws IOException {
         super(MQTT_PORT);
     }
 
