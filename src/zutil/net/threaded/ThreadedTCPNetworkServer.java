@@ -36,6 +36,7 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.security.*;
+import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
@@ -81,7 +82,7 @@ public abstract class ThreadedTCPNetworkServer extends Thread {
      * @param   port            the port that the server should listen to.
      * @param   certificate     the certificate for the servers domain.
      */
-    public ThreadedTCPNetworkServer(int port, X509Certificate certificate) throws IOException {
+    public ThreadedTCPNetworkServer(int port, Certificate certificate) throws IOException {
         this.port = port;
         this.serverSocket = createSSLSocket(port, certificate);
     }
@@ -112,7 +113,7 @@ public abstract class ThreadedTCPNetworkServer extends Thread {
      * @param   certificate     the certificate for the servers domain.
      * @return a SSLServerSocket object
      */
-    private static ServerSocket createSSLSocket(int port, X509Certificate certificate) throws IOException{
+    private static ServerSocket createSSLSocket(int port, Certificate certificate) throws IOException{
         try {
             KeyStore keyStore = KeyStore.getInstance(KeyStore.getDefaultType());
             keyStore.load(null); // Create empty keystore
@@ -144,10 +145,16 @@ public abstract class ThreadedTCPNetworkServer extends Thread {
         return socketFactory.createServerSocket(port);
     }
 
+    /**
+     * @return the port that this TCP server is listening to.
+     */
+    public int getPort() {
+        return port;
+    }
 
     public void run() {
         try {
-            logger.info("Listening for TCP Connections on port: " + port);
+            logger.info("Accepting TCP Connections on port: " + port);
 
             while (true) {
                 Socket connectionSocket = serverSocket.accept();

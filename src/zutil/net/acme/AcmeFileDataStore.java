@@ -9,8 +9,6 @@ public class AcmeFileDataStore implements AcmeDataStore {
 
     private final File userKeyFile;
     private final File domainKeyFile;
-    private final File domainCsrFile;
-    private final File domainChainFile;
 
 
     /**
@@ -21,8 +19,6 @@ public class AcmeFileDataStore implements AcmeDataStore {
     public AcmeFileDataStore(File folder) {
         this.userKeyFile     = new File(folder, "user.key");
         this.domainKeyFile   = new File(folder, "domain.key");
-        this.domainCsrFile   = new File(folder, "domain.csr");
-        this.domainChainFile = new File(folder, "domain-chain.crt");
     }
 
 

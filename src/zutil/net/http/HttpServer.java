@@ -34,6 +34,8 @@ import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.net.Socket;
+import java.security.cert.Certificate;
+import java.security.cert.X509Certificate;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
@@ -78,11 +80,23 @@ public class HttpServer extends ThreadedTCPNetworkServer{
         logger.info("HTTP Server ready and listening to port: " + port);
     }
     /**
-     * Creates a new instance of the sever
+     * Creates a new instance of the sever which accepts SSL connections
      *
      * @param   port            The port that the server should listen to
-     * @param   keyStore        If this is not null then the server will use SSL connection with this keyStore file path
-     * @param   keyStorePass    If this is not null then the server will use a SSL connection with the given certificate
+     * @param   certificate     The certificate that should be used for the servers SSL connections
+     */
+    public HttpServer(int port, Certificate certificate) throws IOException {
+        super(port, certificate);
+        initGarbageCollector();
+
+        logger.info("HTTPS Server ready and listening to port: " + port);
+    }
+    /**
+     * Creates a new instance of the sever which accepts SSL connections
+     *
+     * @param   port            The port that the server should listen to
+     * @param   keyStore        The keyStore containing the certificate to use for the servers SSL connections
+     * @param   keyStorePass    The password to unlock the key store.
      */
     public HttpServer(int port, File keyStore, char[] keyStorePass) throws IOException {
         super(port, keyStore, keyStorePass);

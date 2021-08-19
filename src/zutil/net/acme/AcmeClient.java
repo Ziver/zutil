@@ -17,14 +17,13 @@ import org.shredzone.acme4j.Certificate;
 import org.shredzone.acme4j.Order;
 import org.shredzone.acme4j.Session;
 import org.shredzone.acme4j.Status;
-import org.shredzone.acme4j.challenge.Http01Challenge;
+import org.shredzone.acme4j.challenge.Challenge;
 import org.shredzone.acme4j.exception.AcmeException;
 import org.shredzone.acme4j.util.CSRBuilder;
 import org.shredzone.acme4j.util.KeyPairUtils;
 import zutil.StringUtil;
 import zutil.log.LogUtil;
 import zutil.net.http.HttpServer;
-import zutil.net.http.page.HttpStaticContentPage;
 
 /**
  * A class implementing the ACME protocol (Automatic Certificate Management Environment) used by the LetsEncrypt service.
@@ -43,19 +42,24 @@ public class AcmeClient {
 
     private String acmeServerUrl;
     private AcmeDataStore dataStore;
+    private AcmeChallengeFactory challengeFactory;
 
+
+    public AcmeClient(AcmeDataStore dataStore, HttpServer httpServer) {
+        this(dataStore, new AcmeHttpChallengeFactory(httpServer), ACME_SERVER_LETSENCRYPT_PRODUCTION);
+    }
+    public AcmeClient(AcmeDataStore dataStore, AcmeChallengeFactory challengeFactory) {
+        this(dataStore, challengeFactory, ACME_SERVER_LETSENCRYPT_PRODUCTION);
+    }
     /**
      * Create a new instance of the ACME Client
      */
-    public AcmeClient(AcmeDataStore dataStore, String acmeServerUrl) {
+    public AcmeClient(AcmeDataStore dataStore, AcmeChallengeFactory challengeFactory, String acmeServerUrl) {
         Security.addProvider(new BouncyCastleProvider());
 
         this.dataStore = dataStore;
+        this.challengeFactory = challengeFactory;
         this.acmeServerUrl = acmeServerUrl;
-    }
-
-    public AcmeClient(AcmeDataStore dataStore) {
-        this(dataStore, ACME_SERVER_LETSENCRYPT_PRODUCTION);
     }
 
 
@@ -63,11 +67,10 @@ public class AcmeClient {
      * Generates a certificate for the given domains. Also takes care for the registration
      * process.
      *
-     * @param httpServer    the web server where the challenge and response will be performed on and where the certificate will be applied to.
      * @param domains       the domains to get a certificates for
      * @return a certificate for the given domains.
      */
-    public X509Certificate fetchCertificate(HttpServer httpServer, String... domains) throws IOException, AcmeException {
+    public X509Certificate fetchCertificate(String... domains) throws IOException, AcmeException {
         // ------------------------------------------------
         // Read in keys
         // ------------------------------------------------
@@ -94,7 +97,10 @@ public class AcmeClient {
 
         // Perform all required authorizations
         for (Authorization auth : order.getAuthorizations()) {
-            execHttpChallenge(auth, httpServer);
+            if (auth.getStatus() == Status.VALID)
+                continue; // The authorization is already valid. No need to process a challenge.
+
+            execDomainChallenge(auth);
         }
 
         // Generate a "Certificate Signing Request" for all of the domains, and sign it with the domain key pair.
@@ -106,7 +112,7 @@ public class AcmeClient {
 
         // Wait for the order to complete
         try {
-            for (int attempts = 0; attempts < 10; attempts--) {
+            for (int attempts = 0; attempts < 10; attempts++) {
                 // Did the order pass or fail?
                 if (order.getStatus() == Status.VALID) {
                     break;
@@ -115,7 +121,9 @@ public class AcmeClient {
                 }
 
                 // Wait for a few seconds
-                Thread.sleep(100L + 500L * attempts);
+                long sleep = 100L + 1000L * attempts;
+                logger.fine("Challenge not yet completed, sleeping for: " + StringUtil.formatTimeToString(sleep));
+                Thread.sleep(sleep);
 
                 // Then update the status
                 order.update();
@@ -166,49 +174,38 @@ public class AcmeClient {
      * Authorize a domain. It will be associated with your account, so you will be able to
      * retrieve a signed certificate for the domain later.
      *
-     * @param   auth    {@link Authorization} to perform
+     * @param   authorization    {@link Authorization} to perform
      */
-    private void execHttpChallenge(Authorization auth, HttpServer httpServer) throws AcmeException {
-        logger.info("Authorization for domain: " + auth.getIdentifier().getDomain());
+    private void execDomainChallenge(Authorization authorization) throws AcmeException {
+        logger.info("Authorization for domain: " + authorization.getIdentifier().getDomain());
+        Challenge challenge = null;
 
-        // The authorization is already valid. No need to process a challenge.
-        if (auth.getStatus() == Status.VALID) {
-            return;
-        }
-
-        // Find the desired challenge and prepare it.
-        Http01Challenge challenge = auth.findChallenge(Http01Challenge.class);
-        if (challenge == null) {
-            throw new AcmeException("Found no " + Http01Challenge.TYPE + " challenge.");
-        }
-
-        // If the challenge is already verified, there's no need to execute it again.
-        if (challenge.getStatus() == Status.VALID)
-            return;
-
-        String url = "http://" + auth.getIdentifier().getDomain();
-        String path = "/.well-known/acme-challenge/" + challenge.getToken();
-        String content = challenge.getAuthorization();
-
-        // Output the challenge, wait for acknowledge...
-        logger.fine("Adding challenge HttpPage at: " + url + path);
-        httpServer.setPage(path, new HttpStaticContentPage(content));
-
-        // Now trigger the challenge.
-        challenge.trigger();
-
-        // Poll for the challenge to complete.
         try {
-            for (int attempts = 0; attempts < 10; attempts--) {
+            challenge = challengeFactory.createChallenge(authorization);
+
+            // If the challenge is already verified, there's no need to execute it again.
+            if (challenge.getStatus() == Status.VALID)
+                return;
+
+            // Now trigger the challenge.
+            challenge.trigger();
+
+            // Poll for the challenge to complete.
+
+            for (int attempts = 0; attempts < 30; attempts++) {
                 // Did the authorization fail?
                 if (challenge.getStatus() == Status.VALID) {
                     break;
                 } else if (challenge.getStatus() == Status.INVALID) {
-                    throw new AcmeException("Certificate challenge failed: " + challenge.getError());
+                    //throw new AcmeException("Certificate challenge failed: " + challenge.getError());
+                    logger.severe("Certificate challenge failed: " + challenge.getError());
+                    challenge.trigger();
                 }
 
                 // Wait for a few seconds
-                Thread.sleep(100L + 500L * attempts);
+                long sleep = 100L + 5000L * attempts;
+                logger.fine("Challenge not yet completed, sleeping for: " + StringUtil.formatTimeToString(sleep));
+                Thread.sleep(sleep);
 
                 // Then update the status
                 challenge.update();
@@ -216,12 +213,14 @@ public class AcmeClient {
 
             // All reattempts are used up and there is still no valid authorization?
             if (challenge.getStatus() != Status.VALID)
-                throw new AcmeException("Failed to pass the challenge for domain " + auth.getIdentifier().getDomain());
+                throw new AcmeException("Failed to pass the challenge for domain " + authorization.getIdentifier().getDomain());
         } catch (InterruptedException ex) {
             logger.log(Level.SEVERE, "Interrupted", ex);
         } finally {
             // Cleanup
-            httpServer.removePage(path);
+            challengeFactory.postChallengeAction(challenge);
         }
+
+        logger.fine("Domain challenge executed successfully.");
     }
 }

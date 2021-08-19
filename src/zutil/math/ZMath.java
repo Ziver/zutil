@@ -27,7 +27,7 @@ package zutil.math;
 import java.math.BigInteger;
 
 /**
- * Very Simple  math functions
+ * Very Simple math functions
  *
  * @author Ziver
  */
