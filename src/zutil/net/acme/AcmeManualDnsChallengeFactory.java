@@ -19,9 +19,6 @@ public class AcmeManualDnsChallengeFactory implements AcmeChallengeFactory {
 
     @Override
     public Challenge createChallenge(Authorization authorization) throws AcmeException {
-        if (challengeCache.containsKey(authorization.getIdentifier().getDomain()))
-            return challengeCache.get(authorization.getIdentifier().getDomain());
-
         Dns01Challenge challenge = authorization.findChallenge(Dns01Challenge.class);
         if (challenge == null) {
             throw new AcmeException("Found no " + Dns01Challenge.TYPE + " challenge.");
@@ -31,11 +28,33 @@ public class AcmeManualDnsChallengeFactory implements AcmeChallengeFactory {
 
         logger.warning(
             "---------------------------- ATTENTION ----------------------------\n" +
-                "For certificate challenge to pass please create a DNS TXT record:\n" +
-                "_acme-challenge." + authorization.getIdentifier().getDomain() + ". IN TXT " + challenge.getDigest() + "\n" +
+                "Please deploy a DNS TXT record under the name\n" +
+                getChallengeDnsName(authorization.getIdentifier().getDomain()) + " with the following value:\n\n" +
+                challenge.getDigest() + "\n\n" +
+                "Continue the process once this is deployed." +
                 "--------------------------------------------------------------------");
 
         challengeCache.put(authorization.getIdentifier().getDomain(), challenge);
         return challenge;
+    }
+
+    /**
+     * Returns the name of the record where the challenge value has to be assigned to.
+     *
+     * @param domain    the specific domain
+     * @return a String DNS record name
+     */
+    public String getChallengeDnsName(String domain) {
+        return "_acme-challenge." + domain;
+    }
+
+    /**
+     * Gives the value of the required DNS record.
+     *
+     * @param domain    the specific domain
+     * @return a special String value that needs to be added to the domains DNS record
+     */
+    public String getChallengeDnsValue(String domain) {
+        return challengeCache.get(domain).getDigest();
     }
 }

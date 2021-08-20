@@ -6,17 +6,14 @@ import java.net.URL;
 import java.security.KeyPair;
 import java.security.Security;
 import java.security.cert.X509Certificate;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.shredzone.acme4j.Account;
-import org.shredzone.acme4j.AccountBuilder;
-import org.shredzone.acme4j.Authorization;
-import org.shredzone.acme4j.Certificate;
-import org.shredzone.acme4j.Order;
-import org.shredzone.acme4j.Session;
-import org.shredzone.acme4j.Status;
+import org.shredzone.acme4j.*;
 import org.shredzone.acme4j.challenge.Challenge;
 import org.shredzone.acme4j.exception.AcmeException;
 import org.shredzone.acme4j.util.CSRBuilder;
@@ -44,69 +41,107 @@ public class AcmeClient {
     private AcmeDataStore dataStore;
     private AcmeChallengeFactory challengeFactory;
 
+    private Account acmeAccount;
+    private ArrayList<String> domains = new ArrayList<>();
+    private Order order;
+    private ArrayList<Challenge> challenges = new ArrayList<>();
 
-    public AcmeClient(AcmeDataStore dataStore, HttpServer httpServer) {
+
+    public AcmeClient(AcmeDataStore dataStore, HttpServer httpServer) throws AcmeException {
         this(dataStore, new AcmeHttpChallengeFactory(httpServer), ACME_SERVER_LETSENCRYPT_PRODUCTION);
     }
-    public AcmeClient(AcmeDataStore dataStore, AcmeChallengeFactory challengeFactory) {
+    public AcmeClient(AcmeDataStore dataStore, AcmeChallengeFactory challengeFactory) throws AcmeException {
         this(dataStore, challengeFactory, ACME_SERVER_LETSENCRYPT_PRODUCTION);
     }
     /**
-     * Create a new instance of the ACME Client
+     * Create a new instance of the ACME Client and authenticates the user account towards
+     * the AMCE service, if no account exists then a new one will be created.
      */
-    public AcmeClient(AcmeDataStore dataStore, AcmeChallengeFactory challengeFactory, String acmeServerUrl) {
+    public AcmeClient(AcmeDataStore dataStore, AcmeChallengeFactory challengeFactory, String acmeServerUrl) throws AcmeException {
         Security.addProvider(new BouncyCastleProvider());
 
         this.dataStore = dataStore;
         this.challengeFactory = challengeFactory;
         this.acmeServerUrl = acmeServerUrl;
-    }
 
-
-    /**
-     * Generates a certificate for the given domains. Also takes care for the registration
-     * process.
-     *
-     * @param domains       the domains to get a certificates for
-     * @return a certificate for the given domains.
-     */
-    public X509Certificate fetchCertificate(String... domains) throws IOException, AcmeException {
         // ------------------------------------------------
         // Read in keys
         // ------------------------------------------------
 
         KeyPair userKeyPair = dataStore.loadUserKeyPair();     // Load the user key file. If there is no key file, create a new one.
-        KeyPair domainKeyPair = dataStore.loadDomainKeyPair(); // Load or create a key pair for the domains. This should not be the userKeyPair!
+        KeyPair domainKeyPair = dataStore.loadDomainKeyPair(); // Load or create a key pair for the domains. This should not be same as the userKeyPair!
 
         if (userKeyPair == null) {
+            logger.fine("Creating new user keys.");
             userKeyPair = KeyPairUtils.createKeyPair(KEY_SIZE);
             dataStore.storeUserKeyPair(userKeyPair);
         }
         if (domainKeyPair == null) {
+            logger.fine("Creating new domain keys.");
             domainKeyPair = KeyPairUtils.createKeyPair(KEY_SIZE);
             dataStore.storeDomainKeyPair(domainKeyPair);
         }
 
         // ------------------------------------------------
-        // Start authorization process
+        // Start user authorization process
         // ------------------------------------------------
 
         Session session = new Session(acmeServerUrl);
-        Account acct = getAccount(session, userKeyPair); // Get the Account. If there is no account yet, create a new one.
-        Order order = acct.newOrder().domains(domains).create();    // Order the certificate
+        acmeAccount = getAccount(session, userKeyPair); // Get the Account. If there is no account yet, create a new one.
+    }
+
+
+    /**
+     * Add a domain that the certificate should be valid for. This method can only be called before
+     * the {@link #prepareRequest()} method has been called.
+     *
+     * @param domains   the domains to add to the certificate
+     */
+    public void addDomain(String... domains) {
+        Collections.addAll(this.domains, domains);
+    }
+
+
+    /**
+     * This method will prepare the request for the ACME service. Any manual action must be taken after this
+     * method has been called and before the {@link #requestCertificate()} method is called.
+     *
+     * @throws AcmeException
+     */
+    public void prepareRequest() throws AcmeException {
+        order = acmeAccount.newOrder().domains(domains).create(); // Order the certificate
 
         // Perform all required authorizations
         for (Authorization auth : order.getAuthorizations()) {
             if (auth.getStatus() == Status.VALID)
                 continue; // The authorization is already valid. No need to process a challenge.
 
-            execDomainChallenge(auth);
+            challenges.add(challengeFactory.createChallenge(auth));
+        }
+    }
+
+    /**
+     * Connects to the ACME service and requests a certificate to be generated.
+     * <p>
+     * Note that before this method is called the {@link #prepareRequest()} method must be called to prepare
+     * the challenge requests. The reason for this is as some challenges require manual intervention between
+     * the preparation and the actual request.
+     *
+     * @return a certificate for the given domains.
+     */
+    public X509Certificate requestCertificate() throws IOException, AcmeException {
+        if (order == null)
+            throw new IllegalStateException("prepareRequest() method has not been called before the request of certificate.");
+
+        // Perform all required domain authorizations
+        for (Challenge challenge : challenges) {
+            execDomainChallenge(challenge);
         }
 
-        // Generate a "Certificate Signing Request" for all of the domains, and sign it with the domain key pair.
+        // Generate one "Certificate Signing Request" for all the domains, and sign it with the domain key pair.
         CSRBuilder csrBuilder = new CSRBuilder();
         csrBuilder.addDomains(domains);
-        csrBuilder.sign(domainKeyPair);
+        csrBuilder.sign(dataStore.loadDomainKeyPair());
 
         order.execute(csrBuilder.getEncoded()); // Order the certificate
 
@@ -136,6 +171,10 @@ public class AcmeClient {
         Certificate certificate = order.getCertificate();
 
         logger.info("The certificate for domains '" + StringUtil.join(",", domains) + "' has been successfully generated.");
+
+        // Cleanup
+        order = null;
+        challenges.clear();
 
         return certificate.getCertificate();
     }
@@ -170,19 +209,17 @@ public class AcmeClient {
         return account;
     }
 
+
     /**
      * Authorize a domain. It will be associated with your account, so you will be able to
      * retrieve a signed certificate for the domain later.
      *
-     * @param   authorization    {@link Authorization} to perform
+     * @param   challenge    {@link Challenge} to be performed
      */
-    private void execDomainChallenge(Authorization authorization) throws AcmeException {
-        logger.info("Authorization for domain: " + authorization.getIdentifier().getDomain());
-        Challenge challenge = null;
+    private void execDomainChallenge(Challenge challenge) throws AcmeException {
+        logger.info("Executing challenge: " + challenge);
 
         try {
-            challenge = challengeFactory.createChallenge(authorization);
-
             // If the challenge is already verified, there's no need to execute it again.
             if (challenge.getStatus() == Status.VALID)
                 return;
@@ -197,9 +234,7 @@ public class AcmeClient {
                 if (challenge.getStatus() == Status.VALID) {
                     break;
                 } else if (challenge.getStatus() == Status.INVALID) {
-                    //throw new AcmeException("Certificate challenge failed: " + challenge.getError());
-                    logger.severe("Certificate challenge failed: " + challenge.getError());
-                    challenge.trigger();
+                    throw new AcmeException("Certificate challenge failed: " + challenge.getError());
                 }
 
                 // Wait for a few seconds
@@ -213,7 +248,7 @@ public class AcmeClient {
 
             // All reattempts are used up and there is still no valid authorization?
             if (challenge.getStatus() != Status.VALID)
-                throw new AcmeException("Failed to pass the challenge for domain " + authorization.getIdentifier().getDomain());
+                throw new AcmeException("Failed to pass the challenge: " + challenge.getError());
         } catch (InterruptedException ex) {
             logger.log(Level.SEVERE, "Interrupted", ex);
         } finally {
