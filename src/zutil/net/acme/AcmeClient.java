@@ -7,7 +7,6 @@ import java.security.KeyPair;
 import java.security.Security;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -65,29 +64,11 @@ public class AcmeClient {
         this.acmeServerUrl = acmeServerUrl;
 
         // ------------------------------------------------
-        // Read in keys
-        // ------------------------------------------------
-
-        KeyPair userKeyPair = dataStore.loadUserKeyPair();     // Load the user key file. If there is no key file, create a new one.
-        KeyPair domainKeyPair = dataStore.loadDomainKeyPair(); // Load or create a key pair for the domains. This should not be same as the userKeyPair!
-
-        if (userKeyPair == null) {
-            logger.fine("Creating new user keys.");
-            userKeyPair = KeyPairUtils.createKeyPair(KEY_SIZE);
-            dataStore.storeUserKeyPair(userKeyPair);
-        }
-        if (domainKeyPair == null) {
-            logger.fine("Creating new domain keys.");
-            domainKeyPair = KeyPairUtils.createKeyPair(KEY_SIZE);
-            dataStore.storeDomainKeyPair(domainKeyPair);
-        }
-
-        // ------------------------------------------------
-        // Start user authorization process
+        // Start user authentication process
         // ------------------------------------------------
 
         Session session = new Session(acmeServerUrl);
-        acmeAccount = getAccount(session, userKeyPair); // Get the Account. If there is no account yet, create a new one.
+        acmeAccount = getAccount(session); // Get the Account. If there is no account yet, create a new one.
     }
 
 
@@ -138,10 +119,19 @@ public class AcmeClient {
             execDomainChallenge(challenge);
         }
 
+        // Load or create a key pair for the domains. This should not be same as the userKeyPair!
+        KeyPair domainKeyPair = dataStore.getDomainKeyPair();
+
+        if (domainKeyPair == null) {
+            logger.fine("Creating new domain keys.");
+            domainKeyPair = KeyPairUtils.createKeyPair(KEY_SIZE);
+            dataStore.storeDomainKeyPair(domainKeyPair);
+        }
+
         // Generate one "Certificate Signing Request" for all the domains, and sign it with the domain key pair.
         CSRBuilder csrBuilder = new CSRBuilder();
         csrBuilder.addDomains(domains);
-        csrBuilder.sign(dataStore.loadDomainKeyPair());
+        csrBuilder.sign(domainKeyPair);
 
         order.execute(csrBuilder.getEncoded()); // Order the certificate
 
@@ -173,6 +163,7 @@ public class AcmeClient {
         logger.info("The certificate for domains '" + StringUtil.join(",", domains) + "' has been successfully generated.");
 
         // Cleanup
+
         order = null;
         challenges.clear();
 
@@ -184,29 +175,42 @@ public class AcmeClient {
      * Finds your {@link Account} at the ACME server. It will be found by your user's
      * public key. If your key is not known to the server yet, a new account will be
      * created.
-     * <p>
-     * This is a simple way of finding your {@link Account}. A better way is to get the
-     * URL of your new account with {@link Account#getLocation()} and store it somewhere.
-     * If you need to get access to your account later, reconnect to it via {@link
-     * Session#login(URL, KeyPair)} by using the stored location.
      *
      * @param session   {@link Session} to bind with
      * @return {@link Account}
      */
-    private Account getAccount(Session session, KeyPair accountKey) throws AcmeException {
+    private Account getAccount(Session session) throws AcmeException {
+        // Load the account key pair
+
+        URL accountLocation = dataStore.getAccountLocation();
+        KeyPair accountKeyPair = dataStore.getAccountKeyPair();
+
         // Ask the user to accept the TOS, if server provides us with a link.
+
         URI tos = session.getMetadata().getTermsOfService();
         if (tos != null) {
             logger.info("By using this service you accept the Terms of Service: " + tos);
         }
 
-        Account account = new AccountBuilder()
-                .agreeToTermsOfService()
-                .useKeyPair(accountKey)
-                .create(session);
-        logger.info("Registered a new user, URL: " + account.getLocation());
+        // Create a new account or login existing user
 
-        return account;
+        if (accountLocation == null || accountKeyPair == null) {
+            logger.fine("Creating new account keys.");
+            accountKeyPair = KeyPairUtils.createKeyPair(KEY_SIZE);
+
+            Account account = new AccountBuilder()
+                    .agreeToTermsOfService()
+                    .useKeyPair(accountKeyPair)
+                    .create(session);
+
+            logger.info("Successfully registered new account, URL: " + account.getLocation());
+            dataStore.storeAccountKeyPair(account.getLocation(), accountKeyPair);
+            return account;
+        } else {
+            logger.info("Logging in existing account: " + accountLocation);
+            Login login = session.login(accountLocation, accountKeyPair);
+            return login.getAccount();
+        }
     }
 
 
@@ -238,7 +242,7 @@ public class AcmeClient {
                 }
 
                 // Wait for a few seconds
-                long sleep = 100L + 5000L * attempts;
+                long sleep = 100L + 1000L * attempts;
                 logger.fine("Challenge not yet completed, sleeping for: " + StringUtil.formatTimeToString(sleep));
                 Thread.sleep(sleep);
 
