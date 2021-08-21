@@ -3,6 +3,7 @@ package zutil.net.acme;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URL;
+import java.security.GeneralSecurityException;
 import java.security.KeyPair;
 import java.security.Security;
 import java.security.cert.X509Certificate;
@@ -114,60 +115,68 @@ public class AcmeClient {
         if (order == null)
             throw new IllegalStateException("prepareRequest() method has not been called before the request of certificate.");
 
-        // Perform all required domain authorizations
-        for (Challenge challenge : challenges) {
-            execDomainChallenge(challenge);
-        }
+        X509Certificate certificate = dataStore.getCertificate();
 
-        // Load or create a key pair for the domains. This should not be same as the userKeyPair!
-        KeyPair domainKeyPair = dataStore.getDomainKeyPair();
-
-        if (domainKeyPair == null) {
-            logger.fine("Creating new domain keys.");
-            domainKeyPair = KeyPairUtils.createKeyPair(KEY_SIZE);
-            dataStore.storeDomainKeyPair(domainKeyPair);
-        }
-
-        // Generate one "Certificate Signing Request" for all the domains, and sign it with the domain key pair.
-        CSRBuilder csrBuilder = new CSRBuilder();
-        csrBuilder.addDomains(domains);
-        csrBuilder.sign(domainKeyPair);
-
-        order.execute(csrBuilder.getEncoded()); // Order the certificate
-
-        // Wait for the order to complete
-        try {
-            for (int attempts = 0; attempts < 10; attempts++) {
-                // Did the order pass or fail?
-                if (order.getStatus() == Status.VALID) {
-                    break;
-                } else if (order.getStatus() == Status.INVALID) {
-                    throw new AcmeException("Certificate order has failed, reason: " + order.getError());
-                }
-
-                // Wait for a few seconds
-                long sleep = 100L + 1000L * attempts;
-                logger.fine("Challenge not yet completed, sleeping for: " + StringUtil.formatTimeToString(sleep));
-                Thread.sleep(sleep);
-
-                // Then update the status
-                order.update();
+        // TODO: Check if certificate is valid for the given domains
+        if (!isCertificateValid(certificate)) {
+            // Perform all required domain authorizations
+            for (Challenge challenge : challenges) {
+                execDomainChallenge(challenge);
             }
-        } catch (InterruptedException ex) {
-            logger.log(Level.SEVERE, "Interrupted", ex);
+
+            // Load or create a key pair for the domains. This should not be same as the userKeyPair!
+            KeyPair domainKeyPair = dataStore.getDomainKeyPair();
+
+            if (domainKeyPair == null) {
+                logger.fine("Creating new domain keys.");
+                domainKeyPair = KeyPairUtils.createKeyPair(KEY_SIZE);
+                dataStore.storeDomainKeyPair(domainKeyPair);
+            }
+
+            // Generate one "Certificate Signing Request" for all the domains, and sign it with the domain key pair.
+            CSRBuilder csrBuilder = new CSRBuilder();
+            csrBuilder.addDomains(domains);
+            csrBuilder.sign(domainKeyPair);
+
+            order.execute(csrBuilder.getEncoded()); // Order the certificate
+
+            // Wait for the order to complete
+            try {
+                for (int attempts = 0; attempts < 10; attempts++) {
+                    // Did the order pass or fail?
+                    if (order.getStatus() == Status.VALID) {
+                        break;
+                    } else if (order.getStatus() == Status.INVALID) {
+                        throw new AcmeException("Certificate order has failed, reason: " + order.getError());
+                    }
+
+                    // Wait for a few seconds
+                    long sleep = 100L + 1000L * attempts;
+                    logger.fine("Challenge not yet completed, sleeping for: " + StringUtil.formatTimeToString(sleep));
+                    Thread.sleep(sleep);
+
+                    // Then update the status
+                    order.update();
+                }
+            } catch (InterruptedException ex) {
+                logger.log(Level.SEVERE, "Interrupted", ex);
+            }
+
+            // Get the certificate
+            certificate = order.getCertificate().getCertificate();
+            dataStore.storeCertificate(certificate);
+
+            logger.info("Successfully created new certificate for domains: " + StringUtil.join(",", domains));
+        } else {
+            logger.info("Using existing certificate for domains: " + StringUtil.join(",", domains));
         }
-
-        // Get the certificate
-        Certificate certificate = order.getCertificate();
-
-        logger.info("The certificate for domains '" + StringUtil.join(",", domains) + "' has been successfully generated.");
 
         // Cleanup
 
         order = null;
         challenges.clear();
 
-        return certificate.getCertificate();
+        return certificate;
     }
 
 
@@ -261,5 +270,24 @@ public class AcmeClient {
         }
 
         logger.fine("Domain challenge executed successfully.");
+    }
+
+
+    /**
+     * A helper method to check if a certificate is still valid.
+     *
+     * @param certificate   the certificate to validate.
+     * @return true if the certificate is still valid otherwise false
+     */
+    public static boolean isCertificateValid(X509Certificate certificate) {
+        if (certificate == null)
+            return false;
+
+        try {
+            certificate.checkValidity();
+            return true;
+        } catch (GeneralSecurityException e) {
+            return false;
+        }
     }
 }

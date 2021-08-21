@@ -26,8 +26,8 @@ package zutil.net.threaded;
 
 import zutil.log.LogUtil;
 
+import javax.net.ServerSocketFactory;
 import javax.net.ssl.KeyManagerFactory;
-import javax.net.ssl.ManagerFactoryParameters;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLServerSocketFactory;
 import java.io.File;
@@ -37,7 +37,6 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.security.*;
 import java.security.cert.Certificate;
-import java.security.cert.X509Certificate;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.logging.Level;
@@ -63,7 +62,16 @@ public abstract class ThreadedTCPNetworkServer extends Thread {
      */
     public ThreadedTCPNetworkServer(int port) throws IOException {
         this.port = port;
-        this.serverSocket = new ServerSocket(port);
+        this.serverSocket = ServerSocketFactory.getDefault().createServerSocket(port);
+    }
+    /**
+     * Creates a new SSL instance of the sever.
+     *
+     * @param   port            the port that the server should listen to.
+     * @param   certificate     the certificate for the server domain.
+     */
+    public ThreadedTCPNetworkServer(int port, Certificate certificate) throws IOException, GeneralSecurityException {
+        this(port, getKeyStore(certificate), null);
     }
     /**
      * Creates a new SSL instance of the sever.
@@ -72,78 +80,65 @@ public abstract class ThreadedTCPNetworkServer extends Thread {
      * @param   keyStoreFile    the path to the key store file containing the server certificates
      * @param   keyStorePass    the password to decrypt the key store file.
      */
-    public ThreadedTCPNetworkServer(int port, File keyStoreFile, char[] keyStorePass) throws IOException {
-        this.port = port;
-        this.serverSocket = createSSLSocket(port, keyStoreFile, keyStorePass);
+    public ThreadedTCPNetworkServer(int port, File keyStoreFile, char[] keyStorePass) throws IOException, GeneralSecurityException {
+        this(port, getKeyStore(keyStoreFile, keyStorePass), keyStorePass);
     }
     /**
      * Creates a new SSL instance of the sever.
      *
      * @param   port            the port that the server should listen to.
-     * @param   certificate     the certificate for the servers domain.
+     * @param   keyStore        the KeyStore that contains the certificate to be used by the server
+     * @param   keyStorePass    the password to decrypt the key store file, null if there is no password set
      */
-    public ThreadedTCPNetworkServer(int port, Certificate certificate) throws IOException {
+    public ThreadedTCPNetworkServer(int port, KeyStore keyStore, char[] keyStorePass) throws IOException, GeneralSecurityException {
         this.port = port;
-        this.serverSocket = createSSLSocket(port, certificate);
+        this.serverSocket = getSSLServerSocketFactory(keyStore, keyStorePass).createServerSocket(port);
     }
 
     /**
      * Initiates a SSLServerSocket
      *
-     * @param 	port 	        the port the server should to
+     * @param   certificate     the certificate for the server domain.
+     * @return a SSLServerSocket object
+     */
+    private static KeyStore getKeyStore(Certificate certificate) throws IOException, GeneralSecurityException {
+        KeyStore keyStore = KeyStore.getInstance(KeyStore.getDefaultType());
+        keyStore.load(null, null); // Create empty keystore
+        keyStore.setCertificateEntry("ssl_server_cert", certificate);
+
+        return keyStore;
+    }
+    /**
+     * Initiates a SSLServerSocket
+     *
      * @param   keyStoreFile    the cert file location
-     * @param   keyStorePass    the password for the cert file
+     * @param   keyStorePass    the password for the cert file, null if there is no password set
      * @return a SSLServerSocket object
      */
-    private static ServerSocket createSSLSocket(int port, File keyStoreFile, char[] keyStorePass) throws IOException{
-        try {
-            KeyStore keyStore = KeyStore.getInstance(KeyStore.getDefaultType());
-            keyStore.load(new FileInputStream(keyStoreFile), keyStorePass);
+    private static KeyStore getKeyStore(File keyStoreFile, char[] keyStorePass) throws IOException, GeneralSecurityException {
+        KeyStore keyStore = KeyStore.getInstance(KeyStore.getDefaultType());
+        keyStore.load(new FileInputStream(keyStoreFile), keyStorePass);
 
-            return createSSLSocket(port, keyStore, keyStorePass);
-        } catch (GeneralSecurityException e) {
-            throw new IOException("Unable to configure certificate.", e);
-        }
+        return keyStore;
     }
 
     /**
-     * Initiates a SSLServerSocket
+     * Creates a new SSLServerSocketFactory
      *
-     * @param 	port 	        the port the server should to.
-     * @param   certificate     the certificate for the servers domain.
-     * @return a SSLServerSocket object
-     */
-    private static ServerSocket createSSLSocket(int port, Certificate certificate) throws IOException{
-        try {
-            KeyStore keyStore = KeyStore.getInstance(KeyStore.getDefaultType());
-            keyStore.load(null); // Create empty keystore
-            keyStore.setCertificateEntry("main_certificate", certificate);
-
-            return createSSLSocket(port, keyStore, null);
-        } catch (GeneralSecurityException e) {
-            throw new IOException("Unable to configure certificate.", e);
-        }
-    }
-
-    /**
-     * Initiates a SSLServerSocket
-     *
-     * @param 	port 	        the port the server should to.
      * @param   keyStore        the key store containing the domain certificates
-     * @param   keyStorePass    the password for the cert file
-     * @return a SSLServerSocket object
+     * @param   keyStorePass    the password for the cert file, null if there is no password set
+     * @return a SSLServerSocketFactory object
      */
-    private static ServerSocket createSSLSocket(int port, KeyStore keyStore, char[] keyStorePass)
-            throws IOException, NoSuchAlgorithmException, UnrecoverableKeyException, KeyStoreException, KeyManagementException {
+    private static SSLServerSocketFactory getSSLServerSocketFactory(KeyStore keyStore, char[] keyStorePass)
+            throws NoSuchAlgorithmException, UnrecoverableKeyException, KeyStoreException, KeyManagementException {
         KeyManagerFactory keyManagerFactory = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
         keyManagerFactory.init(keyStore, keyStorePass);
 
         SSLContext ctx = SSLContext.getInstance("TLS");
         ctx.init(keyManagerFactory.getKeyManagers(), null, SecureRandom.getInstanceStrong());
-        SSLServerSocketFactory socketFactory = ctx.getServerSocketFactory();
-
-        return socketFactory.createServerSocket(port);
+        return ctx.getServerSocketFactory();
     }
+
 
     /**
      * @return the port that this TCP server is listening to.

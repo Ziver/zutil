@@ -34,8 +34,9 @@ import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.net.Socket;
+import java.security.GeneralSecurityException;
+import java.security.KeyStore;
 import java.security.cert.Certificate;
-import java.security.cert.X509Certificate;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
@@ -60,13 +61,14 @@ public class HttpServer extends ThreadedTCPNetworkServer{
     public static final String SESSION_KEY_ID  = "session_id";
     public static final String SESSION_KEY_TTL = "session_ttl";
     public static final String SERVER_NAME     = "Zutil HttpServer";
-    public static final int SESSION_TTL = 10*60*1000; // in milliseconds
+    public static final int SESSION_TTL        = 10*60*1000; // in milliseconds
 
 
     private Map<String,HttpPage> pages = new ConcurrentHashMap<>();;
     private Map<String,Map<String,Object>> sessions = new ConcurrentHashMap<>();;
     private int nextSessionId = 0;
     private HttpPage defaultPage = null;
+
 
     /**
      * Creates a new instance of the sever
@@ -75,9 +77,7 @@ public class HttpServer extends ThreadedTCPNetworkServer{
      */
     public HttpServer(int port) throws IOException {
         super(port);
-        initGarbageCollector();
-
-        logger.info("HTTP Server ready and listening to port: " + port);
+        initialize("HTTP");
     }
     /**
      * Creates a new instance of the sever which accepts SSL connections
@@ -85,32 +85,43 @@ public class HttpServer extends ThreadedTCPNetworkServer{
      * @param   port            The port that the server should listen to
      * @param   certificate     The certificate that should be used for the servers SSL connections
      */
-    public HttpServer(int port, Certificate certificate) throws IOException {
+    public HttpServer(int port, Certificate certificate) throws IOException, GeneralSecurityException {
         super(port, certificate);
-        initGarbageCollector();
-
-        logger.info("HTTPS Server ready and listening to port: " + port);
+        initialize("HTTPS");
     }
     /**
      * Creates a new instance of the sever which accepts SSL connections
      *
      * @param   port            The port that the server should listen to
-     * @param   keyStore        The keyStore containing the certificate to use for the servers SSL connections
+     * @param   keyStoreFile    The keyStore file containing the certificate to use for the servers SSL connections
      * @param   keyStorePass    The password to unlock the key store.
      */
-    public HttpServer(int port, File keyStore, char[] keyStorePass) throws IOException {
-        super(port, keyStore, keyStorePass);
-        initGarbageCollector();
-
-        logger.info("HTTPS Server ready and listening to port: " + port);
-    }
-
-    private void initGarbageCollector() {
-        ScheduledExecutorService exec = Executors.newSingleThreadScheduledExecutor();
-        exec.scheduleWithFixedDelay(new SessionGarbageCollector(), 10000, SESSION_TTL / 2, TimeUnit.MILLISECONDS);
+    public HttpServer(int port, File keyStoreFile, char[] keyStorePass) throws IOException, GeneralSecurityException {
+        super(port, keyStoreFile, keyStorePass);
+        initialize("HTTPS");
     }
     /**
-     * This class acts as an garbage collector that
+     * Creates a new instance of the sever which accepts SSL connections
+     *
+     * @param   port            The port that the server should listen to
+     * @param   keyStore        The keyStore object containing the certificate to use for the servers SSL connections
+     * @param   keyStorePass    The password to unlock the key store.
+     */
+    public HttpServer(int port, KeyStore keyStore, char[] keyStorePass) throws IOException, GeneralSecurityException {
+        super(port, keyStore, keyStorePass);
+        initialize("HTTPS");
+    }
+
+    private void initialize(String httpType) {
+        ScheduledExecutorService exec = Executors.newSingleThreadScheduledExecutor();
+        exec.scheduleWithFixedDelay(new SessionGarbageCollector(), 10000, SESSION_TTL / 2, TimeUnit.MILLISECONDS);
+
+        logger.info(httpType + " Server ready and listening to port: " + httpType.toLowerCase() + "://localhost:" + getPort());
+    }
+
+
+    /**
+     * This class acts as a garbage collector that
      * removes old sessions from the session HashMap
      */
     private class SessionGarbageCollector implements Runnable {
@@ -186,7 +197,7 @@ public class HttpServer extends ThreadedTCPNetworkServer{
     /**
      * Internal class that handles all the requests
      */
-    protected class HttpServerThread implements ThreadedTCPNetworkServerThread{
+    protected class HttpServerThread implements ThreadedTCPNetworkServerThread {
         private HttpPrintStream out;
         private BufferedInputStream in;
         private Socket socket;
