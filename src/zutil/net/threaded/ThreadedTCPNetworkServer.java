@@ -53,16 +53,16 @@ public abstract class ThreadedTCPNetworkServer extends Thread {
 
     private Executor executor = Executors.newCachedThreadPool();
     private final int port;
-    private ServerSocket serverSocket;
+    private ServerSocketFactory serverSocketFactory;
 
     /**
      * Creates a new instance of the sever.
      *
      * @param 	port 		the port that the server should listen to
      */
-    public ThreadedTCPNetworkServer(int port) throws IOException {
+    public ThreadedTCPNetworkServer(int port) {
         this.port = port;
-        this.serverSocket = ServerSocketFactory.getDefault().createServerSocket(port);
+        this.serverSocketFactory = ServerSocketFactory.getDefault();
     }
     /**
      * Creates a new SSL instance of the sever.
@@ -91,13 +91,13 @@ public abstract class ThreadedTCPNetworkServer extends Thread {
      * @param   keyStore        the KeyStore that contains the certificate to be used by the server
      * @param   keyStorePass    the password to decrypt the key store file, null if there is no password set
      */
-    public ThreadedTCPNetworkServer(int port, KeyStore keyStore, char[] keyStorePass) throws IOException, GeneralSecurityException {
+    public ThreadedTCPNetworkServer(int port, KeyStore keyStore, char[] keyStorePass) throws GeneralSecurityException {
         this.port = port;
-        this.serverSocket = getSSLServerSocketFactory(keyStore, keyStorePass).createServerSocket(port);
+        this.serverSocketFactory = getSSLServerSocketFactory(keyStore, keyStorePass);
     }
 
     /**
-     * Initiates a SSLServerSocket
+     * Initiates a SSLServerSocketFactory
      *
      * @param   privateKey      the private key for the certificate
      * @param   certificate     the certificate for the server domain.
@@ -113,7 +113,7 @@ public abstract class ThreadedTCPNetworkServer extends Thread {
         return keyStore;
     }
     /**
-     * Initiates a SSLServerSocket
+     * Initiates a SSLServerSocketFactory
      *
      * @param   keyStoreFile    the cert file location
      * @param   keyStorePass    the password for the cert file, null if there is no password set
@@ -152,7 +152,11 @@ public abstract class ThreadedTCPNetworkServer extends Thread {
     }
 
     public void run() {
+        ServerSocket serverSocket = null;
+
         try {
+            serverSocket = serverSocketFactory.createServerSocket(port);
+
             logger.info("Accepting TCP Connections on port: " + port);
 
             while (true) {
@@ -173,15 +177,14 @@ public abstract class ThreadedTCPNetworkServer extends Thread {
                 try {
                     logger.info("Closing TCP socket listener (Port: " + port + ").");
                     serverSocket.close();
-                    serverSocket = null;
                 } catch(IOException e) { logger.log(Level.SEVERE, null, e); }
             }
         }
     }
 
     /**
-     * This method returns an new instance of the ThreadedTCPNetworkServerThread
-     * that will handle the newly made connection, if an null value is returned
+     * This method returns a new instance of the ThreadedTCPNetworkServerThread
+     * that will handle the newly made connection, if a null value is returned
      * then the ThreadedTCPNetworkServer will close the new connection.
      *
      * @param   socket   is an new connection to an host
