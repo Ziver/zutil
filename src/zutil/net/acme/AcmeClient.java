@@ -163,7 +163,8 @@ public class AcmeClient {
             }
 
             // Get the certificate
-            certificate = order.getCertificate().getCertificate();
+            Certificate certWrapper = order.getCertificate();
+            certificate = certWrapper.getCertificate();
             dataStore.storeCertificate(certificate);
 
             logger.info("Successfully created new certificate for domains: " + StringUtil.join(",", domains));

@@ -24,6 +24,7 @@
 
 package zutil.net.http.page;
 
+import zutil.io.file.FileUtil;
 import zutil.log.CompactLogFormatter;
 import zutil.log.LogUtil;
 import zutil.net.http.HttpHeader;
@@ -32,6 +33,8 @@ import zutil.net.http.HttpPrintStream;
 import zutil.net.http.HttpServer;
 
 import java.io.IOException;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
 import java.util.Map;
 import java.util.logging.Level;
 
@@ -46,12 +49,16 @@ public class HttpGuessTheNumber implements HttpPage {
     private static final String COOKIE_KEY_HIGH    = "high";
 
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws Exception {
         LogUtil.setGlobalLevel(Level.ALL);
         LogUtil.setGlobalFormatter(new CompactLogFormatter());
 
-        //HttpServer server = new HttpServer("localhost", 443, FileFinder.find("keySSL"), "rootroot");//SSL
+        // Run command to generate key store:
+        // keytool.exe -genkeypair -alias signFiles -keystore sslKeyStore -keyalg RSA
+        //HttpServer server = new HttpServer(443, FileUtil.find("sslKeyStore"), "password".toCharArray()); //SSL
+
         HttpServer server = new HttpServer(8080);
+
         server.setDefaultPage(new HttpGuessTheNumber());
         server.run();
     }

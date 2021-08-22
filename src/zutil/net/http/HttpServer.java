@@ -36,7 +36,8 @@ import java.io.IOException;
 import java.net.Socket;
 import java.security.GeneralSecurityException;
 import java.security.KeyStore;
-import java.security.cert.Certificate;
+import java.security.PrivateKey;
+import java.security.cert.X509Certificate;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
@@ -73,7 +74,7 @@ public class HttpServer extends ThreadedTCPNetworkServer{
     /**
      * Creates a new instance of the sever
      *
-     * @param   port    The port that the server should listen to
+     * @param   port    the port that the server should listen to
      */
     public HttpServer(int port) throws IOException {
         super(port);
@@ -82,19 +83,20 @@ public class HttpServer extends ThreadedTCPNetworkServer{
     /**
      * Creates a new instance of the sever which accepts SSL connections
      *
-     * @param   port            The port that the server should listen to
-     * @param   certificate     The certificate that should be used for the servers SSL connections
+     * @param   port            the port that the server should listen to
+     * @param   privateKey      the private key for the certificate
+     * @param   certificate     the certificate that should be used for the servers SSL connections
      */
-    public HttpServer(int port, Certificate certificate) throws IOException, GeneralSecurityException {
-        super(port, certificate);
+    public HttpServer(int port, PrivateKey privateKey, X509Certificate certificate) throws IOException, GeneralSecurityException {
+        super(port, privateKey, certificate);
         initialize("HTTPS");
     }
     /**
      * Creates a new instance of the sever which accepts SSL connections
      *
-     * @param   port            The port that the server should listen to
-     * @param   keyStoreFile    The keyStore file containing the certificate to use for the servers SSL connections
-     * @param   keyStorePass    The password to unlock the key store.
+     * @param   port            the port that the server should listen to
+     * @param   keyStoreFile    the keyStore file containing the certificate to use for the servers SSL connections
+     * @param   keyStorePass    the password to unlock the key store.
      */
     public HttpServer(int port, File keyStoreFile, char[] keyStorePass) throws IOException, GeneralSecurityException {
         super(port, keyStoreFile, keyStorePass);
@@ -103,9 +105,9 @@ public class HttpServer extends ThreadedTCPNetworkServer{
     /**
      * Creates a new instance of the sever which accepts SSL connections
      *
-     * @param   port            The port that the server should listen to
-     * @param   keyStore        The keyStore object containing the certificate to use for the servers SSL connections
-     * @param   keyStorePass    The password to unlock the key store.
+     * @param   port            the port that the server should listen to
+     * @param   keyStore        the keyStore object containing the certificate to use for the servers SSL connections
+     * @param   keyStorePass    the password to unlock the key store.
      */
     public HttpServer(int port, KeyStore keyStore, char[] keyStorePass) throws IOException, GeneralSecurityException {
         super(port, keyStore, keyStorePass);

@@ -36,7 +36,7 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.security.*;
-import java.security.cert.Certificate;
+import java.security.cert.X509Certificate;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.logging.Level;
@@ -68,10 +68,11 @@ public abstract class ThreadedTCPNetworkServer extends Thread {
      * Creates a new SSL instance of the sever.
      *
      * @param   port            the port that the server should listen to.
+     * @param   privateKey      the private key for the certificate
      * @param   certificate     the certificate for the server domain.
      */
-    public ThreadedTCPNetworkServer(int port, Certificate certificate) throws IOException, GeneralSecurityException {
-        this(port, getKeyStore(certificate), null);
+    public ThreadedTCPNetworkServer(int port, PrivateKey privateKey, X509Certificate certificate) throws IOException, GeneralSecurityException {
+        this(port, getKeyStore(privateKey, certificate), null);
     }
     /**
      * Creates a new SSL instance of the sever.
@@ -98,13 +99,16 @@ public abstract class ThreadedTCPNetworkServer extends Thread {
     /**
      * Initiates a SSLServerSocket
      *
+     * @param   privateKey      the private key for the certificate
      * @param   certificate     the certificate for the server domain.
      * @return a SSLServerSocket object
      */
-    private static KeyStore getKeyStore(Certificate certificate) throws IOException, GeneralSecurityException {
+    private static KeyStore getKeyStore(PrivateKey privateKey, X509Certificate certificate) throws IOException, GeneralSecurityException {
         KeyStore keyStore = KeyStore.getInstance(KeyStore.getDefaultType());
         keyStore.load(null, null); // Create empty keystore
-        keyStore.setCertificateEntry("ssl_server_cert", certificate);
+
+        keyStore.setCertificateEntry("cert-alias", certificate);
+        keyStore.setKeyEntry("key-alias", privateKey, new char[0], new X509Certificate[]{certificate});
 
         return keyStore;
     }
