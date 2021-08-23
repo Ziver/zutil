@@ -92,7 +92,7 @@ public class MulticastDnsServer extends ThreadedUDPNetwork implements ThreadedUD
         resource.name = name;
         resource.type = type;
         resource.clazz = clazz;
-        //resource.ttl = 10; ???
+        resource.ttl = 120; // client can cache the record for 2 min
         resource.length = data.length;
         resource.data = new String(data, StandardCharsets.ISO_8859_1);
 
@@ -118,6 +118,7 @@ public class MulticastDnsServer extends ThreadedUDPNetwork implements ThreadedUD
             // Just handle queries and no responses
             if (! dnsPacket.getHeader().flagQueryResponse) {
                 DnsPacket response = handleReceivedPacket(packet.getAddress(), dnsPacket);
+
                 if (response != null) {
                     ByteArrayOutputStream outBuffer = new ByteArrayOutputStream();
                     BinaryStructOutputStream out = new BinaryStructOutputStream(outBuffer);
@@ -139,6 +140,7 @@ public class MulticastDnsServer extends ThreadedUDPNetwork implements ThreadedUD
     protected DnsPacket handleReceivedPacket(InetAddress address, DnsPacket request) {
         DnsPacket response = new DnsPacket();
         response.getHeader().setDefaultResponseData();
+
         for (DnsPacketQuestion question : request.getQuestions()) {
             if (question.name == null) continue;
 
@@ -148,8 +150,9 @@ public class MulticastDnsServer extends ThreadedUDPNetwork implements ThreadedUD
                 // ------------------------------------------
 
                 case DnsConstants.TYPE.A:
+                case DnsConstants.TYPE.AAAA:
                     if (entries.containsKey(question.name)) {
-                        logger.finer("Received request for domain: '" + question.name + "' from source: " + address);
+                        logger.finer("Received request for IPv4 domain: '" + question.name + "' from source: " + address);
                         response.addAnswerRecord(entries.get(question.name));
                     } else {
                         logger.finest("Received request for unknown domain: '" + question.name + "' from source: " + address);
@@ -175,7 +178,7 @@ public class MulticastDnsServer extends ThreadedUDPNetwork implements ThreadedUD
                         logger.finer("Received request for service: '" + question.name + "' from source: " + address);
                         response.addAnswerRecord(entries.get(question.name));
                     } else {
-                        logger.finer("Received request for unknown pointer: '" + question.name + "' from source: " + address);
+                        logger.finest("Received request for unknown pointer: '" + question.name + "' from source: " + address);
                     }
                     break;
             }

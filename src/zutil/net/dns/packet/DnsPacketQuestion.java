@@ -68,7 +68,7 @@ public class DnsPacketQuestion implements BinaryStruct {
      *
      * @see DnsConstants.TYPE
      */
-    @BinaryField(index=10, length=16)
+    @BinaryField(index=20, length=16)
     public int type;
 
     /**
@@ -77,7 +77,7 @@ public class DnsPacketQuestion implements BinaryStruct {
      *
      * @see DnsConstants.CLASS
      */
-    @BinaryField(index=20, length=16)
+    @BinaryField(index=30, length=16)
     public int clazz;
 
 

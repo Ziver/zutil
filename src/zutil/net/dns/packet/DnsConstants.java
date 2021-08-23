@@ -79,7 +79,7 @@ public final class DnsConstants {
 
 
     public static final class TYPE {
-        /** a host address */
+        /** a IPv4 host address */
         public static final int A     = 1;
         /** an authoritative name server */
         public static final int NS    = 2;
@@ -111,6 +111,8 @@ public final class DnsConstants {
         public static final int MX    = 15;
         /** text strings */
         public static final int TXT   = 16;
+        /** a IPv6 host address */
+        public static final int AAAA  = 28;
         /** service location record in format {Instance}.{Service}.{Domain}*/
         public static final int SRV   = 33;
         /** A request for a transfer of an entire zone */
