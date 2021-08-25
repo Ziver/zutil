@@ -29,12 +29,16 @@ import zutil.ByteUtil;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 
 /**
- * A stream class that generates a byte stream from
- * binary struct objects.
+ * A stream class that generates a byte stream from a binary struct objects.
+ * <p><p/>
+ * Limitations:<br>
+ *  - Does not support sub binary objects.<br>
  *
  * @author Ziver
  */
@@ -84,13 +88,19 @@ public class BinaryStructOutputStream {
      */
     public void write(BinaryStruct struct) throws IOException {
         List<BinaryFieldData> structDataList = BinaryFieldData.getStructFieldList(struct.getClass());
+        Map<Class, BinaryFieldSerializer> serializerCache = new HashMap<>();
 
         for (BinaryFieldData field : structDataList) {
-            if (field.getSerializer() != null) {
+            if (field.hasSerializer()) {
+                BinaryFieldSerializer serializer = serializerCache.get(field.getSerializerClass());
+                if (serializer == null) {
+                    serializer = field.getSerializer();
+                    serializerCache.put(serializer.getClass(), serializer);
+                }
+
                 localFlush();
-                field.getSerializer().write(out, field.getValue(struct), field);
-            }
-            else {
+                serializer.write(out, field.getValue(struct), field);
+            } else {
                 int fieldBitLength = field.getBitLength(struct);
                 byte[] data = field.getByteValue(struct);
                 data = ByteUtil.shiftRight(data, ((8 - fieldBitLength % 8) % 8));
@@ -100,7 +110,7 @@ public class BinaryStructOutputStream {
                     if (restBitLength == 0 && fieldBitLength >= 8)
                         out.write(0xFF & b);
                     else {
-                        b = (byte)((b&0xFF) >> restBitLength);
+                        b = (byte) ((b & 0xFF) >> restBitLength);
                         b &= ByteUtil.getBitMask(7 - restBitLength, fieldBitLength);
                         rest |= b;
                         restBitLength += fieldBitLength;

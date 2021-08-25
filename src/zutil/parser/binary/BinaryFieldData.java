@@ -33,6 +33,7 @@ import zutil.parser.binary.BinaryStruct.CustomBinaryField;
 import zutil.parser.binary.BinaryStruct.VariableLengthBinaryField;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
@@ -49,7 +50,7 @@ public class BinaryFieldData {
     private BinaryFieldData lengthField;
     private int lengthMultiplier;
     /* @CustomBinaryField */
-    private BinaryFieldSerializer serializer;
+    private Class<? extends BinaryFieldSerializer> serializerClass;
 
 
     protected static List<BinaryFieldData> getStructFieldList(Class<? extends BinaryStruct> clazz) {
@@ -80,16 +81,17 @@ public class BinaryFieldData {
     }
 
 
-    private BinaryFieldData(Field f) throws IllegalAccessException, InstantiationException, NoSuchFieldException {
+    private BinaryFieldData(Field f) throws NoSuchFieldException {
         field = f;
         this.length = -1;
         this.lengthField = null;
         this.lengthMultiplier = 1;
-        this.serializer = null;
+        this.serializerClass = null;
+
         if (field.isAnnotationPresent(CustomBinaryField.class)) {
             CustomBinaryField fieldData = field.getAnnotation(CustomBinaryField.class);
             this.index = fieldData.index();
-            this.serializer = fieldData.serializer().newInstance();
+            this.serializerClass = fieldData.serializer();
         }
         else if (field.isAnnotationPresent(VariableLengthBinaryField.class)) {
             VariableLengthBinaryField fieldData = field.getAnnotation(VariableLengthBinaryField.class);
@@ -185,8 +187,21 @@ public class BinaryFieldData {
         return length;
     }
 
+
+    public boolean hasSerializer() {
+        return serializerClass != null;
+    }
+
+    public Class<? extends BinaryFieldSerializer> getSerializerClass() {
+        return serializerClass;
+    }
+
     public BinaryFieldSerializer getSerializer() {
-        return serializer;
+        try {
+            return serializerClass.getDeclaredConstructor().newInstance();
+        } catch (ReflectiveOperationException e) {
+            throw new RuntimeException("Unable to instantiate class: " + serializerClass, e);
+        }
     }
 
 
@@ -197,8 +212,8 @@ public class BinaryFieldData {
                 (lengthField != null ?
                     "LengthField: " + lengthField + ", LengthMultiplier: " + lengthMultiplier :
                     length + " bits") +
-                (serializer != null ?
-                    ", Serializer: " + serializer.getClass().getName() : "") +
+                (serializerClass != null ?
+                    ", Serializer: " + serializerClass.getClass().getName() : "") +
                 ")";
 
     }

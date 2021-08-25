@@ -29,11 +29,15 @@ import zutil.ByteUtil;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
- * A stream class that parses a byte stream into
- * binary struct objects.
+ * A stream class that parses a byte stream into binary struct objects.
+ * <p><p/>
+ * Limitations:<br>
+ *  - Does not support sub binary objects.<br>
  *
  * @author Ziver
  */
@@ -74,14 +78,20 @@ public class BinaryStructInputStream {
      */
     public int read(BinaryStruct struct) throws IOException {
         List<BinaryFieldData> structDataList = BinaryFieldData.getStructFieldList(struct.getClass());
+        Map<Class, BinaryFieldSerializer> serializerCache = new HashMap<>();
 
         int totalReadLength = 0;
         for (BinaryFieldData field : structDataList) {
-            if (field.getSerializer() != null) {
-                Object value = field.getSerializer().read(in, field);
+            if (field.hasSerializer()) {
+                BinaryFieldSerializer serializer = serializerCache.get(field.getSerializerClass());
+                if (serializer == null) {
+                    serializer = field.getSerializer();
+                    serializerCache.put(serializer.getClass(), serializer);
+                }
+
+                Object value = serializer.read(in, field);
                 field.setValue(struct, value);
-            }
-            else {
+            } else {
                 byte[] valueData = new byte[(int) Math.ceil(field.getBitLength(struct) / 8.0)];
                 int fieldReadLength = 0; // How much we have read so far
                 int shiftBy = shiftLeftBy(dataBitIndex, field.getBitLength(struct));

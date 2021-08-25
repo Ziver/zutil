@@ -30,6 +30,11 @@ import java.io.OutputStream;
 
 /**
  * An Interface where custom field parser and writer can be implemented.
+ * <p></p>
+ * One instance of the serializer and will have the scope of the methods
+ * {@link BinaryStructInputStream#read(BinaryStruct)} and {@link BinaryStructOutputStream#write(BinaryStruct)}
+ * where as it will be deallocated after the methods have returned.
+ * <p></p>
  * NOTE: Partial octet serializing not supported.
  *
  * Created by Ziver on 2016-04-11.

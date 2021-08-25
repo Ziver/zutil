@@ -42,7 +42,7 @@ public interface BinaryStruct {
      */
     @Retention(RetentionPolicy.RUNTIME)
     @Target(ElementType.FIELD)
-    @interface BinaryField{
+    @interface BinaryField {
         /** @return a number indicating the order the fields are read. Lowest index number field will be read first. */
         int index();
         /** @return the bit length of the data */
@@ -56,7 +56,7 @@ public interface BinaryStruct {
      */
     @Retention(RetentionPolicy.RUNTIME)
     @Target(ElementType.FIELD)
-    @interface VariableLengthBinaryField{
+    @interface VariableLengthBinaryField {
         /** @return a number indicating the order the fields are read. Lowest index number field will be read first. */
         int index();
         /** @return a String name of the field that contains the length of the data to be read. */
@@ -71,7 +71,7 @@ public interface BinaryStruct {
      */
     @Retention(RetentionPolicy.RUNTIME)
     @Target(ElementType.FIELD)
-    @interface CustomBinaryField{
+    @interface CustomBinaryField {
         /** @return a number indicating the order the fields are read. Lowest index number field will be read first. */
         int index();
         /** @return the serializer class name that will be used. Class needs to be publicly visible. */
