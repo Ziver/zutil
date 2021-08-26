@@ -27,7 +27,7 @@ package zutil.io;
 import java.io.OutputStream;
 
 /**
- * This class saves all the input data in to an StringBuffer
+ * This class saves all the input data into a String
  *
  * @author Ziver
  *

@@ -25,29 +25,29 @@
 package zutil.io;
 
 import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 
 /**
- * This class saves all the input data in to an StringBuffer
+ * This InputStream uses a string as the data source.
  *
  * @author Ziver
  *
  */
-public class StringInputStream extends InputStream{
-    // The buffer
-    protected StringBuilder buffer;
+public class StringInputStream extends InputStream {
+
+    private StringBuilder buffer = new StringBuilder();
+    private int pos;
+    private int mark;
+
 
     /**
-     * Creates an new instance of this class
+     * Creates a new instance of this class
      */
-    public StringInputStream() {
-        clear();
-    }
+    public StringInputStream() { }
 
     public StringInputStream(String data) {
-        clear();
         add(data);
     }
+
 
     /**
      * Returns an estimate of the number of bytes
@@ -56,44 +56,37 @@ public class StringInputStream extends InputStream{
      * invocation of a method for this input stream.
      */
     public int available() {
-        return buffer.length();
+        return buffer.length() - pos;
     }
 
 
     /**
      * Reads the next byte of data from the input stream.
      */
-    public int read() {
-        if (buffer.length() == 0)
+    public synchronized int read() {
+        if (available() <= 0)
             return -1;
 
-        int ret = buffer.charAt(0);
-        buffer.deleteCharAt(0);
+        int ret = buffer.charAt(pos);
+        pos++;
         return ret;
     }
 
     /**
-     * Reads some number of bytes from the input stream
-     * and stores them into the buffer array b.
+     * Reads up to len bytes of data from the input stream into an array of bytes.
      */
-    public int read(byte[] b) {
-        return read(b, 0, b.length);
-    }
-
-    /**
-     * Reads up to len bytes of data from the input stream
-     * into an array of bytes.
-     */
-    public int read(byte[] b, int off, int len) {
-        if (buffer.length() == 0)
+    public synchronized int read(byte[] b, int off, int len) {
+        if (available() <= 0)
             return -1;
 
-        if (buffer.length() < len) {
-            len = buffer.length();
+        if (available() < len)
+            len = available();
+
+        for (int i=0; i<len; i++) {
+            b[off + i] = (byte) buffer.charAt(pos);
+            pos++;
         }
-        byte[] btmp = buffer.substring(0, len).getBytes(StandardCharsets.ISO_8859_1);
-        System.arraycopy(btmp, 0, b, off, len);
-        buffer.delete(0, len);
+
         return len;
     }
 
@@ -104,16 +97,12 @@ public class StringInputStream extends InputStream{
      *
      * @param	n		is the amount characters to skip
      */
-    public long skip(long n) {
-        if (buffer.length() < n) {
-            int len = buffer.length();
-            buffer.delete(0, len);
-            return len;
-        }
-        else {
-            buffer.delete(0, (int) n);
-            return n;
-        }
+    public synchronized long skip(long n) {
+        if (available() < n)
+            n = available();
+
+        pos += n;
+        return n;
     }
 
     /**
@@ -121,7 +110,23 @@ public class StringInputStream extends InputStream{
      * reset methods.
      */
     public boolean markSupported() {
-        return false;
+        return true;
+    }
+
+    /**
+     * Set the current position as a sae point that can be returned to with the {@link #reset()} method
+     *
+     * @param readLimit parameter not used.
+     */
+    public synchronized void mark(int readLimit) {
+        mark = pos;
+    }
+
+    /**
+     * Reset the reading position back to the mark point.
+     */
+    public synchronized void reset() {
+        pos = mark;
     }
 
 
@@ -133,8 +138,19 @@ public class StringInputStream extends InputStream{
         clear();
     }
 
-    public void clear() {
+    public synchronized void clear() {
         buffer = new StringBuilder();
+        pos = 0;
+        mark = 0;
+    }
+
+    /**
+     * Clears the part of the String buffer that has already been read.
+     */
+    public synchronized void clearOld() {
+        buffer.delete(0, pos);
+        pos = 0;
+        mark = 0;
     }
 
     public void add(String data) {

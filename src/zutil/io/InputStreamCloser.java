@@ -25,38 +25,28 @@
 package zutil.io;
 
 import java.io.Closeable;
+import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
 /**
- * A simple Class that mirrors a InputStream but
- * also has an additional Closeable objects that
- * will be closed when the this object is closed.
+ * A simple Class that mirrors a InputStream but also has additional Closeable objects that
+ * will be closed at the same time as the {@link #close()} method is called.
  *
  * @author Ziver
  */
-public class InputStreamCloser extends InputStream{
-    private Closeable[] c;
-    private InputStream in;
+public class InputStreamCloser extends FilterInputStream {
+    private Closeable[] additionalClosable;
 
-    public InputStreamCloser(InputStream in, Closeable... c) {
-        this.c = c;
-        this.in = in;
+    public InputStreamCloser(InputStream in, Closeable... additionalClosable) {
+        super(in);
+        this.additionalClosable = additionalClosable;
     }
 
     public void close() throws IOException {
-        in.close();
-        for (Closeable stream : c)
+        super.close();
+
+        for (Closeable stream : additionalClosable)
             stream.close();
     }
-
-    // Mirror functions
-    public int read() throws IOException                { return in.read(); }
-    public int read(byte b[]) throws IOException        { return in.read(b); }
-    public int read(byte b[], int off, int len) throws IOException { return in.read(b, off, len); }
-    public long skip(long n) throws IOException         { return in.skip(n); }
-    public int available() throws IOException           { return in.available(); }
-    public synchronized void mark(int readlimit)        { in.mark(readlimit); }
-    public synchronized void reset() throws IOException { in.reset(); }
-    public boolean markSupported()                      { return in.markSupported(); }
 }

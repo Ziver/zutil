@@ -45,12 +45,13 @@ public class FQDNStringSerializer implements BinaryFieldSerializer<String> {
                 str.append('.');
 
             if ((c & 0b1100_0000) == 0b1100_0000) {
-                // This a pointer
+                // This a offset pointer to the String data
                 int offset = (c & 0b0011_1111) << 8;
                 offset |= in.read() & 0b1111_1111;
                 str.append(offset);
+                break; // PTR is always the last part of the FQDN
             } else {
-                // Normal String
+                // Normal String data
                 for (int i = 0; i < c; ++i) {
                     str.append((char) in.read());
                 }
