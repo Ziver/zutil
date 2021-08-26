@@ -112,8 +112,7 @@ public class MulticastDnsServer extends ThreadedUDPNetwork implements ThreadedUD
         try {
             ByteArrayInputStream buffer = new ByteArrayInputStream(packet.getData(),
                     packet.getOffset(), packet.getLength());
-            BinaryStructInputStream in = new BinaryStructInputStream(buffer);
-            DnsPacket dnsPacket = DnsPacket.read(in);
+            DnsPacket dnsPacket = DnsPacket.read(buffer);
 
             // Just handle queries and no responses
             if (! dnsPacket.getHeader().flagQueryResponse) {
@@ -121,9 +120,8 @@ public class MulticastDnsServer extends ThreadedUDPNetwork implements ThreadedUD
 
                 if (response != null) {
                     ByteArrayOutputStream outBuffer = new ByteArrayOutputStream();
-                    BinaryStructOutputStream out = new BinaryStructOutputStream(outBuffer);
-                    response.write(out);
-                    out.close();
+                    response.write(outBuffer);
+                    outBuffer.close();
 
                     DatagramPacket outPacket = new DatagramPacket(
                             outBuffer.toByteArray(), outBuffer.size(),

@@ -29,15 +29,13 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 /**
- * An Interface where custom field parser and writer can be implemented.
+ * An Interface defining a custom field parser and writer.
  * <p></p>
- * One instance of the serializer and will have the scope of the methods
- * {@link BinaryStructInputStream#read(BinaryStruct)} and {@link BinaryStructOutputStream#write(BinaryStruct)}
- * where as it will be deallocated after the methods have returned.
+ * One singleton instance of the serializer will be instantiated for the lifetime of the
+ * {@link BinaryStructInputStream} and {@link BinaryStructOutputStream} objects.
  * <p></p>
  * NOTE: Partial octet serializing not supported.
  *
- * Created by Ziver on 2016-04-11.
  */
 public interface BinaryFieldSerializer<T> {
 

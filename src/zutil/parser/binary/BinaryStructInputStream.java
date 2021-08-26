@@ -35,7 +35,7 @@ import java.util.Map;
 
 /**
  * A stream class that parses a byte stream into binary struct objects.
- * <p><p/>
+ * <p></p>
  * Limitations:<br>
  *  - Does not support sub binary objects.<br>
  *
@@ -46,6 +46,9 @@ public class BinaryStructInputStream {
     private InputStream in;
     private byte data;
     private int dataBitIndex = -1;
+
+    private Map<Class, BinaryFieldSerializer> serializerCache = new HashMap<>();
+
 
     public BinaryStructInputStream(InputStream in) {
         this.in = in;
@@ -78,7 +81,6 @@ public class BinaryStructInputStream {
      */
     public int read(BinaryStruct struct) throws IOException {
         List<BinaryFieldData> structDataList = BinaryFieldData.getStructFieldList(struct.getClass());
-        Map<Class, BinaryFieldSerializer> serializerCache = new HashMap<>();
 
         int totalReadLength = 0;
         for (BinaryFieldData field : structDataList) {

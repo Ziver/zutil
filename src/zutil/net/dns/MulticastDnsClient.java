@@ -78,7 +78,6 @@ public class MulticastDnsClient extends ThreadedUDPNetwork implements ThreadedUD
         int id = 0; // Needs to be zero when doing multicast
         activeProbes.add(id);
         ByteArrayOutputStream buffer = new ByteArrayOutputStream();
-        BinaryStructOutputStream out = new BinaryStructOutputStream(buffer);
 
         DnsPacket dnsPacket = new DnsPacket();
         dnsPacket.getHeader().id = id;
@@ -87,7 +86,7 @@ public class MulticastDnsClient extends ThreadedUDPNetwork implements ThreadedUD
                 domain,
                 DnsConstants.TYPE.SRV,
                 DnsConstants.CLASS.IN));
-        dnsPacket.write(out);
+        dnsPacket.write(buffer);
 
         DatagramPacket udpPacket = new DatagramPacket(
                 buffer.toByteArray(), buffer.size(),
@@ -106,8 +105,7 @@ public class MulticastDnsClient extends ThreadedUDPNetwork implements ThreadedUD
         try {
             ByteArrayInputStream buffer = new ByteArrayInputStream(packet.getData(),
                     packet.getOffset(), packet.getLength());
-            BinaryStructInputStream in = new BinaryStructInputStream(buffer);
-            DnsPacket dnsPacket = DnsPacket.read(in);
+            DnsPacket dnsPacket = DnsPacket.read(buffer);
 
             //System.out.println("Received:\n" +ByteUtil.toFormattedString(packet.getData(), packet.getOffset(), packet.getLength()));
             MultiPrintStream.out.dump(dnsPacket,3);

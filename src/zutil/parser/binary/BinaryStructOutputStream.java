@@ -36,7 +36,7 @@ import java.util.Map;
 
 /**
  * A stream class that generates a byte stream from a binary struct objects.
- * <p><p/>
+ * <p></p>
  * Limitations:<br>
  *  - Does not support sub binary objects.<br>
  *
@@ -47,6 +47,8 @@ public class BinaryStructOutputStream {
     private OutputStream out;
     private byte rest;
     private int restBitLength; // length from Most Significant Bit
+
+    private Map<Class, BinaryFieldSerializer> serializerCache = new HashMap<>();
 
 
     public BinaryStructOutputStream(OutputStream out) {
@@ -88,7 +90,6 @@ public class BinaryStructOutputStream {
      */
     public void write(BinaryStruct struct) throws IOException {
         List<BinaryFieldData> structDataList = BinaryFieldData.getStructFieldList(struct.getClass());
-        Map<Class, BinaryFieldSerializer> serializerCache = new HashMap<>();
 
         for (BinaryFieldData field : structDataList) {
             if (field.hasSerializer()) {

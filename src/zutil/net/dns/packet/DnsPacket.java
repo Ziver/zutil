@@ -24,10 +24,13 @@
 
 package zutil.net.dns.packet;
 
+import zutil.io.PositionalInputStream;
 import zutil.parser.binary.BinaryStructInputStream;
 import zutil.parser.binary.BinaryStructOutputStream;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -94,7 +97,9 @@ public class DnsPacket {
     }
 
 
-    public static DnsPacket read(BinaryStructInputStream structIn) throws IOException {
+    public static DnsPacket read(InputStream in) throws IOException {
+        BinaryStructInputStream structIn = new BinaryStructInputStream(new PositionalInputStream(in));
+
         DnsPacket packet = new DnsPacket();
         structIn.read(packet.header);
 
@@ -116,7 +121,9 @@ public class DnsPacket {
         }
     }
 
-    public void write(BinaryStructOutputStream structOut) throws IOException {
+    public void write(OutputStream out) throws IOException {
+        BinaryStructOutputStream structOut = new BinaryStructOutputStream(out);
+
         structOut.write(header);
 
         for (DnsPacketQuestion question : questions)

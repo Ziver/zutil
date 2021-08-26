@@ -75,8 +75,7 @@ public class DnsPacketTest {
         packet.getHeader().setDefaultQueryData();
 
         ByteArrayOutputStream buffer = new ByteArrayOutputStream();
-        BinaryStructOutputStream out = new BinaryStructOutputStream(buffer);
-        packet.write(out);
+        packet.write(buffer);
         byte[] data = buffer.toByteArray();
 
         byte[] expected = {
@@ -97,8 +96,7 @@ public class DnsPacketTest {
                 "appletv.local", DnsConstants.TYPE.A, DnsConstants.CLASS.IN));
 
         ByteArrayOutputStream buffer = new ByteArrayOutputStream();
-        BinaryStructOutputStream out = new BinaryStructOutputStream(buffer);
-        packet.write(out);
+        packet.write(buffer);
         byte[] data = buffer.toByteArray();
 
         byte[] expected = {
@@ -155,8 +153,7 @@ public class DnsPacketTest {
                 0xc0, 0x0c, 0x00, 0x04, 0x40, 0x00, 0x00, 0x08 // NSEC
         };
         ByteArrayInputStream buffer = new ByteArrayInputStream(Converter.toBytes(input));
-        BinaryStructInputStream in = new BinaryStructInputStream(buffer);
-        DnsPacket packet = DnsPacket.read(in);
+        DnsPacket packet = DnsPacket.read(buffer);
 
         // Assert Header
         assertTrue("flagQueryResponse", packet.getHeader().flagQueryResponse);
@@ -217,10 +214,9 @@ Domain Name System (query)
         question.clazz = DnsConstants.CLASS.IN;
         packet.addQuestion(question);
 
-        ByteArrayOutputStream buff = new ByteArrayOutputStream();
-        BinaryStructOutputStream out = new BinaryStructOutputStream(buff);
-        packet.write(out);
-        byte[] data = buff.toByteArray();
+        ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+        packet.write(buffer);
+        byte[] data = buffer.toByteArray();
         assertEquals((
                 "241a 01 00 00 01 00 00 00 00 00 00 " +
                 "03 77  77 77 06 67 6f 6f 67 6c 65 03 63 6f 6d 00  0001  0001"
@@ -297,8 +293,7 @@ Domain Name System (response)
                     "c02c  0001  0001  000000e3  0004  42 f9 59 68"   // Answer3
                 ).replace(" ", ""));
         ByteArrayInputStream buffer = new ByteArrayInputStream(input);
-        BinaryStructInputStream in = new BinaryStructInputStream(buffer);
-        DnsPacket packet = DnsPacket.read(in);
+        DnsPacket packet = DnsPacket.read(buffer);
 
         assertEquals("id", 0x241a, packet.getHeader().id);
         assertTrue("flagQueryResponse", packet.getHeader().flagQueryResponse);
@@ -315,19 +310,20 @@ Domain Name System (response)
 
         // Answer
         DnsPacketResource answer = packet.getAnswerRecords().get(0);
-        assertEquals("NAME", "12", answer.name);
+        assertEquals("NAME", "www.google.com", answer.name);
+        //assertEquals("NAME", "<12>", answer.name);
         assertEquals("TYPE", DnsConstants.TYPE.CNAME, answer.type);
         assertEquals("CLASS", DnsConstants.CLASS.IN, answer.clazz);
         assertEquals("TTL", 337977, answer.ttl);
 
         answer = packet.getAnswerRecords().get(1);
-        assertEquals("NAME", "44", answer.name);
+        assertEquals("NAME", "<44>", answer.name);
         assertEquals("TYPE", DnsConstants.TYPE.A, answer.type);
         assertEquals("CLASS", DnsConstants.CLASS.IN, answer.clazz);
         assertEquals("TTL", 227, answer.ttl);
 
         answer = packet.getAnswerRecords().get(2);
-        assertEquals("NAME", "44", answer.name);
+        assertEquals("NAME", "<44>", answer.name);
         assertEquals("TYPE", DnsConstants.TYPE.A, answer.type);
         assertEquals("CLASS", DnsConstants.CLASS.IN, answer.clazz);
         assertEquals("TTL", 227, answer.ttl);
@@ -415,17 +411,16 @@ Multicast Domain Name System (query)
 
         byte[] input = Converter.hexToByte((
                 "00 00 00 00 00 06 00 00 00 00 00 01" + // Header
-                "0f 5f 63 6f 6d 70 61 6e 69 6f 6e 2d 6c 69 6e 6b 04 5f 74 63 70 05 6c 6f 63 61 6c 00 00 0c 00 01" + // Query PTR: _companion-link._tcp.local
-                "08 5f 68 6f 6d 65 6b 69 74 c0 1c 00 0c 00 01" + // Query PTR: _homekit._tcp.local
-                "03 68 61 6c c0 21 00 41 00 01" + // Query Unknown: hal.local
-                "c0 3b 00 1c 00 01" + // Query IPv6: hal.local
-                "c0 3b 00 01 00 01" + // Query IPv4: hal.local
+                "0f 5f 63 6f 6d 70 61 6e 69 6f 6e 2d 6c 69 6e 6b 04 5f 74 63 70 05 6c 6f 63 61 6c 00 00 0c 00 01" + // (offset 12) Query PTR: _companion-link._tcp.local
+                "08 5f 68 6f 6d 65 6b 69 74 c0 1c 00 0c 00 01" + // (offset 44) Query PTR: _homekit._tcp.local
+                "03 68 61 6c c0 21 00 41 00 01" + // (offset 59) Query Unknown: hal.local
+                "c0 3b 00 1c 00 01" + // (offset 69) Query IPv6: hal.local
+                "c0 3b 00 01 00 01" + // (offset 75) Query IPv4: hal.local
                 "0c 5f 73 6c 65 65 70 2d 70 72 6f 78 79 04 5f 75 64 70 c0 21 00 0c 00 01" + // Query PTR: _sleep-proxy._udp.local
                 "00 00 29 05 a0 00 00 11 94 00 12 00 04 00 0e 00 65 7a e6 ba 29 34 00 d6 07 3a f2 2e e7" // Additional records
         ).replace(" ", ""));
         ByteArrayInputStream buffer = new ByteArrayInputStream(input);
-        BinaryStructInputStream in = new BinaryStructInputStream(buffer);
-        DnsPacket packet = DnsPacket.read(in);
+        DnsPacket packet = DnsPacket.read(buffer);
 
         assertEquals("id", 0x00, packet.getHeader().id);
         assertFalse("flagQueryResponse", packet.getHeader().flagQueryResponse);
@@ -441,31 +436,31 @@ Multicast Domain Name System (query)
         assertEquals("clazz", DnsConstants.CLASS.IN, question1.clazz);
 
         DnsPacketQuestion question2 = packet.getQuestions().get(1);
-        //assertEquals("qNAME", "_homekit._tcp.local", question2.name);
-        assertEquals("qNAME", "_homekit.28", question2.name); // TODO: Fix support for string pointers
+        assertEquals("qNAME", "_homekit._tcp.local", question2.name);
+        //assertEquals("qNAME", "_homekit.<28>", question2.name); // TODO: Fix support for string pointers
         assertEquals("type", DnsConstants.TYPE.PTR, question2.type);
         assertEquals("clazz", DnsConstants.CLASS.IN, question2.clazz);
 
         DnsPacketQuestion question3 = packet.getQuestions().get(2);
-        //assertEquals("qNAME", "hal.local", question3.name);
-        assertEquals("qNAME", "hal.33", question3.name);
+        assertEquals("qNAME", "hal.local", question3.name);
+        //assertEquals("qNAME", "hal.<33>", question3.name);
         assertEquals("clazz", DnsConstants.CLASS.IN, question3.clazz);
 
         DnsPacketQuestion question4 = packet.getQuestions().get(3);
-        //assertEquals("qNAME", "hal.local", question4.name);
-        assertEquals("qNAME", "59", question4.name);
+        assertEquals("qNAME", "hal.local", question4.name);
+        //assertEquals("qNAME", "<59>", question4.name);
         assertEquals("type", DnsConstants.TYPE.AAAA, question4.type);
         assertEquals("clazz", DnsConstants.CLASS.IN, question4.clazz);
 
         DnsPacketQuestion question5 = packet.getQuestions().get(4);
-        //assertEquals("qNAME", "hal.local", question5.name);
-        assertEquals("qNAME", "59", question5.name);
+        assertEquals("qNAME", "hal.local", question5.name);
+        //assertEquals("qNAME", "<59>", question5.name);
         assertEquals("type", DnsConstants.TYPE.A, question5.type);
         assertEquals("clazz", DnsConstants.CLASS.IN, question5.clazz);
 
         DnsPacketQuestion question6 = packet.getQuestions().get(5);
-        //assertEquals("qNAME", "_sleep-proxy._udp.local", question6.name);
-        assertEquals("qNAME", "_sleep-proxy._udp.33", question6.name);
+        assertEquals("qNAME", "_sleep-proxy._udp.local", question6.name);
+        //assertEquals("qNAME", "_sleep-proxy._udp.<33>", question6.name);
         assertEquals("type", DnsConstants.TYPE.PTR, question6.type);
         assertEquals("clazz", DnsConstants.CLASS.IN, question6.clazz);
     }

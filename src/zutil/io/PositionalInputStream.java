@@ -16,7 +16,7 @@ public class PositionalInputStream extends FilterInputStream {
     /**
      * @param in the underlying input stream.
      */
-    protected PositionalInputStream(InputStream in) {
+    public PositionalInputStream(InputStream in) {
         super(in);
     }
 
@@ -60,8 +60,8 @@ public class PositionalInputStream extends FilterInputStream {
     }
 
     @Override
-    public void mark(int readlimit) {
-        super.mark(readlimit);
+    public void mark(int readLimit) {
+        super.mark(readLimit);
 
         synchronized(this) {
             mark = pos;
