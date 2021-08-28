@@ -80,7 +80,8 @@ public class Configurator<T> {
     }
 
     /**
-     * Interface for providing a specific selection of values that a user is allowed to pick from for assignment to a object field.
+     * Interface for providing a specific selection of values that a user is allowed to pick from for assignment to an object field.
+     * The instantiation of the value provider will be done and cashed for each class type.
      * The class implementing this interface is required to have one of the below constructors for instantiation:
      * <pre>
      *     ** no constructors **
@@ -274,7 +275,7 @@ public class Configurator<T> {
     }
 
 
-    public static class ConfigurationParam implements Comparable<ConfigurationParam>{
+    public static class ConfigurationParam implements Comparable<ConfigurationParam> {
         protected String niceName;
         protected String description;
         protected int order;
