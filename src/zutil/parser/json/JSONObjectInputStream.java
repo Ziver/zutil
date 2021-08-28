@@ -30,10 +30,7 @@ import zutil.parser.Base64Decoder;
 import zutil.parser.DataNode;
 
 import java.io.*;
-import java.lang.reflect.Array;
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Modifier;
+import java.lang.reflect.*;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -241,30 +238,38 @@ public class JSONObjectInputStream extends InputStream implements ObjectInput, C
 
         // Date and time objects
         if (Date.class.isAssignableFrom(objClass)) {
-            obj = new Date(json.getLong("timestamp"));
+            if (json.getString("timestamp") != null) {
+                obj = new Date(json.getLong("timestamp"));
+            }
         }
         else if (Calendar.class.isAssignableFrom(objClass)) {
-            obj = Calendar.getInstance();
-            ((Calendar) obj).setTimeInMillis(json.getLong("timestamp"));
+            if (json.getString("timestamp") != null) {
+                obj = Calendar.getInstance();
+                ((Calendar) obj).setTimeInMillis(json.getLong("timestamp"));
+            }
         }
         // Instantiate generic object
         else{
-            obj = objClass.getDeclaredConstructor().newInstance();
+            try {
+                obj = objClass.getDeclaredConstructor().newInstance();
 
-            // Read all fields from the new object instance
-            for (Field field : ClassUtil.getAllDeclaredFields(obj.getClass())) {
-                if ((field.getModifiers() & Modifier.STATIC) == 0 &&
-                        (field.getModifiers() & Modifier.TRANSIENT) == 0 &&
-                        json.get(field.getName()) != null) {
-                    // Parse field
-                    field.setAccessible(true);
-                    field.set(obj, readType(
-                            field.getType(),
-                            ClassUtil.getGenericClasses(field),
-                            field.get(obj),
-                            field.getName(),
-                            json.get(field.getName())));
+                // Read all fields from the new object instance
+                for (Field field : ClassUtil.getAllDeclaredFields(obj.getClass())) {
+                    if ((field.getModifiers() & Modifier.STATIC) == 0 &&
+                            (field.getModifiers() & Modifier.TRANSIENT) == 0 &&
+                            json.get(field.getName()) != null) {
+                        // Parse field
+                        field.setAccessible(true);
+                        field.set(obj, readType(
+                                field.getType(),
+                                ClassUtil.getGenericClasses(field),
+                                field.get(obj),
+                                field.getName(),
+                                json.get(field.getName())));
+                    }
                 }
+            } catch (Exception e) {
+                logger.warning("Unable to instantiate object(" + key + "): " + e.getMessage());
             }
         }
         // Add object to the cache
