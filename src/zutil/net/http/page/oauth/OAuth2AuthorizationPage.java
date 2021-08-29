@@ -42,12 +42,12 @@ import java.util.logging.Logger;
  *
  * <pre>
  * From RFC:
- *      +---------+                                  +---------------+
- *      |         |&#62;---(D)-- Authorization Code ----&#62;|               |
- *      |  Client |          and Redirection URI     | Authorization |
- *      |         |                                  |     Server    |
- *      |         |&#60;---(E)----- Access Token -------&#60;|               |
- *      +---------+     (w/ Optional Refresh Token)  +---------------+
+ *      +---------+                                    +---------------+
+ *      |         | &#62;---(D)-- Authorization Code ----&#62; |               |
+ *      |  Client |           and Redirection URI      | Authorization |
+ *      |         |                                    |     Server    |
+ *      |         | &#60;---(E)----- Access Token -------&#60; |               |
+ *      +---------+      (w/ Optional Refresh Token)   +---------------+
  * </pre>
  *
  * @see <a href="https://tools.ietf.org/html/rfc6749#section-4">RFC 6749: Chapter 4</a>
@@ -161,9 +161,9 @@ public class OAuth2AuthorizationPage implements HttpPage {
                 return;
         }
 
-        // Setup the redirect
+        // Prepare the redirect
 
-        logger.warning("OAuth2 successful authorization of client: " + clientId);
+        logger.info("OAuth2 successful authorization of client: " + clientId);
         redirect(out, url);
     }
 

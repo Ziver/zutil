@@ -40,13 +40,13 @@ import zutil.parser.DataNode;
  *
  * <pre>
  * From RFC:
- *   +---------+                                  +---------------+
- *   |         |                                  |               |
- *   |         |&#62;--(A)- Client Authentication ---&#62;| Authorization |
- *   | Client  |                                  |     Server    |
- *   |         |&#60;--(B)---- Access Token ---------&#60;|               |
- *   |         |                                  |               |
- *   +---------+                                  +---------------+
+ *   +---------+                                    +---------------+
+ *   |         |                                    |               |
+ *   |         | &#62;--(A)- Client Authentication ---&#62; | Authorization |
+ *   | Client  |                                    |     Server    |
+ *   |         | &#60;--(B)---- Access Token ---------&#60; |               |
+ *   |         |                                    |               |
+ *   +---------+                                    +---------------+
  * </pre>
  *
  *
@@ -162,7 +162,7 @@ public class OAuth2TokenPage extends HttpJsonPage {
         if (clientId == null)
             clientId = registry.getClientIdForAuthenticationCode(authorizationCode);
 
-        logger.warning("OAuth2 successful token provisioning for client: " + clientId);
+        logger.info("OAuth2 successful token provisioning for client: " + clientId);
 
         String token = registry.generateToken();
         long timeoutMillis = registry.registerAccessToken(clientId, token);
