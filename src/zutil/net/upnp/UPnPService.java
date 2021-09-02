@@ -25,9 +25,7 @@
 package zutil.net.upnp;
 
 /**
- * Information about a UPNP Service
- * 
- * @author Ziver
+ * A interface that represents a UPnP service.
  */
 public interface UPnPService {
 

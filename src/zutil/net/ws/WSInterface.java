@@ -76,8 +76,7 @@ public interface WSInterface {
 
 
     /**
-     * Annotation that assigns a name to an parameters
-     * in an method.
+     * Annotation will change the exposed name of the annotated field or method input parameter.
      */
     @Retention(RetentionPolicy.RUNTIME)
     @Target({ElementType.PARAMETER, ElementType.FIELD})

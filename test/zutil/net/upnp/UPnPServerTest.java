@@ -38,7 +38,7 @@ import java.io.IOException;
 public class UPnPServerTest {
 
     public static void main(String[] args) throws IOException{
-        UPnPMediaServer upnp = new UPnPMediaServer("http://192.168.0.60:8080/");
+        UPnPServer upnp = new UPnPServer("http://192.168.0.60:8080/");
         MultiPrintStream.out.println("UPNP Server running");
 
         UPnPContentDirectory cds = new UPnPContentDirectory(new File("C:\\Users\\Ziver\\Desktop\\lan"));

@@ -24,7 +24,10 @@
 
 package zutil.net.upnp.service;
 
-import org.dom4j.DocumentException;
+import org.dom4j.Document;
+import org.dom4j.DocumentHelper;
+import org.dom4j.Element;
+import org.dom4j.io.XMLWriter;
 import zutil.io.file.FileUtil;
 import zutil.net.http.HttpHeader;
 import zutil.net.http.HttpPage;
@@ -40,16 +43,11 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Information about a UPNP Service
- *
- * @author Ziver
+ * A directory browsing UPnP service.
  */
 public class UPnPContentDirectory implements UPnPService, HttpPage, WSInterface {
-    public static final int VERSION = 1;
-
     private static List<File> file_list;
 
-    public UPnPContentDirectory() {}
 
     public UPnPContentDirectory(File dir) {
         file_list = FileUtil.search(dir, new LinkedList<>(), true, Integer.MAX_VALUE);
@@ -85,7 +83,8 @@ public class UPnPContentDirectory implements UPnPService, HttpPage, WSInterface 
      */
     @WSReturnName("Id")
     public int GetSystemUpdateID() {
-        return 0;
+        // Todo: add caching support
+        return (int) (Math.random() *  Integer.MAX_VALUE);
     }
 
     /**
@@ -96,55 +95,53 @@ public class UPnPContentDirectory implements UPnPService, HttpPage, WSInterface 
      * in any particular object container.
      *
      */
-    //@WSNameSpace("urn:schemas-upnp-org:service:ContentDirectory:1")
+    @WSPath("urn:schemas-upnp-org:service:ContentDirectory:1")
     public BrowseRetObj Browse(
-            @WSParamName("ObjectID") String ObjectID,
-            @WSParamName("BrowseFlag") String BrowseFlag,
-            @WSParamName("Filter") String Filter,
-            @WSParamName("StartingIndex") int StartingIndex,
-            @WSParamName("RequestedCount") int RequestedCount,
-            @WSParamName("SortCriteria") String SortCriteria) {
+            @WSParamName("ObjectID") String objectID,
+            @WSParamName("BrowseFlag") String browseFlag,
+            @WSParamName("filter") String filter,
+            @WSParamName("StartingIndex") int startingIndex,
+            @WSParamName("RequestedCount") int requestedCount,
+            @WSParamName("SortCriteria") String sortCriteria) {
 
         BrowseRetObj ret = new BrowseRetObj();
-        if (BrowseFlag.equals("BrowseMetadata")) {
+
+        if (browseFlag.equals("BrowseMetadata")) {
 
         }
-        else if (BrowseFlag.equals("BrowseDirectChildren")) {
-            StringBuilder xml = new StringBuilder();
-            xml.append("<DIDL-Lite xmlns:dc=\"http://purl.org/dc/elements/1.1/\" " +
-                    "xmlns:upnp=\"urn:schemas-upnp-org:metadata-1-0/upnp/\" " +
-                    "xmlns=\"urn:schemas-upnp-org:metadata-1-0/DIDL-Lite/\">");
-            List<File> tmp = FileUtil.search(file_list.get(Integer.parseInt(ObjectID)), new LinkedList<>(), false);
-            for (File file : tmp) {
-                xml.append("	<container id=\"").append(file_list.indexOf(file)).append("\" ");
-                if (tmp.get(0) != file) xml.append("parentID=\"").append(file_list.indexOf(file.getParent())).append("\" ");
-                if (file.isDirectory()) xml.append("childCount=\"").append(file.list().length).append("\" ");
-                xml.append("restricted=\"1\" searchable=\"0\" >");
+        else if (browseFlag.equals("BrowseDirectChildren")) {
+            Document document = DocumentHelper.createDocument();
+            Element rootElement = document.addElement("DIDL-Lite", "urn:schemas-upnp-org:metadata-1-0/DIDL-Lite/");
+            rootElement.addNamespace("dc", "http://purl.org/dc/elements/1.1/");
+            rootElement.addNamespace("upnp", "urn:schemas-upnp-org:metadata-1-0/upnp/");
 
-                xml.append("		<dc:title>").append(file.getName()).append("</dc:title> ");
-                if (file.isDirectory())
-                    xml.append("		<upnp:class>object.container.storageFolder</upnp:class> ");
-                else
-                    xml.append("		<upnp:class>object.container</upnp:class> ");
-                xml.append("		<upnp:storageUsed>").append((int) (file.length() / 1000)).append("</upnp:storageUsed> ");
-                xml.append("	</container> ");
+            List<File> fileList = FileUtil.search(file_list.get(Integer.parseInt(objectID)), new LinkedList<>(), false);
 
-                ret.NumberReturned++;
-                ret.TotalMatches++;
+            for (File file : fileList) {
+                Element containerElement = rootElement.addElement("container")
+                        .addAttribute("id", "" + file_list.indexOf(file))
+                        .addAttribute("restricted", "1")
+                        .addAttribute("searchable", "0");
+
+                if (fileList.get(0) != file)
+                    containerElement.addAttribute("parentID", "" + file_list.indexOf(file.getParent()));
+
+                containerElement.addElement("dc:title").setText(file.getName());
+                containerElement.addElement("upnp:storageUsed").setText("" + (int) (file.length() / 1000));
+
+                if (file.isDirectory()) {
+                    containerElement.addAttribute("childCount", "" + file.list().length);
+                    containerElement.addElement("upnp:class").setText("object.container.storageFolder");
+                } else {
+                    containerElement.addElement("upnp:class").setText("object.container");
+                }
             }
-            xml.append("</DIDL-Lite>");
 
-            ret.Result = xml.toString();
-            //Document document = DocumentHelper.parseText(xml.toString());
-            //ret.Result =  document.getRootElement();
+            ret.NumberReturned = fileList.size();
+            ret.TotalMatches = rootElement.elements().size();
+            ret.Result = document.asXML();
         }
         return ret;
-    }
-    public class BrowseRetObj extends WSReturnObject{
-        public String Result;
-        public int NumberReturned;
-        public int TotalMatches;
-        public int UpdateID;
     }
 
 
@@ -155,7 +152,7 @@ public class UPnPContentDirectory implements UPnPService, HttpPage, WSInterface 
                         Map<String, String> request) throws IOException {
 
         out.enableBuffering(true);
-        out.setHeader("Content-Type", "text/xml");
+        out.setHeader(HttpHeader.HEADER_CONTENT_TYPE, "text/xml");
 
         out.println("<?xml version=\"1.0\" encoding=\"utf-8\"?>");
         out.println("<scpd xmlns=\"urn:schemas-upnp-org:service-1-0\">");
@@ -607,5 +604,16 @@ public class UPnPContentDirectory implements UPnPService, HttpPage, WSInterface 
 
         out.println("	</actionList>");
         out.println("</scpd>");
+    }
+
+    public static class BrowseRetObj extends WSReturnObject {
+        @WSParamName("Result")
+        public String Result;
+        @WSParamName("NumberReturned")
+        public int NumberReturned;
+        @WSParamName("TotalMatches")
+        public int TotalMatches;
+        @WSParamName("UpdateID")
+        public int updateID;
     }
 }
