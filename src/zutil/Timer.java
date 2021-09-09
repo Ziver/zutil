@@ -49,6 +49,7 @@ public class Timer {
         reset();
     }
 
+
     /**
      * Will start or restart the timer if it is already running
      *
@@ -71,6 +72,15 @@ public class Timer {
      */
     public boolean hasTimedOut() {
         return timestamp + period < System.currentTimeMillis();
+    }
+
+    /**
+     * @return the timestamp in the future based on epoc in milliseconds where the timer will timeout or -1 if the timer has already timeout.
+     */
+    public long getTimeoutTimeMillis() {
+        if (hasTimedOut())
+            return -1;
+        return timestamp + period;
     }
 
     public String toString() {

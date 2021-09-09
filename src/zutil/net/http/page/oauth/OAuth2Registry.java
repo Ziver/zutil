@@ -235,6 +235,42 @@ public class OAuth2Registry implements Serializable {
         return null;
     }
 
+    /**
+     * @param clientId is the client_id string
+     * @return all the authorization codes assigned to the given clientID or empty list if client does not exist
+     */
+    public List<String> getAuthenticationCodes(String clientId) {
+        OAuth2ClientRegister clientRegister = getClientRegister(clientId);
+
+        if (clientRegister != null)
+            return new ArrayList<>(clientRegister.authCodes.keySet());
+        return Collections.EMPTY_LIST;
+    }
+
+    /**
+     * @param clientId is the client_id string
+     * @return all the access tokens assigned to the given clientID or empty list if client does not exist
+     */
+    public List<String> getAccessTokens(String clientId) {
+        OAuth2ClientRegister clientRegister = getClientRegister(clientId);
+
+        if (clientRegister != null)
+            return new ArrayList<>(clientRegister.accessTokens.keySet());
+        return Collections.EMPTY_LIST;
+    }
+
+    /**
+     * @param token is the access token to get timeout value for.
+     * @return an epic based value in milliseconds where the token stops being valid or -1 if token is already invalid or does not exist.
+     */
+    public long getAccessTokenTimeout(String token) {
+        OAuth2ClientRegister clientRegister = getClientRegisterForToken(token);
+
+        if (clientRegister != null)
+            return clientRegister.accessTokens.get(token).getTimeoutTimeMillis();
+        return -1;
+    }
+
     // ------------------------------------------------------
     // Listeners
     // ------------------------------------------------------
