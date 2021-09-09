@@ -25,6 +25,8 @@
 package zutil.parser.json;
 
 import zutil.ClassUtil;
+import zutil.io.StringInputStream;
+import zutil.io.StringOutputStream;
 import zutil.log.LogUtil;
 import zutil.parser.Base64Decoder;
 import zutil.parser.DataNode;
@@ -52,6 +54,23 @@ public class JSONObjectInputStream extends InputStream implements ObjectInput, C
     }
     public JSONObjectInputStream(InputStream in) {
         this.parser = new JSONParser(in);
+    }
+
+
+    /**
+     * @return a String containing the JSON representation of the Object
+     */
+    public static <T> T parse(String json) {
+        try {
+            StringInputStream in = new StringInputStream();
+            JSONObjectInputStream reader = new JSONObjectInputStream(in);
+            T object = reader.readGenericObject();
+            reader.close();
+            return object;
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
 

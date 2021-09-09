@@ -79,6 +79,7 @@ public class JSONObjectOutputStream extends OutputStream implements ObjectOutput
         return null;
     }
 
+
     public synchronized void writeObject(Object obj) throws IOException{
         try {
             out.write(getDataNode(obj));
