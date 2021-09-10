@@ -24,15 +24,15 @@
 
 package zutil;
 
+import java.io.Serializable;
+
 /**
  * This class is a timer, it will track time and
  * timeout after a specific amount of time.
  * <br>
  * Note that the {@link #start()} method needs to be called for the timer to start.
- *
- * Created by Ziver on 2015-07-15.
  */
-public class Timer {
+public class Timer implements Serializable {
     /** The timeout period **/
     private long period;
     /** The timestamp when the timer was started, -1 if timer has not been started or has been reset **/
@@ -40,15 +40,31 @@ public class Timer {
 
 
     /**
+     * Create a new timer with no timeout period configured.
+     */
+    public Timer() {}
+
+    /**
      * Create a new timer that will timeout in a specified amount of time from now.
      *
-     * @param millisecond the time in milliseconds that the timeout should happen.
+     * @param millisecond is the period in milliseconds that the timeout should happen in.
      */
     public Timer(long millisecond) {
         this.period = millisecond;
         reset();
     }
 
+
+    /**
+     * Sets a new timeout period. Note that this will modify the timeout of a already started timer.
+     *
+     * @param millisecond is the new period of timeout in milliseconds.
+     * @return a reference of itself
+     */
+    public Timer setPeriod(long millisecond) {
+        this.period = millisecond;
+        return this;
+    }
 
     /**
      * Will start or restart the timer if it is already running
@@ -62,9 +78,12 @@ public class Timer {
 
     /**
      * Will reset the timer so that {@link #hasTimedOut()} returns true
+     *
+     * @return a reference of itself
      */
-    public void reset() {
+    public Timer reset() {
         timestamp = -1;
+        return this;
     }
 
     /**

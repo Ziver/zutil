@@ -62,7 +62,7 @@ public class JSONObjectInputStream extends InputStream implements ObjectInput, C
      */
     public static <T> T parse(String json) {
         try {
-            StringInputStream in = new StringInputStream();
+            StringInputStream in = new StringInputStream(json);
             JSONObjectInputStream reader = new JSONObjectInputStream(in);
             T object = reader.readGenericObject();
             reader.close();
@@ -119,7 +119,15 @@ public class JSONObjectInputStream extends InputStream implements ObjectInput, C
         try {
             DataNode root = parser.read();
             if (root != null) {
-                return (T) readObject(c, null, root);
+                if (root.isList()) { // Handle json that starts as an array
+                    ArrayList list = new ArrayList();
+                    for (DataNode node : root) {
+                        list.add((T) readObject(c, null, node));
+                    }
+                    return (T) list;
+                } else { // Handle json that starts as an object
+                    return (T) readObject(c, null, root);
+                }
             }
         } catch (Exception e) {
             logger.log(Level.SEVERE, null, e);
@@ -132,7 +140,7 @@ public class JSONObjectInputStream extends InputStream implements ObjectInput, C
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
     protected Object readType(Class<?> type, Class<?>[] genericType, Object currentValue, String key, DataNode json)
-            throws IllegalAccessException, ClassNotFoundException, InstantiationException, NoSuchFieldException, NoSuchMethodException, InvocationTargetException {
+            throws IllegalAccessException, ClassNotFoundException, InstantiationException, NoSuchMethodException, InvocationTargetException {
 
         if (json == null || type == null)
             return null;
@@ -217,12 +225,12 @@ public class JSONObjectInputStream extends InputStream implements ObjectInput, C
     }
 
 
-    protected Object readObject(Class<?> type, String key, DataNode json) throws IllegalAccessException, InstantiationException, ClassNotFoundException, IllegalArgumentException, NoSuchFieldException, NoSuchMethodException, InvocationTargetException {
+    protected Object readObject(Class<?> type, String key, DataNode json) throws ClassNotFoundException, IllegalArgumentException {
         // Only parse if json is a map
         if (json == null || !json.isMap())
             return null;
         // See if the Object id is in the cache before continuing
-        if (json.getString("@object_id") != null && objectCache.containsKey(json.getInt(MD_OBJECT_ID)))
+        if (json.getString(MD_OBJECT_ID) != null && objectCache.containsKey(json.getInt(MD_OBJECT_ID)))
             return objectCache.get(json.getInt(MD_OBJECT_ID));
 
         // ------------------------------------------------

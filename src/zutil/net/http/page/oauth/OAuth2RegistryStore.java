@@ -36,6 +36,7 @@ public interface OAuth2RegistryStore {
         public HashMap<String, Timer> accessTokens = new HashMap<>();
 
 
+        public OAuth2ClientRegister() {}
         public OAuth2ClientRegister(String clientId) {
             this.clientId = clientId;
         }
