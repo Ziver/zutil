@@ -29,7 +29,7 @@ import java.net.URL;
 import java.util.HashMap;
 
 /**
- * Handles URLs in the HTTP protocol
+ * Handles URLs used by the HTTP protocol
  *
  * @author Ziver
  */
@@ -84,44 +84,96 @@ public class HttpURL {
         return anchor;
     }
 
-    public void setProtocol(String prot) {
-        this.protocol = prot;
+    public String getParameter(String key) {
+        return parameters.get(key);
     }
 
-    public void setHost(String host) {
+
+    /**
+     * @param protocol the protocol to set in the URL
+     * @return a reference to this object so that set methods can be chained.
+     */
+    public HttpURL setProtocol(String protocol) {
+        this.protocol = protocol;
+
+        return this;
+    }
+
+    /**
+     * @param host the host to set in the URL
+     * @return a reference to this object so that set methods can be chained.
+     */
+    public HttpURL setHost(String host) {
         this.host = host;
+
+        return this;
     }
 
-    public void setPort(int port) {
+    /**
+     * @param port the port to set in the URL
+     * @return a reference to this object so that set methods can be chained.
+     */
+    public HttpURL setPort(int port) {
         this.port = port;
+
+        return this;
     }
 
-    public void setPath(String path) {
+    /**
+     * @param path the path to set in the URL
+     * @return a reference to this object so that set methods can be chained.
+     */
+    public HttpURL setPath(String path) {
         if (path.length() >= 1 && !path.startsWith(PATH_SEPARATOR))
             path = PATH_SEPARATOR + path;
         this.path = path;
+
+        return this;
     }
 
-    public void setAnchor(String anch) {
-        this.anchor = anch;
+    /**
+     * @param anchor the anchor to set in the URL
+     * @return a reference to this object so that set methods can be chained.
+     */
+    public HttpURL setAnchor(String anchor) {
+        this.anchor = anchor;
+
+        return this;
     }
 
-    public void setParameter(String key, String value) {
+    /**
+     * Add a single key value pair to the URL
+     *
+     * @param key
+     * @param value
+     * @return a reference to this object so that set methods can be chained.
+     */
+    public HttpURL setParameter(String key, String value) {
         this.parameters.put(key, value);
+
+        return this;
     }
 
-    protected void setParameters(HashMap<String, String> pars) {
+    /**
+     * @param pars the key value map that will be set as the parameters of the URL
+     * @return a reference to this object so that set methods can be chained.
+     */
+    protected HttpURL setParameters(HashMap<String, String> pars) {
         this.parameters = pars;
+
+        return this;
     }
 
-    protected void setParameters(String query) {
+    /**
+     * @param query the string representing the key value pair separated by & that will be parsed and set as the parameters of the URL
+     * @return a reference to this object so that set methods can be chained.
+     */
+    protected HttpURL setParameters(String query) {
         if (query == null)
-            return;
+            return this;
         HttpHeaderParser.parseURLParameters(parameters, query);
-    }
 
-    public String getParameter(String key) {
-        return parameters.get(key);
+        return this;
     }
 
     /**
