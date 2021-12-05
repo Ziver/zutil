@@ -35,7 +35,7 @@ import java.util.Map;
 
 /**
  * A stream class that parses a byte stream into binary struct objects.
- * <p></p>
+ * <p>
  * Limitations:<br>
  *  - Does not support sub binary objects.<br>
  *

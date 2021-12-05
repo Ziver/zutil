@@ -45,7 +45,7 @@ import java.util.logging.Logger;
 /**
  * The class that extends this will be able to save its state to a database.
  * Fields that are transient will be ignored, and fields that extend
- * DBBean will be replaced with the an id which corresponds to the field
+ * DBBean will be replaced with the id which corresponds to the field
  * of that object.
  *
  * <p>
@@ -62,6 +62,7 @@ import java.util.logging.Logger;
  * <li>DBBean (A Integer reference to another Bean in another table)</li>
  * <li>List&lt;DBBean&gt; (A reference table is used to associate Beans into the list)</li>
  * </ul>
+ *
  * @author Ziver
  */
 public abstract class DBBean {
@@ -77,7 +78,7 @@ public abstract class DBBean {
         String value();
         /** Change the id column name of the bean, default column name is "id", SQL rules apply should not contain any strange characters or spaces **/
         String idColumn() default "id";
-        /** Sets if the fields in the super classes is also part of the bean **/
+        /** Indicates if the fields in the super classes should also be part of the bean **/
         boolean superBean() default false;
     }
 
@@ -87,7 +88,7 @@ public abstract class DBBean {
     @Retention(RetentionPolicy.RUNTIME)
     @Target(ElementType.FIELD)
     public @interface DBColumn {
-        /** This is the name of the column in the database for the specified field. SQL rules apply, should not contain any strange characters or spaces **/
+        /** The name of the column in the database for the specified field. SQL rules apply, should not contain any strange characters or spaces **/
         String value();
     }
 
@@ -144,8 +145,9 @@ public abstract class DBBean {
     @SuppressWarnings("unchecked")
     public void save(DBConnection db, boolean recursive) throws SQLException{
         if (saveLock.isHeldByCurrentThread()) // If the current thread already has a lock then this
-            return;                           // is a recursive call and we do not need to do anything
-        else if (saveLock.tryLock()) {
+            return;                           // is a recursive call, and we do not need to do anything
+
+        if (saveLock.tryLock()) {
             Class<? extends DBBean> c = this.getClass();
             DBBeanConfig config = DBBeanConfig.getBeanConfig(c);
             try {
@@ -164,13 +166,13 @@ public abstract class DBBean {
                             sqlValues.append(", ");
                         sqlValues.append("?");
                     }
-                    if (config.getFields().size() > 0) { // is there any fields?
+                    if (config.getFields().size() > 0) { // are there any fields in the class?
                         query.append(" (").append(sqlCols).append(")");
                         query.append(" VALUES(").append(sqlValues).append(")");
                     } else
                         query.append(" DEFAULT VALUES");
                 }
-                else if (config.getFields().size() > 0) { // Is there any fields to update?
+                else if (config.getFields().size() > 0) { // are there any fields to update?
                     query.append("UPDATE ").append(config.getTableName());
                     StringBuilder sqlSets = new StringBuilder();
                     for (DBBeanFieldConfig field : config.getFields()) {
@@ -191,8 +193,8 @@ public abstract class DBBean {
                     // Put in the variables in the SQL
                     int index = 1;
                     for (DBBeanFieldConfig field : config.getFields()) {
-                        // Another DBBean class
                         if (DBBean.class.isAssignableFrom(field.getType())) {
+                            // Another DBBean class
                             DBBean subObj = (DBBean) field.getValue(this);
                             if (subObj != null) {
                                 if (recursive || subObj.getId() == null)
@@ -200,14 +202,13 @@ public abstract class DBBean {
                                 stmt.setObject(index, subObj.getId());
                             } else
                                 stmt.setObject(index, null);
-                            index++;
-                        }
-                        // Normal field
-                        else {
+                        } else {
+                            // Normal field
                             Object value = field.getValue(this);
                             stmt.setObject(index, value);
-                            index++;
                         }
+
+                        index++;
                     }
                     if (this.id != null)
                         stmt.setObject(index, this.id);
@@ -290,6 +291,7 @@ public abstract class DBBean {
      * @param		recursive		if all sub beans should be deleted also
      * @throws SQLException if there is any issue with the SQL query
      */
+    @SuppressWarnings("unchecked")
     public void delete(DBConnection db, boolean recursive) throws SQLException{
         Class<? extends DBBean> c = this.getClass();
         DBBeanConfig config = DBBeanConfig.getBeanConfig(c);
@@ -367,8 +369,7 @@ public abstract class DBBean {
         PreparedStatement stmt = db.getPreparedStatement(sql);
         stmt.setObject(1, id);
         // Run query
-        T obj = DBConnection.exec(stmt, DBBeanSQLResultHandler.create(c, db));
-        return obj;
+        return DBConnection.exec(stmt, DBBeanSQLResultHandler.create(c, db));
     }
 
     /**
@@ -400,8 +401,8 @@ public abstract class DBBean {
         query.delete(query.length()-2, query.length());
         query.append(")");
 
-        logger.finest("Create Bean(" + c.getName() + ") query: " + db.toString());
-        PreparedStatement stmt = db.getPreparedStatement(db.toString());
+        logger.finest("Create Bean(" + c.getName() + ") query: " + query);
+        PreparedStatement stmt = db.getPreparedStatement(query.toString());
 
         // Execute the SQL
         DBConnection.exec(stmt);
@@ -432,7 +433,7 @@ public abstract class DBBean {
     }
 
     /**
-     * @return the bean id or null if the bean has not bean saved yet
+     * @return the bean id or null if the bean has not been saved yet
      */
     public final Long getId() {
         return id;

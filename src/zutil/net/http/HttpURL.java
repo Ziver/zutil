@@ -165,7 +165,7 @@ public class HttpURL {
     }
 
     /**
-     * @param query the string representing the key value pair separated by & that will be parsed and set as the parameters of the URL
+     * @param query the string representing the key value pair separated by &amp; that will be parsed and set as the parameters of the URL
      * @return a reference to this object so that set methods can be chained.
      */
     protected HttpURL setParameters(String query) {

@@ -81,6 +81,8 @@ public class FileSearcher implements Iterable<FileSearcher.FileSearchItem>{
 
     /**
      * Defines if the search should go into sub-folders
+     *
+     * @param recursive true if search should be recursive into subfolders
      */
     public void setRecursive(boolean recursive) {
         this.recursive = recursive;
@@ -95,19 +97,25 @@ public class FileSearcher implements Iterable<FileSearcher.FileSearchItem>{
     //}
 
     /**
-     * Sets if the searcher should match to files.
+     * Sets if the search should include files.
+     *
+     * @param searchFiles   true if files should be included in the search results.
      */
     public void searchFiles(boolean searchFiles) {
         this.searchFiles = searchFiles;
     }
     /**
-     * Sets if the searcher should match to folders.
+     * Sets if the search should include folders.
+     *
+     * @param searchFolders true if folders should be included in search.
      */
     public void searchFolders(boolean searchFolders) {
         this.searchFolders = searchFolders;
     }
     /**
-     * Sets if the searcher should go into compressed files.
+     * Sets if the searcher should traverse into compressed files. Currently, only zip files are supported.
+     *
+     * @param searchCompressedFiles true if compressed files should be traversed.
      */
     public void searchCompressedFiles(boolean searchCompressedFiles) {
         this.searchCompressedFiles = searchCompressedFiles;
@@ -248,9 +256,12 @@ public class FileSearcher implements Iterable<FileSearcher.FileSearchItem>{
         boolean isFile();
         boolean isDirectory();
 
-        /** @return an InputStream if this is a file otherwise null **/
+        /**
+         * @return an InputStream if this is a file otherwise null
+         * @throws IOException if there is any IO issue with retrieving the stream object.
+         */
         InputStream getInputStream() throws IOException;
-        /** @return an String array with all files if this is a folder otherwise null **/
+        /** @return a String array with all files if this is a folder otherwise null **/
         String[] listFiles();
     }
 

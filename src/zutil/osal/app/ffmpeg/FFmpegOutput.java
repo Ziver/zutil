@@ -123,6 +123,8 @@ public class FFmpegOutput {
 
     /**
      * Add additional args that may not be supported by the API, these values will be inserted to the command line as is.
+     *
+     * @param args a list of FFmpeg arguments
      */
     public void addAdditionalArg(String... args) {
         additionalArgs.addAll(Arrays.asList(args));

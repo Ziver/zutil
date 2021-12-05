@@ -36,7 +36,7 @@ import java.util.Map;
 
 /**
  * A stream class that generates a byte stream from a binary struct objects.
- * <p></p>
+ * <p>
  * Limitations:<br>
  *  - Does not support sub binary objects.<br>
  *

@@ -9,7 +9,7 @@ public interface AcmeChallengeFactory {
     /**
      * Create a new Challenge object and do any needed actions for the challenge to proceed.
      *
-     * @param authorization
+     * @param authorization the authorization object t o use for the challenge.
      * @return a Challenge object that will be used to authorize a domain.
      * @throws AcmeException in case of any issues
      */
@@ -17,6 +17,8 @@ public interface AcmeChallengeFactory {
 
     /**
      * Do any needed cleanup after challenge has completed successfully or failed.
+     *
+     * @param challenge the Challenge object that was used for the challenge.
      */
     default void postChallengeAction(Challenge challenge) {}
 }

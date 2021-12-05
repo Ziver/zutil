@@ -30,10 +30,10 @@ import java.io.OutputStream;
 
 /**
  * An Interface defining a custom field parser and writer.
- * <p></p>
+ * <p>
  * One singleton instance of the serializer will be instantiated for the lifetime of the
  * {@link BinaryStructInputStream} and {@link BinaryStructOutputStream} objects.
- * <p></p>
+ * <p>
  * NOTE: Partial octet serializing not supported.
  *
  */

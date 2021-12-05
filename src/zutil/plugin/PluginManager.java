@@ -104,21 +104,21 @@ public class PluginManager<T> implements Iterable<PluginData>{
     }
 
     /**
-     * @return a Iterator of all enabled plugins.
+     * @return an Iterator of all enabled plugins.
      */
     @Override
     public Iterator<PluginData> iterator() {
         return new EnabledPluginIterator(toList(plugins.values().iterator()));
     }
     /**
-     * @return a Iterator for singleton Objects from all plugins that are enabled and
+     * @return an Iterator for singleton Objects from all plugins that are enabled and
      *          has defined implementations of the given interface.
      */
     public <K> Iterator<K> getSingletonIterator(Class<K> intf) {
         return new PluginSingletonIterator<>(iterator(), intf);
     }
     /**
-     * @return a Iterator for classes from all plugins that are enabled and has defined
+     * @return an Iterator for classes from all plugins that are enabled and has defined
      *          implementations of the given interface.
      */
     public <K> Iterator<Class<? extends K>> getClassIterator(Class<K> intf) {
@@ -126,7 +126,7 @@ public class PluginManager<T> implements Iterable<PluginData>{
     }
 
     /**
-     * @return a Iterator of all plugins, independently on if they are enabled or disabled.
+     * @return an Iterator of all plugins, independently on if they are enabled or disabled.
      */
     public Iterator<PluginData> iteratorAll() {
         return plugins.values().iterator();
@@ -172,7 +172,7 @@ public class PluginManager<T> implements Iterable<PluginData>{
 
 
     /**
-     * A Iterator that only returns enabled plugins.
+     * An Iterator that only returns enabled plugins.
      */
     protected static class EnabledPluginIterator implements Iterator<PluginData> {
         private List<PluginData> pluginList;
@@ -232,6 +232,7 @@ public class PluginManager<T> implements Iterable<PluginData>{
             return false;
         }
 
+        @SuppressWarnings("unchecked")
         @Override
         public Class<? extends T> next() {
             if (!hasNext())

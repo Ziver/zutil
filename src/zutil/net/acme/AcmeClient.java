@@ -56,6 +56,12 @@ public class AcmeClient {
     /**
      * Create a new instance of the ACME Client and authenticates the user account towards
      * the AMCE service, if no account exists then a new one will be created.
+     *
+     * @param dataStore         the AcmeDataStore that should be used to store persistent data.
+     * @param challengeFactory  the challenge type to be used.
+     * @param acmeServerUrl     the URL to the ACME server.
+     *
+     * @throws AcmeException in case there is an issue retrieving the ACME account information.
      */
     public AcmeClient(AcmeDataStore dataStore, AcmeChallengeFactory challengeFactory, String acmeServerUrl) throws AcmeException {
         Security.addProvider(new BouncyCastleProvider());
@@ -88,7 +94,7 @@ public class AcmeClient {
      * This method will prepare the request for the ACME service. Any manual action must be taken after this
      * method has been called and before the {@link #requestCertificate()} method is called.
      *
-     * @throws AcmeException
+     * @throws AcmeException    if there is a issue preparing the ACME challenge before doing the request to the server.
      */
     public void prepareRequest() throws AcmeException {
         order = acmeAccount.newOrder().domains(domains).create(); // Order the certificate
@@ -110,6 +116,9 @@ public class AcmeClient {
      * the preparation and the actual request.
      *
      * @return a certificate for the given domains.
+     *
+     * @throws IOException      if there is a network issue connecting to the ACME server.
+     * @throws AcmeException    if there is an issue with the executing the ACME challenge towards the ACME server.
      */
     public X509Certificate requestCertificate() throws IOException, AcmeException {
         if (order == null)
