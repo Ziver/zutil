@@ -24,7 +24,10 @@
 
 package zutil.osal;
 
+import zutil.log.LogUtil;
+
 import java.io.File;
+import java.util.logging.Logger;
 
 
 /**
@@ -46,7 +49,12 @@ import java.io.File;
  *   - win-x86/
  * </pre>
  */
-public class MultiPlatformBinaryManager {
+public class OSALBinaryManager {
+    private static final Logger logger = LogUtil.getLogger();
+
+
+    private OSALBinaryManager() {}
+
 
     /**
      *
@@ -87,8 +95,15 @@ public class MultiPlatformBinaryManager {
             case Windows: binary += ".exe"; break;
         }
 
-        String platform = os + "-" + arch;
-        File platformPath = new File(root, platform);
-        return new File(platformPath, binary);
+        File platformPath = new File(root, os + "-" + arch);
+        if (!platformPath.exists())
+            platformPath = new File(root, os); // if platform is not available, try the generic OS path
+
+        if (platformPath.exists())
+            return new File(platformPath, binary);
+        else {
+            logger.fine("Unable to find platform(" + os + " or " + os + "-" + arch + ") specific path under: " + root);
+            return null;
+        }
     }
 }
