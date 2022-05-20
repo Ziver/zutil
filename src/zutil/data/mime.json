@@ -114,6 +114,10 @@
       "description": "Tape Archive (TAR)",
       "extensions": ["tar"]
     },
+    "x-mpegURL": {
+      "description": "Apple HTTP Live Streaming (HLS)",
+      "extensions": ["m3u8"]
+    },
     "typescript": {
       "description": "Typescript file",
       "extensions": ["ts"]
