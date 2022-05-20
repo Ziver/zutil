@@ -51,7 +51,9 @@ public class FFmpegInput {
     private boolean subtitleEnabled = true;
 
 
-
+    /**
+     * @param input     A path to a file or network resource, see FFmpeg documentation for details https://ffmpeg.org/ffmpeg-protocols.html#Protocols
+     */
     public FFmpegInput(String input) {
         this.input = input;
     }
@@ -152,7 +154,7 @@ public class FFmpegInput {
             command.append(" -sn");
 
         command.append(StringUtil.join(" ", additionalArgs));
-        command.append(" -i ").append(input);
+        command.append(" -i \"").append(input).append("\"");
         return command.toString().trim();
     }
 }

@@ -71,6 +71,9 @@ public class FFmpegOutput {
     private boolean subtitleEnabled = true;
 
 
+    /**
+     * @param output     A path to a file or network resource, see FFmpeg documentation for details https://ffmpeg.org/ffmpeg-protocols.html#Protocols
+     */
     public FFmpegOutput(String output) {
         this.output = output;
     }
@@ -352,7 +355,7 @@ public class FFmpegOutput {
             command.append(" -sn");
 
         command.append(StringUtil.join(" ", additionalArgs));
-        command.append(' ').append(output);
+        command.append(" \"").append(output).append("\"");
         return command.toString().trim();
     }
 }
