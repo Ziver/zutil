@@ -55,7 +55,7 @@ public abstract class OSAbstractionLayer {
         if      (os.contains("Linux"))   return new OsalLinuxImpl();
         else if (os.contains("Windows")) return new OsalWindowsImpl();
         else if (os.contains("Mac"))     return new OsalMacOSImpl();
-        else                            return new OsalDummyImpl();
+        else                            return new OSALDummyImpl();
     }
 
     /**

@@ -73,13 +73,17 @@ public class MultiCommandExecutor implements AutoCloseable{
         } catch (RuntimeException e) {
             throw e;
         } catch (Exception e) {
-            throw new RuntimeException("Unable to initiate shell",e);
+            throw new RuntimeException("Unable to initiate shell", e);
         }
     }
 
-
-    public void exec(String cmd) throws IOException {
-        while (readLine() != null); // read the output from previous exec
+    /**
+     * Method will execute a given command. Note that any previous output of a command will be flushed.
+     *
+     * @param cmd       Is a String containing the command to execute.
+     */
+    public synchronized void exec(String cmd) throws IOException {
+        clear();
         eol = false;
 
         stdin.write(cmd);
@@ -94,6 +98,19 @@ public class MultiCommandExecutor implements AutoCloseable{
         stdin.flush();
     }
 
+    /**
+     * @return a String containing all content until the end of the command execution.
+     */
+    public String readAll() throws IOException {
+        StringBuffer buff = new StringBuffer();
+        String line;
+
+        while ((line= readLine()) != null) {
+            buff.append(line).append('\n');
+        }
+
+        return buff.toString();
+    }
 
     /**
      * @return one line from command execution, or null if the command has finished running
@@ -101,19 +118,27 @@ public class MultiCommandExecutor implements AutoCloseable{
     public String readLine() throws IOException {
         if (eol)
             return null;
+
         String line = stdout.readLine();
         if (line != null && line.startsWith(delimiter)) {
             eol = true;
             return null;
         }
+
         return line;
     }
 
+    /**
+     * Will clear any existing command output from buffer.
+     */
+    public void clear() throws IOException {
+        while (readLine() != null); // read the output from previous exec
+    }
 
     @Override
     public void close() {
         try {
-            // finally close the shell by execution exit command
+            // close the shell by execution exit command
             stdin.write("exit");
             stdin.newLine();
             stdin.flush();

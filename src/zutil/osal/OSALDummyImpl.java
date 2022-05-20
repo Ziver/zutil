@@ -29,7 +29,7 @@ import java.io.File;
 /**
  * This is a dummy implementation for unknown platforms
  */
-public class OsalDummyImpl extends OSAbstractionLayer {
+public class OSALDummyImpl extends OSAbstractionLayer {
 
     @Override
     public OSType getOSType() {
