@@ -36,10 +36,13 @@ import zutil.net.http.HttpPrintStream;
 
 import java.io.*;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.regex.Pattern;
 
 /**
  * This Http Page will host static content from the server.
@@ -47,19 +50,23 @@ import java.util.logging.Logger;
  * Created by Ziver on 2015-03-30.
  */
 public class HttpFilePage implements HttpPage{
-    private static final Logger log = LogUtil.getLogger();
+    private static final Logger logger = LogUtil.getLogger();
     private static final int MAX_CACHE_AGE_SECONDS = 120;
 
-    private final File resource_root;
-    private boolean showFolders;
-    private boolean redirectToIndex;
+    private final File resourceRoot;
+    private boolean showFolders = true;
+    private boolean redirectToIndex = true;
 
-    private final HashMap<File,FileCache> cache;
+    private boolean cacheEnabled = true;
+    private List<Pattern> cacheDisableRegex = new ArrayList<>();
+
+    private final HashMap<File,FileCache> cache = new HashMap<>();
 
     private static class FileCache{
         public long lastModified;
         public String hash;
     }
+
 
     /**
      * @param    file       a reference to a root directory or a file.
@@ -68,10 +75,25 @@ public class HttpFilePage implements HttpPage{
         if (file == null)
             throw new IllegalArgumentException("Root path cannot be null.");;
 
-        this.resource_root = file;
-        this.showFolders = true;
-        this.redirectToIndex = true;
-        this.cache = new HashMap<>();
+        this.resourceRoot = file;
+    }
+
+
+    /**
+     * @param enabled   True to enable caching for all files.
+     */
+    public void enableCaching(boolean enabled) {
+        this.cacheEnabled = enabled;
+    }
+
+    /**
+     * Disable caching for files matching the given regex.
+     *
+     * @param regex  A regex String.
+     */
+    public void disableCaching(String regex) {
+        if (regex != null)
+            cacheDisableRegex.add(Pattern.compile(regex));
     }
 
 
@@ -84,12 +106,15 @@ public class HttpFilePage implements HttpPage{
 
         try {
             // Is the root only one file or a folder
-            if (resource_root.isFile()) {
-                deliverFileWithCache(headers, resource_root, out);
+            if (resourceRoot.isFile()) {
+                if (isCacheEnabled(resourceRoot))
+                    deliverFileWithCache(headers, resourceRoot, out);
+                else
+                    deliverFile(resourceRoot, out);
             } else { // Resource root is a folder
-                File file = new File(resource_root,
+                File file = new File(resourceRoot,
                         headers.getRequestURL());
-                if (file.getCanonicalPath().startsWith(resource_root.getCanonicalPath())) {
+                if (file.getCanonicalPath().startsWith(resourceRoot.getCanonicalPath())) {
                     // Web Gui
                     if (file.isDirectory() && showFolders) {
                         File indexFile = new File(file, "index.html");
@@ -116,29 +141,44 @@ public class HttpFilePage implements HttpPage{
                             out.println("</html>");
                         }
                         else {
-                            throw new SecurityException("User not allowed to view folder: root=" + resource_root.getAbsolutePath());
+                            throw new SecurityException("User not allowed to view folder: root=" + resourceRoot.getAbsolutePath());
                         }
                     }
                     // Deliver the requested file
                     else {
-                        deliverFileWithCache(headers, file, out);
+                        if (isCacheEnabled(file))
+                            deliverFileWithCache(headers, file, out);
+                        else
+                            deliverFile(file, out);
                     }
                 } else {
-                    throw new SecurityException("File is outside of root directory: root=" + resource_root.getAbsolutePath() + " file=" + file.getAbsolutePath());
+                    throw new SecurityException("File is outside of root directory: root=" + resourceRoot.getAbsolutePath() + " file=" + file.getAbsolutePath());
                 }
             }
 
         } catch (FileNotFoundException | SecurityException e) {
             if (!out.isHeaderSent())
                 out.setResponseStatusCode(404);
-            log.log(Level.WARNING, e.getMessage());
+            logger.log(Level.WARNING, e.getMessage());
             out.println("404 Page Not Found: " + headers.getRequestURL());
         } catch (IOException e) {
             if (!out.isHeaderSent())
                 out.setResponseStatusCode(500);
-            log.log(Level.WARNING, null, e);
+            logger.log(Level.WARNING, null, e);
             out.println("500 Internal Server Error: " +e.getMessage());
         }
+    }
+
+    private boolean isCacheEnabled(File file) {
+        if (!cacheEnabled)
+            return false;
+
+        for (Pattern regex : cacheDisableRegex) {
+            if (regex.matcher(file.getPath()).matches())
+                return false;
+        }
+
+        return true;
     }
 
     private void deliverFileWithCache(HttpHeader headers, File file, HttpPrintStream out) throws IOException {
@@ -181,7 +221,7 @@ public class HttpFilePage implements HttpPage{
             }
             return fileCache.hash;
         } catch (NoSuchAlgorithmException e) {
-            log.log(Level.WARNING, "Unable to generate hash", e);
+            logger.log(Level.WARNING, "Unable to generate hash", e);
         }
         return "";
     }
