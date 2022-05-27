@@ -34,7 +34,7 @@ public class FFmpegInputTest {
     public void onlyInput() {
         FFmpegInput ffmpegInput = new FFmpegInput("iTest.mp4");
 
-        assertEquals("-i iTest.mp4", ffmpegInput.buildCommand());
+        assertEquals("-i \"iTest.mp4\"", ffmpegInput.buildCommand());
     }
 
     @Test
@@ -51,6 +51,6 @@ public class FFmpegInputTest {
         assertEquals("-ss 9.1 -to 20.1 -t 10.1" +
                 " -an" +
                 " -sn" +
-                " -i iTest.mp4", ffmpegInput.buildCommand());
+                " -i \"iTest.mp4\"", ffmpegInput.buildCommand());
     }
 }

@@ -38,7 +38,7 @@ public class FFmpegTest {
         ffmpeg.addInput(new FFmpegInput("iTest.mp4"));
         ffmpeg.addOutput(new FFmpegOutput("oTest.mp4"));
 
-        assertEquals("ffmpeg -i iTest.mp4 oTest.mp4", ffmpeg.buildCommand());
+        assertEquals("ffmpeg -i \"iTest.mp4\" \"oTest.mp4\"", ffmpeg.buildCommand());
     }
 
     @Test
@@ -48,7 +48,7 @@ public class FFmpegTest {
         ffmpeg.addInput(new FFmpegInput("iTest.mp4"));
         ffmpeg.addOutput(new FFmpegOutput("oTest.mp4"));
 
-        assertEquals("ffmpeg -loglevel error -i iTest.mp4 oTest.mp4", ffmpeg.buildCommand());
+        assertEquals("ffmpeg -loglevel error -i \"iTest.mp4\" \"oTest.mp4\"", ffmpeg.buildCommand());
     }
 
     @Test
@@ -58,6 +58,6 @@ public class FFmpegTest {
         ffmpeg.addInput(new FFmpegInput("iTest.mp4"));
         ffmpeg.addOutput(new FFmpegOutput("oTest.mp4"));
 
-        assertEquals("ffmpeg -y -i iTest.mp4 oTest.mp4", ffmpeg.buildCommand());
+        assertEquals("ffmpeg -y -i \"iTest.mp4\" \"oTest.mp4\"", ffmpeg.buildCommand());
     }
 }

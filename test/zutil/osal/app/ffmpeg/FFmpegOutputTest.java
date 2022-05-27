@@ -34,7 +34,7 @@ public class FFmpegOutputTest {
     public void onlyOutput() {
         FFmpegOutput ffmpegOutput = new FFmpegOutput("oTest.mp4");
 
-        assertEquals("oTest.mp4", ffmpegOutput.buildCommand());
+        assertEquals("\"oTest.mp4\"", ffmpegOutput.buildCommand());
     }
 
 
@@ -67,7 +67,7 @@ public class FFmpegOutputTest {
                     " -codec:v libx264 -frames 29.8 -filter:v scale=320:240 -b:v 300000 -qscale:v 22" +
                     " -codec:a libmp3lame -ar 48000 -ac 6 -b:a 360000 -qscale:a 23 -an" +
                     " -codec:s subrip -sn" +
-                    " oTest.mp4",
+                    " \"oTest.mp4\"",
                 ffmpegOutput.buildCommand());
     }
 
