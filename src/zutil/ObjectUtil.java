@@ -33,9 +33,24 @@ import java.util.Map;
 public class ObjectUtil {
 
     /**
+     * @return true if all given Objects are null or empty String, List or Map
+     */
+    public static boolean isEmpty(Object... objs) {
+        if (isEmptyCheck(objs))
+            return true;
+
+        for (Object obj : objs) {
+            if (!isEmptyCheck(obj))
+                return false;
+        }
+
+        return true;
+    }
+
+    /**
      * @return true if obj is null or empty String, List, Map
      */
-    public static boolean isEmpty(Object obj) {
+    private static boolean isEmptyCheck(Object obj) {
         if (obj == null)
             return true;
 
