@@ -58,7 +58,7 @@ public class OpenAPIHttpPage implements HttpPage {
             out.setHeader(HttpHeader.HEADER_CONTENT_TYPE, "application/json");
             wsdl.write(out);
         } else {
-            // Output human readable interface
+            // Output human-readable interface
 
             out.println("<!DOCTYPE html>");
             out.println("<html>");
