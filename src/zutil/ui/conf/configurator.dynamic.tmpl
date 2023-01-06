@@ -24,9 +24,7 @@
             var button = $(event.relatedTarget);
             var modal = $(this);
 
-            // Reset all inputs
-            if (formTemplateId != null)
-                modal.find("#" + formTemplateId).empty(); // clear form div
+            modal.find(" input, select").val('').change(); // Reset all inputs
 
             // Set dynamic form data
             $.each(button.attr(), function(fieldName, value) {
@@ -53,10 +51,7 @@
                                 input.parent().prepend("<input type='hidden' name='" + input.prop("name") + "' value='false' />");
                             }
                         } else {
-                            input.val(value);
-
-                            if (input.prop("tagName") == "SELECT")
-                                input.change(); // required for select elements to update properly
+                            input.val(value).change();
                         }
                     }
                 }
