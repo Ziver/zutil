@@ -43,6 +43,7 @@ public class ObjectUtilTest {
         assertTrue(ObjectUtil.isEmpty(new LinkedList<>(), ""));
         assertTrue(ObjectUtil.isEmpty(new HashMap<>(), ""));
         assertTrue(ObjectUtil.isEmpty(new Hashtable<>(), ""));
+        assertTrue(ObjectUtil.isEmpty((Object) new String[0]));
 
 
         assertFalse(ObjectUtil.isEmpty(" ", ""));
@@ -50,6 +51,7 @@ public class ObjectUtilTest {
         assertFalse(ObjectUtil.isEmpty("", new StringBuilder("a")));
         assertFalse(ObjectUtil.isEmpty("", new StringBuffer("a")));
         assertFalse(ObjectUtil.isEmpty("", Arrays.asList(1, 2, 3)));
+        assertFalse(ObjectUtil.isEmpty((Object) new String[]{"a"}));
     }
 
     @Test

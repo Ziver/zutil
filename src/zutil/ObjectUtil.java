@@ -58,6 +58,8 @@ public class ObjectUtil {
             return ((Map) obj).isEmpty();
         else if (obj instanceof List)
             return ((List) obj).isEmpty();
+        else if (obj.getClass().isArray())
+            return ((Object[]) obj).length == 0;
         else if (obj instanceof CharSequence)
             return ((CharSequence) obj).length() == 0;
 
