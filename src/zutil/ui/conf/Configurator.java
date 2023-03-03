@@ -308,7 +308,9 @@ public class Configurator<T> {
             if (valueProvider != null)             type = ConfigType.SELECTION;
             else if (f.getType() == String.class)  type = ConfigType.STRING;
             else if (f.getType() == int.class)     type = ConfigType.NUMBER;
+            else if (f.getType() == long.class)    type = ConfigType.NUMBER;
             else if (f.getType() == double.class)  type = ConfigType.NUMBER;
+            else if (f.getType() == float.class)   type = ConfigType.NUMBER;
             else if (f.getType() == boolean.class) type = ConfigType.BOOLEAN;
             else if (f.getType().isEnum()) {
                 type = ConfigType.SELECTION;
@@ -379,6 +381,10 @@ public class Configurator<T> {
                 case NUMBER:
                     if (field.getType() == double.class)
                         value = Double.parseDouble(selectedValue);
+                    else if (field.getType() == float.class)
+                        value = Float.parseFloat(selectedValue);
+                    else if (field.getType() == long.class)
+                        value = Long.parseLong(selectedValue);
                     else
                         value = Integer.parseInt(selectedValue);
                     break;
