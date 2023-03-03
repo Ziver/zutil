@@ -34,7 +34,7 @@ import java.net.URL;
 import java.util.logging.Logger;
 
 /**
- * This is an factory that generates clients for web services
+ * This is a factory that generates clients for web services
  *
  * @author Ziver
  */

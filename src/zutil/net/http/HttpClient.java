@@ -99,7 +99,7 @@ public class HttpClient implements AutoCloseable {
     }
 
     /**
-     * If set to true the the request will contain the full URL instead of only the path to the page.
+     * If set to true the request will contain the full URL instead of only the path to the page.
      */
     public void setAbsoluteURL(boolean absoluteURL) {
         this.absoluteURL = absoluteURL;

@@ -37,7 +37,7 @@ import static org.junit.Assert.assertNotNull;
  */
 public class RESTClientTest {
 
-    public interface OpenWeartherMap extends WSInterface {
+    public interface OpenWeatherMap extends WSInterface {
 
         @WSPath("")
         int weather(@WSParamName("q") String city);
@@ -46,9 +46,9 @@ public class RESTClientTest {
 
     //@Test
     public void testREST() throws MalformedURLException {
-        OpenWeartherMap restObj = RESTClientFactory.createClient(
+        OpenWeatherMap restObj = RESTClientFactory.createClient(
                 new URL("http://samples.openweathermap.org/data/2.5/"),
-                OpenWeartherMap.class);
+                OpenWeatherMap.class);
 
         assertNotNull(restObj.weather("London,uk"));
     }

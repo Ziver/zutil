@@ -24,16 +24,13 @@
 
 package zutil.net.ws.rest;
 
-import zutil.io.IOUtil;
 import zutil.log.LogUtil;
-import zutil.net.http.HttpClient;
-import zutil.net.http.HttpHeader;
 import zutil.net.http.HttpURL;
+import zutil.net.ws.WSInterface.RequestType;
 import zutil.net.ws.WSMethodDef;
 import zutil.net.ws.WSParameterDef;
 import zutil.net.ws.WebServiceDef;
 import zutil.parser.DataNode;
-import zutil.parser.json.JSONParser;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
@@ -72,31 +69,15 @@ public class RESTClientInvocationHandler implements InvocationHandler {
         WSMethodDef methodDef = wsDef.getMethod(method.getName());
         HttpURL url = generateRESTRequest(methodDef, args);
 
-        String requestType = "GET";
-        if (methodDef.getRequestType() != null)
-            requestType = methodDef.getRequestType().toString();
+        RequestType requestType = RequestType.GET;
+        if (methodDef.getRequestType() != null) {
+            requestType = RequestType.valueOf(methodDef.getRequestType().toString());
+        }
 
         // Send request
 
-        HttpClient request = new HttpClient(HttpClient.HttpRequestType.POST);
-        request.setURL(url);
-        request.setType(requestType);
-
-        logger.fine("Sending request for: " + url);
-        HttpHeader response = request.send();
-        logger.fine("Received response(" + response.getResponseStatusCode() + ")");
-
-        // Parse response
-
-        String rspStr = IOUtil.readContentAsString(request.getResponseInputStream());
-        request.close();
-
-        //if (logger.isLoggable(Level.FINEST)) {
-            System.out.println("********** Response: " + url);
-            System.out.println(rspStr);
-        //}
-
-        Object rspObj = parseRESTResponse(methodDef, rspStr);
+        DataNode jsonResponse = RESTClient.request(requestType, url);
+        Object rspObj = parseRESTResponse(methodDef, jsonResponse);
         return rspObj;
     }
 
@@ -119,13 +100,12 @@ public class RESTClientInvocationHandler implements InvocationHandler {
         return url;
     }
 
-    private Object parseRESTResponse(WSMethodDef methodDef, String str) {
-        DataNode json = JSONParser.read(str);
+    private Object parseRESTResponse(WSMethodDef methodDef, DataNode jsonResponse) {
         List<WSParameterDef> outputs = methodDef.getOutputs();
 
         if (outputs.size() == 1) {
             if (outputs.get(0).getParamClass().isAssignableFrom(DataNode.class))
-                return json;
+                return jsonResponse;
         }
 
         throw new RuntimeException("WS JSON return type currently not supported: " + methodDef);
