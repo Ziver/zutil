@@ -29,9 +29,7 @@ import zutil.ByteUtil;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 
 /**
@@ -42,13 +40,11 @@ import java.util.Map;
  *
  * @author Ziver
  */
-public class BinaryStructOutputStream {
+public class BinaryStructOutputStream extends OutputStream {
 
     private OutputStream out;
     private byte rest;
     private int restBitLength; // length from Most Significant Bit
-
-    private Map<Class, BinaryFieldSerializer> serializerCache = new HashMap<>();
 
 
     public BinaryStructOutputStream(OutputStream out) {
@@ -72,15 +68,22 @@ public class BinaryStructOutputStream {
     }
 
     /**
+     * @see OutputStream#write(int b)
+     */
+    @Override
+    public void write(int b) throws IOException {
+        out.write(b);
+    }
+    /**
      * @see OutputStream#write(byte[])
      */
-    public void write(byte b[]) throws IOException {
+    public void write(byte[] b) throws IOException {
         out.write(b);
     }
     /**
      * @see OutputStream#write(byte[], int, int)
      */
-    public void write(byte b[], int off, int len) throws IOException {
+    public void write(byte[] b, int off, int len) throws IOException {
         out.write(b, off, len);
     }
 
@@ -93,14 +96,10 @@ public class BinaryStructOutputStream {
 
         for (BinaryFieldData field : structDataList) {
             if (field.hasSerializer()) {
-                BinaryFieldSerializer serializer = serializerCache.get(field.getSerializerClass());
-                if (serializer == null) {
-                    serializer = field.getSerializer();
-                    serializerCache.put(serializer.getClass(), serializer);
-                }
+                BinaryFieldSerializer<Object> serializer = field.getSerializer();
 
                 localFlush();
-                serializer.write(out, field.getValue(struct), field);
+                serializer.write(out, field.getValue(struct), field, struct);
             } else {
                 int fieldBitLength = field.getBitLength(struct);
                 byte[] data = field.getByteValue(struct);

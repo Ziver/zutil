@@ -41,13 +41,11 @@ import java.util.Map;
  *
  * @author Ziver
  */
-public class BinaryStructInputStream {
+public class BinaryStructInputStream extends InputStream{
 
     private InputStream in;
     private byte data;
     private int dataBitIndex = -1;
-
-    private Map<Class, BinaryFieldSerializer> serializerCache = new HashMap<>();
 
 
     public BinaryStructInputStream(InputStream in) {
@@ -85,13 +83,9 @@ public class BinaryStructInputStream {
         int totalReadLength = 0;
         for (BinaryFieldData field : structDataList) {
             if (field.hasSerializer()) {
-                BinaryFieldSerializer serializer = serializerCache.get(field.getSerializerClass());
-                if (serializer == null) {
-                    serializer = field.getSerializer();
-                    serializerCache.put(serializer.getClass(), serializer);
-                }
+                BinaryFieldSerializer<Object> serializer = field.getSerializer();
 
-                Object value = serializer.read(in, field);
+                Object value = serializer.read(in, field, struct);
                 field.setValue(struct, value);
             } else {
                 byte[] valueData = new byte[(int) Math.ceil(field.getBitLength(struct) / 8.0)];
@@ -119,21 +113,35 @@ public class BinaryStructInputStream {
         return totalReadLength;
     }
 
+    @Override
+    public int read() throws IOException {
+        return in.read();
+    }
+
+    @Override
+    public int read(byte[] b, int off, int len) throws IOException {
+        return in.read(b, off, len);
+    }
+
     /**
      * @see InputStream#markSupported()
      */
+    @Override
     public boolean markSupported() {
         return in.markSupported();
     }
+
     /**
      * @see InputStream#mark(int)
      */
+    @Override
     public void mark(int limit) {
         in.mark(limit);
     }
     /**
      * @see InputStream#reset()
      */
+    @Override
     public void reset() throws IOException {
         in.reset();
     }

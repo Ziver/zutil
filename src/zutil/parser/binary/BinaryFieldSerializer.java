@@ -31,17 +31,59 @@ import java.io.OutputStream;
 /**
  * An Interface defining a custom field parser and writer.
  * <p>
- * One singleton instance of the serializer will be instantiated for the lifetime of the
+ * A new instance of the serializer will be instantiated for every time serialization is required.
  * {@link BinaryStructInputStream} and {@link BinaryStructOutputStream} objects.
  * <p>
  * NOTE: Partial octet serializing not supported.
- *
  */
 public interface BinaryFieldSerializer<T> {
 
+    /**
+     * Read the given field from the stream.
+     *
+     * @param in           the stream where the data should be read from.
+     * @param field        meta-data about the target field that will be assigned.
+     * @param parentObject the parent object that owns the field.
+     * @return the value that should be assigned to the field.
+     */
+    default T read(InputStream in,
+                   BinaryFieldData field,
+                   Object parentObject) throws IOException {
+        return read(in, field);
+    }
+
+    /**
+     * Read the given field from the stream.
+     *
+     * @param in    the stream where the data should be read from.
+     * @param field meta-data about the target field that will be assigned.
+     * @return the value that should be assigned to the field.
+     */
     T read(InputStream in,
            BinaryFieldData field) throws IOException;
 
+    /**
+     * Write the given field to the output stream.
+     *
+     * @param out          the stream where the field data should be written to.
+     * @param obj          the object that should be serialized and written to the stream.
+     * @param field        meta-data about the source field that will be serialized.
+     * @param parentObject the parent object that owns the field.
+     */
+    default void write(OutputStream out,
+                       T obj,
+                       BinaryFieldData field,
+                       Object parentObject) throws IOException {
+        write(out, obj, field);
+    }
+
+    /**
+     * Write the given field to the output stream.
+     *
+     * @param out   the stream where the field data should be written to.
+     * @param obj   the object that should be serialized and written to the stream.
+     * @param field meta-data about the source field that will be serialized.
+     */
     void write(OutputStream out,
                T obj,
                BinaryFieldData field) throws IOException;

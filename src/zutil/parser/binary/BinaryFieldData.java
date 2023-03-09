@@ -32,8 +32,8 @@ import zutil.parser.binary.BinaryStruct.BinaryField;
 import zutil.parser.binary.BinaryStruct.CustomBinaryField;
 import zutil.parser.binary.BinaryStruct.VariableLengthBinaryField;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
@@ -53,7 +53,7 @@ public class BinaryFieldData {
     private Class<? extends BinaryFieldSerializer> serializerClass;
 
 
-    protected static List<BinaryFieldData> getStructFieldList(Class<? extends BinaryStruct> clazz) {
+    public static List<BinaryFieldData> getStructFieldList(Class<? extends BinaryStruct> clazz) {
         if (!cache.containsKey(clazz)) {
             try {
                 ArrayList<BinaryFieldData> list = new ArrayList<>();
@@ -198,7 +198,9 @@ public class BinaryFieldData {
 
     public BinaryFieldSerializer getSerializer() {
         try {
-            return serializerClass.getDeclaredConstructor().newInstance();
+            Constructor<? extends BinaryFieldSerializer> constructor = serializerClass.getDeclaredConstructor();
+            constructor.setAccessible(true);
+            return constructor.newInstance();
         } catch (ReflectiveOperationException e) {
             throw new RuntimeException("Unable to instantiate class: " + serializerClass, e);
         }

@@ -25,6 +25,7 @@
 package zutil;
 
 import java.util.List;
+import java.util.Objects;
 
 /**
  * A  utility class containing Array specific utility methods
@@ -45,15 +46,87 @@ public class ArrayUtil {
     }
 
     /**
-     * Searches for a given object inside of an array.
+     * Searches for a given object inside an array.
      * The method uses reference comparison or {@link #equals(Object)} to check for equality.
      *
      * @return True if the given Object is found inside the array, false otherwise.
      */
     public static <T> boolean contains(T[] array, T obj) {
         for (final T element : array)
-            if (element == obj || obj != null && obj.equals(element))
+            if (Objects.equals(obj, element))
                 return true;
         return false;
+    }
+
+    /**
+     * Combines multiple arras into one.
+     *
+     * @param arrays the arrays to be combined.
+     * @return one array containing all the elements of the provided arrays.
+     * @param <T>
+     */
+    public static <T> T[] combine(T[]... arrays) {
+        int totalLength = 0;
+        for (T[] array : arrays) {
+            totalLength += array.length;
+        }
+
+        int outputPos = 0;
+        Object[] output = new Object[totalLength];
+
+        for (T[] array : arrays) {
+            System.arraycopy(array, 0, output, outputPos, array.length);
+            outputPos += array.length;
+        }
+
+        return (T[]) output;
+    }
+
+    /**
+     * Combines multiple arras into one.
+     *
+     * @param arrays the arrays to be combined.
+     * @return one array containing all the elements of the provided arrays.
+     * @param <T>
+     */
+    public static int[] combine(int[]... arrays) {
+        int totalLength = 0;
+        for (int[] array : arrays) {
+            totalLength += array.length;
+        }
+
+        int outputPos = 0;
+        int[] output = new int[totalLength];
+
+        for (int[] array : arrays) {
+            System.arraycopy(array, 0, output, outputPos, array.length);
+            outputPos += array.length;
+        }
+
+        return output;
+    }
+
+    /**
+     * Combines multiple arras into one.
+     *
+     * @param arrays the arrays to be combined.
+     * @return one array containing all the elements of the provided arrays.
+     * @param <T>
+     */
+    public static byte[] combine(byte[]... arrays) {
+        int totalLength = 0;
+        for (byte[] array : arrays) {
+            totalLength += array.length;
+        }
+
+        int outputPos = 0;
+        byte[] output = new byte[totalLength];
+
+        for (byte[] array : arrays) {
+            System.arraycopy(array, 0, output, outputPos, array.length);
+            outputPos += array.length;
+        }
+
+        return output;
     }
 }
