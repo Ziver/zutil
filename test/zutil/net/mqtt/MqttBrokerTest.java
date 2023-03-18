@@ -66,7 +66,7 @@ public class MqttBrokerTest {
         MqttPacketHeader responsePacket = thread.sentPackets.poll();
         assertEquals(MqttPacketSubscribeAck.class, responsePacket.getClass());
         assertEquals(subscribePacket.packetId, ((MqttPacketSubscribeAck)responsePacket).packetId);
-        assertEquals(subscribePacket.payload.size(), ((MqttPacketSubscribeAck)responsePacket).payload.size());
+        assertEquals(subscribePacket.payloads.size(), ((MqttPacketSubscribeAck)responsePacket).payloads.size());
     }
 
     @Test
@@ -76,10 +76,10 @@ public class MqttBrokerTest {
         MqttPacketSubscribe subscribePacket = new MqttPacketSubscribe();
         subscribePacket.packetId = (int)(Math.random()*1000);
 
-        subscribePacket.payload.add(new MqttSubscribePayload());
-        subscribePacket.payload.get(0).topicFilter = "topic1";
-        subscribePacket.payload.add(new MqttSubscribePayload());
-        subscribePacket.payload.get(1).topicFilter = "topic2";
+        subscribePacket.payloads.add(new MqttSubscribePayload());
+        subscribePacket.payloads.get(0).topicFilter = "topic1";
+        subscribePacket.payloads.add(new MqttSubscribePayload());
+        subscribePacket.payloads.get(1).topicFilter = "topic2";
 
         thread.handlePacket(subscribePacket);
 
@@ -87,7 +87,7 @@ public class MqttBrokerTest {
         MqttPacketHeader responsePacket = thread.sentPackets.poll();
         assertEquals(MqttPacketSubscribeAck.class, responsePacket.getClass());
         assertEquals(subscribePacket.packetId, ((MqttPacketSubscribeAck)responsePacket).packetId);
-        assertEquals(subscribePacket.payload.size(), ((MqttPacketSubscribeAck)responsePacket).payload.size());
+        assertEquals(subscribePacket.payloads.size(), ((MqttPacketSubscribeAck)responsePacket).payloads.size());
         // Check broker
         assertEquals(1, broker.getSubscriberCount("topic1"));
         assertEquals(1, broker.getSubscriberCount("topic2"));
@@ -95,9 +95,9 @@ public class MqttBrokerTest {
         //************************ Duplicate subscribe packet
 
         subscribePacket.packetId = (int)(Math.random()*1000);
-        subscribePacket.payload.clear();
-        subscribePacket.payload.add(new MqttSubscribePayload());
-        subscribePacket.payload.get(0).topicFilter = "topic1";
+        subscribePacket.payloads.clear();
+        subscribePacket.payloads.add(new MqttSubscribePayload());
+        subscribePacket.payloads.get(0).topicFilter = "topic1";
 
         thread.handlePacket(subscribePacket);
 
@@ -166,8 +166,8 @@ public class MqttBrokerTest {
         MqttPacketUnsubscribe unsubscribePacket = new MqttPacketUnsubscribe();
         unsubscribePacket.packetId = (int)(Math.random()*1000);
 
-        unsubscribePacket.payload.add(new MqttUnsubscribePayload());
-        unsubscribePacket.payload.get(0).topicFilter = "topic1";
+        unsubscribePacket.payloads.add(new MqttUnsubscribePayload());
+        unsubscribePacket.payloads.get(0).topicFilter = "topic1";
 
         thread.handlePacket(unsubscribePacket);
 
@@ -183,10 +183,10 @@ public class MqttBrokerTest {
         MqttPacketSubscribe subscribePacket = new MqttPacketSubscribe();
         subscribePacket.packetId = (int)(Math.random()*1000);
 
-        subscribePacket.payload.add(new MqttSubscribePayload());
-        subscribePacket.payload.get(0).topicFilter = "topic1";
-        subscribePacket.payload.add(new MqttSubscribePayload());
-        subscribePacket.payload.get(1).topicFilter = "topic2";
+        subscribePacket.payloads.add(new MqttSubscribePayload());
+        subscribePacket.payloads.get(0).topicFilter = "topic1";
+        subscribePacket.payloads.add(new MqttSubscribePayload());
+        subscribePacket.payloads.get(1).topicFilter = "topic2";
 
         thread.handlePacket(subscribePacket);
 

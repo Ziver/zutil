@@ -24,6 +24,8 @@
 
 package zutil.parser.binary.serializer;
 
+import zutil.ByteUtil;
+import zutil.converter.Converter;
 import zutil.parser.binary.BinaryFieldData;
 import zutil.parser.binary.BinaryFieldSerializer;
 
@@ -34,7 +36,7 @@ import java.io.StreamCorruptedException;
 import java.nio.charset.StandardCharsets;
 
 /**
- * Serializer handles data that is prefixed by two byte length.
+ * Serializer handles data that is prefixed by two byte length. Null objects will be prefixed by two zero bytes indicating length 0.
  * <p>
  * Currently only these types are supported:
  * <ul>
@@ -46,15 +48,16 @@ public class TwoByteLengthPrefixedDataSerializer implements BinaryFieldSerialize
 
     @Override
     public Object read(InputStream in, BinaryFieldData field) throws IOException {
-        int b = in.read();
-        if (b < 0)
+        int b1, b2;
+        if ((b1 = in.read()) < 0)
             throw new StreamCorruptedException("Stream ended prematurely when reading first length byte.");
-        int length = (b & 0xFF) << 8;
-
-        b = in.read();
-        if (b < 0)
+        if ((b2 = in.read()) < 0)
             throw new StreamCorruptedException("Stream ended prematurely when reading second length byte.");
-        length |= b & 0xFF;
+
+        int length = Converter.toInt(new byte[]{
+                (byte) (0XFF & b2),
+                (byte) (0xFF & b1)
+        });
 
         byte[] payload = new byte[length];
         in.read(payload);
@@ -66,14 +69,19 @@ public class TwoByteLengthPrefixedDataSerializer implements BinaryFieldSerialize
 
     @Override
     public void write(OutputStream out, Object obj, BinaryFieldData field) throws IOException {
-        if (obj == null)
+        if (obj == null) {
+            out.write(0);
+            out.write(0);
             return;
+        }
 
         byte[] payload;
         if (obj instanceof String)
             payload = ((String) obj).getBytes(StandardCharsets.UTF_8);
-        else
+        else if (obj instanceof byte[])
             payload = (byte[]) obj;
+        else
+            throw new UnsupportedOperationException("Class type not supported for serialization: " + obj.getClass().getSimpleName());
 
         int length = payload.length;
 

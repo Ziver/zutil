@@ -24,7 +24,10 @@
 
 package zutil.net.mqtt.packet;
 
+import zutil.parser.binary.BinaryFieldData;
 import zutil.parser.binary.BinaryStruct;
+import zutil.parser.binary.serializer.BinaryStructListSerializer;
+import zutil.parser.binary.serializer.TwoByteLengthPrefixedDataSerializer;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -34,7 +37,7 @@ import java.util.List;
  *
  * @see <a href="http://docs.oasis-open.org/mqtt/mqtt/v3.1.1/mqtt-v3.1.1.html">MQTT v3.1.1 Spec</a>
  */
-public class MqttPacketUnsubscribe extends MqttPacketHeader{
+public class MqttPacketUnsubscribe extends MqttPacketHeader {
 
     // Header
 
@@ -42,24 +45,59 @@ public class MqttPacketUnsubscribe extends MqttPacketHeader{
         type = MqttPacketHeader.PACKET_TYPE_UNSUBSCRIBE;
     }
 
+    // ------------------------------------------
     // Variable Header
+    // ------------------------------------------
 
     @BinaryField(index = 2000, length = 16)
     public int packetId;
 
+
+    @Override
+    public int calculateVariableHeaderLength() {
+        return 2;
+    }
+
+    // ------------------------------------------
     // Payload
+    // ------------------------------------------
 
-    public List<MqttUnsubscribePayload> payload = new LinkedList<>();
+    @CustomBinaryField(index = 3000, serializer = MqttSubscribePayloadSerializer.class)
+    public List<MqttUnsubscribePayload> payloads = new LinkedList<>();
 
 
+    @Override
+    public int calculatePayloadLength() {
+        int length = 0;
+        for (MqttUnsubscribePayload p : payloads) {
+            length += p.calculatePayloadLength();
+        }
+        return length;
+    }
 
     public static class MqttUnsubscribePayload implements BinaryStruct{
-
-        @BinaryField(index = 3001, length = 16)
-        private int topicFilterLength;
+        //@BinaryField(index = 3001, length = 16)
+        //private int topicFilterLength;
         /** A filter indicating the Topic to which the Client wants to subscribe to*/
-        @VariableLengthBinaryField(index = 3002, lengthField = "topicFilterLength")
+        @CustomBinaryField(index = 3002, serializer = TwoByteLengthPrefixedDataSerializer.class)
         public String topicFilter;
 
+
+        protected int calculatePayloadLength() {
+            return 2 + (topicFilter != null ? topicFilter.length() : 0);
+        }
+    }
+
+    private static class MqttSubscribePayloadSerializer extends BinaryStructListSerializer<MqttUnsubscribePayload> {
+
+        protected MqttSubscribePayloadSerializer() {
+            super(MqttUnsubscribePayload.class);
+        }
+
+        @Override
+        protected boolean readNext(int objIndex, int bytesRead, BinaryFieldData field, Object parentObject) {
+            MqttPacketUnsubscribe packetSubscribe = ((MqttPacketUnsubscribe) parentObject);
+            return bytesRead < packetSubscribe.variableHeaderAndPayloadLength - packetSubscribe.calculateVariableHeaderLength();
+        }
     }
 }

@@ -25,13 +25,12 @@
 package zutil.parser.binary;
 
 import zutil.ByteUtil;
+import zutil.io.PositionalInputStream;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * A stream class that parses a byte stream into binary struct objects.
@@ -79,13 +78,13 @@ public class BinaryStructInputStream extends InputStream{
      */
     public int read(BinaryStruct struct) throws IOException {
         List<BinaryFieldData> structDataList = BinaryFieldData.getStructFieldList(struct.getClass());
+        PositionalInputStream positionalInputStream = new PositionalInputStream(in);
 
-        int totalReadLength = 0;
         for (BinaryFieldData field : structDataList) {
             if (field.hasSerializer()) {
-                BinaryFieldSerializer<Object> serializer = field.getSerializer();
+                BinaryFieldSerializer serializer = field.getSerializer();
 
-                Object value = serializer.read(in, field, struct);
+                Object value = serializer.read(positionalInputStream, field, struct);
                 field.setValue(struct, value);
             } else {
                 byte[] valueData = new byte[(int) Math.ceil(field.getBitLength(struct) / 8.0)];
@@ -95,7 +94,7 @@ public class BinaryStructInputStream extends InputStream{
                 // Parse value
                 for (int valueDataIndex=valueData.length-1; valueDataIndex >= 0; --valueDataIndex) {
                     if (dataBitIndex < 0) { // Read new data?
-                        data = (byte) in.read();
+                        data = (byte) positionalInputStream.read();
                         dataBitIndex = 7;
                     }
                     int subBitLength = Math.min(dataBitIndex + 1, field.getBitLength(struct) - fieldReadLength);
@@ -106,11 +105,10 @@ public class BinaryStructInputStream extends InputStream{
                 // Set value
                 ByteUtil.shiftLeft(valueData, shiftBy); // shift data so that LSB is at the beginning
                 field.setByteValue(struct, valueData);
-                totalReadLength += fieldReadLength;
             }
         }
 
-        return totalReadLength;
+        return (int) positionalInputStream.getPosition();
     }
 
     @Override
@@ -121,6 +119,11 @@ public class BinaryStructInputStream extends InputStream{
     @Override
     public int read(byte[] b, int off, int len) throws IOException {
         return in.read(b, off, len);
+    }
+
+    @Override
+    public int available() throws IOException {
+        return in.available();
     }
 
     /**
@@ -145,7 +148,6 @@ public class BinaryStructInputStream extends InputStream{
     public void reset() throws IOException {
         in.reset();
     }
-
 
 
     protected static int shiftLeftBy(int bitIndex, int bitLength) {

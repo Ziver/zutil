@@ -24,8 +24,12 @@
 
 package zutil.net.mqtt.packet;
 
+import zutil.parser.binary.BinaryFieldData;
 import zutil.parser.binary.BinaryStruct;
+import zutil.parser.binary.serializer.BinaryStructListSerializer;
 
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -35,7 +39,7 @@ import java.util.List;
  *
  * @see <a href="http://docs.oasis-open.org/mqtt/mqtt/v3.1.1/mqtt-v3.1.1.html">MQTT v3.1.1 Spec</a>
  */
-public class MqttPacketSubscribeAck extends MqttPacketHeader{
+public class MqttPacketSubscribeAck extends MqttPacketHeader {
 
     // Header
 
@@ -43,16 +47,35 @@ public class MqttPacketSubscribeAck extends MqttPacketHeader{
         type = MqttPacketHeader.PACKET_TYPE_SUBACK;
     }
 
+    // ------------------------------------------
     // Variable Header
+    // ------------------------------------------
 
     @BinaryField(index = 2000, length = 16)
     public int packetId;
 
+
+    @Override
+    public int calculateVariableHeaderLength() {
+        return 2;
+    }
+
+    // ------------------------------------------
     // Payload
+    // ------------------------------------------
 
-    public List<MqttSubscribeAckPayload> payload = new LinkedList<>();
+    @CustomBinaryField(index = 3000, serializer = MqttSubscribeAckPayloadSerializer.class)
+    public List<MqttSubscribeAckPayload> payloads = new LinkedList<>();
 
 
+    @Override
+    public int calculatePayloadLength() {
+        int length = 0;
+        for (MqttSubscribeAckPayload p : payloads) {
+            length += p.calculatePayloadLength();
+        }
+        return length;
+    }
 
     public static class MqttSubscribeAckPayload implements BinaryStruct{
         public static final int RETCODE_SUCESS_MAX_QOS_0 = 0;
@@ -62,5 +85,24 @@ public class MqttPacketSubscribeAck extends MqttPacketHeader{
 
         @BinaryField(index = 3001, length = 8)
         public int returnCode;
+
+
+        protected int calculatePayloadLength() {
+            return 1;
+        }
+    }
+
+
+    private static class MqttSubscribeAckPayloadSerializer extends BinaryStructListSerializer<MqttSubscribeAckPayload> {
+
+        protected MqttSubscribeAckPayloadSerializer() {
+            super(MqttSubscribeAckPayload.class);
+        }
+
+        @Override
+        protected boolean readNext(int objIndex, int bytesRead, BinaryFieldData field, Object parentObject) {
+            MqttPacketSubscribeAck packetSubscribe = ((MqttPacketSubscribeAck) parentObject);
+            return bytesRead < packetSubscribe.variableHeaderAndPayloadLength - packetSubscribe.calculateVariableHeaderLength();
+        }
     }
 }

@@ -26,6 +26,13 @@ package zutil.net.mqtt.packet;
 
 
 import zutil.ByteUtil;
+import zutil.parser.binary.BinaryFieldData;
+import zutil.parser.binary.BinaryFieldSerializer;
+import zutil.parser.binary.serializer.TwoByteLengthPrefixedDataSerializer;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 
 /**
  * A PUBLISH Control Packet is sent from a Client to a Server
@@ -41,42 +48,83 @@ public class MqttPacketPublish extends MqttPacketHeader {
     }
 
 
-    private byte flagDupBitmask = ByteUtil.getBitMask(3, 1);
-    private byte flagQoSBitmask = ByteUtil.getBitMask(1, 2);
-    private byte flagRetainBitmask = ByteUtil.getBitMask(0, 1);
+    private static final byte FLAG_DUP_BITMASK = ByteUtil.getBitMask(3, 1);
+    private static final byte FLAG_QOS_BITMASK = ByteUtil.getBitMask(1, 2);
+    private static final byte FLAG_RETAIN_BITMASK = ByteUtil.getBitMask(0, 1);
 
+    // ------------------------------------------
     // Variable Header
+    // ------------------------------------------
 
-    @BinaryField(index = 2001, length = 16)
-    private int topicNameLength;
+    //@BinaryField(index = 2001, length = 16)
+    //private int topicNameLength;
     /**
      * The Topic Name identifies the information channel to which controlHeader data is published.
      */
-    @VariableLengthBinaryField(index = 2102, lengthField = "topicNameLength")
+    @CustomBinaryField(index = 2002, serializer = TwoByteLengthPrefixedDataSerializer.class)
     public String topicName;
 
-    @BinaryField(index = 2002, length = 16)
+    @BinaryField(index = 2003, length = 16)
     public int packetId;
 
 
+    @Override
+    public int calculateVariableHeaderLength() {
+        return 4 + (topicName != null ? topicName.length() : 0);
+    }
+
+    // ------------------------------------------
     // Payload
+    // ------------------------------------------
     // - Application data
 
-    @BinaryField(index = 3001, length = 100000)
+    @CustomBinaryField(index = 3000, serializer = MqttPacketPublishPayloadSerializer.class)
     public byte[] payload;
 
 
+    @Override
+    public int calculatePayloadLength() {
+        return payload == null ? 0 : payload.length;
+    }
+
+    // ------------------------------------------
     // Util methods
+    // ------------------------------------------
 
     public boolean getFlagDup() {
-        return (flags & flagDupBitmask) != 0;
+        return (flags & FLAG_DUP_BITMASK) != 0;
     }
 
     public byte getFlagQoS() {
-        return (byte) ((flags & flagQoSBitmask) >> 1);
+        return (byte) ((flags & FLAG_QOS_BITMASK) >> 1);
     }
 
     public boolean getFlagRetain() {
-        return (flags & flagRetainBitmask) != 0;
+        return (flags & FLAG_RETAIN_BITMASK) != 0;
+    }
+
+
+    private static class MqttPacketPublishPayloadSerializer implements BinaryFieldSerializer<byte[]> {
+
+        @Override
+        public byte[] read(InputStream in, BinaryFieldData field) throws IOException {
+            return new byte[0];
+        }
+
+        @Override
+        public byte[] read(InputStream in, BinaryFieldData field, Object parentObject) throws IOException {
+            MqttPacketPublish publishPacket = (MqttPacketPublish) parentObject;
+            int payloadLength = Math.max(0, publishPacket.variableHeaderAndPayloadLength - publishPacket.calculateVariableHeaderLength());
+
+            byte[] payload = new byte[payloadLength];
+            in.read(payload);
+            return payload;
+        }
+
+        @Override
+        public void write(OutputStream out, byte[] obj, BinaryFieldData field) throws IOException {
+            if (obj != null)
+                out.write(obj);
+        }
     }
 }

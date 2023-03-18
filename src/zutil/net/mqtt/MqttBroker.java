@@ -34,7 +34,9 @@ import zutil.net.threaded.ThreadedTCPNetworkServerThread;
 import zutil.parser.binary.BinaryStructInputStream;
 import zutil.parser.binary.BinaryStructOutputStream;
 
+import java.io.BufferedInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.Socket;
 import java.util.*;
 import java.util.logging.Level;
@@ -55,9 +57,15 @@ public class MqttBroker extends ThreadedTCPNetworkServer {
     private MqttSubscriptionListener globalListener;
     private Map<String, List<MqttSubscriptionListener>> subscriptionListeners = new HashMap<>();
 
+
     public MqttBroker() throws IOException {
         super(MQTT_PORT);
     }
+
+    public MqttBroker(int port) throws IOException {
+        super(port);
+    }
+
 
     @Override
     protected ThreadedTCPNetworkServerThread getThreadInstance(Socket s) throws IOException {
@@ -108,19 +116,16 @@ public class MqttBroker extends ThreadedTCPNetworkServer {
      * Publish data to the specific topic
      */
     public void publish(String topic, byte[] data) {
-        if (!subscriptionListeners.containsKey(topic)) {
-            logger.fine("Data was published to topic (" + topic + ") with no subscribers.");
-            return;
-        }
-
         logger.finer("Data has been published to topic (" + topic + ")");
-        List<MqttSubscriptionListener> topicSubscriptions = subscriptionListeners.get(topic);
 
         if (globalListener != null)
             globalListener.dataPublished(topic, data);
 
-        for (MqttSubscriptionListener subscriber : topicSubscriptions) {
-            subscriber.dataPublished(topic, data);
+        List<MqttSubscriptionListener> topicSubscriptions = subscriptionListeners.get(topic);
+        if (topicSubscriptions != null) {
+            for (MqttSubscriptionListener subscriber : topicSubscriptions) {
+                subscriber.dataPublished(topic, data);
+            }
         }
     }
 
@@ -166,6 +171,10 @@ public class MqttBroker extends ThreadedTCPNetworkServer {
         private BinaryStructOutputStream out;
 
         private boolean disconnected = false;
+        /** A message that should be sent in case the connection to client is abnormally disconnected */
+        private MqttPacketHeader willPacket = null;
+        /** The maximum amount of time(seconds) to wait for activity from client, 0 means no timeout */
+        private int connectionTimeoutTime = 0;
 
         /**
          * Test constructor
@@ -177,7 +186,12 @@ public class MqttBroker extends ThreadedTCPNetworkServer {
         public MqttConnectionThread(MqttBroker b, Socket s) throws IOException {
             this(b);
             socket = s;
-            in = new BinaryStructInputStream(socket.getInputStream());
+
+            InputStream baseInputstream = socket.getInputStream();
+            if (!baseInputstream.markSupported())
+                baseInputstream = new BufferedInputStream(baseInputstream);
+
+            in = new BinaryStructInputStream(baseInputstream);
             out = new BinaryStructOutputStream(socket.getOutputStream());
         }
 
@@ -203,6 +217,8 @@ public class MqttBroker extends ThreadedTCPNetworkServer {
                 logger.log(Level.SEVERE, null, e);
             } finally {
                 try {
+                    sendWillPacket();
+
                     socket.close();
                     broker.unsubscribe(this);
                 } catch (IOException e) {
@@ -220,6 +236,10 @@ public class MqttBroker extends ThreadedTCPNetworkServer {
             // Reply
             MqttPacketConnectAck connectAck = new MqttPacketConnectAck();
 
+            // ----------------------------------
+            // Handling Header
+            // ----------------------------------
+
             // Incorrect protocol version?
             if (conn.protocolLevel != MQTT_PROTOCOL_VERSION) {
                 connectAck.returnCode = MqttPacketConnectAck.RETCODE_PROT_VER_ERROR;
@@ -229,14 +249,53 @@ public class MqttBroker extends ThreadedTCPNetworkServer {
                 connectAck.returnCode = MqttPacketConnectAck.RETCODE_OK;
             }
 
+            // Is reserved field properly set? should be false
+            if (conn.flagReserved) {
+                disconnected = true;
+                return;
+            }
+
+            // Handle Session
+            if (conn.flagCleanSession) {
+                // TODO: Remove session
+                connectAck.flagSessionPresent = false;
+            } else {
+                // TODO: Restore or create new session
+                throw new UnsupportedOperationException("Sessions currently not supported.");
+            }
+
+            // Handle will message
+            if (conn.flagWillFlag) {
+                // TODO: Read will message from payload
+                //willPacket = xxx
+                //throw new UnsupportedOperationException("Will packet currently not supported.");
+            } else {
+                willPacket = null;
+            }
+
             // TODO: authenticate
-            // TODO: clean session
+            if (conn.flagUsername) {
+                String username;
+
+                if (conn.flagPassword) {
+                    String password;
+                }
+            }
+
+            connectionTimeoutTime = conn.keepAlive;
+
+            // ----------------------------------
+            // Handling Payload
+            // ----------------------------------
+
+
             sendPacket(connectAck);
         }
 
         protected void handlePacket(MqttPacketHeader packet) throws IOException {
             // TODO: QOS 1
             // TODO: QOS 2
+            // TODO: handle connection timeout
 
             switch (packet.type) {
                 case MqttPacketHeader.PACKET_TYPE_PUBLISH:
@@ -259,7 +318,10 @@ public class MqttBroker extends ThreadedTCPNetworkServer {
                 // Close connection
                 default:
                     logger.warning("Received unknown packet type: " + packet.type);
+                    sendWillPacket();
+                    /* FALLTHROUGH */
                 case MqttPacketHeader.PACKET_TYPE_DISCONNECT:
+                    willPacket = null;
                     disconnected = true;
                     break;
             }
@@ -277,20 +339,20 @@ public class MqttBroker extends ThreadedTCPNetworkServer {
             MqttPacketSubscribeAck subscribeAckPacket = new MqttPacketSubscribeAck();
             subscribeAckPacket.packetId = subscribePacket.packetId;
 
-            for (MqttSubscribePayload payload : subscribePacket.payload) {
+            for (MqttSubscribePayload payload : subscribePacket.payloads) {
                 broker.subscribe(payload.topicFilter, this);
 
                 // Prepare response
                 MqttSubscribeAckPayload ackPayload = new MqttSubscribeAckPayload();
                 ackPayload.returnCode = MqttSubscribeAckPayload.RETCODE_SUCESS_MAX_QOS_0;
-                subscribeAckPacket.payload.add(ackPayload);
+                subscribeAckPacket.payloads.add(ackPayload);
             }
 
             sendPacket(subscribeAckPacket);
         }
 
         private void handleUnsubscribe(MqttPacketUnsubscribe unsubscribePacket) throws IOException {
-            for (MqttUnsubscribePayload payload : unsubscribePacket.payload) {
+            for (MqttUnsubscribePayload payload : unsubscribePacket.payloads) {
                 broker.unsubscribe(payload.topicFilter, this);
             }
 
@@ -306,13 +368,20 @@ public class MqttBroker extends ThreadedTCPNetworkServer {
             // Data has been published to a subscribed topic.
         }
 
+        private void sendWillPacket() throws IOException {
+            if (willPacket != null) {
+                sendPacket(willPacket);
+                willPacket = null;
+            }
+        }
+
         public synchronized void sendPacket(MqttPacketHeader packet) throws IOException {
             MqttPacket.write(out, packet);
         }
 
+
         public boolean isDisconnected() {
             return disconnected;
         }
-
     }
 }

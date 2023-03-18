@@ -34,7 +34,7 @@ import java.io.OutputStream;
 /**
  * Code from MQTT specification
  */
-public class MqttVariableIntSerializer implements BinaryFieldSerializer<Integer>{
+public class MqttVariableIntSerializer implements BinaryFieldSerializer<Integer> {
 
     @Override
     public Integer read(InputStream in, BinaryFieldData field) throws IOException {

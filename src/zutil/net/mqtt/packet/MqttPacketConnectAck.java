@@ -30,7 +30,7 @@ package zutil.net.mqtt.packet;
  *
  * @see <a href="http://docs.oasis-open.org/mqtt/mqtt/v3.1.1/mqtt-v3.1.1.html">MQTT v3.1.1 Spec</a>
  */
-public class MqttPacketConnectAck extends MqttPacketHeader{
+public class MqttPacketConnectAck extends MqttPacketHeader {
     public static final int RETCODE_OK                 = 0;
     public static final int RETCODE_PROT_VER_ERROR     = 1;
     public static final int RETCODE_IDENTIFIER_REJECT  = 2;
@@ -44,16 +44,24 @@ public class MqttPacketConnectAck extends MqttPacketHeader{
         type = MqttPacketHeader.PACKET_TYPE_CONNACK;
     }
 
+    // ------------------------------------------
     // Variable header
+    // ------------------------------------------
 
     @BinaryField(index = 2000, length = 7)
-    private int flagReserved;
+    private int flagReserved = 0;
     /** Indicates that there is a valid Session available */
     @BinaryField(index = 2001, length = 1)
     public boolean flagSessionPresent;
 
     @BinaryField(index = 2002, length = 8)
     public int returnCode;
+
+
+    @Override
+    public int calculateVariableHeaderLength() {
+        return 2;
+    }
 
     // No payload
 

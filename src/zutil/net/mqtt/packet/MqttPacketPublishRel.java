@@ -40,7 +40,9 @@ public class MqttPacketPublishRel extends MqttPacketHeader{
         type = MqttPacketHeader.PACKET_TYPE_PUBREL;
     }
 
+    // ------------------------------------------
     // Variable Header
+    // ------------------------------------------
 
     @BinaryField(index = 2000, length = 16)
     public int packetId;

@@ -72,10 +72,10 @@ public class TwoByteLengthPrefixedDataSerializerTest implements BinaryStruct {
         // 0 Length
         outputStream.reset();outputStream.reset();
         serializer.write(outputStream, null, stringFieldData, this);
-        assertArrayEquals(new byte[]{}, outputStream.toByteArray());
+        assertArrayEquals(new byte[]{0, 0}, outputStream.toByteArray());
         outputStream.reset();
         serializer.write(outputStream, null, byteFieldData, this);
-        assertArrayEquals(new byte[]{}, outputStream.toByteArray());
+        assertArrayEquals(new byte[]{0, 0}, outputStream.toByteArray());
 
         // 0 Length
         outputStream.reset();

@@ -28,6 +28,14 @@ public class PositionalInputStream extends FilterInputStream {
         return pos;
     }
 
+    /**
+     * Method will reset the position to 0.
+     */
+    public synchronized void resetPosition() {
+        pos = 0;
+        mark = 0;
+    }
+
 
     @Override
     public int read() throws IOException {
@@ -72,11 +80,10 @@ public class PositionalInputStream extends FilterInputStream {
     public synchronized void reset() throws IOException {
         super.reset();
 
-        synchronized(this) {
-            // Only update the position if mark is supported,
-            // as reset succeeds even if mark is not supported.
-            if (markSupported())
-                pos = mark;
-        }
+        // Only update the position if mark is supported,
+        // as reset succeeds even if mark is not supported.
+        if (markSupported())
+            pos = mark;
+
     }
 }

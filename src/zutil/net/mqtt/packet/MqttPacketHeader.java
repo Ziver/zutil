@@ -26,6 +26,10 @@ package zutil.net.mqtt.packet;
 
 import zutil.parser.binary.BinaryStruct;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+
 /**
  *
  */
@@ -57,6 +61,27 @@ public class MqttPacketHeader implements BinaryStruct {
     public byte flags;
 
     @CustomBinaryField(index = 3, serializer = MqttVariableIntSerializer.class)
-    public int payloadLength;
+    public int variableHeaderAndPayloadLength;
 
+    // ------------------------------------------
+    // Variable Header
+    // ------------------------------------------
+
+    /**
+     * @return the calculated length of the variable MQTT header in bytes
+     */
+    public int calculateVariableHeaderLength() {
+        return 0;
+    }
+
+    // ------------------------------------------
+    // Payload
+    // ------------------------------------------
+
+    /**
+     * @return the calculated length of assigned payload in bytes
+     */
+    public int calculatePayloadLength() {
+        return 0;
+    }
 }

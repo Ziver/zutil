@@ -32,7 +32,7 @@ package zutil.net.mqtt.packet;
  *
  * @see <a href="http://docs.oasis-open.org/mqtt/mqtt/v3.1.1/mqtt-v3.1.1.html">MQTT v3.1.1 Spec</a>
  */
-public class MqttPacketPublishComp extends MqttPacketHeader{
+public class MqttPacketPublishComp extends MqttPacketHeader {
 
     // Header
 
@@ -40,10 +40,18 @@ public class MqttPacketPublishComp extends MqttPacketHeader{
         type = MqttPacketHeader.PACKET_TYPE_PUBCOMP;
     }
 
+    // ------------------------------------------
     // Variable Header
+    // ------------------------------------------
 
     @BinaryField(index = 2000, length = 16)
     public int packetId;
+
+
+    @Override
+    public int calculateVariableHeaderLength() {
+        return 2;
+    }
 
     // No payload
 

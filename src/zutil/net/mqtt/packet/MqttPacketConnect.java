@@ -24,6 +24,14 @@
 
 package zutil.net.mqtt.packet;
 
+import zutil.parser.binary.BinaryFieldData;
+import zutil.parser.binary.BinaryFieldSerializer;
+import zutil.parser.binary.serializer.TwoByteLengthPrefixedDataSerializer;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+
 /**
  * This packet is the first message sent from a Client when it
  * has established a connection to a Server. A Client can only
@@ -39,7 +47,9 @@ public class MqttPacketConnect extends MqttPacketHeader {
         type = MqttPacketHeader.PACKET_TYPE_CONN;
     }
 
+    // ------------------------------------------
     // Variable header
+    // ------------------------------------------
 
     @BinaryField(index = 2001, length = 16)
     private int protocolNameLength = 4;
@@ -86,7 +96,7 @@ public class MqttPacketConnect extends MqttPacketHeader {
     public boolean flagCleanSession;
 
     @BinaryField(index = 2016, length = 1)
-    private boolean reserved;
+    public boolean flagReserved;
 
 
     /**
@@ -101,11 +111,91 @@ public class MqttPacketConnect extends MqttPacketHeader {
     public int keepAlive;
 
 
-    // Payload:
-    // - Client identifier
-    // - Will Topic
-    // - Will message
-    // - User name
-    // - Password
+    @Override
+    public int calculateVariableHeaderLength() {
+        return 10;
+    }
 
+    // ------------------------------------------
+    // Payload
+    // ------------------------------------------
+
+    @CustomBinaryField(index = 3000, serializer = MqttPacketConnectPayloadSerializer.class)
+    public String clientIdentifier;
+
+    @CustomBinaryField(index = 3001, serializer = MqttPacketConnectPayloadSerializer.class)
+    public String willTopic;
+
+    @CustomBinaryField(index = 3002, serializer = MqttPacketConnectPayloadSerializer.class)
+    public byte[] willPayload;
+
+    @CustomBinaryField(index = 3003, serializer = MqttPacketConnectPayloadSerializer.class)
+    public String username;
+
+    @CustomBinaryField(index = 3004, serializer = MqttPacketConnectPayloadSerializer.class)
+    public String password;
+
+
+    @Override
+    public int calculatePayloadLength() {
+        int length = 0;
+
+        // Each String and byte[] is prefixed with a 2 byte length value in the payload
+
+        if (!flagCleanSession)
+            length += 2 + clientIdentifier.length();
+        if (flagWillFlag)
+            length += 2 + willTopic.length() + 2 + willPayload.length;
+        if (flagUsername)
+            length += 2 + username.length();
+        if (flagPassword)
+            length += 2 + password.length();
+
+        return length;
+    }
+
+    // ------------------------------------------
+    // Utilities
+    // ------------------------------------------
+
+    protected static class MqttPacketConnectPayloadSerializer implements BinaryFieldSerializer {
+
+        @Override
+        public Object read(InputStream in, BinaryFieldData field, Object parentObject) throws IOException {
+            MqttPacketConnect packet = (MqttPacketConnect) parentObject;
+            TwoByteLengthPrefixedDataSerializer serializer = new TwoByteLengthPrefixedDataSerializer();
+
+            if ("clientIdentifier".equals(field.getName()) && !packet.flagCleanSession ||
+                    "willTopic".equals(field.getName()) && packet.flagWillFlag ||
+                    "willPayload".equals(field.getName()) && packet.flagWillFlag ||
+                    "username".equals(field.getName()) && packet.flagUsername ||
+                    "password".equals(field.getName()) && packet.flagPassword) {
+                return serializer.read(in, field, parentObject);
+            }
+
+            return null;
+        }
+
+        @Override
+        public void write(OutputStream out, Object obj, BinaryFieldData field, Object parentObject) throws IOException {
+            MqttPacketConnect packet = (MqttPacketConnect) parentObject;
+            TwoByteLengthPrefixedDataSerializer serializer = new TwoByteLengthPrefixedDataSerializer();
+
+            if ("clientIdentifier".equals(field.getName()) && !packet.flagCleanSession ||
+                    "willTopic".equals(field.getName()) && packet.flagWillFlag ||
+                    "willPayload".equals(field.getName()) && packet.flagWillFlag ||
+                    "username".equals(field.getName()) && packet.flagUsername ||
+                    "password".equals(field.getName()) && packet.flagPassword) {
+                serializer.write(out, obj, field, parentObject);
+            }
+        }
+
+
+        @Override
+        public Object read(InputStream in, BinaryFieldData field) throws IOException {
+            return null;
+        }
+        @Override
+        public void write(OutputStream out, Object obj, BinaryFieldData field) throws IOException {}
+    }
 }
