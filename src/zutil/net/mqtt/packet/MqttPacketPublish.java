@@ -26,6 +26,7 @@ package zutil.net.mqtt.packet;
 
 
 import zutil.ByteUtil;
+import zutil.converter.Converter;
 import zutil.parser.binary.BinaryFieldData;
 import zutil.parser.binary.BinaryFieldSerializer;
 import zutil.parser.binary.serializer.TwoByteLengthPrefixedDataSerializer;
@@ -64,13 +65,16 @@ public class MqttPacketPublish extends MqttPacketHeader {
     @CustomBinaryField(index = 2002, serializer = TwoByteLengthPrefixedDataSerializer.class)
     public String topicName;
 
-    @BinaryField(index = 2003, length = 16)
+    /**
+     * A unique identity of this packet. Only available if QOS is above 0.
+     */
+    @CustomBinaryField(index = 2003, serializer = MqttPacketPublishPacketIdSerializer.class)
     public int packetId;
 
 
     @Override
     public int calculateVariableHeaderLength() {
-        return 4 + (topicName != null ? topicName.length() : 0);
+        return 2 + (topicName != null ? topicName.length() : 0) + (getFlagQoS() > 0 ? 2 : 0);
     }
 
     // ------------------------------------------
@@ -114,7 +118,8 @@ public class MqttPacketPublish extends MqttPacketHeader {
         @Override
         public byte[] read(InputStream in, BinaryFieldData field, Object parentObject) throws IOException {
             MqttPacketPublish publishPacket = (MqttPacketPublish) parentObject;
-            int payloadLength = Math.max(0, publishPacket.variableHeaderAndPayloadLength - publishPacket.calculateVariableHeaderLength());
+            int variableLength = publishPacket.calculateVariableHeaderLength();
+            int payloadLength = Math.max(0, publishPacket.variableHeaderAndPayloadLength - variableLength);
 
             byte[] payload = new byte[payloadLength];
             in.read(payload);
@@ -126,5 +131,38 @@ public class MqttPacketPublish extends MqttPacketHeader {
             if (obj != null)
                 out.write(obj);
         }
+    }
+
+    /**
+     * Only read and write Packet Identifier if QOS is above 0
+     */
+    private static class MqttPacketPublishPacketIdSerializer implements BinaryFieldSerializer {
+        @Override
+        public Object read(InputStream in, BinaryFieldData field, Object parentObject) throws IOException {
+            MqttPacketPublish publish = (MqttPacketPublish) parentObject;
+
+            if (0 < publish.getFlagQoS()) {
+                byte[] b = new byte[2];
+                in.read(b);
+                return Converter.toInt(b);
+            }
+
+            return 0;
+        }
+        @Override
+        public Object read(InputStream in, BinaryFieldData field) throws IOException {return null;}
+
+        @Override
+        public void write(OutputStream out, Object obj, BinaryFieldData field, Object parentObject) throws IOException {
+            MqttPacketPublish publish = (MqttPacketPublish) parentObject;
+
+            if (0 < publish.getFlagQoS()) {
+                byte[] b = Converter.toBytes((int) obj);
+                out.write(b[1]);
+                out.write(b[0]);
+            }
+        }
+        @Override
+        public void write(OutputStream out, Object obj, BinaryFieldData field) throws IOException {}
     }
 }

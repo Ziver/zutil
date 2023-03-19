@@ -317,7 +317,7 @@ public class MqttBroker extends ThreadedTCPNetworkServer {
 
                 // Close connection
                 default:
-                    logger.warning("Received unknown packet type: " + packet.type);
+                    logger.warning("Received unknown packet type: " + packet.type + " (" + packet.getClass() + ")");
                     sendWillPacket();
                     /* FALLTHROUGH */
                 case MqttPacketHeader.PACKET_TYPE_DISCONNECT:

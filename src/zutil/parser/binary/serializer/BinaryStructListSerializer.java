@@ -14,7 +14,7 @@ import java.util.List;
  * This class needs to be extended by a more specific subclass that can provide
  * the list class type and handling the flow control of the read action.
  *
- * @param <T>
+ * @param <T> defines the class type of the items in the List.
  */
 public abstract class BinaryStructListSerializer<T extends BinaryStruct> implements BinaryFieldSerializer<List<T>> {
 

@@ -138,12 +138,9 @@ public class MqttPacketConnect extends MqttPacketHeader {
 
     @Override
     public int calculatePayloadLength() {
-        int length = 0;
-
         // Each String and byte[] is prefixed with a 2 byte length value in the payload
 
-        if (!flagCleanSession)
-            length += 2 + clientIdentifier.length();
+        int length = 2 + (clientIdentifier != null ? clientIdentifier.length() : 0);
         if (flagWillFlag)
             length += 2 + willTopic.length() + 2 + willPayload.length;
         if (flagUsername)
@@ -165,7 +162,7 @@ public class MqttPacketConnect extends MqttPacketHeader {
             MqttPacketConnect packet = (MqttPacketConnect) parentObject;
             TwoByteLengthPrefixedDataSerializer serializer = new TwoByteLengthPrefixedDataSerializer();
 
-            if ("clientIdentifier".equals(field.getName()) && !packet.flagCleanSession ||
+            if ("clientIdentifier".equals(field.getName()) ||
                     "willTopic".equals(field.getName()) && packet.flagWillFlag ||
                     "willPayload".equals(field.getName()) && packet.flagWillFlag ||
                     "username".equals(field.getName()) && packet.flagUsername ||
@@ -181,7 +178,7 @@ public class MqttPacketConnect extends MqttPacketHeader {
             MqttPacketConnect packet = (MqttPacketConnect) parentObject;
             TwoByteLengthPrefixedDataSerializer serializer = new TwoByteLengthPrefixedDataSerializer();
 
-            if ("clientIdentifier".equals(field.getName()) && !packet.flagCleanSession ||
+            if ("clientIdentifier".equals(field.getName()) ||
                     "willTopic".equals(field.getName()) && packet.flagWillFlag ||
                     "willPayload".equals(field.getName()) && packet.flagWillFlag ||
                     "username".equals(field.getName()) && packet.flagUsername ||

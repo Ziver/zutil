@@ -54,12 +54,12 @@ public class MqttPacketConnectTest {
 
                 0b0000_0100, // Prot. Level
 
-                0b0101_1010, // Flags
+                0b0001_1010, // Flags
 
                 0b0000_0000, // Keep alive
                 0b0000_1010, // Keep alive
                 // Payload
-                0x00, 0x01, '5', // password
+                0x00, 0x01, '1', // Client Identifier
         };
 
         MqttPacketConnect obj = (MqttPacketConnect) MqttPacket.read(
@@ -70,17 +70,17 @@ public class MqttPacketConnectTest {
         assertEquals(10, obj.keepAlive);
 
         assertFalse(obj.flagUsername);
-        assertTrue(obj.flagPassword);
+        assertFalse(obj.flagPassword);
         assertFalse(obj.flagWillRetain);
         assertEquals(3, obj.flagWillQoS);
         assertFalse(obj.flagWillFlag);
         assertTrue(obj.flagCleanSession);
 
-        assertNull(obj.clientIdentifier);
+        assertEquals("1", obj.clientIdentifier);
         assertNull(obj.willTopic);
         assertNull(null, obj.willPayload);
         assertNull(obj.username);
-        assertEquals("5", obj.password);
+        assertNull(obj.password);
     }
 
     @Test
@@ -88,7 +88,7 @@ public class MqttPacketConnectTest {
         char[] data = new char[]{
                 // Fixed Header
                 0b0001_0000, // Packet Type + Reserved
-                0b0000_1010, // Variable Header + Payload Length
+                0xFF & 25,   // Variable Header + Payload Length
                 // Variable Header
                 0b0000_0000, // length
                 0b0000_0100, // length
@@ -137,7 +137,7 @@ public class MqttPacketConnectTest {
         char[] data = new char[]{
                 // Fixed Header
                 0b0001_0000, // Packet Type + Reserved
-                0b0000_1010, // Variable Header + Payload Length
+                0xFF & 13,   // Variable Header + Payload Length
                 // Variable Header
                 0b0000_0000, // length
                 0b0000_0100, // length
@@ -153,10 +153,10 @@ public class MqttPacketConnectTest {
                 0b0000_0000, // Keep alive
                 0b0000_1010, // Keep alive
                 // Payload
+                0x00, 0x01, '1', // Client Identifier
         };
 
         MqttPacketConnect obj = new MqttPacketConnect();
-        obj.variableHeaderAndPayloadLength = 10;
         obj.keepAlive = 10;
 
         obj.flagUsername = false;
@@ -165,6 +165,8 @@ public class MqttPacketConnectTest {
         obj.flagWillQoS = 1;
         obj.flagWillFlag = false;
         obj.flagCleanSession = true;
+
+        obj.clientIdentifier = "1";
 
         ByteArrayOutputStream buffer = new ByteArrayOutputStream();
         BinaryStructOutputStream binOut = new BinaryStructOutputStream(buffer);
@@ -201,7 +203,6 @@ public class MqttPacketConnectTest {
         };
 
         MqttPacketConnect obj = new MqttPacketConnect();
-        obj.variableHeaderAndPayloadLength = 10;
         obj.keepAlive = 10;
 
         obj.flagUsername = true;

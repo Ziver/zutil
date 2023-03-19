@@ -63,12 +63,11 @@ public class MqttPacket {
             case PACKET_TYPE_PINGRESP:    packet = new MqttPacketPingResp(); break;       // no payload
             case PACKET_TYPE_DISCONNECT:  packet = new MqttPacketDisconnect(); break;     // no payload
             default:
-                throw new IOException("Unknown header type: " + packet.type);
+                throw new IOException("Unknown packet type in header: " + packet.type);
         }
+
+        // Read header and payload
         in.read(packet);
-        // TODO: payload
-        byte[] payload = new byte[Math.max(0, packet.variableHeaderAndPayloadLength - packet.calculateVariableHeaderLength())];
-        in.read(payload);
 
         return packet;
     }

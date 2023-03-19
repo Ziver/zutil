@@ -18,23 +18,21 @@ public class MqttPacketPublishTest {
         char[] data = new char[]{
                 // Fixed Header
                 0b0011_0000, // Packet Type(4) + Reserved(4)
-                0xFF & 6, // Variable Header + Payload Length
+                0xFF & 4, // Variable Header + Payload Length
                 // Variable Header
                 0b0000_0000, // length
                 0xFF & 2,    // length
                 'a',         // Topic Name
                 'b',         // Topic Name
-                0b0000_0000, // Packet Identifier
-                0xFF & 5,    // Packet Identifier
                 // Payload
         };
 
         MqttPacketPublish obj = (MqttPacketPublish) MqttPacket.read(
                 new BinaryStructInputStream(new ByteArrayInputStream(Converter.toBytes(data))));
 
-        assertEquals(6, obj.variableHeaderAndPayloadLength);
+        assertEquals(4, obj.variableHeaderAndPayloadLength);
         assertEquals("ab", obj.topicName);
-        assertEquals(5, obj.packetId);
+        assertEquals(0, obj.packetId);
         assertArrayEquals(new byte[0], obj.payload);
     }
 
@@ -43,14 +41,12 @@ public class MqttPacketPublishTest {
         char[] data = new char[]{
                 // Fixed Header
                 0b0011_0000, // Packet Type(4) + Reserved(4)
-                0xFF & 9, // Variable Header + Payload Length
+                0xFF & 7, // Variable Header + Payload Length
                 // Variable Header
                 0b0000_0000, // length
                 0xFF & 2,    // length
                 'a',         // Topic Name
                 'b',         // Topic Name
-                0b0000_0000, // Packet Identifier
-                0xFF & 5,    // Packet Identifier
                 // Payload
                 0x00, 0x01, 0x02,
         };
@@ -58,9 +54,9 @@ public class MqttPacketPublishTest {
         MqttPacketPublish obj = (MqttPacketPublish) MqttPacket.read(
                 new BinaryStructInputStream(new ByteArrayInputStream(Converter.toBytes(data))));
 
-        assertEquals(9, obj.variableHeaderAndPayloadLength);
+        assertEquals(7, obj.variableHeaderAndPayloadLength);
         assertEquals("ab", obj.topicName);
-        assertEquals(5, obj.packetId);
+        assertEquals(0, obj.packetId);
         assertArrayEquals(new byte[]{0x00, 0x01, 0x02}, obj.payload);
     }
 
@@ -69,19 +65,16 @@ public class MqttPacketPublishTest {
         char[] data = new char[]{
                 // Fixed Header
                 0b0011_0000, // Packet Type(4) + Reserved(4)
-                0xFF & 6, // Variable Header + Payload Length
+                0xFF & 4, // Variable Header + Payload Length
                 // Variable Header
                 0b0000_0000, // length
                 0xFF & 2,    // length
                 'a',         // Topic Name
                 'b',         // Topic Name
-                0b0000_0000, // Packet Identifier
-                0xFF & 5,    // Packet Identifier
                 // Payload
         };
 
         MqttPacketPublish obj = new MqttPacketPublish();
-        obj.variableHeaderAndPayloadLength = 5;
         obj.topicName = "ab";
         obj.packetId = 5;
 
