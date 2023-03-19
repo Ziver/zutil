@@ -31,8 +31,9 @@ import java.io.OutputStream;
 /**
  * An Interface defining a custom field parser and writer.
  * <p>
- * A new instance of the serializer will be instantiated for every time serialization is required.
- * {@link BinaryStructInputStream} and {@link BinaryStructOutputStream} objects.
+ * One singleton instance of the serializer will be cached for the lifetime of the
+ * {@link BinaryStructInputStream} and {@link BinaryStructOutputStream} objects,
+ * this can be disabled by calling the {@link BinaryStructInputStream#enableSerializerCache(boolean)}.
  * <p>
  * NOTE: Partial octet serializing not supported.
  */

@@ -437,7 +437,7 @@ Multicast Domain Name System (query)
 
         DnsPacketQuestion question2 = packet.getQuestions().get(1);
         assertEquals("qNAME", "_homekit._tcp.local", question2.name);
-        //assertEquals("qNAME", "_homekit.<28>", question2.name); // TODO: Fix support for string pointers
+        //assertEquals("qNAME", "_homekit.<28>", question2.name);
         assertEquals("type", DnsConstants.TYPE.PTR, question2.type);
         assertEquals("clazz", DnsConstants.CLASS.IN, question2.clazz);
 

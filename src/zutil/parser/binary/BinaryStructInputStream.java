@@ -30,7 +30,9 @@ import zutil.io.PositionalInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * A stream class that parses a byte stream into binary struct objects.
@@ -46,9 +48,13 @@ public class BinaryStructInputStream extends InputStream{
     private byte data;
     private int dataBitIndex = -1;
 
+    private Map<Class, BinaryFieldSerializer> serializerCache;
+
 
     public BinaryStructInputStream(InputStream in) {
         this.in = in;
+
+        enableSerializerCache(true);
     }
 
 
@@ -78,11 +84,22 @@ public class BinaryStructInputStream extends InputStream{
      */
     public int read(BinaryStruct struct) throws IOException {
         List<BinaryFieldData> structDataList = BinaryFieldData.getStructFieldList(struct.getClass());
-        PositionalInputStream positionalInputStream = new PositionalInputStream(in);
+        PositionalInputStream positionalInputStream = (in instanceof PositionalInputStream ? (PositionalInputStream) in : new PositionalInputStream(in));
+        long startPos = positionalInputStream.getPosition();
 
         for (BinaryFieldData field : structDataList) {
             if (field.hasSerializer()) {
-                BinaryFieldSerializer serializer = field.getSerializer();
+                // Handle serializer cache
+
+                BinaryFieldSerializer serializer = (serializerCache != null ? serializerCache.get(field.getSerializerClass()) : null);
+                if (serializer == null) {
+                    serializer = field.getSerializer();
+
+                    if (serializerCache != null)
+                        serializerCache.put(serializer.getClass(), serializer);
+                }
+
+                // Read in field through serializer
 
                 Object value = serializer.read(positionalInputStream, field, struct);
                 field.setValue(struct, value);
@@ -108,7 +125,7 @@ public class BinaryStructInputStream extends InputStream{
             }
         }
 
-        return (int) positionalInputStream.getPosition();
+        return (int) (positionalInputStream.getPosition() - startPos);
     }
 
     @Override
@@ -149,6 +166,31 @@ public class BinaryStructInputStream extends InputStream{
         in.reset();
     }
 
+
+    /**
+     * Enable or disable the caching of serializer objects. If disabled then
+     * a new instance of the serializer will be created every time it is needed.
+     * <p>
+     * By default, caching is enabled.
+     *
+     * @param enabled set true to enable caching or false to disable.
+     */
+    public void enableSerializerCache(boolean enabled) {
+        if (enabled) {
+            serializerCache = new HashMap<>();
+        } else {
+            serializerCache = null;
+        }
+    }
+
+    /**
+     * Method will clear all cached instances of serializer objects.
+     */
+    public void clearSerializerCache() {
+        if (serializerCache != null) {
+            serializerCache.clear();
+        }
+    }
 
     protected static int shiftLeftBy(int bitIndex, int bitLength) {
         return (8 - ((7-bitIndex) + bitLength) % 8) % 8;
