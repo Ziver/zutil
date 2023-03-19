@@ -87,7 +87,6 @@ public class ArrayUtil {
      *
      * @param arrays the arrays to be combined.
      * @return one array containing all the elements of the provided arrays.
-     * @param <T>
      */
     public static int[] combine(int[]... arrays) {
         int totalLength = 0;
@@ -111,7 +110,6 @@ public class ArrayUtil {
      *
      * @param arrays the arrays to be combined.
      * @return one array containing all the elements of the provided arrays.
-     * @param <T>
      */
     public static byte[] combine(byte[]... arrays) {
         int totalLength = 0;
