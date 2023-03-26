@@ -154,7 +154,7 @@ public class JSONParserTest {
                 "\"test3\": 1234.99," +
                 "\"test4\": \"91011\"," +
                 "\"test5\": [12,13,14,15]," +
-                "\"test6\": [\"a\",\"b\",\"c\",\"d\"]" +
+                "\"test6\": [\"a\",\'b\',\"c\",\'d\']" +
                 "}";
 
         DataNode data = JSONParser.read(json);

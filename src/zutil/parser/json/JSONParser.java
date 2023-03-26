@@ -131,10 +131,12 @@ public class JSONParser extends Parser {
             // Parse String
             // TODO: Support double backslash escaping
             case '\"':
+            case '\'':
                 root = new DataNode(DataType.String);
                 StringBuilder str = new StringBuilder();
-                while ((c=in.read()) >= 0 && c != '\"')
-                    str.append((char)c);
+                int c2;
+                while ((c2=in.read()) >= 0 && c2 != c)
+                    str.append((char) c2);
                 root.set(str.toString());
                 break;
             // Parse unknown type
