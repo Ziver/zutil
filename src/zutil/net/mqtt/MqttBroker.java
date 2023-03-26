@@ -38,6 +38,7 @@ import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.Socket;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -127,7 +128,20 @@ public class MqttBroker extends ThreadedTCPNetworkServer {
     }
 
     /**
-     * Publish data to the specific topic
+     * Publish data to the specific topic.
+     *
+     * @param topic the topic where the data should be published to.
+     * @param data  the data that should be published. String will be converted to UTF-8 byte array.
+     */
+    public void publish(String topic, String data) {
+        publish(topic, data.getBytes(StandardCharsets.UTF_8));
+    }
+
+    /**
+     * Publish data to the specific topic.
+     *
+     * @param topic the topic where the data should be published to.
+     * @param data  the data that should be published.
      */
     public void publish(String topic, byte[] data) {
         logger.finer("Data has been published to topic: " + topic);
@@ -143,6 +157,8 @@ public class MqttBroker extends ThreadedTCPNetworkServer {
 
     /**
      * Unsubscribe the listener from all available MQTT topics.
+     *
+     * @param listener the listener that should be unsubscribed.
      */
     public synchronized void unsubscribe(MqttSubscriptionListener listener) {
         if (listener == null)
@@ -155,6 +171,9 @@ public class MqttBroker extends ThreadedTCPNetworkServer {
 
     /**
      * Unsubscribe the listener from the specific MQTT topic.
+     *
+     * @param topic    the specific topic that should be unsubscribed from.
+     * @param listener the target listener that should be unsubscribed.
      */
     public synchronized void unsubscribe(String topic, MqttSubscriptionListener listener) {
         if (topic == null || topic.isEmpty() || listener == null)
